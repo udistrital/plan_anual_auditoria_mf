@@ -1,0 +1,13 @@
+<p>gestion-auditoria works!</p>
+<div class="border">
+    <mat-stepper [linear]="isLinear" #stepper labelPosition="bottom">
+        <mat-step>
+            <ng-template matStepLabel>INFORMACION</ng-template>
+            
+        </mat-step>
+        <mat-step [stepControl]="secondFormGroup">
+            <ng-template matStepLabel>AUDITORIAS</ng-template>
+            <app-registro-plan-anual-auditoria />
+        </mat-step>
+    </mat-stepper>
+</div>
