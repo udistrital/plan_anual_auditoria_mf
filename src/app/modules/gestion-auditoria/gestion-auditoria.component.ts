@@ -12,13 +12,18 @@ export class GestionAuditoriaComponent implements OnInit{
   @ViewChild('stepper') stepper!: MatStepper;
   @ViewChild(RegistroPlanAnualAuditoriaComponent) registroPlan!: RegistroPlanAnualAuditoriaComponent;
 
-
+  firstFormGroup: FormGroup;
   secondFormGroup: FormGroup;
 
   constructor(private _formBuilder: FormBuilder) {
+    this.firstFormGroup = this._formBuilder.group({});
     this.secondFormGroup = this._formBuilder.group({});
   }
   ngOnInit() {
+     // Paso 1
+    this.firstFormGroup = this._formBuilder.group({
+      secondCtrl: ['', Validators.required],
+    });
     // Paso 2
     this.secondFormGroup = this._formBuilder.group({
       secondCtrl: ['', Validators.required],
