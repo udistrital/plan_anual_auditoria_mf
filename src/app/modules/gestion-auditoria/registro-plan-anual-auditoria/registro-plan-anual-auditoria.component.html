@@ -1,0 +1,76 @@
+    <div class="container">
+        <div class="header-row">
+            <div class="filter-section">
+                <label for="select" class="label-select">Ordenado por: </label>
+                <mat-form-field appearance="outline">
+                    <mat-label >Seleccion </mat-label>
+                    <mat-select id="select">
+                        <mat-option value="opcion1">Opción 1</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <mat-icon color="primary" class="icon">view_list</mat-icon>
+        </div>
+        <table mat-table [dataSource]="datos" class="mat-elevation-z8 centered-table">
+
+            <!-- Numero Columna -->
+            <ng-container matColumnDef="no">
+                <th mat-header-cell *matHeaderCellDef class="header">No.</th>
+                <td mat-cell *matCellDef="let element" class="cell label-select">{{element.no}}</td>
+            </ng-container>
+
+            <!--Auditoria -->
+            <ng-container matColumnDef="auditoria">
+                <th mat-header-cell *matHeaderCellDef class="header">Auditoría</th>
+                <td mat-cell *matCellDef="let element" class="cell">{{element.auditoria}}</td>
+            </ng-container>
+
+            <!--tipo evaluacion -->
+            <ng-container matColumnDef="tipoEvaluacion">
+                <th mat-header-cell *matHeaderCellDef class="header">Tipo <br> Evaluación</th>
+                <td mat-cell *matCellDef="let element" class="cell">{{element.tipoEvaluacion}}</td>
+            </ng-container>
+
+            <!-- Cronograma actividades -->
+            <ng-container matColumnDef="cronogramaActividades">
+                <th mat-header-cell *matHeaderCellDef class="header">Cronograma de <br> Actividades</th>
+                <td mat-cell *matCellDef="let element" class="cell">{{element.cronogramaActividades}}</td>
+            </ng-container>
+
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+                <th mat-header-cell *matHeaderCellDef class="header">Estado</th>
+                <td mat-cell *matCellDef="let element" class="cell">{{element.estado}}</td>
+            </ng-container>
+
+           
+            <!-- Acciones  -->
+            <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef class="header">Acciones</th>
+                <td mat-cell *matCellDef="let element" class="cell">
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item >
+                            <mat-icon color="primary">edit</mat-icon> Editar Auditoría
+                        </button>
+                        <button mat-menu-item >
+                            <mat-icon color="grey" >delete</mat-icon> Eliminar Auditoría
+                        </button>
+                    </mat-menu>
+                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+            <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+        </table>
+        <div class="button-container">
+            <button class="buttoms" mat-raised-button color="primary">Añadir Auditoría</button>
+            <button class="buttoms" mat-raised-button color="primary">Cargue Masivo</button>
+            <button class="buttoms" mat-raised-button color="primary"><mat-icon>visibility</mat-icon>ver</button>
+            <button class="buttoms" mat-raised-button color="primary"><mat-icon>file_upload</mat-icon>Matriz</button>
+            <button class="buttoms" mat-raised-button color="primary">Guardar</button>
+          </div>
+    </div>
