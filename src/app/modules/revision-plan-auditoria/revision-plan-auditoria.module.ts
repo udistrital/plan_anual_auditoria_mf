@@ -9,12 +9,16 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { PdfVisualizadorComponent } from './pdf-visualizador/pdf-visualizador.component';
 import { SafeURLPipe  } from '../../@core/pipes/safeUrl.pipe';
+import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
+import { ModalConfirmarRechazoComponent } from './modal-confirmar-rechazo/modal-confirmar-rechazo.component';
 
 @NgModule({
   declarations: [
     RevisionPlanAuditoriaComponent,
     PdfVisualizadorComponent,
-    SafeURLPipe
+    SafeURLPipe,
+    ModalMotivosRechazoComponent,
+    ModalConfirmarRechazoComponent
   ],
   imports: [
     CommonModule,

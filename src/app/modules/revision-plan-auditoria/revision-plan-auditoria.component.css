@@ -2,6 +2,19 @@ h3{
   margin-left: 2rem;
 
 }
+ 
+mat-grid-tile  {
+  .mat-grid-tile-content{
+    align-items: start ;
+    justify-content: center ;
+  }
+ 
+}
+mat-nav-list{
+  width: 95%;
+  align-items: left ;
+
+}
 .container {
     padding: 16px;
     margin-left: 2rem;
@@ -65,14 +78,17 @@ h3{
     justify-content: flex-end;
   }
   .btn-cont{
-    
     background-color: white;
     color: hsl(8.28deg 68.5% 75.1%);
     font-weight: normal;
-    
+    padding: 0px;
+    width: 100%;
+    align-items: start;
     button{
+      align-self: start;
       text-align: left;
       width: 100%;
+      height: 50px;
       margin:0;
       border-radius:9px;
       padding-top:10px;
@@ -94,4 +110,5 @@ h3{
     }
     
   }
+
   

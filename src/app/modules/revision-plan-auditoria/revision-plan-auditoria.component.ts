@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
-
+import { MatDialog } from '@angular/material/dialog';
+import {ModalConfirmarRechazoComponent} from './modal-confirmar-rechazo/modal-confirmar-rechazo.component'
+import {ModalMotivosRechazoComponent} from './modal-motivos-rechazo/modal-motivos-rechazo.component'
 @Component({
   selector: 'app-revision-plan-auditoria',
   templateUrl: './revision-plan-auditoria.component.html',
   styleUrls: ['./revision-plan-auditoria.component.css']
 })
 export class RevisionPlanAuditoriaComponent {
+  constructor(public dialog: MatDialog) {}
+
   botonSeleccionado: string = 'formato';
   documento: string ='' ;
   
@@ -24,5 +28,23 @@ export class RevisionPlanAuditoriaComponent {
     } else {
      //segunda opcion
     }
+  }
+  openModalRechazo(): void {
+    this.dialog.open(ModalMotivosRechazoComponent, {
+      width: '70vw',
+    });
+  }
+  openModalEnviar(): void {
+    this.dialog.open(ModalConfirmarRechazoComponent, {
+      width: '75vw',
+      data: {  mensaje: '¿Está seguro de enviar el <br> plan anual de auditoría - PAA?',
+        icono: 'warning',
+        mostrarBotonCancelar: true,
+        textoConfirmacion: 'Aceptar',
+        continue:true,
+        textoMensajeConfirmacion:'PLAN ENVIADO',
+        textoSubMensajeConfirmacion:'Su plan fue enviado a jefe de oficina',
+      }
+    });
   }
 }
