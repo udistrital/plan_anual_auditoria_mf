@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {ModalConfirmarRechazoComponent} from './modal-confirmar-rechazo/modal-confirmar-rechazo.component'
+import {ModalGeneral} from './modal-general/modal-general'
 import {ModalMotivosRechazoComponent} from './modal-motivos-rechazo/modal-motivos-rechazo.component'
 @Component({
   selector: 'app-revision-plan-auditoria',
@@ -35,7 +35,7 @@ export class RevisionPlanAuditoriaComponent {
     });
   }
   openModalEnviar(): void {
-    this.dialog.open(ModalConfirmarRechazoComponent, {
+    this.dialog.open(ModalGeneral, {
       width: '75vw',
       data: {  mensaje: '¿Está seguro de enviar el <br> plan anual de auditoría - PAA?',
         icono: 'warning',

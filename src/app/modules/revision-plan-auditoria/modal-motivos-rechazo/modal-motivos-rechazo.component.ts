@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
-import {ModalConfirmarRechazoComponent} from '../modal-confirmar-rechazo/modal-confirmar-rechazo.component'
+import {ModalGeneral} from '../modal-general/modal-general'
 @Component({
   selector: 'app-modal-motivos-rechazo',
   templateUrl: './modal-motivos-rechazo.component.html',
@@ -14,10 +14,10 @@ export class ModalMotivosRechazoComponent {
   }
   openConfirmarRechazo(): void {
     this.dialogRef.close();
-    this.dialog.open(ModalConfirmarRechazoComponent, {
+    this.dialog.open(ModalGeneral, {
       width: '60vw',
       data: {
-        mensaje: '¿Está seguro(a) de realizar esta acción?',  // Mensaje actualizado
+        mensaje: '¿Está seguro(a) de realizar esta acción?',
         icono: 'warning',
         mostrarBotonCancelar: true,
         textoConfirmacion: 'Aceptar',

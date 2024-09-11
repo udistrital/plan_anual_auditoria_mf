@@ -3,11 +3,11 @@ import Swal from 'sweetalert2';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-modal-confirmar-rechazo',
-  templateUrl: './modal-confirmar-rechazo.component.html',
-  styleUrls: ['./modal-confirmar-rechazo.component.css']
+  selector: 'app-modal-general',
+  templateUrl: './modal-general.component.html',
+  styleUrls: ['./modal-general.component.css']
 })
-export class ModalConfirmarRechazoComponent {
+export class ModalGeneral {
 
   mensaje: string;
   icono: 'warning' | 'success' | 'error' | 'info';
@@ -19,7 +19,7 @@ export class ModalConfirmarRechazoComponent {
   textoSubMensajeConfirmacion:string;
 
   constructor(
-    public dialogRef: MatDialogRef<ModalConfirmarRechazoComponent>,
+    public dialogRef: MatDialogRef<ModalGeneral>,
     private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) { 
@@ -58,7 +58,7 @@ mostrarModal(): void {
       console.log('Plan rechazado');
 
       // Abrir otro modal igual
-      this.dialog.open(ModalConfirmarRechazoComponent, {
+      this.dialog.open(ModalGeneral, {
         data: {
           mensaje: this.textoMensajeConfirmacion,  
           icono: 'success',

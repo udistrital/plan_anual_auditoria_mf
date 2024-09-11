@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-auditoria.component';
 import { ConsultaPlanAnualAuditoriaComponent } from './modules/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.component';
 import {RevisionPlanAuditoriaComponent}from "./modules/revision-plan-auditoria/revision-plan-auditoria.component"
+import {AsignacionAuditoresComponent}from "./modules/asignacion-auditores/asignacion-auditores.component"
+
 import { APP_BASE_HREF } from '@angular/common';
 
 const routes: Routes = [
@@ -17,6 +19,10 @@ const routes: Routes = [
   {
     path:"revision-plan",
     component: RevisionPlanAuditoriaComponent
+  },
+  {
+    path:"asignacion-auditor",
+    component: AsignacionAuditoresComponent
   }
 ];
 
