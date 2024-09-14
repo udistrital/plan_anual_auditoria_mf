@@ -1,0 +1,98 @@
+<div class="auditoria-especial">
+    <h2 class="title">AUDITORÍAS ESPECIALES</h2>
+
+    <mat-card style="padding: 50px">
+        <p>Seleccione el año de auditoría especial a realizar</p>
+		<div class="año">
+			<mat-label style="margin-right: 20px;" >AÑO</mat-label>
+			<mat-form-field appearance="outline" style="width: 250px; padding-left: 10px; align-items: center; ">            
+				<mat-select placeholder="Seleccione el año del plan" padding="10px">
+					<mat-option value="2">2020</mat-option>
+					<mat-option value="3">2021</mat-option>
+				</mat-select>            
+			</mat-form-field>
+			<button class="boton" mat-raised-button color="primary" style="margin-left: 16px;">Crear</button>
+		</div>
+    </mat-card>
+
+
+    <mat-card>
+		<p>Seleccione el plan de auditoría especial a realizar modificaciones o enviar a aprobación</p>
+		
+		<section class="section">
+			<table mat-table [dataSource]="dataSource">
+			  <!-- Numero Columna -->
+			  <ng-container matColumnDef="numero">
+				<mat-header-cell *matHeaderCellDef>No.</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.numero }} </mat-cell>
+				<mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- Auditoria Columna -->
+			  <ng-container matColumnDef="auditoria">
+				<mat-header-cell *matHeaderCellDef>Auditoría</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.auditoria }} </mat-cell>
+				<mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- Evaluacion Columna -->
+			  <ng-container matColumnDef="evaluacion">
+				<mat-header-cell *matHeaderCellDef>Tipo de evaluación</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.evaluacion }} </mat-cell>
+				<mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- Auditor Columna -->
+			  <ng-container matColumnDef="auditor">
+				<mat-header-cell *matHeaderCellDef>Auditor (es)</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.auditor }} </mat-cell>
+				<mat-footer-cell *matFooterCellDef>
+				</mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- cronograma Columna -->
+			  <ng-container matColumnDef="cronograma">
+				<mat-header-cell *matHeaderCellDef>Cronograma de actividades</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.cronograma ? 'Activo' : 'Inactivo' }} </mat-cell>
+				<mat-footer-cell *matFooterCellDef>
+				</mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- Estado Columna -->
+			  <ng-container matColumnDef="estado">
+				<mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.estado }} </mat-cell>
+				<mat-footer-cell *matFooterCellDef>
+				</mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- Acciones Columna -->
+			  <ng-container matColumnDef="acciones">
+				<mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<button mat-icon-button [matMenuTriggerFor]= "menu">
+						<mat-icon>more_vert</mat-icon>
+					  </button>					
+					  <mat-menu #menu="matMenu">
+						<button mat-menu-item (click)="abrirModal()">
+						  <mat-icon color="primary">edit</mat-icon>
+						  <span>Editar Auditoria Especial</span>
+						</button>
+						<button mat-menu-item >
+						  <mat-icon color="primary">send</mat-icon>
+						  <span>Enviar a Auditor (a)</span>
+						</button>
+					  </mat-menu>
+				</mat-cell>
+				<mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+			  </ng-container>
+		  
+			  <!-- Definir las filas y columnas a mostrar -->
+			  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+			  <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
+			  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+			</table>
+			
+		  </section>
+	</mat-card>
+</div>

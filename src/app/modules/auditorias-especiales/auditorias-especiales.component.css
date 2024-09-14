@@ -1,0 +1,110 @@
+.title {
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--primary);
+    border-bottom: 1.5px solid var(--primary);
+    padding-bottom: 15px;
+}
+
+.año {
+    display: flex;
+    align-items: center;    
+}
+
+
+.container-border {
+    margin: 25px 2%;
+    border: 1.5px solid var(--primary);
+    padding: 1%;
+    border-radius: 40px;
+  }
+
+  .boton {    
+    color: white !important;
+  }
+  
+  .title-top {
+    padding-left: 7%;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
+  
+  .mat-mdc-card-content:first-child {
+    padding-top: 0px;
+  }
+  
+  .content-top {
+    margin-bottom: 25px;
+  }
+  
+  .textGuide {
+    background-color: #ffff;
+    border: 1.5px solid var(--primary);
+    border-radius: 10px;
+    box-shadow: 3px 4px 5px 0px #a7a7a7;
+    color: #0a0a0a;
+    display: inline-block;
+    font-size: 0.8em;
+    padding: 1% 1.8%;
+    text-decoration: none;
+    margin: 20px 0;
+    width: 96%;
+  }
+  
+  .container-border_intern {
+    border: 1.5px solid var(--primary);
+    border-radius: 15px;
+    padding: 0;
+  }
+  
+  .form {
+    margin-top: 10px;
+    align-items: center;
+  }
+  
+  .label {
+    font-size: 1em;
+    padding-left: 5px;
+  }
+  
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    width: 97% !important;
+    padding: 0 !important;
+  }
+
+  
+  mat-error {
+    color: var(--primary);
+    font-size: 1em;
+    padding: 5px;
+  }
+  
+  .section {
+    margin-bottom: 20px;
+  }
+  
+  
+  mat-header-cell{
+    /* background-color: var(--primary) !important; */
+    color: black !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    border-bottom: 1px solid var(--primary) !important;
+  }
+  
+  mat-row:nth-child(even) {
+    background-color: white !important;
+  }
+  
+  mat-row:nth-child(odd) {
+    background-color: #f5f5f5 !important;
+  }
+  
+  
+  mat-cell, mat-header-cell, mat-footer-cell {
+    align-items: center;
+    justify-content: center;
+    
+  }

@@ -4,6 +4,7 @@ import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-a
 import { ConsultaPlanAnualAuditoriaComponent } from './modules/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.component';
 import {RevisionPlanAuditoriaComponent}from "./modules/revision-plan-auditoria/revision-plan-auditoria.component"
 import {AsignacionAuditoresComponent}from "./modules/asignacion-auditores/asignacion-auditores.component"
+import { AuditoriasEspecialesComponent } from './modules/auditorias-especiales/auditorias-especiales.component';
 
 import { APP_BASE_HREF } from '@angular/common';
 
@@ -23,6 +24,10 @@ const routes: Routes = [
   {
     path:"asignacion-auditor",
     component: AsignacionAuditoresComponent
+  },
+  {
+    path: "auditorias-especiales",
+    component: AuditoriasEspecialesComponent
   }
 ];
 

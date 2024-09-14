@@ -9,9 +9,12 @@ import { GestionAuditoriaModule } from './modules/gestion-auditoria/gestion-audi
 import { ConsultaPlanAnualAuditoriaModule } from './modules/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.module';
 import { RevisionPlanAuditoriaModule } from './modules/revision-plan-auditoria/revision-plan-auditoria.module';
 import { AsignacionAuditoresModule } from './modules/asignacion-auditores/asignacion-auditores.module'
+import { AuditoriasEspecialesModule } from './modules/auditorias-especiales/auditorias-especiales.module';
+import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditoria-especial/formulario-auditoria-especial.module';
 @NgModule({
   declarations: [
     AppComponent,
+    
   ],
   imports: [
     BrowserModule,
@@ -21,7 +24,9 @@ import { AsignacionAuditoresModule } from './modules/asignacion-auditores/asigna
     ConsultaPlanAnualAuditoriaModule,
     RevisionPlanAuditoriaModule,
     AsignacionAuditoresModule,
-    CommonModule
+    AuditoriasEspecialesModule,
+    FormularioAuditoriaEspecialModule,
+    CommonModule,
 
   ],
   providers: [],
