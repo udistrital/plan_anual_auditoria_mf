@@ -1,0 +1,80 @@
+.container-border {
+    display: flex;
+    flex-direction: column;
+    margin: 25px 2%;
+    border: 1.5px solid var(--primary);
+    padding: 1%;
+    border-radius: 30px;
+  }
+
+  .header {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .dialog-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .botonGuardar {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .botones {
+    color: white !important;
+  }
+
+  .botonAuditor {
+    background-color: var(--danger-base) !important;
+    color: white !important;
+    
+  }
+
+  .auditorField{
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 0 5px;
+  }
+
+  .principal {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 16px;
+    margin-top: 4rem;
+    
+  }
+
+  input {
+    padding: 0 5px;
+    width: 100%;
+  }
+
+
+  .mat-form-field {
+  width: 100%;
+  align-items: center;
+}
+
+.mat-form-fieldAud {
+    width: 30%;
+    align-items: center;
+   
+  }
+
+
+  .formLabel {
+    text-align: center;
+    background-color: var(--primary);
+    color: white;
+    width: auto;
+    padding: 0.5rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  

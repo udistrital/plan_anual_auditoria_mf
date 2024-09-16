@@ -1,0 +1,64 @@
+<h3>Gestión Auditoría >> Asignar Auditorías </h3>
+<div class="container">
+    <div class="header-row">
+        <div class="filter-section">
+            <label for="select" class="label-select">VIGENCIA </label>
+            <mat-form-field appearance="outline">
+                
+                <input matInput type="number" [(ngModel)]="year" min="1900" max="2100" step="1">
+              </mat-form-field>
+        </div>
+        <button class="icon" mat-icon-button><mat-icon color="primary" >view_list</mat-icon></button>
+    </div>
+    <table mat-table [dataSource]="datos" class="mat-elevation-z8 centered-table">
+
+        <!-- Numero Columna -->
+        <ng-container matColumnDef="no">
+            <th mat-header-cell *matHeaderCellDef class="header">No.</th>
+            <td mat-cell *matCellDef="let element" class="cell label-select">{{element.no}}</td>
+        </ng-container>
+
+        <!--Auditoria -->
+        <ng-container matColumnDef="auditoria">
+            <th mat-header-cell *matHeaderCellDef class="header">Auditoría</th>
+            <td mat-cell *matCellDef="let element" class="cell">{{element.auditoria}}</td>
+        </ng-container>
+
+        <!--tipo evaluacion -->
+        <ng-container matColumnDef="tipoEvaluacion">
+            <th mat-header-cell *matHeaderCellDef class="header">Tipo <br> Evaluación</th>
+            <td mat-cell *matCellDef="let element" class="cell">{{element.tipoEvaluacion}}</td>
+        </ng-container>
+        <!--tipo evaluacion -->
+        <ng-container matColumnDef="auditor">
+            <th mat-header-cell *matHeaderCellDef class="header">Auditor (es)</th>
+            <td mat-cell *matCellDef="let element" class="cell">{{element.auditor}}</td>
+        </ng-container>
+        <!-- Cronograma actividades -->
+        <ng-container matColumnDef="cronogramaActividades">
+            <th mat-header-cell *matHeaderCellDef class="header">Cronograma de <br> Actividades</th>
+            <td mat-cell *matCellDef="let element" class="cell">{{element.cronogramaActividades}}</td>
+        </ng-container>
+
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef class="header">Estado</th>
+            <td mat-cell *matCellDef="let element" class="cell">{{element.estado}}</td>
+        </ng-container>
+
+       
+        <!-- Acciones  -->
+        <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="header">Acciones</th>
+            <td mat-cell *matCellDef="let element" class="cell">
+                <button mat-icon-button matTooltip="Agregar auditor">
+                    <mat-icon  color="primary">add_circle</mat-icon>
+                </button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+    </table>
+</div>

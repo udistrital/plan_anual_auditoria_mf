@@ -1,0 +1,87 @@
+<div class="container-border">
+
+  <div mat-dialog-title class="dialog-title">
+    <h2>Auditoría</h2>
+    <button mat-icon-button aria-label="close dialog" mat-dialog-close>
+      <mat-icon color="primary">close</mat-icon>
+    </button>
+  </div>
+
+  <div class="botonGuardar">
+    <button
+      class="botones"
+      mat-raised-button
+      color="primary"
+      (click)="guardar()"
+    >
+      Guardar y Cerrar
+    </button>
+  </div>
+
+  <form [formGroup]="form">
+    <div class="principal">
+      <div>
+        <span class="formLabel">AUDITORÍA</span>
+        <mat-form-field class="mat-form-field" appearance="outline">
+          <input
+            matInput
+            placeholder="Título de la Auditoría"
+            formControlName="tituloAuditoria"
+          />
+        </mat-form-field>
+      </div>
+      <div>
+        <span class="formLabel">TIPO DE EVALUACIÓN</span>
+        <mat-form-field class="mat-form-field" appearance="outline">
+          <input
+            matInput
+            placeholder="Especial"
+            formControlName="tituloAuditoria"
+          />
+        </mat-form-field>
+      </div>
+      <div>
+        <span class="formLabel">CRONOGRAMA DE ACTIVIDADES</span>
+        <mat-form-field class="mat-form-field" appearance="outline">
+          <mat-select
+            placeholder="Seleccione"
+            formControlName="cronograma"
+            multiple
+          >
+            <mat-option *ngFor="let mes of meses" [value]="mes">
+              {{ mes }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div style="padding: 0 0 16px 5px">
+      <span>Auditor</span>
+    </div>
+
+    <div class="auditorField">
+      <mat-form-field class="mat-form-fieldAud" style="display: flex" appearance="outline">        
+        <mat-select formControlName="auditor" placeholder="Seleccione">
+          <mat-option *ngFor="let auditor of auditores" [value]="auditor">
+            {{ auditor }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button class="botonAuditor" mat-raised-button>Agregar Auditor</button>
+    </div>
+    <div class="auditorField">
+        <mat-form-field class="mat-form-fieldAud" style="display: flex" appearance="outline">          
+          <mat-select formControlName="auditor" placeholder="seleccione">
+            <mat-option *ngFor="let auditor of auditores" [value]="auditor">
+              {{ auditor }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button> 
+            <mat-icon color="primary">delete</mat-icon>
+        </button>
+        <button class="botonAuditor" mat-raised-button>Agregar Auditor</button>
+      </div>
+  </form>
+</div>
