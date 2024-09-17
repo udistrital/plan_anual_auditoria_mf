@@ -1,0 +1,110 @@
+
+mat-grid-tile  {
+    .mat-grid-tile-content{
+      align-items: start ;
+      justify-content: center ;
+    }
+   
+  }
+  mat-nav-list{
+    width: 95%;
+    align-items: left ;
+  
+  }
+  .container {
+      padding: 0px;
+      background-color: white;
+    }
+    
+    .title {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-left: 4rem;
+    }
+    
+    .close-button { 
+      padding:1px;
+      position: absolute;
+      right: 16px;
+      top: 16px;
+    }
+    .grid{
+      width: 95%;
+      padding:5px;
+    }
+    .btn{
+      border: 2px solid #731514;
+      border-radius:0;
+    }
+    .document-image {
+      width: 100%;
+      height: auto;
+    }
+    
+    .footer {
+      display: flex;
+      margin-top: 16px;
+      justify-content: center;
+  
+      button{
+          color: var(--md-primary-contrast-300);
+          margin-top: 35px;
+          margin-left:5px;
+          margin-right:5px;
+          margin-bottom: 40px;
+      }
+    }
+    .custom-card {
+      border-color: hsl(0deg 0% 63.53%);
+      border-radius: 16px; 
+      box-shadow: 4px 4px 8px hsl(0deg 0% 63.53%);
+      padding: 10px;
+    }
+    .divider{
+      color: #e1e1e1;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      height: 3px;
+    }
+  
+    .buttoms{
+      color: white;
+    }
+    #descargarBtn{
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-cont{
+      background-color: white;
+      color: hsl(8.28deg 68.5% 75.1%);
+      font-weight: normal;
+      padding: 0px;
+      width: 100%;
+      align-items: start;
+      button{
+        align-self: start;
+        text-align: left;
+        width: 100%;
+        height: 50px;
+        margin:0;
+        border-radius:9px;
+        padding-top:10px;
+        padding-bottom:15px;
+        border: 1px solid hsl(210deg 15% 92.16%);
+      }
+    }
+    .selected {
+      background-color: hsl(8.28deg 68.5% 75.1%);
+      color:#731514;
+      font-weight: bold;
+  
+    }
+    .object-render{
+      height: 700px;
+      border: 1px solid  black;
+      padding:2px;
+      app-pdf-visualizador {
+        width: 100%;
+      }
+    }
+  

@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialog } from '@angular/material/dialog';
-import {ModalGeneral} from './modal-general/modal-general'
-import {ModalMotivosRechazoComponent} from './modal-motivos-rechazo/modal-motivos-rechazo.component'
-import {ModalRevisionPlanAuditoriaComponent} from './modal-revision-plan-auditoria/modal-revision-plan-auditoria.component'
+import {ModalGeneral} from '../modal-general/modal-general'
+import {ModalMotivosRechazoComponent} from '../modal-motivos-rechazo/modal-motivos-rechazo.component'
 @Component({
-  selector: 'app-revision-plan-auditoria',
-  templateUrl: './revision-plan-auditoria.component.html',
-  styleUrls: ['./revision-plan-auditoria.component.css']
+  selector: 'app-modal-revision-plan-auditoria',
+  templateUrl: './modal-revision-plan-auditoria.component.html',
+  styleUrls: ['./modal-revision-plan-auditoria.component.css']
 })
-export class RevisionPlanAuditoriaComponent {
-  constructor(public dialog: MatDialog) {}
+export class ModalRevisionPlanAuditoriaComponent {
+  constructor(public dialogRef: MatDialogRef<ModalRevisionPlanAuditoriaComponent>, public dialog: MatDialog) {}
 
   botonSeleccionado: string = 'formato';
   documento: string ='' ;
@@ -48,9 +48,7 @@ export class RevisionPlanAuditoriaComponent {
       }
     });
   }
-  openModalRevisionPlanAuditoria():void{
-    this.dialog.open(ModalRevisionPlanAuditoriaComponent, {
-      width: '70vw',
-    });
+  onClose(): void {
+    this.dialogRef.close();
   }
 }

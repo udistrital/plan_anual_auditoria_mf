@@ -12,6 +12,7 @@ import { SafeURLPipe  } from '../../@core/pipes/safeUrl.pipe';
 import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
 import { ModalGeneral } from './modal-general/modal-general';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { ModalRevisionPlanAuditoriaComponent } from './modal-revision-plan-auditoria/modal-revision-plan-auditoria.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     PdfVisualizadorComponent,
     SafeURLPipe,
     ModalMotivosRechazoComponent,
-    ModalGeneral
+    ModalGeneral,
+    ModalRevisionPlanAuditoriaComponent
   ],
   imports: [
     CommonModule,
