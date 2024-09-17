@@ -33,6 +33,7 @@ mat-nav-list{
     top: 16px;
   }
   .grid{
+    width: 95%;
     padding:5px;
   }
   .btn{
@@ -59,15 +60,15 @@ mat-nav-list{
   }
   .custom-card {
     border-color: hsl(0deg 0% 63.53%);
-    border-radius: 16px; /* Ajusta el radio del borde según tu preferencia */
-    box-shadow: 4px 4px 8px hsl(0deg 0% 63.53%); /* Ajusta el tamaño y el color de la sombra según tu preferencia */
+    border-radius: 16px; 
+    box-shadow: 4px 4px 8px hsl(0deg 0% 63.53%);
     padding: 10px;
   }
   .divider{
-    color: hsl(0deg 0% 84.31%);
+    color: #e1e1e1;
     margin-top: 5px;
     margin-bottom: 5px;
-    height: 2px;
+    height: 3px;
   }
 
   .buttoms{
@@ -103,16 +104,12 @@ mat-nav-list{
 
   }
   .object-render{
-    width: 100%; /* O un tamaño específico */
-    height: 700px; /* O un tamaño específico */
-    overflow: hidden;
+    height: 700px;
     border: 1px solid  black;
-    /*app-pdf-visualizador {
+    padding:2px;
+    app-pdf-visualizador {
       width: 100%;
-      height: 600px;
-      
-    }*/
-    
+    }
   }
 
   
