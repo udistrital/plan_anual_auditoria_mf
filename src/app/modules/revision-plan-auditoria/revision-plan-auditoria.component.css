@@ -26,12 +26,6 @@ mat-nav-list{
     margin-left: 4rem;
   }
   
-  .close-button { 
-    padding:1px;
-    position: absolute;
-    right: 16px;
-    top: 16px;
-  }
   .grid{
     width: 95%;
     padding:5px;
