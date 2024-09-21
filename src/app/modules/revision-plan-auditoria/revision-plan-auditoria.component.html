@@ -5,9 +5,6 @@
         <mat-card-title class="title">
           Aprobación Plan Anual de Auditoría
         </mat-card-title>
-        <button mat-icon-button class="close-button">
-          <mat-icon color="primary" class="btn">close</mat-icon>
-        </button>
       </mat-card-header>
   
       <mat-divider class="divider"></mat-divider>
@@ -20,7 +17,6 @@
 
       <!-- Mat-Grid-List para organizar el layout en dos columnas -->
       <mat-grid-list cols="7" rowHeight="500px" gutterSize="0" class="grid">
-        
         <!-- Primera columna para los "botones" -->
         <mat-grid-tile colspan="1" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;">
           <mat-nav-list>
@@ -39,21 +35,15 @@
           </mat-nav-list>
         </mat-grid-tile>
   
-        <!-- Segunda columna con la imagen -->
+        <!-- Segunda columna con la pdf-viewer -->
         <mat-grid-tile colspan="6" class="object-render" >
              <app-pdf-visualizador [base64Document]="documento" width="100%" height="400px"></app-pdf-visualizador>
         </mat-grid-tile>
-  
       </mat-grid-list>
-  
-      <mat-divider></mat-divider>
-  
-      <!-- Footer con botones de acción -->
+
       <div class="footer">
         <button mat-raised-button color="primary" (click)="openModalRechazo()">Rechazar Plan</button>
         <button mat-raised-button color="primary" (click)="openModalEnviar()">Aprobar y Enviar a Secretario</button>
       </div>
     </mat-card>
   </div>
-  
-  

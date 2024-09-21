@@ -11,6 +11,7 @@ import { PdfVisualizadorComponent } from './pdf-visualizador/pdf-visualizador.co
 import { SafeURLPipe  } from '../../@core/pipes/safeUrl.pipe';
 import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
 import { ModalGeneral } from './modal-general/modal-general';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { ModalGeneral } from './modal-general/modal-general';
     MatIconModule,
     MatDividerModule,
     MatGridListModule,
-    MatListModule
+    MatListModule,
+    PdfViewerModule
   ]
 })
 export class RevisionPlanAuditoriaModule { }
