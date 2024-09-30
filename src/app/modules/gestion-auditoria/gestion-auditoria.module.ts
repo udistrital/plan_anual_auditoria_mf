@@ -12,11 +12,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     RegistroPlanAnualAuditoriaComponent,
-    GestionAuditoriaComponent
+    GestionAuditoriaComponent,
   ],
   imports: [
     CommonModule,
@@ -28,7 +30,10 @@ import { MatSelectModule } from '@angular/material/select';
     MatMenuModule,
     MatIconModule,
     MatTableModule,
-    MatSelectModule
+    MatSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatInputModule
     
   ],
   exports: [

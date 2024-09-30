@@ -11,10 +11,11 @@ import { RevisionPlanAuditoriaModule } from './modules/revision-plan-auditoria/r
 import { AsignacionAuditoresModule } from './modules/asignacion-auditores/asignacion-auditores.module'
 import { AuditoriasEspecialesModule } from './modules/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditoria-especial/formulario-auditoria-especial.module';
+import { EditarActividadesModule } from './modules/editar-actividades/editar-actividades.module';
+
 @NgModule({
   declarations: [
-    AppComponent,
-    
+    AppComponent,  
   ],
   imports: [
     BrowserModule,
@@ -26,6 +27,7 @@ import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditori
     AsignacionAuditoresModule,
     AuditoriasEspecialesModule,
     FormularioAuditoriaEspecialModule,
+    EditarActividadesModule,
     CommonModule,
 
   ],
