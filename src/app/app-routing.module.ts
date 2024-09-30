@@ -5,6 +5,7 @@ import { ConsultaPlanAnualAuditoriaComponent } from './modules/consulta-plan-anu
 import {RevisionPlanAuditoriaComponent}from "./modules/revision-plan-auditoria/revision-plan-auditoria.component"
 import {AsignacionAuditoresComponent}from "./modules/asignacion-auditores/asignacion-auditores.component"
 import { AuditoriasEspecialesComponent } from './modules/auditorias-especiales/auditorias-especiales.component';
+import { EditarActividadesComponent } from './modules/editar-actividades/editar-actividades.component';
 
 import { APP_BASE_HREF } from '@angular/common';
 
@@ -14,8 +15,12 @@ const routes: Routes = [
     component: GestionAuditoriaComponent
   },
   {
-    path:"consultar-plan",
+    path: 'consultar-plan',  
     component: ConsultaPlanAnualAuditoriaComponent
+  },
+  {
+    path: 'editar-actividades/:id',  
+    component: EditarActividadesComponent
   },
   {
     path:"revision-plan",

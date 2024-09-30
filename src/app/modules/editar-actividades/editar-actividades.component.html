@@ -1,0 +1,66 @@
+<mat-card [style.width.%]="100">
+  <div class="container">
+    <h2 class="title">Editar Actividades</h2>
+    <mat-divider class="divider"></mat-divider>
+
+    <!-- Agregar cdkDropList a la tabla -->
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" cdkDropList (cdkDropListDropped)="drop($event)">
+      
+      <!-- No Column (Generado automáticamente) -->
+      <ng-container matColumnDef="no">
+        <th mat-header-cell *matHeaderCellDef>No.</th>
+        <td mat-cell *matCellDef="let element; let i = index" class="cell">{{i + 1}}</td>
+      </ng-container>
+      
+      <!-- Auditoría Column -->
+      <ng-container matColumnDef="auditoria">
+        <th mat-header-cell *matHeaderCellDef> Auditoría </th>
+        <td mat-cell *matCellDef="let element"> {{element.auditoria}} </td>
+      </ng-container>
+
+      <!-- Tipo Evaluación Column -->
+      <ng-container matColumnDef="tipoEvaluacion">
+        <th mat-header-cell *matHeaderCellDef> Tipo de Evaluación </th>
+        <td mat-cell *matCellDef="let element"> {{element.tipoEvaluacion}} </td>
+      </ng-container>
+
+      <!-- Cronograma Column -->
+      <ng-container matColumnDef="cronograma">
+        <th mat-header-cell *matHeaderCellDef> Cronograma </th>
+        <td mat-cell *matCellDef="let element"> {{element.cronograma}} </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let element"> {{element.estado}} </td>
+      </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button (click)="editAuditoria(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="deleteAuditoria(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Definir las filas (Agregar cdkDrag a las filas) -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" cdkDrag></tr>
+      
+    </table>
+
+    <!-- Botón para guardar cambios -->
+    <button mat-raised-button color="primary" (click)="saveChanges()">Guardar</button>
+    <button mat-raised-button color="primary" (click)="addAuditoria()">Añadir Auditoría</button>
+    <button mat-raised-button color="primary">Cargue Masivo</button>
+    <button mat-raised-button color="primary">Ver</button>
+    <button mat-raised-button color="primary">Matriz</button>
+    <button mat-raised-button color="primary" (click)="saveChanges()">Guardar</button>
+  </div>
+</mat-card>
