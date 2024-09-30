@@ -78,7 +78,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "plan_anual_auditoria_mf:build"
+            "buildTarget": "plan_anual_auditoria_mf:build"
           }
         },
         "test": {
