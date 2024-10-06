@@ -19,7 +19,7 @@ export class ConsultaPlanAnualAuditoriaComponent {
 
   editReport(element: any) {
     const nombreFormulario = 'sisifo_form';
-    window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${element.id}/${nombreFormulario}`;
+    window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${element.id}`;
   }
 
   editActivities(element: any) {

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { ActivatedRoute } from '@angular/router';  // Importar ActivatedRoute para obtener el ID de la URL
+import { ActivatedRoute } from '@angular/router'; 
 
 
 interface Auditoria {
@@ -39,29 +39,30 @@ export class EditarActividadesComponent implements OnInit {
 
   constructor(private route: ActivatedRoute) {
     this.id = '';
-  }  // Inyectar ActivatedRoute
+  } 
 
   ngOnInit(): void {
-    // Obtener el ID de la URL
-    this.id = this.route.snapshot.paramMap.get('id') ?? '1'; // Si no hay ID, usar '1' como predeterminado
-    this.loadAuditorias(this.id);  // Cargar los datos correspondientes al ID
+    this.id = this.route.snapshot.paramMap.get('id') ?? '1'; 
+    this.loadAuditorias(this.id);  
   }
 
   // Cargar los datos de auditorías según el ID
   loadAuditorias(id: string): void {
-    this.dataSource.data = this.auditoriasMock[id] || [];  // Asignar los datos correspondientes al ID
+    this.dataSource.data = this.auditoriasMock[id] || [];  
   }
 
   // Función para manejar el evento de drag-and-drop
   drop(event: CdkDragDrop<Auditoria[]>): void {
     const prevData = [...this.dataSource.data];
     moveItemInArray(prevData, event.previousIndex, event.currentIndex);
-    this.dataSource.data = prevData;  // Actualiza el dataSource con el nuevo orden
+    this.dataSource.data = prevData;  
   }
 
   // Editar auditoría
-  editAuditoria(element: Auditoria) {
-    console.log('Editar Auditoría:', element);
+  editAuditoria(index: number) {
+    const nombreFormulario = 'sisifo_form2';
+    window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index+1}`;
+    
   }
 
   // Eliminar auditoría
@@ -76,6 +77,6 @@ export class EditarActividadesComponent implements OnInit {
 
   addAuditoria() {
     const nombreFormulario = 'sisifo_form2';
-    window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${this.id}/${nombreFormulario}`;
+    window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
   }
 }
