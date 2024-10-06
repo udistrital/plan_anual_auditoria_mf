@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { ModalService } from 'src/app/services/modal.service';
+import { CargarArchivoComponent } from '../cargar-archivo/cargar-archivo.component';
 
 @Component({
   selector: 'app-consulta-plan-anual-auditoria',
@@ -15,7 +18,11 @@ export class ConsultaPlanAnualAuditoriaComponent {
   ];
   displayedColumns: string[] = ['no', 'creadoPor', 'vigencia', 'fechaCreacion', 'estado', 'documentos', 'acciones'];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private modalService: ModalService,
+    public dialog: MatDialog
+  ) {}
 
   editReport(element: any) {
     const nombreFormulario = 'sisifo_form';
@@ -27,6 +34,25 @@ export class ConsultaPlanAnualAuditoriaComponent {
   }
 
   sendApproval(element: any) {
-    // Lógica para enviar aprobación
+    this.modalService
+      .modalConfirmacion(
+        ' ',
+        'warning',
+        '¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?'
+      )
+      .then((result) => {
+        if (result.isConfirmed) {
+          console.log('Plan eliminado');
+
+          this.modalService.mostrarModal(
+            'Su plan fue enviado al jefe de oficina',
+            'success',
+            'PLAN ENVIADO'
+          );
+        }
+      });
   }
+
+  
+  
 }

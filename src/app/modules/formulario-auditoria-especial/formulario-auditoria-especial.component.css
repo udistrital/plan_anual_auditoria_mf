@@ -29,8 +29,7 @@
 
   .botonAuditor {
     background-color: var(--danger-base) !important;
-    color: white !important;
-    
+    color: white !important;    
   }
 
   .auditorField{

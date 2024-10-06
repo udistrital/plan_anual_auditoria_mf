@@ -12,6 +12,7 @@ import { AsignacionAuditoresModule } from './modules/asignacion-auditores/asigna
 import { AuditoriasEspecialesModule } from './modules/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { EditarActividadesModule } from './modules/editar-actividades/editar-actividades.module';
+import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,7 @@ import { EditarActividadesModule } from './modules/editar-actividades/editar-act
     FormularioAuditoriaEspecialModule,
     EditarActividadesModule,
     CommonModule,
-
+    CargarArchivoModule
   ],
   providers: [],
   bootstrap: [AppComponent]
