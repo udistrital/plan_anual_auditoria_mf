@@ -1,13 +1,23 @@
-    <h3>Gestión Auditoría >> Registrar Plan Anual Auditoría PAA </h3>
-    <div class="border">
-        <mat-stepper [linear]="isLinear" #stepper labelPosition="bottom" orientation="vertical" class="custom-stepper-icon">
-            <mat-step [stepControl]="firstFormGroup">
-                <ng-template matStepLabel>INFORMACIÓN</ng-template>
-                
-            </mat-step>
-            <mat-step [stepControl]="secondFormGroup">
-                <ng-template matStepLabel>AUDITORÍAS</ng-template>
-                <app-registro-plan-anual-auditoria/>
-            </mat-step>
-        </mat-stepper>
-    </div>
+<h3>Gestión Auditoría >> Registrar Plan Anual Auditoría PAA </h3>
+<div class="border">
+    <mat-stepper [linear]="isLinear" #stepper labelPosition="bottom" orientation="vertical" class="custom-stepper-icon">
+        <mat-step [stepControl]="firstFormGroup">
+            <ng-template matStepLabel>INFORMACIÓN</ng-template>
+            <mat-card *ngIf="formulario != null">
+                <mat-card-title>{{ "formulario.titulo"}}</mat-card-title>
+                <mat-card-content>
+                    <app-formulario-dinamico [formulario]="formulario"
+                        (submitFormulario)="manejarEnvio($event)">
+                    </app-formulario-dinamico>
+                    <button mat-raised-button color="primary" (click)="enviarFormulario()">
+                        Enviar
+                    </button>
+                </mat-card-content>
+            </mat-card>
+        </mat-step>
+        <mat-step [stepControl]="secondFormGroup">
+            <ng-template matStepLabel>AUDITORÍAS</ng-template>
+            <app-registro-plan-anual-auditoria />
+        </mat-step>
+    </mat-stepper>
+</div>

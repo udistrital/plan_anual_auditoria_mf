@@ -4,9 +4,11 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
   selector: 'app-cargar-archivo',
   templateUrl: './cargar-archivo.component.html',
-  styleUrl: './cargar-archivo.component.css'
+  styleUrls: ['./cargar-archivo.component.css']
 })
 export class CargarArchivoComponent {
+
+  
 
   archivo: string | null = null;
 
