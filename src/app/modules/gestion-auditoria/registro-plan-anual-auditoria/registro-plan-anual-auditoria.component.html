@@ -70,9 +70,9 @@
         </table>
         <div class="button-container">
             <button class="buttoms" mat-raised-button color="primary">Añadir Auditoría</button>
-            <button class="buttoms" mat-raised-button color="primary">Cargue Masivo</button>
+            <button class="buttoms" mat-raised-button color="primary" (click)="subirArchivo('csv-xlsm')"><mat-icon>file_upload</mat-icon>Cargue Masivo</button>
             <button class="buttoms" mat-raised-button color="primary"><mat-icon>visibility</mat-icon>ver</button>
-            <button class="buttoms" mat-raised-button color="primary" (click)="subirArchivo()"><mat-icon>file_upload</mat-icon>Matriz</button>
+            <button class="buttoms" mat-raised-button color="primary" (click)="subirArchivo('pdf')"><mat-icon>file_upload</mat-icon>Matriz</button>
             <button class="buttoms" mat-raised-button color="primary" (click)="GuardarPaa()">Guardar</button>
           </div>
     </div>
