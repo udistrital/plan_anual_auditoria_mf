@@ -6,18 +6,13 @@
 
 <div class="file-input-container">
   <mat-form-field class="full-width" appearance="outline">
-    <input matInput placeholder="Seleccionar archivo ..." [value]="archivo" readonly />
-    <!-- <input type="file" hidden #fileInput (change)="onFileSelected($event)" /> -->
+    <input matInput placeholder="Seleccionar archivo ..." [value]="archivo?.name" readonly />
+    <input type="file" hidden #fileInput (change)="onFileSelected($event)" accept="pdf"/> 
   </mat-form-field>
   <button mat-raised-button color="primary" (click)="onFileInputClick()">Examinar ... </button>
 </div>
 
 <div class="button-container">
-  <button class="remover" mat-raised-button >Remover</button>
-  <button class="subir"  
-    mat-raised-button
-    color="primary"
-    (click)="cargarArchivo()"
-  >Subir
-  </button>
+  <button class="remover" mat-raised-button (click)="removerArchivo()">Remover</button>
+  <button class="subir"   mat-raised-button color="primary" (click)="cargarArchivo()">Subir</button>
 </div>
