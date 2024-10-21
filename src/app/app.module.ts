@@ -14,9 +14,13 @@ import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditori
 import { EditarActividadesModule } from './modules/editar-actividades/editar-actividades.module';
 import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
 
+
+
+
+
 @NgModule({
   declarations: [
-    AppComponent,  
+    AppComponent,
   ],
   imports: [
     BrowserModule,
@@ -30,9 +34,12 @@ import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.mod
     FormularioAuditoriaEspecialModule,
     EditarActividadesModule,
     CommonModule,
-    CargarArchivoModule
+    CargarArchivoModule,
+
+    
   ],
-  providers: [],
+  providers: [
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
