@@ -1,0 +1,33 @@
+.example-form {
+  min-width: 150px;
+  width: 100%;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.box-field {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.7rem;
+  padding-top: 0.7rem;
+}
+
+.example-full-width {
+  width: 100%;
+}
+
+.example-headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.example-headers-align .mat-mdc-form-field+.mat-mdc-form-field {
+  margin-left: 8px;
+}
+
+.button-container {
+  text-align: center;
+  margin-top: 1em;
+}
