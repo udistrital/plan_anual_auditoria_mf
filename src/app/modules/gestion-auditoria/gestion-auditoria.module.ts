@@ -27,8 +27,6 @@ import { MatDividerModule } from '@angular/material/divider';
 @NgModule({
   declarations: [
     RegistroPlanAnualAuditoriaComponent,
-    GestionAuditoriaComponent,
-    FormularioDinamicoComponent
   ],
   imports: [
     CommonModule,
@@ -57,7 +55,6 @@ import { MatDividerModule } from '@angular/material/divider';
   ],
   exports: [
     RegistroPlanAnualAuditoriaComponent,
-    GestionAuditoriaComponent 
   ]
 })
 export class GestionAuditoriaModule { }

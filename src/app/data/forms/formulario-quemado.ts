@@ -12,6 +12,9 @@ export const formularioQuemado: Formulario = {
             deshabilitado: false,
             validaciones: [
                 { tipo: "requerido", valor: "" },
+                { tipo: "min", valor: 4 },
+                { tipo: "max", valor: 10 },
+
             ],
             claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
         },
@@ -21,7 +24,8 @@ export const formularioQuemado: Formulario = {
             tipo: "text",
             validaciones: [
                 { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "30"}
+                { tipo: "maxLength", valor: "6"},
+                { tipo: "minLength", valor: "2"}
             ],
             deshabilitado: false,
             claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
@@ -89,7 +93,7 @@ export const formularioQuemado: Formulario = {
             tipo: "text",
             validaciones: [
                 { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "30"}
+                { tipo: "maxLength", valor: "3"}
             ],
             deshabilitado: false,
             claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
@@ -125,10 +129,10 @@ export const formularioQuemado: Formulario = {
         {
             nombre: "objetivo_auditoria",
             etiqueta: "Objetivo de la Auditoría",
-            tipo: "text",
+            tipo: "email",
             validaciones: [
                 { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "30"}
+                { tipo: "email" }
             ],
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-6 col-sm-12 col-xs-12"
@@ -147,10 +151,10 @@ export const formularioQuemado: Formulario = {
         {
             nombre: "criterios",
             etiqueta: "Criterios",
-            tipo: "text",
+            tipo: "textarea",
             validaciones: [
                 { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "30"}
+                { tipo: "maxLength", valor: "8"}
             ],
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-6 col-sm-12 col-xs-12"

@@ -25,12 +25,13 @@ export class ConsultaPlanAnualAuditoriaComponent {
   ) {}
 
   editReport(element: any) {
-    const nombreFormulario = 'sisifo_form';
-    window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${element.id}`;
+    // const nombreFormulario = 'sisifo_form';
+    // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${element.id}`;
+    this.router.navigate([`registrar-plan/`, element.id])
   }
 
   editActivities(element: any) {
-    this.router.navigate([`/editar-actividades`, element.id]);  
+    this.router.navigate([`editar-actividades`, element.id]);  
   }
 
   sendApproval(element: any) {

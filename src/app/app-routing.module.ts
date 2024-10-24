@@ -6,6 +6,8 @@ import {RevisionPlanAuditoriaComponent}from "./modules/revision-plan-auditoria/r
 import {AsignacionAuditoresComponent}from "./modules/asignacion-auditores/asignacion-auditores.component"
 import { AuditoriasEspecialesComponent } from './modules/auditorias-especiales/auditorias-especiales.component';
 import { EditarActividadesComponent } from './modules/editar-actividades/editar-actividades.component';
+import { RegistrarPlanComponent } from './modules/registrar-plan/registrar-plan.component';
+
 
 import { APP_BASE_HREF } from '@angular/common';
 
@@ -21,6 +23,10 @@ const routes: Routes = [
   {
     path: 'editar-actividades/:id',  
     component: EditarActividadesComponent
+  },
+  {
+    path: 'registrar-plan/:id',  
+    component: RegistrarPlanComponent
   },
   {
     path:"revision-plan",
