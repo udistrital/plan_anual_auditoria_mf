@@ -11,11 +11,11 @@
 }
 
 .primary-button {
-  color: var(--primary); /* Color primario permanente */
+  color: var(--primary);
 }
 
 .btn-cont button.selected {
-  background-color: #EEA096; /* Fondo cuando está seleccionado */
+  background-color: #EEA096;
   color: #710C17;
 }
 
