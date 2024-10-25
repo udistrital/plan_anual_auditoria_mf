@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
+import { MatCardModule } from '@angular/material/card';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -13,6 +14,8 @@ import { AuditoriasEspecialesModule } from './modules/auditorias-especiales/audi
 import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { EditarActividadesModule } from './modules/editar-actividades/editar-actividades.module';
 import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
+import { PlanAnualAuditoriaComponent } from './modules/plan-anual-auditoria/plan-anual-auditoria.component';
+
 
 
 
@@ -24,6 +27,7 @@ import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.mod
   ],
   imports: [
     BrowserModule,
+    MatCardModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     GestionAuditoriaModule,
@@ -35,8 +39,7 @@ import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.mod
     EditarActividadesModule,
     CommonModule,
     CargarArchivoModule,
-
-    
+    PlanAnualAuditoriaComponent 
   ],
   providers: [
   ],

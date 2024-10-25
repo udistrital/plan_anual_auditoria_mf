@@ -1,0 +1,44 @@
+<mat-card class="custom-card">
+  <mat-card-header>
+    <mat-card-title>Aprobación plan anual Auditoría</mat-card-title>
+    <mat-card-subtitle>Validación y autorización del plan anual de auditoría para garantizar la transparencia y eficiencia en los procesos.</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-grid-list cols="7" rowHeight="500px" gutterSize="0" class="grid">
+      <mat-grid-tile>
+        <mat-nav-list>
+          <mat-list-item class="btn-cont">
+            <button
+              mat-button
+              color="primary"
+              class="primary-button"
+              [ngClass]="{ 'selected': botonSeleccionado === 'formato' }"
+              (click)="seleccionarBoton('formato')">
+              Formato PAA
+            </button>
+          </mat-list-item>
+        
+          <mat-list-item class="btn-cont">
+            <button
+              mat-button
+              [ngClass]="{ 'selected': botonSeleccionado === 'matriz' }"
+              (click)="seleccionarBoton('matriz')">
+              Matriz Función <br> Pública
+            </button>
+          </mat-list-item>
+        </mat-nav-list>
+        
+      </mat-grid-tile>
+
+      <mat-grid-tile colspan="6" class="object-render">
+        <h2>PDF</h2>
+      </mat-grid-tile>
+    </mat-grid-list>
+
+    <div class="button">
+      <button mat-raised-button color="primary">Rechazar Plan</button>
+      <button mat-raised-button color="primary">Aprobar y Enviar a Secretario</button>
+    </div>
+  </mat-card-content>
+</mat-card>

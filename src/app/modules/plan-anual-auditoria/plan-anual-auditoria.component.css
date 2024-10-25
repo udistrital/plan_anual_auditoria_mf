@@ -1,0 +1,46 @@
+.custom-card {
+  margin: 40px;
+  padding: 20px;
+  box-shadow: 0 0.7rem 1.5rem rgba(44, 51, 73, 0.3);
+  border-radius: 10px;
+}
+
+.btn-cont button {
+  border-color: #710C17;
+  color: #710C17;
+}
+
+.primary-button {
+  color: var(--primary); /* Color primario permanente */
+}
+
+.btn-cont button.selected {
+  background-color: #EEA096; /* Fondo cuando está seleccionado */
+  color: #710C17;
+}
+
+mat-card-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+mat-card-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.button button {
+  color: var(--md-primary-contrast-300);
+  margin: 35px 5px 40px;
+}
+
+.object-render {
+  box-shadow: 0 0.7rem 1.5rem rgba(44, 51, 73, 0.3);
+  border-radius: 10px;
+}
