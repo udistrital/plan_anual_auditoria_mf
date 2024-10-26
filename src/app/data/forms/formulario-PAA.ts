@@ -11,6 +11,7 @@ export const formularioPAA1: Formulario = {
             placeholder: "Escriba aquí el Objetivo",
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+            valor: "Valor1",
             validaciones: [
                 {
                     tipo: "requerido",

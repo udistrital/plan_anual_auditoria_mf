@@ -31,7 +31,7 @@ export class ConsultaPlanAnualAuditoriaComponent {
   }
 
   editActivities(element: any) {
-    this.router.navigate([`editar-actividades`, element.id]);  
+    this.router.navigate([`registrar-auditorias`, element.id]);  
   }
 
   sendApproval(element: any) {

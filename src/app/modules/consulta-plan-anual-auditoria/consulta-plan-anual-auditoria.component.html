@@ -1,5 +1,5 @@
 <mat-card [style.width.%]="100">
-    <div class="containerDiv">
+    <div class="container-principal">
         <h2 class="title">PLAN ANUAL DE AUDITORÍA - PAA</h2>
         <mat-divider class="divider"></mat-divider>
 
@@ -68,10 +68,10 @@
                 <td mat-cell *matCellDef="let element" class="cell">
                     <mat-menu #menu="matMenu">
                         <button mat-menu-item (click)="editReport(element)">
-                            <mat-icon color="primary">edit</mat-icon> Editar informe
+                            <mat-icon color="primary">edit</mat-icon> Plan de Acción
                         </button>
                         <button mat-menu-item (click)="editActivities(element)">
-                            <mat-icon color="primary">add_circle</mat-icon> Editar actividades
+                            <mat-icon color="primary">add_circle</mat-icon> Registrar Auditorías
                         </button>
                         <button mat-menu-item (click)="sendApproval(element)">
                             <mat-icon color="primary">send</mat-icon> Enviar Aprobación Jefe OCI
