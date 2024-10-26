@@ -11,7 +11,7 @@ import { RevisionPlanAuditoriaModule } from './modules/revision-plan-auditoria/r
 import { AsignacionAuditoresModule } from './modules/asignacion-auditores/asignacion-auditores.module'
 import { AuditoriasEspecialesModule } from './modules/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditoria-especial/formulario-auditoria-especial.module';
-import { EditarActividadesModule } from './modules/editar-actividades/editar-actividades.module';
+import { RegistrarAuditoriasModule } from './modules/registrar-auditorias/registrar-auditorias.module';
 import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
 import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-auditoria.component';
 import { FormularioDinamicoComponent } from './components/formulario-dinamico/formulario-dinamico.component';
@@ -56,7 +56,7 @@ import { RegistrarPlanComponent } from './modules/registrar-plan/registrar-plan.
     AsignacionAuditoresModule,
     AuditoriasEspecialesModule,
     FormularioAuditoriaEspecialModule,
-    EditarActividadesModule,
+    RegistrarAuditoriasModule,
     CommonModule,
     CargarArchivoModule,
     MatStepperModule,
