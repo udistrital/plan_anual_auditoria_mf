@@ -1,4 +1,10 @@
-import { Component, ElementRef, Inject, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Inject,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GestorDocumentalService } from 'src/app/services/gestor-documental.service';
 import { lambdaService } from 'src/app/services/lambda.service';
@@ -19,7 +25,7 @@ export class CargarArchivoComponent {
     private gestorDocumentalService: GestorDocumentalService,
     private lambdaService: lambdaService,
     private http: HttpClient,
-    @Inject(MAT_DIALOG_DATA) public data: {tipoArchivo: string}
+    @Inject(MAT_DIALOG_DATA) public data: { tipoArchivo: string }
   ) {}
 
   onFileSelected(event: any): void {
@@ -34,10 +40,11 @@ export class CargarArchivoComponent {
       }
 
       if (
-        this.data.tipoArchivo === 'csv-xlsm' &&
-        !['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'].includes(file.type)
+        this.data.tipoArchivo === 'xlsx' &&
+        file.type !==
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       ) {
-        alert('Por favor seleccione un archivo CSV o XLSM.');
+        alert('Por favor seleccione un archivo XLSX.');
         this.removerArchivo();
         return;
       }
@@ -65,7 +72,7 @@ export class CargarArchivoComponent {
       const base64String = e.target.result.split(',')[1];
 
       const lambdaPayload = {
-        base64Data: base64String, 
+        base64data: base64String,
       };
 
       const payload = [
@@ -79,7 +86,7 @@ export class CargarArchivoComponent {
       ];
 
       this.lambdaService
-        .post('/hello', lambdaPayload,)
+        .post('/registro-datos-archivo', lambdaPayload)
         .subscribe({
           next: (response) => {
             console.log('Archivo enviado exitosamente a la Lambda', response);
@@ -88,7 +95,7 @@ export class CargarArchivoComponent {
             console.error('Error al enviar el archivo a la Lambda', error);
           },
         });
-      
+
       this.gestorDocumentalService
         .postAny('/document/uploadAnyFormat', payload)
         .subscribe({
