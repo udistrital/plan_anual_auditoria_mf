@@ -1,7 +1,8 @@
 <mat-card class="custom-card">
   <mat-card-header>
     <mat-card-title>Aprobación plan anual Auditoría</mat-card-title>
-    <mat-card-subtitle>Validación y autorización del plan anual de auditoría para garantizar la transparencia y eficiencia en los procesos.</mat-card-subtitle>
+    <mat-card-subtitle>Validación y autorización del plan anual de auditoría para garantizar la transparencia y
+      eficiencia en los procesos.</mat-card-subtitle>
   </mat-card-header>
 
   <mat-card-content>
@@ -9,30 +10,24 @@
       <mat-grid-tile>
         <mat-nav-list>
           <mat-list-item class="btn-cont">
-            <button
-              mat-button
-              color="primary"
-              class="primary-button"
-              [ngClass]="{ 'selected': botonSeleccionado === 'formato' }"
-              (click)="seleccionarBoton('formato')">
+            <button mat-button class="primary-button"
+              [ngClass]="{ 'selected': botonSeleccionado === 'formato' }" (click)="seleccionarBoton('formato')">
               Formato PAA
-            </button>
+            </button>            
           </mat-list-item>
-        
+
           <mat-list-item class="btn-cont">
-            <button
-              mat-button
-              [ngClass]="{ 'selected': botonSeleccionado === 'matriz' }"
+            <button mat-button [ngClass]="{ 'selected': botonSeleccionado === 'matriz' }"
               (click)="seleccionarBoton('matriz')">
               Matriz Función <br> Pública
             </button>
           </mat-list-item>
         </mat-nav-list>
-        
+
       </mat-grid-tile>
 
       <mat-grid-tile colspan="6" class="object-render">
-        <h2>PDF</h2>
+        <app-pdf-visualizador [base64Document]="documento" width="100%" height="400px"></app-pdf-visualizador>  
       </mat-grid-tile>
     </mat-grid-list>
 
@@ -42,3 +37,4 @@
     </div>
   </mat-card-content>
 </mat-card>
+
