@@ -101,9 +101,10 @@ export class RegistroPlanAnualAuditoriaComponent implements OnInit {
       });
   }
 
-  subirArchivo(): void {
+  subirArchivo(tipoArchivo: string): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: '600px',
+      data: {tipoArchivo}
     });
   }
 }
