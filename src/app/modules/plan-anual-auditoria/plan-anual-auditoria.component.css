@@ -5,19 +5,30 @@
   border-radius: 10px;
 }
 
-.btn-cont button {
-  border-color: #710C17;
-  color: #710C17;
+.btn-cont{
+  background-color: white;
+  color: hsl(8.28deg 68.5% 75.1%);
+  font-weight: normal;
+  padding: 0px;
+  width: 100%;
+  align-items: start;
+  button{
+    align-self: start;
+    text-align: left;
+    width: 100%;
+    height: 50px;
+    margin:0;
+    border-radius:9px;
+    padding-top:10px;
+    padding-bottom:15px;
+    border: 1px solid hsl(210deg 15% 92.16%);
+  }
 }
+.selected {
+  background-color: hsl(8.28deg 68.5% 75.1%);
+  color:#731514;
+  font-weight: bold;
 
-.primary-button {
-  background-color: #710C17;
-  color: #ffffff;
-}
-
-.btn-cont button.selected {
-  background-color: #EEA096;
-  color: #710C17;
 }
 
 mat-card-title {
@@ -30,10 +41,23 @@ mat-card-subtitle {
   color: #666;
 }
 
-.button {
+#descargarBtn{
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
+}
+
+.button_down {
+  display: flex;
   margin-top: 16px;
+  justify-content: center;
+
+  button{
+      color: var(--md-primary-contrast-300);
+      margin-top: 35px;
+      margin-left:5px;
+      margin-right:5px;
+      margin-bottom: 40px;
+  }
 }
 
 .button button {
