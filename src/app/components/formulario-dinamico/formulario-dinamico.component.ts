@@ -49,6 +49,7 @@ export class FormularioDinamicoComponent implements OnInit {
             validators.push(Validators.pattern(validacion.valor));
           }
           if (validacion.tipo == 'min') {
+            console.log(validacion.valor, validacion.tipo)
             validators.push(Validators.min(validacion.valor));
           }
           if (validacion.tipo == 'max') {
@@ -61,17 +62,21 @@ export class FormularioDinamicoComponent implements OnInit {
       });
     }
 
-
     return validators;
   }
 
+  getValidacionValor(campo: any, tipoValidacion: string): number | string | null {
+    const validacion = campo.validaciones?.find((v: any) => v.tipo.toLowerCase() === tipoValidacion.toLowerCase());
+    return validacion ? validacion.valor : null;
+  }
 
-   onSubmit(): void {
+
+  onSubmit(): void {
     if (this.form.valid) {
       const formData = this.form.value;
       this.submitFormulario.emit(formData); 
     } else {
-      console.log('Formulario no válido', this.form);
+      this.submitFormulario.emit(null); 
     }
   }
 }

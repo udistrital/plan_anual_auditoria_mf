@@ -3,6 +3,7 @@
     justify-content: space-between;
     align-items: center;
 }
+
 .centered-table {
     width: 100%;
 
@@ -16,6 +17,7 @@
         text-align: center;
     }
 }
+
 .label-select{
     font-weight: bold;
 }

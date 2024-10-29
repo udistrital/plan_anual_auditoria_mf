@@ -4,7 +4,7 @@
     right: 16px;
     top: 16px;
   }
-  .container{
+  .container-principal {
     padding: 20px;
     box-sizing: border-box;
     display: flex;

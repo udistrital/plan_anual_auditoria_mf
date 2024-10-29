@@ -1,5 +1,3 @@
-<h3>formulario</h3>
-
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="example-form">
   
       <div *ngFor="let campo of formulario.campos" [ngSwitch]="campo.tipo" [ngClass]="campo.claseGrid + ' box-field'">
@@ -10,11 +8,11 @@
           <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
             {{ campo.etiqueta }} es requerido
           </mat-error>
-          <mat-error *ngIf="form.controls[campo.nombre].hasError('minLength')">
-            {{ campo.etiqueta }} no puede ser menor a {{ campo.validaciones?.min }} caracteres
+          <mat-error *ngIf="form.controls[campo.nombre].hasError('minlength')">
+            {{ campo.etiqueta }} no puede ser menor a {{ getValidacionValor(campo, 'minLength') }} caracteres
           </mat-error>
-          <mat-error *ngIf="form.controls[campo.nombre].hasError('maxLength')">
-            {{ campo.etiqueta }} no puede ser mayor a {{ campo.validaciones?.max }} caracteres
+          <mat-error *ngIf="form.controls[campo.nombre].hasError('maxlength')">
+            {{ campo.etiqueta }} no puede ser mayor a {{ getValidacionValor(campo, 'maxLength') }} caracteres
           </mat-error>
         </mat-form-field>
 
@@ -27,7 +25,7 @@
           </mat-error>
           <mat-error
             *ngIf="form.controls[campo.nombre].hasError('email') && !form.controls[campo.nombre].hasError('required')">
-            {{ campo.etiqueta }} no tiene un formato válido
+            {{ campo.etiqueta }} no tiene un formato de correo válido
           </mat-error>
         </mat-form-field>
 
@@ -39,10 +37,10 @@
             {{ campo.etiqueta }} es requerido
           </mat-error>
           <mat-error *ngIf="form.controls[campo.nombre].hasError('min')">
-            {{ campo.etiqueta }} no puede ser menor que {{ campo.validaciones?.min }}
+            {{ campo.etiqueta }} no puede ser menor que {{ getValidacionValor(campo, 'min') }}
           </mat-error>
           <mat-error *ngIf="form.controls[campo.nombre].hasError('max')">
-            {{ campo.etiqueta }} no puede ser mayor que {{ campo.validaciones?.max }}
+            {{ campo.etiqueta }} no puede ser mayor que {{ getValidacionValor(campo, 'max') }}
           </mat-error>
         </mat-form-field>
 
@@ -110,6 +108,12 @@
           <textarea matInput [formControlName]="campo.nombre"></textarea>
           <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
             {{ campo.etiqueta }} es requerido
+          </mat-error>
+          <mat-error *ngIf="form.controls[campo.nombre].hasError('minlength')">
+            {{ campo.etiqueta }} no puede ser menor a {{ getValidacionValor(campo, 'minLength') }} caracteres
+          </mat-error>
+          <mat-error *ngIf="form.controls[campo.nombre].hasError('maxlength')">
+            {{ campo.etiqueta }} no puede ser mayor a {{ getValidacionValor(campo, 'maxLength') }} caracteres
           </mat-error>
         </mat-form-field>
 

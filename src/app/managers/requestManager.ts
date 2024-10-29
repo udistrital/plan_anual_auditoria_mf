@@ -47,13 +47,12 @@ export class RequestManager {
    * @returns Observable<any>
    */
   get(endpoint: string) {
-    return this.http.get<any>(`${this.path}${endpoint}`, this.httpOptions).pipe(
-      map((res) => {
+    return this.http.get<any>(`${this.path}${endpoint}`, { ...this.httpOptions, observe: 'body' }).pipe(
+      map((res: any) => {  
         if (res.hasOwnProperty('Body')) {
-          return res;
-        } else {
-          return res;
+          return res['Body'];
         }
+        return res;
       }),
       catchError(this.errManager.handleError.bind(this))
     );

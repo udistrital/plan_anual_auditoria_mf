@@ -68,6 +68,53 @@
 
 /* Es necesario que la fila sea display: flex 
 para el correcto funcionamiento del drag & drop */
+
+
+.container-principal {
+    margin: 10px;
+    padding: 60px 40px;
+}
+
+.title {
+    padding-left: 12px;
+    margin-bottom: 10px;
+    color: var(--primary);
+}
+
+.divider {
+    margin-bottom: 30px;
+    background-color: var(--md-primary-contrast-50);
+}
+
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.icon{
+    /*font-size:30px;*/
+    transform: scale(1.5);
+}
+
+.centered-table {
+    width: 100%;
+
+    .cell {
+        text-align: center;
+        font-weight: bold;
+        color: rgba(0, 0, 0, 0.5);
+    }
+    .header {
+        font-weight: bold;
+        text-align: center;
+    }
+}
+
+.label-select{
+    font-weight: bold;
+}
+
 .mat-row {
     display: flex;
     align-items: center;
@@ -92,4 +139,17 @@ cdk-drag-preview {
 
 cdk-drag-placeholder {
     opacity: 0;
+}
+
+.button-container{
+    display: flex;
+    margin-bottom: 10px;
+    justify-content: flex-end;
+
+    button{
+        color: var(--md-primary-contrast-300);
+        margin-top: 35px;
+        margin-left:5px;
+        margin-right:5px;
+    }
 }

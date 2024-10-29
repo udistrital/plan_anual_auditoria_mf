@@ -25,11 +25,9 @@
               "src/assets"
             ],
             "styles": [
-              "src/assets/styles/theme.scss",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "src/assets/styles/theme.scss"
             ],
             "scripts": [
-               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
             "customWebpackConfig": {
               "path": "extra-webpack.config.js",
@@ -97,8 +95,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "src/styles.css"
             ],
             "scripts": []
           }
