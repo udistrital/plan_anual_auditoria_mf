@@ -3,7 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ActivatedRoute } from '@angular/router';
 import { AddAuditoriaModalComponent } from './add-auditoria-modal/add-auditoria-modal.component';
-import { CargarArchivoComponent } from '../cargar-archivo/cargar-archivo.component';
+import { CargarArchivoComponent } from '../../cargar-archivo/cargar-archivo.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalService } from 'src/app/services/modal.service';
 

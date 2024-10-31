@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ModalService } from 'src/app/services/modal.service';
-import { CargarArchivoComponent } from '../cargar-archivo/cargar-archivo.component';
+import { CargarArchivoComponent } from '../../cargar-archivo/cargar-archivo.component';
 
 @Component({
   selector: 'app-consulta-plan-anual-auditoria',
