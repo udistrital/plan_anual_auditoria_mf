@@ -3,11 +3,11 @@ import { MatDialog } from '@angular/material/dialog';
 import {ModalGeneral} from './modal-general/modal-general'
 import {ModalMotivosRechazoComponent} from './modal-motivos-rechazo/modal-motivos-rechazo.component'
 @Component({
-  selector: 'app-revision-plan-auditoria',
-  templateUrl: './revision-plan-auditoria.component.html',
-  styleUrls: ['./revision-plan-auditoria.component.css']
+  selector: 'app-revision-jefe',
+  templateUrl: './revision-jefe.component.html',
+  styleUrls: ['./revision-jefe.component.css']
 })
-export class RevisionPlanAuditoriaComponent {
+export class revisionJefeComponent {
   constructor(public dialog: MatDialog) {}
 
   botonSeleccionado: string = 'formato';
