@@ -1,14 +1,14 @@
 
 import { Formulario } from "../models/formulario.model";
 
-export const formularioPAA2: Formulario = {
+export const formularioPAA: Formulario = {
     campos: [
         {
-            nombre: "Objetivo",
+            nombre: "objetivo",
             descripcion: "Objetivo del plan",
             etiqueta: "Objetivo",
             tipo: "textarea",
-            valor: "Establecer un plan anual de auditorías para asegurar la calidad del sistema de gestión.",
+            valor: "Planear las actividades que realizará el equipo auditor de la Oficina de Control Interno, mediante la aplicación de auditorias y seguimientos que contribuyan a proteger los recursos, garantizar los estándares de las operaciones, la confiabilidad y oportunidad de la información, dar manejo adecuado a los riesgos para contribuir con el cumplimiento de los objetivos institucionales y la mejora de la gestión de la Universidad.",
             placeholder: "Escriba aquí el Objetivo",
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
@@ -20,11 +20,11 @@ export const formularioPAA2: Formulario = {
             ]
         },
         {
-            nombre: "Alcance",
+            nombre: "alcance",
             descripcion: "Alcance del plan",
             etiqueta: "Alcance",
             tipo: "textarea",
-            valor: "Todas las áreas de la organización serán auditadas en el transcurso del año.",
+            valor: "Planear las actividades que realizará el equipo auditor de la Oficina de Control Interno, mediante la aplicación de auditorias y seguimientos que contribuyan a proteger los recursos, garantizar los estándares de las operaciones, la confiabilidad y oportunidad de la información, dar manejo adecuado a los riesgos para contribuir con el cumplimiento de los objetivos institucionales y la mejora de la gestión de la Universidad.",
             placeholder: "Escriba aquí el Alcance",
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
@@ -36,11 +36,11 @@ export const formularioPAA2: Formulario = {
             ]
         },
         {
-            nombre: "Criterios",
+            nombre: "criterio",
             descripcion: "Criterios del plan",
             etiqueta: "Criterios",
             tipo: "textarea",
-            valor: "Se seguirán los criterios establecidos en la norma ISO 9001:2015.",
+            valor: "Normatividad interna y externa aplicable a la Universidad.\nDireccionamiento Estratégico\nModelo Integrado de Planeación y Gestión MIPG\nSistema Integrado de Gestión\nProyectos de Inversión",
             placeholder: "Escriba aquí el Criterios",
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
@@ -52,11 +52,11 @@ export const formularioPAA2: Formulario = {
             ]
         },
         {
-            nombre: "Recursos",
+            nombre: "recurso",
             descripcion: "Recursos del plan",
             etiqueta: "Recursos",
             tipo: "textarea",
-            valor: "El equipo de auditores internos, consultores externos, y herramientas tecnológicas.",
+            valor: "Humanos: Equipo de trabajo de la Oficina de Control interno (servidores públicos y/o particulares que ejerzan funciones públicas permanente o transitoria)\nFinancieros: Presupuesto asignado\nTecnológicos: Equipos de cómputo, sistemas de información, archivo documental, papelería, sistemas de redes y correo electrónico de la Universidad.",
             placeholder: "Escriba aquí los Recursos",
             deshabilitado: false,
             claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",

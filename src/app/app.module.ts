@@ -35,7 +35,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { RegistrarPlanComponent } from './modules/programacion/registrar-plan/registrar-plan.component';
 
-
+//Services
+import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 
 
 
@@ -82,6 +83,7 @@ import { RegistrarPlanComponent } from './modules/programacion/registrar-plan/re
     MatDividerModule,  
   ],
   providers: [
+    PlanAnualAuditoriaService
   ],
   bootstrap: [AppComponent]
 })

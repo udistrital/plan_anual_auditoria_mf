@@ -11,6 +11,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 
+//Servicios
+import { ParametrosService } from 'src/app/services/parametros.service';
+import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
+
 @NgModule({
   declarations: [
     ConsultaPlanAnualAuditoriaComponent
@@ -26,6 +30,10 @@ import { MatCardModule } from '@angular/material/card';
     MatInputModule,
     MatDividerModule,
     MatCardModule
+  ],
+  providers: [
+    ParametrosService,
+    PlanAnualAuditoriaService
   ]
 })
 export class ConsultaPlanAnualAuditoriaModule { }
