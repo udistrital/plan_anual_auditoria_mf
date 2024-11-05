@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { importProvidersFrom, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { RegistrarAuditoriasComponent } from './registrar-auditorias.component';
@@ -16,6 +16,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 //Servicios
 import { ParametrosService } from 'src/app/services/parametros.service';
+import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { ParametrosService } from 'src/app/services/parametros.service';
     DragDropModule
   ],
   providers: [
-    ParametrosService
+    ParametrosService,
+    PlanAnualAuditoriaService
   ]
 })
 export class RegistrarAuditoriasModule { }

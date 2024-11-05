@@ -123,6 +123,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: '1200px',
+      data: { planAuditoriaId: this.id }
     });
 
     dialogRef.afterClosed().subscribe(result => {

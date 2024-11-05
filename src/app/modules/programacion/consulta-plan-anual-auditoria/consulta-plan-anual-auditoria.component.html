@@ -5,20 +5,19 @@
 
         <div class="section">
             <h5>Seleccione el año del plan de auditoría - PAA a realizar</h5>
-
             <div class="filter-section">
-                <label for="ano-select">AÑO</label>
-                <mat-form-field appearance="outline">
-                    <mat-label>Seleccione el año del plan: </mat-label>
-                    <mat-select id="ano-select">
-                        <mat-option *ngFor="let year of years" [value]="year">
-                            {{ year }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <button mat-raised-button color="primary" class="crear-button">Crear</button>
+              <label for="ano-select">AÑO</label>
+              <mat-form-field appearance="outline">
+                <mat-label>Seleccione el año del plan: </mat-label>
+                <mat-select id="ano-select" [(value)]="selectedYearId">
+                  <mat-option *ngFor="let year of years" [value]="year.Id">
+                    {{ year.Nombre }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-raised-button color="primary" class="crear-button" (click)="crearPlan()">Crear</button>
             </div>
-        </div>
+          </div>
 
         <h5>Seleccione el plan de auditoría - PAA a realizar modificaciones o enviar a aprobación</h5>
 

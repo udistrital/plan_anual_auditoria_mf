@@ -34,19 +34,21 @@
     </mat-form-field>
   </div>
 
-  <!-- Cronograma de Actividades -->
-  <div class="form-section">
-    <div class="section-header">CRONOGRAMA DE ACTIVIDADES</div>
-    <mat-form-field appearance="outline" class="form-input">
-      <mat-label>Seleccione...</mat-label>
-      <mat-select formControlName="cronogramaActividades" multiple>
-        <mat-option *ngFor="let mes of meses" [value]="mes">{{ mes }}</mat-option>
-      </mat-select>
-      <mat-error *ngIf="auditoriaForm.get('cronogramaActividades').hasError('required') && auditoriaForm.get('cronogramaActividades').touched">
-        Seleccione al menos un mes para el cronograma
-      </mat-error>
-    </mat-form-field>
-  </div>
+ <!-- Cronograma de Actividades -->
+<div class="form-section">
+  <div class="section-header">CRONOGRAMA DE ACTIVIDADES</div>
+  <mat-form-field appearance="outline" class="form-input">
+    <mat-label>Seleccione...</mat-label>
+    <mat-select formControlName="cronogramaActividades" multiple>
+      <mat-option (click)="asignarTodos()">Asignar todos</mat-option>
+      <mat-option *ngFor="let mes of meses" [value]="mes.Nombre">{{ mes.Nombre }}</mat-option>
+    </mat-select>
+    <mat-error *ngIf="auditoriaForm.get('cronogramaActividades').hasError('required') && auditoriaForm.get('cronogramaActividades').touched">
+      Seleccione al menos un mes para el cronograma
+    </mat-error>
+  </mat-form-field>
+</div>
+
 </form>
 
 <div class="modal-footer">
