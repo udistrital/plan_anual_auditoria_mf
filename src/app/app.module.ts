@@ -14,8 +14,7 @@ import { AuditoriasEspecialesModule } from './modules/auditorias-especiales/audi
 import { FormularioAuditoriaEspecialModule } from './modules/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { EditarActividadesModule } from './modules/editar-actividades/editar-actividades.module';
 import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
-import { PlanAnualAuditoriaModule } from './modules/plan-anual-auditoria/plan-anual-auditoria.module';
-
+import { PlanAnualAuditoriaModule } from './modules/plan-anual-auditoria/plan-anual-auditoria.module'
 
 
 
@@ -39,7 +38,7 @@ import { PlanAnualAuditoriaModule } from './modules/plan-anual-auditoria/plan-an
     EditarActividadesModule,
     CommonModule,
     CargarArchivoModule,
-    PlanAnualAuditoriaModule
+    PlanAnualAuditoriaModule    
   ],
   providers: [
   ],

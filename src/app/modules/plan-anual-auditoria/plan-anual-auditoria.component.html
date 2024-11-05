@@ -5,39 +5,101 @@
   <mat-divider class="divider"></mat-divider>
 
   <div id="descargarBtn">
-    <button  mat-button color="primary">
-      Descargar Todo <mat-icon> insert_drive_file</mat-icon>
+    <button mat-button color="primary">
+      Descargar Todo <mat-icon>insert_drive_file</mat-icon>
     </button>
   </div>
 
   <mat-card-content>
     <mat-grid-list cols="7" rowHeight="500px" gutterSize="0" class="grid">
-        <mat-grid-tile colspan="1" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;">
-          <mat-nav-list>
-            <mat-list-item class="btn-cont ">
-                <button mat-button color="primary"
-                [ngClass]="{'selected': botonSeleccionado === 'formato'}"
-                (click)="seleccionarBoton('formato')"
-                >Formato PAA</button>
-            </mat-list-item>
-            <mat-list-item  class="btn-cont">
-                <button mat-button color="primary"
-                [ngClass]="{'selected': botonSeleccionado === 'matriz'}"
-                (click)="seleccionarBoton('matriz')"
-                >Matriz Función Pública</button>
-            </mat-list-item>
-          </mat-nav-list>
-        </mat-grid-tile>
+      <mat-grid-tile colspan="1"
+        style="display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;">
+        <mat-nav-list>
+          <mat-list-item class="btn-cont">
+            <button mat-button color="primary" [ngClass]="{'selected': botonSeleccionado === 'formato'}"
+              (click)="seleccionarBoton('formato')">Formato PAA</button>
+          </mat-list-item>
+          <mat-list-item class="btn-cont">
+            <button mat-button color="primary" [ngClass]="{'selected': botonSeleccionado === 'matriz'}"
+              (click)="seleccionarBoton('matriz')">Matriz Función Pública</button>
+          </mat-list-item>
+        </mat-nav-list>
+      </mat-grid-tile>
 
       <!-- Segunda columna para el visualizador de PDF -->
       <mat-grid-tile colspan="6" class="object-render">
-        <app-pdf-visualizador [base64Document]="documento" width="100%" height="400px"></app-pdf-visualizador>  
+        <app-pdf-visualizador [base64Document]="documento" width="100%" height="400px"></app-pdf-visualizador>
       </mat-grid-tile>
     </mat-grid-list>
 
+
+
     <div class="button_down">
-      <button mat-raised-button color="primary">Rechazar Plan</button>
-      <button mat-raised-button color="primary">Aprobar y Enviar a Secretario</button>
+      <button mat-raised-button color="primary" (click)="openModalRechazo()">Rechazar Plan</button>      
+      <button mat-raised-button color="primary" (click)="openAprobacionModal()">Aprobar y Enviar a Secretario</button>
     </div>
   </mat-card-content>
 </mat-card>
+
+<!-- Modal para Aprobación -->
+<ng-template #aprobacionModal>
+  <h2 mat-dialog-title></h2>
+  <mat-dialog-content>
+    <mat-horizontal-stepper linear #stepper>
+      <mat-step [completed]="step1Completed">
+        <ng-template matStepLabel>Paso 1</ng-template>
+
+        <!-- Contenedor para el mensaje de advertencia con ícono y texto centralizado -->
+        <div class="MatStep1">
+          <mat-icon style="color: #731514;">error_outline</mat-icon>
+          <p class="TextMatStep1">¿Está seguro de enviar el <br> plan anual de auditoría - PAA?</p>
+        </div>
+
+        <!-- Botones de confirmación y cancelación con estilo personalizado -->
+        <div class="ButtonMatStep1">
+          <button mat-raised-button style="background-color: #731514; color: white;" mat-button matStepperNext
+            (click)="completeStep1()">Aceptar</button>
+          <button mat-raised-button mat-dialog-close
+            matStepperPrevious>Cancelar</button>
+        </div>
+      </mat-step>
+
+
+
+      <mat-step [completed]="step2Completed">
+        <div class="MatStep1">          
+          <p class="TextMatStep1">Por favor adjuntar Acta de CCCI</p>
+        </div>        
+        <ng-template matStepLabel>Paso 2</ng-template>
+        <div class="file-input-container">
+          <mat-form-field class="full-width" appearance="outline">
+            <input matInput placeholder="Seleccionar archivo ..." [value]="archivo?.name" readonly />
+            <input type="file" hidden #fileInput (change)="onFileSelected($event)" accept="pdf" />
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="onFileInputClick()">Examinar</button>
+        </div>
+
+        <div class="button-container">
+          <button class="remover" mat-raised-button (click)="removerArchivo()">Remover</button>
+          <button class="subir" mat-raised-button color="primary" (click)="cargarArchivo()">Subir</button>
+        </div><br><br>
+        <div>
+          <button mat-button matStepperNext (click)="completeStep2()" style="background-color: #731514; color: white;">Siguiente</button>          
+        </div>
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Paso 3</ng-template>
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 1rem;">
+          <mat-icon style="color: #731514;">check_circle </mat-icon>
+          <h3>PLAN ENVIADO</h3>
+          <p style="font-size: 1.2rem; font-weight: 500; margin: 1rem 0;">Su plan fue enviado a jefe de oficina</p>
+        </div>
+
+        <div class="ButtonMatStep1">
+          <button mat-button mat-dialog-close (click)="finishAprobacion()" style="background-color: #731514; color: white;">OK</button>
+        </div>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </mat-dialog-content>
+</ng-template>

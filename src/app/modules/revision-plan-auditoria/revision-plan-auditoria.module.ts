@@ -32,7 +32,9 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     PdfViewerModule
   ],
   exports: [
-PdfVisualizadorComponent,
+  PdfVisualizadorComponent,
+  ModalGeneral,
+  ModalMotivosRechazoComponent
   ]
 })
 export class RevisionPlanAuditoriaModule { }
