@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { revisionJefeComponent } from './revision-jefe.component';
+import { RevisionJefeComponent } from './revision-jefe.component';
 
-describe('revisionJefeComponent', () => {
-  let component: revisionJefeComponent;
-  let fixture: ComponentFixture<revisionJefeComponent>;
+describe('RevisionJefeComponent', () => {
+  let component: RevisionJefeComponent;
+  let fixture: ComponentFixture<RevisionJefeComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [revisionJefeComponent]
+      declarations: [RevisionJefeComponent]
     });
-    fixture = TestBed.createComponent(revisionJefeComponent);
+    fixture = TestBed.createComponent(RevisionJefeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

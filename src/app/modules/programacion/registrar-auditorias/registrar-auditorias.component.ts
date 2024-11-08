@@ -6,55 +6,54 @@ import { AddAuditoriaModalComponent } from './add-auditoria-modal/add-auditoria-
 import { CargarArchivoComponent } from '../../cargar-archivo/cargar-archivo.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalService } from 'src/app/services/modal.service';
-
-interface Auditoria {
-  auditoria: string;
-  tipoEvaluacion: string;
-  cronograma: string;
-  estado: string;
-}
+import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
+import { Auditoria } from 'src/app/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
   selector: 'app-registrar-auditorias',
   templateUrl: './registrar-auditorias.component.html',
   styleUrls: ['./registrar-auditorias.component.css']
 })
-export class RegistrarAuditoriasComponent implements OnInit {
-  constructor(  private modalService: ModalService, private route: ActivatedRoute, private dialog: MatDialog) {
-  }
 
+export class RegistrarAuditoriasComponent implements OnInit {
 
   displayedColumns: string[] = ['no', 'auditoria', 'tipoEvaluacion', 'cronograma', 'estado', 'acciones'];
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = '';
 
-  // Mock de datos basado en diferentes IDs
-  auditoriasMock: { [key: string]: Auditoria[] } = {
-    '1': [
-      { auditoria: 'Auditoría 1', tipoEvaluacion: 'Auditoría Interna', cronograma: 'Mes', estado: 'Sin Iniciar' },
-      { auditoria: 'Auditoría 2', tipoEvaluacion: 'Seguimiento', cronograma: 'Mes', estado: 'Sin Iniciar' },
-      { auditoria: 'Auditoría 3', tipoEvaluacion: 'Auditoría Externa', cronograma: 'Trimestre', estado: 'En Proceso' }
-    ],
-    '2': [
-      { auditoria: 'Auditoría 4', tipoEvaluacion: 'Revisión', cronograma: 'Mes', estado: 'Completada' }
-    ],
-    '3': [
-      { auditoria: 'Auditoría 5', tipoEvaluacion: 'Auditoría Interna', cronograma: 'Anual', estado: 'En Proceso' },
-      { auditoria: 'Auditoría 6', tipoEvaluacion: 'Seguimiento', cronograma: 'Semestre', estado: 'Sin Iniciar' }
-    ]
-  };
-
-
+  constructor(  
+    private modalService: ModalService, 
+    private route: ActivatedRoute, 
+    private dialog: MatDialog,
+    private planAnualAuditoriaService: PlanAnualAuditoriaService
+  ) {}
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id') ?? '1';
-    this.loadAuditorias(this.id);
+    this.loadAuditoriasFromService();  
   }
 
-  // Cargar los datos de auditorías según el ID
-  loadAuditorias(id: string): void {
-    this.dataSource.data = this.auditoriasMock[id] || [];
+  loadAuditoriasFromService(): void {
+    this.planAnualAuditoriaService.get(`/auditoria?query=planAuditoriaId:${this.id}`).subscribe(
+      (res) => {
+        if (res && res.Data) {
+          this.dataSource.data = res.Data
+            .filter((item: any) => item.activo === true) 
+            .map((item: any) => ({
+              id: item._id,
+              auditoria: item.titulo ?? 'Sin Título',
+              tipoEvaluacion: item.tipoEvaluacionId ?? 'Sin Tipo',
+              cronograma: item.cronogramaId ?? 'Sin Cronograma',
+              estado: item.estadoId ?? 'Desconocido'
+            }));
+        }
+      },
+      (error) => {
+        this.modalService.mostrarModal('Error al cargar las auditorías', 'error', 'ERROR');
+      }
+    );
   }
+
 
   // Función para manejar el evento de drag-and-drop
   drop(event: CdkDragDrop<Auditoria[]>): void {
@@ -63,26 +62,27 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.dataSource.data = prevData;
   }
 
-  // Editar auditoría
-  editAuditoria(index: number) {
-    const nombreFormulario = 'sisifo_form2';
-    window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
-  }
   
   // Eliminar auditoría
-  EliminarAuditoria(element: Auditoria) {
+  deleteAuditoria(element: Auditoria) {
     this.modalService
-      .modalConfirmacion(
-        ' ',
-        'warning',
-        '¿Está seguro(a) de eliminar el registro?'
-      )
+      .modalConfirmacion(' ', 'warning', '¿Está seguro(a) de eliminar el registro?')
       .then((result) => {
         if (result.isConfirmed) {
-          console.log('Registro eliminado');
-
-          this.modalService.mostrarModal(' ', 'error', 'Registro eliminado');
-          this.dataSource.data = this.dataSource.data.filter(e => e !== element);
+          console.log(element)
+          this.planAnualAuditoriaService.delete(`/auditoria`, element).subscribe(
+            (response) => {
+              if (response) {
+                this.modalService.mostrarModal('Registro eliminado', 'success', 'ÉXITO');
+                this.dataSource.data = this.dataSource.data.filter(e => e.id !== element.id);
+              } else {
+                this.modalService.mostrarModal('Error al eliminar el registro', 'error', 'ERROR');
+              }
+            },
+            (error) => {
+              this.modalService.mostrarModal('Error al eliminar el registro', 'error', 'ERROR');
+            }
+          );
         }
       });
   }
@@ -118,18 +118,30 @@ export class RegistrarAuditoriasComponent implements OnInit {
     console.log('Nuevo orden de auditorías:', this.dataSource.data);
   }
 
-  addAuditoria() {
+  addAuditoria(auditoria?: Auditoria) {
     // const nombreFormulario = 'sisifo_form2';
     // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: '1200px',
-      data: { planAuditoriaId: this.id }
+      data: {
+        planAuditoriaId: this.id,
+        auditoria 
+      }
     });
-
+  
     dialogRef.afterClosed().subscribe(result => {
       if (result?.saved) {
-        console.log('Auditoría guardada');
+        console.log('Auditoría guardada o actualizada');
+        this.loadAuditoriasFromService(); // Refrescar la lista después de guardar o actualizar.
       }
-    })
+    });
   }
+
+    // Editar auditoría
+    editAuditoria(auditoria: Auditoria) {
+      // const nombreFormulario = 'sisifo_form2';
+      // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
+      this.addAuditoria(auditoria);
+    }
+
 }
