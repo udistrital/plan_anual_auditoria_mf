@@ -7,7 +7,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GestionAuditoriaModule } from './modules/gestion-auditoria/gestion-auditoria.module';
 import { ConsultaPlanAnualAuditoriaModule } from './modules/programacion/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.module';
-import { revisionJefeModule } from './modules/programacion/revision-jefe/revision-jefe.module';
+import { RevisionJefeModule } from './modules/programacion/revision-jefe/revision-jefe.module';
 import { AsignacionAuditoresModule } from './modules/programacion/asignacion-auditores/asignacion-auditores.module'
 import { AuditoriasEspecialesModule } from './modules/programacion/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/gestion-auditoria/formulario-auditoria-especial/formulario-auditoria-especial.module';
@@ -53,7 +53,7 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
     BrowserAnimationsModule,
     GestionAuditoriaModule,
     ConsultaPlanAnualAuditoriaModule,
-    revisionJefeModule,
+    RevisionJefeModule,
     AsignacionAuditoresModule,
     AuditoriasEspecialesModule,
     FormularioAuditoriaEspecialModule,

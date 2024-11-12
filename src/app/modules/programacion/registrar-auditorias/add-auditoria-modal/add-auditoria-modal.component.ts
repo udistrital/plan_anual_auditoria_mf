@@ -4,11 +4,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ParametrosService } from 'src/app/services/parametros.service';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 import { ModalService } from 'src/app/services/modal.service'; 
-
-interface Respuestas {
-  Id: number;
-  Nombre: string;
-}
+import { Parametro } from 'src/app/data/models/parametros/parametros';
+import { Auditoria } from 'src/app/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
   selector: 'app-add-auditoria-modal',
@@ -17,24 +14,26 @@ interface Respuestas {
 })
 export class AddAuditoriaModalComponent implements OnInit {
   auditoriaForm: FormGroup| any;
-  evaluaciones: Respuestas[] = [];
-  meses: Respuestas[] = [];
-  planAuditoriaId: string | null = null; 
+  evaluaciones: Parametro[] = [];
+  meses: Parametro[] = [];
+  isEditMode = false;
+  TODOS = 'Todos';
 
   constructor(
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService, 
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { planAuditoriaId: string },
+    @Inject(MAT_DIALOG_DATA) public data: { planAuditoriaId: string; auditoria?: Auditoria },
     private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
+    this.isEditMode = !!this.data.auditoria; 
     this.auditoriaForm = this.fb.group({
-      tituloActividad: ['', Validators.required],
-      tipoEvaluacion: [[], Validators.required],
-      cronogramaActividades: [[], Validators.required]
+      tituloActividad: [this.data.auditoria?.auditoria || '', Validators.required],
+      tipoEvaluacion: [this.data.auditoria?.tipoEvaluacion || [], Validators.required],
+      cronogramaActividades: [this.data.auditoria?.cronograma || [], Validators.required]
     });
     this.CargarEvaluaciones();
     this.CargarMeses();
@@ -62,41 +61,56 @@ export class AddAuditoriaModalComponent implements OnInit {
   }
 
   asignarTodos(): void {
-    const todosLosMeses = this.meses.map(mes => mes.Nombre);
-    this.auditoriaForm.get('cronogramaActividades').setValue(todosLosMeses);
+    const seleccion = [this.TODOS];
+    this.auditoriaForm.get('cronogramaActividades').setValue(seleccion);
+  }
+
+  onMesChange(): void {
+    const seleccionados = this.auditoriaForm.get('cronogramaActividades').value;
+  
+    if (seleccionados.includes(this.TODOS) && seleccionados.length > 1) {
+      this.auditoriaForm.get('cronogramaActividades').setValue(
+        seleccionados.filter((mes: string) => mes !== this.TODOS)
+      );
+    }
+
+    if (seleccionados.length === 0) {
+      this.auditoriaForm.get('cronogramaActividades').setValue([this.TODOS]);
+    }
   }
   
+   
   onSave(): void {
     if (this.auditoriaForm.valid) {
-      // Mostrar alerta de confirmación
       this.modalService.modalConfirmacion(
         'Confirmación',
         'warning',
-        '¿Está seguro(a) de guardar la auditoría?'
+        `¿Está seguro(a) de ${this.isEditMode ? 'actualizar' : 'guardar'} la auditoría?`
       ).then((result) => {
         if (result.isConfirmed) {
           const formData = {
             planAuditoriaId: this.data.planAuditoriaId,
             titulo: this.auditoriaForm.value.tituloActividad,
-            tipoEvaluacionId: this.auditoriaForm.value.tipoEvaluacion[0],
+            tipoEvaluacionId: this.auditoriaForm.value.tipoEvaluacion,
             cronogramaId: this.auditoriaForm.value.cronogramaActividades
           };
 
-          // Realiza la solicitud POST al servicio
-          this.planAnualAuditoriaService.post('/auditoria', formData).subscribe({
+          const request$ = this.isEditMode 
+            ? this.planAnualAuditoriaService.put(`/auditoria/${this.data.auditoria!.id}`, formData)
+            : this.planAnualAuditoriaService.post('/auditoria', formData);
+
+          request$.subscribe({
             next: (response) => {
-              console.log('Auditoría guardada con éxito:', response);
               this.modalService.mostrarModal(
-                'Auditoría guardada exitosamente.',
+                `Auditoría ${this.isEditMode ? 'actualizada' : 'guardada'} exitosamente.`,
                 'success',
-                'AUDITORÍA GUARDADA'
+                'ÉXITO'
               );
-              this.dialogRef.close();
+              this.dialogRef.close({ saved: true });
             },
             error: (error) => {
-              console.error('Error al guardar la auditoría:', error);
               this.modalService.mostrarModal(
-                'Error al guardar la auditoría. Inténtelo de nuevo.',
+                `Error al ${this.isEditMode ? 'actualizar' : 'guardar'} la auditoría. Inténtelo de nuevo.`,
                 'error',
                 'ERROR'
               );

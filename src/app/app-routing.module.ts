@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-auditoria.component';
 import { ConsultaPlanAnualAuditoriaComponent } from './modules/programacion/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.component';
-import {revisionJefeComponent}from "./modules/programacion/revision-jefe/revision-jefe.component"
+import {RevisionJefeComponent}from "./modules/programacion/revision-jefe/revision-jefe.component"
 import {AsignacionAuditoresComponent}from "./modules/programacion/asignacion-auditores/asignacion-auditores.component"
 import { AuditoriasEspecialesComponent } from './modules/programacion/auditorias-especiales/auditorias-especiales.component';
 import { RegistrarAuditoriasComponent } from './modules/programacion/registrar-auditorias/registrar-auditorias.component';
@@ -30,7 +30,7 @@ const routes: Routes = [
   },
   {
     path:"revision-jefe",
-    component: revisionJefeComponent
+    component: RevisionJefeComponent
   },
   {
     path:"asignacion-auditor",

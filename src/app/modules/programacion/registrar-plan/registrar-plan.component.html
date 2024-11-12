@@ -5,7 +5,7 @@
             <ng-container *ngIf="formulario != null">
                 <mat-card-title class="title">Plan de Acción</mat-card-title>
                 <mat-divider class="divider"></mat-divider>
-                <mat-card-content>
+                <mat-card-content *ngIf="datosCargados">
                     <app-formulario-dinamico [formulario]="formulario" (submitFormulario)="manejarEnvio($event)" />           
                     <div class="button-container">
                         <button mat-raised-button color="primary" (click)="guardarInformacion()">

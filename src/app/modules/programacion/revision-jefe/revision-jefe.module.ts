@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { revisionJefeComponent } from './revision-jefe.component';
+import { RevisionJefeComponent } from './revision-jefe.component';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -15,7 +15,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 @NgModule({
   declarations: [
-    revisionJefeComponent,
+    RevisionJefeComponent,
     PdfVisualizadorComponent,
     SafeURLPipe,
     ModalMotivosRechazoComponent,
@@ -32,4 +32,4 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     PdfViewerModule
   ]
 })
-export class revisionJefeModule { }
+export class RevisionJefeModule { }

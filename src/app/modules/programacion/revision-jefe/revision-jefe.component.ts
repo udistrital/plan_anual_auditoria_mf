@@ -7,7 +7,7 @@ import {ModalMotivosRechazoComponent} from './modal-motivos-rechazo/modal-motivo
   templateUrl: './revision-jefe.component.html',
   styleUrls: ['./revision-jefe.component.css']
 })
-export class revisionJefeComponent {
+export class RevisionJefeComponent {
   constructor(public dialog: MatDialog) {}
 
   botonSeleccionado: string = 'formato';
