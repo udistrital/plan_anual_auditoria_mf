@@ -20,7 +20,6 @@ export class RevisionJefeComponent {
     this.documento = documento();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
-      console.log(this.usuarioId);
     });
   }
 
@@ -40,6 +39,9 @@ export class RevisionJefeComponent {
   openModalRechazo(): void {
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: '70vw',
+      data: {
+        usuarioId: this.usuarioId,
+      },
     });
   }
 

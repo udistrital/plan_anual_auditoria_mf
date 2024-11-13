@@ -8,6 +8,11 @@ export const environment = {
   TERCEROS_SERVICE:
     'https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/',
 
+  PLAN_ESTADO: {
+    EN_BORRADOR_ID: 6790,
+    EN_REVISION_JEFE_ID: 6791,
+    APROBADO_JEFE_ID: 6791,
+  },
   // idsCamposFormulario: {
   //   Objetivo: 6770,
   //   Alcance: 6771,
