@@ -14,6 +14,11 @@ export class AlertService {
       title: title,
       text: text,
       confirmButtonText: 'Aceptar',
+      customClass: {
+        confirmButton: 'alertaConfirmarBoton',
+        cancelButton: 'alertaCancelarBoton',
+        icon: 'alertaIconoWarn',
+      },
     });
   }
 
@@ -23,6 +28,11 @@ export class AlertService {
       title: 'Operación exitosa',
       text: text,
       confirmButtonText: 'Aceptar',
+      customClass: {
+        confirmButton: 'alertaConfirmarBoton',
+        cancelButton: 'alertaCancelarBoton',
+        icon: 'alertaIconoSuccess',
+      },
     });
   }
 
@@ -32,6 +42,10 @@ export class AlertService {
       title: 'Error',
       text: text,
       confirmButtonText: 'Aceptar',
+      customClass: {
+        confirmButton: 'alertaConfirmarBoton',
+        cancelButton: 'alertaCancelarBoton',
+      },
     });
   }
 
@@ -43,6 +57,11 @@ export class AlertService {
       showCancelButton: true,
       confirmButtonText: 'Aceptar',
       cancelButtonText: 'Cancelar',
+      customClass: {
+        confirmButton: 'alertaConfirmarBoton',
+        cancelButton: 'alertaCancelarBoton',
+        icon: 'alertaIconoConfirmacion',
+      },
     });
   }
 }
