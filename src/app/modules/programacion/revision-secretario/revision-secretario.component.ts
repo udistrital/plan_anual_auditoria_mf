@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ModalGeneral } from './modal-general/modal-general';
-import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
-import { UserService } from 'src/app/services/user.service';
 import { AlertService } from 'src/app/services/alert.service';
-import { environment } from 'src/environments/environment';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
+import { UserService } from 'src/app/services/user.service';
+import { environment } from 'src/environments/environment';
+import { ModalMotivosRechazoComponent } from '../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component';
+
 @Component({
-  selector: 'app-revision-jefe',
-  templateUrl: './revision-jefe.component.html',
-  styleUrls: ['./revision-jefe.component.css'],
+  selector: 'app-revision-secretario',
+  templateUrl: './revision-secretario.component.html',
+  styleUrl: './revision-secretario.component.css',
 })
-export class RevisionJefeComponent {
+export class RevisionSecretarioComponent {
   selectedTab: number = 0;
 
   constructor(

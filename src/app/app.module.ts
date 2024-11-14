@@ -7,8 +7,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GestionAuditoriaModule } from './modules/gestion-auditoria/gestion-auditoria.module';
 import { ConsultaPlanAnualAuditoriaModule } from './modules/programacion/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.module';
-import { RevisionJefeModule } from './modules/programacion/revision-jefe/revision-jefe.module';
-import { AsignacionAuditoresModule } from './modules/programacion/asignacion-auditores/asignacion-auditores.module'
+import { AsignacionAuditoresModule } from './modules/programacion/asignacion-auditores/asignacion-auditores.module';
 import { AuditoriasEspecialesModule } from './modules/programacion/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/gestion-auditoria/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { RegistrarAuditoriasModule } from './modules/programacion/registrar-auditorias/registrar-auditorias.module';
@@ -34,18 +33,24 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { RegistrarPlanComponent } from './modules/programacion/registrar-plan/registrar-plan.component';
-
-//Services
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
-
-
+import { RevisionSecretarioComponent } from './modules/programacion/revision-secretario/revision-secretario.component';
+import { PdfVisualizadorComponent } from './modules/programacion/revision-jefe/pdf-visualizador/pdf-visualizador.component';
+import { RevisionJefeComponent } from './modules/programacion/revision-jefe/revision-jefe.component';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { ModalMotivosRechazoComponent } from './modules/programacion/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     GestionAuditoriaComponent,
     RegistrarPlanComponent,
-    FormularioDinamicoComponent
+    FormularioDinamicoComponent,
+    RevisionSecretarioComponent,
+    PdfVisualizadorComponent,
+    RevisionJefeComponent,
+    PdfVisualizadorComponent,
+    ModalMotivosRechazoComponent,
   ],
   imports: [
     BrowserModule,
@@ -53,7 +58,6 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
     BrowserAnimationsModule,
     GestionAuditoriaModule,
     ConsultaPlanAnualAuditoriaModule,
-    RevisionJefeModule,
     AsignacionAuditoresModule,
     AuditoriasEspecialesModule,
     FormularioAuditoriaEspecialModule,
@@ -80,11 +84,10 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
     MatExpansionModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatDividerModule,  
+    MatDividerModule,
+    PdfViewerModule,
   ],
-  providers: [
-    PlanAnualAuditoriaService
-  ],
-  bootstrap: [AppComponent]
+  providers: [PlanAnualAuditoriaService],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
