@@ -3,13 +3,21 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalGeneral } from './modal-general/modal-general';
 import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
 import { UserService } from 'src/app/services/user.service';
+import { AlertService } from 'src/app/services/alert.service';
+import { environment } from 'src/environments/environment';
+import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 @Component({
   selector: 'app-revision-jefe',
   templateUrl: './revision-jefe.component.html',
   styleUrls: ['./revision-jefe.component.css'],
 })
 export class RevisionJefeComponent {
-  constructor(public dialog: MatDialog, private userService: UserService) {}
+  constructor(
+    public dialog: MatDialog,
+    private alertService: AlertService,
+    private planAuditoriaService: PlanAnualAuditoriaService,
+    private userService: UserService
+  ) {}
 
   botonSeleccionado: string = 'formato';
   documento: string = '';
@@ -46,19 +54,35 @@ export class RevisionJefeComponent {
   }
 
   openModalEnviar(): void {
-    this.dialog.open(ModalGeneral, {
-      width: '75vw',
-      data: {
-        mensaje:
-          '¿Está seguro de enviar el <br> plan anual de auditoría - PAA?',
-        icono: 'warning',
-        mostrarBotonCancelar: true,
-        textoConfirmacion: 'Aceptar',
-        continue: true,
-        textoMensajeConfirmacion: 'PLAN ENVIADO',
-        textoSubMensajeConfirmacion: 'Su plan fue enviado a jefe de oficina',
-      },
+    this.alertService
+      .showConfirmAlert(
+        '¿Está seguro de enviar el plan anual de auditoría - PAA?'
+      )
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+        this.aprobarPlanAuditoria();
+      });
+  }
+
+  aprobarPlanAuditoria() {
+    const planEstado = this.construirObjetoPlanEstado();
+    this.planAuditoriaService.post('/estado', planEstado).subscribe((res) => {
+      this.alertService.showSuccessAlert(
+        'Plan aceptado, el plan fue enviado al jefe de oficina'
+      );
     });
+  }
+
+  construirObjetoPlanEstado() {
+    return {
+      //todo: este id esta quemado
+      plan_auditoria_id: '6734d09dec8e871919b3b5dd',
+      usuario_id: this.usuarioId,
+      observacion: '',
+      estado_id: environment.PLAN_ESTADO.APROBADO_JEFE_ID,
+    };
   }
 }
 
