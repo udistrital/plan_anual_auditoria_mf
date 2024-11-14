@@ -8,10 +8,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { PdfVisualizadorComponent } from './pdf-visualizador/pdf-visualizador.component';
-import { SafeURLPipe  } from '../../../@core/pipes/safeUrl.pipe';
+import { SafeURLPipe } from '../../../@core/pipes/safeUrl.pipe';
 import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
 import { ModalGeneral } from './modal-general/modal-general';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -19,9 +21,10 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     PdfVisualizadorComponent,
     SafeURLPipe,
     ModalMotivosRechazoComponent,
-    ModalGeneral
+    ModalGeneral,
   ],
   imports: [
+    ReactiveFormsModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -29,7 +32,9 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
     MatDividerModule,
     MatGridListModule,
     MatListModule,
-    PdfViewerModule
-  ]
+    MatDialogModule,
+    MatCardModule,
+    PdfViewerModule,
+  ],
 })
-export class RevisionJefeModule { }
+export class RevisionJefeModule {}

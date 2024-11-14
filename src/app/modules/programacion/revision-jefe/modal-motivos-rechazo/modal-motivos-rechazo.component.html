@@ -1,15 +1,26 @@
-<div class="container-principal">
-    
-    <div mat-dialog-actions>
-        <button mat-icon-button class="close-button">
-            <mat-icon color="primary" class="btn">close</mat-icon>
-          </button>
-    </div>
+<mat-card class="container-principal">
+  <button mat-icon-button class="close-button" [mat-dialog-close]>
+    <mat-icon color="primary" class="btn">close</mat-icon>
+  </button>
+  <form [formGroup]="formObservaciones">
     <div>
-        <div id="container-title">
-            <h4 >Oservaciones</h4>
-        </div>
-        <textarea name="" id="" placeholder="motivos de rechazo"></textarea>
+      <div id="container-title">
+        <h4>Observaciones</h4>
+      </div>
+      <textarea
+        formControlName="observaciones"
+        placeholder="Motivos de rechazo"
+      ></textarea>
     </div>
-    <button mat-raised-button color="primary" id="btn-rechazar" (click)="openConfirmarRechazo()">Rechazar</button>
-</div>
+  </form>
+  <mat-dialog-actions align="end">
+    <button
+      mat-raised-button
+      color="primary"
+      id="btn-rechazar"
+      (click)="preguntarConfirmacionRechazo()"
+    >
+      Rechazar
+    </button>
+  </mat-dialog-actions>
+</mat-card>
