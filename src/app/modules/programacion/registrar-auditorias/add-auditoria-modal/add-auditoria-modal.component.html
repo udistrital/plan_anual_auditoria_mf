@@ -43,7 +43,7 @@
       <mat-label>Seleccione...</mat-label>
       <mat-select formControlName="cronogramaActividades" multiple (selectionChange)="onMesChange()">
         <mat-option (click)="asignarTodos()"  [value]="TODOS">{{ TODOS }}</mat-option>
-        <mat-option *ngFor="let mes of meses" [value]="mes.Nombre">{{ mes.Nombre }}</mat-option>
+        <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{ mes.Nombre }}</mat-option>
       </mat-select>
       <mat-error
         *ngIf="auditoriaForm.get('cronogramaActividades').hasError('required') && auditoriaForm.get('cronogramaActividades').touched">
