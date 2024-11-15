@@ -33,19 +33,6 @@ export class RevisionJefeComponent {
     });
   }
 
-  seleccionarBoton(button: string) {
-    this.botonSeleccionado = button;
-    this.actualizarFrame(button);
-  }
-
-  actualizarFrame(boton: string) {
-    if (boton === 'formato') {
-      this.documento = this.documento;
-    } else {
-      //segunda opcion
-    }
-  }
-
   openModalRechazo(): void {
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: '70vw',

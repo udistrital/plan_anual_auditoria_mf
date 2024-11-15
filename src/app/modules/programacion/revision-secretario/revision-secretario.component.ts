@@ -5,6 +5,7 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
 import { UserService } from 'src/app/services/user.service';
 import { environment } from 'src/environments/environment';
 import { ModalMotivosRechazoComponent } from '../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component';
+import { ModalAprobacionSecretarioComponent } from './modal-aprobacion-secretario/modal-aprobacion-secretario.component';
 
 @Component({
   selector: 'app-revision-secretario',
@@ -33,19 +34,6 @@ export class RevisionSecretarioComponent {
     });
   }
 
-  seleccionarBoton(button: string) {
-    this.botonSeleccionado = button;
-    this.actualizarFrame(button);
-  }
-
-  actualizarFrame(boton: string) {
-    if (boton === 'formato') {
-      this.documento = this.documento;
-    } else {
-      //segunda opcion
-    }
-  }
-
   openModalRechazo(): void {
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: '70vw',
@@ -56,35 +44,12 @@ export class RevisionSecretarioComponent {
   }
 
   openModalEnviar(): void {
-    this.alertService
-      .showConfirmAlert(
-        '¿Está seguro de enviar el plan anual de auditoría - PAA?'
-      )
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.aprobarPlanAuditoria();
-      });
-  }
-
-  aprobarPlanAuditoria() {
-    const planEstado = this.construirObjetoPlanEstado();
-    this.planAuditoriaService.post('/estado', planEstado).subscribe((res) => {
-      this.alertService.showSuccessAlert(
-        'Plan aceptado, el plan fue enviado al jefe de oficina'
-      );
+    this.dialog.open(ModalAprobacionSecretarioComponent, {
+      width: '50%',
+      data: {
+        usuarioId: this.usuarioId,
+      },
     });
-  }
-
-  construirObjetoPlanEstado() {
-    return {
-      //todo: este id esta quemado
-      plan_auditoria_id: '6734d09dec8e871919b3b5dd',
-      usuario_id: this.usuarioId,
-      observacion: '',
-      estado_id: environment.PLAN_ESTADO.APROBADO_JEFE_ID,
-    };
   }
 
   selectTab(index: number) {

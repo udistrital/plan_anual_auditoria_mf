@@ -11,7 +11,6 @@ import { AsignacionAuditoresModule } from './modules/programacion/asignacion-aud
 import { AuditoriasEspecialesModule } from './modules/programacion/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/gestion-auditoria/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { RegistrarAuditoriasModule } from './modules/programacion/registrar-auditorias/registrar-auditorias.module';
-import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
 import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-auditoria.component';
 import { FormularioDinamicoComponent } from './components/formulario-dinamico/formulario-dinamico.component';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -39,6 +38,9 @@ import { PdfVisualizadorComponent } from './modules/programacion/revision-jefe/p
 import { RevisionJefeComponent } from './modules/programacion/revision-jefe/revision-jefe.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { ModalMotivosRechazoComponent } from './modules/programacion/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component';
+import { ModalAprobacionSecretarioComponent } from './modules/programacion/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component';
+import { CargarArchivoComponent } from './modules/cargar-archivo/cargar-archivo.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -51,8 +53,12 @@ import { ModalMotivosRechazoComponent } from './modules/programacion/revision-je
     RevisionJefeComponent,
     PdfVisualizadorComponent,
     ModalMotivosRechazoComponent,
+    ModalAprobacionSecretarioComponent,
+    CargarArchivoComponent,
   ],
+
   imports: [
+    HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -63,7 +69,6 @@ import { ModalMotivosRechazoComponent } from './modules/programacion/revision-je
     FormularioAuditoriaEspecialModule,
     RegistrarAuditoriasModule,
     CommonModule,
-    CargarArchivoModule,
     MatStepperModule,
     MatButtonModule,
     MatDialogModule,
