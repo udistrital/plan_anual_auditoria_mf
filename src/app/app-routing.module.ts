@@ -10,6 +10,7 @@ import { RegistrarPlanComponent } from './modules/programacion/registrar-plan/re
 
 import { APP_BASE_HREF } from '@angular/common';
 import { RevisionSecretarioComponent } from './modules/programacion/revision-secretario/revision-secretario.component';
+import { BasesComponent } from './components/bases/bases.component';
 
 const routes: Routes = [
   {
@@ -43,6 +44,10 @@ const routes: Routes = [
   {
     path: 'auditorias-especiales',
     component: AuditoriasEspecialesComponent,
+  },
+  {
+    path: 'bases',
+    component: BasesComponent,
   },
 ];
 

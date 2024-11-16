@@ -41,6 +41,7 @@ import { ModalMotivosRechazoComponent } from './modules/programacion/revision-je
 import { ModalAprobacionSecretarioComponent } from './modules/programacion/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component';
 import { CargarArchivoComponent } from './modules/cargar-archivo/cargar-archivo.component';
 import { HttpClientModule } from '@angular/common/http';
+import { BasesComponent } from './components/bases/bases.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { HttpClientModule } from '@angular/common/http';
     ModalMotivosRechazoComponent,
     ModalAprobacionSecretarioComponent,
     CargarArchivoComponent,
+    BasesComponent,
   ],
 
   imports: [
