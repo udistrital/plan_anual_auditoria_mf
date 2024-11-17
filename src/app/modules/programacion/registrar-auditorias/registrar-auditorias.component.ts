@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalService } from 'src/app/services/modal.service';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 import { Auditoria } from 'src/app/data/models/plan-anual-auditoria/plan-anual-auditoria';
-
+import { PdfVisualizadorComponent } from '../revision-jefe/pdf-visualizador/pdf-visualizador.component';
 @Component({
   selector: 'app-registrar-auditorias',
   templateUrl: './registrar-auditorias.component.html',
@@ -21,30 +21,30 @@ export class RegistrarAuditoriasComponent implements OnInit {
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = '';
 
-  constructor(  
-    private modalService: ModalService, 
-    private route: ActivatedRoute, 
+  constructor(
+    private modalService: ModalService,
+    private route: ActivatedRoute,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id') ?? '1';
-    this.loadAuditoriasFromService();  
+    this.loadAuditoriasFromService();
   }
 
   loadAuditoriasFromService(): void {
-    this.planAnualAuditoriaService.get(`/auditoria?query=planAuditoriaId:${this.id}`).subscribe(
+    this.planAnualAuditoriaService.get(`/auditoria?query=plan_auditoria_id:${this.id}`).subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data
-            .filter((item: any) => item.activo === true) 
+            .filter((item: any) => item.activo === true)
             .map((item: any) => ({
               id: item._id,
               auditoria: item.titulo ?? 'Sin Título',
-              tipoEvaluacion: item.tipoEvaluacionId ?? 'Sin Tipo',
-              cronograma: item.cronogramaId ?? 'Sin Cronograma',
-              estado: item.estadoId ?? 'Desconocido'
+              tipoEvaluacion: item.tipo_evaluacion_id ?? 'Sin Tipo',
+              cronograma: item.cronograma_id ?? 'Sin Cronograma',
+              estado: item.estado_id ?? 'Desconocido'
             }));
         }
       },
@@ -62,7 +62,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.dataSource.data = prevData;
   }
 
-  
+
   // Eliminar auditoría
   deleteAuditoria(element: Auditoria) {
     this.modalService
@@ -125,10 +125,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: '1200px',
       data: {
         planAuditoriaId: this.id,
-        auditoria 
+        auditoria
       }
     });
-  
+
     dialogRef.afterClosed().subscribe(result => {
       if (result?.saved) {
         console.log('Auditoría guardada o actualizada');
@@ -136,12 +136,31 @@ export class RegistrarAuditoriasComponent implements OnInit {
       }
     });
   }
-
-    // Editar auditoría
-    editAuditoria(auditoria: Auditoria) {
-      // const nombreFormulario = 'sisifo_form2';
-      // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
-      this.addAuditoria(auditoria);
-    }
-
+ 
+  // Editar auditoría
+  editAuditoria(auditoria: Auditoria) {
+    // const nombreFormulario = 'sisifo_form2';
+    // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
+    this.addAuditoria(auditoria);
+  }
+  renderizar() {
+    this.planAnualAuditoriaService.planilla(`/plantilla/${this.id}`).subscribe(
+      (res) => {
+        if (res && res.Data) {
+          console.log("DATA ",res.Data)
+          this.dialog.open(PdfVisualizadorComponent, {
+            data: { base64Document: res.Data }, 
+            width: '800px',
+            height: '600px',
+          });
+        } else {
+          this.modalService.mostrarModal('No se pudo cargar el PDF', 'warning', 'AVISO');
+        }
+      },
+      (error) => {
+        console.log("-----------",error)
+        this.modalService.mostrarModal('Error al cargar el PDF', 'error', 'ERROR');
+      }
+    );
+  }
 }

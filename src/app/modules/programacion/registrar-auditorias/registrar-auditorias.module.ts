@@ -18,6 +18,9 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ParametrosService } from 'src/app/services/parametros.service';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 
+import {RevisionJefeModule} from '../revision-jefe/revision-jefe.module';
+
+
 @NgModule({
   declarations: [
     RegistrarAuditoriasComponent,
@@ -35,7 +38,8 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
     MatDividerModule,
     MatCardModule,
     ReactiveFormsModule,
-    DragDropModule
+    DragDropModule,
+    RevisionJefeModule,
   ],
   providers: [
     ParametrosService,
