@@ -1,34 +1,30 @@
 
 import { Formulario } from "../models/formulario.model";
 
-export const formularioQuemado: Formulario = {
+export const formularioInformacionAuditoria: Formulario = {
     campos: [
         {
             nombre: "no_auditoria",
             descripcion: "No Auditoria y/o seguimiento",
             etiqueta: "No Auditoria y/o seguimiento",
             tipo: "number",
-            placeholder: "Escriba aquí su nombre",
+            placeholder: "Escriba aquí el numero de la auditoria",
             deshabilitado: false,
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "min", valor: 4 },
-                { tipo: "max", valor: 10 },
+                { tipo: "requerido", valor: "" }
 
             ],
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-2 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "consecutivo_OCI",
             etiqueta: "Consecutivov OCI",
             tipo: "text",
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "6"},
-                { tipo: "minLength", valor: "2"}
+                { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-4 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "consecutivo_IE",
@@ -39,7 +35,7 @@ export const formularioQuemado: Formulario = {
                 { tipo: "maxLength", valor: "30"}
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-4 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "tipo",
@@ -57,7 +53,7 @@ export const formularioQuemado: Formulario = {
                 { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-2 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-2 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "proceso",
@@ -74,29 +70,27 @@ export const formularioQuemado: Formulario = {
                 { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-4 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "lider",
             etiqueta: "Lider",
             tipo: "text",
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "30"}
+                { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-4 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "responsable",
             etiqueta: "Responsable",
             tipo: "text",
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "3"}
+                { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-4 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "fecha_ejecucion_inicial",
@@ -110,7 +104,7 @@ export const formularioQuemado: Formulario = {
             ],
             deshabilitado: false,
             tipo: "date",
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-2 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "fecha_ejecucion_final",
@@ -124,40 +118,37 @@ export const formularioQuemado: Formulario = {
             ],
             deshabilitado: false,
             tipo: "date",
-            claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-2 col-md-4 col-sm-12 col-xs-12"
         },
         {
             nombre: "objetivo_auditoria",
             etiqueta: "Objetivo de la Auditoría",
-            tipo: "email",
+            tipo: "textarea",
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "email" }
+                { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-12 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12"
         },
         {
             nombre: "alcance_auditoria",
             etiqueta: "Alcance de la Auditoría",
-            tipo: "text",
+            tipo: "textarea",
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "30"}
+                { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-12 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12"
         },
         {
             nombre: "criterios",
             etiqueta: "Criterios",
             tipo: "textarea",
             validaciones: [
-                { tipo: "requerido", valor: "" },
-                { tipo: "maxLength", valor: "8"}
+                { tipo: "requerido", valor: "" }
             ],
             deshabilitado: false,
-            claseGrid: "col-lg-12 col-md-6 col-sm-12 col-xs-12"
+            claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12"
         }
     ]
 }

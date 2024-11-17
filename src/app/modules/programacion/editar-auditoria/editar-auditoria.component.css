@@ -1,3 +1,13 @@
+
+.titulo{
+    font-family: "Raleway", "Open Sans", sans-serif;
+    font-weight: bold;
+}
+
+.container-principal {
+    padding: 20px 30px;
+}
+
 ::ng-deep .mat-horizontal-stepper-header-container {
     display: flex;
     flex-wrap: wrap;
@@ -17,4 +27,15 @@
     text-align: center;
     white-space: normal;
     overflow: visible;
+}
+
+::ng-deep .mat-step-header .mat-active .mat-step-label {
+    text-align: center;
+    white-space: normal;
+    color: brown;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
 }

@@ -34,17 +34,17 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   loadAuditoriasFromService(): void {
-    this.planAnualAuditoriaService.get(`/auditoria?query=planAuditoriaId:${this.id}`).subscribe(
+    this.planAnualAuditoriaService.get(`/auditoria?query=plan_auditoria_id:${this.id}`).subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data
             .filter((item: any) => item.activo === true) 
             .map((item: any) => ({
-              id: item._id,
+              id: item._id ?? 0,
               auditoria: item.titulo ?? 'Sin Título',
-              tipoEvaluacion: item.tipoEvaluacionId ?? 'Sin Tipo',
-              cronograma: item.cronogramaId ?? 'Sin Cronograma',
-              estado: item.estadoId ?? 'Desconocido'
+              tipoEvaluacion: item.tipo_evaluacion_id ?? 'Sin Tipo',
+              cronograma: item.cronograma_id ?? 'Sin Cronograma',
+              estado: item.estado_id ?? 'Desconocido'
             }));
         }
       },
