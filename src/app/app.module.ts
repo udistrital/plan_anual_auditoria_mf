@@ -11,9 +11,7 @@ import { AsignacionAuditoresModule } from './modules/programacion/asignacion-aud
 import { AuditoriasEspecialesModule } from './modules/programacion/auditorias-especiales/auditorias-especiales.module';
 import { FormularioAuditoriaEspecialModule } from './modules/programacion/auditorias-especiales/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { RegistrarAuditoriasModule } from './modules/programacion/registrar-auditorias/registrar-auditorias.module';
-import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-auditoria.component';
 import { FormularioDinamicoComponent } from './components/formulario-dinamico/formulario-dinamico.component';
-import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
 import { FormularioDinamicoModule } from './components/formulario-dinamico/formulario-dinamico.module';
 import { RegistrarPlanModule } from './modules/programacion/registrar-plan/registrar-plan.module';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -45,11 +43,14 @@ import { ModalAprobacionSecretarioComponent } from './modules/programacion/revis
 import { CargarArchivoComponent } from './modules/cargar-archivo/cargar-archivo.component';
 import { HttpClientModule } from '@angular/common/http';
 import { BasesComponent } from './components/bases/bases.component';
+import { EditarAuditoriaComponent } from './modules/programacion/editar-auditoria/editar-auditoria.component';
+import { ActividadesAuditoriaComponent } from './modules/programacion/editar-auditoria/actividades-auditoria/actividades-auditoria.component';
+import { DocumentosAnexosAuditoriaComponent } from './modules/programacion/editar-auditoria/documentos-anexos-auditoria/documentos-anexos-auditoria.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    GestionAuditoriaComponent,
+    // GestionAuditoriaComponent,
     RegistrarPlanComponent,
     FormularioDinamicoComponent,
     RevisionSecretarioComponent,
@@ -60,14 +61,17 @@ import { BasesComponent } from './components/bases/bases.component';
     ModalAprobacionSecretarioComponent,
     CargarArchivoComponent,
     BasesComponent,
+    EditarAuditoriaComponent,
+    DocumentosAnexosAuditoriaComponent,
+    ActividadesAuditoriaComponent,
   ],
 
   imports: [
+    EditarAuditoriaModule,
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    EditarAuditoriaModule,
     ConsultaPlanAnualAuditoriaModule,
     AsignacionAuditoresModule,
     AuditoriasEspecialesModule,

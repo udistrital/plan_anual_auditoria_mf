@@ -17,12 +17,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatRadioModule } from '@angular/material/radio';
 
-
-
 @NgModule({
-  declarations: [
-    FormularioDinamicoComponent
-  ],
+  declarations: [],
   imports: [
     CommonModule,
     MatFormFieldModule,
@@ -51,10 +47,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatExpansionModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatDividerModule,  
+    MatDividerModule,
   ],
-  exports: [
-    FormularioDinamicoComponent  // Asegúrate de exportar tu componente aquí
-  ]
+  exports: [],
 })
-export class FormularioDinamicoModule { }
+export class FormularioDinamicoModule {}
