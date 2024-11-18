@@ -1,17 +1,18 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ModalGeneral } from './modal-general/modal-general';
-import { ModalMotivosRechazoComponent } from './modal-motivos-rechazo/modal-motivos-rechazo.component';
-import { UserService } from 'src/app/services/user.service';
 import { AlertService } from 'src/app/services/alert.service';
-import { environment } from 'src/environments/environment';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
+import { UserService } from 'src/app/services/user.service';
+import { environment } from 'src/environments/environment';
+import { ModalMotivosRechazoComponent } from '../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component';
+import { ModalAprobacionSecretarioComponent } from './modal-aprobacion-secretario/modal-aprobacion-secretario.component';
+
 @Component({
-  selector: 'app-revision-jefe',
-  templateUrl: './revision-jefe.component.html',
-  styleUrls: ['./revision-jefe.component.css'],
+  selector: 'app-revision-secretario',
+  templateUrl: './revision-secretario.component.html',
+  styleUrl: './revision-secretario.component.css',
 })
-export class RevisionJefeComponent {
+export class RevisionSecretarioComponent {
   selectedTab: number = 0;
 
   constructor(
@@ -43,35 +44,12 @@ export class RevisionJefeComponent {
   }
 
   openModalEnviar(): void {
-    this.alertService
-      .showConfirmAlert(
-        '¿Está seguro de enviar el plan anual de auditoría - PAA?'
-      )
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.aprobarPlanAuditoria();
-      });
-  }
-
-  aprobarPlanAuditoria() {
-    const planEstado = this.construirObjetoPlanEstado();
-    this.planAuditoriaService.post('/estado', planEstado).subscribe((res) => {
-      this.alertService.showSuccessAlert(
-        'Plan aceptado, el plan fue enviado al jefe de oficina'
-      );
+    this.dialog.open(ModalAprobacionSecretarioComponent, {
+      width: '50%',
+      data: {
+        usuarioId: this.usuarioId,
+      },
     });
-  }
-
-  construirObjetoPlanEstado() {
-    return {
-      //todo: este id esta quemado
-      plan_auditoria_id: '6734d09dec8e871919b3b5dd',
-      usuario_id: this.usuarioId,
-      observacion: '',
-      estado_id: environment.PLAN_ESTADO.APROBADO_JEFE_ID,
-    };
   }
 
   selectTab(index: number) {

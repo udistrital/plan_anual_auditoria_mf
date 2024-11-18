@@ -1,0 +1,74 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      <b>Componentes bases SISIFO</b>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="row">
+      <div class="col-12 mt-3">
+        <b>Botones con color primario</b>
+        <div class="example-button-row">
+          <button mat-button color="primary">Primary</button>
+          <button mat-stroked-button color="primary">Primary</button>
+          <button mat-flat-button color="primary">Primary</button>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <b>Botones con color accent</b>
+        <div class="example-button-row">
+          <button mat-button color="accent">Accent</button>
+          <button mat-stroked-button color="accent">Accent</button>
+          <button mat-flat-button color="accent">Accent</button>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <b>Botones con color accent</b>
+        <div class="example-button-row">
+          <button mat-button color="warn">Warn</button>
+          <button mat-stroked-button color="warn">Warn</button>
+          <button mat-flat-button color="warn">Warn</button>
+          <mat-error color="warn"></mat-error>
+        </div>
+      </div>
+      <div class="col-12 mt-3">
+        <b>Botones prioridad</b>
+        <div class="example-button-row">
+          <button mat-button color="warn">Volver</button>
+          <button mat-stroked-button color="warn">Cancelar</button>
+          <button mat-flat-button color="accent">Guardar</button>
+          <mat-error color="warn"></mat-error>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 mt-3">
+        <b>Form fields</b>
+        <div class="row mt-3">
+          <mat-form-field class="col-4" appearance="outline">
+            <mat-label>Digite primary</mat-label>
+            <mat-icon class="mat-icon-outlined" color="primary" matPrefix
+              >assignment</mat-icon
+            >
+            <input formControlName="horas" type="text" matInput />
+          </mat-form-field>
+          <mat-form-field class="col-4" appearance="outline">
+            <mat-label>Digite accent</mat-label>
+            <mat-icon class="mat-icon-outlined" color="accent" matPrefix
+              >assignment</mat-icon
+            >
+            <input formControlName="horas" type="text" matInput />
+          </mat-form-field>
+          <mat-form-field class="col-4" appearance="outline">
+            <mat-label>Digite warn</mat-label>
+            <mat-icon class="mat-icon-outlined" color="warn" matPrefix
+              >assignment</mat-icon
+            >
+            <input formControlName="horas" type="text" matInput />
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -55,8 +55,8 @@ export class AlertService {
       text: text,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Aceptar',
       cancelButtonText: 'Cancelar',
+      confirmButtonText: 'Aceptar',
       customClass: {
         confirmButton: 'alertaConfirmarBoton',
         cancelButton: 'alertaCancelarBoton',
