@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ActividadesAuditoriaComponent } from './actividades-auditoria/actividades-auditoria.component';
 import { EditarAuditoriaComponent } from './editar-auditoria.component';
 import { DocumentosAnexosAuditoriaComponent } from './documentos-anexos-auditoria/documentos-anexos-auditoria.component';
-import { MatStepperModule } from '@angular/material/stepper'; 
+import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { EditarAuditoriaRoutingModule } from './editar-auditoria-routing.module';
@@ -24,13 +24,8 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { FormularioDinamicoModule } from 'src/app/components/formulario-dinamico/formulario-dinamico.module';
 
-
 @NgModule({
-  declarations: [
-    ActividadesAuditoriaComponent,
-    EditarAuditoriaComponent,
-    DocumentosAnexosAuditoriaComponent
-  ],
+  declarations: [],
   imports: [
     CommonModule,
     MatStepperModule,
@@ -54,12 +49,7 @@ import { FormularioDinamicoModule } from 'src/app/components/formulario-dinamico
     MatDatepickerModule,
     MatNativeDateModule,
     MatDividerModule,
-    FormularioDinamicoModule,
-    
   ],
-  exports: [
-    ActividadesAuditoriaComponent,
-    DocumentosAnexosAuditoriaComponent
-  ]
+  exports: [],
 })
-export class EditarAuditoriaModule { }
+export class EditarAuditoriaModule {}

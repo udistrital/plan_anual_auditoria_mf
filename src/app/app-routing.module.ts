@@ -14,16 +14,12 @@ import { BasesComponent } from './components/bases/bases.component';
 
 const routes: Routes = [
   {
-    path: 'gestion-auditoria',
-    component: GestionAuditoriaComponent,
-  },
-  {
     path: 'consultar-plan',
     component: ConsultaPlanAnualAuditoriaComponent,
   },
   {
-    path:"editar-auditoria",
-    component: EditarAuditoriaComponent
+    path: 'editar-auditoria',
+    component: EditarAuditoriaComponent,
   },
   {
     path: 'registrar-auditorias/:id',

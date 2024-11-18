@@ -2,7 +2,6 @@ import { importProvidersFrom, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { RegistrarPlanComponent } from './registrar-plan.component';
-import { FormularioDinamicoModule } from 'src/app/components/formulario-dinamico/formulario-dinamico.module';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
@@ -18,9 +17,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 
 @NgModule({
-  declarations: [
-    RegistrarPlanComponent,
-  ],
+  declarations: [],
   imports: [
     CommonModule,
     MatFormFieldModule,
@@ -34,10 +31,7 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
     MatCardModule,
     ReactiveFormsModule,
     DragDropModule,
-    FormularioDinamicoModule
   ],
-  providers: [
-    PlanAnualAuditoriaService
-  ]
+  providers: [PlanAnualAuditoriaService],
 })
-export class RegistrarPlanModule { }
+export class RegistrarPlanModule {}
