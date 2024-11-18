@@ -1,0 +1,55 @@
+<mat-card [style.width.%]="100">
+    <div class="container-principal">
+        <h3>Gestión Auditoría >> Editar Auditoría</h3>
+        <div class="border">
+            <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" orientation="horizontal"
+                class="custom-stepper-icon">
+
+                <!-- Paso 1: Información -->
+                <mat-step [stepControl]="primerFormulario">
+                    <ng-template matStepLabel>INFORMACIÓN</ng-template>
+                    <div *ngIf="formularioInformacion != null">
+                        <app-formulario-dinamico #formularioInformacionComp [formulario]="formularioInformacion"
+                            (submitFormulario)="manejarEnvioInformacion($event)">
+                        </app-formulario-dinamico>
+                        <div class="button-container">
+                            <button mat-raised-button color="primary" (click)="enviarFormularioInformacion()">
+                                Guardar y Continuar
+                            </button>
+                        </div>
+                    </div>
+                </mat-step>
+
+                <!-- Paso 2: Actividades -->
+                <mat-step [stepControl]="segundoFormulario">
+                    <ng-template matStepLabel>ACTIVIDADES</ng-template>
+                    <app-actividades-auditoria></app-actividades-auditoria>
+                </mat-step>
+
+                <!-- Paso 3: Recursos -->
+                <mat-step [stepControl]="tercerFormulario">
+                    <ng-template matStepLabel>RECURSOS</ng-template>
+                    <div *ngIf="formularioRecursos != null">
+                        <mat-card-title class="titulo">Recursos para la ejecución de la auditoría</mat-card-title>
+                        <app-formulario-dinamico #formularioRecursosComp [formulario]="formularioRecursos"
+                            (submitFormulario)="manejarEnvioRecursos($event)">
+                        </app-formulario-dinamico>
+                        <div class="button-container">
+                            <button mat-raised-button color="primary" (click)="guardarRecursos()">
+                                Guardar y Continuar
+                            </button>
+                        </div>
+                    </div>
+                </mat-step>
+
+                <!-- Paso 4: Documentos Anexos -->
+                <mat-step [stepControl]="cuartoFormulario">
+                    <ng-template matStepLabel>DOCUMENTOS ANEXOS</ng-template>
+                    <app-documentos-anexos-auditoria
+                        (guardarDocumentos)="manejarEnvioDocumentos($event)"></app-documentos-anexos-auditoria>
+                </mat-step>
+
+            </mat-stepper>
+        </div>
+    </div>
+</mat-card>

@@ -1,6 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="example-form">
   
-      <div *ngFor="let campo of formulario.campos" [ngSwitch]="campo.tipo" [ngClass]="campo.claseGrid + ' box-field'">
+      <div *ngFor="let campo of formulario.campos" [ngSwitch]="campo.tipo" [ngClass]="['col', campo.claseGrid, 'box-field']">
         <!-- Campo tipo texto -->
         <mat-form-field *ngSwitchCase="'text'" appearance="fill" class="example-full-width">
           <mat-label>{{ campo.etiqueta }}</mat-label>

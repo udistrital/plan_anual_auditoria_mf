@@ -5,18 +5,21 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { GestionAuditoriaModule } from './modules/gestion-auditoria/gestion-auditoria.module';
+import { EditarAuditoriaModule } from './modules/programacion/editar-auditoria/editar-auditoria.module';
 import { ConsultaPlanAnualAuditoriaModule } from './modules/programacion/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.module';
 import { AsignacionAuditoresModule } from './modules/programacion/asignacion-auditores/asignacion-auditores.module';
 import { AuditoriasEspecialesModule } from './modules/programacion/auditorias-especiales/auditorias-especiales.module';
-import { FormularioAuditoriaEspecialModule } from './modules/gestion-auditoria/formulario-auditoria-especial/formulario-auditoria-especial.module';
+import { FormularioAuditoriaEspecialModule } from './modules/programacion/auditorias-especiales/formulario-auditoria-especial/formulario-auditoria-especial.module';
 import { RegistrarAuditoriasModule } from './modules/programacion/registrar-auditorias/registrar-auditorias.module';
 import { GestionAuditoriaComponent } from './modules/gestion-auditoria/gestion-auditoria.component';
 import { FormularioDinamicoComponent } from './components/formulario-dinamico/formulario-dinamico.component';
+import { CargarArchivoModule } from './modules/cargar-archivo/cargar-archivo.module';
+import { FormularioDinamicoModule } from './components/formulario-dinamico/formulario-dinamico.module';
+import { RegistrarPlanModule } from './modules/programacion/registrar-plan/registrar-plan.module';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { GestionAuditoriaRoutingModule } from './modules/gestion-auditoria/gestion-auditoria-routing.module';
+import { EditarAuditoriaRoutingModule } from './modules/programacion/editar-auditoria/editar-auditoria-routing.module';
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
@@ -64,17 +67,19 @@ import { BasesComponent } from './components/bases/bases.component';
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    GestionAuditoriaModule,
+    EditarAuditoriaModule,
     ConsultaPlanAnualAuditoriaModule,
     AsignacionAuditoresModule,
     AuditoriasEspecialesModule,
     FormularioAuditoriaEspecialModule,
     RegistrarAuditoriasModule,
+    FormularioDinamicoModule,
+    RegistrarPlanModule,
     CommonModule,
     MatStepperModule,
     MatButtonModule,
     MatDialogModule,
-    GestionAuditoriaRoutingModule,
+    EditarAuditoriaRoutingModule,
     MatCardModule,
     MatMenuModule,
     MatIconModule,

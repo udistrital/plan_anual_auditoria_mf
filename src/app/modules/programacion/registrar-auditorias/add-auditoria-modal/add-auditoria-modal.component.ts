@@ -89,10 +89,10 @@ export class AddAuditoriaModalComponent implements OnInit {
       ).then((result) => {
         if (result.isConfirmed) {
           const formData = {
-            planAuditoriaId: this.data.planAuditoriaId,
+            plan_auditoria_id: this.data.planAuditoriaId,
             titulo: this.auditoriaForm.value.tituloActividad,
-            tipoEvaluacionId: this.auditoriaForm.value.tipoEvaluacion,
-            cronogramaId: this.auditoriaForm.value.cronogramaActividades
+            tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
+            cronograma_id: this.auditoriaForm.value.cronogramaActividades
           };
 
           const request$ = this.isEditMode 

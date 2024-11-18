@@ -45,14 +45,13 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
     this.planAnualAuditoriaService.get('/plan-auditoria').subscribe(
       (res) => {
         if (res && res.Data) {
-          
           this.dataSource.data = res.Data
             .filter((item: any) => item.activo === true) 
             .map((item: any, index: number) => ({
               id: item._id,
               creadoPor: item.creadoPor ?? 'Sin asignar',
-              vigencia: item.vigenciaId,
-              fechaCreacion: item.fechaCreacion,
+              vigencia: item.vigencia_id ?? 'No encontrada',
+              fechaCreacion: item.fecha_creacion ?? 'No encontrada',
               estado: item.estado ?? 'Desconocido'
             }));
         }
@@ -66,7 +65,7 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
   crearPlan() {
     if (this.selectedYearId) {
       const Plan: any = {
-        vigenciaId: this.selectedYearId,
+        vigencia_id: this.selectedYearId,
       };
   
       this.planAnualAuditoriaService.post('/plan-auditoria', Plan)
@@ -79,7 +78,7 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
           },
           (error) => {
             // Verificar si el error es por duplicidad de vigenciaId
-            if (error.error?.Data && error.error.Data.includes('Ya existe un plan de auditoría para la vigencia')) {
+            if (error.error?.Data && error.error.Data.includes('Ya existe un plan')) {
               this.modalService.mostrarModal(
                 'Ya existe un plan de auditoría para la vigencia seleccionada.',
                 'warning',
