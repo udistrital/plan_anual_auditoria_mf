@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalService } from 'src/app/services/modal.service';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 import { Auditoria } from 'src/app/data/models/plan-anual-auditoria/plan-anual-auditoria';
-import { PdfVisualizadorComponent } from '../revision-jefe/pdf-visualizador/pdf-visualizador.component';
+import { PdfVisualizadorComponent } from './pdf-visualizador-modal/pdf-visualizador.component';
 @Component({
   selector: 'app-registrar-auditorias',
   templateUrl: './registrar-auditorias.component.html',
@@ -150,8 +150,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
           console.log("DATA ",res.Data)
           this.dialog.open(PdfVisualizadorComponent, {
             data: { base64Document: res.Data }, 
-            width: '800px',
-            height: '600px',
+            width: '80%',
+            height: '80vh',
           });
         } else {
           this.modalService.mostrarModal('No se pudo cargar el PDF', 'warning', 'AVISO');

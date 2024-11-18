@@ -47,6 +47,7 @@ export class RequestManager {
    * @returns Observable<any>
    */
   get(endpoint: string) {
+    console.log(`${this.path}${endpoint}`)
     return this.http.get<any>(`${this.path}${endpoint}`, { ...this.httpOptions, observe: 'body' }).pipe(
       map((res: any) => {  
         if (res.hasOwnProperty('Body')) {
