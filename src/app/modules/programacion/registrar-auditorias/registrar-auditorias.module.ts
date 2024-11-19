@@ -13,15 +13,22 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ReactiveFormsModule } from '@angular/forms';
+import { PdfVisualizadorComponent } from './pdf-visualizador-modal/pdf-visualizador.component';
 
 //Servicios
 import { ParametrosService } from 'src/app/services/parametros.service';
 import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
 
+import { MatDialogModule } from '@angular/material/dialog';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
+
+
+
 @NgModule({
   declarations: [
     RegistrarAuditoriasComponent,
-    AddAuditoriaModalComponent
+    AddAuditoriaModalComponent,
+    PdfVisualizadorComponent,
   ],
   imports: [
     CommonModule,
@@ -35,7 +42,9 @@ import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria
     MatDividerModule,
     MatCardModule,
     ReactiveFormsModule,
-    DragDropModule
+    DragDropModule,
+    MatDialogModule,
+    PdfViewerModule,
   ],
   providers: [
     ParametrosService,

@@ -26,4 +26,9 @@ export class PlanAnualAuditoriaService {
     this.requestManager.setPath('PLAN_ANUAL_AUDITORIA_SERVICE');
     return this.requestManager.delete(endpoint, element.id);
   }
+
+  planilla(endpoint: string) {
+    this.requestManager.setPath('PLAN_ANUAL_AUDITORIA_MID');
+    return this.requestManager.get(endpoint);
+  }
 }

@@ -9,7 +9,8 @@ export const environment = {
     'https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/',
 
   LAMBDA_SERVICE: 'http://localhost:3001',
-
+  PLAN_ANUAL_AUDITORIA_MID: 'http://localhost:3001',
+  
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
     EN_REVISION_JEFE_ID: 6791,
