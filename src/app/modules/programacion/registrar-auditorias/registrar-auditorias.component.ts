@@ -149,7 +149,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         if (res && res.Data) {
           console.log("DATA ",res.Data)
           this.dialog.open(PdfVisualizadorComponent, {
-            data: { base64Document: res.Data }, 
+            data: { base64Document: res.Data, id: this.id}, 
             width: '80%',
             height: '80vh',
           });
