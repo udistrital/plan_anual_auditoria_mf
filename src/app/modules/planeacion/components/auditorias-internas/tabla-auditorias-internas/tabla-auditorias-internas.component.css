@@ -1,0 +1,14 @@
+.mat-column-numero {
+  text-align: center;
+}
+
+.mat-column-acciones {
+  text-align: center;
+}
+.mat-column-documentos {
+  text-align: center;
+}
+
+.even-row {
+  background-color: #fff3f1; /* Color de fondo para filas pares */
+}

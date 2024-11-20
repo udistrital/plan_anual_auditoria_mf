@@ -53,6 +53,7 @@ import { ActividadesAuditoriaComponent } from "./modules/programacion/editar-aud
 import { DocumentosAnexosAuditoriaComponent } from "./modules/programacion/editar-auditoria/documentos-anexos-auditoria/documentos-anexos-auditoria.component";
 import { SpinnerComponent } from "./components/spinner/spinner.component";
 import { SpinnerIntercerptor } from "./shared/interceptors/spinner.interceptor";
+import { PlaneacionModule } from "./modules/planeacion/planeacion.module";
 
 @NgModule({
   declarations: [
@@ -111,6 +112,7 @@ import { SpinnerIntercerptor } from "./shared/interceptors/spinner.interceptor";
     MatDividerModule,
     PdfViewerModule,
   ],
+
   providers: [
     PlanAnualAuditoriaService,
     provideHttpClient(withInterceptors([SpinnerIntercerptor])),
