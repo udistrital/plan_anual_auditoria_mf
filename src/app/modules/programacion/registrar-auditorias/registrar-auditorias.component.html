@@ -81,9 +81,9 @@
 
     <div class="button-container">
       <button mat-raised-button color="primary" (click)="addAuditoria()">Añadir Auditoría</button>
-      <button mat-raised-button color="primary">Cargue Masivo</button>
+      <button mat-raised-button color="primary" (click)="subirArchivo('xlsx')"><mat-icon>file_upload</mat-icon> Cargue Masivo</button>
       <button mat-raised-button color="primary" (click)="renderizar()"><mat-icon>visibility</mat-icon>ver</button>
-      <button mat-raised-button color="primary" (click)="subirArchivo()"><mat-icon>file_upload</mat-icon>Matriz</button>
+      <button mat-raised-button color="primary" (click)="subirArchivo('pdf')"><mat-icon>file_upload</mat-icon>Matriz</button>
       <button mat-raised-button color="primary" (click)="GuardarPaa()">Guardar</button>
     </div>
   </div>

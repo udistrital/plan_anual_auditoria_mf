@@ -107,9 +107,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
       });
   }
 
-  subirArchivo(): void {
+  subirArchivo(tipoArchivo: string): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: '600px',
+      data: {tipoArchivo, id: this.id}
     });
   }
 
