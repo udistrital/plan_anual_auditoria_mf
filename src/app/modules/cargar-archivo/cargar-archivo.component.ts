@@ -25,7 +25,7 @@ export class CargarArchivoComponent {
     private gestorDocumentalService: GestorDocumentalService,
     private lambdaService: lambdaService,
     private http: HttpClient,
-    @Inject(MAT_DIALOG_DATA) public data: { tipoArchivo: string }
+    @Inject(MAT_DIALOG_DATA) public data: { tipoArchivo: string; id: string }
   ) {}
 
   onFileSelected(event: any): void {
@@ -73,6 +73,8 @@ export class CargarArchivoComponent {
 
       const lambdaPayload = {
         base64data: base64String,
+        complement: { plan_auditoria_id: this.data.id },
+        type_upload: "auditorias"        
       };
 
       const payload = [
@@ -86,13 +88,13 @@ export class CargarArchivoComponent {
       ];
 
       this.lambdaService
-        .post('/registro-datos-archivo', lambdaPayload)
+        .post('/cargue-masivo/auditorias', lambdaPayload)
         .subscribe({
           next: (response) => {
-            console.log('Archivo enviado exitosamente a la Lambda', response);
+            console.log('Archivo enviado exitosamente al MID', response);
           },
           error: (error) => {
-            console.error('Error al enviar el archivo a la Lambda', error);
+            console.error('Error al enviar el archivo al MID', error);
           },
         });
 
