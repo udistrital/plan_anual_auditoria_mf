@@ -1,50 +1,55 @@
-<div class="container-principal">
-    <table mat-table [dataSource]="datos" class="mat-elevation-z8 centered-table">
+<h3 class="mt-5 mb-3">Lista de actividades</h3>
+<div class="tabla-container">
+  <table mat-table [dataSource]="datos">
+    <!-- No. Column -->
+    <ng-container matColumnDef="no">
+      <th mat-header-cell *matHeaderCellDef class="header"><b>No.</b></th>
+      <td mat-cell *matCellDef="let element; let i = index" class="bold-text">
+        {{ i + 1 }}
+      </td>
+    </ng-container>
 
-        <!-- No. Column -->
-        <ng-container matColumnDef="no">
-            <th mat-header-cell *matHeaderCellDef class="header">No.</th>
-            <td mat-cell *matCellDef="let element; let i = index" class="bold-text">
-                {{ i + 1 }}
-            </td>
-        </ng-container>
+    <!-- Actividad Column -->
+    <ng-container matColumnDef="actividad">
+      <th mat-header-cell *matHeaderCellDef class="header"><b>Actividad</b></th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        {{ element.actividad }}
+      </td>
+    </ng-container>
 
-        <!-- Actividad Column -->
-        <ng-container matColumnDef="actividad">
-            <th mat-header-cell *matHeaderCellDef class="header">Actividad</th>
-            <td mat-cell *matCellDef="let element" class="cell">{{element.actividad}}</td>
-        </ng-container>
+    <!-- Fecha Inicio Column -->
+    <ng-container matColumnDef="fechaInicio">
+      <th mat-header-cell *matHeaderCellDef class="header">
+        <b>Fecha Inicio</b>
+      </th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        {{ element.fechaInicio }}
+      </td>
+    </ng-container>
 
-        <!-- Fecha Inicio Column -->
-        <ng-container matColumnDef="fechaInicio">
-            <th mat-header-cell *matHeaderCellDef class="header">Fecha Inicio</th>
-            <td mat-cell *matCellDef="let element" class="cell">{{element.fechaInicio}}</td>
-        </ng-container>
+    <!-- Fecha Fin Column -->
+    <ng-container matColumnDef="fechaFin">
+      <th mat-header-cell *matHeaderCellDef class="header"><b>Fecha Fin</b></th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        {{ element.fechaFin }}
+      </td>
+    </ng-container>
 
-        <!-- Fecha Fin Column -->
-        <ng-container matColumnDef="fechaFin">
-            <th mat-header-cell *matHeaderCellDef class="header">Fecha Fin</th>
-            <td mat-cell *matCellDef="let element" class="cell">{{element.fechaFin}}</td>
-        </ng-container>
+    <!-- Papeles de Trabajo Column -->
+    <ng-container matColumnDef="papelesTrabajo">
+      <th mat-header-cell *matHeaderCellDef class="header">
+        <b>Papeles de Trabajo</b>
+      </th>
+      <td mat-cell *matCellDef="let element; let i = index">
+        Ref: {{ element.ref }} <br />
+        Descripción: {{ element.descripcion }} <br />
+        Folios: {{ element.folios }} <br />
+        Medio: {{ element.medio }} <br />
+        Carpeta: {{ element.carpeta }}
+      </td>
+    </ng-container>
 
-        <!-- Papeles de Trabajo Column -->
-        <ng-container matColumnDef="papelesTrabajo">
-            <th mat-header-cell *matHeaderCellDef class="header">Papeles de Trabajo</th>
-            <td mat-cell *matCellDef="let element" class="cell">
-                Ref: {{element.ref}} <br>
-                Descripción: {{element.descripcion}} <br>
-                Folios: {{element.folios}} <br>
-                Medio: {{element.medio}} <br>
-                Carpeta: {{element.carpeta}}
-            </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-        <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
-    </table>
-
-    <div class="button-container">
-        <button class="buttoms" mat-raised-button color="primary">Editar Actividades</button>
-        <button class="buttoms" mat-raised-button color="primary">Guardar y Continuar</button>
-    </div>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>
+  </table>
 </div>

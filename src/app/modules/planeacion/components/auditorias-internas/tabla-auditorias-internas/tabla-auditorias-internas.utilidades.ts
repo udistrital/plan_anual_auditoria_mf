@@ -2,8 +2,8 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "numero",
     header: "No.",
-    cell: (auditoria: any) => "1",
-    sortable: false,
+    cell: (auditoria: any) => "",
+    sortable: true,
   },
   {
     columnDef: "vigencia",

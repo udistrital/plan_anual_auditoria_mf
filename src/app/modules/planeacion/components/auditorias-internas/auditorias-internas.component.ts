@@ -44,7 +44,7 @@ export class AuditoriasInternasComponent implements OnInit {
     this.banderaTablaAuditoriasInternas = false;
 
     this.planAuditoriaMid
-      .get(`auditoria/vigencia/${vigenciaId}`)
+      .get(`auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=0`)
       .subscribe((res) => {
         const auditorias: any[] = res.Data;
 

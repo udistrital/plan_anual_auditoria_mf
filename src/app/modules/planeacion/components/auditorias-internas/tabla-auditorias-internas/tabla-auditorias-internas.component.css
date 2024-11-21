@@ -1,5 +1,6 @@
 .mat-column-numero {
   text-align: center;
+  font-weight: 600;
 }
 
 .mat-column-acciones {
@@ -10,5 +11,15 @@
 }
 
 .even-row {
-  background-color: #fff3f1; /* Color de fondo para filas pares */
+  background-color: #fff3f1;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.link {
+  cursor: pointer;
 }

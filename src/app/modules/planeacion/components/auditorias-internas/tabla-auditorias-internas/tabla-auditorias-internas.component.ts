@@ -29,7 +29,6 @@ export class TablaAuditoriasInternasComponent implements AfterViewInit {
   ngAfterViewInit() {
     this.construirTabla();
     this.cdref.detectChanges();
-    console.log(this.auditoriasPorVigencia);
   }
 
   construirTabla() {
