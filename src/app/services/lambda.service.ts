@@ -14,4 +14,5 @@ export class lambdaService {
     this.requestManager.setPath('LAMBDA_SERVICE');
     return this.requestManager.post(endpoint, element);
     }
+    
 }

@@ -26,7 +26,7 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
     public dialog: MatDialog,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.CargarEvaluaciones();
@@ -34,7 +34,8 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
   }
 
   CargarEvaluaciones() {
-    this.parametrosService.get('parametro?query=TipoParametroId:121&limit=0').subscribe((res) => {
+    this.parametrosService.get('parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc'
+    ).subscribe((res) => {
       if (res !== null) {
         this.years = res.Data;
       }
@@ -42,17 +43,17 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria() {
-    this.planAnualAuditoriaService.get('/plan-auditoria').subscribe(
+    this.planAnualAuditoriaService.planilla('/plan-auditoria').subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data
-            .filter((item: any) => item.activo === true) 
+            .filter((item: any) => item.activo === true)
             .map((item: any, index: number) => ({
               id: item._id,
-              creadoPor: item.creadoPor ?? 'Sin asignar',
+              creadoPor: item.creado_por_id ?? 'Sin asignar',
               vigencia: item.vigencia_id ?? 'No encontrada',
               fechaCreacion: item.fecha_creacion ?? 'No encontrada',
-              estado: item.estado ?? 'Desconocido'
+              estado: item.estado ?? 'Borrador'
             }));
         }
       },
@@ -67,7 +68,7 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
       const Plan: any = {
         vigencia_id: this.selectedYearId,
       };
-  
+
       this.planAnualAuditoriaService.post('/plan-auditoria', Plan)
         .subscribe(
           (response: any) => {
@@ -99,8 +100,8 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
     this.router.navigate([`registrar-plan/`, element.id]);
   }
 
-  editActivities(element: any) { 
-    this.router.navigate([`registrar-auditorias`, element.id]);  
+  editActivities(element: any) {
+    this.router.navigate([`registrar-auditorias`, element.id]);
   }
 
   sendApproval(element: any) {
