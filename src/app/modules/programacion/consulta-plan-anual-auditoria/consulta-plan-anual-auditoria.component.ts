@@ -14,6 +14,8 @@ import { Plan } from 'src/app/data/models/plan-anual-auditoria/plan-anual-audito
   styleUrls: ['./consulta-plan-anual-auditoria.component.css']
 })
 export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
+  role: string = 'auditor';
+ 
   years: Parametro[] = [];
   selectedYearId: number | null = null;
 
@@ -122,4 +124,13 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
         }
       });
   }
+
+  viewPlanJefe() {
+    this.router.navigate(['/revision-jefe']);
+  }
+
+  viewPlanSecretario() {
+    this.router.navigate(['/revision-secretario']);
+  }
+  
 }

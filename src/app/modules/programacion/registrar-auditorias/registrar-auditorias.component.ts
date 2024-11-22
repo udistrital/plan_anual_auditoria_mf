@@ -144,6 +144,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
     this.addAuditoria(auditoria);
   }
+  
   renderizar() {
     this.planAnualAuditoriaService.planilla(`/plantilla/${this.id}`).subscribe(
       (res) => {
