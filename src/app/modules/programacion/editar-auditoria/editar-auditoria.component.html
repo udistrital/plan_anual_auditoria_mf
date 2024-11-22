@@ -26,7 +26,7 @@
               <mat-icon>lens</mat-icon>
             </ng-template>
             <!-- Paso 1: Información -->
-            <mat-step [stepControl]="primerFormulario">
+            <mat-step>
               <ng-template matStepLabel>
                 <p>Paso 1</p>
                 <b style="color: #a11413">Información</b>
@@ -44,15 +44,14 @@
                 <app-formulario-dinamico
                   #formularioInformacionComp
                   [formulario]="formularioInformacion"
-                  (submitFormulario)="manejarEnvioInformacion($event)"
+                  (submitFormulario)="preguntarGuardadoInformacion($event)"
                 >
                 </app-formulario-dinamico>
                 <div class="d-flex justify-content-end mt-4">
                   <button
-                    matStepperNext
                     mat-raised-button
                     color="accent"
-                    (click)="enviarFormularioInformacion()"
+                    (click)="enviarFormInformacion()"
                   >
                     Guardar y continuar
                   </button>
@@ -61,7 +60,7 @@
             </mat-step>
 
             <!-- Paso 2: Actividades -->
-            <mat-step [stepControl]="segundoFormulario">
+            <mat-step>
               <ng-template matStepLabel>
                 <p>Paso 2</p>
                 <b style="color: #a11413">Actividades</b>
@@ -77,19 +76,13 @@
               </div>
               <app-actividades-auditoria></app-actividades-auditoria>
               <div class="d-flex justify-content-end mt-4">
-                <button
-                  matStepperPrevious
-                  mat-stroked-button
-                  color="accent"
-                  (click)="enviarFormularioInformacion()"
-                >
+                <button matStepperPrevious mat-stroked-button color="accent">
                   Volver
                 </button>
                 <button
                   matStepperNext
                   mat-flat-button
                   color="accent"
-                  (click)="enviarFormularioInformacion()"
                   class="mx-2"
                 >
                   Guardar y continuar
@@ -98,7 +91,7 @@
             </mat-step>
 
             <!-- Paso 3: Recursos -->
-            <mat-step [stepControl]="tercerFormulario">
+            <mat-step>
               <ng-template matStepLabel>
                 <p>Paso 3</p>
                 <b style="color: #a11413">Recursos</b>
@@ -116,23 +109,17 @@
                 <app-formulario-dinamico
                   #formularioRecursosComp
                   [formulario]="formularioRecursos"
-                  (submitFormulario)="manejarEnvioRecursos($event)"
+                  (submitFormulario)="preguntarGuardadoRecursos($event)"
                 >
                 </app-formulario-dinamico>
                 <div class="d-flex justify-content-end mt-4">
-                  <button
-                    matStepperPrevious
-                    mat-stroked-button
-                    color="accent"
-                    (click)="enviarFormularioInformacion()"
-                  >
+                  <button mat-stroked-button color="accent" matStepperPrevious>
                     Volver
                   </button>
                   <button
-                    matStepperNext
                     mat-flat-button
                     color="accent"
-                    (click)="guardarRecursos()"
+                    (click)="enviarFormRecursos()"
                     class="mx-2"
                   >
                     Guardar y continuar
@@ -142,7 +129,7 @@
             </mat-step>
 
             <!-- Paso 4: Documentos anexos -->
-            <mat-step [stepControl]="cuartoFormulario">
+            <mat-step>
               <ng-template matStepLabel>
                 <p>Paso 4</p>
                 <b style="color: #a11413">Documentos anexos</b>
@@ -160,19 +147,13 @@
                 (guardarDocumentos)="manejarEnvioDocumentos($event)"
               ></app-documentos-anexos-auditoria>
               <div class="d-flex justify-content-end mt-4">
-                <button
-                  matStepperPrevious
-                  mat-stroked-button
-                  color="accent"
-                  (click)="enviarFormularioInformacion()"
-                >
+                <button matStepperPrevious mat-stroked-button color="accent">
                   Volver
                 </button>
                 <button
                   matStepperNext
                   mat-flat-button
                   color="accent"
-                  (click)="enviarFormularioInformacion()"
                   class="mx-2"
                 >
                   Guardar y cerrar

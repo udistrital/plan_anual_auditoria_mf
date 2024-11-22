@@ -1,4 +1,5 @@
 import { Formulario } from "src/app/data/models/formulario.model";
+import { environment } from "src/environments/environment";
 
 export const formularioInformacionAuditoria: Formulario = {
   campos: [
@@ -40,12 +41,9 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "list",
       tipo: "select",
       parametros: {
-        opciones: [
-          { valor: "1", etiqueta: "1" },
-          { valor: "2", etiqueta: "2" },
-          { valor: "3", etiqueta: "3" },
-          { valor: "4", etiqueta: "4" },
-        ],
+        url:
+          environment.PARAMETROS_SERVICE +
+          "parametro?query=TipoParametroId:140&fields=Id,Nombre&limit=0",
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
@@ -58,9 +56,9 @@ export const formularioInformacionAuditoria: Formulario = {
       tipo: "select",
       parametros: {
         opciones: [
-          { valor: "Macroproceso", etiqueta: "Macroproceso" },
-          { valor: "Proceso", etiqueta: "Proceso" },
-          { valor: "Dependencia", etiqueta: "Dependencia" },
+          { Id: "1", Nombre: "Macroproceso" },
+          { Id: "2", Nombre: "Proceso" },
+          { Id: "3", Nombre: "Dependencia" },
         ],
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
@@ -135,6 +133,44 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "check_circle",
       tipo: "textarea",
       validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+  ],
+};
+
+export const formularioRecursosAuditoria: Formulario = {
+  campos: [
+    {
+      nombre: "tecnologicos",
+      etiqueta: "Tecnológicos",
+      tipo: "textarea",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "8" },
+      ],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "humanos",
+      etiqueta: "Humanos",
+      tipo: "textarea",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "8" },
+      ],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "fisicos",
+      etiqueta: "Fisicos",
+      tipo: "textarea",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "8" },
+      ],
       deshabilitado: false,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
     },

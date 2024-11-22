@@ -99,10 +99,10 @@
         <mat-select [formControlName]="campo.nombre">
           <mat-option
             *ngFor="let opcion of campo.parametros?.opciones || []"
-            [value]="opcion.valor"
+            [value]="opcion.Id"
             [disabled]="opcion.deshabilitado"
           >
-            {{ opcion.etiqueta }}
+            {{ opcion.Nombre }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
@@ -125,10 +125,10 @@
         <mat-radio-group [formControlName]="campo.nombre">
           <div *ngFor="let opcion of campo.parametros?.opciones || []">
             <mat-radio-button
-              [value]="opcion.valor"
+              [value]="opcion.Id"
               [disabled]="opcion.deshabilitado"
             >
-              {{ opcion.etiqueta }}
+              {{ opcion.Nombre }}
             </mat-radio-button>
           </div>
         </mat-radio-group>

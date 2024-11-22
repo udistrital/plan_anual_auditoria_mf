@@ -25,8 +25,8 @@ export class Campo {
   parametros?: {
     url?: string;
     opciones?: Array<{
-      valor: string;
-      etiqueta: string;
+      Nombre: string;
+      Id?: string;
       deshabilitado?: boolean;
     }>;
     vista?: "month" | "year" | "multi-year";
