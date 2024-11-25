@@ -45,29 +45,44 @@ export class AddAuditoriaModalComponent implements OnInit {
         Validators.required,
       ],
     });
-    this.CargarEvaluaciones();
-    this.CargarMeses();
+
+    this.CargarEvaluaciones(() => this.mapearSeleccion('tipoEvaluacion', this.evaluaciones));
+  this.CargarMeses(() => this.mapearSeleccion('cronogramaActividades', this.meses));
+    
   }
 
-  CargarMeses() {
-    this.parametrosService
-      .get("parametro?query=TipoParametroId:139&limit=0")
-      .subscribe((res) => {
-        if (res !== null) {
-          this.meses = res.Data;
-        }
-      });
+  CargarMeses(callback?: () => void) {
+    this.parametrosService.get('parametro?query=TipoParametroId:139&limit=0').subscribe(res => {
+      if (res && res.Data) {
+        this.meses = res.Data;
+        if (callback) callback();
+      }
+    });
   }
 
-  CargarEvaluaciones() {
-    this.parametrosService
-      .get("parametro?query=TipoParametroId:136&limit=0")
-      .subscribe((res) => {
-        if (res !== null) {
-          this.evaluaciones = res.Data;
-        }
-      });
+  CargarEvaluaciones(callback?: () => void) {
+    this.parametrosService.get('parametro?query=TipoParametroId:136&limit=0').subscribe(res => {
+      if (res && res.Data) {
+        this.evaluaciones = res.Data;
+        if (callback) callback();
+      }
+    });
   }
+
+  mapearSeleccion(campo: string, opciones: Parametro[]): void {
+    const seleccion = this.auditoriaForm.get(campo)?.value;
+  
+    if (typeof seleccion === 'string') {
+      const idMapeado = opciones.find(opcion => opcion.Nombre === seleccion)?.Id;
+      this.auditoriaForm.get(campo)?.setValue(idMapeado ?? null); // Usa null si no se encuentra
+    } else if (Array.isArray(seleccion)) {
+      const idsMapeados = seleccion
+        .map(nombre => opciones.find(opcion => opcion.Nombre === nombre)?.Id)
+        .filter((id): id is number => id !== undefined); // Filtra valores no encontrados
+      this.auditoriaForm.get(campo)?.setValue(idsMapeados);
+    }
+  }
+
 
   onCancel(): void {
     this.dialogRef.close();
