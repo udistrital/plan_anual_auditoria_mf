@@ -1,22 +1,29 @@
-<mat-card *ngFor="let documento of documentos; let i = index" class="documento-card">
-    <div class="documento-content">
-      <span>{{ documento.nombre }}</span>
-      <div class="icon-buttons">
-        <!-- Botón para seleccionar archivo -->
-        <button mat-icon-button color="primary" (click)="fileInput.click()">
-          <mat-icon>upload</mat-icon>
-        </button>
-        <input type="file" (change)="onArchivoSeleccionado($event, i)" #fileInput hidden />
-  
-        <!-- Botón para ver archivo -->
-        <button mat-icon-button color="accent" [disabled]="!documento.archivo">
-          <mat-icon>visibility</mat-icon>
-        </button>
-      </div>
+<mat-card
+  *ngFor="let documento of documentos; let i = index"
+  class="documento-card"
+>
+  <div class="documento-content">
+    <span>{{ documento.nombre }}</span>
+    <div class="icon-buttons">
+      <!-- Botón para seleccionar archivo -->
+      <button mat-icon-button color="primary" (click)="fileInput.click()">
+        <mat-icon>upload</mat-icon>
+      </button>
+      <input
+        type="file"
+        (change)="onArchivoSeleccionado($event, i)"
+        #fileInput
+        hidden
+      />
+
+      <!-- Botón para ver archivo -->
+      <button mat-icon-button color="accent" [disabled]="!documento.archivo">
+        <mat-icon>visibility</mat-icon>
+      </button>
     </div>
-  </mat-card>
-  
-  <div class="button-container">
-    <button mat-raised-button color="primary" (click)="onGuardar()">Guardar y Cerrar</button>
   </div>
-  
+</mat-card>
+
+<!-- <div class="button-container">
+    <button mat-raised-button color="primary" (click)="onGuardar()">Guardar y Cerrar</button>
+  </div> -->

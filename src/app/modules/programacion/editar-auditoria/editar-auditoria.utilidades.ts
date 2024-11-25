@@ -1,0 +1,178 @@
+import { Formulario } from "src/app/data/models/formulario.model";
+import { environment } from "src/environments/environment";
+
+export const formularioInformacionAuditoria: Formulario = {
+  campos: [
+    {
+      nombre: "no_auditoria",
+      descripcion: "No Auditoria y/o seguimiento",
+      etiqueta: "No Auditoria y/o seguimiento",
+      icono: "format_list_numbered",
+      tipo: "number",
+      placeholder: "Escriba aquí el número de la auditoria",
+      deshabilitado: false,
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "consecutivo_OCI",
+      etiqueta: "Consecutivo OCI",
+      icono: "bookmark",
+      tipo: "text",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "consecutivo_IE",
+      etiqueta: "Consecutivo IE",
+      icono: "bookmark_border",
+      tipo: "text",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "30" },
+      ],
+      deshabilitado: false,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "tipo",
+      etiqueta: "Tipo",
+      icono: "list",
+      tipo: "select",
+      parametros: {
+        url:
+          environment.PARAMETROS_SERVICE +
+          "parametro?query=TipoParametroId:140&fields=Id,Nombre&limit=0",
+      },
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-2 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "proceso",
+      etiqueta: "Proceso",
+      icono: "work",
+      tipo: "select",
+      parametros: {
+        opciones: [
+          { Id: "1", Nombre: "Macroproceso" },
+          { Id: "2", Nombre: "Proceso" },
+          { Id: "3", Nombre: "Dependencia" },
+        ],
+      },
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-5 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "lider",
+      etiqueta: "Líder",
+      icono: "person",
+      tipo: "text",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-5 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "responsable",
+      etiqueta: "Responsable",
+      icono: "supervisor_account",
+      tipo: "text",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "fecha_ejecucion_inicial",
+      etiqueta: "Fecha de Ejecución Inicial",
+      icono: "event",
+      parametros: {
+        vista: "year",
+        fecha_inicio: "2024-01-01T05:00:00.000Z",
+      },
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      tipo: "date",
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "fecha_ejecucion_final",
+      etiqueta: "Fecha de Ejecución Final",
+      icono: "event_available",
+      parametros: {
+        vista: "year",
+        fecha_inicio: "2024-01-01T05:00:00.000Z",
+      },
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      tipo: "date",
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "objetivo_auditoria",
+      etiqueta: "Objetivo de la Auditoría",
+      icono: "flag",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "alcance_auditoria",
+      etiqueta: "Alcance de la Auditoría",
+      icono: "visibility",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "criterios",
+      etiqueta: "Criterios",
+      icono: "check_circle",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+  ],
+};
+
+export const formularioRecursosAuditoria: Formulario = {
+  campos: [
+    {
+      nombre: "tecnologicos",
+      etiqueta: "Tecnológicos",
+      tipo: "textarea",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "8" },
+      ],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "humanos",
+      etiqueta: "Humanos",
+      tipo: "textarea",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "8" },
+      ],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "fisicos",
+      etiqueta: "Fisicos",
+      tipo: "textarea",
+      validaciones: [
+        { tipo: "requerido", valor: "" },
+        { tipo: "maxLength", valor: "8" },
+      ],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    },
+  ],
+};

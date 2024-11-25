@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map } from 'rxjs/operators';
-import { HttpErrorManager } from './errorManager';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { catchError, map } from "rxjs/operators";
+import { HttpErrorManager } from "./errorManager";
 
-
-import { environment } from '../../environments/environment';
+import { environment } from "../../environments/environment";
 
 /**
  * This class manage the http connections with internal REST services. Use the response format {
@@ -14,17 +13,17 @@ import { environment } from '../../environments/environment';
  * }
  */
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class RequestManager {
   private path!: any;
   public httpOptions: any;
   constructor(private http: HttpClient, private errManager: HttpErrorManager) {
-    const acces_token = window.localStorage.getItem('access_token');
+    const acces_token = window.localStorage.getItem("access_token");
     if (acces_token !== null) {
       this.httpOptions = {
         headers: new HttpHeaders({
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${acces_token}`,
         }),
       };
@@ -37,7 +36,6 @@ export class RequestManager {
    */
   public setPath(service: string) {
     this.path = environment[service as keyof typeof environment];
-    console.log("el path es:", this.path)
   }
 
   /**
@@ -47,16 +45,20 @@ export class RequestManager {
    * @returns Observable<any>
    */
   get(endpoint: string) {
-    console.log(`${this.path}${endpoint}`)
-    return this.http.get<any>(`${this.path}${endpoint}`, { ...this.httpOptions, observe: 'body' }).pipe(
-      map((res: any) => {  
-        if (res.hasOwnProperty('Body')) {
-          return res['Body'];
-        }
-        return res;
-      }),
-      catchError(this.errManager.handleError.bind(this))
-    );
+    return this.http
+      .get<any>(`${this.path}${endpoint}`, {
+        ...this.httpOptions,
+        observe: "body",
+      })
+      .pipe(
+        map((res: any) => {
+          if (res.hasOwnProperty("Body")) {
+            return res["Body"];
+          }
+          return res;
+        }),
+        catchError(this.errManager.handleError.bind(this))
+      );
   }
 
   /**

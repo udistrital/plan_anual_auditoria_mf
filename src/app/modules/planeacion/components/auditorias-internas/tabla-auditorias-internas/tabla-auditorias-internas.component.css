@@ -1,0 +1,25 @@
+.mat-column-numero {
+  text-align: center;
+  font-weight: 600;
+}
+
+.mat-column-acciones {
+  text-align: center;
+}
+.mat-column-documentos {
+  text-align: center;
+}
+
+.even-row {
+  background-color: #fff3f1;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.link {
+  cursor: pointer;
+}

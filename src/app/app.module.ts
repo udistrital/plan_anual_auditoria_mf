@@ -1,51 +1,59 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppRoutingModule } from './app-routing.module';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { BrowserModule } from "@angular/platform-browser";
+import { AppRoutingModule } from "./app-routing.module";
 
-import { AppComponent } from './app.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { EditarAuditoriaModule } from './modules/programacion/editar-auditoria/editar-auditoria.module';
-import { ConsultaPlanAnualAuditoriaModule } from './modules/programacion/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.module';
-import { AsignacionAuditoresModule } from './modules/programacion/asignacion-auditores/asignacion-auditores.module';
-import { AuditoriasEspecialesModule } from './modules/programacion/auditorias-especiales/auditorias-especiales.module';
-import { FormularioAuditoriaEspecialModule } from './modules/programacion/auditorias-especiales/formulario-auditoria-especial/formulario-auditoria-especial.module';
-import { RegistrarAuditoriasModule } from './modules/programacion/registrar-auditorias/registrar-auditorias.module';
-import { FormularioDinamicoComponent } from './components/formulario-dinamico/formulario-dinamico.component';
-import { FormularioDinamicoModule } from './components/formulario-dinamico/formulario-dinamico.module';
-import { RegistrarPlanModule } from './modules/programacion/registrar-plan/registrar-plan.module';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
-import { EditarAuditoriaRoutingModule } from './modules/programacion/editar-auditoria/editar-auditoria-routing.module';
-import { MatCardModule } from '@angular/material/card';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatRadioModule } from '@angular/material/radio';
-import { RegistrarPlanComponent } from './modules/programacion/registrar-plan/registrar-plan.component';
-import { PlanAnualAuditoriaService } from 'src/app/services/plan-anual-auditoria.service';
-import { RevisionSecretarioComponent } from './modules/programacion/revision-secretario/revision-secretario.component';
-import { PdfVisualizadorComponent } from './modules/programacion/revision-jefe/pdf-visualizador/pdf-visualizador.component';
-import { RevisionJefeComponent } from './modules/programacion/revision-jefe/revision-jefe.component';
-import { PdfViewerModule } from 'ng2-pdf-viewer';
-import { ModalMotivosRechazoComponent } from './modules/programacion/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component';
-import { ModalAprobacionSecretarioComponent } from './modules/programacion/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component';
-import { CargarArchivoComponent } from './modules/cargar-archivo/cargar-archivo.component';
-import { HttpClientModule } from '@angular/common/http';
-import { BasesComponent } from './components/bases/bases.component';
-import { EditarAuditoriaComponent } from './modules/programacion/editar-auditoria/editar-auditoria.component';
-import { ActividadesAuditoriaComponent } from './modules/programacion/editar-auditoria/actividades-auditoria/actividades-auditoria.component';
-import { DocumentosAnexosAuditoriaComponent } from './modules/programacion/editar-auditoria/documentos-anexos-auditoria/documentos-anexos-auditoria.component';
+import { AppComponent } from "./app.component";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { EditarAuditoriaModule } from "./modules/programacion/editar-auditoria/editar-auditoria.module";
+import { ConsultaPlanAnualAuditoriaModule } from "./modules/programacion/consulta-plan-anual-auditoria/consulta-plan-anual-auditoria.module";
+import { AsignacionAuditoresModule } from "./modules/programacion/asignacion-auditores/asignacion-auditores.module";
+import { AuditoriasEspecialesModule } from "./modules/programacion/auditorias-especiales/auditorias-especiales.module";
+import { FormularioAuditoriaEspecialModule } from "./modules/programacion/auditorias-especiales/formulario-auditoria-especial/formulario-auditoria-especial.module";
+import { RegistrarAuditoriasModule } from "./modules/programacion/registrar-auditorias/registrar-auditorias.module";
+import { FormularioDinamicoComponent } from "./components/formulario-dinamico/formulario-dinamico.component";
+import { FormularioDinamicoModule } from "./components/formulario-dinamico/formulario-dinamico.module";
+import { RegistrarPlanModule } from "./modules/programacion/registrar-plan/registrar-plan.module";
+import { MatStepperModule } from "@angular/material/stepper";
+import { MatButtonModule } from "@angular/material/button";
+import { MatDialogModule } from "@angular/material/dialog";
+import { EditarAuditoriaRoutingModule } from "./modules/programacion/editar-auditoria/editar-auditoria-routing.module";
+import { MatCardModule } from "@angular/material/card";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTableModule } from "@angular/material/table";
+import { MatSelectModule } from "@angular/material/select";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { MatInputModule } from "@angular/material/input";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatNativeDateModule } from "@angular/material/core";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatDividerModule } from "@angular/material/divider";
+import { MatExpansionModule } from "@angular/material/expansion";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatRadioModule } from "@angular/material/radio";
+import { RegistrarPlanComponent } from "./modules/programacion/registrar-plan/registrar-plan.component";
+import { PlanAnualAuditoriaService } from "src/app/services/plan-anual-auditoria.service";
+import { RevisionSecretarioComponent } from "./modules/programacion/revision-secretario/revision-secretario.component";
+import { PdfVisualizadorComponent } from "./modules/programacion/revision-jefe/pdf-visualizador/pdf-visualizador.component";
+import { RevisionJefeComponent } from "./modules/programacion/revision-jefe/revision-jefe.component";
+import { PdfViewerModule } from "ng2-pdf-viewer";
+import { ModalMotivosRechazoComponent } from "./modules/programacion/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
+import { ModalAprobacionSecretarioComponent } from "./modules/programacion/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component";
+import { CargarArchivoComponent } from "./modules/cargar-archivo/cargar-archivo.component";
+import {
+  HTTP_INTERCEPTORS,
+  HttpClientModule,
+  provideHttpClient,
+  withInterceptors,
+} from "@angular/common/http";
+import { BasesComponent } from "./components/bases/bases.component";
+import { EditarAuditoriaComponent } from "./modules/programacion/editar-auditoria/editar-auditoria.component";
+import { ActividadesAuditoriaComponent } from "./modules/programacion/editar-auditoria/actividades-auditoria/actividades-auditoria.component";
+import { DocumentosAnexosAuditoriaComponent } from "./modules/programacion/editar-auditoria/documentos-anexos-auditoria/documentos-anexos-auditoria.component";
+import { SpinnerComponent } from "./components/spinner/spinner.component";
+import { SpinnerIntercerptor } from "./shared/interceptors/spinner.interceptor";
+import { PlaneacionModule } from "./modules/planeacion/planeacion.module";
 
 @NgModule({
   declarations: [
@@ -64,6 +72,7 @@ import { DocumentosAnexosAuditoriaComponent } from './modules/programacion/edita
     EditarAuditoriaComponent,
     DocumentosAnexosAuditoriaComponent,
     ActividadesAuditoriaComponent,
+    SpinnerComponent,
   ],
 
   imports: [
@@ -103,7 +112,11 @@ import { DocumentosAnexosAuditoriaComponent } from './modules/programacion/edita
     MatDividerModule,
     PdfViewerModule,
   ],
-  providers: [PlanAnualAuditoriaService],
+
+  providers: [
+    PlanAnualAuditoriaService,
+    provideHttpClient(withInterceptors([SpinnerIntercerptor])),
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
