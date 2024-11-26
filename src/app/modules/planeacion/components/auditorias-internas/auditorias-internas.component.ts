@@ -1,9 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Vigencia } from "src/app/data/models/vigencia.model";
-import { AlertService } from "src/app/services/alert.service";
-import { ParametrosService } from "src/app/services/parametros.service";
-import { PlanAnualAuditoriaMid } from "src/app/services/plan-anual-auditoria-mid.service";
+import { Vigencia } from "src/app/shared/data/models/vigencia.model";
+import { AlertService } from "src/app/shared/services/alert.service";
+import { ParametrosService } from "src/app/core/services/parametros.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 
 @Component({
   selector: "app-auditorias-internas",
