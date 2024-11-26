@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   GESTOR_DOCUMENTAL_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1",
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
   PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
@@ -10,7 +10,7 @@ export const environment = {
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
 
-  LAMBDA_SERVICE: "http://localhost:3001",
+  LAMBDA_SERVICE: "http://localhost:3001/",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,

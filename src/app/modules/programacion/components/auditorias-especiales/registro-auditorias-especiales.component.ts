@@ -10,11 +10,11 @@ import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 
 @Component({
-  selector: "app-auditorias-especiales",
-  templateUrl: "./auditorias-especiales.component.html",
-  styleUrls: ["./auditorias-especiales.component.css"],
+  selector: "app-registro-auditorias-especiales",
+  templateUrl: "./registro-auditorias-especiales.component.html",
+  styleUrls: ["./registro-auditorias-especiales.component.css"],
 })
-export class AuditoriasEspecialesComponent implements OnInit {
+export class RegistroAuditoriasEspecialesComponent implements OnInit {
   formUsuarios: FormGroup | undefined;
   displayedColumns: string[] = [
     "numero",
@@ -54,7 +54,7 @@ export class AuditoriasEspecialesComponent implements OnInit {
   }
 
   loadAuditoriasFromService(): void {
-    this.planAnualAuditoriaService.get(`/auditoria`).subscribe(
+    this.planAnualAuditoriaService.get(`auditoria`).subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter(
@@ -82,7 +82,7 @@ export class AuditoriasEspecialesComponent implements OnInit {
   NewAuditoria() {
     if (this.selectedYearId) {
       this.planAnualAuditoriaService
-        .post("/auditoria", {
+        .post("auditoria", {
           vigencia_id: this.selectedYearId,
         })
         .subscribe(
