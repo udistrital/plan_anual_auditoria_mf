@@ -30,6 +30,6 @@ const routes: Routes = [
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
-  providers: [{ provide: APP_BASE_HREF, useValue: "/plan-auditoria/" }],
+  providers: [{ provide: APP_BASE_HREF, useValue: "/gestion-auditoria/" }],
 })
 export class AppRoutingModule {}

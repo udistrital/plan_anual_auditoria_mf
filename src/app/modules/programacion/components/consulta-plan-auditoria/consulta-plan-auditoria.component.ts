@@ -9,11 +9,11 @@ import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 
 @Component({
-  selector: "app-consulta-plan-anual-auditoria",
-  templateUrl: "./consulta-plan-anual-auditoria.component.html",
-  styleUrls: ["./consulta-plan-anual-auditoria.component.css"],
+  selector: "app-consulta-plan-auditoria",
+  templateUrl: "./consulta-plan-auditoria.component.html",
+  styleUrls: ["./consulta-plan-auditoria.component.css"],
 })
-export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
+export class ConsultaPlanAuditoriaComponent implements OnInit {
   role: string = "auditor";
 
   years: Parametro[] = [];
@@ -56,7 +56,7 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria() {
-    this.planAnualAuditoriaService.planilla("/plan-auditoria").subscribe(
+    this.planAnualAuditoriaService.planilla("plan-auditoria").subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter(
@@ -86,7 +86,7 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
         vigencia_id: this.selectedYearId,
       };
 
-      this.planAnualAuditoriaService.post("/plan-auditoria", Plan).subscribe(
+      this.planAnualAuditoriaService.post("plan-auditoria", Plan).subscribe(
         (response: any) => {
           if (response.Status === 201) {
             this.modalService.mostrarModal(
@@ -128,11 +128,14 @@ export class ConsultaPlanAnualAuditoriaComponent implements OnInit {
 
   editReport(element: any) {
     console.log(this.dataSource);
-    this.router.navigate([`registrar-plan/`, element.id]);
+    this.router.navigate([`/programacion/plan-auditoria/editar/`, element.id]);
   }
 
   editActivities(element: any) {
-    this.router.navigate([`registrar-auditorias`, element.id]);
+    this.router.navigate([
+      `/programacion/plan-auditoria/registrar-auditorias/`,
+      element.id,
+    ]);
   }
 
   sendApproval(element: any) {

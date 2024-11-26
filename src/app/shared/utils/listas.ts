@@ -5,13 +5,16 @@
  * @param {1 | -1} orden - El orden de la clasificación (1 para ascendente, -1 para descendente).
  * @returns {any[]} - La lista ordenada.
  */
-export function ordenarPorPropiedad(data: any[], propiedad: string, orden: 1 | -1): any[] {
-    return data.sort((a: any, b: any) => {
-      const valorA = a[propiedad];
-      const valorB = b[propiedad];
-      if (valorA < valorB) return -1 * orden;
-      if (valorA > valorB) return 1 * orden;
-      return 0;
-    });
-  }
-  
+export function ordenarPorPropiedad(
+  data: any[],
+  propiedad: string,
+  orden: 1 | -1
+): any[] {
+  return data.sort((a: any, b: any) => {
+    const valorA = a[propiedad];
+    const valorB = b[propiedad];
+    if (valorA < valorB) return -1 * orden;
+    if (valorA > valorB) return 1 * orden;
+    return 0;
+  });
+}

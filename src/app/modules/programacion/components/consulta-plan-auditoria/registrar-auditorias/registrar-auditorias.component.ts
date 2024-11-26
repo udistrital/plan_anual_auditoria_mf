@@ -40,7 +40,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   loadAuditoriasFromService(): void {
     this.planAnualAuditoriaService
-      .planilla(`/auditoria?query=plan_auditoria_id:${this.id}`)
+      .planilla(`auditoria?query=plan_auditoria_id:${this.id}`)
       .subscribe(
         (res) => {
           if (res && res.Data) {
