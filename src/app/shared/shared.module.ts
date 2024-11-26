@@ -8,19 +8,22 @@ import { CargarArchivoComponent } from "./components/cargar-archivo/cargar-archi
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { CommonModule } from "@angular/common";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { PlantillaTarjetaContenedoraComponent } from "./templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
 
 @NgModule({
   declarations: [
     BasesComponent,
     FormularioDinamicoComponent,
     CargarArchivoComponent,
+    PlantillaTarjetaContenedoraComponent,
   ],
   imports: [CommonModule, FormsModule, MaterialModule, ReactiveFormsModule],
   exports: [
     //Componentes
     BasesComponent,
-    FormularioDinamicoComponent,
     CargarArchivoComponent,
+    FormularioDinamicoComponent,
+    PlantillaTarjetaContenedoraComponent,
     //modulos
     FormsModule,
     DragDropModule,
