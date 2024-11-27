@@ -38,22 +38,23 @@
                 <button
                   mat-icon-button
                   [matMenuTriggerFor]="menu"
-                  color="accent"
+                  color="primary"
                 >
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
                   <button mat-menu-item>
-                    <mat-icon color="accent">visibility</mat-icon> Ver auditoría
+                    <mat-icon color="primary">visibility</mat-icon> Ver
+                    auditoría
                   </button>
                   <button mat-menu-item>
-                    <mat-icon color="accent">edit</mat-icon> Editar auditoría
+                    <mat-icon color="primary">edit</mat-icon> Editar auditoría
                   </button>
                 </mat-menu>
               </div>
 
               <div *ngSwitchCase="'documentos'">
-                <mat-icon color="accent" class="link">description</mat-icon>
+                <mat-icon color="primary" class="link">description</mat-icon>
               </div>
 
               <span *ngSwitchDefault>{{ columna.cell(row) }}</span>

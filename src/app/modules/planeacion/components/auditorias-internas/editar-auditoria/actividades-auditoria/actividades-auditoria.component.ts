@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { CargarArchivoComponent } from "src/app/shared/components/cargar-archivo/cargar-archivo.component";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { ModalService } from "src/app/shared/services/modal.service";
 
 @Component({

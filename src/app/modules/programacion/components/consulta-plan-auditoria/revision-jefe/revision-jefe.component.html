@@ -1,75 +1,83 @@
-<p>Gestión Auditoría / <b>Plan Anual Auditoría</b></p>
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>
-      <b>Aprobación Plan Anual de Auditoría</b>
-    </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="d-flex flex-row-reverse my-2">
-      <button mat-button color="primary">
-        Descargar Todo <mat-icon> insert_drive_file</mat-icon>
-      </button>
-    </div>
-    <div class="row">
-      <div class="col-sm-12 col-md-4 col-lg-3">
-        <div class="d-flex flex-column">
-          <button
-            class="mb-2"
-            mat-stroked-button
-            [ngClass]="selectedTab === 0 ? 'selected' : ''"
-            (click)="selectTab(0)"
-          >
-            Formato PAA
-          </button>
-          <button
-            class="mb-2"
-            mat-stroked-button
-            [ngClass]="selectedTab === 1 ? 'selected' : ''"
-            (click)="selectTab(1)"
-          >
-            Matriz Función Pública
-          </button>
-        </div>
+<plantilla-tarjeta-contenedora
+  [title]="'Aprobación Plan Anual de Auditoría'"
+  [breadcrumb]="
+    '<p>Gestión Auditoría / Programación / Plan anual de auditorías / <b>Revisión</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="d-flex flex-row-reverse my-2">
+        <button mat-button color="primary">
+          Descargar Todo <mat-icon> insert_drive_file</mat-icon>
+        </button>
       </div>
-      <div class="col-sm-12 col-md-8 col-lg-9">
-        <div>
-          <div *ngIf="selectedTab === 0">
-            <div class="row">
-              <div class="col-12">
-                <div style="border: 1px solid #ebdddd">
-                  <app-pdf-visualizador
-                    [base64Document]="documento"
-                  ></app-pdf-visualizador>
+      <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <button
+              class="mb-2"
+              mat-stroked-button
+              [ngClass]="selectedTab === 0 ? 'selected' : ''"
+              (click)="selectTab(0)"
+            >
+              Formato PAA
+            </button>
+            <button
+              class="mb-2"
+              mat-stroked-button
+              [ngClass]="selectedTab === 1 ? 'selected' : ''"
+              (click)="selectTab(1)"
+            >
+              Matriz Función Pública
+            </button>
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-9">
+          <div>
+            <div *ngIf="selectedTab === 0">
+              <div class="row">
+                <div class="col-12">
+                  <div style="border: 1px solid #ebdddd">
+                    <app-pdf-visualizador
+                      [base64Document]="documento"
+                    ></app-pdf-visualizador>
+                  </div>
                 </div>
               </div>
             </div>
+            <div *ngIf="selectedTab === 1">Matriz Función Pública</div>
           </div>
-          <div *ngIf="selectedTab === 1">Matriz Función Pública</div>
         </div>
       </div>
+      <mat-dialog-actions align="center">
+        <div class="row">
+          <div class="col-12 my-4">
+            <button
+              (click)="openModalRechazo()"
+              mat-stroked-button
+              color="primary"
+              class="mx-2"
+              style="border: 1px solid var(--md-primary-500)"
+            >
+              <mat-icon>cancel</mat-icon>Rechazar Plan
+            </button>
+            <button
+              class="mx-2"
+              mat-raised-button
+              color="primary"
+              (click)="openModalEnviar()"
+            >
+              <mat-icon>check_circle</mat-icon>
+              Aprobar y Enviar a Secretario
+            </button>
+          </div>
+        </div>
+      </mat-dialog-actions>
     </div>
-  </mat-card-content>
-  <mat-dialog-actions align="center">
-    <div class="row">
-      <div class="col-12 my-4">
-        <button
-          class="mx-2"
-          mat-raised-button
-          color="primary"
-          (click)="openModalRechazo()"
-        >
-          Rechazar Plan
-        </button>
-        <button
-          class="mx-2"
-          mat-raised-button
-          color="primary"
-          (click)="openModalEnviar()"
-        >
-          Aprobar y Enviar a Secretario
-        </button>
-      </div>
-    </div>
-  </mat-dialog-actions>
-</mat-card>
+  </div>
+</ng-template>

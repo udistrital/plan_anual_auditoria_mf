@@ -13,13 +13,11 @@
         <div class="row">
           <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
             <mat-label>Seleccione una vigencia:</mat-label>
-            <mat-icon class="mat-icon-outlined" color="accent" matPrefix
-              >today</mat-icon
-            >
+            <mat-icon color="primary" matPrefix>today</mat-icon>
             <mat-select
               formControlName="vigencia"
               (selectionChange)="listarAuditoriasPorVigencia($event.value)"
-              color="accent"
+              color="primary"
             >
               <mat-option disabled value="">--Seleccionar--</mat-option>
               <mat-option
@@ -30,7 +28,7 @@
             </mat-select>
           </mat-form-field>
           <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
-            <mat-icon color="accent" class="me-2">info</mat-icon>
+            <mat-icon color="primary" class="me-2">info</mat-icon>
             <p style="font-size: 14px">
               Se cargarán las auditorías correspondientes a la vigencia
               seleccionada.

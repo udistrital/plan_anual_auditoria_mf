@@ -158,10 +158,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   viewPlanJefe() {
-    this.router.navigate(["/revision-jefe"]);
+    this.router.navigate(["/programacion/revision-jefe"]);
   }
 
   viewPlanSecretario() {
-    this.router.navigate(["/revision-secretario"]);
+    this.router.navigate(["/programacion/revision-secretario"]);
   }
 }

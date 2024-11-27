@@ -1,14 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { AddAuditoriaModalComponent } from "./add-auditoria-modal/add-auditoria-modal.component";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalService } from "src/app/shared/services/modal.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
-import { CargarArchivoComponent } from "src/app/shared/components/cargar-archivo/cargar-archivo.component";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 @Component({
   selector: "app-registrar-auditorias",
   templateUrl: "./registrar-auditorias.component.html",
@@ -30,7 +30,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private modalService: ModalService,
     private route: ActivatedRoute,
     private dialog: MatDialog,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService
+    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -201,5 +202,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
         );
       }
     );
+  }
+
+  regresarRuta() {
+    this.router.navigate([`/programacion/plan-auditoria`]);
   }
 }

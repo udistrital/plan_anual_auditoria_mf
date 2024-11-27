@@ -6,6 +6,7 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalMotivosRechazoComponent } from "../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretario/modal-aprobacion-secretario.component";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-revision-secretario",
@@ -19,7 +20,8 @@ export class RevisionSecretarioComponent {
     public dialog: MatDialog,
     private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {}
 
   botonSeleccionado: string = "formato";
@@ -54,6 +56,10 @@ export class RevisionSecretarioComponent {
 
   selectTab(index: number) {
     this.selectedTab = index;
+  }
+
+  regresarRuta() {
+    this.router.navigate([`/programacion/plan-auditoria`]);
   }
 }
 

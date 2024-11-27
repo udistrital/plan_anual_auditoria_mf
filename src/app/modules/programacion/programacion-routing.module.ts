@@ -1,6 +1,5 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
-import { BasesComponent } from "src/app/shared/components/bases/bases.component";
 import { AsignarAuditoriasComponent } from "./components/asignar-auditorias/asignar-auditorias.component";
 import { RegistroAuditoriasEspecialesComponent } from "./components/auditorias-especiales/registro-auditorias-especiales.component";
 import { ConsultaPlanAuditoriaComponent } from "./components/consulta-plan-auditoria/consulta-plan-auditoria.component";
@@ -8,6 +7,7 @@ import { RegistrarPlanComponent } from "./components/consulta-plan-auditoria/reg
 import { RevisionJefeComponent } from "./components/consulta-plan-auditoria/revision-jefe/revision-jefe.component";
 import { RevisionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/revision-secretario.component";
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
+import { BasesComponent } from "src/app/shared/elements/components/bases/bases.component";
 
 const routes: Routes = [
   {
@@ -17,10 +17,6 @@ const routes: Routes = [
   {
     path: "auditorias-especiales",
     component: RegistroAuditoriasEspecialesComponent,
-  },
-  {
-    path: "registrar/:id",
-    component: RegistrarAuditoriasComponent,
   },
   {
     path: "plan-auditoria",

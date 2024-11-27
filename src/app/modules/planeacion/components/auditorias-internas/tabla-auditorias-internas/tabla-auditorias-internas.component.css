@@ -11,7 +11,7 @@
 }
 
 .even-row {
-  background-color: #fff3f1;
+  background-color: var(--md-accent-50);
 }
 
 .table-container {

@@ -1,14 +1,14 @@
 import { NgModule } from "@angular/core";
 import { MaterialModule } from "./modules/material.module";
-import { FormularioDinamicoComponent } from "./components/formulario-dinamico/formulario-dinamico.component";
-import { BasesComponent } from "./components/bases/bases.component";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import { CargarArchivoComponent } from "./components/cargar-archivo/cargar-archivo.component";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { CommonModule } from "@angular/common";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { PlantillaTarjetaContenedoraComponent } from "./templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
+import { BasesComponent } from "./elements/components/bases/bases.component";
+import { CargarArchivoComponent } from "./elements/components/cargar-archivo/cargar-archivo.component";
+import { FormularioDinamicoComponent } from "./elements/components/formulario-dinamico/formulario-dinamico.component";
+import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
 
 @NgModule({
   declarations: [

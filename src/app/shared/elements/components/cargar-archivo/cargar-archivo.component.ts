@@ -88,7 +88,7 @@ export class CargarArchivoComponent {
       ];
 
       this.lambdaService
-        .post("/cargue-masivo/auditorias", lambdaPayload)
+        .post("cargue-masivo/auditorias", lambdaPayload)
         .subscribe({
           next: (response) => {
             console.log("Archivo enviado exitosamente al MID", response);
@@ -99,7 +99,7 @@ export class CargarArchivoComponent {
         });
 
       this.gestorDocumentalService
-        .postAny("/document/uploadAnyFormat", payload)
+        .postAny("document/uploadAnyFormat", payload)
         .subscribe({
           next: (response) => {
             console.log("Documento subido exitosamente", response);

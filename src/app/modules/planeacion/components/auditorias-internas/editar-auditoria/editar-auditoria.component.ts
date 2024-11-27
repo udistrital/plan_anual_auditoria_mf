@@ -3,7 +3,6 @@ import { MatStepper } from "@angular/material/stepper";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { ActividadesAuditoriaComponent } from "./actividades-auditoria/actividades-auditoria.component";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { FormularioDinamicoComponent } from "src/app/shared/components/formulario-dinamico/formulario-dinamico.component";
 import { ModalService } from "src/app/shared/services/modal.service";
 import {
   formularioInformacionAuditoria,
@@ -13,6 +12,8 @@ import { map, Observable } from "rxjs";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-editar-auditoria",
@@ -33,11 +34,10 @@ export class EditarAuditoriaComponent implements OnInit {
   orientation: "horizontal" | "vertical" = "horizontal";
 
   constructor(
-    private _formBuilder: FormBuilder,
     private alertaService: AlertService,
     private breakpointObserver: BreakpointObserver,
-    private modalService: ModalService,
-    private planAuditoriaService: PlanAnualAuditoriaService
+    private planAuditoriaService: PlanAnualAuditoriaService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -166,5 +166,9 @@ export class EditarAuditoriaComponent implements OnInit {
       .subscribe((result) => {
         this.orientation = result.matches ? "vertical" : "horizontal";
       });
+  }
+
+  regresarRuta() {
+    this.router.navigate([`/planeacion/auditorias-internas`]);
   }
 }

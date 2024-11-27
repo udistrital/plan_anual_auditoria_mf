@@ -4,6 +4,7 @@
 
 @import "bootstrap/scss/bootstrap-grid";
 @import "sweetalert.scss";
+@import "./estilos-generales.scss";
 * {
   font-family: "Raleway", "Open Sans", sans-serif;
 }
@@ -19,10 +20,6 @@ $md-primary: (
   700: var(--md-primary-700),
   800: var(--md-primary-800),
   900: var(--md-primary-900),
-  A100: var(--md-primary-A100),
-  A200: var(--md-primary-A200),
-  A400: var(--md-primary-A400),
-  A700: var(--md-primary-A700),
   contrast: (
     50: var(--md-primary-contrast-50),
     100: var(--md-primary-contrast-100),
@@ -34,10 +31,6 @@ $md-primary: (
     700: var(--md-primary-contrast-700),
     800: var(--md-primary-contrast-800),
     900: var(--md-primary-contrast-900),
-    A100: var(--md-primary-contrast-A100),
-    A200: var(--md-primary-contrast-A200),
-    A400: var(--md-primary-contrast-A400),
-    A700: var(--md-primary-contrast-A700),
   ),
 );
 
@@ -52,10 +45,6 @@ $md-accent: (
   700: var(--md-accent-700),
   800: var(--md-accent-800),
   900: var(--md-accent-900),
-  A100: var(--md-accent-A100),
-  A200: var(--md-accent-A200),
-  A400: var(--md-accent-A400),
-  A700: var(--md-accent-A700),
   contrast: (
     50: var(--md-accent-contrast-50),
     100: var(--md-accent-contrast-100),
@@ -67,10 +56,6 @@ $md-accent: (
     700: var(--md-accent-contrast-700),
     800: var(--md-accent-contrast-800),
     900: var(--md-accent-contrast-900),
-    A100: var(--md-accent-contrast-A100),
-    A200: var(--md-accent-contrast-A200),
-    A400: var(--md-accent-contrast-A400),
-    A700: var(--md-accent-contrast-A700),
   ),
 );
 
@@ -85,10 +70,6 @@ $md-warning: (
   700: var(--md-warning-700),
   800: var(--md-warning-800),
   900: var(--md-warning-900),
-  A100: var(--md-warning-A100),
-  A200: var(--md-warning-A200),
-  A400: var(--md-warning-A400),
-  A700: var(--md-warning-A700),
   contrast: (
     50: var(--md-warning-contrast-50),
     100: var(--md-warning-contrast-100),
@@ -100,10 +81,6 @@ $md-warning: (
     700: var(--md-warning-contrast-700),
     800: var(--md-warning-contrast-800),
     900: var(--md-warning-contrast-900),
-    A100: var(--md-warning-contrast-A100),
-    A200: var(--md-warning-contrast-A200),
-    A400: var(--md-warning-contrast-A400),
-    A700: var(--md-warning-contrast-A700),
   ),
 );
 

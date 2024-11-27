@@ -1,6 +1,0 @@
-@media (max-width: 768px) {
-  .centrar-md {
-    display: flex;
-    justify-content: center; /* Centra horizontalmente */
-  }
-}

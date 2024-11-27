@@ -4,6 +4,8 @@
     '<p>Gestión Auditoría / Planeación / Auditorías internas / <b>Editar Auditoría</b></p>'
   "
   [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -13,7 +15,7 @@
         [linear]="esLineal"
         #stepper
         labelPosition="bottom"
-        color="accent"
+        color="primary"
         [orientation]="orientation"
       >
         <ng-template matStepperIcon="number">
@@ -44,7 +46,7 @@
             <div class="d-flex justify-content-end mt-4">
               <button
                 mat-raised-button
-                color="accent"
+                color="primary"
                 (click)="enviarFormInformacion()"
               >
                 Guardar y continuar
@@ -70,10 +72,10 @@
           </div>
           <app-actividades-auditoria></app-actividades-auditoria>
           <div class="d-flex justify-content-end mt-4">
-            <button matStepperPrevious mat-stroked-button color="accent">
+            <button matStepperPrevious mat-stroked-button color="primary">
               Volver
             </button>
-            <button matStepperNext mat-flat-button color="accent" class="mx-2">
+            <button matStepperNext mat-flat-button color="primary" class="mx-2">
               Guardar y continuar
             </button>
           </div>
@@ -102,12 +104,12 @@
             >
             </app-formulario-dinamico>
             <div class="d-flex justify-content-end mt-4">
-              <button mat-stroked-button color="accent" matStepperPrevious>
+              <button mat-stroked-button color="primary" matStepperPrevious>
                 Volver
               </button>
               <button
                 mat-flat-button
-                color="accent"
+                color="primary"
                 (click)="enviarFormRecursos()"
                 class="mx-2"
               >
@@ -136,10 +138,10 @@
             (guardarDocumentos)="manejarEnvioDocumentos($event)"
           ></app-documentos-anexos-auditoria>
           <div class="d-flex justify-content-end mt-4">
-            <button matStepperPrevious mat-stroked-button color="accent">
+            <button matStepperPrevious mat-stroked-button color="primary">
               Volver
             </button>
-            <button matStepperNext mat-flat-button color="accent" class="mx-2">
+            <button matStepperNext mat-flat-button color="primary" class="mx-2">
               Guardar y cerrar
             </button>
           </div>
