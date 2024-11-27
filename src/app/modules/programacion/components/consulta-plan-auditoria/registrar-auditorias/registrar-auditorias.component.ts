@@ -84,7 +84,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         if (result.isConfirmed) {
           console.log(element);
           this.planAnualAuditoriaService
-            .delete(`/auditoria`, element)
+            .delete(`auditoria`, element)
             .subscribe(
               (response) => {
                 if (response) {
@@ -175,7 +175,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   renderizar() {
-    this.planAnualAuditoriaService.planilla(`/plantilla/${this.id}`).subscribe(
+    this.planAnualAuditoriaService.planilla(`plantilla/${this.id}`).subscribe(
       (res) => {
         if (res && res.Data) {
           console.log("DATA ", res.Data);

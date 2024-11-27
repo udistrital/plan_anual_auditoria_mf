@@ -73,7 +73,7 @@ export class CargarArchivoComponent {
 
       const lambdaPayload = {
         base64data: base64String,
-        complement: { plan_auditoria_id: this.data.id },
+        complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619},
         type_upload: "auditorias",
       };
 
@@ -88,7 +88,7 @@ export class CargarArchivoComponent {
       ];
 
       this.lambdaService
-        .post("/cargue-masivo/auditorias", lambdaPayload)
+        .post("cargue-masivo/auditorias", lambdaPayload)
         .subscribe({
           next: (response) => {
             console.log("Archivo enviado exitosamente al MID", response);
@@ -99,7 +99,7 @@ export class CargarArchivoComponent {
         });
 
       this.gestorDocumentalService
-        .postAny("/document/uploadAnyFormat", payload)
+        .postAny("document/uploadAnyFormat", payload)
         .subscribe({
           next: (response) => {
             console.log("Documento subido exitosamente", response);
