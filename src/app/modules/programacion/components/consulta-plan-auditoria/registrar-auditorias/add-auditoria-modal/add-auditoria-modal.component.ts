@@ -134,6 +134,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               titulo: this.auditoriaForm.value.tituloActividad,
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
               cronograma_id: this.auditoriaForm.value.cronogramaActividades,
+              vigencia_id: 2,
             };
 
             const request$ = this.isEditMode
