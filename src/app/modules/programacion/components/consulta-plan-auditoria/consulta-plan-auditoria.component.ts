@@ -98,7 +98,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           ).map((item: any, index: number) => ({
             id: item._id,
             creadoPor: item.creado_por_id ?? "Sin asignar",
-            vigencia: item.vigencia_id ?? "No encontrada",
+            vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
             estado: item.estado ?? "Borrador",
           }));
