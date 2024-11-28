@@ -10,7 +10,7 @@ import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-
 @Component({
   selector: "app-add-auditoria-modal",
   templateUrl: "./add-auditoria-modal.component.html",
-  styleUrls: ["./add-auditoria-modal.component.css"], // Corrige el 'styleUrl' a 'styleUrls'
+  styleUrls: ["./add-auditoria-modal.component.css"], 
 })
 export class AddAuditoriaModalComponent implements OnInit {
   auditoriaForm: FormGroup | any;
@@ -37,21 +37,17 @@ export class AddAuditoriaModalComponent implements OnInit {
         Validators.required,
       ],
       tipoEvaluacion: [
-        this.data.auditoria?.tipoEvaluacion || [],
+        this.data.auditoria?.tipoEvaluacionId || [],
         Validators.required,
       ],
       cronogramaActividades: [
-        this.data.auditoria?.cronograma || [],
+        this.data.auditoria?.cronogramaId || [],
         Validators.required,
       ],
     });
 
-    this.CargarEvaluaciones(() =>
-      this.mapearSeleccion("tipoEvaluacion", this.evaluaciones)
-    );
-    this.CargarMeses(() =>
-      this.mapearSeleccion("cronogramaActividades", this.meses)
-    );
+    this.CargarVigencia();
+    this.CargarMeses();
   }
 
   CargarMeses(callback?: () => void) {
@@ -65,7 +61,7 @@ export class AddAuditoriaModalComponent implements OnInit {
       });
   }
 
-  CargarEvaluaciones(callback?: () => void) {
+  CargarVigencia(callback?: () => void) {
     this.parametrosService
       .get("parametro?query=TipoParametroId:136&limit=0")
       .subscribe((res) => {
@@ -74,24 +70,6 @@ export class AddAuditoriaModalComponent implements OnInit {
           if (callback) callback();
         }
       });
-  }
-
-  mapearSeleccion(campo: string, opciones: Parametro[]): void {
-    const seleccion = this.auditoriaForm.get(campo)?.value;
-
-    if (typeof seleccion === "string") {
-      const idMapeado = opciones.find(
-        (opcion) => opcion.Nombre === seleccion
-      )?.Id;
-      this.auditoriaForm.get(campo)?.setValue(idMapeado ?? null); // Usa null si no se encuentra
-    } else if (Array.isArray(seleccion)) {
-      const idsMapeados = seleccion
-        .map(
-          (nombre) => opciones.find((opcion) => opcion.Nombre === nombre)?.Id
-        )
-        .filter((id): id is number => id !== undefined); // Filtra valores no encontrados
-      this.auditoriaForm.get(campo)?.setValue(idsMapeados);
-    }
   }
 
   onCancel(): void {
@@ -134,7 +112,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               titulo: this.auditoriaForm.value.tituloActividad,
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
               cronograma_id: this.auditoriaForm.value.cronogramaActividades,
-              vigencia_id: 2,
+              vigencia_id: 6619,
             };
 
             const request$ = this.isEditMode
