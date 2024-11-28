@@ -41,7 +41,7 @@ export class RevisionJefeComponent implements OnInit {
         console.log(res);
       });
     this.dialog.open(ModalMotivosRechazoComponent, {
-      width: "70vw",
+      width: "50%",
       data: {
         usuarioId: this.usuarioId,
       },
@@ -51,7 +51,7 @@ export class RevisionJefeComponent implements OnInit {
   openModalEnviar(): void {
     this.alertService
       .showConfirmAlert(
-        "¿Está seguro de enviar el plan anual de auditoría - PAA?"
+        "¿Está seguro de enviar el Plan Anual de Auditoría? - PAA?"
       )
       .then((confirmado) => {
         if (!confirmado.value) {

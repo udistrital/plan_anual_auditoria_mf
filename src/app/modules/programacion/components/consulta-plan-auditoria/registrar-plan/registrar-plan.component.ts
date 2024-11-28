@@ -59,7 +59,7 @@ export class RegistrarPlanComponent implements OnInit {
   async obtenerPlanAuditoria(): Promise<any> {
     try {
       const response = await this.planAnualAuditoriaService
-        .get(`/plan-auditoria/${this.planId}`)
+        .get(`plan-auditoria/${this.planId}`)
         .toPromise();
       return response?.Data;
     } catch (error) {
@@ -130,7 +130,7 @@ export class RegistrarPlanComponent implements OnInit {
   async manejarEnvio(formData: any): Promise<void> {
     if (formData) {
       this.planAnualAuditoriaService
-        .put(`/plan-auditoria/${this.planId}`, formData)
+        .put(`plan-auditoria/${this.planId}`, formData)
         .subscribe(
           async () => {
             const updatedData = await this.obtenerPlanAuditoria();

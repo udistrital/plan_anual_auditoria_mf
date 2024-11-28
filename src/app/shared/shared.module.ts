@@ -9,6 +9,7 @@ import { BasesComponent } from "./elements/components/bases/bases.component";
 import { CargarArchivoComponent } from "./elements/components/cargar-archivo/cargar-archivo.component";
 import { FormularioDinamicoComponent } from "./elements/components/formulario-dinamico/formulario-dinamico.component";
 import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
+import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/plantilla-modal.component";
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plant
     FormularioDinamicoComponent,
     CargarArchivoComponent,
     PlantillaTarjetaContenedoraComponent,
+    PlantillaModalComponent,
   ],
   imports: [CommonModule, FormsModule, MaterialModule, ReactiveFormsModule],
   exports: [
@@ -24,6 +26,7 @@ import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plant
     CargarArchivoComponent,
     FormularioDinamicoComponent,
     PlantillaTarjetaContenedoraComponent,
+    PlantillaModalComponent,
     //modulos
     FormsModule,
     DragDropModule,

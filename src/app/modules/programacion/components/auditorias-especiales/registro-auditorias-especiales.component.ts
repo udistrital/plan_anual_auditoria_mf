@@ -115,6 +115,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   addAuditoria(auditoria?: Auditoria) {
     const dialogRef = this.dialog.open(FormularioAuditoriaEspecialComponent, {
       width: "1100px",
+      autoFocus: false,
       data: {
         auditoria,
       },

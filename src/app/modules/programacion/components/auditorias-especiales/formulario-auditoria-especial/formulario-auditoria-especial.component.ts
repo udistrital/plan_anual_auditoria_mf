@@ -96,7 +96,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
             };
 
             this.planAnualAuditoriaService
-              .put(`/auditoria/${this.data.auditoria!.id}`, formData)
+              .put(`auditoria/${this.data.auditoria!.id}`, formData)
               .subscribe({
                 next: (response: any) => {
                   if (response.Status === 200) {

@@ -38,7 +38,7 @@ export class RevisionSecretarioComponent {
 
   openModalRechazo(): void {
     this.dialog.open(ModalMotivosRechazoComponent, {
-      width: "70vw",
+      width: "50%",
       data: {
         usuarioId: this.usuarioId,
       },

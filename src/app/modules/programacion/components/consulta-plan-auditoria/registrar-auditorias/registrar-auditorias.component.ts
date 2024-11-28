@@ -156,7 +156,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   renderizar() {
-    this.planAnualAuditoriaService.planilla(`/plantilla/${this.id}`).subscribe(
+    this.planAnualAuditoriaService.planilla(`plantilla/${this.id}`).subscribe(
       (res) => {
         if (res && res.Data) {
           console.log("DATA ", res.Data);
