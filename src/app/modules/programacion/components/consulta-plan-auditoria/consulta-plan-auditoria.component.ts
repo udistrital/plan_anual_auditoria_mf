@@ -1,12 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
-import { ModalService } from "src/app/shared/services/modal.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -31,8 +31,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   ];
 
   constructor(
+    private alertaService: AlertService,
     private router: Router,
-    private modalService: ModalService,
     public dialog: MatDialog,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService
@@ -71,10 +71,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         }
       },
       (error) => {
-        this.modalService.mostrarModal(
-          "Error al cargar los planes de auditoría",
-          "error",
-          "ERROR"
+        this.alertaService.showErrorAlert(
+          "Error al cargar los planes de auditoría"
         );
       }
     );
@@ -89,11 +87,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       this.planAnualAuditoriaService.post("plan-auditoria", Plan).subscribe(
         (response: any) => {
           if (response.Status === 201) {
-            this.modalService.mostrarModal(
-              "Plan creado exitosamente",
-              "success",
-              "PLAN CREADO"
-            );
+            this.alertaService.showSuccessAlert("Plan creado exitosamente");
             this.cargarPlanesAuditoria();
           }
         },
@@ -103,25 +97,19 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             error.error?.Data &&
             error.error.Data.includes("Ya existe un plan")
           ) {
-            this.modalService.mostrarModal(
-              "Ya existe un plan de auditoría para la vigencia seleccionada.",
-              "warning",
-              "VIGENCIA DUPLICADA"
+            this.alertaService.showAlert(
+              "Vigencia duplicada",
+              "Ya existe un plan de auditoría para la vigencia seleccionada."
             );
           } else {
-            this.modalService.mostrarModal(
-              "Error al crear el plan",
-              "error",
-              "ERROR"
-            );
+            this.alertaService.showErrorAlert("Error al crear el plan");
           }
         }
       );
     } else {
-      this.modalService.mostrarModal(
-        "Debe seleccionar un año",
-        "warning",
-        "SELECCIÓN REQUERIDA"
+      this.alertaService.showAlert(
+        "Selección requerida",
+        "Debe seleccionar un año"
       );
     }
   }
@@ -139,19 +127,15 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   sendApproval(element: any) {
-    this.modalService
-      .modalConfirmacion(
-        " ",
-        "warning",
+    this.alertaService
+      .showConfirmAlert(
         "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?"
       )
       .then((result) => {
         if (result.isConfirmed) {
           console.log("Plan enviado");
-          this.modalService.mostrarModal(
-            "Su plan fue enviado al jefe de oficina",
-            "success",
-            "PLAN ENVIADO"
+          this.alertaService.showSuccessAlert(
+            "Su plan fue enviado al jefe de oficina"
           );
         }
       });

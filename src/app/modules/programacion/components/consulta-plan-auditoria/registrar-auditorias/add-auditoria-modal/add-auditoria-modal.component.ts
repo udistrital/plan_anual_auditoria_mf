@@ -3,9 +3,9 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import { ModalService } from "src/app/shared/services/modal.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-add-auditoria-modal",
@@ -20,13 +20,13 @@ export class AddAuditoriaModalComponent implements OnInit {
   TODOS = "Todos";
 
   constructor(
+    private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: { planAuditoriaId: string; auditoria?: Auditoria },
-    private modalService: ModalService
+    public data: { planAuditoriaId: string; auditoria?: Auditoria }
   ) {}
 
   ngOnInit(): void {
@@ -119,10 +119,8 @@ export class AddAuditoriaModalComponent implements OnInit {
 
   onSave(): void {
     if (this.auditoriaForm.valid) {
-      this.modalService
-        .modalConfirmacion(
-          "Confirmación",
-          "warning",
+      this.alertaService
+        .showConfirmAlert(
           `¿Está seguro(a) de ${
             this.isEditMode ? "actualizar" : "guardar"
           } la auditoría?`
@@ -145,22 +143,18 @@ export class AddAuditoriaModalComponent implements OnInit {
 
             request$.subscribe({
               next: (response) => {
-                this.modalService.mostrarModal(
+                this.alertaService.showSuccessAlert(
                   `Auditoría ${
                     this.isEditMode ? "actualizada" : "guardada"
-                  } exitosamente.`,
-                  "success",
-                  "ÉXITO"
+                  } exitosamente.`
                 );
                 this.dialogRef.close({ saved: true });
               },
               error: (error) => {
-                this.modalService.mostrarModal(
+                this.alertaService.showErrorAlert(
                   `Error al ${
                     this.isEditMode ? "actualizar" : "guardar"
-                  } la auditoría. Inténtelo de nuevo.`,
-                  "error",
-                  "ERROR"
+                  } la auditoría. Inténtelo de nuevo.`
                 );
               },
             });

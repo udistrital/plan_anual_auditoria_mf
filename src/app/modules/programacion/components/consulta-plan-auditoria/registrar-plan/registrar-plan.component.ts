@@ -8,10 +8,10 @@ import {
 import { ActivatedRoute, Router } from "@angular/router";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import { formularioPAA } from "src/app/shared/data/forms/formulario-PAA-valores";
-import { ModalService } from "src/app/shared/services/modal.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-registrar-plan",
@@ -28,8 +28,8 @@ export class RegistrarPlanComponent implements OnInit {
   // parametros: Record<string, any> = {};
 
   constructor(
+    private alertaService: AlertService,
     private route: ActivatedRoute,
-    private modalService: ModalService,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private cdr: ChangeDetectorRef,
@@ -101,20 +101,14 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   errorRegistro() {
-    this.modalService.mostrarModal(
-      "Información no guardada por favor intente nuevamente",
-      "error",
-      "ERROR"
+    this.alertaService.showErrorAlert(
+      "Información no guardada por favor intente nuevamente"
     );
   }
 
   guardarInformacion() {
-    this.modalService
-      .modalConfirmacion(
-        " ",
-        "warning",
-        "¿Está seguro(a) de guardar la información?"
-      )
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de guardar la información?")
       .then((result) => {
         if (result.isConfirmed) {
           this.formularioDinamico.submitFormulario.subscribe(
@@ -142,10 +136,8 @@ export class RegistrarPlanComponent implements OnInit {
             const updatedData = await this.obtenerPlanAuditoria();
             if (updatedData) this.actualizarValoresFormulario(updatedData);
 
-            this.modalService.mostrarModal(
-              "La información fue guardada exitosamente",
-              "success",
-              "INFORMACIÓN GUARDADA"
+            this.alertaService.showSuccessAlert(
+              "La información fue guardada exitosamente"
             );
           },
           (error) => {

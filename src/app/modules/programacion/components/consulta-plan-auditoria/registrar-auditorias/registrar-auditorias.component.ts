@@ -4,11 +4,11 @@ import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AddAuditoriaModalComponent } from "./add-auditoria-modal/add-auditoria-modal.component";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalService } from "src/app/shared/services/modal.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
+import { AlertService } from "src/app/shared/services/alert.service";
 @Component({
   selector: "app-registrar-auditorias",
   templateUrl: "./registrar-auditorias.component.html",
@@ -27,7 +27,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   id: string = "";
 
   constructor(
-    private modalService: ModalService,
+    private alertaSevice: AlertService,
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
@@ -57,11 +57,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
           }
         },
         (error) => {
-          this.modalService.mostrarModal(
-            "Error al cargar las auditorías",
-            "error",
-            "ERROR"
-          );
+          this.alertaSevice.showErrorAlert("Error al cargar las auditorías");
         }
       );
   }
@@ -75,12 +71,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   // Eliminar auditoría
   deleteAuditoria(element: Auditoria) {
-    this.modalService
-      .modalConfirmacion(
-        " ",
-        "warning",
-        "¿Está seguro(a) de eliminar el registro?"
-      )
+    this.alertaSevice
+      .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
         if (result.isConfirmed) {
           console.log(element);
@@ -89,27 +81,19 @@ export class RegistrarAuditoriasComponent implements OnInit {
             .subscribe(
               (response) => {
                 if (response) {
-                  this.modalService.mostrarModal(
-                    "Registro eliminado",
-                    "success",
-                    "ÉXITO"
-                  );
+                  this.alertaSevice.showSuccessAlert("Registro eliminado");
                   this.dataSource.data = this.dataSource.data.filter(
                     (e) => e.id !== element.id
                   );
                 } else {
-                  this.modalService.mostrarModal(
-                    "Error al eliminar el registro",
-                    "error",
-                    "ERROR"
+                  this.alertaSevice.showErrorAlert(
+                    "Error al eliminar el registro"
                   );
                 }
               },
               (error) => {
-                this.modalService.mostrarModal(
-                  "Error al eliminar el registro",
-                  "error",
-                  "ERROR"
+                this.alertaSevice.showErrorAlert(
+                  "Error al eliminar el registro"
                 );
               }
             );
@@ -118,20 +102,16 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   GuardarPaa() {
-    this.modalService
-      .modalConfirmacion(
-        " ",
-        "warning",
+    this.alertaSevice
+      .showConfirmAlert(
         "¿Está seguro(a) de guardar el Plan Anual de Auditoría - PAA?"
       )
       .then((result) => {
         if (result.isConfirmed) {
           console.log("Plan eliminado");
 
-          this.modalService.mostrarModal(
-            "Su plan fue guardado exitosamente",
-            "success",
-            "PLAN GUARDADO"
+          this.alertaSevice.showSuccessAlert(
+            "Su plan fue guardado exitosamente"
           );
         }
       });
@@ -186,20 +166,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
             height: "80vh",
           });
         } else {
-          this.modalService.mostrarModal(
-            "No se pudo cargar el PDF",
-            "warning",
-            "AVISO"
-          );
+          this.alertaSevice.showAlert("Aviso", "No se pudo cargar el PDF");
         }
       },
       (error) => {
         console.log("-----------", error);
-        this.modalService.mostrarModal(
-          "Error al cargar el PDF",
-          "error",
-          "ERROR"
-        );
+        this.alertaSevice.showErrorAlert("Error al cargar el PDF");
       }
     );
   }
