@@ -133,7 +133,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     // const nombreFormulario = 'sisifo_form2';
     // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
-      width: "1200px",
+      width: "1000px",
       data: {
         planAuditoriaId: this.id,
         auditoria,

@@ -3,6 +3,22 @@
     display: flex;
     justify-content: center;
   }
+
+  .mb-md {
+    margin-bottom: 10px;
+  }
+  .mt-md {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mb-sm {
+    margin-bottom: 10px;
+  }
+  .mt-sm {
+    margin-top: 10px;
+  }
 }
 
 .table-container {

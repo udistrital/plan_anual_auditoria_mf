@@ -10,61 +10,59 @@
     <div class="col-12">
       <div class="row">
         <form [formGroup]="form">
-          <div class="row mt-4 mb-3">
-            <div class="col-4">
-              <div class="fondo-acento-50 d-flex justify-content-center">
+          <div class="row mt-2">
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Auditoría</b>
               </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Nombre de Auditoría</mat-label>
+                <mat-icon matPrefix color="primary">developer_board</mat-icon>
+                <input
+                  matInput
+                  placeholder="Título de la Auditoría"
+                  formControlName="tituloAuditoria"
+                />
+              </mat-form-field>
             </div>
-            <div class="col-4">
-              <div class="fondo-acento-50 d-flex justify-content-center">
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Tipo de evaluación</b>
               </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">assessment</mat-icon>
+                <mat-select formControlName="tipoEvaluacion">
+                  <mat-option
+                    *ngFor="let evaluacion of evaluaciones"
+                    [value]="evaluacion.Id"
+                  >
+                    {{ evaluacion.Nombre }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
-            <div class="col-4">
-              <div class="fondo-acento-50 d-flex justify-content-center">
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Cronograma de actividades</b>
               </div>
-            </div>
-          </div>
-          <div class="row">
-            <mat-form-field class="col-4" appearance="outline">
-              <mat-label>Nombre de Auditoría</mat-label>
-              <mat-icon matPrefix color="primary">developer_board</mat-icon>
-              <input
-                matInput
-                placeholder="Título de la Auditoría"
-                formControlName="tituloAuditoria"
-              />
-            </mat-form-field>
-            <mat-form-field class="col-4" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">assessment</mat-icon>
-              <mat-select formControlName="tipoEvaluacion">
-                <mat-option
-                  *ngFor="let evaluacion of evaluaciones"
-                  [value]="evaluacion.Id"
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">date_range</mat-icon>
+                <mat-select
+                  formControlName="cronogramaActividades"
+                  multiple
+                  (selectionChange)="onMesChange()"
                 >
-                  {{ evaluacion.Nombre }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field class="col-4" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">date_range</mat-icon>
-              <mat-select
-                formControlName="cronogramaActividades"
-                multiple
-                (selectionChange)="onMesChange()"
-              >
-                <mat-option (click)="asignarTodos()" [value]="TODOS">{{
-                  TODOS
-                }}</mat-option>
-                <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
-                  mes.Nombre
-                }}</mat-option>
-              </mat-select>
-            </mat-form-field>
+                  <mat-option (click)="asignarTodos()" [value]="TODOS">{{
+                    TODOS
+                  }}</mat-option>
+                  <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
+                    mes.Nombre
+                  }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
 
           <div style="padding: 0 0 16px 5px">
@@ -124,10 +122,16 @@
           color="primary"
           style="border: 1px solid var(--md-primary-500)"
           [mat-dialog-close]
+          class="mb-sm"
         >
           <mat-icon>close</mat-icon>No, cerrar
         </button>
-        <button mat-raised-button color="primary" (click)="onSave()">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onSave()"
+          class="mb-sm"
+        >
           <mat-icon>save</mat-icon>
           Si, guardar y cerrar
         </button>

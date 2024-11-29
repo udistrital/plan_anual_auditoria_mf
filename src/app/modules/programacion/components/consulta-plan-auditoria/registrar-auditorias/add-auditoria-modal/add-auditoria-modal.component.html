@@ -9,87 +9,85 @@
   <div class="row">
     <div class="col-12">
       <form [formGroup]="auditoriaForm" class="form-container">
-        <div class="row mt-4 mb-3">
-          <div class="col-4">
-            <div class="fondo-acento-50 d-flex justify-content-center">
+        <div class="row mt-2">
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Auditoría</b>
             </div>
-          </div>
-          <div class="col-4">
-            <div class="fondo-acento-50 d-flex justify-content-center">
-              <b>Tipo de evaluación</b>
-            </div>
-          </div>
-          <div class="col-4">
-            <div class="fondo-acento-50 d-flex justify-content-center">
-              <b>Cronograma de actividades</b>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <mat-form-field class="col-4" appearance="outline">
-            <mat-label>Nombre de Auditoría</mat-label>
-            <mat-icon matPrefix color="primary">developer_board</mat-icon>
-            <input
-              matInput
-              formControlName="tituloActividad"
-              placeholder="Título de la Actividad"
-            />
-            <mat-error
-              *ngIf="
-                auditoriaForm.get('tituloActividad').hasError('required') &&
-                auditoriaForm.get('tituloActividad').touched
-              "
-            >
-              El título de la actividad es requerido
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field class="col-4" appearance="outline">
-            <mat-label>Seleccionar </mat-label>
-            <mat-icon matPrefix color="primary">assessment</mat-icon>
-            <mat-select formControlName="tipoEvaluacion">
-              <mat-option
-                *ngFor="let evaluacion of evaluaciones"
-                [value]="evaluacion.Id"
-              >
-                {{ evaluacion.Nombre }}
-              </mat-option>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-label>Nombre de Auditoría</mat-label>
+              <mat-icon matPrefix color="primary">developer_board</mat-icon>
+              <input
+                matInput
+                formControlName="tituloActividad"
+                placeholder="Título de la Actividad"
+              />
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('tipoEvaluacion').hasError('required') &&
-                  auditoriaForm.get('tipoEvaluacion').touched
+                  auditoriaForm.get('tituloActividad').hasError('required') &&
+                  auditoriaForm.get('tituloActividad').touched
                 "
               >
-                Seleccione el tipo de evaluación
+                El título de la actividad es requerido
               </mat-error>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field class="col-4" appearance="outline">
-            <mat-label>Seleccionar </mat-label>
-            <mat-icon matPrefix color="primary">date_range</mat-icon>
-            <mat-select
-              formControlName="cronogramaActividades"
-              multiple
-              (selectionChange)="onMesChange()"
-            >
-              <mat-option (click)="asignarTodos()" [value]="TODOS">{{
-                TODOS
-              }}</mat-option>
-              <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
-                mes.Nombre
-              }}</mat-option>
-            </mat-select>
-            <mat-error
-              *ngIf="
-                auditoriaForm
-                  .get('cronogramaActividades')
-                  .hasError('required') &&
-                auditoriaForm.get('cronogramaActividades').touched
-              "
-            >
-              Seleccione al menos un mes para el cronograma
-            </mat-error>
-          </mat-form-field>
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Tipo de evaluación</b>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-label>Seleccionar </mat-label>
+              <mat-icon matPrefix color="primary">assessment</mat-icon>
+              <mat-select formControlName="tipoEvaluacion">
+                <mat-option
+                  *ngFor="let evaluacion of evaluaciones"
+                  [value]="evaluacion.Id"
+                >
+                  {{ evaluacion.Nombre }}
+                </mat-option>
+                <mat-error
+                  *ngIf="
+                    auditoriaForm.get('tipoEvaluacion').hasError('required') &&
+                    auditoriaForm.get('tipoEvaluacion').touched
+                  "
+                >
+                  Seleccione el tipo de evaluación
+                </mat-error>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Cronograma de actividades</b>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-label>Seleccionar </mat-label>
+              <mat-icon matPrefix color="primary">date_range</mat-icon>
+              <mat-select
+                formControlName="cronogramaActividades"
+                multiple
+                (selectionChange)="onMesChange()"
+              >
+                <mat-option (click)="asignarTodos()" [value]="TODOS">{{
+                  TODOS
+                }}</mat-option>
+                <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
+                  mes.Nombre
+                }}</mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  auditoriaForm
+                    .get('cronogramaActividades')
+                    .hasError('required') &&
+                  auditoriaForm.get('cronogramaActividades').touched
+                "
+              >
+                Seleccione al menos un mes para el cronograma
+              </mat-error>
+            </mat-form-field>
+          </div>
         </div>
       </form>
       <div class="d-flex justify-content-center align-items-center my-2">
@@ -102,10 +100,16 @@
           color="primary"
           style="border: 1px solid var(--md-primary-500)"
           [mat-dialog-close]
+          class="mb-sm"
         >
           <mat-icon>close</mat-icon>No, cerrar
         </button>
-        <button mat-raised-button color="primary" (click)="onSave()">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onSave()"
+          class="mb-sm"
+        >
           <mat-icon>save</mat-icon>
           Si, guardar y cerrar
         </button>

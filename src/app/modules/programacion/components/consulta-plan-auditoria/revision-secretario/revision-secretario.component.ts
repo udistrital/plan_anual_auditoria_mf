@@ -47,7 +47,7 @@ export class RevisionSecretarioComponent {
 
   openModalEnviar(): void {
     this.dialog.open(ModalAprobacionSecretarioComponent, {
-      width: "50%",
+      width: "600px",
       data: {
         usuarioId: this.usuarioId,
       },

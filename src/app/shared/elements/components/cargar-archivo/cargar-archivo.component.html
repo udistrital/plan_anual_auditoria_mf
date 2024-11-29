@@ -12,7 +12,7 @@
         <mat-form-field
           class="full-width"
           appearance="outline"
-          class="col-9 mt-4"
+          class="col-12 col-md-9 mt-4"
         >
           <mat-icon matPrefix color="primary">attach_file</mat-icon>
           <input
@@ -29,8 +29,9 @@
             accept="pdf"
           />
         </mat-form-field>
-        <div class="col-3">
+        <div class="col-12 col-md-3 d-flex justify-content-center">
           <button
+            class="mb-md"
             mat-raised-button
             color="primary"
             (click)="onFileInputClick()"
@@ -63,10 +64,16 @@
       color="primary"
       style="border: 1px solid var(--md-primary-500)"
       [mat-dialog-close]
+      class="mb-sm"
     >
       <mat-icon>close</mat-icon>No, cerrar
     </button>
-    <button mat-raised-button color="primary" (click)="cargarArchivo()">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="cargarArchivo()"
+      class="mb-sm"
+    >
       <mat-icon>cloud_upload</mat-icon>
       Si, subir
     </button>
