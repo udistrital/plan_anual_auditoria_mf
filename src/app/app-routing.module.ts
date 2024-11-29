@@ -1,11 +1,13 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
+import { AuthGuard } from "src/_guards/auth.guard";
 
 import { APP_BASE_HREF } from "@angular/common";
 
 const routes: Routes = [
   {
     path: "ejecucion",
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/ejecucion/ejecucion.module").then(
         (m) => m.EjecucionModule
@@ -13,6 +15,7 @@ const routes: Routes = [
   },
   {
     path: "planeacion",
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/planeacion/planeacion.module").then(
         (m) => m.PlaneacionModule
@@ -20,6 +23,7 @@ const routes: Routes = [
   },
   {
     path: "programacion",
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/programacion/programacion.module").then(
         (m) => m.ProgramacionModule

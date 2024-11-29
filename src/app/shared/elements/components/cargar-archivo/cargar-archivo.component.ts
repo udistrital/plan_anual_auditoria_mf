@@ -73,7 +73,7 @@ export class CargarArchivoComponent {
 
       const lambdaPayload = {
         base64data: base64String,
-        complement: { plan_auditoria_id: this.data.id },
+        complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619},
         type_upload: "auditorias",
       };
 

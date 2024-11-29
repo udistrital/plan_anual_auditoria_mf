@@ -3,6 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
@@ -14,7 +15,10 @@ import { AlertService } from "src/app/shared/services/alert.service";
   styleUrls: ["./consulta-plan-auditoria.component.css"],
 })
 export class ConsultaPlanAuditoriaComponent implements OnInit {
-  role: string = "auditor";
+  role: string | null = null;
+  IsSecretario = false;
+  IsAuditor = false;
+  IsJefe = false;
 
   years: Parametro[] = [];
   selectedYearId: number | null = null;
@@ -35,15 +39,41 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private router: Router,
     public dialog: MatDialog,
     private parametrosService: ParametrosService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService
+    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private autenticationService: ImplicitAutenticationService
   ) {}
 
   ngOnInit(): void {
-    this.CargarEvaluaciones();
+    this.buscarRole();
     this.cargarPlanesAuditoria();
   }
 
-  CargarEvaluaciones() {
+  buscarRole() {
+    this.autenticationService.getRole().then((roles: any) => {
+      if (!roles || roles.length === 0) {
+        console.error("No roles found for the user");
+        return;
+      }
+
+      this.IsSecretario = roles.some((role: string) => role === "VICERRECTOR");
+      this.IsAuditor = roles.includes("ADMIN_SGA");
+      this.IsJefe = roles.includes("JEFE_DEPENDENCIA");
+
+      this.role = this.IsSecretario
+        ? "secretario"
+        : this.IsAuditor
+        ? "auditor"
+        : this.IsJefe
+        ? "jefe"
+        : null;
+
+      if (this.IsAuditor) {
+        this.cargarVigencias();
+      }
+    });
+  }
+
+  cargarVigencias() {
     this.parametrosService
       .get(
         "parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc"
@@ -51,6 +81,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       .subscribe((res) => {
         if (res !== null) {
           this.years = res.Data;
+        } else {
+          console.warn("vigencias no encontradas");
         }
       });
   }
@@ -64,7 +96,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           ).map((item: any, index: number) => ({
             id: item._id,
             creadoPor: item.creado_por_id ?? "Sin asignar",
-            vigencia: item.vigencia_id ?? "No encontrada",
+            vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
             estado: item.estado ?? "Borrador",
           }));
@@ -146,6 +178,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   viewPlanSecretario() {
-    this.router.navigate(["/programacion/revision-secretario"]);
+    this.router.navigate(["/programacion/plan-auditoria/revision-secretario"]);
   }
 }

@@ -50,8 +50,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
             ).map((item: any) => ({
               id: item._id ?? 0,
               auditoria: item.titulo ?? "Sin Título",
-              tipoEvaluacion: item.tipo_evaluacion_id ?? "Sin Tipo",
-              cronograma: item.cronograma_id ?? "Sin Cronograma",
+              tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
+              tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
+              cronograma: item.cronograma_nombre ?? "Sin Cronograma",
+              cronogramaId: item.cronograma_id ?? [],
               estado: item.estado_id ?? "Desconocido",
             }));
           }
@@ -77,7 +79,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         if (result.isConfirmed) {
           console.log(element);
           this.planAnualAuditoriaService
-            .delete(`/auditoria`, element)
+            .delete(`auditoria`, element)
             .subscribe(
               (response) => {
                 if (response) {
