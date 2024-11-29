@@ -1,26 +1,51 @@
-<mat-card class="container-principal">
-  <button mat-icon-button class="close-button" [mat-dialog-close]>
-    <mat-icon color="primary" class="btn">close</mat-icon>
-  </button>
-  <form [formGroup]="formObservaciones">
-    <div>
-      <div id="container-title">
-        <h4>Observaciones</h4>
+<plantilla-modal
+  [icono]="'list_alt'"
+  [titulo]="'Rechazar plan'"
+  [descripcion]="'Motivos del rechazo'"
+  [contenido]="contenidoDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-4">
+    <div class="col-12">
+      <form [formGroup]="formObservaciones">
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12">
+            <mat-label>Motivos del rechazo</mat-label>
+            <mat-icon color="primary" matPrefix>assignment</mat-icon>
+            <textarea
+              style="height: 100px; resize: none"
+              matInput
+              formControlName="observaciones"
+            ></textarea>
+          </mat-form-field>
+        </div>
+      </form>
+      <div
+        class="d-flex justify-content-center align-items-center fondo-acento-50 my-1"
+      >
+        <mat-icon> info </mat-icon>
+        <p class="mx-2">¿Rechazar el Plan Anual de Auditoría?</p>
       </div>
-      <textarea
-        formControlName="observaciones"
-        placeholder="Motivos de rechazo"
-      ></textarea>
+      <mat-dialog-actions align="center">
+        <button
+          mat-stroked-button
+          color="primary"
+          style="border: 1px solid var(--md-primary-500)"
+          [mat-dialog-close]
+        >
+          <mat-icon>toll</mat-icon>No, regresar
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          id="btn-rechazar"
+          (click)="preguntarConfirmacionRechazo()"
+        >
+          <mat-icon>cancel</mat-icon>
+          Si, rechazar
+        </button>
+      </mat-dialog-actions>
     </div>
-  </form>
-  <mat-dialog-actions align="end">
-    <button
-      mat-raised-button
-      color="primary"
-      id="btn-rechazar"
-      (click)="preguntarConfirmacionRechazo()"
-    >
-      Rechazar
-    </button>
-  </mat-dialog-actions>
-</mat-card>
+  </div>
+</ng-template>

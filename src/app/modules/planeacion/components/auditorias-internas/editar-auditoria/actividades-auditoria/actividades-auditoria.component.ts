@@ -1,7 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { CargarArchivoComponent } from "src/app/shared/components/cargar-archivo/cargar-archivo.component";
-import { ModalService } from "src/app/shared/services/modal.service";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 
 @Component({
   selector: "app-actividades-auditoria",
@@ -39,7 +38,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
     "papelesTrabajo",
   ];
 
-  constructor(private modalService: ModalService, public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog) {}
 
   resetComponent() {}
   onStepLeave() {

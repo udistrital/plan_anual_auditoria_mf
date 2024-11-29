@@ -1,84 +1,141 @@
-<div class="container-border">
+<plantilla-modal
+  [icono]="'editar'"
+  [titulo]="'Editar Auditoría'"
+  [descripcion]="'Edición de Auditoría Especial'"
+  [contenido]="contenidoDeModal"
+></plantilla-modal>
 
-  <div mat-dialog-title class="dialog-title">
-    <h2>Auditoría</h2>
-    <button mat-icon-button aria-label="close dialog" mat-dialog-close>
-      <mat-icon color="primary">close</mat-icon>
-    </button>
-  </div>
+<ng-template #contenidoDeModal>
+  <div class="row">
+    <div class="col-12">
+      <div class="row">
+        <form [formGroup]="form">
+          <div class="row mt-2">
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Auditoría</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Nombre de Auditoría</mat-label>
+                <mat-icon matPrefix color="primary">developer_board</mat-icon>
+                <input
+                  matInput
+                  placeholder="Título de la Auditoría"
+                  formControlName="tituloAuditoria"
+                />
+              </mat-form-field>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Tipo de evaluación</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">assessment</mat-icon>
+                <mat-select formControlName="tipoEvaluacion">
+                  <mat-option
+                    *ngFor="let evaluacion of evaluaciones"
+                    [value]="evaluacion.Id"
+                  >
+                    {{ evaluacion.Nombre }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Cronograma de actividades</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">date_range</mat-icon>
+                <mat-select
+                  formControlName="cronogramaActividades"
+                  multiple
+                  (selectionChange)="onMesChange()"
+                >
+                  <mat-option (click)="asignarTodos()" [value]="TODOS">{{
+                    TODOS
+                  }}</mat-option>
+                  <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
+                    mes.Nombre
+                  }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
 
-  <div class="botonGuardar">
-    <button
-      class="botones"
-      mat-raised-button
-      color="primary"
-      (click)="onSave()"
-    >
-      Guardar y Cerrar
-    </button>
-  </div>
+          <div style="padding: 0 0 16px 5px">
+            <span><b>Auditor</b></span>
+          </div>
 
-  <form [formGroup]="form">
-    <div class="principal">
-      <div>
-        <span class="formLabel">AUDITORÍA</span>
-        <mat-form-field class="mat-form-field" appearance="outline">
-          <input
-            matInput
-            placeholder="Título de la Auditoría"
-            formControlName="tituloAuditoria"
-          />
-        </mat-form-field>
+          <div class="row d-flex align-items-center">
+            <mat-form-field appearance="outline" class="col-4 mt-3">
+              <mat-label>Seleccione un auditor</mat-label>
+              <mat-icon color="primary" matPrefix>person</mat-icon>
+              <mat-select formControlName="auditor">
+                <mat-option *ngFor="let auditor of auditores" [value]="auditor">
+                  {{ auditor }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="col-4">
+              <button class="botonAuditor" mat-button color="primary">
+                <mat-icon>add </mat-icon>
+                Agregar Auditor
+              </button>
+            </div>
+
+            <div class="row d-flex align-items-center">
+              <mat-form-field appearance="outline" class="col-4 mt-3">
+                <mat-label>Seleccione un auditor</mat-label>
+                <mat-icon color="primary" matPrefix>person</mat-icon>
+                <mat-select formControlName="auditor">
+                  <mat-option
+                    *ngFor="let auditor of auditores"
+                    [value]="auditor"
+                  >
+                    {{ auditor }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <div class="col-6">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  aria-label="Eliminar auditor"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
-      <div>
-        <span class="formLabel">TIPO DE EVALUACIÓN</span>
-        <mat-form-field class="mat-form-field" appearance="outline">
-          <mat-label>Seleccione...</mat-label>
-          <mat-select formControlName="tipoEvaluacion">
-            <mat-option *ngFor="let evaluacion of evaluaciones" [value]="evaluacion.Id">
-              {{ evaluacion.Nombre }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <div class="d-flex justify-content-center align-items-center my-2">
+        <mat-icon color="primary"> info </mat-icon>
+        <p class="mx-2">¿Guardar cambios?</p>
       </div>
-      <div>
-        <span class="formLabel">CRONOGRAMA DE ACTIVIDADES</span>
-        <mat-form-field class="mat-form-field" appearance="outline">
-          <mat-label>Seleccione...</mat-label>
-          <mat-select formControlName="cronogramaActividades" multiple (selectionChange)="onMesChange()">
-            <mat-option (click)="asignarTodos()"  [value]="TODOS">{{ TODOS }}</mat-option>
-            <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{ mes.Nombre }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <div style="padding: 0 0 16px 5px">
-      <span>Auditor</span>
-    </div>
-
-    <div class="auditorField">
-      <mat-form-field class="mat-form-fieldAud" style="display: flex" appearance="outline">        
-        <mat-select formControlName="auditor" placeholder="Seleccione">
-          <mat-option *ngFor="let auditor of auditores" [value]="auditor">
-            {{ auditor }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button class="botonAuditor" mat-raised-button>Agregar Auditor</button>
-    </div>
-    <div class="auditorField">
-        <mat-form-field class="mat-form-fieldAud" style="display: flex" appearance="outline">          
-          <mat-select formControlName="auditor" placeholder="seleccione">
-            <mat-option *ngFor="let auditor of auditores" [value]="auditor">
-              {{ auditor }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button> 
-            <mat-icon color="primary">delete</mat-icon>
+      <mat-dialog-actions align="center">
+        <button
+          mat-stroked-button
+          color="primary"
+          style="border: 1px solid var(--md-primary-500)"
+          [mat-dialog-close]
+          class="mb-sm"
+        >
+          <mat-icon>close</mat-icon>No, cerrar
         </button>
-        <button class="botonAuditor" mat-raised-button>Agregar Auditor</button>
-      </div>
-  </form>
-</div>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onSave()"
+          class="mb-sm"
+        >
+          <mat-icon>save</mat-icon>
+          Si, guardar y cerrar
+        </button>
+      </mat-dialog-actions>
+    </div>
+  </div>
+</ng-template>

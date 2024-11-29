@@ -5,7 +5,7 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import { ModalService } from "src/app/shared/services/modal.service";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-formulario-auditoria-especial",
@@ -21,11 +21,11 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   isEditMode = false;
 
   constructor(
+    private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<FormularioAuditoriaEspecialComponent>,
-    private modalService: ModalService,
     @Inject(MAT_DIALOG_DATA) public data: { auditoria?: Auditoria }
   ) {}
 
@@ -84,12 +84,8 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
 
   onSave() {
     if (this.form.valid) {
-      this.modalService
-        .modalConfirmacion(
-          "Confirmación",
-          "warning",
-          `¿Está seguro(a) de actualizar la auditoría?`
-        )
+      this.alertaService
+        .showConfirmAlert(`¿Está seguro(a) de actualizar la auditoría?`)
         .then((result) => {
           if (result.isConfirmed) {
             console.log("auditoria id", this.data.auditoria!.id);
@@ -100,29 +96,23 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
             };
 
             this.planAnualAuditoriaService
-              .put(`/auditoria/${this.data.auditoria!.id}`, formData)
+              .put(`auditoria/${this.data.auditoria!.id}`, formData)
               .subscribe({
                 next: (response: any) => {
                   if (response.Status === 200) {
-                    this.modalService.mostrarModal(
-                      `Auditoría actualizada exitosamente.`,
-                      "success",
-                      "AUDITORIA ACTUALIZADA"
+                    this.alertaService.showSuccessAlert(
+                      `Auditoría actualizada exitosamente.`
                     );
                     this.dialogRef.close({ saved: true });
                   } else {
-                    this.modalService.mostrarModal(
-                      `Error al actualizar la auditoría. Código de estado inesperado: ${response.Status}`,
-                      "error",
-                      "ERROR"
+                    this.alertaService.showSuccessAlert(
+                      `Error al actualizar la auditoría. Código de estado inesperado: ${response.Status}`
                     );
                   }
                 },
                 error: (err) => {
-                  this.modalService.mostrarModal(
-                    `Error al actualizar la auditoría. Inténtelo de nuevo.`,
-                    "error",
-                    "ERROR"
+                  this.alertaService.showErrorAlert(
+                    `Error al actualizar la auditoría. Inténtelo de nuevo.`
                   );
                 },
               });

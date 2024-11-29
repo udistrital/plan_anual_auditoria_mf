@@ -1,19 +1,31 @@
-<mat-card style="width: 100%;">
-    <div class="container-principal">
-        <h3>Gestión Auditoría >> Registrar Plan Anual Auditoría PAA</h3>
-        <div class="border">
-            <ng-container *ngIf="formulario != null">
-                <mat-card-title class="title">Plan de Acción</mat-card-title>
-                <mat-divider class="divider"></mat-divider>
-                <mat-card-content *ngIf="datosCargados">
-                    <app-formulario-dinamico [formulario]="formulario" (submitFormulario)="manejarEnvio($event)" />           
-                    <div class="button-container">
-                        <button mat-raised-button color="primary" (click)="guardarInformacion()">
-                            Guardar
-                        </button>
-                    </div>
-                </mat-card-content>
-            </ng-container>
+<plantilla-tarjeta-contenedora
+  [title]="'Plan de Acción'"
+  [breadcrumb]="
+    '<p>Gestión Auditoría / Programación / Plan anual de auditorías / <b>Editar</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row mt-3">
+    <div class="col-12">
+      <app-formulario-dinamico
+        [formulario]="formulario"
+        (submitFormulario)="manejarEnvio($event)"
+      />
+      <div class="d-flex justify-content-end">
+        <div class="button-container">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="guardarInformacion()"
+          >
+            Guardar
+          </button>
         </div>
+      </div>
     </div>
-</mat-card>
+  </div>
+</ng-template>

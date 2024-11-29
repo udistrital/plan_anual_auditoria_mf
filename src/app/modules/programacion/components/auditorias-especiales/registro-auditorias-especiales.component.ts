@@ -5,9 +5,9 @@ import { FormularioAuditoriaEspecialComponent } from "./formulario-auditoria-esp
 import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import { ModalService } from "src/app/shared/services/modal.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { ParametrosService } from "src/app/core/services/parametros.service";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-registro-auditorias-especiales",
@@ -31,7 +31,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   selectedYearId: number | null = null;
 
   constructor(
-    private modalService: ModalService,
+    private alertaService: AlertService,
     private fb: FormBuilder,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
@@ -70,11 +70,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
         }
       },
       (error) => {
-        this.modalService.mostrarModal(
-          "Error al cargar las auditorías",
-          "error",
-          "ERROR"
-        );
+        this.alertaService.showErrorAlert("Error al cargar las auditorías");
       }
     );
   }
@@ -88,10 +84,8 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
         .subscribe(
           (response: any) => {
             if (response.Status === 201) {
-              this.modalService.mostrarModal(
-                "Auditoría especial creada exitosamente",
-                "success",
-                "AUDITORIA CREADA"
+              this.alertaService.showSuccessAlert(
+                "Auditoría especial creada exitosamente"
               );
               this.loadAuditoriasFromService();
             }
@@ -101,32 +95,27 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
               error.error?.Data &&
               error.error.Data.includes("Ya existe una auditoría")
             ) {
-              this.modalService.mostrarModal(
-                "Ya existe una auditoría para la vigencia seleccionada.",
-                "warning",
-                "VIGENCIA DUPLICADA"
+              this.alertaService.showAlert(
+                "Vigencia duplicada",
+                "Ya existe una auditoría para la vigencia seleccionada."
               );
             } else {
-              this.modalService.mostrarModal(
-                "Error al crear la auditoría",
-                "error",
-                "ERROR"
-              );
+              this.alertaService.showErrorAlert("Error al crear la auditoría");
             }
           }
         );
     } else {
-      this.modalService.mostrarModal(
-        "Debe seleccionar un año.",
-        "warning",
-        "SELECCIÓN REQUERIDA"
+      this.alertaService.showAlert(
+        "Selección requerida",
+        "Debe seleccionar un año."
       );
     }
   }
 
   addAuditoria(auditoria?: Auditoria) {
     const dialogRef = this.dialog.open(FormularioAuditoriaEspecialComponent, {
-      width: "1100px",
+      width: "90%",
+      autoFocus: false,
       data: {
         auditoria,
       },

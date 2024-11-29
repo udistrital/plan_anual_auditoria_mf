@@ -5,6 +5,7 @@ import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { Router } from "@angular/router";
 @Component({
   selector: "app-revision-jefe",
   templateUrl: "./revision-jefe.component.html",
@@ -20,7 +21,8 @@ export class RevisionJefeComponent implements OnInit {
     public dialog: MatDialog,
     private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
-    private userService: UserService
+    private userService: UserService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -39,7 +41,7 @@ export class RevisionJefeComponent implements OnInit {
         console.log(res);
       });
     this.dialog.open(ModalMotivosRechazoComponent, {
-      width: "70vw",
+      width: "50%",
       data: {
         usuarioId: this.usuarioId,
       },
@@ -49,7 +51,7 @@ export class RevisionJefeComponent implements OnInit {
   openModalEnviar(): void {
     this.alertService
       .showConfirmAlert(
-        "¿Está seguro de enviar el plan anual de auditoría - PAA?"
+        "¿Está seguro de enviar el Plan Anual de Auditoría? - PAA?"
       )
       .then((confirmado) => {
         if (!confirmado.value) {
@@ -80,6 +82,10 @@ export class RevisionJefeComponent implements OnInit {
 
   selectTab(index: number) {
     this.selectedTab = index;
+  }
+
+  regresarRuta() {
+    this.router.navigate([`/programacion/plan-auditoria`]);
   }
 }
 

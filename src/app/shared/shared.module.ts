@@ -1,26 +1,32 @@
 import { NgModule } from "@angular/core";
 import { MaterialModule } from "./modules/material.module";
-import { FormularioDinamicoComponent } from "./components/formulario-dinamico/formulario-dinamico.component";
-import { BasesComponent } from "./components/bases/bases.component";
 import { ReactiveFormsModule, FormsModule } from "@angular/forms";
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import { CargarArchivoComponent } from "./components/cargar-archivo/cargar-archivo.component";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { CommonModule } from "@angular/common";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { BasesComponent } from "./elements/components/bases/bases.component";
+import { CargarArchivoComponent } from "./elements/components/cargar-archivo/cargar-archivo.component";
+import { FormularioDinamicoComponent } from "./elements/components/formulario-dinamico/formulario-dinamico.component";
+import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
+import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/plantilla-modal.component";
 
 @NgModule({
   declarations: [
     BasesComponent,
     FormularioDinamicoComponent,
     CargarArchivoComponent,
+    PlantillaTarjetaContenedoraComponent,
+    PlantillaModalComponent,
   ],
   imports: [CommonModule, FormsModule, MaterialModule, ReactiveFormsModule],
   exports: [
     //Componentes
     BasesComponent,
-    FormularioDinamicoComponent,
     CargarArchivoComponent,
+    FormularioDinamicoComponent,
+    PlantillaTarjetaContenedoraComponent,
+    PlantillaModalComponent,
     //modulos
     FormsModule,
     DragDropModule,
