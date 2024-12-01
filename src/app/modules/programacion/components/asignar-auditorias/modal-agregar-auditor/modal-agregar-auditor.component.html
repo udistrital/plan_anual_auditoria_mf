@@ -22,6 +22,7 @@
                   matInput
                   placeholder="Título de la Auditoría"
                   formControlName="tituloAuditoria"
+                  readonly
                 />
               </mat-form-field>
             </div>
@@ -30,16 +31,14 @@
                 <b>Tipo de evaluación</b>
               </div>
               <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Seleccionar </mat-label>
+                
                 <mat-icon matPrefix color="primary">assessment</mat-icon>
-                <mat-select formControlName="tipoEvaluacion">
-                  <mat-option
-                    *ngFor="let evaluacion of evaluaciones"
-                    [value]="evaluacion.Id"
-                  >
-                    {{ evaluacion.Nombre }}
-                  </mat-option>
-                </mat-select>
+                <input
+                matInput
+                placeholder="Tipo de Evaluación"
+                formControlName="tipoEvaluacion"
+                readonly
+                />
               </mat-form-field>
             </div>
             <div class="col-12 col-md-6 col-xl-4">
@@ -47,20 +46,14 @@
                 <b>Cronograma de actividades</b>
               </div>
               <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Seleccionar </mat-label>
+                
                 <mat-icon matPrefix color="primary">date_range</mat-icon>
-                <mat-select
-                  formControlName="cronogramaActividades"
-                  multiple
-                  (selectionChange)="onMesChange()"
-                >
-                  <mat-option (click)="asignarTodos()" [value]="TODOS">{{
-                    TODOS
-                  }}</mat-option>
-                  <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
-                    mes.Nombre
-                  }}</mat-option>
-                </mat-select>
+                <input
+                matInput
+                placeholder="Cronograma de Actividades"
+                formControlName="cronogramaActividades"
+                readonly
+              />
               </mat-form-field>
             </div>
           </div>

@@ -1,4 +1,7 @@
 import { Component } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
+import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
+import { ModalAgregarAuditorComponent } from "./modal-agregar-auditor/modal-agregar-auditor.component";
 
 @Component({
   selector: "app-asignar-auditorias",
@@ -6,6 +9,11 @@ import { Component } from "@angular/core";
   styleUrls: ["./asignar-auditorias.component.css"],
 })
 export class AsignarAuditoriasComponent {
+
+  constructor(
+    private dialog: MatDialog,
+  ) {}
+
   fechaAsignacion: Date | null = null;
 
   datos = [
@@ -60,4 +68,15 @@ export class AsignarAuditoriasComponent {
     "acciones",
   ];
   year: number = new Date().getFullYear();
+
+  agregarAuditor(auditoria?: Auditoria) {
+    const dialogRef = this.dialog.open(ModalAgregarAuditorComponent, {
+      width: "1100px",
+      data: {
+        auditoria,
+      },
+    });
+
+  }
+
 }
