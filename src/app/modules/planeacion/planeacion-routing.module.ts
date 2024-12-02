@@ -7,8 +7,13 @@ const routes: Routes = [
   { path: "", component: AuditoriasInternasComponent },
   { path: "auditorias-internas", component: AuditoriasInternasComponent },
   {
-    path: "editar-auditoria",
-    component: EditarAuditoriaComponent,
+    path: "auditorias-internas",
+    children: [
+      {
+        path: "editar",
+        component: EditarAuditoriaComponent,
+      },
+    ],
   },
 ];
 

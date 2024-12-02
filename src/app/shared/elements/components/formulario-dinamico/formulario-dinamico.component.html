@@ -12,7 +12,7 @@
         class="example-full-width"
       >
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" color="accent" matPrefix>{{
+        <mat-icon *ngIf="campo.icono" color="primary" matPrefix>{{
           campo.icono
         }}</mat-icon>
         <input
@@ -40,7 +40,7 @@
         class="example-full-width"
       >
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" color="accent" matPrefix>{{
+        <mat-icon *ngIf="campo.icono" color="primary" matPrefix>{{
           campo.icono
         }}</mat-icon>
         <input
@@ -69,7 +69,7 @@
         class="example-full-width"
       >
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" color="accent" matPrefix>{{
+        <mat-icon *ngIf="campo.icono" color="primary" matPrefix>{{
           campo.icono
         }}</mat-icon>
         <input matInput type="number" [formControlName]="campo.nombre" />
@@ -93,7 +93,7 @@
         class="example-full-width"
       >
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" color="accent" matPrefix>{{
+        <mat-icon *ngIf="campo.icono" color="primary" matPrefix>{{
           campo.icono
         }}</mat-icon>
         <mat-select [formControlName]="campo.nombre">
@@ -152,13 +152,13 @@
         <mat-datepicker-toggle
           matPrefix
           [for]="picker"
-          color="accent"
+          color="primary"
         ></mat-datepicker-toggle>
         <mat-datepicker
           #picker
           [startView]="campo.parametros?.vista || 'month'"
           [startAt]="campo.parametros?.fecha_inicio || ''"
-          color="accent"
+          color="primary"
         ></mat-datepicker>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
@@ -197,7 +197,7 @@
         class="example-full-width"
       >
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" color="accent" matPrefix>{{
+        <mat-icon *ngIf="campo.icono" color="primary" matPrefix>{{
           campo.icono
         }}</mat-icon>
         <textarea

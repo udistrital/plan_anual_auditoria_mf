@@ -38,7 +38,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
     }
 
     this.alertService
-      .showConfirmAlert("¿Está seguro de rechazar el plan de auditoría anual?")
+      .showConfirmAlert("¿Está seguro de rechazar el Plan Anual de Auditoría?")
       .then((confirmado) => {
         if (!confirmado.value) {
           return;

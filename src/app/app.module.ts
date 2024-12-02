@@ -8,9 +8,9 @@ import {
   withInterceptors,
 } from "@angular/common/http";
 import { SpinnerIntercerptor } from "./core/intercerptors/spinner.interceptor";
-import { SpinnerComponent } from "./shared/components/spinner/spinner.component";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
 
 @NgModule({
   declarations: [AppComponent, SpinnerComponent],
