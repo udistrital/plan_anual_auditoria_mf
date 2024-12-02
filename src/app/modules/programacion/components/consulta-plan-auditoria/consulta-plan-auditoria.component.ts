@@ -1,12 +1,15 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
+import { ModalService } from "src/app/shared/services/modal.service";
+import { UserService } from "src/app/core/services/user.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
+import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
@@ -19,6 +22,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   IsSecretario = false;
   IsAuditor = false;
   IsJefe = false;
+  usuarioId: any;
 
   years: Parametro[] = [];
   selectedYearId: number | null = null;
@@ -40,15 +44,19 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     public dialog: MatDialog,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private autenticationService: ImplicitAutenticationService
-  ) {}
+    private autenticationService: ImplicitAutenticationService,
+    private userService: UserService
+  ) { }
 
   ngOnInit(): void {
-    this.buscarRole();
+    this.buscarRol();
     this.cargarPlanesAuditoria();
+    this.userService.getPersonaId().then((usuarioId) => {
+      this.usuarioId = usuarioId;
+    });
   }
 
-  buscarRole() {
+  buscarRol() {
     this.autenticationService.getRole().then((roles: any) => {
       if (!roles || roles.length === 0) {
         console.error("No roles found for the user");
@@ -62,10 +70,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       this.role = this.IsSecretario
         ? "secretario"
         : this.IsAuditor
-        ? "auditor"
-        : this.IsJefe
-        ? "jefe"
-        : null;
+          ? "auditor"
+          : this.IsJefe
+            ? "jefe"
+            : null;
 
       if (this.IsAuditor) {
         this.cargarVigencias();
@@ -98,7 +106,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             creadoPor: item.creado_por_id ?? "Sin asignar",
             vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
-            estado: item.estado ?? "Borrador",
+            estado: item.estado?.estado_nombre ?? "Borrador",
           }));
         }
       },
@@ -118,24 +126,55 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
       this.planAnualAuditoriaService.post("plan-auditoria", Plan).subscribe(
         (response: any) => {
-          if (response.Status === 201) {
-            this.alertaService.showSuccessAlert("Plan creado exitosamente");
-            this.cargarPlanesAuditoria();
+          if (response.Status === 201 && response.Data) {
+            const planAuditoriaId = response.Data._id;
+
+            const estadoBody = this.construirEstado(
+              planAuditoriaId,
+              environment.PLAN_ESTADO.EN_BORRADOR_ID
+            );
+
+            this.planAnualAuditoriaService.post("estado", estadoBody).subscribe(
+              (estadoResponse: any) => {
+                if (estadoResponse.Status === 201) {
+                  this.alertaService.showSuccessAlert(
+                    "Plan creado exitosamente"
+                  );
+                  this.cargarPlanesAuditoria();
+                } else {
+                  this.alertaService.showErrorAlert(
+                    "Error al asociar el estado al plan"
+                  );
+                }
+              },
+              (estadoError) => {
+                this.alertaService.showErrorAlert(
+                  "Error al asociar el estado al plan"
+                );
+                console.error(estadoError);
+              }
+            );
+          } else {
+            this.alertaService.showErrorAlert(
+              "Error al crear el plan"
+            );
           }
         },
         (error) => {
-          // Verificar si el error es por duplicidad de vigenciaId
           if (
             error.error?.Data &&
             error.error.Data.includes("Ya existe un plan")
           ) {
-            this.alertaService.showAlert(
-              "Vigencia duplicada",
-              "Ya existe un plan de auditoría para la vigencia seleccionada."
+            this.alertaService.showConfirmAlert(
+              "Ya existe un plan de auditoría para la vigencia seleccionada.",
+              "VIGENCIA DUPLICADA"
             );
           } else {
-            this.alertaService.showErrorAlert("Error al crear el plan");
+            this.alertaService.showErrorAlert(
+              "Error al crear el plan"
+            );
           }
+          console.error(error);
         }
       );
     } else {
@@ -146,38 +185,66 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     }
   }
 
-  editReport(element: any) {
+  editarReporte(element: any) {
     console.log(this.dataSource);
     this.router.navigate([`/programacion/plan-auditoria/editar/`, element.id]);
   }
 
-  editActivities(element: any) {
+  editarActividades(element: any) {
     this.router.navigate([
       `/programacion/plan-auditoria/registrar-auditorias/`,
       element.id,
     ]);
   }
 
-  sendApproval(element: any) {
-    this.alertaService
-      .showConfirmAlert(
-        "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?"
-      )
-      .then((result) => {
-        if (result.isConfirmed) {
-          console.log("Plan enviado");
-          this.alertaService.showSuccessAlert(
-            "Su plan fue enviado al jefe de oficina"
-          );
-        }
-      });
+  enviarPlan(element: any) {
+    this.alertaService.showConfirmAlert(
+      "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?",
+    ).then((result) => {
+      if (result.isConfirmed) {
+
+        const nuevoEstado = this.construirEstado(
+          element.id,
+          environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
+        );
+
+        this.planAnualAuditoriaService.post("estado", nuevoEstado).subscribe(
+          (nuevoEstadoResponse: any) => {
+            if (nuevoEstadoResponse.Status === 201) {
+              this.alertaService.showSuccessAlert(
+                "plan enviado exitosamente"
+              );
+            } else {
+              this.alertaService.showErrorAlert(
+                "Error al asociar el estado al plan"
+              );
+            }
+          },
+          (nuevoEstadoError) => {
+            this.alertaService.showErrorAlert(
+              "Error al asociar el estado al plan"
+            );
+            console.error(nuevoEstadoError);
+          }
+        );
+      }
+    });
   }
 
-  viewPlanJefe() {
-    this.router.navigate(["/programacion/revision-jefe"]);
+  construirEstado(planId: string, estadoId: number, observacion = "") {
+    return {
+      plan_auditoria_id: planId,
+      usuario_id: this.usuarioId,
+      observacion,
+      estado_id: estadoId,
+    };
   }
 
-  viewPlanSecretario() {
-    this.router.navigate(["/programacion/plan-auditoria/revision-secretario"]);
+  viewPlanJefe(element: any) {
+    this.router.navigate(["/programacion/plan-auditoria/revision-jefe", element.id]);
+  }
+
+  viewPlanSecretario(element: any) {
+    this.router.navigate(["/programacion/plan-auditoria/revision-secretario", element.id]);
   }
 }

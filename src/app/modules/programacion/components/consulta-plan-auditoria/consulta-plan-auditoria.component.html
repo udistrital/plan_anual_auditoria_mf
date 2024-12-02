@@ -115,14 +115,14 @@
                   <mat-menu #menu="matMenu">
                     <ng-container [ngSwitch]="role">
                       <div *ngSwitchCase="'auditor'">
-                        <button mat-menu-item (click)="editReport(element)">
+                        <button mat-menu-item (click)="editarReporte(element)">
                           <mat-icon color="primary">edit</mat-icon> Editar
                         </button>
-                        <button mat-menu-item (click)="editActivities(element)">
+                        <button mat-menu-item (click)="editarActividades(element)">
                           <mat-icon color="primary">add_circle</mat-icon>
                           Registrar Auditorías
                         </button>
-                        <button mat-menu-item (click)="sendApproval(element)">
+                        <button mat-menu-item (click)="enviarPlan(element)">
                           <mat-icon color="primary">send</mat-icon> Enviar
                           Aprobación
                         </button>
@@ -131,7 +131,7 @@
                         mat-menu-item
                         *ngSwitchCase="'jefe'"
                         mat-menu-item
-                        (click)="viewPlanJefe()"
+                        (click)="viewPlanJefe(element)"
                       >
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
@@ -139,7 +139,7 @@
                         mat-menu-item
                         *ngSwitchCase="'secretario'"
                         mat-menu-item
-                        (click)="viewPlanSecretario()"
+                        (click)="viewPlanSecretario(element)"
                       >
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>

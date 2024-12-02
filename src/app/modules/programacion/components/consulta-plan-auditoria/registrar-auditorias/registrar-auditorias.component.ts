@@ -77,7 +77,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
         if (result.isConfirmed) {
-          console.log(element);
           this.planAnualAuditoriaService
             .delete(`auditoria`, element)
             .subscribe(
@@ -110,7 +109,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
       )
       .then((result) => {
         if (result.isConfirmed) {
-          console.log("Plan eliminado");
 
           this.alertaSevice.showSuccessAlert(
             "Su plan fue guardado exitosamente"
