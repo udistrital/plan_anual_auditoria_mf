@@ -38,11 +38,11 @@ const routes: Routes = [
         component: RegistrarPlanComponent,
       },
       {
-        path: "revision-jefe",
+        path: "revision-jefe/:id",
         component: RevisionJefeComponent,
       },
       {
-        path: "revision-secretario",
+        path: "revision-secretario/:id",
         component: RevisionSecretarioComponent,
       },
     ],

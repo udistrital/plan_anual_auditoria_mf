@@ -6,6 +6,7 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalMotivosRechazoComponent } from "../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretario/modal-aprobacion-secretario.component";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: "app-revision-secretario",
@@ -14,8 +15,10 @@ import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretari
 })
 export class RevisionSecretarioComponent {
   selectedTab: number = 0;
+  planAuditoriaId: string = "";
 
   constructor(
+    private route: ActivatedRoute,
     public dialog: MatDialog,
     private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
@@ -28,6 +31,7 @@ export class RevisionSecretarioComponent {
 
   ngOnInit(): void {
     // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.documento = documento();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
@@ -39,6 +43,7 @@ export class RevisionSecretarioComponent {
       width: "70vw",
       data: {
         usuarioId: this.usuarioId,
+        planAuditoriaId: this.planAuditoriaId,
       },
     });
   }
@@ -48,6 +53,7 @@ export class RevisionSecretarioComponent {
       width: "50%",
       data: {
         usuarioId: this.usuarioId,
+        planAuditoriaId: this.planAuditoriaId,
       },
     });
   }

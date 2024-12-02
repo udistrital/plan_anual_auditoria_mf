@@ -84,7 +84,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
       )
       .then((result) => {
         if (result.isConfirmed) {
-          console.log(element);
           this.planAnualAuditoriaService
             .delete(`auditoria`, element)
             .subscribe(
@@ -127,7 +126,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
       )
       .then((result) => {
         if (result.isConfirmed) {
-          console.log("Plan eliminado");
 
           this.modalService.mostrarModal(
             "Su plan fue guardado exitosamente",

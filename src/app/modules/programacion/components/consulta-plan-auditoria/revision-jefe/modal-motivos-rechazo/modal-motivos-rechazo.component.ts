@@ -1,10 +1,10 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { MatDialog } from "@angular/material/dialog";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+
 @Component({
   selector: "app-modal-motivos-rechazo",
   templateUrl: "./modal-motivos-rechazo.component.html",
@@ -16,7 +16,6 @@ export class ModalMotivosRechazoComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
     public dialogRef: MatDialogRef<ModalMotivosRechazoComponent>,
-    public dialog: MatDialog,
     private alertService: AlertService,
     private fb: FormBuilder,
     private planAuditoriaService: PlanAnualAuditoriaService
@@ -24,16 +23,20 @@ export class ModalMotivosRechazoComponent implements OnInit {
 
   ngOnInit() {
     this.iniciarFormObservaciones();
-    console.log(this.infoModal);
   }
 
   iniciarFormObservaciones() {
     this.formObservaciones = this.fb.group({
-      observaciones: ["", Validators.required],
+      observaciones: ["", Validators.required], 
     });
   }
 
   preguntarConfirmacionRechazo() {
+    if (this.formObservaciones.invalid) {
+      this.alertService.showErrorAlert("Debe ingresar una observación.");
+      return;
+    }
+
     this.alertService
       .showConfirmAlert("¿Está seguro de rechazar el plan de auditoría anual?")
       .then((confirmado) => {
@@ -45,23 +48,27 @@ export class ModalMotivosRechazoComponent implements OnInit {
   }
 
   rechazarPlanAuditoria() {
-    const planEstado = this.construirObjetoPlanEstado();
-    this.planAuditoriaService.post("estado", planEstado).subscribe((res) => {
-      this.alertService.showAlert(
-        "Plan rechazado",
-        "El Plan fue devuelto al auditor (a)"
-      );
-      this.dialogRef.close();
-    });
-  }
-
-  construirObjetoPlanEstado() {
-    return {
-      //todo: este id esta quemado
-      plan_auditoria_id: "6734d09dec8e871919b3b5dd",
+    const planEstado = {
+      plan_auditoria_id: this.infoModal.planAuditoriaId,
       usuario_id: this.infoModal.usuarioId,
       observacion: this.formObservaciones.get("observaciones")?.value,
       estado_id: environment.PLAN_ESTADO.EN_BORRADOR_ID,
     };
+  
+    this.planAuditoriaService.post("estado", planEstado).subscribe(
+      () => {
+        this.alertService.showAlert(
+          "Plan rechazado",
+          "El plan fue devuelto al auditor(a)."
+        );
+        this.dialogRef.close();
+      },
+      (error) => {
+        this.alertService.showErrorAlert(
+          "Error al asociar el nuevo estado al plan."
+        );
+        console.error(error);
+      }
+    );
   }
 }
