@@ -1,0 +1,68 @@
+<plantilla-modal
+  [icono]="'report'"
+  [titulo]="'Motivos de rechazo'"
+  [descripcion]="'Lista de motivos de rechazo del Plan Anual de Auditoría'"
+  [contenido]="contenidoDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="d-flex align-items-center mt-4">
+    <mat-icon color="primary">restore</mat-icon>
+    <h3 class="mx-2">Historial de rechazos</h3>
+  </div>
+  <ng-container *ngFor="let rechazo of rechazos">
+    <div class="p-3 mb-4 mt-3">
+      <div
+        style="border-left: 8px solid var(--md-accent-500)"
+        class="fondo-acento-50 mb-3"
+      >
+        <p><b style="color: var(--md-accent-800)">Observaciones:</b></p>
+        <p>{{ rechazo.observacion }}</p>
+      </div>
+      <div class="row">
+        <div class="col-12 col-sm-6 mb-sm">
+          <div class="d-flex align-items-center">
+            <div>
+              <mat-icon color="primary">highlight_off</mat-icon>
+            </div>
+            <div class="mx-3">
+              <p><b>Rechazado por: </b> {{ rechazo.usuario_id }}</p>
+              <p><b>Rol usuario: </b> {{ rechazo.usuario_id }}</p>
+              <p>
+                <b>Fecha: </b>
+                {{ rechazo.fecha_ejecucion_estado | date : "dd/MM/yyyy" }}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6">
+          <div class="d-flex align-items-center">
+            <div>
+              <mat-icon color="primary">exit_to_app</mat-icon>
+            </div>
+            <div class="mx-3">
+              <p><b>Enviado por: </b> {{ rechazo.usuario_id }}</p>
+              <p><b>Rol usuario: </b> {{ rechazo.usuario_id }}</p>
+              <p>
+                <b>Fecha: </b>
+                {{ rechazo.fecha_ejecucion_estado | date : "dd/MM/yyyy" }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr style="border: 1px dashed var(--md-accent-700)" class="mx-5" />
+  </ng-container>
+  <mat-dialog-actions align="center">
+    <button
+      mat-stroked-button
+      color="primary"
+      style="border: 1px solid var(--md-primary-500)"
+      [mat-dialog-close]
+      class="mt-3"
+    >
+      <mat-icon>toll</mat-icon>Regresar
+    </button>
+  </mat-dialog-actions>
+</ng-template>

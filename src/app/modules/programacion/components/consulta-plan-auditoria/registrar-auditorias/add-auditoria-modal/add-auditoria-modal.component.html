@@ -46,15 +46,15 @@
                 >
                   {{ evaluacion.Nombre }}
                 </mat-option>
-                <mat-error
-                  *ngIf="
-                    auditoriaForm.get('tipoEvaluacion').hasError('required') &&
-                    auditoriaForm.get('tipoEvaluacion').touched
-                  "
-                >
-                  Seleccione el tipo de evaluación
-                </mat-error>
               </mat-select>
+              <mat-error
+                *ngIf="
+                  auditoriaForm.get('tipoEvaluacion').hasError('required') &&
+                  auditoriaForm.get('tipoEvaluacion').touched
+                "
+              >
+                Seleccione el tipo de evaluación
+              </mat-error>
             </mat-form-field>
           </div>
           <div class="col-12 col-md-6 col-xl-4">

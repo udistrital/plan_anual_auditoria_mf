@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -8,6 +7,9 @@ import { MatTableDataSource } from "@angular/material/table";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
+import { MatDialog } from "@angular/material/dialog";
+import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -36,8 +38,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   constructor(
     private alertaService: AlertService,
+    private dialog: MatDialog,
     private router: Router,
-    public dialog: MatDialog,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private autenticationService: ImplicitAutenticationService
@@ -179,5 +181,29 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   viewPlanSecretario() {
     this.router.navigate(["/programacion/plan-auditoria/revision-secretario"]);
+  }
+
+  verMotivosRechazo(plan: any) {
+    const dialogRef = this.dialog.open(ModalListaRechazosComponent, {
+      width: "1000px",
+      data: plan,
+      autoFocus: false,
+    });
+  }
+
+  verificarRechazos(plan: any) {
+    const planId = plan.id;
+    const estadoRechazadoId = environment.PLAN_ESTADO.RECHAZADO;
+
+    this.planAnualAuditoriaService
+      .get(
+        `estado?query=plan_auditoria_id:${planId},estado_id:${estadoRechazadoId},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
+      )
+      .subscribe((res) => {
+        if (res.MetaData.Count) {
+          plan.tieneRechazos = true;
+          plan.rechazos = res.Data;
+        }
+      });
   }
 }

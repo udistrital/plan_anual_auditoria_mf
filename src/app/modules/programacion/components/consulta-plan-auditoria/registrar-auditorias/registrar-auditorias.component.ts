@@ -78,27 +78,23 @@ export class RegistrarAuditoriasComponent implements OnInit {
       .then((result) => {
         if (result.isConfirmed) {
           console.log(element);
-          this.planAnualAuditoriaService
-            .delete(`auditoria`, element)
-            .subscribe(
-              (response) => {
-                if (response) {
-                  this.alertaSevice.showSuccessAlert("Registro eliminado");
-                  this.dataSource.data = this.dataSource.data.filter(
-                    (e) => e.id !== element.id
-                  );
-                } else {
-                  this.alertaSevice.showErrorAlert(
-                    "Error al eliminar el registro"
-                  );
-                }
-              },
-              (error) => {
+          this.planAnualAuditoriaService.delete(`auditoria`, element).subscribe(
+            (response) => {
+              if (response) {
+                this.alertaSevice.showSuccessAlert("Registro eliminado");
+                this.dataSource.data = this.dataSource.data.filter(
+                  (e) => e.id !== element.id
+                );
+              } else {
                 this.alertaSevice.showErrorAlert(
                   "Error al eliminar el registro"
                 );
               }
-            );
+            },
+            (error) => {
+              this.alertaSevice.showErrorAlert("Error al eliminar el registro");
+            }
+          );
         }
       });
   }
@@ -121,7 +117,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   subirArchivo(tipoArchivo: string): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
-      width: "600px",
+      width: "800px",
       data: { tipoArchivo, id: this.id },
     });
   }
