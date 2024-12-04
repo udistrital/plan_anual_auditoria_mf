@@ -5,6 +5,7 @@ import { ModalService } from "src/app/shared/services/modal.service";
 import { UserService } from "src/app/core/services/user.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
@@ -44,6 +45,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     public dialog: MatDialog,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private autenticationService: ImplicitAutenticationService,
     private userService: UserService
   ) { }
@@ -96,7 +98,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria() {
-    this.planAnualAuditoriaService.planilla("plan-auditoria").subscribe(
+    this.PlanAnualAuditoriaMid.get("plan-auditoria").subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter(
@@ -107,6 +109,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
             estado: item.estado?.estado_nombre ?? "Borrador",
+            estadoId: item.estado?.estado_id ?? 6790,
           }));
         }
       },
@@ -214,6 +217,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
               this.alertaService.showSuccessAlert(
                 "plan enviado exitosamente"
               );
+              this.cargarPlanesAuditoria();
             } else {
               this.alertaService.showErrorAlert(
                 "Error al asociar el estado al plan"

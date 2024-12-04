@@ -19,6 +19,8 @@ import { ModalPdfVisualizadorComponent } from "./components/consulta-plan-audito
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
 
+import { MatTooltip } from "@angular/material/tooltip";
+
 @NgModule({
   declarations: [
     AddAuditoriaModalComponent,
@@ -41,6 +43,7 @@ import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/mo
     SharedModule,
     ProgramacionRoutingModule,
     MaterialModule,
+    MatTooltip
   ],
 })
 export class ProgramacionModule {}
