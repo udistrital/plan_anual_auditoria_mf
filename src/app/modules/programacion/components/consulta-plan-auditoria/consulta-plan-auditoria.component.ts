@@ -173,11 +173,15 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       });
   }
 
-  viewPlanJefe() {
-    this.router.navigate(["/programacion/revision-jefe"]);
+  viewPlanJefe(id: string) {
+    this.router.navigate(["/programacion/plan-auditoria/revision-jefe/"], {
+      queryParams: { id },
+    });
   }
 
-  viewPlanSecretario() {
-    this.router.navigate(["/programacion/plan-auditoria/revision-secretario"]);
+  viewPlanSecretario(id: string) {
+    this.router.navigate(["/programacion/plan-auditoria/revision-secretario/"], {
+      queryParams: { id },
+    });
   }
 }

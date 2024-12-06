@@ -131,7 +131,7 @@
                         mat-menu-item
                         *ngSwitchCase="'jefe'"
                         mat-menu-item
-                        (click)="viewPlanJefe()"
+                        (click)="viewPlanJefe(element.id)"
                       >
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
@@ -139,7 +139,7 @@
                         mat-menu-item
                         *ngSwitchCase="'secretario'"
                         mat-menu-item
-                        (click)="viewPlanSecretario()"
+                        (click)="viewPlanSecretario(element.id)"
                       >
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
