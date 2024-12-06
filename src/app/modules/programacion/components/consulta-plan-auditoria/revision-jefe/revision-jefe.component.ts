@@ -1,15 +1,16 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { ActivatedRoute } from "@angular/router";
 import { ModalMotivosRechazoComponent } from "./modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
-
 import {ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { Router } from "@angular/router";
 @Component({
   selector: "app-revision-jefe",
   templateUrl: "./revision-jefe.component.html",
@@ -20,8 +21,10 @@ export class RevisionJefeComponent implements OnInit {
   botonSeleccionado: string = "formato";
   documento: string = "";
   usuarioId: any;
-  idPlanAuditoria: string = "";
+  planAuditoriaId: string = "";
+  
   constructor(
+    private route: ActivatedRoute,
     public dialog: MatDialog,
     private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
@@ -29,15 +32,13 @@ export class RevisionJefeComponent implements OnInit {
     private userService: UserService,
     private router: Router,
     private route: ActivatedRoute,
-
   ) {}
 
   async ngOnInit() {
-    // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
-    this.route.queryParams.subscribe((params) => {
-      this.idPlanAuditoria = params['id']; // Aquí obtienes el ID enviado
-    });
-    try{
+
+
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+     try{
       this.documento = await this.renderDocumento();
       
     }catch(error){
@@ -49,16 +50,11 @@ export class RevisionJefeComponent implements OnInit {
   }
 
   openModalRechazo(): void {
-    this.planAuditoriaService
-      .get("estado?query=activo:true&limit=0")
-      .subscribe((res) => {
-        console.log("slkdjaslkdjkasl");
-        console.log(res);
-      });
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: "50%",
       data: {
         usuarioId: this.usuarioId,
+        planAuditoriaId: this.planAuditoriaId,
       },
     });
   }
@@ -76,22 +72,35 @@ export class RevisionJefeComponent implements OnInit {
       });
   }
 
+
+
   aprobarPlanAuditoria() {
-    const planEstado = this.construirObjetoPlanEstado();
-    this.planAuditoriaService.post("estado", planEstado).subscribe((res) => {
-      this.alertService.showSuccessAlert(
-        "Plan aceptado, el plan fue enviado al jefe de oficina"
-      );
-    });
+    const planEstado = this.construirObjetoPlanEstado(
+      this.planAuditoriaId,
+      environment.PLAN_ESTADO.APROBADO_JEFE_ID
+    );
+  
+    this.planAuditoriaService.post("estado", planEstado).subscribe(
+      () => {
+        this.alertService.showSuccessAlert(
+          "Plan aceptado, el plan fue enviado al secretario."
+        );
+      },
+      (error) => {
+        this.alertService.showErrorAlert(
+          "Error al asociar el nuevo estado al plan."
+        );
+        console.error(error);
+      }
+    );
   }
 
-  construirObjetoPlanEstado() {
+  construirObjetoPlanEstado(planId: string, estadoId: number, observacion = "") {
     return {
-      //todo: este id esta quemado
-      plan_auditoria_id: "6734d09dec8e871919b3b5dd",
+      plan_auditoria_id: planId,
       usuario_id: this.usuarioId,
-      observacion: "",
-      estado_id: environment.PLAN_ESTADO.APROBADO_JEFE_ID,
+      observacion,
+      estado_id: estadoId,
     };
   }
 

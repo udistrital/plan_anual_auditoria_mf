@@ -58,7 +58,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter(
-            (item: any) => item.activo === true
+            (item: any) => item.activo === true && !item.plan_auditoria_id
           ).map((item: any) => ({
             id: item._id ?? 0,
             auditoria: item.titulo ?? "Sin Título",

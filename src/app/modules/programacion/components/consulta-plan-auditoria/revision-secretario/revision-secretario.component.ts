@@ -10,6 +10,7 @@ import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretari
 import { ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+
 @Component({
   selector: "app-revision-secretario",
   templateUrl: "./revision-secretario.component.html",
@@ -17,8 +18,10 @@ import { map, catchError } from 'rxjs/operators';
 })
 export class RevisionSecretarioComponent {
   selectedTab: number = 0;
-  idPlanAuditoria: string = ""; constructor(
 
+  planAuditoriaId: string = "";
+
+  constructor(
     public dialog: MatDialog,
     private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
@@ -35,10 +38,8 @@ export class RevisionSecretarioComponent {
 
   async ngOnInit() {
     // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
-    this.route.queryParams.subscribe((params) => {
-      this.idPlanAuditoria = params['id']; // Aquí obtienes el ID enviado
-    });
-    try{
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+   try{
       this.documento = await this.renderDocumento();
       
     }catch(error){
@@ -54,6 +55,7 @@ export class RevisionSecretarioComponent {
       width: "50%",
       data: {
         usuarioId: this.usuarioId,
+        planAuditoriaId: this.planAuditoriaId,
       },
     });
   }
@@ -63,6 +65,7 @@ export class RevisionSecretarioComponent {
       width: "600px",
       data: {
         usuarioId: this.usuarioId,
+        planAuditoriaId: this.planAuditoriaId,
       },
     });
   }

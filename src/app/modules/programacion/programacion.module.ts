@@ -17,6 +17,9 @@ import { RevisionSecretarioComponent } from "./components/consulta-plan-auditori
 import { AddAuditoriaModalComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/add-auditoria-modal/add-auditoria-modal.component";
 import { ModalPdfVisualizadorComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/pdf-visualizador-modal/pdf-visualizador.component";
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
+import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
+
+import { MatTooltip } from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -24,6 +27,7 @@ import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditor
     AsignarAuditoriasComponent,
     ConsultaPlanAuditoriaComponent,
     FormularioAuditoriaEspecialComponent,
+    ModalAgregarAuditorComponent,
     ModalAprobacionSecretarioComponent,
     ModalMotivosRechazoComponent,
     PdfVisualizadorComponent,
@@ -39,6 +43,7 @@ import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditor
     SharedModule,
     ProgramacionRoutingModule,
     MaterialModule,
+    MatTooltip
   ],
 })
 export class ProgramacionModule {}
