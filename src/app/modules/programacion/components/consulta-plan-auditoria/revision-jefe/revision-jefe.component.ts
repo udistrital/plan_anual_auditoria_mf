@@ -1,6 +1,5 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { ActivatedRoute } from "@angular/router";
 import { ModalMotivosRechazoComponent } from "./modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -10,7 +9,6 @@ import { GestorDocumentalService } from "src/app/core/services/gestor-documental
 import {ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { Router } from "@angular/router";
 @Component({
   selector: "app-revision-jefe",
   templateUrl: "./revision-jefe.component.html",
@@ -31,7 +29,6 @@ export class RevisionJefeComponent implements OnInit {
     private gestorDocumentalService: GestorDocumentalService,
     private userService: UserService,
     private router: Router,
-    private route: ActivatedRoute,
   ) {}
 
   async ngOnInit() {
@@ -141,7 +138,7 @@ export class RevisionJefeComponent implements OnInit {
   async consultarDocumento(): Promise<string> {
     try {
       const nuxeoId = await lastValueFrom(
-        this.planAuditoriaService.get(`documento?query=referencia_id:${this.idPlanAuditoria}&fields=nuxeo_enlace`).pipe(
+        this.planAuditoriaService.get(`documento?query=referencia_id:${this.planAuditoriaId}&fields=nuxeo_enlace`).pipe(
           map((response: any) => {
             if (response && response.Data && Array.isArray(response.Data) && response.Data.length > 0) {
               const firstItem = response.Data[0];

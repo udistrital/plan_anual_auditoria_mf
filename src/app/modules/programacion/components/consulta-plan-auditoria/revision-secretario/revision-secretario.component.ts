@@ -10,7 +10,6 @@ import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretari
 import { ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-
 @Component({
   selector: "app-revision-secretario",
   templateUrl: "./revision-secretario.component.html",
@@ -106,7 +105,7 @@ export class RevisionSecretarioComponent {
   async consultarDocumento(): Promise<string> {
     try {
       const nuxeoId = await lastValueFrom(
-        this.planAuditoriaService.get(`documento?query=referencia_id:${this.idPlanAuditoria}&fields=nuxeo_enlace`).pipe(
+        this.planAuditoriaService.get(`documento?query=referencia_id:${this.planAuditoriaId}&fields=nuxeo_enlace`).pipe(
           map((response: any) => {
             if (response && response.Data && Array.isArray(response.Data) && response.Data.length > 0) {
               const firstItem = response.Data[0];
