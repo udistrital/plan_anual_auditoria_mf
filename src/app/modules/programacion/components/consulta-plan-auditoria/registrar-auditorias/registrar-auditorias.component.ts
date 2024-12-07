@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { AddAuditoriaModalComponent } from "./add-auditoria-modal/add-auditoria-modal.component";
 import { MatDialog } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
@@ -31,6 +32,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private router: Router
   ) {}
 
@@ -40,8 +42,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   loadAuditoriasFromService(): void {
-    this.planAnualAuditoriaService
-      .planilla(`auditoria?query=plan_auditoria_id:${this.id}`)
+    this.PlanAnualAuditoriaMid
+      .get(`auditoria?query=plan_auditoria_id:${this.id}`)
       .subscribe(
         (res) => {
           if (res && res.Data) {
@@ -77,15 +79,22 @@ export class RegistrarAuditoriasComponent implements OnInit {
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
         if (result.isConfirmed) {
-          console.log(element);
-          this.planAnualAuditoriaService.delete(`auditoria`, element).subscribe(
-            (response) => {
-              if (response) {
-                this.alertaSevice.showSuccessAlert("Registro eliminado");
-                this.dataSource.data = this.dataSource.data.filter(
-                  (e) => e.id !== element.id
-                );
-              } else {
+          this.planAnualAuditoriaService
+            .delete(`auditoria`, element)
+            .subscribe(
+              (response) => {
+                if (response) {
+                  this.alertaSevice.showSuccessAlert("Registro eliminado");
+                  this.dataSource.data = this.dataSource.data.filter(
+                    (e) => e.id !== element.id
+                  );
+                } else {
+                  this.alertaSevice.showErrorAlert(
+                    "Error al eliminar el registro"
+                  );
+                }
+              },
+              (error) => {
                 this.alertaSevice.showErrorAlert(
                   "Error al eliminar el registro"
                 );
@@ -106,11 +115,27 @@ export class RegistrarAuditoriasComponent implements OnInit {
       )
       .then((result) => {
         if (result.isConfirmed) {
-          console.log("Plan eliminado");
-
-          this.alertaSevice.showSuccessAlert(
-            "Su plan fue guardado exitosamente"
-          );
+          const auditoriaIds = this.dataSource.data.map(auditoria => auditoria.id);
+  
+          const payload = {
+            auditorias: auditoriaIds,
+          };
+  
+          this.planAnualAuditoriaService
+            .put(`plan-auditoria/${this.id}`, payload)
+            .subscribe(
+              () => {
+                this.alertaSevice.showSuccessAlert(
+                  "El Plan Anual de Auditoría fue guardado exitosamente"
+                );
+              },
+              (error) => {
+                console.error("Error al guardar el PAA:", error);
+                this.alertaSevice.showErrorAlert(
+                  "Hubo un error al guardar el Plan Anual de Auditoría"
+                );
+              }
+            );
         }
       });
   }
@@ -154,7 +179,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   renderizar() {
-    this.planAnualAuditoriaService.planilla(`plantilla/${this.id}`).subscribe(
+    this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}`).subscribe(
       (res) => {
         if (res && res.Data) {
           console.log("DATA ", res.Data);

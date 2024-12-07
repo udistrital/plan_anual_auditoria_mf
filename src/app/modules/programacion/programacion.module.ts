@@ -20,6 +20,8 @@ import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditor
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
 import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
 
+import { MatTooltip } from "@angular/material/tooltip";
+
 @NgModule({
   declarations: [
     AddAuditoriaModalComponent,
@@ -43,6 +45,7 @@ import { ModalListaRechazosComponent } from "./components/consulta-plan-auditori
     SharedModule,
     ProgramacionRoutingModule,
     MaterialModule,
+    MatTooltip
   ],
 })
 export class ProgramacionModule {}

@@ -85,21 +85,29 @@ export class ModalAprobacionSecretarioComponent {
     reader.readAsDataURL(this.archivo);
   }
 
-  aceptarPlanAuditoria() {
-    const planEstado = this.construirObjetoPlanEstado();
-    this.planAuditoriaService.post("estado", planEstado).subscribe((res) => {
-      this.alertService.showSuccessAlert("Plan aprobado");
-      this.dialogRef.close();
-    });
+  aceptarPlanAuditoria(): void {
+    const planEstado = this.construirObjetoPlanEstado(
+      this.infoModal.planAuditoriaId, // ID del plan pasado por el modal
+      environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
+    );
+
+    this.planAuditoriaService.post("estado", planEstado).subscribe(
+      () => {
+        this.alertService.showSuccessAlert("Plan aprobado");
+      },
+      (error) => {
+        this.alertService.showErrorAlert("Error al aprobar el plan");
+        console.error(error);
+      }
+    );
   }
 
-  construirObjetoPlanEstado() {
+  construirObjetoPlanEstado(planId: string, estadoId: number, observacion = "") {
     return {
-      //todo: este id esta quemado
-      plan_auditoria_id: "6734d09dec8e871919b3b5dd",
+      plan_auditoria_id: planId,
       usuario_id: this.infoModal.usuarioId,
-      observacion: "",
-      estado_id: environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID,
+      observacion,
+      estado_id: estadoId,
     };
   }
 }
