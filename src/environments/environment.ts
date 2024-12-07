@@ -20,7 +20,7 @@ export const environment = {
     EN_REVISION_JEFE_ID: 6791,
     APROBADO_JEFE_ID: 6792,
     APROBADO_SECRETARIO_ID: 6794,
-    RECHAZADO: 6794,
+    RECHAZADO: 6806,
   },
   // idsCamposFormulario: {
   //   Objetivo: 6770,

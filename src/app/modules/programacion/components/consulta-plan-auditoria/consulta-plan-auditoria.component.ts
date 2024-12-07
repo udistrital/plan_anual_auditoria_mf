@@ -72,6 +72,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       if (this.IsAuditor) {
         this.cargarVigencias();
       }
+      console.log(this.role);
     });
   }
 
@@ -197,12 +198,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
     this.planAnualAuditoriaService
       .get(
-        `estado?query=plan_auditoria_id:${planId},estado_id:${estadoRechazadoId},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
+        `estado?query=plan_auditoria_id:${planId},estado_id:${estadoRechazadoId},activo:true&limit=1&fields=_id`
       )
       .subscribe((res) => {
         if (res.MetaData.Count) {
           plan.tieneRechazos = true;
-          plan.rechazos = res.Data;
+          plan.numRechazos = res.MetaData.Count;
         }
       });
   }
