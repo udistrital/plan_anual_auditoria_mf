@@ -101,9 +101,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get("plan-auditoria").subscribe(
       (res) => {
         if (res && res.Data) {
-          this.dataSource.data = res.Data.filter(
-            (item: any) => item.activo === true
-          ).map((item: any, index: number) => ({
+          this.dataSource.data = res.Data.filter((item: any) => {
+
+            if ((this.IsSecretario || this.IsJefe) && item.estado?.estado_id === 6790) {
+              return false;  
+            }
+            return item.activo === true;
+          }).map((item: any, index: number) => ({
             id: item._id,
             creadoPor: item.creado_por_id ?? "Sin asignar",
             vigencia: item.vigencia_nombre ?? "No encontrada",

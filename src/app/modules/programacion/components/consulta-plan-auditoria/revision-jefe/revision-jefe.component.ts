@@ -19,6 +19,8 @@ export class RevisionJefeComponent implements OnInit {
   documento: string = "";
   usuarioId: any;
   planAuditoriaId: string = "";
+  estadoIdActual: number | null = null;
+  mostrarBotones: boolean = true; 
 
   constructor(
     private route: ActivatedRoute,
@@ -27,18 +29,37 @@ export class RevisionJefeComponent implements OnInit {
     private planAuditoriaService: PlanAnualAuditoriaService,
     private userService: UserService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit() {
-
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.obtenerEstadoActual();
     this.documento = documento();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
   }
 
+  obtenerEstadoActual(): void {
+    this.planAuditoriaService
+      .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
+      .subscribe(
+        (response: any) => {
+          const estadoActual = response?.Data?.[0]; 
+          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.mostrarBotones =
+            this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
+        },
+        (error) => {
+          console.error("Error al obtener el estado actual:", error);
+          this.mostrarBotones = false; 
+        }
+      );
+  }
+
   openModalRechazo(): void {
+    if (!this.mostrarBotones) return;
+
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: "50%",
       data: {
@@ -49,6 +70,8 @@ export class RevisionJefeComponent implements OnInit {
   }
 
   openModalEnviar(): void {
+    if (!this.mostrarBotones) return;
+
     this.alertService
       .showConfirmAlert(
         "¿Está seguro de enviar el Plan Anual de Auditoría? - PAA?"
@@ -58,15 +81,15 @@ export class RevisionJefeComponent implements OnInit {
           return;
         }
         this.aprobarPlanAuditoria();
+        
       });
   }
-
 
 
   aprobarPlanAuditoria() {
     const planEstado = this.construirObjetoPlanEstado(
       this.planAuditoriaId,
-      environment.PLAN_ESTADO.APROBADO_JEFE_ID
+      environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID
     );
   
     this.planAuditoriaService.post("estado", planEstado).subscribe(
@@ -74,6 +97,9 @@ export class RevisionJefeComponent implements OnInit {
         this.alertService.showSuccessAlert(
           "Plan aceptado, el plan fue enviado al secretario."
         );
+        this.router.navigate([
+          `/programacion/plan-auditoria/`
+        ]);
       },
       (error) => {
         this.alertService.showErrorAlert(

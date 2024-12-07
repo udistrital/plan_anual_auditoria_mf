@@ -17,6 +17,8 @@ import { ActivatedRoute } from "@angular/router";
 export class RevisionSecretarioComponent {
   selectedTab: number = 0;
   planAuditoriaId: string = "";
+  estadoIdActual: number | null = null;
+  mostrarBotones: boolean = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -34,13 +36,35 @@ export class RevisionSecretarioComponent {
   ngOnInit(): void {
     // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.obtenerEstadoActual();
     this.documento = documento();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
   }
 
+  obtenerEstadoActual(): void {
+    this.planAuditoriaService
+      .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
+      .subscribe(
+        (response: any) => {
+          const estadoActual = response?.Data?.[0]; 
+          console.log(response?.Data)
+          console.log(this.planAuditoriaId)
+          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.mostrarBotones =
+            this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
+        },
+        (error) => {
+          console.error("Error al obtener el estado actual:", error);
+          this.mostrarBotones = false; 
+        }
+      );
+  }
+
   openModalRechazo(): void {
+    if (!this.mostrarBotones) return;
+
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: "50%",
       data: {
@@ -51,6 +75,8 @@ export class RevisionSecretarioComponent {
   }
 
   openModalEnviar(): void {
+    if (!this.mostrarBotones) return;
+
     this.dialog.open(ModalAprobacionSecretarioComponent, {
       width: "600px",
       data: {

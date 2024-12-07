@@ -103,14 +103,13 @@
                     <ng-container [ngSwitch]="role">
                       <!-- Auditor Actions -->
                       <ng-container *ngSwitchCase="'auditor'">
-                        <!-- Mostrar acciones solo si estadoId === 6790 -->
-                        <ng-container *ngIf="element.estadoId === 6790   ">
+                        <ng-container *ngIf="element.estadoId === 6790 || element.estadoId === 6806">
                           <button mat-menu-item (click)="editarReporte(element)">
                             <mat-icon color="primary">edit</mat-icon> Editar
                           </button>
                           <button mat-menu-item (click)="editarActividades(element)">
                             <mat-icon color="primary">add_circle</mat-icon>
-                            Registrar Auditorías
+                            Registrar Auditorías 
                           </button>
                           <button mat-menu-item (click)="enviarPlan(element)">
                             <mat-icon color="primary">send</mat-icon> Enviar Aprobación
@@ -130,7 +129,7 @@
                     </ng-container>
                   </mat-menu>
 
-                  <ng-container *ngIf="role !== 'auditor' || element.estadoId === 6790; else enviado">
+                  <ng-container *ngIf="role !== 'auditor' || element.estadoId === 6790 || element.estadoId === 6806  ; else enviado">
                     <button mat-icon-button [matMenuTriggerFor]="menu">
                       <mat-icon color="primary">more_vert</mat-icon>
                     </button>

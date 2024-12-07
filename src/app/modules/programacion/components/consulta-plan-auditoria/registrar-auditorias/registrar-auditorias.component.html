@@ -21,8 +21,8 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <button mat-icon-button>
-          <mat-icon color="primary" class="icon">view_list</mat-icon>
+        <button mat-icon-button (click)="descargarPlantilla()">
+          <mat-icon color="primary" class="icon" >view_list</mat-icon>
         </button>
       </div>
 
@@ -127,7 +127,7 @@
             class="mx-2"
             mat-raised-button
             color="primary"
-            (click)="subirArchivo('xlsx')"
+            (click)="subirArchivoCargueMasivo()"
           >
             <mat-icon>file_upload</mat-icon> Cargue Masivo
           </button>
@@ -143,7 +143,7 @@
             class="mx-2"
             mat-raised-button
             color="primary"
-            (click)="subirArchivo('pdf')"
+            (click)="subirArchivoMatriz()"
           >
             <mat-icon>file_upload</mat-icon>Matriz
           </button>
