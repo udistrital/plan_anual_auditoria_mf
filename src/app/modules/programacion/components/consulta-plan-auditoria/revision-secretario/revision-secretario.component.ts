@@ -33,14 +33,15 @@ export class RevisionSecretarioComponent {
 
   botonSeleccionado: string = "formato";
   documento: string = "";
+  documentoMatrizPublica: string = "";
   usuarioId: any;
 
   async ngOnInit() {
     // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
    try{
-      this.documento = await this.renderDocumento();
-      
+    this.documento = await this.renderDocumento(0);
+    this.documentoMatrizPublica= await this.renderDocumento(1);
     }catch(error){
       console.log("no se genero el base 64");
     }
@@ -102,10 +103,10 @@ export class RevisionSecretarioComponent {
     }
   }
 
-  async consultarDocumento(): Promise<string> {
+  async consultarDocumento(tipoId:number): Promise<string> {
     try {
       const nuxeoId = await lastValueFrom(
-        this.planAuditoriaService.get(`documento?query=referencia_id:${this.planAuditoriaId}&fields=nuxeo_enlace`).pipe(
+        this.planAuditoriaService.get(`documento?query=referencia_id:${this.planAuditoriaId},tipo_id:${tipoId}&fields=nuxeo_enlace`).pipe(
           map((response: any) => {
             if (response && response.Data && Array.isArray(response.Data) && response.Data.length > 0) {
               const firstItem = response.Data[0];
@@ -127,9 +128,8 @@ export class RevisionSecretarioComponent {
       throw error; // Permitir manejo del error en el lugar donde se llama este método
     }
   }
-  async renderDocumento(): Promise<string> {
-    console.log("secretario 1111");
-    const enlace = await this.consultarDocumento();
+  async renderDocumento(tipoId:number): Promise<string> {
+    const enlace = await this.consultarDocumento(tipoId);
     const base64 = await this.consultarNuxeo(enlace);
     return base64;
   }

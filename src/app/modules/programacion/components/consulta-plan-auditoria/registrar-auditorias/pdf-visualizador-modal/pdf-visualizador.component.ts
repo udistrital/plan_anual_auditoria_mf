@@ -65,7 +65,7 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     if (this.base64 !== "") {
       const payload = [
         {
-          IdTipoDocumento: 1,
+          IdTipoDocumento: 178,
           nombre: this.data.id,
           descripcion: "Documento pdf, auditorias de plan de auditoria",
           metadatos: {},
