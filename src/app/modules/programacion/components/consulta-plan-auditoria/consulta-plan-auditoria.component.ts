@@ -105,7 +105,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter((item: any) => {
 
-            if ((this.IsSecretario || this.IsJefe) && item.estado?.estado_id === 6790 || item.estado?.estado_nombre === "Borrador") {
+            if ((this.IsSecretario || this.IsJefe) && (item.estado?.estado_id === 6790)) {
               return false;  
             }
             return item.activo === true;
