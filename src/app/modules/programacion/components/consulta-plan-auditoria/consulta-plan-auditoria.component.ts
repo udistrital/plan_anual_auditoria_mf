@@ -244,6 +244,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     };
   }
 
+
   viewPlanJefe(element: any) {
     this.router.navigate(["/programacion/plan-auditoria/revision-jefe", element.id]);
   }
