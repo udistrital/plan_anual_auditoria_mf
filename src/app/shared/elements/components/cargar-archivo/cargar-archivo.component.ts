@@ -11,6 +11,7 @@ import { GestorDocumentalService } from "src/app/core/services/gestor-documental
 import { lambdaService } from "src/app/core/services/lambda.service";
 import { HttpClient } from "@angular/common/http";
 import { ModalService } from 'src/app/shared/services/modal.service';
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-cargar-archivo",
@@ -26,9 +27,17 @@ export class CargarArchivoComponent {
     public dialogRef: MatDialogRef<CargarArchivoComponent>,
     private gestorDocumentalService: GestorDocumentalService,
     private lambdaService: lambdaService,
+    private alertService: AlertService,
     private http: HttpClient,
     private modalService: ModalService,
-    @Inject(MAT_DIALOG_DATA) public data: { tipoArchivo: string; id: string }
+    @Inject(MAT_DIALOG_DATA) public data: { 
+      tipoArchivo: string; 
+      idTipoDocumento: number;
+      descripcion: string;
+      id: string;
+      vigenciaId: number;
+      cargaLambda: boolean;
+    }
   ) {}
 
   onFileSelected(event: any): void {
@@ -74,43 +83,48 @@ export class CargarArchivoComponent {
     reader.onload = (e: any) => {
       const base64String = e.target.result.split(",")[1];
 
-      const lambdaPayload = {
-        base64data: base64String,
-        complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619},
-        type_upload: "auditorias",
-      };
+      if (this.data.cargaLambda) {
+        const lambdaPayload = {
+          base64data: base64String,
+          complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
+          type_upload: "auditorias",
+        };
+
+        this.lambdaService
+          .post("cargue-masivo/auditorias", lambdaPayload)
+          .subscribe({
+            next: (response: any) => {
+              console.log("Archivo enviado exitosamente al MID", response);
+              if (response && response.Data) {
+              this.resultados(response.Data);              
+            }
+          },
+            error: (error) => {
+              console.error("Error al enviar el archivo al MID", error);
+            },
+          });
+      }
 
       const payload = [
         {
-          IdTipoDocumento: 1,
+          IdTipoDocumento: this.data.idTipoDocumento,
           nombre: this.archivo!.name,
-          descripcion: "Documento prueba",
+          descripcion: this.data.descripcion,
           metadatos: {},
           file: base64String,
         },
       ];
 
-      this.lambdaService
-        .post("cargue-masivo/auditorias", lambdaPayload)
-        .subscribe({
-          next: (response: any) => {
-            console.log("Archivo enviado exitosamente al MID", response);
-            if (response && response.Data) {
-              this.resultados(response.Data);              
-            }
-          },
-          error: (error) => {
-            console.error("Error al enviar el archivo al MID", error);
-          },
-        });
-
       this.gestorDocumentalService
         .postAny("document/uploadAnyFormat", payload)
         .subscribe({
           next: (response) => {
+            this.alertService.showSuccessAlert("Documento subido exitosamente");
             console.log("Documento subido exitosamente", response);
+            this.dialogRef.close();
           },
           error: (error) => {
+            this.alertService.showErrorAlert("Error al subir el documento");
             console.error("Error al subir el documento", error);
           },
         });

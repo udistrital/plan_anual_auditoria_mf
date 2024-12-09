@@ -1,9 +1,11 @@
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
-import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-modal-aprobacion-secretario",
@@ -18,9 +20,11 @@ export class ModalAprobacionSecretarioComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
     public dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
+    private dialog: MatDialog,
     private alertService: AlertService,
     private gestorDocumentalService: GestorDocumentalService,
-    private planAuditoriaService: PlanAnualAuditoriaService
+    private planAuditoriaService: PlanAnualAuditoriaService,
+    private router: Router
   ) {}
 
   onFileSelected(event: Event): void {
@@ -32,7 +36,7 @@ export class ModalAprobacionSecretarioComponent {
       if (file.type !== "application/pdf") {
         alert("Por favor, seleccione un archivo en formato PDF.");
         this.removerArchivo();
-        input.value = ""; //
+        input.value = "";
         return;
       }
 
@@ -66,9 +70,9 @@ export class ModalAprobacionSecretarioComponent {
 
       const payload = [
         {
-          IdTipoDocumento: 1,
+          IdTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_COMITE_COORDINADOR,
           nombre: this.archivo!.name,
-          descripcion: "Documento prueba",
+          descripcion: "Acta de comite coordinador",
           metadatos: {},
           file: base64String,
         },
@@ -87,13 +91,17 @@ export class ModalAprobacionSecretarioComponent {
 
   aceptarPlanAuditoria(): void {
     const planEstado = this.construirObjetoPlanEstado(
-      this.infoModal.planAuditoriaId, // ID del plan pasado por el modal
+      this.infoModal.planAuditoriaId, 
       environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
     );
 
     this.planAuditoriaService.post("estado", planEstado).subscribe(
       () => {
         this.alertService.showSuccessAlert("Plan aprobado");
+        this.dialogRef.close();
+        this.router.navigate([
+          `/programacion/plan-auditoria/`
+        ]);
       },
       (error) => {
         this.alertService.showErrorAlert("Error al aprobar el plan");

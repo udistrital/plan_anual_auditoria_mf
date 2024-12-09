@@ -12,8 +12,11 @@ export const environment = {
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
+    EN_RECHAZO_ID: 6806,
     EN_REVISION_JEFE_ID: 6791,
-    APROBADO_JEFE_ID: 6791,
+    APROBADO_JEFE_ID: 6792,
+    EN_REVISION_SECRETARIO_ID: 6793,
+    APROBADO_SECRETARIO_ID: 6794,
   },
   // idsCamposFormulario: {
   //   Objetivo: 6770,

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-modal-motivos-rechazo",
@@ -18,7 +19,9 @@ export class ModalMotivosRechazoComponent implements OnInit {
     public dialogRef: MatDialogRef<ModalMotivosRechazoComponent>,
     private alertService: AlertService,
     private fb: FormBuilder,
-    private planAuditoriaService: PlanAnualAuditoriaService
+    private planAuditoriaService: PlanAnualAuditoriaService,
+    private router: Router
+
   ) {}
 
   ngOnInit() {
@@ -44,6 +47,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
           return;
         }
         this.rechazarPlanAuditoria();
+        
       });
   }
 
@@ -52,7 +56,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
       plan_auditoria_id: this.infoModal.planAuditoriaId,
       usuario_id: this.infoModal.usuarioId,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_id: environment.PLAN_ESTADO.EN_BORRADOR_ID,
+      estado_id: environment.PLAN_ESTADO.EN_RECHAZO_ID,
     };
   
     this.planAuditoriaService.post("estado", planEstado).subscribe(
@@ -62,6 +66,9 @@ export class ModalMotivosRechazoComponent implements OnInit {
           "El plan fue devuelto al auditor(a)."
         );
         this.dialogRef.close();
+        this.router.navigate([
+          `/programacion/plan-auditoria/`
+        ]);
       },
       (error) => {
         this.alertService.showErrorAlert(

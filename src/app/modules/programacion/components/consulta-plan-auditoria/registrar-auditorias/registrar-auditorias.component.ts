@@ -10,6 +10,8 @@ import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
+import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
 @Component({
   selector: "app-registrar-auditorias",
   templateUrl: "./registrar-auditorias.component.html",
@@ -28,13 +30,14 @@ export class RegistrarAuditoriasComponent implements OnInit {
   id: string = "";
 
   constructor(
-    private alertaSevice: AlertService,
+    private alertaService: AlertService,
     private route: ActivatedRoute,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private gestorDocumentalService: GestorDocumentalService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
@@ -61,7 +64,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
           }
         },
         (error) => {
-          this.alertaSevice.showErrorAlert("Error al cargar las auditorías");
+          this.alertaService.showErrorAlert("Error al cargar las auditorías");
         }
       );
   }
@@ -73,9 +76,67 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.dataSource.data = prevData;
   }
 
+  descargarPlantilla() {
+    this.gestorDocumentalService.get("document?query=Id:158543").subscribe(
+      (res) => {
+        if (res && res.Data && res.Data.length > 0) {
+          const base64File = res.Data[0].Nuxeo.file; 
+          console.log(base64File)
+          const fileType = res.Data[0].Nuxeo["file:content"]["mime-type"] || "application/pdf"; // Tipo de archivo
+          const fileName = res.Data[0].Nombre || "plantilla";
+  
+          try {
+            const arrayBuffer = this.base64ToArrayBuffer(base64File);
+            const blob = new Blob([arrayBuffer], { type: fileType });
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `${fileName}.${this.getExtensionFromMimeType(fileType)}`;
+            link.target = "_blank";
+            link.click();
+  
+            // Limpiar URL temporal
+            window.URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error("Error al procesar el archivo para descarga:", error);
+            this.alertaService.showErrorAlert("Error al descargar la plantilla");
+          }
+        } else {
+          this.alertaService.showErrorAlert("No se encontró la plantilla para descargar");
+        }
+      },
+      (error) => {
+        console.error("Error al obtener el archivo:", error);
+        this.alertaService.showErrorAlert("Error al descargar la plantilla");
+      }
+    );
+  }
+  
+  base64ToArrayBuffer(base64: string): ArrayBuffer {
+    const binaryString = window.atob(base64); 
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer; 
+  }
+  
+  getExtensionFromMimeType(mimeType: string): string {
+    const mimeMap: { [key: string]: string } = {
+      "application/pdf": "pdf",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+      "text/plain": "txt",
+      "application/json": "json",
+    };
+    return mimeMap[mimeType] || "file";
+  }
+  
+
   // Eliminar auditoría
   deleteAuditoria(element: Auditoria) {
-    this.alertaSevice
+    this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
         if (result.isConfirmed) {
@@ -84,54 +145,54 @@ export class RegistrarAuditoriasComponent implements OnInit {
             .subscribe(
               (response) => {
                 if (response) {
-                  this.alertaSevice.showSuccessAlert("Registro eliminado");
+                  this.alertaService.showSuccessAlert("Registro eliminado");
                   this.dataSource.data = this.dataSource.data.filter(
                     (e) => e.id !== element.id
                   );
                 } else {
-                  this.alertaSevice.showErrorAlert(
+                  this.alertaService.showErrorAlert(
                     "Error al eliminar el registro"
                   );
                 }
               },
               (error) => {
-                this.alertaSevice.showErrorAlert(
+                this.alertaService.showErrorAlert(
                   "Error al eliminar el registro"
                 );
               }
-            },
-            (error) => {
-              this.alertaSevice.showErrorAlert("Error al eliminar el registro");
-            }
-          );
+            );
         }
-      });
+      },
+      (error) => {
+        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      }
+    );
   }
 
   GuardarPaa() {
-    this.alertaSevice
+    this.alertaService
       .showConfirmAlert(
         "¿Está seguro(a) de guardar el Plan Anual de Auditoría - PAA?"
       )
       .then((result) => {
         if (result.isConfirmed) {
           const auditoriaIds = this.dataSource.data.map(auditoria => auditoria.id);
-  
+
           const payload = {
             auditorias: auditoriaIds,
           };
-  
+
           this.planAnualAuditoriaService
             .put(`plan-auditoria/${this.id}`, payload)
             .subscribe(
               () => {
-                this.alertaSevice.showSuccessAlert(
+                this.alertaService.showSuccessAlert(
                   "El Plan Anual de Auditoría fue guardado exitosamente"
                 );
               },
               (error) => {
                 console.error("Error al guardar el PAA:", error);
-                this.alertaSevice.showErrorAlert(
+                this.alertaService.showErrorAlert(
                   "Hubo un error al guardar el Plan Anual de Auditoría"
                 );
               }
@@ -140,10 +201,28 @@ export class RegistrarAuditoriasComponent implements OnInit {
       });
   }
 
-  subirArchivo(tipoArchivo: string): void {
+  subirArchivoCargueMasivo(): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
-      data: { tipoArchivo, id: this.id },
+      data: {
+        tipoArchivo: 'xlsx',
+        id: this.id,
+        idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+        descripcion: 'Archivo para cargue masivo',
+        cargaLambda: true
+      },
+    });
+  }
+
+  subirArchivoMatriz(): void {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+      width: "800px",
+      data: {
+        tipoArchivo: 'pdf',
+        idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
+        descripcion: 'Matriz funcion publica',
+        cargaLambda: false
+      },
     });
   }
 
@@ -189,12 +268,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
             height: "80vh",
           });
         } else {
-          this.alertaSevice.showAlert("Aviso", "No se pudo cargar el PDF");
+          this.alertaService.showAlert("Aviso", "No se pudo cargar el PDF");
         }
       },
       (error) => {
         console.log("-----------", error);
-        this.alertaSevice.showErrorAlert("Error al cargar el PDF");
+        this.alertaService.showErrorAlert("Error al cargar el PDF");
       }
     );
   }
