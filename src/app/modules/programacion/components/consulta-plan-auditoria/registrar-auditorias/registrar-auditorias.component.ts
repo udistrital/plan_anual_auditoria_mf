@@ -99,7 +99,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
                   "Error al eliminar el registro"
                 );
               }
-            );
+            },
+            (error) => {
+              this.alertaSevice.showErrorAlert("Error al eliminar el registro");
+            }
+          );
         }
       });
   }
@@ -138,7 +142,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   subirArchivo(tipoArchivo: string): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
-      width: "600px",
+      width: "800px",
       data: { tipoArchivo, id: this.id },
     });
   }

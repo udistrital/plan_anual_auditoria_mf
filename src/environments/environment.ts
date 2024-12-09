@@ -13,7 +13,8 @@ export const environment = {
 
   LAMBDA_SERVICE: "http://localhost:3001/",
 
-  AUTENTICACION_MID_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
+  AUTENTICACION_MID_SERVICE:
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
@@ -21,6 +22,7 @@ export const environment = {
     APROBADO_JEFE_ID: 6792,
     EN_REVISION_SECRETARIO_ID: 6793,
     APROBADO_SECRETARIO_ID: 6794,
+    RECHAZADO: 6806,
   },
 
   // idsCamposFormulario: {
