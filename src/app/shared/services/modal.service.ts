@@ -14,10 +14,14 @@ export class ModalService {
     titulo: string): void {
     Swal.fire({
       title: titulo.toUpperCase(),
-      text: mensaje,
+      html: mensaje,
       icon: icono,
-      confirmButtonText: 'OK',
+      confirmButtonText: 'Aceptar',
       confirmButtonColor: 'rgb(47, 165, 244)',
+      customClass: {
+        popup: 'anchoModal',
+        htmlContainer: 'barraModal',
+      }
     });
   }
 

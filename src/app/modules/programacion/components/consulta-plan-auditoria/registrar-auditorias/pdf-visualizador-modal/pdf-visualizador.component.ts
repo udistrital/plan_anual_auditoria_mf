@@ -7,6 +7,11 @@ import {
 } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+
+import { HttpResponse } from '@angular/common/http';
+import { filter, map } from 'rxjs/operators';
+
 @Component({
   selector: "app-modal-pdf-visualizador",
   templateUrl: "./pdf-visualizador.component.html",
@@ -21,8 +26,9 @@ export class ModalPdfVisualizadorComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string },
-    private gestorDocumentalService: GestorDocumentalService
-  ) {}
+    private gestorDocumentalService: GestorDocumentalService,
+    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+  ) { }
 
   ngOnInit() {
     const documentSource = this.data.base64Document;
@@ -54,12 +60,12 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     }
     return bytes.buffer; // Retorna el ArrayBuffer
   }
-
+  private registroPlanAuditoria: any;
   guardarPdf() {
     if (this.base64 !== "") {
       const payload = [
         {
-          IdTipoDocumento: 1,
+          IdTipoDocumento: 178,
           nombre: this.data.id,
           descripcion: "Documento pdf, auditorias de plan de auditoria",
           metadatos: {},
@@ -71,6 +77,9 @@ export class ModalPdfVisualizadorComponent implements OnInit {
         .subscribe({
           next: (response) => {
             console.log("Documento subido exitosamente", response);
+            this.registroPlanAuditoria = response;
+            console.log("---------------registroPlanAuditoria ",this.registroPlanAuditoria.res.Nombre)
+            this.guardarReferenciaPdf(this.registroPlanAuditoria.res.Nombre,this.registroPlanAuditoria.res.Id,  this.registroPlanAuditoria.res.Enlace)
           },
           error: (error) => {
             console.error("Error al subir el documento", error);
@@ -78,4 +87,59 @@ export class ModalPdfVisualizadorComponent implements OnInit {
         });
     }
   }
+
+  guardarReferenciaPdf(id: number, nuexoId: number, nuexoEnlace: string): void {
+    if (nuexoEnlace !== "") {
+      const payload = {
+        "referencia_tipo": "Plan Auditoria",
+        "referencia_id": id,
+        "nuxeo_id": nuexoId,
+        "nuxeo_enlace": nuexoEnlace,
+        "tipo_id": 0,
+        "activo": true,
+        "fecha_creacion": new Date().toISOString()
+      };
+  
+      // Validar si el registro ya existe
+      this.planAnualAuditoriaService
+        .get(`documento?referencia_id=${id}`)
+        .subscribe({
+          next: (response) => {
+            if (response && response.length > 0) {
+              // Si el registro existe, realizar un PUT
+              const documentoId = response[0].id; // Suponiendo que el ID del documento está en `response[0].id`
+              console.log("actualizacion payload", payload)
+
+              this.planAnualAuditoriaService
+                .put(`documento/${documentoId}`, payload)
+                .subscribe({
+                  next: (putResponse) => {
+                    console.log("Documento actualizado exitosamente", putResponse);
+                  },
+                  error: (putError) => {
+                    console.error("Error al actualizar el documento", putError);
+                  },
+                });
+            } else {
+              // Si el registro no existe, realizar un POST
+              console.log("registro payload", payload)
+              this.planAnualAuditoriaService
+                .post("documento", payload)
+                .subscribe({
+                  next: (postResponse) => {
+                    console.log("Documento registrado exitosamente", postResponse);
+                  },
+                  error: (postError) => {
+                    console.error("Error al registrar el documento", postError);
+                  },
+                });
+            }
+          },
+          error: (getError) => {
+            console.error("Error al verificar la existencia del documento", getError);
+          },
+        });
+    }
+  }
+  
 }

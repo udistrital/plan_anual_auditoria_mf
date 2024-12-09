@@ -103,6 +103,14 @@
                     <ng-container [ngSwitch]="role">
                       <!-- Auditor Actions -->
                       <ng-container *ngSwitchCase="'auditor'">
+                        <button
+                          mat-menu-item
+                          (click)="verMotivosRechazo(element)"
+                          *ngIf="element.tieneRechazos"
+                        >
+                          <mat-icon color="primary">report</mat-icon> Motivos de
+                          rechazo
+                        </button>
                         <ng-container *ngIf="element.estadoId === 6790 || element.estadoId === 6806">
                           <button mat-menu-item (click)="editarReporte(element)">
                             <mat-icon color="primary">edit</mat-icon> Editar
@@ -128,9 +136,8 @@
                       </button>
                     </ng-container>
                   </mat-menu>
-
                   <ng-container *ngIf="role !== 'auditor' || element.estadoId === 6790 || element.estadoId === 6806  ; else enviado">
-                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <button (click)="verificarRechazos(element)" mat-icon-button [matMenuTriggerFor]="menu">
                       <mat-icon color="primary">more_vert</mat-icon>
                     </button>
                   </ng-container><ng-template #enviado>

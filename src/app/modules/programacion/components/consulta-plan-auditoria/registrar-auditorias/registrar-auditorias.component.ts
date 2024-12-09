@@ -162,7 +162,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
               }
             );
         }
-      });
+      },
+      (error) => {
+        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      }
+    );
   }
 
   GuardarPaa() {
@@ -199,7 +203,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   subirArchivoCargueMasivo(): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
-      width: "600px",
+      width: "800px",
       data: {
         tipoArchivo: 'xlsx',
         id: this.id,
@@ -212,7 +216,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   subirArchivoMatriz(): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
-      width: "600px",
+      width: "800px",
       data: {
         tipoArchivo: 'pdf',
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,

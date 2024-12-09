@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { ModalService } from "src/app/shared/services/modal.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -12,6 +11,9 @@ import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
+import { MatDialog } from "@angular/material/dialog";
+import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -41,8 +43,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   constructor(
     private alertaService: AlertService,
+    private dialog: MatDialog,
     private router: Router,
-    public dialog: MatDialog,
     private parametrosService: ParametrosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
@@ -80,6 +82,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       if (this.IsAuditor) {
         this.cargarVigencias();
       }
+      console.log(this.role);
     });
   }
 
@@ -248,11 +251,36 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     };
   }
 
+
   viewPlanJefe(element: any) {
     this.router.navigate(["/programacion/plan-auditoria/revision-jefe", element.id]);
   }
 
   viewPlanSecretario(element: any) {
     this.router.navigate(["/programacion/plan-auditoria/revision-secretario", element.id]);
+  }
+
+  verMotivosRechazo(plan: any) {
+    const dialogRef = this.dialog.open(ModalListaRechazosComponent, {
+      width: "1000px",
+      data: plan,
+      autoFocus: false,
+    });
+  }
+
+  verificarRechazos(plan: any) {
+    const planId = plan.id;
+    const estadoRechazadoId = environment.PLAN_ESTADO.RECHAZADO;
+
+    this.planAnualAuditoriaService
+      .get(
+        `estado?query=plan_auditoria_id:${planId},estado_id:${estadoRechazadoId},activo:true&limit=1&fields=_id`
+      )
+      .subscribe((res) => {
+        if (res.MetaData.Count) {
+          plan.tieneRechazos = true;
+          plan.numRechazos = res.MetaData.Count;
+        }
+      });
   }
 }

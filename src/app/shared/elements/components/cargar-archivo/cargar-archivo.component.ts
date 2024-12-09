@@ -1,3 +1,4 @@
+import { MatTableDataSource } from '@angular/material/table';
 import {
   Component,
   ElementRef,
@@ -9,6 +10,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
 import { lambdaService } from "src/app/core/services/lambda.service";
 import { HttpClient } from "@angular/common/http";
+import { ModalService } from 'src/app/shared/services/modal.service';
 import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
@@ -27,6 +29,7 @@ export class CargarArchivoComponent {
     private lambdaService: lambdaService,
     private alertService: AlertService,
     private http: HttpClient,
+    private modalService: ModalService,
     @Inject(MAT_DIALOG_DATA) public data: { 
       tipoArchivo: string; 
       idTipoDocumento: number;
@@ -90,9 +93,12 @@ export class CargarArchivoComponent {
         this.lambdaService
           .post("cargue-masivo/auditorias", lambdaPayload)
           .subscribe({
-            next: (response) => {
+            next: (response: any) => {
               console.log("Archivo enviado exitosamente al MID", response);
-            },
+              if (response && response.Data) {
+              this.resultados(response.Data);              
+            }
+          },
             error: (error) => {
               console.error("Error al enviar el archivo al MID", error);
             },
@@ -112,15 +118,37 @@ export class CargarArchivoComponent {
       this.gestorDocumentalService
         .postAny("document/uploadAnyFormat", payload)
         .subscribe({
-          next: () => {
+          next: (response) => {
             this.alertService.showSuccessAlert("Documento subido exitosamente");
+            console.log("Documento subido exitosamente", response);
             this.dialogRef.close();
           },
           error: (error) => {
             this.alertService.showErrorAlert("Error al subir el documento");
+            console.error("Error al subir el documento", error);
           },
         });
     };
     reader.readAsDataURL(this.archivo);
   }
+
+  resultados(data: any):void {
+    let mensaje = "";
+
+    if (data.Erróneos?.length > 0) {
+      mensaje += `<strong>Se encontraron los siguientes errores en algunos registros:</strong><ul><br>`;
+      data.Erróneos.forEach((error: any) => {
+        mensaje += `<li><strong>Fila ${error.Idx}:</strong> ${error.Error}</li>`;
+      });
+      mensaje += `</ul>`;
+    }
+
+    if (data.Correctos?.length > 0) {
+      mensaje += `<br><strong>Registros correctos:</strong><ul>`;
+      mensaje += data.Correctos.join(", ") + '<br><br>';
+    }
+    
+    this.modalService.mostrarModal(mensaje, 'warning', '');
+  }
+
 }
