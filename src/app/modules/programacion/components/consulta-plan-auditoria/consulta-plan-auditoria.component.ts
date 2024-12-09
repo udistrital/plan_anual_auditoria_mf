@@ -11,7 +11,6 @@ import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { environment } from "src/environments/environment";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 
@@ -106,7 +105,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter((item: any) => {
 
-            if ((this.IsSecretario || this.IsJefe) && item.estado?.estado_id === 6790) {
+            if ((this.IsSecretario || this.IsJefe) && item.estado?.estado_id === 6790 || item.estado?.estado_nombre === "Borrador") {
               return false;  
             }
             return item.activo === true;

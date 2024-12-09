@@ -42,10 +42,10 @@ export class RevisionSecretarioComponent {
     // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.obtenerEstadoActual();
-   try{
-    this.documento = await this.renderDocumento(0);
-    this.documentoMatrizPublica= await this.renderDocumento(1);
-    }catch(error){
+    try {
+      this.documento = await this.renderDocumento(0);
+      this.documentoMatrizPublica = await this.renderDocumento(1);
+    } catch (error) {
       console.log("no se genero el base 64");
     }
     this.userService.getPersonaId().then((usuarioId) => {
@@ -58,7 +58,7 @@ export class RevisionSecretarioComponent {
       .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
       .subscribe(
         (response: any) => {
-          const estadoActual = response?.Data?.[0]; 
+          const estadoActual = response?.Data?.[0];
           console.log(response?.Data)
           console.log(this.planAuditoriaId)
           this.estadoIdActual = estadoActual?.estado_id || null;
@@ -67,7 +67,7 @@ export class RevisionSecretarioComponent {
         },
         (error) => {
           console.error("Error al obtener el estado actual:", error);
-          this.mostrarBotones = false; 
+          this.mostrarBotones = false;
         }
       );
   }
@@ -108,7 +108,7 @@ export class RevisionSecretarioComponent {
       const response = await lastValueFrom(
         this.gestorDocumentalService.get(`document/${id}`).pipe(
           map((response: any) => {
-  
+
             // Validar si el campo `file` está presente en la respuesta
             if (response && response.file) {
               return response.file; // Retorna el campo `file`
@@ -121,7 +121,7 @@ export class RevisionSecretarioComponent {
           })
         )
       );
-  
+
       return response; // Devuelve el campo `file`
     } catch (error) {
       console.error('Error en consultarNuxeo:', error);
@@ -129,7 +129,7 @@ export class RevisionSecretarioComponent {
     }
   }
 
-  async consultarDocumento(tipoId:number): Promise<string> {
+  async consultarDocumento(tipoId: number): Promise<string> {
     try {
       const nuxeoId = await lastValueFrom(
         this.planAuditoriaService.get(`documento?query=referencia_id:${this.planAuditoriaId},tipo_id:${tipoId}&fields=nuxeo_enlace`).pipe(
@@ -154,7 +154,7 @@ export class RevisionSecretarioComponent {
       throw error; // Permitir manejo del error en el lugar donde se llama este método
     }
   }
-  async renderDocumento(tipoId:number): Promise<string> {
+  async renderDocumento(tipoId: number): Promise<string> {
     const enlace = await this.consultarDocumento(tipoId);
     const base64 = await this.consultarNuxeo(enlace);
     return base64;

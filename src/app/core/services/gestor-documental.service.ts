@@ -18,8 +18,4 @@ export class GestorDocumentalService {
     this.requestManager.setPath("GESTOR_DOCUMENTAL_SERVICE");
     return this.requestManager.post(endpoint, element);
   }
-  get(endpoint: string){
-    this.requestManager.setPath("GESTOR_DOCUMENTAL_SERVICE");
-    return this.requestManager.get(endpoint);
-  }
 }
