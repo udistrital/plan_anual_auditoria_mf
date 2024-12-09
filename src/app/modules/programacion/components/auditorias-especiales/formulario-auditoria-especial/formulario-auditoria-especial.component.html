@@ -71,18 +71,23 @@
 
           <div class="row d-flex align-items-center">
             <div
-              *ngFor="let auditorControl of auditoresSeleccionados.controls; let i = index"
+              *ngFor="let auditorControl of auditoresSeleccionados.controls; let i = index" [formGroup]="auditorControl"
               class="col-12 d-flex align-items-center mt-3"
             >
               <mat-form-field appearance="outline" class="col-8">
                 <mat-label>Seleccione un auditor</mat-label>
                 <mat-icon color="primary" matPrefix>person</mat-icon>
-                <mat-select [formControl]="auditorControl">
-                  <mat-option *ngFor="let auditor of auditores" [value]="auditor">
+                <mat-select formControlName="auditor">
+                  <mat-option *ngFor="let auditor of auditoresDisponibles(i)" [value]="auditor">
                     {{ auditor.nombre }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
+              <mat-checkbox
+                class="col-3 mx-2"
+                formControlName="lider"
+                (change) = "onLiderChange(i)">
+                Auditor Lider </mat-checkbox>
               <button
                 mat-icon-button
                 color="warn"
