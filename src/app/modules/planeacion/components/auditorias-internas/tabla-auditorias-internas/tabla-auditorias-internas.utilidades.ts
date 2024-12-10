@@ -8,7 +8,7 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "vigencia",
     header: "Vigencia",
-    cell: (auditoria: any) => auditoria.vigencia_id,
+    cell: (auditoria: any) => auditoria.vigencia_nombre,
     sortable: true,
   },
   {
@@ -49,7 +49,7 @@ export const colocacionesContructorTabla = [
   },
   {
     columnDef: "documentos",
-    header: "Documentos",
+    header: "Documento",
     cell: (auditoria: any) => "",
     sortable: false,
   },

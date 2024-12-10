@@ -9,6 +9,9 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilidades";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { MatDialog } from "@angular/material/dialog";
+import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -24,7 +27,11 @@ export class TablaAuditoriasInternasComponent implements AfterViewInit {
   auditoriasContructorTabla: any;
   tablaColumnas: any;
 
-  constructor(private cdref: ChangeDetectorRef) {}
+  constructor(
+    private cdref: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private planAuditoriaMid: PlanAnualAuditoriaMid
+  ) {}
 
   ngAfterViewInit() {
     this.construirTabla();
@@ -40,5 +47,19 @@ export class TablaAuditoriasInternasComponent implements AfterViewInit {
     this.auditorias = new MatTableDataSource(this.auditoriasPorVigencia);
     this.auditorias.paginator = this.paginator;
     this.auditorias.sort = this.sort;
+  }
+
+  verDocumento(auditoria: any) {
+    const auditoriaId = auditoria._id;
+    this.planAuditoriaMid
+      .get(`plantilla/plan-trabajo/${auditoriaId}`)
+      .subscribe((res) => {
+        const documentoBase64 = res.Data;
+        const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
+          width: "1000px",
+          data: documentoBase64,
+          autoFocus: false,
+        });
+      });
   }
 }

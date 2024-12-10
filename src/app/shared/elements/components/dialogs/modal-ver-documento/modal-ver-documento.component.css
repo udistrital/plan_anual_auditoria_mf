@@ -1,0 +1,18 @@
+.visualizador::-webkit-scrollbar {
+  height: 8px;
+}
+
+.visualizador::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 4px;
+}
+
+.visualizador {
+  min-width: 400px;
+  min-height: 600px;
+  width: 100%;
+  height: auto;
+  margin-top: 30px;
+  border: 1px solid #d8d8d8;
+  border-radius: 6px;
+}

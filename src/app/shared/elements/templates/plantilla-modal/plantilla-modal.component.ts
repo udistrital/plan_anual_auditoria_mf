@@ -10,4 +10,6 @@ export class PlantillaModalComponent {
   @Input() titulo: string = "";
   @Input() descripcion: string = "";
   @Input() contenido!: TemplateRef<any>;
+  @Input() footer!: TemplateRef<any>;
+  @Input() alignFooter: "center" | "start" | "end" | undefined = "center";
 }
