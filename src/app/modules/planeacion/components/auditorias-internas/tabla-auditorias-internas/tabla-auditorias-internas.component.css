@@ -1,23 +1,21 @@
 .mat-column-numero {
   text-align: center;
-  font-weight: 600;
+}
+
+.mat-column-vigencia {
+  text-align: center;
+}
+
+.mat-column-documentos {
+  text-align: center;
 }
 
 .mat-column-acciones {
   text-align: center;
 }
-.mat-column-documentos {
-  text-align: center;
-}
 
 .even-row {
-  background-color: var(--md-accent-50);
-}
-
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  background-color: #f4f4f4;
 }
 
 .link {

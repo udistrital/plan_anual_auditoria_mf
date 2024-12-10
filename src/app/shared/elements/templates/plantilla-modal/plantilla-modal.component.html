@@ -1,24 +1,25 @@
-<mat-card class="dialogo">
-  <div class="d-flex justify-content-between align-items-center p-3 shadow">
-    <div class="d-flex align-items-center">
-      <div>
-        <mat-icon color="primary">{{ icono }}</mat-icon>
-      </div>
-      <div style="color: var(--md-primary-900)" class="mx-2">
-        <b>{{ titulo }}</b>
-        <p>{{ descripcion }}</p>
-      </div>
-    </div>
+<div class="d-flex justify-content-between align-items-center p-3 shadow">
+  <div class="d-flex align-items-center">
     <div>
-      <mat-icon style="cursor: pointer" [mat-dialog-close] color="primary"
-        >close</mat-icon
-      >
+      <mat-icon color="primary">{{ icono }}</mat-icon>
+    </div>
+    <div style="color: var(--md-primary-900)" class="mx-2">
+      <b>{{ titulo }}</b>
+      <p>{{ descripcion }}</p>
     </div>
   </div>
-  <mat-card-content>
-    <!-- Renderiza el template proporcionado -->
-    <div class="container">
-      <ng-container *ngTemplateOutlet="contenido"></ng-container>
-    </div>
-  </mat-card-content>
-</mat-card>
+  <div>
+    <mat-icon style="cursor: pointer" [mat-dialog-close] color="primary"
+      >close</mat-icon
+    >
+  </div>
+</div>
+<mat-dialog-content class="modal-scroll">
+  <!-- Renderiza el template proporcionado -->
+  <div class="container">
+    <ng-container *ngTemplateOutlet="contenido"></ng-container>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions [align]="alignFooter">
+  <ng-container *ngTemplateOutlet="footer"></ng-container>
+</mat-dialog-actions>

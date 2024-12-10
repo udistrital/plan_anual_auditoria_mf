@@ -1,0 +1,29 @@
+<plantilla-modal
+  [icono]="'picture_as_pdf'"
+  [titulo]="'Visualizador de documento'"
+  [descripcion]="'Vista previa del documento seleccionado'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <pdf-viewer
+    [src]="documentoSrc"
+    [render-text]="true"
+    [original-size]="false"
+    [show-all]="true"
+    [zoom]="0.98"
+    class="visualizador"
+  ></pdf-viewer>
+</ng-template>
+<ng-template #footerDeModal>
+  <button
+    mat-stroked-button
+    color="primary"
+    style="border: 1px solid var(--md-primary-500)"
+    [mat-dialog-close]
+    class="my-3"
+  >
+    <mat-icon>toll</mat-icon>Regresar
+  </button>
+</ng-template>
