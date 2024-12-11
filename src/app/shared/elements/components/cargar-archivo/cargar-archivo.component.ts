@@ -1,3 +1,4 @@
+import { PlanAnualAuditoriaMid } from './../../../../core/services/plan-anual-auditoria-mid.service';
 import { MatTableDataSource } from '@angular/material/table';
 import {
   Component,
@@ -8,7 +9,6 @@ import {
 } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
-import { lambdaService } from "src/app/core/services/lambda.service";
 import { HttpClient } from "@angular/common/http";
 import { ModalService } from 'src/app/shared/services/modal.service';
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -26,7 +26,7 @@ export class CargarArchivoComponent {
   constructor(
     public dialogRef: MatDialogRef<CargarArchivoComponent>,
     private gestorDocumentalService: GestorDocumentalService,
-    private lambdaService: lambdaService,
+    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private alertService: AlertService,
     private http: HttpClient,
     private modalService: ModalService,
@@ -90,7 +90,7 @@ export class CargarArchivoComponent {
           type_upload: "auditorias",
         };
 
-        this.lambdaService
+        this.PlanAnualAuditoriaMid
           .post("cargue-masivo/auditorias", lambdaPayload)
           .subscribe({
             next: (response: any) => {
