@@ -10,12 +10,13 @@
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
-    <div class="col-12">
+    <div class="col-12" >
       <app-formulario-dinamico
         [formulario]="formulario"
         (submitFormulario)="manejarEnvio($event)"
+        *ngIf= "datosCargados"
       />
-      <div class="d-flex justify-content-end">
+      <div class="d-flex justify-content-end" *ngIf="mostrarBotones">
         <div class="button-container">
           <button
             mat-raised-button
