@@ -10,7 +10,9 @@ import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 @Component({
   selector: "app-editar-auditoria",
@@ -19,14 +21,20 @@ import { Router } from "@angular/router";
 })
 export class EditarAuditoriaComponent implements OnInit {
   @ViewChild("stepper") stepper!: MatStepper;
+
   @ViewChild(ActividadesAuditoriaComponent)
   registroPlan!: ActividadesAuditoriaComponent;
+
   @ViewChild("formularioInformacionComp")
   formularioInformacionComponent!: FormularioDinamicoComponent;
+  formularioInformacion: Formulario | undefined;
+
   @ViewChild("formularioRecursosComp")
   formularioRecursosComponent!: FormularioDinamicoComponent;
-  formularioInformacion: Formulario | undefined;
   formularioRecursos: Formulario | undefined;
+
+  auditoriaId!: string;
+  auditoria!: Auditoria;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
 
@@ -34,12 +42,16 @@ export class EditarAuditoriaComponent implements OnInit {
     private alertaService: AlertService,
     private breakpointObserver: BreakpointObserver,
     private planAuditoriaService: PlanAnualAuditoriaService,
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.cargarFormularios();
     this.manejarResponsiveStepper();
+    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
+    this.obtenerAuditoria(this.auditoriaId);
   }
 
   ngAfterViewInit() {
@@ -47,6 +59,13 @@ export class EditarAuditoriaComponent implements OnInit {
       if (event.previouslySelectedIndex === 3 && event.selectedIndex !== 3) {
         this.registroPlan.onStepLeave();
       }
+    });
+  }
+
+  obtenerAuditoria(auditoriaId: string) {
+    this.planAuditoriaMid.get(`auditoria/${auditoriaId}`).subscribe((res) => {
+      this.auditoria = res.Data;
+      this.cargarFormulariosConAuditoria();
     });
   }
 
@@ -78,7 +97,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   guardarInformacion(informacion: any) {
-    const auditoriaId = "673ce5d37cf5a06432446c5a";
+    const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
     console.log(informacionEditar);
 
@@ -132,8 +151,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   guardarRecursos(recursos: any) {
-    //todo: id quemado
-    const auditoriaId = "673ce5d37cf5a06432446c5a";
+    const auditoriaId = this.auditoria._id;
     const recursosEditar = {
       rec_tecnologico: recursos.tecnologicos,
       rec_humano: recursos.humanos,
@@ -167,5 +185,28 @@ export class EditarAuditoriaComponent implements OnInit {
 
   regresarRuta() {
     this.router.navigate([`/planeacion/auditorias-internas`]);
+  }
+
+  cargarFormulariosConAuditoria() {
+    this.formularioInformacionComponent.form.patchValue({
+      no_auditoria: this.auditoria.no_auditoria,
+      consecutivo_OCI: this.auditoria.consecutivo_OCI,
+      consecutivo_IE: this.auditoria.consecutivo_IE,
+      tipo: this.auditoria.tipo_id,
+      proceso: this.auditoria.macroproceso,
+      lider: this.auditoria.lider_id,
+      responsable: this.auditoria.responsable_id,
+      fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
+      fecha_ejecucion_final: this.auditoria.fecha_fin,
+      objetivo_auditoria: this.auditoria.objetivo,
+      alcance_auditoria: this.auditoria.alcance,
+      criterios: this.auditoria.criterio,
+    });
+
+    this.formularioRecursosComponent.form.patchValue({
+      tecnologicos: this.auditoria.rec_tecnologico,
+      humanos: this.auditoria.rec_humano,
+      fisicos: this.auditoria.rec_fisico,
+    });
   }
 }

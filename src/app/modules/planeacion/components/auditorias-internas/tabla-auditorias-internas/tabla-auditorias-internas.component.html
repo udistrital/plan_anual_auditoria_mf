@@ -47,8 +47,9 @@
                     <mat-icon color="primary">visibility</mat-icon> Ver
                     auditoría
                   </button>
-                  <button mat-menu-item>
-                    <mat-icon color="primary">edit</mat-icon> Editar auditoría
+                  <button (click)="editarAuditoria(row)" mat-menu-item>
+                    <mat-icon color="primary">edit</mat-icon>
+                    Editar auditoría
                   </button>
                 </mat-menu>
               </div>

@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
-import { AuthGuard } from "src/_guards/auth.guard";
+import { AuthGuard } from "src/app/core/_guards/auth.guard";
 
 import { APP_BASE_HREF } from "@angular/common";
 
@@ -15,7 +15,7 @@ const routes: Routes = [
   },
   {
     path: "planeacion",
-    canActivate: [AuthGuard],
+    canActivate: [],
     loadChildren: () =>
       import("./modules/planeacion/planeacion.module").then(
         (m) => m.PlaneacionModule
