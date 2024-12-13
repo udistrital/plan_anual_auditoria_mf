@@ -16,7 +16,7 @@
             <mat-icon color="primary" matPrefix>today</mat-icon>
             <mat-select
               formControlName="vigencia"
-              (selectionChange)="listarAuditoriasPorVigencia($event.value)"
+              (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
               color="primary"
             >
               <mat-option disabled value="">--Seleccionar--</mat-option>
@@ -40,9 +40,9 @@
   </div>
 
   <div class="row">
-    <div *ngIf="banderaTablaAuditoriasInternas" class="col-12">
+    <div class="col-12">
       <app-tabla-auditorias-internas
-        [auditoriasPorVigencia]="auditoriasPorVigencia"
+        [vigenciaId]="vigenciaSeleccionada"
       ></app-tabla-auditorias-internas>
     </div>
   </div>

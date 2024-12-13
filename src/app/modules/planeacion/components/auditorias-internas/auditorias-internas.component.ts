@@ -1,9 +1,10 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { TablaAuditoriasInternasComponent } from "./tabla-auditorias-internas/tabla-auditorias-internas.component";
 
 @Component({
   selector: "app-auditorias-internas",
@@ -11,16 +12,16 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
   styleUrl: "./auditorias-internas.component.css",
 })
 export class AuditoriasInternasComponent implements OnInit {
-  auditoriasPorVigencia: any[] = [];
-  banderaTablaAuditoriasInternas: boolean = false;
-  vigenciaForm!: FormGroup;
+  @ViewChild(TablaAuditoriasInternasComponent)
+  tablaAuditorias!: TablaAuditoriasInternasComponent;
+
   vigencias: any[] = [];
+  vigenciaForm!: FormGroup;
+  vigenciaSeleccionada!: number;
 
   constructor(
     private fb: FormBuilder,
-    private parametrosService: ParametrosService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private alertaService: AlertService
+    private parametrosService: ParametrosService
   ) {}
 
   ngOnInit() {
@@ -38,26 +39,9 @@ export class AuditoriasInternasComponent implements OnInit {
       });
   }
 
-  listarAuditoriasPorVigencia(vigencia: Vigencia) {
-    const vigenciaId = vigencia.Id;
-    this.auditoriasPorVigencia = [];
-    this.banderaTablaAuditoriasInternas = false;
-
-    this.planAuditoriaMid
-      .get(`auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=0`)
-      .subscribe((res) => {
-        const auditorias: any[] = res.Data;
-
-        if (!(auditorias.length > 0)) {
-          return this.alertaService.showAlert(
-            "No hay auditorías registradas",
-            "Actualmente no hay auditorías registradas para la vigencia seleccionada."
-          );
-        }
-
-        this.auditoriasPorVigencia = auditorias;
-        this.banderaTablaAuditoriasInternas = true;
-      });
+  mostrarAuditoriasPorVigencia(vigencia: Vigencia) {
+    this.vigenciaSeleccionada = vigencia.Id;
+    this.tablaAuditorias.listarAuditoriasPorVigencia(this.vigenciaSeleccionada);
   }
 
   iniciarvigenciaForm() {

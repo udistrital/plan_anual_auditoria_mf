@@ -1,11 +1,5 @@
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  Input,
-  ViewChild,
-} from "@angular/core";
-import { MatPaginator } from "@angular/material/paginator";
+import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
+import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilidades";
@@ -14,31 +8,64 @@ import { MatDialog } from "@angular/material/dialog";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
   templateUrl: "./tabla-auditorias-internas.component.html",
   styleUrl: "./tabla-auditorias-internas.component.css",
 })
-export class TablaAuditoriasInternasComponent implements AfterViewInit {
-  @Input() auditoriasPorVigencia: any;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+export class TablaAuditoriasInternasComponent {
+  @Input() vigenciaId: any;
   @ViewChild(MatSort) sort!: MatSort;
 
-  auditorias: MatTableDataSource<any> = new MatTableDataSource();
+  auditoriasPorVigencia: Auditoria[] = [];
+  auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
   auditoriasContructorTabla: any;
+  banderaTablaAuditoriasInternas: boolean = false;
   tablaColumnas: any;
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  totalRegistros: number = 0;
+  pageSize: number = 5;
+  pageIndex: number = 0;
+  itemsPerPage: number[] = [5, 10, 20];
+
   constructor(
-    private cdref: ChangeDetectorRef,
+    private alertaService: AlertService,
+    private changeDetector: ChangeDetectorRef,
     private dialog: MatDialog,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
     private router: Router
   ) {}
 
-  ngAfterViewInit() {
-    this.construirTabla();
-    this.cdref.detectChanges();
+  listarAuditoriasPorVigencia(
+    vigenciaId: number,
+    limit: number = this.itemsPerPage[0],
+    offset: number = 0
+  ) {
+    this.auditoriasPorVigencia = [];
+    this.planAuditoriaMid
+      .get(
+        `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
+      )
+      .subscribe((res) => {
+        const auditorias: any[] = res.Data;
+
+        if (!(auditorias.length > 0)) {
+          this.banderaTablaAuditoriasInternas = false;
+          this.auditoriasDataSource.data = [];
+          return this.alertaService.showAlert(
+            "No hay auditorías registradas",
+            "Actualmente no hay auditorías registradas para la vigencia seleccionada."
+          );
+        }
+
+        this.auditoriasPorVigencia = auditorias;
+        this.totalRegistros = res.MetaData.Count;
+        this.banderaTablaAuditoriasInternas = true;
+        this.construirTabla();
+      });
   }
 
   construirTabla() {
@@ -46,10 +73,31 @@ export class TablaAuditoriasInternasComponent implements AfterViewInit {
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
-    //Asigna la info a la tabla
-    this.auditorias = new MatTableDataSource(this.auditoriasPorVigencia);
-    this.auditorias.paginator = this.paginator;
-    this.auditorias.sort = this.sort;
+
+    this.auditoriasDataSource = new MatTableDataSource(
+      this.auditoriasPorVigencia
+    );
+
+    //si no hay paginador, se crea
+    if (!this.paginator) {
+      this.auditoriasDataSource.paginator = this.paginator;
+      this.auditoriasDataSource.sort = this.sort;
+    }
+
+    this.changeDetector.detectChanges();
+  }
+
+  manejarCambioPaginado(evento: PageEvent) {
+    // Actualizar el índice de página y tamaño de página
+    this.pageSize = evento.pageSize;
+    this.pageIndex = evento.pageIndex;
+
+    const offset = this.pageIndex * this.pageSize;
+    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, offset);
+    // Actualizar el paginador después de realizar la consulta
+    this.paginator.length = this.totalRegistros;
+    this.paginator.pageSize = this.pageSize;
+    this.paginator.pageIndex = this.pageIndex;
   }
 
   verDocumento(auditoria: Auditoria) {
