@@ -19,6 +19,7 @@ import { ModalPdfVisualizadorComponent } from "./components/consulta-plan-audito
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
 import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
+import { ModalVerDocumentosPlanComponent } from "./components/consulta-plan-auditoria/modal-ver-documentos-plan/modal-ver-documentos-plan.component";
 
 import { MatTooltip } from "@angular/material/tooltip";
 
@@ -32,6 +33,7 @@ import { MatTooltip } from "@angular/material/tooltip";
     ModalAprobacionSecretarioComponent,
     ModalListaRechazosComponent,
     ModalMotivosRechazoComponent,
+    ModalVerDocumentosPlanComponent,
     PdfVisualizadorComponent,
     ModalPdfVisualizadorComponent,
     RevisionJefeComponent,

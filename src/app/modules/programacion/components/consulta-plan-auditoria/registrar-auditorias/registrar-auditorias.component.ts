@@ -12,6 +12,8 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
+import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/modal-ver-documentos-plan.component";
+
 @Component({
   selector: "app-registrar-auditorias",
   templateUrl: "./registrar-auditorias.component.html",
@@ -28,6 +30,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   ];
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
+  mostrarBotones: boolean = true;
 
   constructor(
     private alertaService: AlertService,
@@ -39,9 +42,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private router: Router
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.loadAuditoriasFromService();
+    await this.obtenerEstadoActual();
   }
 
   loadAuditoriasFromService(): void {
@@ -69,8 +73,28 @@ export class RegistrarAuditoriasComponent implements OnInit {
       );
   }
 
+  async obtenerEstadoActual(): Promise<void> {
+    try {
+      const response = await this.planAnualAuditoriaService
+        .get(`estado?query=plan_auditoria_id:${this.id},actual:true`)
+        .toPromise();
+      const estadoActual = response?.Data?.[0];
+      const estadoIdActual = estadoActual?.estado_id || null;
+
+      this.mostrarBotones =
+        estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        estadoIdActual === environment.PLAN_ESTADO.EN_RECHAZO_ID;
+    } catch (error) {
+      console.error("Error al obtener el estado actual:", error);
+      this.mostrarBotones = false;
+    }
+  }
+
   // Función para manejar el evento de drag-and-drop
   drop(event: CdkDragDrop<Auditoria[]>): void {
+    if (!this.mostrarBotones) {
+      return;
+    }
     const prevData = [...this.dataSource.data];
     moveItemInArray(prevData, event.previousIndex, event.currentIndex);
     this.dataSource.data = prevData;
@@ -280,5 +304,14 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   regresarRuta() {
     this.router.navigate([`/programacion/plan-auditoria`]);
+  }
+
+  verDocumentos() {
+    const dialogRef = this.dialog.open(ModalVerDocumentosPlanComponent, {
+      width: "1200px",
+      data: {
+        planAuditoriaId: this.id,
+      },
+    });
   }
 }

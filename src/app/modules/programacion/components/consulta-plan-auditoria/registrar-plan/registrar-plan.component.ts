@@ -12,6 +12,7 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-registrar-plan",
@@ -25,6 +26,8 @@ export class RegistrarPlanComponent implements OnInit {
   planId: string = "";
   formulario: Formulario = formularioPAA;
   datosCargados = false;
+  estadoIdActual: number | null = null;
+  mostrarBotones: boolean = true;
   // parametros: Record<string, any> = {};
 
   constructor(
@@ -41,20 +44,26 @@ export class RegistrarPlanComponent implements OnInit {
       this.planId = params["id"];
       this.inicializarFormulario();
 
-      const planData = await this.obtenerPlanAuditoria();
+      try {
+        const planData = await this.obtenerPlanAuditoria();
+        await this.obtenerEstadoActual();
 
-      if (planData) {
-        this.actualizarValoresFormulario(planData);
+        if (planData) {
+          this.actualizarValoresFormulario(planData);
+        }
+
+        this.datosCargados = true;
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error("Error inicializando el componente:", error);
       }
-
-      this.datosCargados = true;
-      this.cdr.detectChanges();
     });
   }
 
-  ngAfterViewInit() {
-    this.cdr.detectChanges();
+  inicializarFormulario(): void {
+    this.formulario = JSON.parse(JSON.stringify(formularioPAA));
   }
+
 
   async obtenerPlanAuditoria(): Promise<any> {
     try {
@@ -68,8 +77,30 @@ export class RegistrarPlanComponent implements OnInit {
     }
   }
 
-  inicializarFormulario(): void {
-    this.formulario = JSON.parse(JSON.stringify(formularioPAA));
+  async obtenerEstadoActual(): Promise<void> {
+    try {
+      const response = await this.planAnualAuditoriaService
+        .get(`estado?query=plan_auditoria_id:${this.planId},actual:true`)
+        .toPromise();
+      const estadoActual = response?.Data?.[0];
+      this.estadoIdActual = estadoActual?.estado_id || null;
+      this.mostrarBotones =
+        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        this.estadoIdActual === environment.PLAN_ESTADO.EN_RECHAZO_ID;
+      this.actualizarEstadoCampos();
+    } catch (error) {
+      console.error("Error al obtener el estado actual:", error);
+      this.mostrarBotones = false;
+      this.actualizarEstadoCampos(); 
+    }
+  }
+
+  
+
+  actualizarEstadoCampos(): void {
+    this.formulario.campos?.forEach((campo) => {
+      campo.deshabilitado = !this.mostrarBotones;
+    });
   }
 
   actualizarValoresFormulario(planData: any): void {
@@ -93,11 +124,13 @@ export class RegistrarPlanComponent implements OnInit {
             break;
           default:
             break;
-        }
+        }        
       });
+      
     } else {
       this.inicializarFormulario();
     }
+    this.actualizarEstadoCampos();
   }
 
   errorRegistro() {
