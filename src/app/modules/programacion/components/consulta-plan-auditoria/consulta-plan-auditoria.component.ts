@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { ModalService } from "src/app/shared/services/modal.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -13,6 +13,7 @@ import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
+import { MatPaginator } from "@angular/material/paginator";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -25,6 +26,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   IsAuditor = false;
   IsJefe = false;
   usuarioId: any;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  total!: number;
+  opcionesPagina: number[] = [5, 10, 25];
+  offset = 0;
 
   years: Parametro[] = [];
   selectedYearId: number | null = null;
@@ -53,10 +58,24 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   ngOnInit(): void {
     this.buscarRol();
-    this.cargarPlanesAuditoria();
+    this.cargarPlanesAuditoria(this.opcionesPagina[0], this.offset);
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  ngAfterViewInit() {
+    this.paginator.page.subscribe(() => {
+      const limit = this.paginator.pageSize;
+      this.offset = this.paginator.pageIndex * limit;
+      this.cargarPlanesAuditoria(limit, this.offset);
+    });
+  }
+  
+  IniciarPaginacion() {
+    this.paginator.pageIndex = 0;
+    this.paginator.pageSize = this.opcionesPagina[0];
+    this.offset = 0;
   }
 
   buscarRol() {
@@ -99,11 +118,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       });
   }
 
-  cargarPlanesAuditoria() {
-    this.PlanAnualAuditoriaMid.get("plan-auditoria").subscribe(
+  cargarPlanesAuditoria(limit: number, offset: number) {
+    this.PlanAnualAuditoriaMid.get(`plan-auditoria?query=&limit=${limit}&offset=${offset}`).subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter((item: any) => {
+            this.total = res.MetaData.Count;
 
             if ((this.IsSecretario || this.IsJefe) && (item.estado?.estado_id === 6790)) {
               return false;  
@@ -149,7 +169,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                   this.alertaService.showSuccessAlert(
                     "Plan creado exitosamente"
                   );
-                  this.cargarPlanesAuditoria();
+                  this.IniciarPaginacion();
+                  this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
                 } else {
                   this.alertaService.showErrorAlert(
                     "Error al asociar el estado al plan"
@@ -223,7 +244,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
               this.alertaService.showSuccessAlert(
                 "plan enviado exitosamente"
               );
-              this.cargarPlanesAuditoria();
+              this.IniciarPaginacion();
+              this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
             } else {
               this.alertaService.showErrorAlert(
                 "Error al asociar el estado al plan"

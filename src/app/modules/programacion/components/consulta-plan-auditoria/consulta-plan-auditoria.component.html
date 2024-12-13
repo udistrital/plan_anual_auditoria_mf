@@ -39,7 +39,7 @@
                   <b>No.</b>
                 </th>
                 <td mat-cell *matCellDef="let element; let i = index" class="cell">
-                  {{ i + 1 }}
+                  {{ i + 1 + offset }}
                 </td>
               </ng-container>
 
@@ -153,6 +153,11 @@
               <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
             </table>
           </div>
+          <mat-paginator
+            [pageSizeOptions]="opcionesPagina"
+            [length]="total"
+            showFirstLastButtons
+          ></mat-paginator>
         </div>
       </div>
     </div>
