@@ -1,0 +1,6 @@
+.selected {
+    background-color: #ffd7ce !important;
+    color: #731514 !important;
+    border: 1px solid #731514 !important;
+    font-weight: 600;
+  }

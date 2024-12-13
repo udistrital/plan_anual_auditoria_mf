@@ -14,6 +14,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
+import { ModalVerDocumentosPlanComponent } from "./modal-ver-documentos-plan/modal-ver-documentos-plan.component";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -125,7 +126,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           this.dataSource.data = res.Data.filter((item: any) => {
             this.total = res.MetaData.Count;
 
-            if ((this.IsSecretario || this.IsJefe) && (item.estado?.estado_id === 6790)) {
+            if ((!this.IsAuditor) && (item.estado?.estado_id === 6790)) {
               return false;  
             }
             return item.activo === true;
@@ -304,4 +305,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         }
       });
   }
+
+  verDocumentos(element: any) {
+    const dialogRef = this.dialog.open(ModalVerDocumentosPlanComponent, {
+      width: "1200px",
+      data: {
+        planAuditoriaId: element.id,
+      },
+    });
+  }
+
 }

@@ -101,7 +101,7 @@
                 <td mat-cell *matCellDef="let element" class="cell">
                   <mat-menu #menu="matMenu">
                     <ng-container [ngSwitch]="role">
-                      <!-- Auditor Actions -->
+                      <!-- Auditor Acciones -->
                       <ng-container *ngSwitchCase="'auditor'">
                         <button
                           mat-menu-item
@@ -111,6 +111,19 @@
                           <mat-icon color="primary">report</mat-icon> Motivos de
                           rechazo
                         </button>
+                        <ng-container *ngIf="element.estadoId !== 6790 && element.estadoId !== 6806">
+                          <button mat-menu-item (click)="editarReporte(element)">
+                            <mat-icon color="primary">visibility</mat-icon> Ver
+                          </button>
+                          <button mat-menu-item (click)="editarActividades(element)">
+                            <mat-icon color="primary">visibility</mat-icon>
+                            Ver Auditorías
+                          </button>
+                          <button mat-menu-item (click)="verDocumentos(element)">
+                            <mat-icon color="primary">visibility</mat-icon>
+                            Ver Documentos
+                          </button>
+                        </ng-container>
                         <ng-container *ngIf="element.estadoId === 6790 || element.estadoId === 6806">
                           <button mat-menu-item (click)="editarReporte(element)">
                             <mat-icon color="primary">edit</mat-icon> Editar
@@ -125,26 +138,22 @@
                         </ng-container>
                       </ng-container>
 
-                      <!-- Jefe Actions -->
+                      <!-- Jefe Acciones -->
                       <button mat-menu-item *ngSwitchCase="'jefe'" (click)="viewPlanJefe(element)">
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
 
-                      <!-- Secretario Actions -->
+                      <!-- Secretario Acciones -->
                       <button mat-menu-item *ngSwitchCase="'secretario'" (click)="viewPlanSecretario(element)">
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
                     </ng-container>
                   </mat-menu>
-                  <ng-container *ngIf="role !== 'auditor' || element.estadoId === 6790 || element.estadoId === 6806  ; else enviado">
+                  <ng-container>
                     <button (click)="verificarRechazos(element)" mat-icon-button [matMenuTriggerFor]="menu">
                       <mat-icon color="primary">more_vert</mat-icon>
                     </button>
-                  </ng-container><ng-template #enviado>
-                    <button mat-icon-button matTooltip="Plan enviado">
-                      <mat-icon color="primary">check_circle</mat-icon>
-                    </button>
-                  </ng-template>
+                  </ng-container>
                 </td>
               </ng-container>
 
