@@ -11,8 +11,6 @@ export const environment = {
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
 
-  LAMBDA_SERVICE: "http://localhost:3001/",
-
   AUTENTICACION_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
 
