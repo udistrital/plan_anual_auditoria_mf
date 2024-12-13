@@ -11,6 +11,8 @@ import { FormularioDinamicoComponent } from "./elements/components/formulario-di
 import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
 import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/plantilla-modal.component";
 import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
+import { MatPaginatorIntl } from "@angular/material/paginator";
+import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 
 @NgModule({
   declarations: [
@@ -43,7 +45,8 @@ import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-
     PdfViewerModule,
   ],
   providers: [
-    { provide: MAT_DIALOG_DATA, useValue: {} }, // Proveedor para MAT_DIALOG_DATA
+    { provide: MAT_DIALOG_DATA, useValue: {} },
+    { provide: MatPaginatorIntl, useClass: CustomPaginadorIntl },
   ],
 })
 export class SharedModule {}
