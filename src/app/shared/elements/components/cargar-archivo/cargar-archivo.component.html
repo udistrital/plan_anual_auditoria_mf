@@ -1,11 +1,12 @@
 <plantilla-modal
   [icono]="'file_copy'"
-  [titulo]="'Cargar arhivo'"
-  [descripcion]="'Cargue de arhivo'"
+  [titulo]="'Cargar archivo'"
+  [descripcion]="'Cargue de un archivo para procesamiento'"
   [contenido]="contenidoDeModal"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
+  <!-- Selector de archivo -->
   <div class="row">
     <div class="col-12">
       <div class="row d-flex align-items-center">
@@ -18,7 +19,7 @@
           <input
             matInput
             placeholder="Seleccionar archivo"
-            [value]="archivo?.name"
+            [value]="archivo?.name || 'No hay archivo seleccionado'"
             readonly
           />
           <input
@@ -26,12 +27,11 @@
             hidden
             #fileInput
             (change)="onFileSelected($event)"
-            accept="pdf"
+            [accept]="data.tipoArchivo === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
           />
         </mat-form-field>
         <div class="col-12 col-md-3 d-flex justify-content-center">
           <button
-            class="mb-md"
             mat-raised-button
             color="primary"
             (click)="onFileInputClick()"
@@ -44,38 +44,32 @@
     </div>
   </div>
 
-  <div class="d-flex justify-content-center">
-    <button class="remover" mat-stroked-button (click)="removerArchivo()">
-      <mat-icon color="primary">delete</mat-icon>
-      Descartar archivo
-    </button>
+  <!-- Confirmación -->
+  <div class="d-flex justify-content-center align-items-center fondo-acento-50 mb-2 mt-4">
+    <mat-icon>info</mat-icon>
+    <p class="mx-2">¿Hacer el cargue del archivo seleccionado?</p>
   </div>
 
-  <div
-    class="d-flex justify-content-center align-items-center fondo-acento-50 mb-2 mt-4"
-  >
-    <mat-icon> info </mat-icon>
-    <p class="mx-2">¿Hacer cargue de arhivo?</p>
-  </div>
-
+  <!-- Acciones -->
   <mat-dialog-actions align="center">
     <button
       mat-stroked-button
       color="primary"
-      style="border: 1px solid var(--md-primary-500)"
       [mat-dialog-close]
       class="mb-sm"
     >
-      <mat-icon>close</mat-icon>No, cerrar
+      <mat-icon>close</mat-icon>
+      No, cerrar
     </button>
     <button
       mat-raised-button
       color="primary"
       (click)="cargarArchivo()"
       class="mb-sm"
+      [disabled]="!archivo"
     >
       <mat-icon>cloud_upload</mat-icon>
-      Si, subir
+      Sí, subir
     </button>
   </mat-dialog-actions>
 </ng-template>
