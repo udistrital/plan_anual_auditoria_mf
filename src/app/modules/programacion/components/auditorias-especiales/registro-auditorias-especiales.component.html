@@ -72,7 +72,7 @@
           </ng-container>
 
           <!-- Auditor Columna -->
-          <ng-container matColumnDef="auditor">
+          <!-- <ng-container matColumnDef="auditor">
             <mat-header-cell *matHeaderCellDef
               ><b>Auditor (es)</b></mat-header-cell
             >
@@ -80,6 +80,21 @@
               {{ element.auditor }}
             </mat-cell>
             <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
+          </ng-container> -->
+          <ng-container matColumnDef="auditor">
+            <mat-header-cell *matHeaderCellDef><b>Auditor (es)</b></mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              <ng-container *ngIf="element.auditores?.length > 0; else noAuditores">
+                <div *ngFor="let auditor of element.auditores">
+                  {{ auditor.auditor_id }}
+                </div>
+                
+              </ng-container>
+              <ng-template #noAuditores>
+                <span>Sin auditores asignados</span>
+              </ng-template>
+            </mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
           </ng-container>
 
           <!-- cronograma Columna -->
