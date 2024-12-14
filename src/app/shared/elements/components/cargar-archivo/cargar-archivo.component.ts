@@ -1,6 +1,6 @@
+import { PlanAnualAuditoriaMid } from './../../../../core/services/plan-anual-auditoria-mid.service';
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { lambdaService } from "src/app/core/services/lambda.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ModalService } from 'src/app/shared/services/modal.service';
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -17,7 +17,7 @@ export class CargarArchivoComponent {
 
   constructor(
     public dialogRef: MatDialogRef<CargarArchivoComponent>,
-    private lambdaService: lambdaService,
+    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private nuxeoService: NuxeoService,
     private alertService: AlertService,
     private modalService: ModalService,
@@ -92,7 +92,7 @@ export class CargarArchivoComponent {
         type_upload: "auditorias",
       };
   
-      const response: any = await this.lambdaService
+      const response: any = await this.PlanAnualAuditoriaMid
         .post("cargue-masivo/auditorias", payload)
         .toPromise();
   

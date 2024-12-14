@@ -8,7 +8,6 @@ export const environment = {
   PLAN_ANUAL_AUDITORIA_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1',
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
-  LAMBDA_SERVICE: "http://localhost:3001",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
