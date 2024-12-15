@@ -10,7 +10,7 @@ const routes: Routes = [
     path: "auditorias-internas",
     children: [
       {
-        path: "editar",
+        path: "editar/:id",
         component: EditarAuditoriaComponent,
       },
     ],
