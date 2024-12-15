@@ -12,6 +12,7 @@ import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilida
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
+import { Router } from '@angular/router';
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -30,7 +31,8 @@ export class TablaAuditoriasInternasComponent implements AfterViewInit {
   constructor(
     private cdref: ChangeDetectorRef,
     private dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private router: Router
   ) {}
 
   ngAfterViewInit() {
@@ -61,5 +63,9 @@ export class TablaAuditoriasInternasComponent implements AfterViewInit {
           autoFocus: false,
         });
       });
+  }
+  editarAuditoria(auditoria: any): void {
+    console.log("adiii ",auditoria._id)
+    this.router.navigate([`/planeacion/auditorias-internas/editar`, auditoria._id]);
   }
 }

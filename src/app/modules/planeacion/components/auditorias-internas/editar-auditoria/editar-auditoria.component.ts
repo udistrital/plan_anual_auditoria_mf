@@ -10,7 +10,10 @@ import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
-import { Router } from "@angular/router";
+import { Router, ActivatedRoute  } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-editar-auditoria",
@@ -29,17 +32,24 @@ export class EditarAuditoriaComponent implements OnInit {
   formularioRecursos: Formulario | undefined;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
+  idAuditoria: String ="";
 
   constructor(
     private alertaService: AlertService,
     private breakpointObserver: BreakpointObserver,
     private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private dialog: MatDialog
+    
   ) {}
 
   ngOnInit() {
+    
     this.cargarFormularios();
     this.manejarResponsiveStepper();
+    this.idAuditoria = String(this.route.snapshot.paramMap.get('id'));
+    //console.log('ID de la auditoría:', this.idAuditoria);
   }
 
   ngAfterViewInit() {
@@ -168,4 +178,18 @@ export class EditarAuditoriaComponent implements OnInit {
   regresarRuta() {
     this.router.navigate([`/planeacion/auditorias-internas`]);
   }
+  
+    subirArchivoCargueMasivo(): void {
+      const dialogRef = this.dialog.open(CargarArchivoComponent, {
+        width: "800px",
+        data: {
+          tipoArchivo: 'xlsx',
+          id: this.idAuditoria,
+          idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+          descripcion: 'Archivo para cargue masivo de actividades',
+          cargaLambda: true,
+          tipo: "actividades"
+        },
+      });
+    }
 }

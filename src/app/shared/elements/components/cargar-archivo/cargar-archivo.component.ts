@@ -30,15 +30,16 @@ export class CargarArchivoComponent {
     private alertService: AlertService,
     private http: HttpClient,
     private modalService: ModalService,
-    @Inject(MAT_DIALOG_DATA) public data: { 
-      tipoArchivo: string; 
+    @Inject(MAT_DIALOG_DATA) public data: {
+      tipoArchivo: string;
       idTipoDocumento: number;
       descripcion: string;
       id: string;
       vigenciaId: number;
       cargaLambda: boolean;
+      tipo: string;
     }
-  ) {}
+  ) { }
 
   onFileSelected(event: any): void {
     const input = event.target as HTMLInputElement;
@@ -54,7 +55,7 @@ export class CargarArchivoComponent {
       if (
         this.data.tipoArchivo === "xlsx" &&
         file.type !==
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       ) {
         alert("Por favor seleccione un archivo XLSX.");
         this.removerArchivo();
@@ -82,23 +83,42 @@ export class CargarArchivoComponent {
     const reader = new FileReader();
     reader.onload = (e: any) => {
       const base64String = e.target.result.split(",")[1];
-
+      let lambdaPayload: any = {};
       if (this.data.cargaLambda) {
-        const lambdaPayload = {
+        switch (this.data.tipo) {
+          case "auditorias":
+            lambdaPayload = {
+              base64data: base64String,
+              complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
+              type_upload: "auditorias",
+            };
+            break;
+          case "actividades":
+            lambdaPayload = {
+              base64data: base64String,
+              complement: { auditoria_id: this.data.id },
+              type_upload: "actividades",
+            };
+            break;
+        }
+
+        /*lambdaPayload = {
           base64data: base64String,
           complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
           type_upload: "auditorias",
-        };
+        };*/
+
+
 
         this.PlanAnualAuditoriaMid
-          .post("cargue-masivo/auditorias", lambdaPayload)
+          .post(`cargue-masivo/${this.data.tipo}`, lambdaPayload)
           .subscribe({
             next: (response: any) => {
               console.log("Archivo enviado exitosamente al MID", response);
               if (response && response.Data) {
-              this.resultados(response.Data);              
-            }
-          },
+                this.resultados(response.Data);
+              }
+            },
             error: (error) => {
               console.error("Error al enviar el archivo al MID", error);
             },
@@ -132,7 +152,7 @@ export class CargarArchivoComponent {
     reader.readAsDataURL(this.archivo);
   }
 
-  resultados(data: any):void {
+  resultados(data: any): void {
     let mensaje = "";
 
     if (data.Erróneos?.length > 0) {
@@ -147,7 +167,7 @@ export class CargarArchivoComponent {
       mensaje += `<br><strong>Registros correctos:</strong><ul>`;
       mensaje += data.Correctos.join(", ") + '<br><br>';
     }
-    
+
     this.modalService.mostrarModal(mensaje, 'warning', '');
   }
 

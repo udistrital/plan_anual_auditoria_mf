@@ -7,13 +7,8 @@ const routes: Routes = [
   { path: "", component: AuditoriasInternasComponent },
   { path: "auditorias-internas", component: AuditoriasInternasComponent },
   {
-    path: "auditorias-internas",
-    children: [
-      {
-        path: "editar",
-        component: EditarAuditoriaComponent,
-      },
-    ],
+    path: "auditorias-internas/editar/:id", // Ruta dinámica para aceptar el ID
+    component: EditarAuditoriaComponent,
   },
 ];
 

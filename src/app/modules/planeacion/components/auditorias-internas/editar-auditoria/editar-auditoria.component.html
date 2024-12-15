@@ -70,7 +70,7 @@
               Actividades de la auditoría
             </div>
           </div>
-          <app-actividades-auditoria></app-actividades-auditoria>
+          <app-actividades-auditoria [idAuditoria]="idAuditoria"></app-actividades-auditoria>
           <div class="d-flex justify-content-end mt-4">
             <button matStepperPrevious mat-stroked-button color="primary">
               Volver
@@ -78,6 +78,14 @@
             <button matStepperNext mat-flat-button color="primary" class="mx-2">
               Guardar y continuar
             </button>
+            <button
+            class="mx-2"
+            mat-raised-button
+            color="primary"
+            (click)="subirArchivoCargueMasivo()"
+          >
+            <mat-icon>file_upload</mat-icon> Cargue Masivo
+          </button>
           </div>
         </mat-step>
 
