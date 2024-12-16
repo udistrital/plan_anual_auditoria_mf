@@ -7,12 +7,12 @@ import {
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { formularioPAA } from "src/app/shared/data/forms/formulario-PAA-valores";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
+import { formularioPAA } from "./registrar-plan.utilidades";
 
 @Component({
   selector: "app-registrar-plan",
@@ -27,7 +27,10 @@ export class RegistrarPlanComponent implements OnInit {
   formulario: Formulario = formularioPAA;
   datosCargados = false;
   estadoIdActual: number | null = null;
-  mostrarBotones: boolean = true;
+  modoEditar: boolean = true;
+  breadcrumb: string = "";
+  labelAccion: string = "";
+
   // parametros: Record<string, any> = {};
 
   constructor(
@@ -47,6 +50,8 @@ export class RegistrarPlanComponent implements OnInit {
       try {
         const planData = await this.obtenerPlanAuditoria();
         await this.obtenerEstadoActual();
+        this.labelAccion = this.modoEditar ? "Editar" : "Ver";
+        this.breadcrumb = `Gestión Auditoría / Programación / Plan anual de auditorías / <b>${this.labelAccion}</b>`;
 
         if (planData) {
           this.actualizarValoresFormulario(planData);
@@ -63,7 +68,6 @@ export class RegistrarPlanComponent implements OnInit {
   inicializarFormulario(): void {
     this.formulario = JSON.parse(JSON.stringify(formularioPAA));
   }
-
 
   async obtenerPlanAuditoria(): Promise<any> {
     try {
@@ -84,22 +88,21 @@ export class RegistrarPlanComponent implements OnInit {
         .toPromise();
       const estadoActual = response?.Data?.[0];
       this.estadoIdActual = estadoActual?.estado_id || null;
-      this.mostrarBotones =
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_RECHAZO_ID;
+      this.modoEditar,
+        (this.modoEditar =
+          this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+          this.estadoIdActual === environment.PLAN_ESTADO.EN_RECHAZO_ID);
       this.actualizarEstadoCampos();
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
-      this.mostrarBotones = false;
-      this.actualizarEstadoCampos(); 
+      this.modoEditar = false;
+      this.actualizarEstadoCampos();
     }
   }
 
-  
-
   actualizarEstadoCampos(): void {
     this.formulario.campos?.forEach((campo) => {
-      campo.deshabilitado = !this.mostrarBotones;
+      campo.deshabilitado = !this.modoEditar;
     });
   }
 
@@ -124,9 +127,8 @@ export class RegistrarPlanComponent implements OnInit {
             break;
           default:
             break;
-        }        
+        }
       });
-      
     } else {
       this.inicializarFormulario();
     }
@@ -187,52 +189,3 @@ export class RegistrarPlanComponent implements OnInit {
     this.router.navigate([`/programacion/plan-auditoria`]);
   }
 }
-
-// Función asíncrona para obtener valores de parámetros
-// async obtenerParametros(): Promise<void> {
-//   const camposIds = Object.values     (environment.idsCamposFormulario);
-
-//   const requests = camposIds.map(async (campoId) => {
-//     try {
-//       const res = await this.parametrosService.get(`parametro/${campoId}`).toPromise();
-//       if (res && res.Data) {
-//         this.parametros[campoId] = res.Data.Descripcion;
-//       }
-//     } catch (error) {
-//       console.error(`Error cargando valor para el campo con id ${campoId}`, error);
-//     }
-//   });
-
-//   await Promise.all(requests);
-// }
-
-// Selecciona y modifica el formulario según los parámetros obtenidos
-// loadFormulario(): void {
-//   if (this.planId === '1') {
-//     this.formulario = formularioPAA1;
-//   } else if (this.planId === '2') {
-//     this.formulario = formularioPAA2;
-//   } else {
-//     console.error('No se encontró un formulario para el planId:', this.planId);
-//     return;
-//   }
-
-//   // this.cargarValoresFormulario();
-// }
-
-// Asigna valores a cada campo del formulario usando los parámetros obtenidos
-// cargarValoresFormulario(): void {
-//   if (this.formulario && this.formulario.campos) {
-//     this.formulario.campos.forEach((campo) => {
-//       const campoId = environment.idsCamposFormulario[campo.nombre as keyof typeof environment.idsCamposFormulario];
-//       if (campoId && this.parametros[campoId]) {
-//         campo.valor = this.parametros[campoId];
-//       } else {
-//         console.warn(`No se encontró un id o valor para el campo ${campo.nombre}`);
-//       }
-//     });
-//     this.cdr.detectChanges();
-//   } else {
-//     console.error("El formulario o sus campos no están definidos");
-//   }
-// }

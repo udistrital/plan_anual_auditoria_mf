@@ -1,8 +1,6 @@
 <plantilla-tarjeta-contenedora
   [title]="'Plan de Acción'"
-  [breadcrumb]="
-    '<p>Gestión Auditoría / Programación / Plan anual de auditorías / <b>Editar</b></p>'
-  "
+  [breadcrumb]="breadcrumb"
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
@@ -10,13 +8,13 @@
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
-    <div class="col-12" >
+    <div class="col-12">
       <app-formulario-dinamico
         [formulario]="formulario"
         (submitFormulario)="manejarEnvio($event)"
-        *ngIf= "datosCargados"
+        *ngIf="datosCargados"
       />
-      <div class="d-flex justify-content-end" *ngIf="mostrarBotones">
+      <div class="d-flex justify-content-end" *ngIf="modoEditar">
         <div class="button-container">
           <button
             mat-raised-button
