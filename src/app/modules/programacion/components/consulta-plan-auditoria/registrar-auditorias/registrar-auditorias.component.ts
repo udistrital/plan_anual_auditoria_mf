@@ -11,8 +11,8 @@ import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visu
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
-import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
 import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/modal-ver-documentos-plan.component";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
 
 @Component({
   selector: "app-registrar-auditorias",
@@ -38,7 +38,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private gestorDocumentalService: GestorDocumentalService,
+    private nuxeoService: NuxeoService,
     private router: Router
   ) { }
 
@@ -100,51 +100,38 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.dataSource.data = prevData;
   }
 
-  descargarPlantilla() {
-    this.gestorDocumentalService.get("document?query=Id:158543").subscribe(
-      (res) => {
-        if (res && res.Data && res.Data.length > 0) {
-          const base64File = res.Data[0].Nuxeo.file; 
-          console.log(base64File)
-          const fileType = res.Data[0].Nuxeo["file:content"]["mime-type"] || "application/pdf"; // Tipo de archivo
-          const fileName = res.Data[0].Nombre || "plantilla";
-  
-          try {
-            const arrayBuffer = this.base64ToArrayBuffer(base64File);
-            const blob = new Blob([arrayBuffer], { type: fileType });
-            const url = window.URL.createObjectURL(blob);
+  async descargarPlantilla(): Promise<void> {
+    try {
+      const base64File = await this.nuxeoService.getByUUID("dac4dc08-3034-4f1c-8f7a-8ea799f2703c");
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; 
+      const fileName = "plantilla"; 
 
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `${fileName}.${this.getExtensionFromMimeType(fileType)}`;
-            link.target = "_blank";
-            link.click();
-  
-            // Limpiar URL temporal
-            window.URL.revokeObjectURL(url);
-          } catch (error) {
-            console.error("Error al procesar el archivo para descarga:", error);
-            this.alertaService.showErrorAlert("Error al descargar la plantilla");
-          }
-        } else {
-          this.alertaService.showErrorAlert("No se encontró la plantilla para descargar");
-        }
-      },
-      (error) => {
-        console.error("Error al obtener el archivo:", error);
-        this.alertaService.showErrorAlert("Error al descargar la plantilla");
-      }
-    );
+      const arrayBuffer = this.base64ToArrayBuffer(base64File);
+      const blob = new Blob([arrayBuffer], { type: fileType });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${fileName}.${this.getExtensionFromMimeType(fileType)}`;
+      link.target = "_blank";
+      link.click();
+
+      // Limpiar URL temporal
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error al descargar la plantilla:", error);
+      this.alertaService.showErrorAlert("Error al descargar la plantilla");
+    }
   }
-  
+
   base64ToArrayBuffer(base64: string): ArrayBuffer {
-    const binaryString = window.atob(base64); 
+    const binaryString = window.atob(base64);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
     for (let i = 0; i < len; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
-    return bytes.buffer; 
+    return bytes.buffer;
   }
   
   getExtensionFromMimeType(mimeType: string): string {

@@ -1,17 +1,10 @@
 import { PlanAnualAuditoriaMid } from './../../../../core/services/plan-anual-auditoria-mid.service';
-import { MatTableDataSource } from '@angular/material/table';
-import {
-  Component,
-  ElementRef,
-  Inject,
-  ViewChild,
-  inject,
-} from "@angular/core";
+import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
-import { HttpClient } from "@angular/common/http";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ModalService } from 'src/app/shared/services/modal.service';
 import { AlertService } from "src/app/shared/services/alert.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
 @Component({
   selector: "app-cargar-archivo",
@@ -19,17 +12,17 @@ import { AlertService } from "src/app/shared/services/alert.service";
   styleUrl: "./cargar-archivo.component.css",
 })
 export class CargarArchivoComponent {
-  archivo: File | null = null;
-
+  archivo: File | null = null; // Único archivo seleccionado
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
 
   constructor(
     public dialogRef: MatDialogRef<CargarArchivoComponent>,
-    private gestorDocumentalService: GestorDocumentalService,
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private nuxeoService: NuxeoService,
     private alertService: AlertService,
-    private http: HttpClient,
     private modalService: ModalService,
+    private referenciaPdfService: ReferenciaPdfService,
+    
     @Inject(MAT_DIALOG_DATA) public data: {
       tipoArchivo: string;
       idTipoDocumento: number;
@@ -46,18 +39,13 @@ export class CargarArchivoComponent {
     const file = input.files ? input.files[0] : null;
 
     if (file) {
-      if (this.data.tipoArchivo === "pdf" && file.type !== "application/pdf") {
-        alert("Por favor seleccione un archivo PDF.");
-        this.removerArchivo();
-        return;
-      }
-
       if (
-        this.data.tipoArchivo === "xlsx" &&
-        file.type !==
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        (this.data.tipoArchivo === "pdf" && file.type !== "application/pdf") ||
+        (this.data.tipoArchivo === "xlsx" &&
+          file.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
       ) {
-        alert("Por favor seleccione un archivo XLSX.");
+        alert("Por favor seleccione un archivo válido según el tipo especificado.");
         this.removerArchivo();
         return;
       }
@@ -77,79 +65,118 @@ export class CargarArchivoComponent {
 
   cargarArchivo(): void {
     if (!this.archivo) {
-      //this.errorMessage = 'No se ha seleccionado ningún archivo.';
+      this.alertService.showErrorAlert("No se ha seleccionado ningún archivo.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const base64String = e.target.result.split(",")[1];
-      let lambdaPayload: any = {};
-      if (this.data.cargaLambda) {
-        switch (this.data.tipo) {
+
+  
+    if (this.data.cargaLambda) {
+      this.cargarConLambda().then(success => {
+        if (success) {
+          this.cargarConNuxeo().then(nuxeoResponse => {
+            this.guardarReferencia(nuxeoResponse, "Auditoria", 0, false);
+
+          });
+        }
+      });
+    } else {
+      this.cargarConNuxeo().then(nuxeoResponse => {
+        this.guardarReferencia(nuxeoResponse, "Auditoria", 0, true);
+      });
+    }
+  }
+  
+  private async cargarConLambda(): Promise<boolean> {
+    try {
+      const base64 = await this.nuxeoService.fileABase64(this.archivo!);
+      console.log("base64", base64);
+  
+      /*const payload = {
+        base64data: base64,
+        complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
+        type_upload: "auditorias",
+      };*/
+       let payload: any = {};
+ switch (this.data.tipo) {
           case "auditorias":
-            lambdaPayload = {
-              base64data: base64String,
+            payload = {
+              base64data: base64,
               complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
               type_upload: "auditorias",
             };
             break;
           case "actividades":
-            lambdaPayload = {
-              base64data: base64String,
+            payload = {
+              base64data: base64,
               complement: { auditoria_id: this.data.id },
               type_upload: "actividades",
             };
             break;
         }
-
-        /*lambdaPayload = {
-          base64data: base64String,
-          complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
-          type_upload: "auditorias",
-        };*/
-
-
-
-        this.PlanAnualAuditoriaMid
-          .post(`cargue-masivo/${this.data.tipo}`, lambdaPayload)
-          .subscribe({
-            next: (response: any) => {
-              console.log("Archivo enviado exitosamente al MID", response);
-              if (response && response.Data) {
-                this.resultados(response.Data);
-              }
-            },
-            error: (error) => {
-              console.error("Error al enviar el archivo al MID", error);
-            },
-          });
+  
+      const response: any = await this.PlanAnualAuditoriaMid
+        .post(`cargue-masivo/${this.data.tipo}`, payload)
+        .toPromise();
+  
+      if (response && response.Data) {
+        console.log("Archivo enviado exitosamente al MID", response);
+        this.resultados(response.Data);
+        return true;
+      } else {
+        this.alertService.showErrorAlert(
+          "La respuesta de Lambda no contiene datos válidos."
+        );
+        return false;
       }
-
-      const payload = [
-        {
-          IdTipoDocumento: this.data.idTipoDocumento,
-          nombre: this.archivo!.name,
-          descripcion: this.data.descripcion,
-          metadatos: {},
-          file: base64String,
+    } catch (error) {
+      this.alertService.showErrorAlert(
+        "Error al enviar el archivo a Lambda. Por favor, revise el log."
+      );
+      console.error("Error al enviar el archivo al MID", error);
+      return false;
+    }
+  }
+  
+  private async cargarConNuxeo(): Promise<any> {
+    const archivoConDatos = {
+      IdTipoDocumento: this.data.idTipoDocumento,
+      nombre: this.archivo!.name,
+      descripcion: this.data.descripcion,
+      file: this.archivo!,
+    };
+  
+    return new Promise((resolve, reject) => {
+      this.nuxeoService.guardarArchivos([archivoConDatos]).subscribe({
+        next: (response) => {
+          console.log("Archivo subido a Nuxeo", response);
+          this.dialogRef.close();
+          resolve(response[0]); 
         },
-      ];
+        error: (error) => {
+          this.alertService.showErrorAlert("Error al subir el archivo.");
+          console.error("Error al subir el archivo", error);
+          reject(error);
+        },
+      });
+    });
+  }
 
-      this.gestorDocumentalService
-        .postAny("document/uploadAnyFormat", payload)
+  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, tipo_id: number, mostrarMensaje: boolean): void {
+    if (nuxeoResponse.res.Enlace) {
+      this.referenciaPdfService
+        .guardarReferencia(nuxeoResponse.res, referencia_tipo, tipo_id)
         .subscribe({
           next: (response) => {
-            this.alertService.showSuccessAlert("Documento subido exitosamente");
-            console.log("Documento subido exitosamente", response);
-            this.dialogRef.close();
+            console.log("Referencia guardada exitosamente", response);
+            if (mostrarMensaje) {
+              this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+            }
           },
           error: (error) => {
-            this.alertService.showErrorAlert("Error al subir el documento");
-            console.error("Error al subir el documento", error);
+            console.error("Error al guardar la referencia", error);
           },
         });
-    };
-    reader.readAsDataURL(this.archivo);
+    }
   }
 
   resultados(data: any): void {

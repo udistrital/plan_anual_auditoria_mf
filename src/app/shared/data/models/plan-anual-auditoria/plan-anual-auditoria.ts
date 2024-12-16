@@ -14,4 +14,5 @@ export class Auditoria {
     cronograma!: string;
     cronogramaId!: number[];
     estado!: string;
+    auditores!: number[];
 }

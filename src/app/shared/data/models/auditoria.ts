@@ -1,0 +1,35 @@
+export interface Auditoria {
+  _id: string;
+  plan_auditoria_id: string;
+  titulo: string;
+  tipo_evaluacion_id: number;
+  cronograma_id: number[];
+  estado_id: number;
+  no_auditoria: number;
+  vigencia_id: number;
+  consecutivo_OCI: string;
+  consecutivo_IE: string;
+  tipo_id: number;
+  macroproceso: number;
+  lider_id: number;
+  responsable_id: number;
+  fecha_inicio: string;
+  fecha_fin: string;
+  objetivo: string;
+  alcance: string;
+  criterio: string;
+  rec_tecnologico: string;
+  rec_humano: string;
+  rec_fisico: string;
+  activo: boolean;
+  fecha_creacion: string;
+  fecha_modificacion: string;
+  tipo_evaluacion_nombre: string;
+  cronograma_nombre: string[];
+  estado_nombre: string;
+  tipo_nombre: string;
+  vigencia_nombre: string;
+  macroproceso_nombre: string;
+  lider_nombre: string;
+  responsable_nombre: string;
+}

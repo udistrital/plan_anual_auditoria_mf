@@ -5,7 +5,7 @@
 
 .shadow {
   box-shadow: 0 0.5px 10px rgba(0, 0, 0, 0.3);
-  z-index: 100;
+  z-index: 300;
 }
 
 .modal-scroll::-webkit-scrollbar {

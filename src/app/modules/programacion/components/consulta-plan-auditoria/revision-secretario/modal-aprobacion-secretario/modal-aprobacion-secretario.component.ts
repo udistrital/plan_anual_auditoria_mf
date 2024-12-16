@@ -1,9 +1,9 @@
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { environment } from "src/environments/environment";
 import { Router } from "@angular/router";
 
@@ -22,8 +22,9 @@ export class ModalAprobacionSecretarioComponent {
     public dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
     private dialog: MatDialog,
     private alertService: AlertService,
-    private gestorDocumentalService: GestorDocumentalService,
     private planAuditoriaService: PlanAnualAuditoriaService,
+    private nuxeoService: NuxeoService,
+    private referenciaPdfService: ReferenciaPdfService,
     private router: Router
   ) {}
 
@@ -55,38 +56,48 @@ export class ModalAprobacionSecretarioComponent {
     this.fileInput.nativeElement.value = "";
   }
 
+  
   cargarArchivo(): void {
     if (!this.archivo) {
       this.alertService.showErrorAlert("Debe seleccionar un archivo");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      const base64String = e.target.result.split(",")[1];
 
-      const lambdaPayload = {
-        base64data: base64String,
-      };
+    const payload = [
+      {
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_COMITE_COORDINADOR,
+        nombre: this.archivo!.name,
+        descripcion: "Acta de comité coordinador",
+        metadatos: {},
+        file: this.archivo,
+      },
+    ];
 
-      const payload = [
-        {
-          IdTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_COMITE_COORDINADOR,
-          nombre: this.archivo!.name,
-          descripcion: "Acta de comite coordinador",
-          metadatos: {},
-          file: base64String,
+    this.nuxeoService.guardarArchivos(payload).subscribe({
+      next: (response) => {
+        console.log("Archivo cargado exitosamente", response);
+        this.guardarReferencia(response[0], "Plan Auditoria", 0);
+        this.aceptarPlanAuditoria();
+      },
+      error: (error) => {
+        console.error("Error al cargar el archivo en Nuxeo", error);
+        this.alertService.showErrorAlert("Error al cargar el archivo");
+      },
+    });
+  }
+
+  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, tipo_id: number): void {
+    if (nuxeoResponse.res.Enlace) {
+      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, tipo_id).subscribe({
+        next: (response) => {
+          console.log("Referencia guardada exitosamente", response);
+          this.alertService.showSuccessAlert("Archivo subido exitosamente.");
         },
-      ];
-
-      this.gestorDocumentalService
-        .postAny("/document/uploadAnyFormat", payload)
-        .subscribe({
-          next: (response) => {
-            this.aceptarPlanAuditoria();
-          },
-        });
-    };
-    reader.readAsDataURL(this.archivo);
+        error: (error) => {
+          console.error("Error al guardar la referencia", error);
+        },
+      });
+    }
   }
 
   aceptarPlanAuditoria(): void {

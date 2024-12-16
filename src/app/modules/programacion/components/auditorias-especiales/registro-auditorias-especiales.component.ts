@@ -57,22 +57,50 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     this.planAnualAuditoriaService.get(`auditoria`).subscribe(
       (res) => {
         if (res && res.Data) {
-          this.dataSource.data = res.Data.filter(
+          const auditorias = res.Data.filter(
             (item: any) => item.activo === true && !item.plan_auditoria_id
           ).map((item: any) => ({
             id: item._id ?? 0,
             auditoria: item.titulo ?? "Sin Título",
             tipoEvaluacion: item.tipo_evaluacion_id ?? "Sin Tipo",
-            auditor: item.auditor_id ?? "Sin Auditor",
+            auditores: [], 
             cronograma: item.cronograma_id ?? "Sin Cronograma",
             estado: item.estado_id ?? "Desconocido",
           }));
+
+          this.loadAuditores(auditorias);
+          console.log("Auditorias", auditorias);
         }
       },
       (error) => {
         this.alertaService.showErrorAlert("Error al cargar las auditorías");
       }
     );
+  }
+
+  loadAuditores(auditorias: any[]): void {
+    this.planAnualAuditoriaService.get(`auditor`).subscribe(
+      (res) => {
+        if (res && res.Data) {
+          const auditores = res.Data;
+
+          auditorias.forEach((auditoria) => {
+            const auditoresAuditoria = auditores.filter(
+              (auditor: any) => auditor.auditoria_id === auditoria.id
+            );
+            auditoria.auditores = auditoresAuditoria.map((auditor: any) => ({
+              auditor_id: auditor.auditor_id,
+              auditor_lider: auditor.auditor_lider,
+            }));
+          });
+          console.log("Auditorias con auditores", auditorias);
+          this.dataSource.data = auditorias;
+        }
+      },
+      (error) => {
+        this.alertaService.showErrorAlert("Error al cargar los auditores");
+      }
+    )
   }
 
   NewAuditoria() {

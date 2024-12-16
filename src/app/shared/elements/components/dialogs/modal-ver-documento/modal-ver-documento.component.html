@@ -7,14 +7,16 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <pdf-viewer
-    [src]="documentoSrc"
-    [render-text]="true"
-    [original-size]="false"
-    [show-all]="true"
-    [zoom]="0.98"
-    class="visualizador"
-  ></pdf-viewer>
+  <div style="z-index: 0">
+    <pdf-viewer
+      [src]="documentoSrc"
+      [render-text]="true"
+      [original-size]="false"
+      [show-all]="true"
+      [zoom]="0.98"
+      class="visualizador"
+    ></pdf-viewer>
+  </div>
 </ng-template>
 <ng-template #footerDeModal>
   <button
