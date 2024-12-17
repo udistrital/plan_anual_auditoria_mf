@@ -50,7 +50,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   cargarAuditorias(): void {
     this.PlanAnualAuditoriaMid
-      .get(`auditoria/reordenadas?query=plan_auditoria_id:${this.id}`)
+      .get(`auditoria/ordenadas?query=plan_auditoria_id:${this.id}`)
       .subscribe(
         (res) => {
           if (res && res.Data) {
