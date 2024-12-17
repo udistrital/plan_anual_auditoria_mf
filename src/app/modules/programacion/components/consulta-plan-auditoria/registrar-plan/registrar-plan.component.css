@@ -1,0 +1,6 @@
+.fondo-chip {
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-left: 6px solid var(--md-primary-500);
+}
