@@ -1,4 +1,4 @@
-import { Formulario } from "../models/formulario.model";
+import { Formulario } from "src/app/shared/data/models/formulario.model";
 
 export const formularioPAA: Formulario = {
   campos: [
@@ -7,6 +7,7 @@ export const formularioPAA: Formulario = {
       descripcion: "Objetivo del plan",
       etiqueta: "Objetivo",
       tipo: "textarea",
+      icono: "flag",
       valor:
         "Planear las actividades que realizará el equipo auditor de la Oficina de Control Interno, mediante la aplicación de auditorias y seguimientos que contribuyan a proteger los recursos, garantizar los estándares de las operaciones, la confiabilidad y oportunidad de la información, dar manejo adecuado a los riesgos para contribuir con el cumplimiento de los objetivos institucionales y la mejora de la gestión de la Universidad.",
       placeholder: "Escriba aquí el Objetivo",
@@ -24,6 +25,7 @@ export const formularioPAA: Formulario = {
       descripcion: "Alcance del plan",
       etiqueta: "Alcance",
       tipo: "textarea",
+      icono: "track_changes",
       valor:
         "Planear las actividades que realizará el equipo auditor de la Oficina de Control Interno, mediante la aplicación de auditorias y seguimientos que contribuyan a proteger los recursos, garantizar los estándares de las operaciones, la confiabilidad y oportunidad de la información, dar manejo adecuado a los riesgos para contribuir con el cumplimiento de los objetivos institucionales y la mejora de la gestión de la Universidad.",
       placeholder: "Escriba aquí el Alcance",
@@ -41,6 +43,7 @@ export const formularioPAA: Formulario = {
       descripcion: "Criterios del plan",
       etiqueta: "Criterios",
       tipo: "textarea",
+      icono: "check_circle",
       valor:
         "Normatividad interna y externa aplicable a la Universidad.\nDireccionamiento Estratégico\nModelo Integrado de Planeación y Gestión MIPG\nSistema Integrado de Gestión\nProyectos de Inversión",
       placeholder: "Escriba aquí el Criterios",
@@ -58,6 +61,7 @@ export const formularioPAA: Formulario = {
       descripcion: "Recursos del plan",
       etiqueta: "Recursos",
       tipo: "textarea",
+      icono: "inventory",
       valor:
         "Humanos: Equipo de trabajo de la Oficina de Control interno (servidores públicos y/o particulares que ejerzan funciones públicas permanente o transitoria)\nFinancieros: Presupuesto asignado\nTecnológicos: Equipos de cómputo, sistemas de información, archivo documental, papelería, sistemas de redes y correo electrónico de la Universidad.",
       placeholder: "Escriba aquí los Recursos",
