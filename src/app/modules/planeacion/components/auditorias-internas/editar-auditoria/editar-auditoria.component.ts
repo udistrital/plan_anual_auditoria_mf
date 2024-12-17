@@ -10,7 +10,10 @@ import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
-import { ActivatedRoute, Router } from "@angular/router";
+import { Router, ActivatedRoute  } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
+import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
@@ -42,12 +45,14 @@ export class EditarAuditoriaComponent implements OnInit {
     private alertaService: AlertService,
     private breakpointObserver: BreakpointObserver,
     private planAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private router: Router,
     private route: ActivatedRoute,
-    private router: Router
+    private dialog: MatDialog
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
   ) {}
 
   ngOnInit() {
+    
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
@@ -186,6 +191,20 @@ export class EditarAuditoriaComponent implements OnInit {
   regresarRuta() {
     this.router.navigate([`/planeacion/auditorias-internas`]);
   }
+
+    subirArchivoCargueMasivo(): void {
+      const dialogRef = this.dialog.open(CargarArchivoComponent, {
+        width: "800px",
+        data: {
+          tipoArchivo: 'xlsx',
+          id: this.auditoriaId,
+          idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+          descripcion: 'Archivo para cargue masivo de actividades',
+          cargaLambda: true,
+          tipo: "actividades"
+        },
+      });
+    }
 
   cargarFormulariosConAuditoria() {
     this.formularioInformacionComponent.form.patchValue({

@@ -220,7 +220,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
         id: this.id,
         idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
         descripcion: 'Archivo para cargue masivo',
-        cargaLambda: true
+        cargaLambda: true,
+        tipo: "auditorias"
       },
     });
   }

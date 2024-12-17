@@ -35,13 +35,24 @@
                   <span>{{ pageIndex * pageSize + i + 1 }}</span>
                 </div>
 
-                <div *ngSwitchCase="'acciones'">
-                  <button
-                    mat-icon-button
-                    [matMenuTriggerFor]="menu"
-                    color="primary"
-                  >
-                    <mat-icon>more_vert</mat-icon>
+
+              <div *ngSwitchCase="'acciones'">
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="menu"
+                  color="primary"
+                >
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item>
+                    <mat-icon color="primary">visibility</mat-icon> Ver
+                    auditoría
+                  </button>
+                  <button mat-menu-item (click)="editarAuditoria(row)">
+                    <mat-icon 
+                      color="primary" 
+                      >edit</mat-icon> Editar auditoría
                   </button>
                   <mat-menu #menu="matMenu">
                     <button mat-menu-item>
