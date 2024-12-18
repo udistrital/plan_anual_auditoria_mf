@@ -72,7 +72,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       this.cargarPlanesAuditoria(limit, this.offset);
     });
   }
-  
+
   IniciarPaginacion() {
     this.paginator.pageIndex = 0;
     this.paginator.pageSize = this.opcionesPagina[0];
@@ -127,7 +127,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             this.total = res.MetaData.Count;
 
             if ((!this.IsAuditor) && (item.estado?.estado_id === 6790)) {
-              return false;  
+              return false;
             }
             return item.activo === true;
           }).map((item: any, index: number) => ({
@@ -230,39 +230,57 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   enviarPlan(element: any) {
     this.alertaService.showConfirmAlert(
-      "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?",
+        "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?"
     ).then((result) => {
-      if (result.isConfirmed) {
+        if (result.isConfirmed) {
+            // Verificar si existe el documento con referencia_id
+            this.planAnualAuditoriaService.get(`documento?query=referencia_id:${element.id},activo:true`).subscribe(
+                (documentos) => {
+                    if (documentos && documentos.Data.length > 0) {
+                        const nuevoEstado = this.construirEstado(
+                            element.id,
+                            environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
+                        );
 
-        const nuevoEstado = this.construirEstado(
-          element.id,
-          environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
-        );
-
-        this.planAnualAuditoriaService.post("estado", nuevoEstado).subscribe(
-          (nuevoEstadoResponse: any) => {
-            if (nuevoEstadoResponse.Status === 201) {
-              this.alertaService.showSuccessAlert(
-                "plan enviado exitosamente"
-              );
-              this.IniciarPaginacion();
-              this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
-            } else {
-              this.alertaService.showErrorAlert(
-                "Error al asociar el estado al plan"
-              );
-            }
-          },
-          (nuevoEstadoError) => {
-            this.alertaService.showErrorAlert(
-              "Error al asociar el estado al plan"
+                        this.planAnualAuditoriaService.post("estado", nuevoEstado).subscribe(
+                            (nuevoEstadoResponse: any) => {
+                                if (nuevoEstadoResponse.Status === 201) {
+                                    this.alertaService.showSuccessAlert(
+                                        "Plan enviado exitosamente"
+                                    );
+                                    this.IniciarPaginacion();
+                                    this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
+                                } else {
+                                    this.alertaService.showErrorAlert(
+                                        "Error al asociar el estado al plan"
+                                    );
+                                }
+                            },
+                            (nuevoEstadoError) => {
+                                this.alertaService.showErrorAlert(
+                                    "Error al asociar el estado al plan"
+                                );
+                                console.error(nuevoEstadoError);
+                            }
+                        );
+                    } else {
+                        // Si no existe el documento, mostrar alerta
+                        this.alertaService.showErrorAlert(
+                            "No cuenta con el PDF del Plan Anual de Auditoría creado"
+                        );
+                    }
+                },
+                (error) => {
+                    this.alertaService.showErrorAlert(
+                        "Error al verificar la existencia del documento asociado."
+                    );
+                    console.error(error);
+                }
             );
-            console.error(nuevoEstadoError);
-          }
-        );
-      }
+        }
     });
-  }
+}
+
 
   construirEstado(planId: string, estadoId: number, observacion = "") {
     return {
