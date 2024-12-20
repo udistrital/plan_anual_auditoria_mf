@@ -1,6 +1,8 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-actividades-auditoria",
@@ -8,7 +10,9 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
   styleUrls: ["./actividades-auditoria.component.css"],
 })
 export class ActividadesAuditoriaComponent implements OnInit {
-  datos = [
+  @Input() idAuditoria!: String;
+  datos: any;
+  /*datos = [
     {
       actividad: "Título de la actividad 1",
       fechaInicio: "2024-01-01",
@@ -29,7 +33,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       medio: "Físico",
       carpeta: "Carpeta B",
     },
-  ];
+  ];*/
   columnsToDisplay: string[] = [
     "no",
     "actividad",
@@ -38,18 +42,50 @@ export class ActividadesAuditoriaComponent implements OnInit {
     "papelesTrabajo",
   ];
 
-  constructor(public dialog: MatDialog) {}
+  constructor(
+    public dialog: MatDialog,
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
+        private alertaService: AlertService
+    
+  ) { }
 
-  resetComponent() {}
+  resetComponent() { }
   onStepLeave() {
     this.resetComponent();
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.listaractividades();
+   }
 
   subirArchivo(tipoArchivo: string): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "600px",
       data: { tipoArchivo },
     });
+  }
+  listaractividades() {
+    this.planAuditoriaMid
+      .get(`actividad?query=auditoria_id:${this.idAuditoria},activo:true&limit=0`)
+      .subscribe((res) => {
+        const actividades: any[] = res.Data;
+
+        if (!(actividades.length > 0)) {
+          return this.alertaService.showAlert(
+            "No hay actividades registradas",
+            "Actualmente no hay actividades registradas para la vigencia seleccionada."
+          );
+        }
+
+        this.datos = actividades.map((item) => ({
+          actividad: item.titulo,
+          fechaInicio: new Date(item.fecha_inicio).toLocaleDateString(),
+          fechaFin: new Date(item.fecha_fin).toLocaleDateString(),
+          ref: item.referencia,
+          descripcion: item.descripcion,
+          folios: item.folio?.toString() || "",
+          medio: item.medio_id || "",  
+          carpeta: item.carpeta || ""
+        }));
+      });
   }
 }

@@ -1,6 +1,10 @@
-<plantilla-tarjeta-contenedora [title]="'Plan anual de auditorías - PAA'" [breadcrumb]="
+<plantilla-tarjeta-contenedora
+  [title]="'Plan anual de auditorías - PAA'"
+  [breadcrumb]="
     '<p>Gestión Auditoría / Programación / <b>Plan anual de auditorías</b></p>'
-  " [contenido]="contenidoDePlantilla"></plantilla-tarjeta-contenedora>
+  "
+  [contenido]="contenidoDePlantilla"
+></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
@@ -16,7 +20,12 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <button mat-raised-button color="primary" class="mx-3" (click)="crearPlan()">
+          <button
+            mat-raised-button
+            color="primary"
+            class="mx-3"
+            (click)="crearPlan()"
+          >
             Crear
           </button>
         </div>
@@ -38,7 +47,11 @@
                 <th mat-header-cell *matHeaderCellDef class="header">
                   <b>No.</b>
                 </th>
-                <td mat-cell *matCellDef="let element; let i = index" class="cell">
+                <td
+                  mat-cell
+                  *matCellDef="let element; let i = index"
+                  class="cell"
+                >
                   {{ i + 1 + offset }}
                 </td>
               </ng-container>
@@ -69,7 +82,7 @@
                   <b>Fecha Creación</b>
                 </th>
                 <td mat-cell *matCellDef="let element" class="cell">
-                  {{ element.fechaCreacion }}
+                  {{ element.fechaCreacion | date : "dd/MM/yyyy" }}
                 </td>
               </ng-container>
 
@@ -101,52 +114,86 @@
                           <mat-icon color="primary">report</mat-icon> Motivos de
                           rechazo
                         </button>
-                        <ng-container *ngIf="element.estadoId !== 6790 && element.estadoId !== 6806">
-                          <button mat-menu-item (click)="editarReporte(element)">
+                        <ng-container
+                          *ngIf="
+                            element.estadoId !== 6790 &&
+                            element.estadoId !== 6806
+                          "
+                        >
+                          <button mat-menu-item (click)="verReporte(element)">
                             <mat-icon color="primary">visibility</mat-icon> Ver
                           </button>
-                          <button mat-menu-item (click)="editarActividades(element)">
+                          <button
+                            mat-menu-item
+                            (click)="editarActividades(element)"
+                          >
                             <mat-icon color="primary">visibility</mat-icon>
                             Ver Auditorías
                           </button>
-                          <button mat-menu-item (click)="verDocumentos(element)">
+                          <button
+                            mat-menu-item
+                            (click)="verDocumentos(element)"
+                          >
                             <mat-icon color="primary">visibility</mat-icon>
                             Ver Documentos
                           </button>
                         </ng-container>
-                        <ng-container *ngIf="element.estadoId === 6790 || element.estadoId === 6806">
-                          <button mat-menu-item (click)="editarReporte(element)">
+                        <ng-container
+                          *ngIf="
+                            element.estadoId === 6790 ||
+                            element.estadoId === 6806
+                          "
+                        >
+                          <button
+                            mat-menu-item
+                            (click)="editarReporte(element)"
+                          >
                             <mat-icon color="primary">edit</mat-icon> Editar
                           </button>
-                          <button mat-menu-item (click)="editarActividades(element)">
+                          <button
+                            mat-menu-item
+                            (click)="editarActividades(element)"
+                          >
                             <mat-icon color="primary">add_circle</mat-icon>
-                            Registrar Auditorías 
+                            Registrar Auditorías
                           </button>
                           <button mat-menu-item (click)="enviarPlan(element)">
-                            <mat-icon color="primary">send</mat-icon> Enviar Aprobación
+                            <mat-icon color="primary">send</mat-icon> Enviar
+                            Aprobación
                           </button>
                         </ng-container>
                       </ng-container>
 
                       <!-- Jefe Acciones -->
-                      <button mat-menu-item *ngSwitchCase="'jefe'" (click)="viewPlanJefe(element)">
+                      <button
+                        mat-menu-item
+                        *ngSwitchCase="'jefe'"
+                        (click)="viewPlanJefe(element)"
+                      >
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
 
                       <!-- Secretario Acciones -->
-                      <button mat-menu-item *ngSwitchCase="'secretario'" (click)="viewPlanSecretario(element)">
+                      <button
+                        mat-menu-item
+                        *ngSwitchCase="'secretario'"
+                        (click)="viewPlanSecretario(element)"
+                      >
                         <mat-icon color="primary">visibility</mat-icon> Ver Plan
                       </button>
                     </ng-container>
                   </mat-menu>
                   <ng-container>
-                    <button (click)="verificarRechazos(element)" mat-icon-button [matMenuTriggerFor]="menu">
+                    <button
+                      (click)="verificarRechazos(element)"
+                      mat-icon-button
+                      [matMenuTriggerFor]="menu"
+                    >
                       <mat-icon color="primary">more_vert</mat-icon>
                     </button>
                   </ng-container>
                 </td>
               </ng-container>
-
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>

@@ -22,6 +22,7 @@ export class CargarArchivoComponent {
     private alertService: AlertService,
     private modalService: ModalService,
     private referenciaPdfService: ReferenciaPdfService,
+    
     @Inject(MAT_DIALOG_DATA) public data: {
       tipoArchivo: string;
       idTipoDocumento: number;
@@ -29,6 +30,7 @@ export class CargarArchivoComponent {
       id: string;
       vigenciaId: number;
       cargaLambda: boolean;
+      tipo: string;
     }
   ) { }
 
@@ -41,6 +43,7 @@ export class CargarArchivoComponent {
         (this.data.tipoArchivo === "pdf" && file.type !== "application/pdf") ||
         (this.data.tipoArchivo === "xlsx" &&
           file.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
       ) {
         alert("Por favor seleccione un archivo válido según el tipo especificado.");
         this.removerArchivo();
@@ -65,12 +68,14 @@ export class CargarArchivoComponent {
       this.alertService.showErrorAlert("No se ha seleccionado ningún archivo.");
       return;
     }
+
   
     if (this.data.cargaLambda) {
       this.cargarConLambda().then(success => {
         if (success) {
           this.cargarConNuxeo().then(nuxeoResponse => {
             this.guardarReferencia(nuxeoResponse, "Auditoria", 0, false);
+
           });
         }
       });
@@ -86,14 +91,31 @@ export class CargarArchivoComponent {
       const base64 = await this.nuxeoService.fileABase64(this.archivo!);
       console.log("base64", base64);
   
-      const payload = {
+      /*const payload = {
         base64data: base64,
         complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
         type_upload: "auditorias",
-      };
+      };*/
+       let payload: any = {};
+ switch (this.data.tipo) {
+          case "auditorias":
+            payload = {
+              base64data: base64,
+              complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
+              type_upload: "auditorias",
+            };
+            break;
+          case "actividades":
+            payload = {
+              base64data: base64,
+              complement: { auditoria_id: this.data.id },
+              type_upload: "actividades",
+            };
+            break;
+        }
   
       const response: any = await this.PlanAnualAuditoriaMid
-        .post("cargue-masivo/auditorias", payload)
+        .post(`cargue-masivo/${this.data.tipo}`, payload)
         .toPromise();
   
       if (response && response.Data) {

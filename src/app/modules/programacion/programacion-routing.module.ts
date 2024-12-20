@@ -30,6 +30,10 @@ const routes: Routes = [
         component: RegistrarAuditoriasComponent,
       },
       {
+        path: "ver/:id",
+        component: RegistrarPlanComponent,
+      },
+      {
         path: "editar/:id",
         component: RegistrarPlanComponent,
       },

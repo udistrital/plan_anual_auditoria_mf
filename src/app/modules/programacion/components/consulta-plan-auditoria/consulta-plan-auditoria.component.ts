@@ -54,7 +54,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private autenticationService: ImplicitAutenticationService,
     private userService: UserService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.buscarRol();
@@ -71,6 +71,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       this.cargarPlanesAuditoria(limit, this.offset);
     });
   }
+
 
   IniciarPaginacion() {
     this.paginator.pageIndex = 0;
@@ -92,10 +93,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       this.role = this.IsSecretario
         ? "secretario"
         : this.IsAuditor
-          ? "auditor"
-          : this.IsJefe
-            ? "jefe"
-            : null;
+        ? "auditor"
+        : this.IsJefe
+        ? "jefe"
+        : null;
 
       if (this.IsAuditor) {
         this.cargarVigencias();
@@ -119,13 +120,15 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
-    this.PlanAnualAuditoriaMid.get(`plan-auditoria?query=&limit=${limit}&offset=${offset}`).subscribe(
+    this.PlanAnualAuditoriaMid.get(
+      `plan-auditoria?query=&limit=${limit}&offset=${offset}`
+    ).subscribe(
       (res) => {
         if (res && res.Data) {
           this.dataSource.data = res.Data.filter((item: any) => {
             this.total = res.MetaData.Count;
 
-            if ((!this.IsAuditor) && (item.estado?.estado_id === 6790)) {
+            if (!this.IsAuditor && item.estado?.estado_id === 6790) {
               return false;
             }
             return item.activo === true;
@@ -185,9 +188,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
               }
             );
           } else {
-            this.alertaService.showErrorAlert(
-              "Error al crear el plan"
-            );
+            this.alertaService.showErrorAlert("Error al crear el plan");
           }
         },
         (error) => {
@@ -200,9 +201,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
               "VIGENCIA DUPLICADA"
             );
           } else {
-            this.alertaService.showErrorAlert(
-              "Error al crear el plan"
-            );
+            this.alertaService.showErrorAlert("Error al crear el plan");
           }
           console.error(error);
         }
@@ -216,8 +215,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   editarReporte(element: any) {
-    console.log(this.dataSource);
     this.router.navigate([`/programacion/plan-auditoria/editar/`, element.id]);
+  }
+
+  verReporte(element: any) {
+    this.router.navigate([`/programacion/plan-auditoria/ver/`, element.id]);
   }
 
   editarActividades(element: any) {
@@ -290,13 +292,18 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     };
   }
 
-
   viewPlanJefe(element: any) {
-    this.router.navigate(["/programacion/plan-auditoria/revision-jefe", element.id]);
+    this.router.navigate([
+      "/programacion/plan-auditoria/revision-jefe",
+      element.id,
+    ]);
   }
 
   viewPlanSecretario(element: any) {
-    this.router.navigate(["/programacion/plan-auditoria/revision-secretario", element.id]);
+    this.router.navigate([
+      "/programacion/plan-auditoria/revision-secretario",
+      element.id,
+    ]);
   }
 
   verMotivosRechazo(plan: any) {
@@ -331,5 +338,4 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       },
     });
   }
-
 }
