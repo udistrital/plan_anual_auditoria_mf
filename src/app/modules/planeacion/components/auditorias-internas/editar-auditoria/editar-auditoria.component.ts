@@ -47,7 +47,7 @@ export class EditarAuditoriaComponent implements OnInit {
     private planAuditoriaService: PlanAnualAuditoriaService,
     private router: Router,
     private route: ActivatedRoute,
-    private dialog: MatDialog
+    private dialog: MatDialog,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
   ) {}
 
