@@ -44,26 +44,24 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
-    this.loadAuditoriasFromService();
+    this.cargarAuditorias();
     await this.obtenerEstadoActual();
   }
 
-  loadAuditoriasFromService(): void {
+  cargarAuditorias(): void {
     this.PlanAnualAuditoriaMid
-      .get(`auditoria?query=plan_auditoria_id:${this.id}`)
+      .get(`auditoria/ordenadas?query=plan_auditoria_id:${this.id}`)
       .subscribe(
         (res) => {
           if (res && res.Data) {
-            this.dataSource.data = res.Data.filter(
-              (item: any) => item.activo === true
-            ).map((item: any) => ({
+            this.dataSource.data = res.Data.map((item: any) => ({
               id: item._id ?? 0,
               auditoria: item.titulo ?? "Sin Título",
               tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
               tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
               cronograma: item.cronograma_nombre ?? "Sin Cronograma",
               cronogramaId: item.cronograma_id ?? [],
-              estado: item.estado_id ?? "Desconocido",
+              estado: item.estado_id ?? "Borrador",
             }));
           }
         },
@@ -257,7 +255,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.saved) {
         console.log("Auditoría guardada o actualizada");
-        this.loadAuditoriasFromService(); // Refrescar la lista después de guardar o actualizar.
+        this.cargarAuditorias(); // Refrescar la lista después de guardar o actualizar.
       }
     });
   }
