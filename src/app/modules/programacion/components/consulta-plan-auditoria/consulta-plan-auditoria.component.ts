@@ -42,8 +42,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     "vigencia",
     "fechaCreacion",
     "estado",
-    "documentos",
-    "acciones",
+    "acciones"
   ];
 
   constructor(
@@ -86,9 +85,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         return;
       }
 
-      this.IsSecretario = roles.some((role: string) => role === "VICERRECTOR");
-      this.IsAuditor = roles.includes("ADMIN_SGA");
-      this.IsJefe = roles.includes("JEFE_DEPENDENCIA");
+      this.IsSecretario = roles.includes("SECRETARIO_AUDITOR");
+      this.IsAuditor =roles.some((role: string) => role === "AUDITOR_EXTERNO" ||  role === "AUDITOR");
+      this.IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
 
       this.role = this.IsSecretario
         ? "secretario"
