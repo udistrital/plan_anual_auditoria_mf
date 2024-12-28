@@ -31,6 +31,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
   mostrarBotones: boolean = true;
+  vigenciaId: number = 6619;
 
   constructor(
     private alertaService: AlertService,
@@ -44,13 +45,29 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
+    this.cargarVigencia();
     this.cargarAuditorias();
     await this.obtenerEstadoActual();
   }
 
+  cargarVigencia(): void{
+    this.planAnualAuditoriaService
+      .get(`plan-auditoria/${this.id}`)
+      .subscribe(
+        (res) => {
+          if (res && res.Data) {
+            this.vigenciaId = res.Data.vigencia_id;
+          }
+        },
+        (error) => {
+          this.alertaService.showErrorAlert("Error al cargar la vigencia");
+        }
+      );
+  }
+
   cargarAuditorias(): void {
     this.PlanAnualAuditoriaMid
-      .get(`auditoria/ordenadas?query=plan_auditoria_id:${this.id}`)
+      .get(`auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`)
       .subscribe(
         (res) => {
           if (res && res.Data) {
@@ -63,6 +80,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
               cronogramaId: item.cronograma_id ?? [],
               estado: item.estado_id ?? "Borrador",
             }));
+            this.vigenciaId = res.Data[0].plan_auditoria_id?.vigencia_id;
           }
         },
         (error) => {
@@ -110,7 +128,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${fileName}.${this.getExtensionFromMimeType(fileType)}`;
+      link.download = `${fileName}.${this.obtenerExtencionMimeType(fileType)}`;
       link.target = "_blank";
       link.click();
 
@@ -132,7 +150,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     return bytes.buffer;
   }
   
-  getExtensionFromMimeType(mimeType: string): string {
+  obtenerExtencionMimeType(mimeType: string): string {
     const mimeMap: { [key: string]: string } = {
       "application/pdf": "pdf",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
@@ -144,7 +162,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   
 
   // Eliminar auditoría
-  deleteAuditoria(element: Auditoria) {
+  borrarAuditoria(element: Auditoria) {
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
@@ -178,7 +196,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     );
   }
 
-  GuardarPaa() {
+  guardarPaa() {
     this.alertaService
       .showConfirmAlert(
         "¿Está seguro(a) de guardar el Plan Anual de Auditoría - PAA?"
@@ -216,6 +234,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       data: {
         tipoArchivo: 'xlsx',
         id: this.id,
+        vigenciaId: this.vigenciaId,
         idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
         descripcion: 'Archivo para cargue masivo',
         cargaLambda: true,
@@ -241,30 +260,32 @@ export class RegistrarAuditoriasComponent implements OnInit {
     console.log("Nuevo orden de auditorías:", this.dataSource.data);
   }
 
-  addAuditoria(auditoria?: Auditoria) {
+  agregarAuditoria(auditoria?: Auditoria) {
     // const nombreFormulario = 'sisifo_form2';
     // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
+    console.log(this.vigenciaId)
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: "1000px",
       data: {
         planAuditoriaId: this.id,
-        auditoria,
+        vigenciaId: this.vigenciaId,
+        auditoria
       },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.saved) {
         console.log("Auditoría guardada o actualizada");
-        this.cargarAuditorias(); // Refrescar la lista después de guardar o actualizar.
+        this.cargarAuditorias();
       }
     });
   }
 
   // Editar auditoría
-  editAuditoria(auditoria: Auditoria) {
+  editarAuditoria(auditoria: Auditoria) {
     // const nombreFormulario = 'sisifo_form2';
     // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
-    this.addAuditoria(auditoria);
+    this.agregarAuditoria(auditoria);
   }
 
   renderizar() {

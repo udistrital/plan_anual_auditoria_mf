@@ -59,8 +59,8 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       auditor: [""],
     });
     this.CargarEvaluaciones();
-    this.CargarMeses();
-    this.CargarAuditores();
+    this.cargarMeses();
+    this.cargarAuditores();
     // if (this.isEditMode) {
     //   this.inicializarAuditoresSeleccionados();
     // }
@@ -165,7 +165,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       this.auditoresSeleccionados.removeAt(index);
     }
   }
-  CargarMeses() {
+  cargarMeses() {
     this.parametrosService
       .get("parametro?query=TipoParametroId:139&limit=0")
       .subscribe((res) => {
@@ -190,7 +190,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     this.form.get("cronogramaActividades").setValue(seleccion);
   }
 
-  onMesChange(): void {
+  cambioMes(): void {
     const seleccionados = this.form.get("cronogramaActividades").value;
 
     if (seleccionados.includes(this.TODOS) && seleccionados.length > 1) {
@@ -204,7 +204,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     }
   }
 
-  CargarAuditores() {
+  cargarAuditores() {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       console.log("res", res);
       if (res && res.Data) {
@@ -314,7 +314,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     // });
   
 
-  onSave() {
+  guardarAuditoria() {
     if (this.form.valid) {
       this.alertaService
         .showConfirmAlert(`¿Está seguro(a) de actualizar la auditoría?`)

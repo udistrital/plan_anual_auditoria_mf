@@ -52,7 +52,7 @@
                 <mat-select
                   formControlName="cronogramaActividades"
                   multiple
-                  (selectionChange)="onMesChange()"
+                  (selectionChange)="cambioMes()"
                 >
                   <mat-option (click)="asignarTodos()" [value]="TODOS">{{
                     TODOS
@@ -123,7 +123,7 @@
         <button
           mat-raised-button
           color="primary"
-          (click)="onSave()"
+          (click)="guardarAuditoria()"
           class="mb-sm"
         >
           <mat-icon>save</mat-icon>

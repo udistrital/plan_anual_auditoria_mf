@@ -36,13 +36,13 @@ export class ModalPdfVisualizadorComponent implements OnInit {
   ngOnInit() {
     const documentSource = this.data.base64Document;
     if (documentSource) {
-      this.loadPdfFromBase64(documentSource);
+      this.cargarPdfDeBase64(documentSource);
     } else {
       console.error("No se proporcionó un documento PDF");
     }
   }
 
-  loadPdfFromBase64(base64: string) {
+  cargarPdfDeBase64(base64: string) {
     this.base64 = base64;
     try {
       console.log("render", this.base64);

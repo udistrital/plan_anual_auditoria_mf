@@ -77,7 +77,7 @@ export class RevisionSecretarioComponent {
       );
   }
 
-  openModalRechazo(): void {
+  abrirModalRechazo(): void {
     if (!this.mostrarBotones) return;
 
     this.dialog.open(ModalMotivosRechazoComponent, {
@@ -89,7 +89,7 @@ export class RevisionSecretarioComponent {
     });
   }
 
-  openModalEnviar(): void {
+  abrirModalEnviar(): void {
     if (!this.mostrarBotones) return;
 
     this.dialog.open(ModalAprobacionSecretarioComponent, {

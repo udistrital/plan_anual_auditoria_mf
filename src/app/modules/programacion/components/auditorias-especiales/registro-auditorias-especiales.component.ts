@@ -39,11 +39,11 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadAuditoriasFromService();
-    this.LoadYears();
+    this.cargarAuditorias();
+    this.cargarAños();
   }
 
-  LoadYears() {
+  cargarAños() {
     this.parametrosService
       .get("parametro?query=TipoParametroId:121&limit=0")
       .subscribe((res) => {
@@ -53,7 +53,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
       });
   }
 
-  loadAuditoriasFromService(): void {
+  cargarAuditorias(): void {
     this.planAnualAuditoriaService.get(`auditoria`).subscribe(
       (res) => {
         if (res && res.Data) {
@@ -68,7 +68,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
             estado: item.estado_id ?? "Desconocido",
           }));
 
-          this.loadAuditores(auditorias);
+          this.cargarAuditores(auditorias);
           console.log("Auditorias", auditorias);
         }
       },
@@ -78,7 +78,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     );
   }
 
-  loadAuditores(auditorias: any[]): void {
+  cargarAuditores(auditorias: any[]): void {
     this.planAnualAuditoriaService.get(`auditor`).subscribe(
       (res) => {
         if (res && res.Data) {
@@ -103,7 +103,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     )
   }
 
-  NewAuditoria() {
+  nuevaAuditoria() {
     if (this.selectedYearId) {
       this.planAnualAuditoriaService
         .post("auditoria", {
@@ -115,7 +115,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
               this.alertaService.showSuccessAlert(
                 "Auditoría especial creada exitosamente"
               );
-              this.loadAuditoriasFromService();
+              this.cargarAuditorias();
             }
           },
           (error) => {
@@ -140,7 +140,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     }
   }
 
-  addAuditoria(auditoria?: Auditoria) {
+  agregarAuditoria(auditoria?: Auditoria) {
     const dialogRef = this.dialog.open(FormularioAuditoriaEspecialComponent, {
       width: "90%",
       autoFocus: false,
@@ -152,13 +152,13 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.saved) {
         console.log("Auditoría guardada o actualizada");
-        this.loadAuditoriasFromService();
+        this.cargarAuditorias();
       }
     });
   }
 
-  editAuditoria(auditoria: Auditoria) {
-    this.addAuditoria(auditoria);
+  editarAuditoria(auditoria: Auditoria) {
+    this.agregarAuditoria(auditoria);
     console.log("Auditoría actual:", auditoria);
   }
 }
