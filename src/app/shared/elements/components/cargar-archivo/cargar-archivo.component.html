@@ -26,7 +26,7 @@
             type="file"
             hidden
             #fileInput
-            (change)="onFileSelected($event)"
+            (change)="onArchivoSelecionado($event)"
             [accept]="data.tipoArchivo === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'"
           />
         </mat-form-field>
@@ -34,7 +34,7 @@
           <button
             mat-raised-button
             color="primary"
-            (click)="onFileInputClick()"
+            (click)="onArchivoInputClick()"
           >
             <mat-icon>search</mat-icon>
             Examinar

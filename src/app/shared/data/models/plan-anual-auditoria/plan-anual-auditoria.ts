@@ -13,6 +13,7 @@ export class Auditoria {
     tipoEvaluacionId!: number;
     cronograma!: string;
     cronogramaId!: number[];
+    vigencia_id!: number;
     estado!: string;
     auditores!: number[];
 }

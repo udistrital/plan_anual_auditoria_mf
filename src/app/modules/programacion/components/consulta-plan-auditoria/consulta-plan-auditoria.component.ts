@@ -73,7 +73,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
 
-  IniciarPaginacion() {
+  iniciarPaginacion() {
     this.paginator.pageIndex = 0;
     this.paginator.pageSize = this.opcionesPagina[0];
     this.offset = 0;
@@ -172,7 +172,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                   this.alertaService.showSuccessAlert(
                     "Plan creado exitosamente"
                   );
-                  this.IniciarPaginacion();
+                  this.iniciarPaginacion();
                   this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
                 } else {
                   this.alertaService.showErrorAlert(
@@ -249,7 +249,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                                     this.alertaService.showSuccessAlert(
                                         "Plan enviado exitosamente"
                                     );
-                                    this.IniciarPaginacion();
+                                    this.iniciarPaginacion();
                                     this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
                                 } else {
                                     this.alertaService.showErrorAlert(
@@ -292,14 +292,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     };
   }
 
-  viewPlanJefe(element: any) {
+  verPlanJefe(element: any) {
     this.router.navigate([
       "/programacion/plan-auditoria/revision-jefe",
       element.id,
     ]);
   }
 
-  viewPlanSecretario(element: any) {
+  verPlanSecretario(element: any) {
     this.router.navigate([
       "/programacion/plan-auditoria/revision-secretario",
       element.id,

@@ -26,7 +26,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: { planAuditoriaId: string; auditoria?: Auditoria }
+    public data: { planAuditoriaId: string; vigenciaId: number; auditoria?: Auditoria }
   ) {}
 
   ngOnInit(): void {
@@ -46,11 +46,11 @@ export class AddAuditoriaModalComponent implements OnInit {
       ],
     });
 
-    this.CargarVigencia();
-    this.CargarMeses();
+    this.cargarVigencia();
+    this.cargarMeses();
   }
 
-  CargarMeses(callback?: () => void) {
+  cargarMeses(callback?: () => void) {
     this.parametrosService
       .get("parametro?query=TipoParametroId:139&limit=0")
       .subscribe((res) => {
@@ -61,7 +61,7 @@ export class AddAuditoriaModalComponent implements OnInit {
       });
   }
 
-  CargarVigencia(callback?: () => void) {
+  cargarVigencia(callback?: () => void) {
     this.parametrosService
       .get("parametro?query=TipoParametroId:136&limit=0")
       .subscribe((res) => {
@@ -72,16 +72,12 @@ export class AddAuditoriaModalComponent implements OnInit {
       });
   }
 
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
   asignarTodos(): void {
     const seleccion = [this.TODOS];
     this.auditoriaForm.get("cronogramaActividades").setValue(seleccion);
   }
 
-  onMesChange(): void {
+  cambioMes(): void {
     const seleccionados = this.auditoriaForm.get("cronogramaActividades").value;
 
     if (seleccionados.includes(this.TODOS) && seleccionados.length > 1) {
@@ -95,7 +91,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     }
   }
 
-  onSave(): void {
+  guardarAuditoria(): void {
     if (this.auditoriaForm.valid) {
       this.alertaService
         .showConfirmAlert(
@@ -104,13 +100,14 @@ export class AddAuditoriaModalComponent implements OnInit {
           } la auditoría?`
         )
         .then((result) => {
+          console.log(this.data.vigenciaId)
           if (result.isConfirmed) {
             const formData = {
               plan_auditoria_id: this.data.planAuditoriaId,
               titulo: this.auditoriaForm.value.tituloActividad,
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
               cronograma_id: this.auditoriaForm.value.cronogramaActividades,
-              vigencia_id: 6619,
+              vigencia_id: this.data.vigenciaId
             };
 
             const request$ = this.isEditMode

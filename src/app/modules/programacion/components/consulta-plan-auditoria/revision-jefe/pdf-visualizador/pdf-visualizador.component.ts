@@ -22,17 +22,18 @@ export class PdfVisualizadorComponent implements OnInit {
   pdfSrc: Uint8Array | undefined;
 
   @Input() base64Document: string = "";
-  ngOnInit(){
-    
+  ngOnInit() {
+
   }
-// Este método se ejecuta cada vez que el valor de base64Document cambia.
-ngOnChanges(changes: SimpleChanges): void {
-  if (changes['base64Document'] && this.base64Document) {
-    console.log("Nuevo base64 recibido:", this.base64Document);
-    this.loadPdfFromBase64(this.base64Document);  // Cargar el nuevo PDF
+  // Este método se ejecuta cada vez que el valor de base64Document cambia.
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['base64Document'] && this.base64Document) {
+      console.log("Nuevo base64 recibido:", this.base64Document);
+      this.cargarPdfDeBase64(this.base64Document);  // Cargar el nuevo PDF
+    }
   }
-}
-  loadPdfFromBase64(base64: string) {
+
+  cargarPdfDeBase64(base64: string) {
     try {
       const arrayBuffer = this.base64ToArrayBuffer(base64);
       this.pdfSrc = new Uint8Array(arrayBuffer);

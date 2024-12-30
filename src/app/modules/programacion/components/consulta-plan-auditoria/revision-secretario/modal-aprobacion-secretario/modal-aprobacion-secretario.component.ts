@@ -28,7 +28,7 @@ export class ModalAprobacionSecretarioComponent {
     private router: Router
   ) {}
 
-  onFileSelected(event: Event): void {
+  onArchivoSelecionado(event: Event): void {
     const input = event.target as HTMLInputElement;
 
     if (input.files && input.files.length > 0) {
@@ -47,7 +47,7 @@ export class ModalAprobacionSecretarioComponent {
     }
   }
 
-  onFileInputClick(): void {
+  onArchivoInputClick(): void {
     this.fileInput.nativeElement.click();
   }
 

@@ -71,7 +71,7 @@ export class RevisionJefeComponent implements OnInit {
       );
   }
 
-  openModalRechazo(): void {
+  abrirModalRechazo(): void {
     if (!this.mostrarBotones) return;
 
     this.dialog.open(ModalMotivosRechazoComponent, {
@@ -83,7 +83,7 @@ export class RevisionJefeComponent implements OnInit {
     });
   }
 
-  openModalEnviar(): void {
+  abrirModalEnviar(): void {
     if (!this.mostrarBotones) return;
 
     this.alertService

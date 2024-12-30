@@ -22,7 +22,7 @@ export class CargarArchivoComponent {
     private alertService: AlertService,
     private modalService: ModalService,
     private referenciaPdfService: ReferenciaPdfService,
-    
+
     @Inject(MAT_DIALOG_DATA) public data: {
       tipoArchivo: string;
       idTipoDocumento: number;
@@ -34,7 +34,7 @@ export class CargarArchivoComponent {
     }
   ) { }
 
-  onFileSelected(event: any): void {
+  onArchivoSelecionado(event: any): void {
     const input = event.target as HTMLInputElement;
     const file = input.files ? input.files[0] : null;
 
@@ -54,7 +54,7 @@ export class CargarArchivoComponent {
     }
   }
 
-  onFileInputClick(): void {
+  onArchivoInputClick(): void {
     this.fileInput.nativeElement.click();
   }
 
@@ -69,7 +69,7 @@ export class CargarArchivoComponent {
       return;
     }
 
-  
+
     if (this.data.cargaLambda) {
       this.cargarConLambda().then(success => {
         if (success) {
@@ -85,39 +85,39 @@ export class CargarArchivoComponent {
       });
     }
   }
-  
+
   private async cargarConLambda(): Promise<boolean> {
     try {
       const base64 = await this.nuxeoService.fileABase64(this.archivo!);
-      console.log("base64", base64);
-  
+      console.log("vigencia Masivo",  this.data.vigenciaId);
+
       /*const payload = {
         base64data: base64,
         complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
         type_upload: "auditorias",
       };*/
-       let payload: any = {};
- switch (this.data.tipo) {
-          case "auditorias":
-            payload = {
-              base64data: base64,
-              complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
-              type_upload: "auditorias",
-            };
-            break;
-          case "actividades":
-            payload = {
-              base64data: base64,
-              complement: { auditoria_id: this.data.id },
-              type_upload: "actividades",
-            };
-            break;
-        }
-  
+      let payload: any = {};
+      switch (this.data.tipo) {
+        case "auditorias":
+          payload = {
+            base64data: base64,
+            complement: { plan_auditoria_id: this.data.id, vigencia_id: this.data.vigenciaId },
+            type_upload: "auditorias",
+          };
+          break;
+        case "actividades":
+          payload = {
+            base64data: base64,
+            complement: { auditoria_id: this.data.id },
+            type_upload: "actividades",
+          };
+          break;
+      }
+
       const response: any = await this.PlanAnualAuditoriaMid
         .post(`cargue-masivo/${this.data.tipo}`, payload)
         .toPromise();
-  
+
       if (response && response.Data) {
         console.log("Archivo enviado exitosamente al MID", response);
         this.resultados(response.Data);
@@ -136,7 +136,7 @@ export class CargarArchivoComponent {
       return false;
     }
   }
-  
+
   private async cargarConNuxeo(): Promise<any> {
     const archivoConDatos = {
       IdTipoDocumento: this.data.idTipoDocumento,
@@ -144,13 +144,13 @@ export class CargarArchivoComponent {
       descripcion: this.data.descripcion,
       file: this.archivo!,
     };
-  
+
     return new Promise((resolve, reject) => {
       this.nuxeoService.guardarArchivos([archivoConDatos]).subscribe({
         next: (response) => {
           console.log("Archivo subido a Nuxeo", response);
           this.dialogRef.close();
-          resolve(response[0]); 
+          resolve(response[0]);
         },
         error: (error) => {
           this.alertService.showErrorAlert("Error al subir el archivo.");

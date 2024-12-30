@@ -90,10 +90,10 @@
             </th>
             <td mat-cell *matCellDef="let element; let i = index" class="cell">
               <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="editAuditoria(element)">
+                <button mat-menu-item (click)="editarAuditoria(element)">
                   <mat-icon color="primary">edit</mat-icon> Editar Auditoría
                 </button>
-                <button mat-menu-item (click)="deleteAuditoria(element)">
+                <button mat-menu-item (click)="borrarAuditoria(element)">
                   <mat-icon color="grey">delete</mat-icon> Eliminar Auditoría
                 </button>
               </mat-menu>
@@ -131,7 +131,7 @@
               class="mx-2"
               mat-raised-button
               color="primary"
-              (click)="addAuditoria()"
+              (click)="agregarAuditoria()"
             >
               <mat-icon>add_circle</mat-icon>
               Añadir Auditoría
@@ -164,7 +164,7 @@
               class="mx-2"
               mat-raised-button
               color="primary"
-              (click)="GuardarPaa()"
+              (click)="guardarPaa()"
             >
               <mat-icon>save</mat-icon>
               Guardar

@@ -52,8 +52,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
       auditor: [""],
     });
     this.CargarEvaluaciones();
-    this.CargarMeses();
-    this.CargarAuditores();      
+    this.cargarMeses();
+    this.cargarAuditores();      
   }
 
   agregarAuditor() {
@@ -64,7 +64,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
     this.auditoresSeleccionados.removeAt(index);
   }
 
-  CargarAuditores() {
+  cargarAuditores() {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       console.log("res", res);
       if (res && res.Data) {
@@ -79,7 +79,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
       console.log("Auditores", this.auditores);
     });
   }
-  CargarMeses() {
+
+  cargarMeses() {
     this.parametrosService
       .get("parametro?query=TipoParametroId:139&limit=0")
       .subscribe((res) => {
@@ -99,6 +100,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
       });
   }
 
-  onSave() {
+  guardarAuditoria() {
   }
 }
