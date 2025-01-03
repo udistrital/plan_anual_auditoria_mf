@@ -90,7 +90,7 @@
               "browserTarget": "plan_anual_auditoria_mf:build:development"
             },
             "local": {
-              "browserTarget": "usuario_rol_mf:build:local"
+              "browserTarget": "plan_anual_auditoria_mf:build:local"
             }
           },
           "defaultConfiguration": "local"
