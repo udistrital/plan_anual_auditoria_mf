@@ -16,7 +16,7 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
-
+import {CrearActividadComponent} from './actividades-auditoria/crear-actividad/crear-actividad.component'
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -227,5 +227,11 @@ export class EditarAuditoriaComponent implements OnInit {
       humanos: this.auditoria.rec_humano,
       fisicos: this.auditoria.rec_fisico,
     });
+  }
+  crearActividad(){
+    console.log("CREAR")
+    const dialogRef = this.dialog.open(CrearActividadComponent, {
+          width: '1100px', // Ajusta el ancho según lo necesites
+        });
   }
 }

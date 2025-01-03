@@ -1,0 +1,10 @@
+<plantilla-modal
+  [icono]="'editar'"
+  [titulo]="'Editar Actividad'"
+  [descripcion]="'Edición de Actividad'"
+  [contenido]="contenidoDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+    <app-actividad-formulario [actividadData]="actividadData" (formSubmit)="onEdit($event)"></app-actividad-formulario>
+</ng-template>

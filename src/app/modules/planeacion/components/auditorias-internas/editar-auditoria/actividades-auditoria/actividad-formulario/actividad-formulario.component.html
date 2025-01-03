@@ -1,0 +1,95 @@
+<div class="row">
+    <div class="col-12">
+      <div class="row">
+        <form [formGroup]="form">
+          <!-- Campo: Nombre de Actividad -->
+          <div class="row mt-2">
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Nombre de Actividad</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Nombre de Actividad</mat-label>
+                <mat-icon matPrefix color="primary">task</mat-icon>
+                <input
+                  matInput
+                  placeholder="Nombre de la actividad"
+                  formControlName="nombreActividad"
+                />
+              </mat-form-field>
+            </div>
+  
+            <!-- Campo: Fecha Inicio -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Fecha de Inicio</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Fecha de Inicio</mat-label>
+                <mat-icon matPrefix color="primary">event</mat-icon>
+                <input
+                  matInput
+                  [matDatepicker]="pickerInicio"
+                  placeholder="Seleccione una fecha"
+                  formControlName="fechaInicio"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="pickerInicio"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #pickerInicio></mat-datepicker>
+              </mat-form-field>
+            </div>
+  
+            <!-- Campo: Fecha Fin -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Fecha de Fin</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Fecha de Fin</mat-label>
+                <mat-icon matPrefix color="primary">event</mat-icon>
+                <input
+                  matInput
+                  [matDatepicker]="pickerFin"
+                  placeholder="Seleccione una fecha"
+                  formControlName="fechaFin"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="pickerFin"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #pickerFin></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+  
+          <!-- Botones de acción -->
+          <div class="d-flex justify-content-center align-items-center my-4">
+            <mat-icon color="primary">info</mat-icon>
+            <p class="mx-2">¿Guardar cambios?</p>
+          </div>
+          <mat-dialog-actions align="center">
+            <button
+              mat-stroked-button
+              color="primary"
+              style="border: 1px solid var(--md-primary-500)"
+              [mat-dialog-close]
+              class="mb-sm"
+            >
+              <mat-icon>close</mat-icon>No, cerrar
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="guardarActividad()"
+              class="mb-sm"
+            >
+              <mat-icon>save</mat-icon>
+              Si, guardar y cerrar
+            </button>
+          </mat-dialog-actions>
+        </form>
+      </div>
+    </div>
+  </div>

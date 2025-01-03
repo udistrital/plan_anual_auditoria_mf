@@ -1,0 +1,10 @@
+<plantilla-modal
+  [icono]="'crear'"
+  [titulo]="'Crear Actividad'"
+  [descripcion]="'Crearción de Actividad'"
+  [contenido]="contenidoDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+    <app-actividad-formulario (formSubmit)="onCreate($event)"></app-actividad-formulario>
+</ng-template>
