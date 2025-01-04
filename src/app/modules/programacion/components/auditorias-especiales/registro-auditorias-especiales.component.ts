@@ -40,10 +40,10 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarAuditorias();
-    this.cargarAños();
+    this.cargarVigencias();
   }
 
-  cargarAños() {
+  cargarVigencias() {
     this.parametrosService
       .get("parametro?query=TipoParametroId:121&limit=0")
       .subscribe((res) => {

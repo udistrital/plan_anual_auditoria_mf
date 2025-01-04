@@ -52,7 +52,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   cargarVigencia(): void{
     this.planAnualAuditoriaService
-      .get(`plan-auditoria/${this.id}`)
+      .get(`plan-auditoria/${this.id}?fields=vigencia_id`)
       .subscribe(
         (res) => {
           if (res && res.Data) {
@@ -118,7 +118,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
-      const base64File = await this.nuxeoService.getByUUID("dac4dc08-3034-4f1c-8f7a-8ea799f2703c");
+      const base64File = await this.nuxeoService.obtenerPorUUID("dac4dc08-3034-4f1c-8f7a-8ea799f2703c");
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; 
       const fileName = "plantilla"; 
 
@@ -248,9 +248,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "800px",
       data: {
         tipoArchivo: 'pdf',
+        id: this.id,
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
         descripcion: 'Matriz funcion publica',
-        cargaLambda: false
+        cargaLambda: false,
+        tipoIdReferencia: 6811
       },
     });
   }
@@ -263,7 +265,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
   agregarAuditoria(auditoria?: Auditoria) {
     // const nombreFormulario = 'sisifo_form2';
     // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
-    console.log(this.vigenciaId)
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: "1000px",
       data: {
@@ -292,7 +293,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}`).subscribe(
       (res) => {
         if (res && res.Data) {
-          console.log("DATA ", res.Data);
           this.dialog.open(ModalPdfVisualizadorComponent, {
             data: { base64Document: res.Data, id: this.id },
             width: "80%",

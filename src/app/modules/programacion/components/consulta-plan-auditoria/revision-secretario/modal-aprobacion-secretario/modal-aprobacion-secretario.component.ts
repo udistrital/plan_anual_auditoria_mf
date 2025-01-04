@@ -76,7 +76,7 @@ export class ModalAprobacionSecretarioComponent {
     this.nuxeoService.guardarArchivos(payload).subscribe({
       next: (response) => {
         console.log("Archivo cargado exitosamente", response);
-        this.guardarReferencia(response[0], "Plan Auditoria", 0);
+        this.guardarReferencia(response[0], "Plan Auditoria", this.infoModal.planAuditoriaId, 6820);
         this.aceptarPlanAuditoria();
       },
       error: (error) => {
@@ -86,9 +86,9 @@ export class ModalAprobacionSecretarioComponent {
     });
   }
 
-  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, tipo_id: number): void {
+  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, referencia_id: string, tipo_id: number): void {
     if (nuxeoResponse.res.Enlace) {
-      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, tipo_id).subscribe({
+      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, referencia_id, tipo_id).subscribe({
         next: (response) => {
           console.log("Referencia guardada exitosamente", response);
           this.alertService.showSuccessAlert("Archivo subido exitosamente.");
