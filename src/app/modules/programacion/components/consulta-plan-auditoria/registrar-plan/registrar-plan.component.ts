@@ -1,18 +1,12 @@
-import {
-  Component,
-  OnInit,
-  OnChanges,
-  ViewChild,
-  ChangeDetectorRef,
-} from "@angular/core";
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { formularioPAA } from "./registrar-plan.utilidades";
+import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 
 @Component({
   selector: "app-registrar-plan",
@@ -30,15 +24,15 @@ export class RegistrarPlanComponent implements OnInit {
   modoEditar: boolean = true;
   breadcrumb: string = "";
   labelAccion: string = "";
+  auditoriaItems: any;
 
   // parametros: Record<string, any> = {};
 
   constructor(
     private alertaService: AlertService,
-    private route: ActivatedRoute,
-    private parametrosService: ParametrosService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private cdr: ChangeDetectorRef,
+    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private route: ActivatedRoute,
     private router: Router
   ) {}
 
@@ -107,6 +101,9 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   actualizarValoresFormulario(planData: any): void {
+    if (!this.modoEditar) {
+      this.cargarInfoModoVer(planData);
+    }
     const { objetivo, alcance, criterio, recurso } = planData;
 
     // Verifica si los campos existen antes de asignar sus valores en el formulario
@@ -183,6 +180,32 @@ export class RegistrarPlanComponent implements OnInit {
     } else {
       this.errorRegistro();
     }
+  }
+
+  cargarInfoModoVer(planData: any) {
+    this.auditoriaItems = [
+      {
+        icon: "flag",
+        title: "Objetivo",
+        content: planData.objetivo,
+      },
+      {
+        icon: "track_changes",
+        title: "Alcance",
+        content: planData.alcance,
+      },
+      {
+        icon: "check_circle",
+        title: "Criterios",
+        content: planData.criterio,
+      },
+      {
+        icon: "inventory",
+        title: "Recursos",
+        content: planData.recurso,
+      },
+    ];
+    return;
   }
 
   regresarRuta() {

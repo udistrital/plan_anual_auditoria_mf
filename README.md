@@ -1,4 +1,5 @@
 # plan_anual_auditoria_mf
+Microcliente para la gestión de las fases programación y planeación de la auditoría.
 
 ## Especificaciones Técnicas
 
@@ -107,9 +108,11 @@ Con estos pasos, se tendrán las partes mínimas necesarias para ejecutar el pro
 
 ## Estado CI
 
-```bash
-# Developing
-```
+| Develop | Relese | Main |
+| -- | -- | -- |
+| [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/plan_anual_auditoria_mf/status.svg?ref=refs/heads/develop)](https://hubci.portaloas.udistrital.edu.co/udistrital/plan_anual_auditoria_mf/) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/plan_anual_auditoria_mf/status.svg?ref=refs/heads/release/0.0.1)](https://hubci.portaloas.udistrital.edu.co/udistrital/plan_anual_auditoria_mf/) | [![Build Status](https://hubci.portaloas.udistrital.edu.co/api/badges/udistrital/plan_anual_auditoria_mf/status.svg?ref=refs/heads/main)](https://hubci.portaloas.udistrital.edu.co/udistrital/plan_anual_auditoria_mf/) |
+
+## Licencia
 
 [This file is part of plan_anual_auditoria_mf](LICENSE)
 

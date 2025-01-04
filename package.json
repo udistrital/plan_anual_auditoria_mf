@@ -7,6 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "build:prod": "ng build --progress --configuration=production",
+    "build:test": "ng build --progress --configuration=development",
     "build:single-spa:plan_anual_auditoria_mf": "ng build plan_anual_auditoria_mf --configuration production",
     "serve:single-spa:plan_anual_auditoria_mf": "ng s --project plan_anual_auditoria_mf --disable-host-check --port 4203 --live-reload false"
   },

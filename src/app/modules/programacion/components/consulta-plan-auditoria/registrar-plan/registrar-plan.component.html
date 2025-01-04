@@ -9,22 +9,41 @@
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
-      <app-formulario-dinamico
-        [formulario]="formulario"
-        (submitFormulario)="manejarEnvio($event)"
-        *ngIf="datosCargados"
-      />
-      <div class="d-flex justify-content-end" *ngIf="modoEditar">
-        <div class="button-container">
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="guardarInformacion()"
-          >
-            Guardar
-          </button>
+      <ng-container *ngIf="modoEditar">
+        <app-formulario-dinamico
+          [formulario]="formulario"
+          (submitFormulario)="manejarEnvio($event)"
+          *ngIf="datosCargados"
+        />
+        <div class="d-flex justify-content-end">
+          <div class="button-container">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="guardarInformacion()"
+            >
+              Guardar
+            </button>
+          </div>
         </div>
-      </div>
+      </ng-container>
+      <ng-container *ngIf="!modoEditar">
+        <div class="row mt-1">
+          <ng-container *ngFor="let item of auditoriaItems">
+            <div class="d-flex align-items-center fondo-chip mb-4">
+              <div>
+                <mat-icon class="mx-1" color="primary">{{
+                  item.icon
+                }}</mat-icon>
+              </div>
+              <div style="color: var(--md-primary-900)" class="mx-2">
+                <h3 class="mb-1">{{ item.title }}</h3>
+                <p>{{ item.content }}</p>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
     </div>
   </div>
 </ng-template>
