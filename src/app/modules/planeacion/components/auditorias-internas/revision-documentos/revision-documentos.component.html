@@ -1,0 +1,85 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Revisión de documentos'"
+  [breadcrumb]="
+    '<p>Gestión Auditoría / Planeación / Auditorías Internas / <b>Revisión documentos</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="row">
+        <div class="col-sm-12 col-md-5 col-lg-4">
+          <div class="d-flex flex-column borde-redondo">
+            <h3 class="mb-3">Documentos</h3>
+            <button
+              class="mb-2 custom-button"
+              mat-stroked-button
+              [ngClass]="selectedTab === i ? 'selected' : ''"
+              *ngFor="let doc of opcionesDocumentos; let i = index"
+              (click)="selectTab(i)"
+            >
+              {{ doc }}
+            </button>
+            <button mat-button color="primary" class="mt-2">
+              Descargar Todo <mat-icon> file_download</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
+          <div class="borde-redondo">
+            <div *ngIf="selectedTab === 0">
+              <h3>Programa de trabajo</h3>
+              <div class="row"></div>
+            </div>
+            <div *ngIf="selectedTab === 1">
+              <h3>Oficio Anuncio Solicitud de Información</h3>
+              <div class="row"></div>
+            </div>
+            <div *ngIf="selectedTab === 2">
+              <h3>Carta de presentación</h3>
+              <div class="row"></div>
+            </div>
+            <div *ngIf="selectedTab === 3">
+              <h3>Compromiso Ético del Auditor Interno</h3>
+              <div class="row"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <mat-dialog-actions align="center" *ngIf="role">
+        <div class="row">
+          <div class="col-12 my-4">
+            <button
+              mat-stroked-button
+              color="primary"
+              class="mx-2 width-100-md"
+              style="border: 1px solid var(--md-primary-500)"
+              (click)="abrirModalRechazo()"
+            >
+              <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
+            </button>
+            <button
+              class="mx-2 width-100-md mt-md"
+              mat-raised-button
+              color="primary"
+              (click)="preguntarAprobacionAuditoria()"
+            >
+              <mat-icon>fact_check</mat-icon>
+              {{
+                role === "jefe"
+                  ? "Aprobar y enviar a Auditado"
+                  : role === "auditor"
+                  ? "Firmar y enviar a Auditor"
+                  : ""
+              }}
+            </button>
+          </div>
+        </div>
+      </mat-dialog-actions>
+    </div>
+  </div>
+</ng-template>

@@ -16,19 +16,11 @@
             "outputPath": "dist/plan_anual_auditoria_mf",
             "index": "src/index.html",
             "main": "src/main.single-spa.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/assets/styles/theme.scss"
-            ],
-            "scripts": [
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/assets/styles/theme.scss"],
+            "scripts": [],
             "customWebpackConfig": {
               "path": "extra-webpack.config.js",
               "libraryName": "plan_anual_auditoria_mf",
@@ -90,7 +82,7 @@
               "browserTarget": "plan_anual_auditoria_mf:build:development"
             },
             "local": {
-              "browserTarget": "usuario_rol_mf:build:local"
+              "browserTarget": "plan_anual_auditoria_mf:build:local"
             }
           },
           "defaultConfiguration": "local"
@@ -104,18 +96,10 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }
