@@ -10,7 +10,7 @@
     <div class="row mt-4">
         <div class="col-12">
             <div class="d-flex flex-row-reverse my-2">
-                <button mat-button color="primary">
+                <button mat-button color="primary" (click)="descargarTodo()">
                     Descargar Todo <mat-icon> insert_drive_file</mat-icon>
                 </button>
             </div>
@@ -33,7 +33,7 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div style="border: 1px solid #ebdddd">
-                                        <app-pdf-visualizador [base64Document]="documento"></app-pdf-visualizador>
+                                        <app-pdf-visualizador [base64Document]="documentoPAA"></app-pdf-visualizador>
                                     </div>
                                 </div>
                             </div>

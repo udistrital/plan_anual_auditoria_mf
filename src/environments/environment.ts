@@ -28,6 +28,12 @@ export const environment = {
     PLANES_AUDITORIA: 178,
   },
 
+  TIPO_DOCUMENTO_PARAMETOS: {
+    ACTA_COMITE_COORDINADOR: 6820,
+    MATRIZ_FUNCION_PUBLICA: 6811,
+    PLAN_ANUAL_AUDITORIA: 6810,
+  },
+
   // idsCamposFormulario: {
   //   Objetivo: 6770,
   //   Alcance: 6771,

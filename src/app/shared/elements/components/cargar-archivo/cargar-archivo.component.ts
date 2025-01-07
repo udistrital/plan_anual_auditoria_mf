@@ -31,6 +31,7 @@ export class CargarArchivoComponent {
       vigenciaId: number;
       cargaLambda: boolean;
       tipo: string;
+      tipoIdReferencia: number;
     }
   ) { }
 
@@ -74,14 +75,14 @@ export class CargarArchivoComponent {
       this.cargarConLambda().then(success => {
         if (success) {
           this.cargarConNuxeo().then(nuxeoResponse => {
-            this.guardarReferencia(nuxeoResponse, "Auditoria", 0, false);
+            this.guardarReferencia(nuxeoResponse, "Plan Auditoria",this.data.id, 0, false);
 
           });
         }
       });
     } else {
       this.cargarConNuxeo().then(nuxeoResponse => {
-        this.guardarReferencia(nuxeoResponse, "Auditoria", 0, true);
+        this.guardarReferencia(nuxeoResponse, "Plan Auditoria", this.data.id, this.data.tipoIdReferencia, true);
       });
     }
   }
@@ -91,11 +92,6 @@ export class CargarArchivoComponent {
       const base64 = await this.nuxeoService.fileABase64(this.archivo!);
       console.log("vigencia Masivo",  this.data.vigenciaId);
 
-      /*const payload = {
-        base64data: base64,
-        complement: { plan_auditoria_id: this.data.id, vigencia_id: 6619 },
-        type_upload: "auditorias",
-      };*/
       let payload: any = {};
       switch (this.data.tipo) {
         case "auditorias":
@@ -161,10 +157,10 @@ export class CargarArchivoComponent {
     });
   }
 
-  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, tipo_id: number, mostrarMensaje: boolean): void {
+  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, referencia_id: string, tipo_id: number, mostrarMensaje: boolean): void {
     if (nuxeoResponse.res.Enlace) {
       this.referenciaPdfService
-        .guardarReferencia(nuxeoResponse.res, referencia_tipo, tipo_id)
+        .guardarReferencia(nuxeoResponse.res, referencia_tipo, referencia_id, tipo_id)
         .subscribe({
           next: (response) => {
             console.log("Referencia guardada exitosamente", response);

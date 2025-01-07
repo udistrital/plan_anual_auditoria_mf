@@ -87,7 +87,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       }
 
       this.IsSecretario = roles.includes("SECRETARIO_AUDITOR");
-      this.IsAuditor =roles.some((role: string) => role === "AUDITOR_EXTERNO" ||  role === "AUDITOR");
+      this.IsAuditor =roles.some((role: string) => role === "AUDITOR_EXPERTO" ||  role === "AUDITOR");
       this.IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
 
       this.role = this.IsSecretario
@@ -235,7 +235,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ).then((result) => {
         if (result.isConfirmed) {
             // Verificar si existe el documento con referencia_id
-            this.planAnualAuditoriaService.get(`documento?query=referencia_id:${element.id},activo:true`).subscribe(
+            this.planAnualAuditoriaService.get(`documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`).subscribe(
                 (documentos) => {
                     if (documentos && documentos.Data.length > 0) {
                         const nuevoEstado = this.construirEstado(
