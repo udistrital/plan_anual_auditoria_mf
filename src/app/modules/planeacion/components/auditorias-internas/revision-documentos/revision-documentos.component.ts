@@ -42,40 +42,52 @@ export class RevisionDocumentosComponent implements OnInit {
   preguntarAprobacionAuditoria() {
     const rolAprobacion = this.rolesAprobacion[this.role!];
 
-    //Para aprobar segun el rol
-    if (rolAprobacion) {
-      const estadoAprobacion = rolAprobacion.estadoAprobacion;
-      const mensajeAprobacion = rolAprobacion.mensajeAprobacion;
-
-      this.alertService
-        .showConfirmAlert(mensajeAprobacion)
-        .then((confirmado) => {
-          if (!confirmado.value) {
-            return;
-          }
-          this.aprobarPlanAuditoria(estadoAprobacion);
-        });
+    if (!rolAprobacion) {
+      return; //si no hay rol
     }
+
+    const { estadoAprobacion, mensajeAprobacion, preguntaAprobacion } =
+      rolAprobacion;
+
+    this.alertService
+      .showConfirmAlert(preguntaAprobacion)
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+        this.aprobarPlanAuditoria(estadoAprobacion, mensajeAprobacion);
+      });
   }
 
-  aprobarPlanAuditoria(estadoAprobacion: number) {
-    const planEstado = this.construirObjetoPlanEstado();
+  aprobarPlanAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
+    const auditoriaEstado =
+      this.construirObjetoAuditoriaEstado(estadoAprobacion);
 
-    this.planAuditoriaService.post("estado", planEstado).subscribe(
-      () => {
-        this.alertService.showSuccessAlert(
-          "Plan aceptado, el plan fue enviado al auditado responsable."
-        );
-        this.router.navigate([`/planeacion/auditorias-internas/`]);
-      },
-      (error) => {
-        this.alertService.showErrorAlert("Error al aprobar el plan.");
-      }
-    );
+    this.planAuditoriaService
+      .post("auditoria-estado", auditoriaEstado)
+      .subscribe(
+        () => {
+          this.alertService.showSuccessAlert(
+            mensajeAprobacion,
+            "Auditoria enviada"
+          );
+          this.router.navigate([`/planeacion/auditorias-internas/`]);
+        },
+        (error) => {
+          this.alertService.showErrorAlert("Error al aprobar el plan.");
+        }
+      );
   }
 
-  construirObjetoPlanEstado() {
-    return {};
+  construirObjetoAuditoriaEstado(estadoAprobacion: number) {
+    return {
+      //todo: id quemado
+      auditoria_id: "675b369a4c36a9bb93228a7e",
+      usuario_id: this.usuarioId,
+      usuario_rol: this.role,
+      observacion: "",
+      estado_id: estadoAprobacion,
+    };
   }
 
   abrirModalRechazo(): void {
@@ -83,6 +95,7 @@ export class RevisionDocumentosComponent implements OnInit {
       width: "50%",
       data: {
         usuarioId: this.usuarioId,
+        role: this.role,
         //todo: id quemado
         auditoriaId: "675b369a4c36a9bb93228a7e",
       },

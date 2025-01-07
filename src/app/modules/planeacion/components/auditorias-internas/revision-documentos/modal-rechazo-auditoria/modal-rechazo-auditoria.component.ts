@@ -52,29 +52,34 @@ export class ModalRechazoAuditoriaComponent {
   }
 
   rechazarPlanAuditoria() {
-    // const planEstado = {
-    //   plan_auditoria_id: this.infoModal.planAuditoriaId,
-    //   usuario_id: this.infoModal.usuarioId,
-    //   observacion: this.formObservaciones.get("observaciones")?.value,
-    //   estado_id: environment.PLAN_ESTADO.EN_RECHAZO_ID,
-    // };
-    // this.planAuditoriaService.post("estado", planEstado).subscribe(
-    //   () => {
-    //     this.alertService.showAlert(
-    //       "Plan rechazado",
-    //       "El plan fue devuelto al auditor(a)."
-    //     );
-    //     this.dialogRef.close();
-    //     this.router.navigate([
-    //       `/programacion/plan-auditoria/`
-    //     ]);
-    //   },
-    //   (error) => {
-    //     this.alertService.showErrorAlert(
-    //       "Error al asociar el nuevo estado al plan."
-    //     );
-    //     console.error(error);
-    //   }
-    // );
+    const auditoriaEstado = this.construirObjetoAuditoriaEstado();
+    this.planAuditoriaService
+      .post("auditoria-estado", auditoriaEstado)
+      .subscribe(
+        () => {
+          this.alertService.showAlert(
+            "Auditoría rechazada",
+            "La auditoría fue devuelta al auditor(a)."
+          );
+          this.dialogRef.close();
+          this.router.navigate([`/planeacion/auditorias-internas/`]);
+        },
+        (error) => {
+          this.alertService.showErrorAlert(
+            "Error al asociar el nuevo estado a la auditoría."
+          );
+          console.error(error);
+        }
+      );
+  }
+
+  construirObjetoAuditoriaEstado() {
+    return {
+      auditoria_id: this.infoModal.auditoriaId,
+      usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.role,
+      observacion: this.formObservaciones.get("observaciones")?.value,
+      estado_id: environment.AUDITORIA_ESTADO.RECHAZADO_ID,
+    };
   }
 }
