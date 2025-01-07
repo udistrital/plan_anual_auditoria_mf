@@ -101,7 +101,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       .then((result) => {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
-            .delete(`actividad`, actividad) 
+            .delete(`actividad/${actividad.id}`, actividad) 
             .subscribe(
               (response) => {
                 if (response) {
@@ -128,10 +128,13 @@ export class ActividadesAuditoriaComponent implements OnInit {
       });
   }
   editarActividad(actividad: Actividad){
-    console.log("ACTIVIDAD ",actividad)
+    
     const dialogRef = this.dialog.open(EditarActividadComponent, {
-      width: '1100px', // Ajusta el ancho según lo necesites
-      data: actividad, // Pasar datos al formulario
+      width: '1100px', 
+      data: { 
+        actividad: actividad, 
+        idAuditoria: this.idAuditoria, 
+      } 
     });
   }
 }

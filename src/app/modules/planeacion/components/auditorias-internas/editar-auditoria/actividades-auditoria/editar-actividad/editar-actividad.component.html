@@ -6,5 +6,8 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-    <app-actividad-formulario [actividadData]="actividadData" (formSubmit)="onEdit($event)"></app-actividad-formulario>
+  <app-actividad-formulario
+  [actividadData]="actividadData"
+  (formSubmit)="editarActividad($event)"
+></app-actividad-formulario>
 </ng-template>

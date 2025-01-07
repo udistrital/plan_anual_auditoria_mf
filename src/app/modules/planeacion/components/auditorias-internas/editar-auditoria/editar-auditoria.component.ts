@@ -229,9 +229,9 @@ export class EditarAuditoriaComponent implements OnInit {
     });
   }
   crearActividad(){
-    console.log("CREAR")
     const dialogRef = this.dialog.open(CrearActividadComponent, {
-          width: '1100px', // Ajusta el ancho según lo necesites
+          width: '1100px',
+          data: { auditoriaId: this.auditoriaId },
         });
   }
 }

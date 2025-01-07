@@ -1,32 +1,44 @@
-import { Component, Input, Output, EventEmitter,Inject   } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { parse } from 'date-fns';
 
 @Component({
   selector: 'app-actividad-formulario',
   templateUrl: './actividad-formulario.component.html',
-  styleUrl: './actividad-formulario.component.css'
+  styleUrls: ['./actividad-formulario.component.css'],
 })
 export class ActividadFormularioComponent {
-  @Input() actividadData: any = {}; 
-  @Output() formSubmit = new EventEmitter<any>();
+  @Input() actividadData: any = {}; // Recibe los datos iniciales
+  @Output() formSubmit = new EventEmitter<any>(); // Envía los datos actualizados al componente padre
 
-  form: FormGroup | any;
-  constructor(
-    private fb: FormBuilder,
-    //@Inject(MAT_DIALOG_DATA) public actividadData: any // Accediendo a los datos pasados
-  ) {
-    console.log("ACTIVIDAD ",this.actividadData)
+  form: FormGroup;
+
+  constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      nombreActividad: [this.actividadData.nombreActividad || ''],
-      fechaInicio: [this.actividadData.fechaInicio || ''],
-      fechaFin: [this.actividadData.fechaFin || ''],
-      auditoriaID: [this.actividadData.auditoriaID || ''],
+      actividad: [''],
+      fechaInicio: [''],
+      fechaFin: [''],
+      id:[''],
     });
   }
+
+  ngOnInit(): void {
+    if (this.actividadData) {
+      const data = {
+        ...this.actividadData,
+        fechaInicio: this.actividadData.fechaInicio
+          ? parse(this.actividadData.fechaInicio, 'dd/MM/yyyy', new Date())
+          : null,
+        fechaFin: this.actividadData.fechaFin
+          ? parse(this.actividadData.fechaFin, 'dd/MM/yyyy', new Date())
+          : null,
+      };
   
+      this.form.patchValue(data);
+    }
+  }
+
   guardarActividad() {
-    console.log(this.form.value);
+    this.formSubmit.emit(this.form.value); // Envía los datos al componente padre
   }
 }
