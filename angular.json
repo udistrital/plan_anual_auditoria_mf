@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "outputPath": "dist/plan_anual_auditoria_mf",
+            "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.single-spa.ts",
             "polyfills": [
