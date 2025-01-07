@@ -28,7 +28,6 @@ export class PdfVisualizadorComponent implements OnInit {
   // Este método se ejecuta cada vez que el valor de base64Document cambia.
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['base64Document'] && this.base64Document) {
-      console.log("Nuevo base64 recibido:", this.base64Document);
       this.cargarPdfDeBase64(this.base64Document);  // Cargar el nuevo PDF
     }
   }
