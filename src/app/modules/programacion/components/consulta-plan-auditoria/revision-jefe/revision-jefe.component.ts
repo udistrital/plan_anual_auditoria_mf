@@ -155,8 +155,8 @@ export class RevisionJefeComponent implements OnInit {
 
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETOS.PLAN_ANUAL_AUDITORIA; 
-      const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETOS.MATRIZ_FUNCION_PUBLICA;
+      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
+      const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
 
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.planAuditoriaId)
@@ -184,8 +184,8 @@ export class RevisionJefeComponent implements OnInit {
 
   async descargarTodo() {
     const zip = new JSZip();
-    const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETOS.PLAN_ANUAL_AUDITORIA; 
-    const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETOS.MATRIZ_FUNCION_PUBLICA;
+    const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
+    const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
 
     try {
       this.documentos.forEach((doc, index) => {
