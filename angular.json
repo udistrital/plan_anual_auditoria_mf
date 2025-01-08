@@ -56,8 +56,8 @@
               "optimization": true,
               "vendorChunk": true,
               "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true,
+              "sourceMap": false,
+              "namedChunks": false,
               "outputHashing": "none",
               "fileReplacements": [
                 {
