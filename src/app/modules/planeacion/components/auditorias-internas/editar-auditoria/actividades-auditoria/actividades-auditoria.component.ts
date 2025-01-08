@@ -101,7 +101,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       .then((result) => {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
-            .delete(`actividad/${actividad.id}`, actividad) 
+            .delete(`actividad`, actividad) 
             .subscribe(
               (response) => {
                 if (response) {

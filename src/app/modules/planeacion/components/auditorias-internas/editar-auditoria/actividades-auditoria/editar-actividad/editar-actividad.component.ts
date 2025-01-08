@@ -49,7 +49,7 @@ export class EditarActividadComponent {
       .then((result) => {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
-            .put(`actividad/${actividadData.id}`, actividadJson)
+            .put(`actividad`, actividadJson)
             .subscribe(
               (response) => {
                 if (response) {
