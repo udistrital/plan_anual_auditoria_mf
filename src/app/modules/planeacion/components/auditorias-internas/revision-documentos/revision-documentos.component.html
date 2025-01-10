@@ -51,34 +51,30 @@
         </div>
       </div>
       <mat-dialog-actions align="center" *ngIf="role">
-        <div class="row">
-          <div class="col-12 my-4">
-            <button
-              mat-stroked-button
-              color="primary"
-              class="mx-2 width-100-md"
-              style="border: 1px solid var(--md-primary-500)"
-              (click)="abrirModalRechazo()"
-            >
-              <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
-            </button>
-            <button
-              class="mx-2 width-100-md mt-md"
-              mat-raised-button
-              color="primary"
-              (click)="preguntarAprobacionAuditoria()"
-            >
-              <mat-icon>fact_check</mat-icon>
-              {{
-                role === "jefe"
-                  ? "Aprobar y enviar a Auditado"
-                  : role === "auditor"
-                  ? "Firmar y enviar a Auditor"
-                  : ""
-              }}
-            </button>
+        <ng-container *ngIf="mostrarAcciones(role, estadoAuditoriaId)">
+          <div class="row">
+            <div class="col-12 my-4">
+              <button
+                mat-stroked-button
+                color="primary"
+                class="mx-2 width-100-md"
+                style="border: 1px solid var(--md-primary-500)"
+                (click)="abrirModalRechazo()"
+              >
+                <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
+              </button>
+              <button
+                class="mx-2 width-100-md mt-md"
+                mat-raised-button
+                color="primary"
+                (click)="preguntarAprobacionAuditoria()"
+              >
+                <mat-icon>fact_check</mat-icon>
+                {{ rolesAprobacion[role]?.botonAprobacion || "" }}
+              </button>
+            </div>
           </div>
-        </div>
+        </ng-container>
       </mat-dialog-actions>
     </div>
   </div>

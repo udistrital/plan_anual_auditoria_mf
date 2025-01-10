@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -15,28 +15,50 @@ import { documentos, rolesAprobacion } from "./revision-documentos.utilidades";
   styleUrl: "./revision-documentos.component.css",
 })
 export class RevisionDocumentosComponent implements OnInit {
+  auditoriaId: string = "";
+  estadoAuditoriaId!: number;
   selectedTab: number = 0;
-  usuarioId: any;
-  role: string | null = null;
   opcionesDocumentos: any;
+  role: string | null = null;
+  rolauditoriaIdesAprobacion: any;
   rolesAprobacion: any;
+  usuarioId: any;
 
   constructor(
     public dialog: MatDialog,
-    private autenticationService: ImplicitAutenticationService,
-    private router: Router,
-    private userService: UserService,
     private alertService: AlertService,
-    private planAuditoriaService: PlanAnualAuditoriaService
+    private autenticationService: ImplicitAutenticationService,
+    private planAuditoriaService: PlanAnualAuditoriaService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
+    this.inicializarDatos();
+    this.cargarEstadoAuditoria();
+  }
+
+  inicializarDatos() {
+    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.opcionesDocumentos = documentos;
     this.rolesAprobacion = rolesAprobacion;
     this.buscarRol();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  cargarEstadoAuditoria() {
+    this.planAuditoriaService
+      .get(
+        `auditoria-estado?query=auditoria_id:${this.auditoriaId},actual:true`
+      )
+      .subscribe((res) => {
+        this.estadoAuditoriaId =
+          res.Data[0].estado_id ?? environment.AUDITORIA_ESTADO.BORRADOR_ID;
+        console.log(this.estadoAuditoriaId);
+      });
   }
 
   preguntarAprobacionAuditoria() {
@@ -81,8 +103,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
     return {
-      //todo: id quemado
-      auditoria_id: "675b369a4c36a9bb93228a7e",
+      auditoria_id: this.auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
       observacion: "",
@@ -96,8 +117,7 @@ export class RevisionDocumentosComponent implements OnInit {
       data: {
         usuarioId: this.usuarioId,
         role: this.role,
-        //todo: id quemado
-        auditoriaId: "675b369a4c36a9bb93228a7e",
+        auditoriaId: this.auditoriaId,
       },
     });
   }
@@ -115,6 +135,7 @@ export class RevisionDocumentosComponent implements OnInit {
       if (!roles || roles.length === 0) {
         return;
       }
+      console.log(roles);
 
       const esSecretario = roles.includes("SECRETARIO_AUDITOR");
       const esAuditor = roles.some(
@@ -129,6 +150,17 @@ export class RevisionDocumentosComponent implements OnInit {
         : esJefe
         ? "jefe"
         : null;
+      console.log(this.role);
     });
+  }
+
+  mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
+    const condicionesVisibilidad: { [key: string]: number[] } = {
+      jefe: [6824],
+      auditor: [6826],
+    };
+
+    // retorna true, si el rol coincide con el estado de revision del rol
+    return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
   }
 }

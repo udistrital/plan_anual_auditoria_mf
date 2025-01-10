@@ -121,4 +121,11 @@ export class TablaAuditoriasInternasComponent {
       `/planeacion/auditorias-internas/editar/${auditoriaId}`,
     ]);
   }
+
+  revisarAuditoria(auditoria: Auditoria) {
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/auditorias-internas/revision/${auditoriaId}`,
+    ]);
+  }
 }
