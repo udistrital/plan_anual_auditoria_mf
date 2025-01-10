@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 
 import { ProgramacionRoutingModule } from "./programacion-routing.module";
 import { MaterialModule } from "src/app/shared/modules/material.module";
+import { IconosModule } from "src/app/shared/modules/iconos.module";
 import { AsignarAuditoriasComponent } from "./components/asignar-auditorias/asignar-auditorias.component";
 import { RegistroAuditoriasEspecialesComponent } from "./components/auditorias-especiales/registro-auditorias-especiales.component";
 import { ConsultaPlanAuditoriaComponent } from "./components/consulta-plan-auditoria/consulta-plan-auditoria.component";
@@ -47,7 +48,8 @@ import { MatTooltip } from "@angular/material/tooltip";
     SharedModule,
     ProgramacionRoutingModule,
     MaterialModule,
-    MatTooltip
+    MatTooltip,
+    IconosModule
   ],
 })
 export class ProgramacionModule {}

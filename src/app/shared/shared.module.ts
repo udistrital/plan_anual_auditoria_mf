@@ -13,6 +13,7 @@ import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/pl
 import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
+import { IconosModule } from "./modules/iconos.module";
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { CustomPaginadorIntl } from "./services/custom-paginador.service";
     CommonModule,
     FormsModule,
     MaterialModule,
+    IconosModule,
     ReactiveFormsModule,
     PdfViewerModule,
   ],
