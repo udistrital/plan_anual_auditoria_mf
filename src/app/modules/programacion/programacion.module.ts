@@ -1,3 +1,4 @@
+import { TablaConsultaAuditoriasComponent } from './components/asignar-auditorias/tabla-consulta-auditorias/tabla-consulta-auditorias.component';
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
@@ -21,6 +22,7 @@ import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/mo
 import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
 import { ModalVerDocumentosPlanComponent } from "./components/consulta-plan-auditoria/modal-ver-documentos-plan/modal-ver-documentos-plan.component";
 
+
 import { MatTooltip } from "@angular/material/tooltip";
 
 @NgModule({
@@ -41,6 +43,7 @@ import { MatTooltip } from "@angular/material/tooltip";
     RegistrarAuditoriasComponent,
     RegistrarPlanComponent,
     RegistroAuditoriasEspecialesComponent,
+    TablaConsultaAuditoriasComponent,
   ],
   imports: [
     CommonModule,
