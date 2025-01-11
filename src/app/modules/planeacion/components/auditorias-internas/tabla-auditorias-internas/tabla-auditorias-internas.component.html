@@ -40,20 +40,54 @@
                     mat-icon-button
                     [matMenuTriggerFor]="menu"
                     color="primary"
+                    (click)="cargarEstadoAuditoria(row)"
                   >
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #menu="matMenu">
-                    <button (click)="revisarAuditoria(row)" mat-menu-item>
+                    <button
+                      (click)="revisarAuditoria(row)"
+                      mat-menu-item
+                      *ngIf="role !== 'auditor'"
+                    >
                       <mat-icon color="primary">content_paste_search</mat-icon>
                       Revisar auditoría
                     </button>
-                    <button (click)="editarAuditoria(row)" mat-menu-item>
-                      <mat-icon color="primary">edit</mat-icon> Editar auditoría
+                    <button
+                      (click)="editarAuditoria(row)"
+                      mat-menu-item
+                      *ngIf="
+                        role === 'auditor' &&
+                        esEditableAuditoria(row.estado_interno_id)
+                      "
+                    >
+                      <mat-icon color="primary">edit</mat-icon>
+                      Editar auditoría
+                    </button>
+                    <button
+                      mat-menu-item
+                      *ngIf="
+                        role === 'auditor' &&
+                        !esEditableAuditoria(row.estado_interno_id)
+                      "
+                    >
+                      <mat-icon color="primary">visibility</mat-icon>
+                      Ver auditoría
+                    </button>
+                    <button
+                      (click)="preguntarEnvioAprobacionPorJefe(row)"
+                      mat-menu-item
+                      *ngIf="
+                        role === 'auditor' &&
+                        esEditableAuditoria(row.estado_interno_id)
+                      "
+                    >
+                      <mat-icon color="primary">send</mat-icon>
+                      Enviar a aprobación por Jefe
                     </button>
                     <button (click)="verDocumento(row)" mat-menu-item>
-                      <mat-icon color="primary"> description </mat-icon> Ver
-                      documento
+                      <mat-icon color="primary">description</mat-icon>
+                      Ver documento
                     </button>
                   </mat-menu>
                 </div>

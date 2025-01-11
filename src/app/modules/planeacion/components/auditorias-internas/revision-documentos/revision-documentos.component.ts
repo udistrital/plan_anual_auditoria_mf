@@ -56,7 +56,7 @@ export class RevisionDocumentosComponent implements OnInit {
       )
       .subscribe((res) => {
         this.estadoAuditoriaId =
-          res.Data[0].estado_id ?? environment.AUDITORIA_ESTADO.BORRADOR_ID;
+          res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.BORRADOR_ID;
         console.log(this.estadoAuditoriaId);
       });
   }
@@ -150,14 +150,13 @@ export class RevisionDocumentosComponent implements OnInit {
         : esJefe
         ? "jefe"
         : null;
-      console.log(this.role);
     });
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [6824],
-      auditor: [6826],
+      jefe: [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID],
+      auditado: [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID],
     };
 
     // retorna true, si el rol coincide con el estado de revision del rol
