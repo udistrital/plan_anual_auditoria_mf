@@ -77,28 +77,47 @@ export class RevisionDocumentosComponent implements OnInit {
         if (!confirmado.value) {
           return;
         }
-        this.aprobarPlanAuditoria(estadoAprobacion, mensajeAprobacion);
+
+        if (Array.isArray(estadoAprobacion)) {
+          // Si es un array como en el caso del rol jefe, para hacer dos post para el flujo de estados
+          this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+        } else {
+          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+        }
       });
   }
 
-  aprobarPlanAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
-    const auditoriaEstado =
-      this.construirObjetoAuditoriaEstado(estadoAprobacion);
+  //funcion para registrar estados de auditoria secuencialmente,
+  async aprobarAuditoriaSecuencial(
+    estadoAprobacion: number[],
+    mensajeAprobacion: string
+  ) {
+    try {
+      for (const estado of estadoAprobacion) {
+        await this.aprobarAuditoria(estado, mensajeAprobacion);
+      }
+    } catch (error) {
+      this.alertService.showErrorAlert("Error al aprobar el plan.");
+    }
+  }
 
-    this.planAuditoriaService
-      .post("auditoria-estado", auditoriaEstado)
-      .subscribe(
-        () => {
-          this.alertService.showSuccessAlert(
-            mensajeAprobacion,
-            "Auditoria enviada"
-          );
-          this.router.navigate([`/planeacion/auditorias-internas/`]);
-        },
-        (error) => {
-          this.alertService.showErrorAlert("Error al aprobar el plan.");
-        }
+  async aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
+    try {
+      const auditoriaEstado =
+        this.construirObjetoAuditoriaEstado(estadoAprobacion);
+
+      await this.planAuditoriaService
+        .post("auditoria-estado", auditoriaEstado)
+        .toPromise();
+
+      this.alertService.showSuccessAlert(
+        mensajeAprobacion,
+        "Auditoria enviada"
       );
+      this.router.navigate([`/planeacion/auditorias-internas/`]);
+    } catch (error) {
+      this.alertService.showErrorAlert("Error al aprobar el plan.");
+    }
   }
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
@@ -158,7 +177,6 @@ export class RevisionDocumentosComponent implements OnInit {
       jefe: [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID],
       auditado: [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID],
     };
-
     // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
   }

@@ -226,10 +226,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         : esJefe
         ? "jefe"
         : null;
-
-      this.role = "jefe";
-
-      console.log(this.role);
     });
   }
 
