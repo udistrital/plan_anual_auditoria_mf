@@ -21,9 +21,14 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <button mat-icon-button (click)="descargarPlantilla()">
-          <mat-icon color="primary" class="icon" >view_list</mat-icon>
-        </button>
+        <div>
+          <button mat-icon-button>
+            <mat-icon color="primary" class="icon">view_list</mat-icon>
+          </button>
+          <button class="mx-2" mat-raised-button color="primary" (click)="descargarPlantilla()">
+            <mat-icon svgIcon="excel"></mat-icon>Plantilla Cargue Masivo
+          </button>
+        </div>
       </div>
 
       <!-- Agregar cdkDropList a la tabla -->
@@ -105,73 +110,39 @@
 
           <!-- Definir las filas (Agregar cdkDrag a las filas) -->
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr
-            mat-row
-            *matRowDef="let row; columns: displayedColumns"
-            cdkDrag
-          ></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" cdkDrag></tr>
         </table>
       </div>
 
       <div class="row mt-3">
         <div class="d-flex justify-content-end" *ngIf="!mostrarBotones; else botonesAcciones">
-          <button
-            class="mx-2"
-            mat-raised-button
-            color="primary"
-            (click)="verDocumentos()"
-          >
+          <button class="mx-2" mat-raised-button color="primary" (click)="verDocumentos()">
             <mat-icon>visibility</mat-icon>
             Ver Documentos
           </button>
         </div>
         <ng-template #botonesAcciones>
           <div class="d-flex justify-content-end">
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="agregarAuditoria()"
-            >
+            <button class="mx-2" mat-raised-button color="primary" (click)="agregarAuditoria()">
               <mat-icon>add_circle</mat-icon>
               Añadir Auditoría
             </button>
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="subirArchivoCargueMasivo()"
-            >
+            <button class="mx-2" mat-raised-button color="primary" (click)="subirArchivoCargueMasivo()">
               <mat-icon>file_upload</mat-icon> Cargue Masivo
             </button>
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="renderizar()"
-            >
+            <button class="mx-2" mat-raised-button color="primary" (click)="renderizar()">
               <mat-icon>visibility</mat-icon>Ver
             </button>
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="subirArchivoMatriz()"
-            >
+            <button class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
               <mat-icon>file_upload</mat-icon>Matriz
             </button>
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="guardarPaa()"
-            >
+            <button class="mx-2" mat-raised-button color="primary" (click)="guardarPaa()">
               <mat-icon>save</mat-icon>
               Guardar
             </button>
           </div>
         </ng-template>
-      </div>      
+      </div>
     </div>
   </div>
 </ng-template>
