@@ -78,7 +78,9 @@ export class ModalRechazoAuditoriaComponent {
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.role,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_id: environment.AUDITORIA_ESTADO.RECHAZADO_ID,
+      estado_interno_id: environment.AUDITORIA_ESTADO.RECHAZADO_ID,
+      //todo por implementar
+      estado_id: 0,
     };
   }
 }

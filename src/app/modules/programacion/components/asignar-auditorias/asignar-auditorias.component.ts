@@ -1,82 +1,108 @@
-import { Component } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalAgregarAuditorComponent } from "./modal-agregar-auditor/modal-agregar-auditor.component";
+import { ParametrosService } from "src/app/core/services/parametros.service";
+import { Vigencia } from "src/app/shared/data/models/vigencia.model";
+import { TablaConsultaAuditoriasComponent } from "./tabla-consulta-auditorias/tabla-consulta-auditorias.component";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: "app-asignar-auditorias",
   templateUrl: "./asignar-auditorias.component.html",
   styleUrls: ["./asignar-auditorias.component.css"],
 })
-export class AsignarAuditoriasComponent {
+export class AsignarAuditoriasComponent implements OnInit {
+  @ViewChild(TablaConsultaAuditoriasComponent)
+  tablaAuditorias!: TablaConsultaAuditoriasComponent;
 
+  vigencias: any[] = [];
+  vigenciaForm!: FormGroup;
+  vigenciaSeleccionada!: number;
   constructor(
     private dialog: MatDialog,
+    private fb: FormBuilder,
+    private parametrosService: ParametrosService
   ) {}
+
+  ngOnInit() {
+    this.iniciarvigenciaForm();
+    this.cargarVigencias();
+  }
 
   fechaAsignacion: Date | null = null;
 
-  datos = [
-    {
-      no: 1,
-      auditoria: "titulo",
-      tipoEvaluacion: "Auditoria Interna",
-      auditor: "",
-      cronogramaActividades: "Mes",
-      estado: "Sin Iniciar",
-    },
-    {
-      no: 2,
-      auditoria: "titulo",
-      tipoEvaluacion: "seguimiento",
-      auditor: "pepito perez",
-      cronogramaActividades: "Mes",
-      estado: "Sin Iniciar",
-    },
-    {
-      no: 4,
-      auditoria: "titulo",
-      tipoEvaluacion: "seguimiento",
-      auditor: "",
-      cronogramaActividades: "Mes",
-      estado: "Sin Iniciar",
-    },
-    {
-      no: 5,
-      auditoria: "titulo",
-      tipoEvaluacion: "seguimiento",
-      auditor: "",
-      cronogramaActividades: "Mes",
-      estado: "Sin Iniciar",
-    },
-    {
-      no: 6,
-      auditoria: "titulo",
-      tipoEvaluacion: "informe",
-      auditor: "",
-      cronogramaActividades: "Mes",
-      estado: "Sin Iniciar",
-    },
-  ];
-  columnsToDisplay: string[] = [
-    "no",
-    "auditoria",
-    "tipoEvaluacion",
-    "auditor",
-    "cronogramaActividades",
-    "estado",
-    "acciones",
-  ];
-  year: number = new Date().getFullYear();
-
-  agregarAuditor(auditoria?: Auditoria) {
-    const dialogRef = this.dialog.open(ModalAgregarAuditorComponent, {
-      width: "1100px",
-      data: {
-        auditoria,
-      },
-    });
-
+  cargarVigencias() {
+    this.parametrosService
+      .get(
+        "parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc"
+      )
+      .subscribe((res) => {
+        this.vigencias = res.Data;
+      });
   }
 
+  mostrarAuditoriasPorVigencia(vigencia: Vigencia) {
+    this.vigenciaSeleccionada = vigencia.Id;
+    this.tablaAuditorias.listarAuditoriasPorVigencia(this.vigenciaSeleccionada);
+  }
+
+  iniciarvigenciaForm() {
+    this.vigenciaForm = this.fb.group({
+      vigencia: ["", Validators.required],
+    });
+  }
+
+  // datos = [
+  //   {
+  //     no: 1,
+  //     auditoria: "titulo",
+  //     tipoEvaluacion: "Auditoria Interna",
+  //     auditor: "",
+  //     cronogramaActividades: "Mes",
+  //     estado: "Sin Iniciar",
+  //   },
+  //   {
+  //     no: 2,
+  //     auditoria: "titulo",
+  //     tipoEvaluacion: "seguimiento",
+  //     auditor: "pepito perez",
+  //     cronogramaActividades: "Mes",
+  //     estado: "Sin Iniciar",
+  //   },
+  //   {
+  //     no: 4,
+  //     auditoria: "titulo",
+  //     tipoEvaluacion: "seguimiento",
+  //     auditor: "",
+  //     cronogramaActividades: "Mes",
+  //     estado: "Sin Iniciar",
+  //   },
+  //   {
+  //     no: 5,
+  //     auditoria: "titulo",
+  //     tipoEvaluacion: "seguimiento",
+  //     auditor: "",
+  //     cronogramaActividades: "Mes",
+  //     estado: "Sin Iniciar",
+  //   },
+  //   {
+  //     no: 6,
+  //     auditoria: "titulo",
+  //     tipoEvaluacion: "informe",
+  //     auditor: "",
+  //     cronogramaActividades: "Mes",
+  //     estado: "Sin Iniciar",
+  //   },
+  // ];
+  // columnsToDisplay: string[] = [
+  //   "no",
+  //   "auditoria",
+  //   "tipoEvaluacion",
+  //   "auditor",
+  //   "cronogramaActividades",
+  //   "estado",
+  //   "acciones",
+  // ];
+  // year: number = new Date().getFullYear();
 }

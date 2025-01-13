@@ -28,6 +28,7 @@ import { IconosModule } from "./modules/iconos.module";
     CommonModule,
     FormsModule,
     MaterialModule,
+    IconosModule,
     ReactiveFormsModule,
     PdfViewerModule,
   ],
