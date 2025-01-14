@@ -22,10 +22,10 @@ export class AlertService {
     });
   }
 
-  showSuccessAlert(text: string) {
+  showSuccessAlert(text: string, title: string = "Operación exitosa") {
     Swal.fire({
       icon: "success",
-      title: "Operación exitosa",
+      title: title,
       text: text,
       confirmButtonText: "Aceptar",
       customClass: {

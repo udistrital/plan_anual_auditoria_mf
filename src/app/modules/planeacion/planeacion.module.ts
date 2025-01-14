@@ -10,6 +10,8 @@ import { EditarAuditoriaComponent } from "./components/auditorias-internas/edita
 import { SharedModule } from "src/app/shared/shared.module";
 import { DocumentosAnexosAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/documentos-anexos-auditoria/documentos-anexos-auditoria.component";
 import { ActividadesAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/actividades-auditoria/actividades-auditoria.component";
+import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
+import { ModalRechazoAuditoriaComponent } from "./components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component";
 
 @NgModule({
   declarations: [
@@ -18,6 +20,8 @@ import { ActividadesAuditoriaComponent } from "./components/auditorias-internas/
     DocumentosAnexosAuditoriaComponent,
     EditarAuditoriaComponent,
     TablaAuditoriasInternasComponent,
+    RevisionDocumentosComponent,
+    ModalRechazoAuditoriaComponent,
   ],
   imports: [
     CommonModule,

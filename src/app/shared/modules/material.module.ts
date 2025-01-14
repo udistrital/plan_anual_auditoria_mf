@@ -16,6 +16,7 @@ import { MatSortModule } from "@angular/material/sort";
 import { MatStepperModule } from "@angular/material/stepper";
 import { MatTableModule } from "@angular/material/table";
 import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatListModule } from "@angular/material/list";
 
 @NgModule({
   exports: [
@@ -37,6 +38,7 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
     MatSortModule,
     MatStepperModule,
     MatTableModule,
+    MatListModule,
   ],
 })
 export class MaterialModule {}

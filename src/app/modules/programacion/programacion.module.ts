@@ -1,8 +1,10 @@
+import { TablaConsultaAuditoriasComponent } from './components/asignar-auditorias/tabla-consulta-auditorias/tabla-consulta-auditorias.component';
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 import { ProgramacionRoutingModule } from "./programacion-routing.module";
 import { MaterialModule } from "src/app/shared/modules/material.module";
+import { IconosModule } from "src/app/shared/modules/iconos.module";
 import { AsignarAuditoriasComponent } from "./components/asignar-auditorias/asignar-auditorias.component";
 import { RegistroAuditoriasEspecialesComponent } from "./components/auditorias-especiales/registro-auditorias-especiales.component";
 import { ConsultaPlanAuditoriaComponent } from "./components/consulta-plan-auditoria/consulta-plan-auditoria.component";
@@ -20,6 +22,7 @@ import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditor
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
 import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
 import { ModalVerDocumentosPlanComponent } from "./components/consulta-plan-auditoria/modal-ver-documentos-plan/modal-ver-documentos-plan.component";
+
 
 import { MatTooltip } from "@angular/material/tooltip";
 
@@ -41,13 +44,15 @@ import { MatTooltip } from "@angular/material/tooltip";
     RegistrarAuditoriasComponent,
     RegistrarPlanComponent,
     RegistroAuditoriasEspecialesComponent,
+    TablaConsultaAuditoriasComponent,
   ],
   imports: [
     CommonModule,
     SharedModule,
     ProgramacionRoutingModule,
     MaterialModule,
-    MatTooltip
+    MatTooltip,
+    IconosModule
   ],
 })
 export class ProgramacionModule {}

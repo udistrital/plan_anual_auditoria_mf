@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 
 @Component({
   selector: 'plan-anual-auditoria-mf',
@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'plan_anual_auditoria_mf';
+  title = "plan_anual_auditoria_mf";
 }

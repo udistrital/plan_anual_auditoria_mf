@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuditoriasInternasComponent } from "./components/auditorias-internas/auditorias-internas.component";
 import { EditarAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/editar-auditoria.component";
+import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
 
 const routes: Routes = [
   { path: "", component: AuditoriasInternasComponent },
@@ -12,6 +13,10 @@ const routes: Routes = [
       {
         path: "editar/:id",
         component: EditarAuditoriaComponent,
+      },
+      {
+        path: "revision/:id",
+        component: RevisionDocumentosComponent,
       },
     ],
   },

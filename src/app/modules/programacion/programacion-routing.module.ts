@@ -47,10 +47,6 @@ const routes: Routes = [
       },
     ],
   },
-  {
-    path: "bases",
-    component: BasesComponent,
-  },
 ];
 
 @NgModule({

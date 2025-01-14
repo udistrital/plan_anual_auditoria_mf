@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+} from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
@@ -10,21 +16,28 @@ import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/d
 import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { environment } from "src/environments/environment";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { UserService } from "src/app/core/services/user.service";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
   templateUrl: "./tabla-auditorias-internas.component.html",
   styleUrl: "./tabla-auditorias-internas.component.css",
 })
-export class TablaAuditoriasInternasComponent {
+export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
   @ViewChild(MatSort) sort!: MatSort;
+  auditoriaEstados = environment.AUDITORIA_ESTADO;
 
   auditoriasPorVigencia: Auditoria[] = [];
   auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
   auditoriasContructorTabla: any;
   banderaTablaAuditoriasInternas: boolean = false;
   tablaColumnas: any;
+  role: string | null = null;
+  usuarioId: any;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   totalRegistros: number = 0;
@@ -34,11 +47,21 @@ export class TablaAuditoriasInternasComponent {
 
   constructor(
     private alertaService: AlertService,
+    private autenticationService: ImplicitAutenticationService,
     private changeDetector: ChangeDetectorRef,
     private dialog: MatDialog,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private router: Router
+    private planAuditoriaService: PlanAnualAuditoriaService,
+    private router: Router,
+    private userService: UserService
   ) {}
+
+  ngOnInit() {
+    this.buscarRol();
+    this.userService.getPersonaId().then((usuarioId) => {
+      this.usuarioId = usuarioId;
+    });
+  }
 
   listarAuditoriasPorVigencia(
     vigenciaId: number,
@@ -115,10 +138,101 @@ export class TablaAuditoriasInternasComponent {
       });
   }
 
+  cargarEstadoAuditoria(auditoria: Auditoria) {
+    if (auditoria.estado_interno_id) {
+      return;
+    }
+
+    const auditoriaId = auditoria._id;
+    this.planAuditoriaService
+      .get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`)
+      .subscribe((res) => {
+        auditoria.estado_interno_id =
+          res.Data[0]?.estado_id ?? this.auditoriaEstados.BORRADOR_ID;
+        console.log(auditoria.estado_interno_id);
+      });
+  }
+
   editarAuditoria(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     this.router.navigate([
       `/planeacion/auditorias-internas/editar/${auditoriaId}`,
     ]);
+  }
+
+  revisarAuditoria(auditoria: Auditoria) {
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/auditorias-internas/revision/${auditoriaId}`,
+    ]);
+  }
+
+  preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+        this.enviarAprobacionPorJefe(auditoria._id);
+        delete auditoria.estado_interno_id;
+      });
+  }
+
+  enviarAprobacionPorJefe(auditoriaId: string) {
+    const auditoriaEstado = this.construirObjetoAuditoriaEstado(auditoriaId);
+    this.planAuditoriaService
+      .post("auditoria-estado", auditoriaEstado)
+      .subscribe(
+        () => {
+          this.alertaService.showSuccessAlert(
+            "Auditoria enviada a aprobación por Jefe",
+            "Auditoria enviada"
+          );
+        },
+        (error) => {
+          this.alertaService.showErrorAlert("Error al enviar el plan.");
+        }
+      );
+  }
+
+  construirObjetoAuditoriaEstado(auditoriaId: string) {
+    return {
+      auditoria_id: auditoriaId,
+      usuario_id: this.usuarioId,
+      usuario_rol: this.role,
+      observacion: "",
+      estado_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
+    };
+  }
+
+  buscarRol() {
+    this.autenticationService.getRole().then((roles: any) => {
+      if (!roles || roles.length === 0) {
+        return;
+      }
+      console.log(roles);
+
+      const esSecretario = roles.includes("SECRETARIO_AUDITOR");
+      const esAuditor = roles.some(
+        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
+      );
+      const esJefe = roles.includes("JEFE_CONTROL_INTERNO");
+
+      this.role = esSecretario
+        ? "secretario"
+        : esAuditor
+        ? "auditor"
+        : esJefe
+        ? "jefe"
+        : null;
+    });
+  }
+
+  esEditableAuditoria(estadoId: number): boolean {
+    return (
+      estadoId === this.auditoriaEstados.RECHAZADO_ID ||
+      estadoId === this.auditoriaEstados.BORRADOR_ID
+    );
   }
 }
