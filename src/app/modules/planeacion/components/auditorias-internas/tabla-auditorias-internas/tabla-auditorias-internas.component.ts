@@ -202,7 +202,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
       observacion: "",
-      estado_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
+      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
+      //todo por implementar
+      estado_id: 0,
     };
   }
 
