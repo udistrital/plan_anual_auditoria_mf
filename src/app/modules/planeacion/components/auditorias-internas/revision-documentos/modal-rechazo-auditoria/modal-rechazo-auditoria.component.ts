@@ -26,7 +26,6 @@ export class ModalRechazoAuditoriaComponent {
 
   ngOnInit() {
     this.iniciarFormObservaciones();
-    console.log(this.infoModal);
   }
 
   iniciarFormObservaciones() {

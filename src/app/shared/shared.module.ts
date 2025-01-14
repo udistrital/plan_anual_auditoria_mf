@@ -42,6 +42,7 @@ import { IconosModule } from "./modules/iconos.module";
     PlantillaModalComponent,
     //modulos
     FormsModule,
+    IconosModule,
     DragDropModule,
     ReactiveFormsModule,
     PdfViewerModule,

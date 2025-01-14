@@ -32,4 +32,5 @@ export interface Auditoria {
   macroproceso_nombre: string;
   lider_nombre: string;
   responsable_nombre: string;
+  estado_interno_id?: number;
 }

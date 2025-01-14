@@ -2,15 +2,19 @@ import { environment } from "src/environments/environment";
 
 export const rolesAprobacion: { [key: string]: any } = {
   jefe: {
-    estadoAprobacion:
+    estadoAprobacion: [
       environment.AUDITORIA_ESTADO.APROBADO_PROGRAMA_POR_JEFE_ID,
+      environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID,
+    ],
     preguntaAprobacion: "¿Está seguro(a) de aprobar y enviar auditoría?",
     mensajeAprobacion: "La auditoría fue enviada al auditado (a) responsable",
+    botonAprobacion: "Aprobar y enviar a Auditado",
   },
-  auditor: {
+  auditado: {
     estadoAprobacion: environment.AUDITORIA_ESTADO.APROBADO_POR_AUDITADO_ID,
     preguntaAprobacion: "¿Está seguro(a) de firmar y enviar auditoría?",
     mensajeAprobacion: "La auditoria fue enviada al auditor",
+    botonAprobacion: "Firmar y enviar a Auditor",
   },
 };
 
