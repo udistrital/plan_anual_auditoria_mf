@@ -13,6 +13,9 @@ import { ActividadesAuditoriaComponent } from "./components/auditorias-internas/
 import { ActividadFormularioComponent } from "./components/auditorias-internas/editar-auditoria/actividades-auditoria/actividad-formulario/actividad-formulario.component";
 import { CrearActividadComponent } from "./components/auditorias-internas/editar-auditoria/actividades-auditoria/crear-actividad/crear-actividad.component";
 import { EditarActividadComponent } from "./components/auditorias-internas/editar-auditoria/actividades-auditoria/editar-actividad/editar-actividad.component";
+import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
+import { ModalRechazoAuditoriaComponent } from "./components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component";
+
 @NgModule({
   declarations: [
     ActividadesAuditoriaComponent,
@@ -23,6 +26,8 @@ import { EditarActividadComponent } from "./components/auditorias-internas/edita
     ActividadFormularioComponent,
     CrearActividadComponent,
     EditarActividadComponent,
+    RevisionDocumentosComponent,
+    ModalRechazoAuditoriaComponent,
   ],
   imports: [
     CommonModule,

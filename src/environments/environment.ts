@@ -1,18 +1,18 @@
 export const environment = {
   production: false,
+
+  AUTENTICACION_MID_SERVICE:
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
   GESTOR_DOCUMENTAL_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
   // PLAN_ANUAL_AUDITORIA_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",  
-  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:3001/",
+  PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
+  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
 
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
-
-  AUTENTICACION_MID_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
@@ -24,12 +24,27 @@ export const environment = {
     RECHAZADO: 6806,
   },
 
+  AUDITORIA_ESTADO: {
+    BORRADOR_ID: 6823,
+    EN_REVISION_POR_JEFE_ID: 6824,
+    APROBADO_PROGRAMA_POR_JEFE_ID: 6825,
+    EN_REVISIÓN_POR_AUDITADO_ID: 6826,
+    APROBADO_POR_AUDITADO_ID: 6827,
+    RECHAZADO_ID: 6828,
+  },
+
   TIPO_DOCUMENTO: {
     ACTA_COMITE_COORDINADOR: 179,
     PROGRAMA_TRABAJO_AUDITORIA: 180,
     MATRIZ_FUNCION_PUBLICA: 181,
     PLANTILLAS: 182,
     PLANES_AUDITORIA: 178,
+  },
+
+  TIPO_DOCUMENTO_PARAMETROS: {
+    ACTA_COMITE_COORDINADOR: 6820,
+    MATRIZ_FUNCION_PUBLICA: 6811,
+    PLAN_ANUAL_AUDITORIA: 6810,
   },
 
   // idsCamposFormulario: {

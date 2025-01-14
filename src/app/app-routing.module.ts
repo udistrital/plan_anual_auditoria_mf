@@ -15,7 +15,7 @@ const routes: Routes = [
   },
   {
     path: "planeacion",
-    canActivate: [AuthGuard],
+    canActivate: [],
     loadChildren: () =>
       import("./modules/planeacion/planeacion.module").then(
         (m) => m.PlaneacionModule
@@ -23,7 +23,7 @@ const routes: Routes = [
   },
   {
     path: "programacion",
-    canActivate: [],
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/programacion/programacion.module").then(
         (m) => m.ProgramacionModule

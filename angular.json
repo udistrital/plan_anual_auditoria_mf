@@ -13,28 +13,19 @@
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "outputPath": "dist/plan_anual_auditoria_mf",
+            "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.single-spa.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/assets/styles/theme.scss"
-            ],
-            "scripts": [
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/assets/styles/theme.scss"],
+            "scripts": [],
             "customWebpackConfig": {
               "path": "extra-webpack.config.js",
               "libraryName": "plan_anual_auditoria_mf",
               "libraryTarget": "umd"
-            },
-            "deployUrl": "http://localhost:4203/"
+            }
           },
           "configurations": {
             "production": {
@@ -53,16 +44,33 @@
               "outputHashing": "none"
             },
             "development": {
+              "buildOptimizer": true,
+              "optimization": true,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": false,
+              "namedChunks": false,
+              "outputHashing": "none",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ],
+              "deployUrl": "https://pruebasplananualauditoria.portaloas.udistrital.edu.co/"
+            },
+            "local": {
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
-              "outputHashing": "none"
+              "outputHashing": "none",
+              "deployUrl": "http://localhost:4203/"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "local"
         },
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
@@ -72,9 +80,12 @@
             },
             "development": {
               "browserTarget": "plan_anual_auditoria_mf:build:development"
+            },
+            "local": {
+              "browserTarget": "plan_anual_auditoria_mf:build:local"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "local"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
@@ -85,18 +96,10 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }

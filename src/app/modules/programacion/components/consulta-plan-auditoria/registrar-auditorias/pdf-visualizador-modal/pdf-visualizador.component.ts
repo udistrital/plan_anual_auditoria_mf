@@ -69,7 +69,7 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     if (this.base64 !== "") {
       const payload = {
           IdTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-          nombre: this.data.id,
+          nombre: this.data.id, 
           descripcion: "Documento pdf, auditorias de plan de auditoria",
           metadatos: {},
           file: this.base64,
@@ -79,7 +79,7 @@ export class ModalPdfVisualizadorComponent implements OnInit {
         next: (response: any) => {
           const documento = response[0];
           console.log("Documento subido exitosamente", documento);
-          this.guardarReferencia(documento, "Plan Auditoria", 0);
+          this.guardarReferencia(documento, "Plan Auditoria", this.data.id, 6810);
         },
         error: (error) => {
           console.error("Error al subir el documento", error);
@@ -88,9 +88,9 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     }
   }
 
-  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, tipo_id: number): void {
+  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, referencia_id: string , tipo_id: number): void {
     if (nuxeoResponse.res.Enlace) {
-      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, tipo_id).subscribe({
+      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, referencia_id, tipo_id).subscribe({
         next: (response) => {
           console.log("Referencia guardada exitosamente", response);
           this.alertService.showSuccessAlert("Archivo subido exitosamente.");

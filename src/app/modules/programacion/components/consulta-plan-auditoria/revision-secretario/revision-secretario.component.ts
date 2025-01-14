@@ -12,6 +12,8 @@ import { lastValueFrom } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import * as JSZip from 'jszip'; 
+import { saveAs } from 'file-saver'; 
 
 @Component({
   selector: "app-revision-secretario",
@@ -39,7 +41,8 @@ export class RevisionSecretarioComponent {
   ) { }
 
   botonSeleccionado: string = "formato";
-  documento: string = "";
+  documentos: { base64: string; tipo_id: number }[] = [];
+  documentoPAA: string = "";
   documentoMatrizPublica: string = "";
   usuarioId: any;
 
@@ -48,8 +51,7 @@ export class RevisionSecretarioComponent {
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.obtenerEstadoActual();
     try {
-      this.documento = await this.renderDocumento(0);
-      this.documentoMatrizPublica = await this.renderDocumento(1);
+      await this.renderizarDocumentos();
     } catch (error) {
       console.log("no se genero el base 64");
     }
@@ -64,8 +66,6 @@ export class RevisionSecretarioComponent {
       .subscribe(
         (response: any) => {
           const estadoActual = response?.Data?.[0];
-          console.log(response?.Data)
-          console.log(this.planAuditoriaId)
           this.estadoIdActual = estadoActual?.estado_id || null;
           this.mostrarBotones =
             this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
@@ -79,7 +79,7 @@ export class RevisionSecretarioComponent {
 
   abrirModalRechazo(): void {
     if (!this.mostrarBotones) return;
-
+    console.log(this.usuarioId)
     this.dialog.open(ModalMotivosRechazoComponent, {
       width: "50%",
       data: {
@@ -91,7 +91,6 @@ export class RevisionSecretarioComponent {
 
   abrirModalEnviar(): void {
     if (!this.mostrarBotones) return;
-
     this.dialog.open(ModalAprobacionSecretarioComponent, {
       width: "600px",
       data: {
@@ -109,16 +108,58 @@ export class RevisionSecretarioComponent {
     this.router.navigate([`/programacion/plan-auditoria`]);
   }
   
-  async renderDocumento(tipoId: number): Promise<string> {
+  async renderizarDocumentos() {
     try {
-      const enlace = await lastValueFrom(
-        this.referenciaPdfService.consultarDocumento(this.planAuditoriaId, tipoId)
+      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
+      const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
+
+      const enlacesConTipo = await lastValueFrom(
+        this.referenciaPdfService.consultarDocumentos(this.planAuditoriaId)
       );
-      const base64 = await this.nuxeoService.getByUUID(enlace);
-      return base64;
+
+      const enlaces = enlacesConTipo.map((doc) => doc.nuxeo_enlace);
+      const base64Files = await this.nuxeoService.obtenerPorUUIDs(enlaces);
+
+      enlacesConTipo.forEach((doc, index) => {
+        const base64 = base64Files[index];
+        this.documentos.push({ base64, tipo_id: doc.tipo_id });
+
+        if (doc.tipo_id === tipoIdPAA && !this.documentoPAA) {
+          this.documentoPAA = base64;
+        }
+        if (doc.tipo_id === tipoIdMatrizPublica && !this.documentoMatrizPublica) {
+          this.documentoMatrizPublica = base64;
+        }
+      });
+
     } catch (error) {
-      console.error(`Error al renderizar el documento para tipoId ${tipoId}:`, error);
-      return ""; 
+      console.error("Error al renderizar los documentos:", error);
+    }
+  }
+
+  async descargarTodo() {
+    const zip = new JSZip();
+    const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
+    const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
+
+    try {
+      this.documentos.forEach((doc, index) => {
+        let fileName = `documento_${index + 1}.pdf`;
+
+        // Nombres específicos según tipo_id
+        if (doc.tipo_id === tipoIdPAA) {
+          fileName = `plan_anual_auditoria.pdf`;
+        } else if (doc.tipo_id === tipoIdMatrizPublica) {
+          fileName = `matriz_funcion_publica.pdf`;
+        }
+
+        zip.file(fileName, doc.base64, { base64: true });
+      });
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(zipBlob, "documentosPAA.zip");
+    } catch (error) {
+      console.error("Error al crear el archivo ZIP:", error);
     }
   }
 
