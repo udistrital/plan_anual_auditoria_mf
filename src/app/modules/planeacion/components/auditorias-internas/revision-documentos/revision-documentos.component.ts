@@ -126,7 +126,9 @@ export class RevisionDocumentosComponent implements OnInit {
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
       observacion: "",
-      estado_id: estadoAprobacion,
+      estado_interno_id: estadoAprobacion,
+      //todo por implementar
+      estado_id: 0,
     };
   }
 

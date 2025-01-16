@@ -17,3 +17,10 @@ export class Auditoria {
     estado!: string;
     auditores!: number[];
 }
+export class Actividad{
+    id!:string;
+    auditoriaId!:string;
+    titulo!:string;
+    fechaInicio!:Date;
+    fechaFin!:Date;
+}
