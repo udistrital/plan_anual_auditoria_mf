@@ -7,6 +7,15 @@ export const environment = {
   PLAN_ANUAL_AUDITORIA_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/',
   PLAN_ANUAL_AUDITORIA_MID: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   TERCEROS_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
+
+  AUDITORIA_ESTADO: {
+    BORRADOR_ID: 6823,
+    EN_REVISION_POR_JEFE_ID: 6824,
+    APROBADO_PROGRAMA_POR_JEFE_ID: 6825,
+    EN_REVISIÓN_POR_AUDITADO_ID: 6826,
+    APROBADO_POR_AUDITADO_ID: 6827,
+    RECHAZADO_ID: 6828,
+  },
   
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
@@ -16,15 +25,6 @@ export const environment = {
     EN_REVISION_SECRETARIO_ID: 6793,
     APROBADO_SECRETARIO_ID: 6794,
     RECHAZADO: 6806,
-  },
-
-  AUDITORIA_ESTADO: {
-    BORRADOR_ID: 6823,
-    EN_REVISION_POR_JEFE_ID: 6824,
-    APROBADO_PROGRAMA_POR_JEFE_ID: 6825,
-    EN_REVISIÓN_POR_AUDITADO_ID: 6826,
-    APROBADO_POR_AUDITADO_ID: 6827,
-    RECHAZADO_ID: 6828,
   },
   
   TIPO_DOCUMENTO: {
