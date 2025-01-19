@@ -1,14 +1,15 @@
-import { AutenticacionMidService } from './../../../../../core/services/autenticacion-mid.service';
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ParametrosService } from 'src/app/core/services/parametros.service';
-import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
-import { UserService } from 'src/app/core/services/user.service';
-import { Parametro } from 'src/app/shared/data/models/parametros/parametros';
-import { Auditoria } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
-import { AlertService } from 'src/app/shared/services/alert.service';
-import { ModalService } from 'src/app/shared/services/modal.service';
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { AutenticacionMidService } from "./../../../../../core/services/autenticacion-mid.service";
+import { Component, Inject, OnInit } from "@angular/core";
+import { FormArray, FormBuilder, FormControl, FormGroup } from "@angular/forms";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { ParametrosService } from "src/app/core/services/parametros.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { UserService } from "src/app/core/services/user.service";
+import { Auditoria } from "src/app/shared/data/models/auditoria-auditor";
+import { Parametro } from "src/app/shared/data/models/parametros/parametros";
+import { AlertService } from "src/app/shared/services/alert.service";
+import { ModalService } from "src/app/shared/services/modal.service";
 
 interface Auditor {
   nombre: string;
@@ -17,26 +18,26 @@ interface Auditor {
 }
 
 @Component({
-  selector: 'app-modal-agregar-auditor',
-  templateUrl: './modal-agregar-auditor.component.html',
-  styleUrl: './modal-agregar-auditor.component.css'
+  selector: "app-modal-agregar-auditor",
+  templateUrl: "./modal-agregar-auditor.component.html",
+  styleUrl: "./modal-agregar-auditor.component.css",
 })
-
 export class ModalAgregarAuditorComponent implements OnInit {
-
   form: FormGroup | any;
   evaluaciones: Parametro[] = [];
+  tipoEvaluacion: number[] = [];
   auditores: Auditor[] = [];
   auditoresSeleccionados: FormArray<FormGroup>;
   meses: Parametro[] = [];
   TODOS = "Todos";
   isEditMode = false;
-  usuarioId: any;  
+  usuarioId: any;
 
   constructor(
     private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
+    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<ModalAgregarAuditorComponent>,
     private modalService: ModalService,
@@ -44,52 +45,61 @@ export class ModalAgregarAuditorComponent implements OnInit {
     private userService: UserService,
     @Inject(MAT_DIALOG_DATA) public data: { auditoria?: Auditoria }
   ) {
-    this.auditoresSeleccionados =this.fb.array<FormGroup>([]);
+    this.auditoresSeleccionados = this.fb.array<FormGroup>([]);
   }
 
   ngOnInit(): void {
     this.isEditMode = !!this.data.auditoria;
+    console.log("dataAuditoria", this.data.auditoria);
+    this.cargarAuditores();
+
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
-      console.log("usuario Logeado", this.usuarioId, usuarioId);
-      });
+    });
     this.form = this.fb.group({
-      tituloAuditoria: [this.data.auditoria?.auditoria || ""],
-      tipoEvaluacion: [this.data.auditoria?.tipoEvaluacion || []],
-      cronogramaActividades: [this.data.auditoria?.cronograma || []],
+      tituloAuditoria: [this.data.auditoria?.titulo || ""],
+      tipoEvaluacion: [this.data.auditoria?.tipo_evaluacion_nombre || []],
+      cronogramaActividades: [this.data.auditoria?.cronograma_nombre || []],
       auditoresSeleccionados: this.auditoresSeleccionados,
       auditor: [""],
     });
-    this.CargarEvaluaciones();
-    this.cargarMeses();
-    this.cargarAuditores();      
   }
 
   inicializarAuditoresSeleccionados(): void {
-    const auditoresAsignados = this.data.auditoria?.auditores || [];
-    console.log("auditoresAsignados", auditoresAsignados);
-  
-    auditoresAsignados.forEach((auditorAsignado: any) => {
-      console.log("auditorSelector", auditorAsignado);  
-      
-      const auditorEncontrado = this.auditores.find((a) => a.id === auditorAsignado.auditor_id);
-      console.log("a.id", this.auditores );
-  
-      if (auditorEncontrado) {
-        const auditorControl = this.fb.group({
-          auditor: this.fb.control<Auditor | null>(auditorEncontrado),
-          lider: this.fb.control<boolean>(auditorAsignado.auditor_lider || false),
+    this.PlanAnualAuditoriaMid.get(
+      `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true`
+    ).subscribe(
+      (res) => {
+        this.auditoresSeleccionados.clear();
+        const auditoresAsignados: any[] = res.Data || [];
+        console.log("auditoresAsignadosConsulta", auditoresAsignados);
+
+        auditoresAsignados.forEach((auditorAsignado) => {
+          const auditorEncontrado = this.auditores.find(
+            (a) => a.id === auditorAsignado.auditor_id
+          );
+
+          if (auditorEncontrado) {
+            console.log("auditorEncontrado", auditorEncontrado);
+            const auditorControl = this.fb.group({
+              auditor: this.fb.control<Auditor | null>(auditorEncontrado),
+              lider: this.fb.control<boolean>(
+                auditorAsignado.auditor_lider || false
+              ),
+            });
+
+            this.auditoresSeleccionados.push(auditorControl);
+          } else {
+            console.warn(
+              `Auditor con ID ${auditorAsignado.auditor_id} no encontrado en la lista de auditores.`
+            );
+          }
         });
-  
-        
-        this.auditoresSeleccionados.push(auditorControl);
-  
-        console.log("Auditor encontrado:", auditorEncontrado);
-        console.log("Control de auditor:", auditorControl);
-      } else {
-        console.warn(`Auditor con ID ${auditorAsignado.id} no encontrado en la lista de auditores.`);
+      },
+      (error) => {
+        console.error("Error al cargar auditores asignados:", error);
       }
-    });
+    );
   }
 
   agregarAuditor() {
@@ -98,185 +108,139 @@ export class ModalAgregarAuditorComponent implements OnInit {
         auditor: this.fb.control<Auditor | null>(null),
         lider: this.fb.control<boolean>(false),
       })
-      );
+    );
   }
 
   eliminarAuditor(index: number) {
     const auditorSeleccionado = this.auditoresSeleccionados.at(index)?.value;
-  
     console.log("Auditor seleccionado para eliminar:", auditorSeleccionado);
-  
-    if (auditorSeleccionado && auditorSeleccionado.auditor) {
-      
-      this.alertaService.showConfirmAlert(`¿Está seguro de eliminar este auditor?`).then((result) => {
+
+    this.alertaService
+      .showConfirmAlert(`¿Está seguro de eliminar este auditor?`)
+      .then((result) => {
         if (result.isConfirmed) {
-          
-          this.planAnualAuditoriaService.get("auditor").subscribe({
-            next: (response: any) => {
-              console.log("Respuesta auditor", response);
-  
-              if (response && response.Data) {                
-                console.log("auditorSeleccionado.auditor.id", auditorSeleccionado.auditor.id);
-                console.log("this.data.auditoria?.id", this.data.auditoria?.id);
-                
-                const auditorAsignado = response.Data.find(
-                  (item: any) =>
-                    item.auditoria_id === this.data.auditoria?.id && 
-                    item.auditor_id === auditorSeleccionado.auditor.id
-                );
-  
-                if (auditorAsignado) {
-                  console.log("auditorAsignadopara eliminar", auditorAsignado);
-                  console.log("auditorAsignadopara eliminar", auditorAsignado._id);
-                  const auditorId = auditorAsignado._id;
-                  console.log("auditorId", auditorId);
-                  
-                  this.planAnualAuditoriaService.delete("auditor", auditorId).subscribe({
-                    next: (deleteResponse: any) => {
-                      console.log("Auditor eliminado exitosamente", deleteResponse);
-                      // Eliminar del array local
-                      this.auditoresSeleccionados.removeAt(index);
-                      this.alertaService.showSuccessAlert("Auditor eliminado correctamente.");
-                    },
-                    error: (err) => {
-                      console.error("Error al eliminar auditor", err);
-                      this.alertaService.showErrorAlert("Error al eliminar el auditor. Inténtelo de nuevo.");
-                    },
-                  });
-                } else {
-                  console.warn("No se encontró el registro del auditor en el backend.");
-                  this.alertaService.showErrorAlert("No se encontró el registro del auditor.");
-                }
-              }
-            },
-            error: (err) => {
-              console.error("Error al obtener los auditores", err);
-              this.alertaService.showErrorAlert("Error al obtener los auditores. Inténtelo de nuevo.");
-            },
+          this.PlanAnualAuditoriaMid.get(
+            `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true,auditor_id:${auditorSeleccionado.auditor.id}`
+          ).subscribe((res) => {
+            const auditorEliminar = res.Data[0] || null;
+            console.log("auditorEliminar", auditorEliminar);
+
+            if (auditorEliminar) {
+              this.planAnualAuditoriaService
+                .delete("auditor", auditorEliminar._id)
+                .subscribe({
+                  next: (deleteResponse: any) => {
+                    console.log("Auditor eliminado crud", deleteResponse);
+
+                    this.auditoresSeleccionados.removeAt(index);
+                    console.log(
+                      "Lista de auditores después de eliminar:",
+                      this.auditoresSeleccionados.value
+                    );
+                    this.alertaService.showSuccessAlert(
+                      "Auditor eliminado correctamente."
+                    );
+                  },
+                  error: (err) => {
+                    console.error("Error al eliminar auditor", err);
+                    this.alertaService.showErrorAlert(
+                      "Error al eliminar el auditor. Inténtelo de nuevo."
+                    );
+                  },
+                });
+            } else {
+              this.auditoresSeleccionados.removeAt(index);
+              console.log("no eliminado, retirado de la lista");
+              console.log(
+                "Lista de auditores luego de retirar:",
+                this.auditoresSeleccionados.value
+              );
+              this.alertaService.showSuccessAlert(
+                "Auditor eliminado correctamente."
+              );
+            }
           });
         }
       });
-    } else {
-      console.warn("No se encontró el ID del auditor para eliminar.");
-      
-      this.auditoresSeleccionados.removeAt(index);
-    }
   }
 
   cargarAuditores() {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       console.log("res", res);
       if (res && res.Data) {
-        this.auditores = res.Data
-        .filter((auditor: any) => auditor.finalizado === false &&
-        ["AUDITOR", "AUDITOR_EXPERTO"].includes(auditor.rol_usuario))  
-        .map((auditor: any) => ({
+        this.auditores = res.Data.filter(
+          (auditor: any) =>
+            auditor.finalizado === false &&
+            ["AUDITOR", "AUDITOR EXPERTO"].includes(auditor.rol_usuario)
+        ).map((auditor: any) => ({
           nombre: auditor.nombre,
           documento: auditor.documento,
-          id: auditor.id_tercero
-      }));        
+          id: auditor.id_tercero,
+        }));
       }
-      this. inicializarAuditoresSeleccionados();
+      this.inicializarAuditoresSeleccionados();
       console.log("Auditores", this.auditores);
-      console.log("auditoria id", this.data.auditoria!.id);
     });
   }
 
   auditoresDisponibles(index: number): Auditor[] {
     const seleccionados = this.auditoresSeleccionados.value
       .filter((_, i) => i !== index)
-      .map((control: {auditor: Auditor }) => control.auditor?.documento);
+      .map((control: { auditor: Auditor }) => control.auditor?.documento);
 
-    return this.auditores.filter((auditor) => !seleccionados.includes(auditor.documento));
+    return this.auditores.filter(
+      (auditor) => !seleccionados.includes(auditor.documento)
+    );
   }
 
   onLiderChange(selectedIndex: number): void {
     this.auditoresSeleccionados.controls.forEach((control, index) => {
       if (index !== selectedIndex) {
-        control.get('lider')?.setValue(false);
+        control.get("lider")?.setValue(false);
       }
     });
   }
 
   asignarAuditor(auditorSeleccionado: any): void {
     const auditorPayload = {
-      auditoria_id: this.data.auditoria?.id,
+      auditoria_id: this.data.auditoria?._id,
       auditor_id: auditorSeleccionado.id,
       asignado: true,
       asignado_por_id: this.usuarioId,
-      auditor_lider: auditorSeleccionado.lider
+      auditor_lider: auditorSeleccionado.lider,
     };
-  
+
     console.log("auditorPayload", auditorPayload);
-  
-    
-    this.planAnualAuditoriaService.get("auditor").subscribe({
-      next: (response: any) => {
-        console.log("Respuesta auditorAsignado", response);
-  
-        if (response && response.Data) {
-          // Filtrar los datos en el cliente
-          const auditorAsignado = response.Data.find(
-            (item: any) =>
-              item.auditoria_id === auditorPayload.auditoria_id &&
-              item.auditor_id === auditorPayload.auditor_id
-          );
-  
-          console.log("auditorAsignado", auditorAsignado);
-  
-          if (auditorAsignado) {
-            
-            this.planAnualAuditoriaService
-              .put(`auditor/${auditorAsignado._id}`, auditorPayload)
-              .subscribe({
-                next: (updateResponse: any) => {
-                  console.log("Auditor actualizado exitosamente", updateResponse);
-                },
-                error: (err) => {
-                  console.error("Error al actualizar auditor", err);
-                },
-              });
-          } else {
-            
-            this.planAnualAuditoriaService
-              .post("auditor", auditorPayload)
-              .subscribe({
-                next: (createResponse: any) => {
-                  console.log("Auditor asignado exitosamente", createResponse);
-                },
-                error: (err) => {
-                  console.error("Error al asignar auditor", err);
-                },
-              });
-          }
-        } else {
-          console.error("No se encontraron datos en la respuesta del servidor");
-        }
-      },
-      error: (err) => {
-        console.error("Error al verificar auditor asignado", err);
-      },
+
+    this.PlanAnualAuditoriaMid.get(
+      `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true,auditor_id:${auditorPayload.auditor_id}`
+    ).subscribe((res) => {
+      const auditorAsignado = res.Data[0] || null;
+
+      if (auditorAsignado) {
+        this.planAnualAuditoriaService
+          .put(`auditor/${auditorAsignado._id}`, auditorPayload)
+          .subscribe({
+            next: (updateResponse: any) => {
+              console.log("Auditor actualizado exitosamente", updateResponse);
+            },
+            error: (err) => {
+              console.error("Error al actualizar auditor", err);
+            },
+          });
+      } else {
+        this.planAnualAuditoriaService
+          .post("auditor", auditorPayload)
+          .subscribe({
+            next: (response: any) => {
+              console.log("Auditor asignado exitosamente", response);
+            },
+            error: (err) => {
+              console.error("Error al asignar auditor", err);
+            },
+          });
+      }
     });
-  }
-
-  cargarMeses() {
-    this.parametrosService
-      .get("parametro?query=TipoParametroId:139&limit=0")
-      .subscribe((res) => {
-        if (res !== null) {
-          this.meses = res.Data;
-        }
-      });
-  }
-
-  CargarEvaluaciones() {
-    this.parametrosService
-      .get("parametro?query=TipoParametroId:136&limit=0")
-      .subscribe((res) => {
-        if (res !== null) {
-          this.evaluaciones = res.Data;
-        }
-      });
   }
 
   guardarAuditoria() {
@@ -285,19 +249,20 @@ export class ModalAgregarAuditorComponent implements OnInit {
         .showConfirmAlert(`¿Está seguro(a) de actualizar la auditoría?`)
         .then((result) => {
           if (result.isConfirmed) {
-            console.log("auditoria id", this.data.auditoria!.id);
+            console.log("auditoria id", this.data.auditoria!._id);
 
-            const auditoresSeleccionados = this.auditoresSeleccionados.value.map(
-              (item: {auditor: Auditor | null; lider: boolean}) =>  ({
-                documento: item.auditor?.documento || 0,
-                lider: item.lider,
-                id: item.auditor?.id
-              })
-            );
+            const auditoresSeleccionados =
+              this.auditoresSeleccionados.value.map(
+                (item: { auditor: Auditor | null; lider: boolean }) => ({
+                  documento: item.auditor?.documento || 0,
+                  lider: item.lider,
+                  id: item.auditor?.id,
+                })
+              );
             console.log("AuditoresSelecc", auditoresSeleccionados);
 
             auditoresSeleccionados.forEach((auditor) => {
-              if (auditor.documento){
+              if (auditor.documento) {
                 console.log("auditor", auditor);
                 this.asignarAuditor(auditor);
               }
@@ -307,13 +272,12 @@ export class ModalAgregarAuditorComponent implements OnInit {
               tipo_evaluacion_id: this.form.value.tipoEvaluacion,
               cronograma_id: this.form.value.cronogramaActividades,
               //auditores: auditoresSeleccionados
-              
             };
 
             console.log("formData", formData);
 
             this.planAnualAuditoriaService
-              .put(`auditoria/${this.data.auditoria!.id}`, formData)
+              .put(`auditoria/${this.data.auditoria!._id}`, formData)
               .subscribe({
                 next: (response: any) => {
                   if (response.Status === 200) {

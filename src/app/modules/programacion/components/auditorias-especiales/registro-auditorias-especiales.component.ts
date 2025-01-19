@@ -8,6 +8,8 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { forkJoin } from "rxjs";
 
 @Component({
   selector: "app-registro-auditorias-especiales",
@@ -35,6 +37,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     private fb: FormBuilder,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
     private parametrosService: ParametrosService
   ) {}
 
@@ -54,22 +57,40 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.planAnualAuditoriaService.get(`auditoria`).subscribe(
+    this.planAuditoriaMid.get(`auditoria?query=activo:true`).subscribe(
       (res) => {
         if (res && res.Data) {
-          const auditorias = res.Data.filter(
-            (item: any) => item.activo === true && !item.plan_auditoria_id
-          ).map((item: any) => ({
-            id: item._id ?? 0,
-            auditoria: item.titulo ?? "Sin Título",
-            tipoEvaluacion: item.tipo_evaluacion_id ?? "Sin Tipo",
-            auditores: [], 
-            cronograma: item.cronograma_id ?? "Sin Cronograma",
-            estado: item.estado_id ?? "Desconocido",
-          }));
-
-          this.cargarAuditores(auditorias);
-          console.log("Auditorias", auditorias);
+          const auditorias: Auditoria[] = res.Data
+            .filter((item: any) => !item.plan_auditoria_id)
+            .map((item: any, index: number) => ({
+              numero: index + 1,
+              id: item._id ?? 0,
+              auditoria: item.titulo ?? "Sin Título",
+              tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
+              tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
+              auditores: [],
+              cronograma: item.cronograma_nombre ?? "Sin Cronograma",
+              cronogramaId: item.cronograma_id ?? 0,
+              estado: item.estado_id ?? "Desconocido",
+            })); 
+          
+          const auditorRequests = auditorias.map((auditoria) =>
+            this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria.id},activo:true`)
+          ); 
+          
+          forkJoin(auditorRequests).subscribe(
+            (auditorResponses) => {
+              auditorias.forEach((auditoria, index) => {
+                auditoria.auditores = auditorResponses[index]?.Data ?? [];
+              });
+  
+              this.dataSource.data = auditorias;
+              console.log("Auditorías con Auditores:", auditorias);
+            },
+            (error) => {
+              this.alertaService.showErrorAlert("Error al cargar auditores");
+            }
+          );
         }
       },
       (error) => {
@@ -100,7 +121,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
       (error) => {
         this.alertaService.showErrorAlert("Error al cargar los auditores");
       }
-    )
+    );
   }
 
   nuevaAuditoria() {
@@ -155,6 +176,10 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
         this.cargarAuditorias();
       }
     });
+  }
+
+  getAuditoresNombres(element: any): string {
+    return element.auditores.map((auditor: any) => auditor.auditor_nombre).join(", ");
   }
 
   editarAuditoria(auditoria: Auditoria) {
