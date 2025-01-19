@@ -4,11 +4,12 @@ import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { Router } from "@angular/router";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
-import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { Auditoria } from "src/app/shared/data/models/auditoria-auditor";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { colocacionesContructorTabla } from "./tabla-consulta-auditorias.utilidades";
 import { MatSort } from "@angular/material/sort";
 import { ModalAgregarAuditorComponent } from "../modal-agregar-auditor/modal-agregar-auditor.component";
+import { forkJoin } from "rxjs";
 
 @Component({
   selector: "app-tabla-consulta-auditorias",
@@ -39,35 +40,54 @@ export class TablaConsultaAuditoriasComponent {
     private router: Router
   ) {}
 
+  
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
-  ) {
+  ): void {
     this.auditoriasPorVigencia = [];
-    this.planAuditoriaMid
-      .get(
-        `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
-      )
-      .subscribe((res) => {
-        const auditorias: any[] = res.Data;
-        console.log("Consulta aud Mid: ",auditorias);
-
-        if (!(auditorias.length > 0)) {
-          this.banderaTablaAuditoriasInternas = false;
-          this.auditoriasDataSource.data = [];
-          return this.alertaService.showAlert(
-            "No hay auditorías registradas",
-            "Actualmente no hay auditorías registradas para la vigencia seleccionada."
-          );
-        }
-
+  
+    const auditorias$ = this.planAuditoriaMid.get(
+      `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
+    );
+  
+    auditorias$.subscribe((res) => {
+      const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
+      console.log("Consulta aud Mid: ", auditorias);
+  
+      if (auditorias.length === 0) {
+        this.banderaTablaAuditoriasInternas = false;
+        this.auditoriasDataSource.data = [];
+        this.alertaService.showAlert(
+          "No hay auditorías registradas",
+          "Actualmente no hay auditorías registradas para la vigencia seleccionada."
+        );
+        return;
+      }
+  
+      const auditoresRequests = auditorias.map((auditoria) =>
+        this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria._id}`)
+      );
+  
+      forkJoin(auditoresRequests).subscribe((auditoresResponses) => {
+        
+        auditorias.forEach((auditoria, index) => {
+          auditoria.auditores = Array.isArray(auditoresResponses[index]?.Data)
+            ? auditoresResponses[index].Data
+            : [];
+        });
+  
         this.auditoriasPorVigencia = auditorias;
-        console.log(this.auditoriasPorVigencia);
-        this.totalRegistros = res.MetaData.Count;
+        this.totalRegistros = res.MetaData?.Count ?? 0;
         this.banderaTablaAuditoriasInternas = true;
         this.construirTabla();
       });
+    }, 
+    (error) => {
+      console.error("Error al cargar auditorías:", error);
+      this.alertaService.showErrorAlert("Error al cargar las auditorías.");
+    });
   }
 
   construirTabla() {

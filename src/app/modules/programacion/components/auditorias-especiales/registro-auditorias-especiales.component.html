@@ -85,10 +85,7 @@
             <mat-header-cell *matHeaderCellDef><b>Auditor (es)</b></mat-header-cell>
             <mat-cell *matCellDef="let element">
               <ng-container *ngIf="element.auditores?.length > 0; else noAuditores">
-                <div *ngFor="let auditor of element.auditores">
-                  {{ auditor.auditor_id }}
-                </div>
-                
+                {{ getAuditoresNombres(element) }}
               </ng-container>
               <ng-template #noAuditores>
                 <span>Sin auditores asignados</span>
