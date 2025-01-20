@@ -1,16 +1,11 @@
+import { map } from 'rxjs/operators';
 export const colocacionesContructorTabla = [
   {
     columnDef: "numero",
     header: "No.",
     cell: (auditoria: any) => "",
     sortable: true,
-  },
-  // {
-  //   columnDef: "vigencia",
-  //   header: "Vigencia",
-  //   cell: (auditoria: any) => auditoria.vigencia_nombre,
-  //   sortable: true,
-  // },
+  }, 
   {
     columnDef: "auditoria",
     header: "Auditoria",
@@ -20,25 +15,19 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "tipoEvaluacion",
     header: "Tipo de Evaluación",
-    cell: (auditoria: any) => auditoria.tipo_evaluacion_id,
+    cell: (auditoria: any) => auditoria.tipo_evaluacion_nombre,
     sortable: true,
   },
   {
     columnDef: "auditores",
     header: "Auditor(es)",
-    cell: (auditoria: any) => "Pepito Perez",
+    cell: (auditoria: any) => auditoria.auditores?.map((a: any) => a.auditor_nombre).join(", ") || "Sin Auditor(es)",
     sortable: true,
   },
-  // {
-  //   columnDef: "lider",
-  //   header: "Líder",
-  //   cell: (auditoria: any) => "Nombre Líder",
-  //   sortable: true,
-  // },
   {
     columnDef: "cronograma",
     header: "Cronograma de Actividades",
-    cell: (auditoria: any) => auditoria.cronograma_id,
+    cell: (auditoria: any) => auditoria.cronograma_nombre,
     sortable: true,
   },
   {
@@ -47,12 +36,6 @@ export const colocacionesContructorTabla = [
     cell: (auditoria: any) => auditoria.estado_id,
     sortable: true,
   },
-  // {
-  //   columnDef: "documentos",
-  //   header: "Documento",
-  //   cell: (auditoria: any) => "",
-  //   sortable: false,
-  // },
   {
     columnDef: "acciones",
     header: "Acciones",
