@@ -9,12 +9,4 @@
     display: flex;
     margin-top: 16px;
     justify-content: center;
-
-    button {
-        color: var(--md-primary-contrast-300);
-        margin-top: 20px;
-        margin-left: 5px;
-        margin-right: 5px;
-        margin-bottom: 20px;
-    }
 }
