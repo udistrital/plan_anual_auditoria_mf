@@ -10,13 +10,13 @@ import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
-import { Router, ActivatedRoute  } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
-import {CrearActividadComponent} from './actividades-auditoria/crear-actividad/crear-actividad.component'
+import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -42,17 +42,16 @@ export class EditarAuditoriaComponent implements OnInit {
   orientation: "horizontal" | "vertical" = "horizontal";
 
   constructor(
-    private alertaService: AlertService,
-    private breakpointObserver: BreakpointObserver,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 
   ngOnInit() {
-    
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
@@ -192,19 +191,19 @@ export class EditarAuditoriaComponent implements OnInit {
     this.router.navigate([`/planeacion/auditorias-internas`]);
   }
 
-    subirArchivoCargueMasivo(): void {
-      const dialogRef = this.dialog.open(CargarArchivoComponent, {
-        width: "800px",
-        data: {
-          tipoArchivo: 'xlsx',
-          id: this.auditoriaId,
-          idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-          descripcion: 'Archivo para cargue masivo de actividades',
-          cargaLambda: true,
-          tipo: "actividades"
-        },
-      });
-    }
+  subirArchivoCargueMasivo(): void {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+      width: "800px",
+      data: {
+        tipoArchivo: "xlsx",
+        id: this.auditoriaId,
+        idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+        descripcion: "Archivo para cargue masivo de actividades",
+        cargaLambda: true,
+        tipo: "actividades",
+      },
+    });
+  }
 
   cargarFormulariosConAuditoria() {
     this.formularioInformacionComponent.form.patchValue({
@@ -228,10 +227,10 @@ export class EditarAuditoriaComponent implements OnInit {
       fisicos: this.auditoria.rec_fisico,
     });
   }
-  crearActividad(){
+  crearActividad() {
     const dialogRef = this.dialog.open(CrearActividadComponent, {
-          width: '1100px',
-          data: { auditoriaId: this.auditoriaId },
-        });
+      width: "1100px",
+      data: { auditoriaId: this.auditoriaId },
+    });
   }
 }

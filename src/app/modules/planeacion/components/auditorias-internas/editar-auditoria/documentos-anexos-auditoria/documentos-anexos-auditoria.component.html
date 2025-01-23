@@ -3,10 +3,16 @@
   class="documento-card"
 >
   <div class="documento-content">
-    <span>{{ documento.nombre }}</span>
+    <span class="mb-md">{{ documento.nombre }}</span>
     <div class="icon-buttons">
       <!-- Botón para seleccionar archivo -->
-      <button mat-icon-button color="primary" (click)="fileInput.click()">
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="fileInput.click()"
+        *ngIf="!documento.plantilla"
+        class="width-100-md"
+      >
         <mat-icon>upload</mat-icon>
       </button>
       <input
@@ -17,13 +23,30 @@
       />
 
       <!-- Botón para ver archivo -->
-      <button mat-icon-button color="accent" [disabled]="!documento.archivo">
+      <button
+        mat-button
+        color="primary"
+        *ngIf="documento.plantilla"
+        class="width-100-md"
+        (click)="generarDocumento(documento)"
+        matTooltip="Haga clic en esta opción una vez que haya realizado cambios en los pasos anteriores, para visualizar las actualizaciones en el documento."
+        [matTooltipPosition]="'above'"
+      >
+        <mat-icon>picture_as_pdf</mat-icon>
+        Actualizar documento
+      </button>
+
+      <button
+        mat-stroked-button
+        color="primary"
+        style="background-color: var(--md-warning-50)"
+        [disabled]="!documento.archivo"
+        class="width-100-md"
+        (click)="verDocumento(documento.archivo)"
+      >
         <mat-icon>visibility</mat-icon>
+        Ver documento
       </button>
     </div>
   </div>
 </mat-card>
-
-<!-- <div class="button-container">
-    <button mat-raised-button color="primary" (click)="onGuardar()">Guardar y Cerrar</button>
-  </div> -->
