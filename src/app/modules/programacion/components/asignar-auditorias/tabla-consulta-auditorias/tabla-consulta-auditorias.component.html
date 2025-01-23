@@ -29,26 +29,12 @@
                     >
                       <mat-icon>more_vert</mat-icon>
                     </button>
-                    <mat-menu #menu="matMenu">
-                      <!-- <button mat-menu-item>
-                        <mat-icon color="primary">visibility</mat-icon> Ver auditoría
-                      </button> -->
+                    <mat-menu #menu="matMenu">                      
                       <button (click)="agregarAuditor(row)" mat-menu-item>
                         <mat-icon color="primary">edit</mat-icon> Editar auditoría
                       </button>
                     </mat-menu>
                   </div>
-            
-                  <!-- Caso 'documentos' -->
-                  <!-- <div *ngSwitchCase="'documentos'">
-                    <mat-icon
-                      (click)="verDocumento(row)"
-                      color="primary"
-                      class="link"
-                    >
-                      description
-                    </mat-icon>
-                  </div> -->
   
                   <span *ngSwitchDefault>{{ columna.cell(row) }}</span>
                 </ng-container>
