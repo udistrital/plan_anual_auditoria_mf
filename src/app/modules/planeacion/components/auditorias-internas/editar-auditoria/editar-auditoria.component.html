@@ -49,6 +49,7 @@
                 color="primary"
                 (click)="enviarFormInformacion()"
               >
+                <mat-icon>save</mat-icon>
                 Guardar y continuar
               </button>
             </div>
@@ -75,12 +76,21 @@
           ></app-actividades-auditoria>
           <div class="d-flex justify-content-end mt-4">
             <button matStepperPrevious mat-stroked-button color="primary">
+              <mat-icon>arrow_back_ios</mat-icon>
               Volver
             </button>
-            <button matStepperNext mat-flat-button color="primary" class="mx-2" (click)="crearActividad()">
+            <button
+              matStepperNext
+              mat-flat-button
+              color="primary"
+              class="mx-2"
+              (click)="crearActividad()"
+            >
+              <mat-icon>add_box</mat-icon>
               Crear Actividad
             </button>
             <button matStepperNext mat-flat-button color="primary" class="mx-2">
+              <mat-icon>save</mat-icon>
               Guardar y continuar
             </button>
             <button
@@ -118,6 +128,7 @@
             </app-formulario-dinamico>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" matStepperPrevious>
+                <mat-icon>arrow_back_ios</mat-icon>
                 Volver
               </button>
               <button
@@ -126,6 +137,7 @@
                 (click)="enviarFormRecursos()"
                 class="mx-2"
               >
+                <mat-icon>save</mat-icon>
                 Guardar y continuar
               </button>
             </div>
@@ -152,10 +164,12 @@
           ></app-documentos-anexos-auditoria>
           <div class="d-flex justify-content-end mt-4">
             <button matStepperPrevious mat-stroked-button color="primary">
+              <mat-icon>arrow_back_ios</mat-icon>
               Volver
             </button>
             <button matStepperNext mat-flat-button color="primary" class="mx-2">
-              Guardar y cerrar
+              <mat-icon>send</mat-icon>
+              Enviar
             </button>
           </div>
         </mat-step>
