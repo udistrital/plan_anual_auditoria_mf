@@ -25,6 +25,7 @@ import { ModalVerDocumentosPlanComponent } from "./components/consulta-plan-audi
 
 
 import { MatTooltip } from "@angular/material/tooltip";
+import { UnirConComaPipe } from 'src/app/shared/pipes/unir-con-coma.pipe';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { MatTooltip } from "@angular/material/tooltip";
     ProgramacionRoutingModule,
     MaterialModule,
     MatTooltip,
-    IconosModule
+    IconosModule,
+    UnirConComaPipe
   ],
 })
 export class ProgramacionModule {}
