@@ -22,7 +22,7 @@ import { IconosModule } from "./modules/iconos.module";
     CargarArchivoComponent,
     ModalVerDocumentoComponent,
     PlantillaTarjetaContenedoraComponent,
-    PlantillaModalComponent,
+    PlantillaModalComponent
   ],
   imports: [
     CommonModule,
@@ -45,7 +45,7 @@ import { IconosModule } from "./modules/iconos.module";
     IconosModule,
     DragDropModule,
     ReactiveFormsModule,
-    PdfViewerModule,
+    PdfViewerModule
   ],
   providers: [
     { provide: MAT_DIALOG_DATA, useValue: {} },

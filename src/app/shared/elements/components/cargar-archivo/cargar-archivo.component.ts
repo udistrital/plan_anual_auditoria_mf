@@ -126,7 +126,7 @@ export class CargarArchivoComponent {
       }
     } catch (error) {
       this.alertService.showErrorAlert(
-        "Error al enviar el archivo a Lambda. Por favor, revise el log."
+        "Error al enviar el archivo a Lambda"
       );
       console.error("Error al enviar el archivo al MID", error);
       return false;
