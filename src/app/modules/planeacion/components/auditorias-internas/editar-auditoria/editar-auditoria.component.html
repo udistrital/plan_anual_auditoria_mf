@@ -41,6 +41,7 @@
               #formularioInformacionComp
               [formulario]="formularioInformacion"
               (submitFormulario)="preguntarGuardadoInformacion($event)"
+              (campoSeleccionado)="manejarCambioSelect($event)"
             >
             </app-formulario-dinamico>
             <div class="d-flex justify-content-end mt-4">

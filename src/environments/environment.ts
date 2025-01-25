@@ -47,6 +47,26 @@ export const environment = {
     PLAN_ANUAL_AUDITORIA: 6810,
   },
 
+  INFO_AUDITORIA: {
+    TIPOS_PROCESO: {
+      ID: 140,
+      VALORES: {
+        MACROPROCESO: {
+          PARAMETRO_ID: 6796,
+          TIPO_PARAMETRO_ID: 148,
+        },
+        PROCESO: {
+          PARAMETRO_ID: 6797,
+          TIPO_PARAMETRO_ID: 149,
+        },
+        DEPENDENCIA: {
+          PARAMETRO_ID: 6798,
+        },
+      },
+    },
+    CARGOS_LIDER_ID: 150,
+  },
+
   // idsCamposFormulario: {
   //   Objetivo: 6770,
   //   Alcance: 6771,
