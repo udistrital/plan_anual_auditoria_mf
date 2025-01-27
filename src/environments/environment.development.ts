@@ -7,6 +7,8 @@ export const environment = {
   PLAN_ANUAL_AUDITORIA_SERVICE: 'https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/',
   PLAN_ANUAL_AUDITORIA_MID: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   TERCEROS_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
+
+  PLANTILLA_CARGUE_MASIVO: "f0c3d702-b5e8-46ff-8f0b-0c9c7511276c",
   
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,

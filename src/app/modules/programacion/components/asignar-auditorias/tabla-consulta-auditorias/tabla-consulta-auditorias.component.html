@@ -36,7 +36,14 @@
                     </mat-menu>
                   </div>
   
-                  <span *ngSwitchDefault>{{ columna.cell(row) }}</span>
+                  <span *ngSwitchDefault>
+                    <ng-container *ngIf="colDef === 'cronograma'; else defaultCell">
+                      {{ columna.cell(row) | unirConComa }}
+                    </ng-container>
+                    <ng-template #defaultCell>
+                      {{ columna.cell(row) }}
+                    </ng-template>
+                  </span>
                 </ng-container>
               </td>
             </ng-container>

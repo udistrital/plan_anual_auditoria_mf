@@ -6,16 +6,8 @@ import { APP_BASE_HREF } from "@angular/common";
 
 const routes: Routes = [
   {
-    path: "ejecucion",
-    canActivate: [AuthGuard],
-    loadChildren: () =>
-      import("./modules/ejecucion/ejecucion.module").then(
-        (m) => m.EjecucionModule
-      ),
-  },
-  {
     path: "planeacion",
-    canActivate: [],
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/planeacion/planeacion.module").then(
         (m) => m.PlaneacionModule
