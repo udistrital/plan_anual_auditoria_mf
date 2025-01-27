@@ -58,16 +58,30 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get(
       `plantilla/${plantilla}/${idAuditoria}`
     ).subscribe((res) => {
-      documento.archivo = res.Data;
       this.verDocumento(res.Data);
     });
   }
 
   verDocumento(documentoBase64: any) {
-    this.dialog.open(ModalVerDocumentoComponent, {
+    const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
       width: "1000px",
       data: documentoBase64,
       autoFocus: false,
     });
+
+    const modalInstance = dialogRef.componentInstance;
+    modalInstance.botonGuardar = { icono: "save", texto: "Guardar" };
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (!res) return;
+
+      if (res.accion === "guardarDocumento") {
+        console.log("sakdjklasdj");
+      }
+    });
+  }
+
+  guardarDocumento(documento: any) {
+    console.log(documento);
   }
 }

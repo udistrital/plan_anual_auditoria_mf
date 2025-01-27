@@ -65,6 +65,7 @@ export const environment = {
       },
     },
     CARGOS_LIDER_ID: 150,
+    CARGOS_RESPONSABLE_ID: 151,
   },
 
   // idsCamposFormulario: {

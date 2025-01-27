@@ -75,9 +75,12 @@ export const formularioInformacionAuditoria: Formulario = {
       nombre: "responsable",
       etiqueta: "Responsable",
       icono: "supervisor_account",
-      tipo: "text",
+      tipo: "select",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
+      parametros: {
+        //vacio porque se llena en el componente editar auditoria
+      },
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {

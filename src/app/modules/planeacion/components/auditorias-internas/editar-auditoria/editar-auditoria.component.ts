@@ -18,6 +18,7 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
+import { establecerCamposSecuenciales } from "src/app/shared/utils/formularios";
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -41,6 +42,7 @@ export class EditarAuditoriaComponent implements OnInit {
   auditoria!: Auditoria;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
+  tipoSeleccionado: "macroproceso" | "proceso" | null = null;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -66,6 +68,13 @@ export class EditarAuditoriaComponent implements OnInit {
         this.registroPlan.onStepLeave();
       }
     });
+
+    establecerCamposSecuenciales(this.formularioInformacionComponent, [
+      "tipo",
+      "proceso",
+      "lider",
+      "responsable",
+    ]);
   }
 
   obtenerAuditoria(auditoriaId: string) {
@@ -194,7 +203,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   subirArchivoCargueMasivo(): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "xlsx",
@@ -228,10 +237,22 @@ export class EditarAuditoriaComponent implements OnInit {
       humanos: this.auditoria.rec_humano,
       fisicos: this.auditoria.rec_fisico,
     });
+
+    if (this.auditoria.tipo_id) {
+      this.manejarCambioSelectTipo(this.auditoria.tipo_id);
+
+      if (this.auditoria.macroproceso) {
+        this.manejarCambioSelectProceso(this.auditoria.macroproceso);
+
+        if (this.auditoria.lider_id) {
+          this.manejarCambioSelectLider(this.auditoria.lider_id);
+        }
+      }
+    }
   }
 
   crearActividad() {
-    const dialogRef = this.dialog.open(CrearActividadComponent, {
+    this.dialog.open(CrearActividadComponent, {
       width: "1100px",
       data: { auditoriaId: this.auditoriaId },
     });
@@ -239,7 +260,8 @@ export class EditarAuditoriaComponent implements OnInit {
 
   private readonly selectActions: { [key: string]: (valor: any) => void } = {
     tipo: (valor) => this.manejarCambioSelectTipo(valor),
-    proceso: (valor) => this.cargarCargosLider(valor),
+    proceso: (valor) => this.manejarCambioSelectProceso(valor),
+    lider: (valor) => this.manejarCambioSelectLider(valor),
   };
 
   manejarCambioSelect(event: any): void {
@@ -252,8 +274,10 @@ export class EditarAuditoriaComponent implements OnInit {
   manejarCambioSelectTipo(tipoProcesoId: any) {
     const valores = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
     if (tipoProcesoId == valores.MACROPROCESO.PARAMETRO_ID) {
+      this.tipoSeleccionado = "macroproceso";
       this.cargarMacropocesos();
     } else if (tipoProcesoId == valores.PROCESO.PARAMETRO_ID) {
+      this.tipoSeleccionado = "proceso";
       this.cargarProcesos();
     }
   }
@@ -302,7 +326,37 @@ export class EditarAuditoriaComponent implements OnInit {
       });
   }
 
-  cargarCargosLider(procesoId: number) {
+  procesoElegido = 0;
+  manejarCambioSelectProceso(procesoId: number) {
+    this.procesoElegido = procesoId;
+    if (this.tipoSeleccionado == "macroproceso") {
+      this.cargarCargosLiderMacroproceso(procesoId);
+    } else if (this.tipoSeleccionado == "proceso") {
+      this.cargarCargosLiderProceso(procesoId);
+    }
+  }
+
+  cargarCargosLiderMacroproceso(procesoId: number) {
+    const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
+
+    let cargosLider: any[] = [];
+
+    this.parametrosService
+      .get(
+        `parametro?query=TipoParametroId:${cargosLiderId},ParametroPadreId.ParametroPadreId.Id:${procesoId}&limit=0&fields=Id,Nombre&sortby=Nombre&order=asc`
+      )
+      .subscribe((res) => {
+        cargosLider = res.Data;
+
+        // Actualiza las opciones del select 'lider'
+        const selectLider = this.formularioInformacion!.campos!.find(
+          (campo) => campo.nombre === "lider"
+        );
+        selectLider!.parametros!.opciones = cargosLider;
+      });
+  }
+
+  cargarCargosLiderProceso(procesoId: number) {
     const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
 
     let cargosLider: any[] = [];
@@ -319,6 +373,57 @@ export class EditarAuditoriaComponent implements OnInit {
           (campo) => campo.nombre === "lider"
         );
         selectLider!.parametros!.opciones = cargosLider;
+      });
+  }
+
+  manejarCambioSelectLider(procesoId: number) {
+    console.log(procesoId);
+    if (this.tipoSeleccionado == "macroproceso") {
+      this.cargarCargosResponsableMacroproceso(procesoId);
+    } else if (this.tipoSeleccionado == "proceso") {
+      this.cargarCargosResponsableProceso(procesoId);
+    }
+  }
+
+  cargarCargosResponsableMacroproceso(procesoId: number) {
+    const cargosResponsableId =
+      environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
+
+    let cargosResponsable: any[] = [];
+
+    this.parametrosService
+      .get(
+        `parametro?query=TipoParametroId:${cargosResponsableId},ParametroPadreId.ParametroPadreId.Id:${this.procesoElegido}&limit=0&fields=Id,Nombre&sortby=Nombre&order=asc`
+      )
+      .subscribe((res) => {
+        cargosResponsable = res.Data;
+
+        // Actualiza las opciones del select 'responsable'
+        const selectLider = this.formularioInformacion!.campos!.find(
+          (campo) => campo.nombre === "responsable"
+        );
+        selectLider!.parametros!.opciones = cargosResponsable;
+      });
+  }
+
+  cargarCargosResponsableProceso(procesoId: number) {
+    const cargosResponsableId =
+      environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
+
+    let cargosResponsable: any[] = [];
+
+    this.parametrosService
+      .get(
+        `parametro?query=TipoParametroId:${cargosResponsableId},ParametroPadreId:${this.procesoElegido}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
+      )
+      .subscribe((res) => {
+        cargosResponsable = res.Data;
+
+        // Actualiza las opciones del select 'responsable'
+        const selectLider = this.formularioInformacion!.campos!.find(
+          (campo) => campo.nombre === "responsable"
+        );
+        selectLider!.parametros!.opciones = cargosResponsable;
       });
   }
 }
