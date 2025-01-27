@@ -44,6 +44,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
+  permisoEdicion: boolean = false;
+  permisoConsulta: boolean = false;
 
   constructor(
     private alertaService: AlertService,
@@ -58,6 +60,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   ngOnInit() {
     this.buscarRol();
+    this.permisos();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
@@ -93,7 +96,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   construirTabla() {
-    this.auditoriasContructorTabla = colocacionesContructorTabla;
+    this.auditoriasContructorTabla = colocacionesContructorTabla.filter(column =>{
+      return column.columnDef !== 'acciones' || this.permisoEdicion;
+    });
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
@@ -154,6 +159,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   editarAuditoria(auditoria: Auditoria) {
+    console.log("ROOOLEEEEE2", this.role)
+
     const auditoriaId = auditoria._id;
     this.router.navigate([
       `/planeacion/auditorias-internas/editar/${auditoriaId}`,
@@ -209,7 +216,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   buscarRol() {
-    this.autenticationService.getRole().then((roles: any) => {
+    this.autenticationService
+    .getRole()
+    .then((roles: any) => {
       if (!roles || roles.length === 0) {
         return;
       }
@@ -228,6 +237,20 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         : esJefe
         ? "jefe"
         : null;
+    });
+  }
+  permisos(){
+    this.autenticationService
+    .getRole()
+    .then((roles) => {
+      this.permisoEdicion = this.autenticationService.PermisoEdicion(roles as string[]);
+      console.log('Permiso de edición:', this.permisoEdicion);
+      this.permisoConsulta = this.autenticationService.PermisoConsulta(roles as string[]);
+      console.log('Permiso de consulta:', this.permisoConsulta);
+      
+    })
+    .catch((error) => {
+      console.error('Error al obtener los roles del usuario:', error);
     });
   }
 
