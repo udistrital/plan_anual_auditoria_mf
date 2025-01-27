@@ -1,13 +1,14 @@
 <button mat-icon-button class="close-button" [mat-dialog-close]>
   <mat-icon color="primary" class="btn">close</mat-icon>
 </button>
-<div *ngIf="pdfLoaded">
+<div  *ngIf="pdfLoaded">
  
   <pdf-viewer [src]="pdfSrc"
               [render-text]="true"
               [original-size]="false"
-              [show-all]="false"
+              [show-all]="true"
               [zoom]="1.0"
+              class="pdf-container"
               style="min-width: 200px; min-height: 550px; width: 100%; height: auto; margin-top: 60px;"
   ></pdf-viewer>
   <div class="footer">

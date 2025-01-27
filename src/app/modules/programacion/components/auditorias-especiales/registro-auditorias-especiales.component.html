@@ -101,7 +101,7 @@
               ><b>Cronograma de actividades</b></mat-header-cell
             >
             <mat-cell *matCellDef="let element">
-              {{ element.cronograma }}
+              {{ element.cronograma | unirConComa }}
             </mat-cell>
             <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
           </ng-container>

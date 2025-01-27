@@ -81,6 +81,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
               estado: item.estado_id ?? "Borrador",
             }));
             this.vigenciaId = res.Data[0].plan_auditoria_id?.vigencia_id;
+            this.actualizarColumnas();
           }
         },
         (error) => {
@@ -89,6 +90,21 @@ export class RegistrarAuditoriasComponent implements OnInit {
       );
   }
 
+  actualizarColumnas(): void {
+    this.displayedColumns = [
+      "no",
+      "auditoria",
+      "tipoEvaluacion",
+      "cronograma",
+      "estado",
+    ];
+  
+    // Agrega la columna de acciones solo si mostrarBotones es true
+    if (this.mostrarBotones) {
+      this.displayedColumns.push("acciones");
+    }
+  }
+  
   async obtenerEstadoActual(): Promise<void> {
     try {
       const response = await this.planAnualAuditoriaService
@@ -118,7 +134,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
-      const base64File = await this.nuxeoService.obtenerPorUUID("dac4dc08-3034-4f1c-8f7a-8ea799f2703c");
+      const base64File = await this.nuxeoService.obtenerPorUUID(environment.PLANTILLA_CARGUE_MASIVO);
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; 
       const fileName = "plantilla"; 
 
@@ -252,7 +268,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
         descripcion: 'Matriz funcion publica',
         cargaLambda: false,
-        tipoIdReferencia: 6811
+        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
       },
     });
   }
