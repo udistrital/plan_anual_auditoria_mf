@@ -120,13 +120,13 @@ export class CargarArchivoComponent {
         return true;
       } else {
         this.alertService.showErrorAlert(
-          "La respuesta de Lambda no contiene datos válidos."
+          "La respuesta de cargue masivo no contiene datos válidos."
         );
         return false;
       }
     } catch (error) {
       this.alertService.showErrorAlert(
-        "Error al enviar el archivo a Lambda. Por favor, revise el log."
+        "Error al enviar el archivo a cargue masivo. Por favor, revise el log."
       );
       console.error("Error al enviar el archivo al MID", error);
       return false;
