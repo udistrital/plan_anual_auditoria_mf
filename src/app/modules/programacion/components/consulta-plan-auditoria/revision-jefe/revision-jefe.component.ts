@@ -1,18 +1,18 @@
 import { Component, OnInit } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalMotivosRechazoComponent } from "./modal-motivos-rechazo/modal-motivos-rechazo.component";
-import { UserService } from "src/app/core/services/user.service";
-import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
-import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import { NuxeoService } from "src/app/core/services/nuxeo.service";
-import { GestorDocumentalService } from "src/app/core/services/gestor-documental.service";
 import {ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+
+//servicios
+import { AlertService } from "src/app/shared/services/alert.service";
+import { UserService } from "src/app/core/services/user.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
-import * as JSZip from 'jszip'; 
-import { saveAs } from 'file-saver'; 
+import { DescargaService } from "src/app/shared/services/descarga.service";
 
 @Component({
   selector: "app-revision-jefe",
@@ -40,6 +40,7 @@ export class RevisionJefeComponent implements OnInit {
     private nuxeoService: NuxeoService,
     private userService: UserService,
     private router: Router,
+    private descargaService: DescargaService,
   ) {}
 
   async ngOnInit() {
@@ -181,28 +182,10 @@ export class RevisionJefeComponent implements OnInit {
       console.error("Error al renderizar los documentos:", error);
     }
   }
-
+  
   async descargarTodo() {
-    const zip = new JSZip();
-    const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
-    const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
-
     try {
-      this.documentos.forEach((doc, index) => {
-        let fileName = `documento_${index + 1}.pdf`;
-
-        // Nombres específicos según tipo_id
-        if (doc.tipo_id === tipoIdPAA) {
-          fileName = `plan_anual_auditoria.pdf`;
-        } else if (doc.tipo_id === tipoIdMatrizPublica) {
-          fileName = `matriz_funcion_publica.pdf`;
-        }
-
-        zip.file(fileName, doc.base64, { base64: true });
-      });
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      saveAs(zipBlob, "documentosPAA.zip");
+      await this.descargaService.descargarMultiplesArchivos( this.documentos, 'documentosPAA.zip');
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }

@@ -34,7 +34,7 @@ import { ModalRechazoAuditoriaComponent } from "./components/auditorias-internas
     PlaneacionRoutingModule,
     MaterialModule,
     ReactiveFormsModule,
-    SharedModule,
+    SharedModule
   ],
 })
 export class PlaneacionModule {}

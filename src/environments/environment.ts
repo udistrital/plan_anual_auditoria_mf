@@ -7,12 +7,15 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
-  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
+  PLAN_ANUAL_AUDITORIA_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_MID: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
+  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:3001/",
 
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
+
+  PLANTILLA_CARGUE_MASIVO: "f0c3d702-b5e8-46ff-8f0b-0c9c7511276c",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
@@ -71,6 +74,10 @@ export const environment = {
     CARGOS_LIDER_ID: 150,
     CARGOS_RESPONSABLE_ID: 151,
   },
+
+
+  ROLES_CONSULTA: ['JEFE_CONTROL_INTERNO'],
+  ROLES_CONSULTA_EDICION: ['ADMIN_SISIFO', 'AUDITOR_EXPERTO']
 
   // idsCamposFormulario: {
   //   Objetivo: 6770,
