@@ -18,7 +18,7 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
-import { establecerCamposSecuenciales } from "src/app/shared/utils/formularios";
+import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -43,6 +43,7 @@ export class EditarAuditoriaComponent implements OnInit {
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
   tipoSeleccionado: "macroproceso" | "proceso" | null = null;
+  procesoElegido = 0;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -69,7 +70,7 @@ export class EditarAuditoriaComponent implements OnInit {
       }
     });
 
-    establecerCamposSecuenciales(this.formularioInformacionComponent, [
+    establecerSelectsSecuenciales(this.formularioInformacionComponent, [
       "tipo",
       "proceso",
       "lider",
@@ -239,13 +240,13 @@ export class EditarAuditoriaComponent implements OnInit {
     });
 
     if (this.auditoria.tipo_id) {
-      this.manejarCambioSelectTipo(this.auditoria.tipo_id);
+      this.manejarCambioTipo(this.auditoria.tipo_id);
 
       if (this.auditoria.macroproceso) {
-        this.manejarCambioSelectProceso(this.auditoria.macroproceso);
+        this.manejarCambioProceso(this.auditoria.macroproceso);
 
         if (this.auditoria.lider_id) {
-          this.manejarCambioSelectLider(this.auditoria.lider_id);
+          this.manejarCambioLider();
         }
       }
     }
@@ -258,172 +259,94 @@ export class EditarAuditoriaComponent implements OnInit {
     });
   }
 
-  private readonly selectActions: { [key: string]: (valor: any) => void } = {
-    tipo: (valor) => this.manejarCambioSelectTipo(valor),
-    proceso: (valor) => this.manejarCambioSelectProceso(valor),
-    lider: (valor) => this.manejarCambioSelectLider(valor),
+  private readonly selectActions: Record<string, (valor: any) => void> = {
+    tipo: (valor) => this.manejarCambioTipo(valor),
+    proceso: (valor) => this.manejarCambioProceso(valor),
+    lider: () => this.manejarCambioLider(),
   };
 
   manejarCambioSelect(event: any): void {
-    const action = this.selectActions[event.campo.nombre];
-    if (action) {
-      action(event.valor);
-    }
+    this.selectActions[event.campo.nombre]?.(event.valor);
   }
 
-  manejarCambioSelectTipo(tipoProcesoId: any) {
-    const valores = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
-    if (tipoProcesoId == valores.MACROPROCESO.PARAMETRO_ID) {
+  manejarCambioTipo(tipoProcesoId: any) {
+    const { MACROPROCESO, PROCESO } =
+      environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
+
+    this.tipoSeleccionado = null;
+    if (tipoProcesoId === MACROPROCESO.PARAMETRO_ID) {
       this.tipoSeleccionado = "macroproceso";
-      this.cargarMacropocesos();
-    } else if (tipoProcesoId == valores.PROCESO.PARAMETRO_ID) {
+    } else if (tipoProcesoId === PROCESO.PARAMETRO_ID) {
       this.tipoSeleccionado = "proceso";
-      this.cargarProcesos();
     }
+
+    const tipoParametroId =
+      this.tipoSeleccionado === "macroproceso"
+        ? MACROPROCESO.TIPO_PARAMETRO_ID
+        : PROCESO.TIPO_PARAMETRO_ID;
+
+    this.cargarOpciones("proceso", tipoParametroId);
   }
 
-  cargarMacropocesos() {
-    const macroprocesoId =
-      environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO
-        .TIPO_PARAMETRO_ID;
-
-    let macroprocesos: any[] = [];
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${macroprocesoId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        macroprocesos = res.Data;
-
-        // Actualiza las opciones del select 'proceso'
-        const selectProceso = this.formularioInformacion!.campos!.find(
-          (campo) => campo.nombre === "proceso"
-        );
-        selectProceso!.parametros!.opciones = macroprocesos;
-      });
-  }
-
-  cargarProcesos() {
-    const procesoId =
-      environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO
-        .TIPO_PARAMETRO_ID;
-
-    let procesos: any[] = [];
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${procesoId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        procesos = res.Data;
-
-        // Actualiza las opciones del select 'proceso'
-        const selectProceso = this.formularioInformacion!.campos!.find(
-          (campo) => campo.nombre === "proceso"
-        );
-        selectProceso!.parametros!.opciones = procesos;
-      });
-  }
-
-  procesoElegido = 0;
-  manejarCambioSelectProceso(procesoId: number) {
+  manejarCambioProceso(procesoId: number) {
     this.procesoElegido = procesoId;
-    if (this.tipoSeleccionado == "macroproceso") {
-      this.cargarCargosLiderMacroproceso(procesoId);
-    } else if (this.tipoSeleccionado == "proceso") {
-      this.cargarCargosLiderProceso(procesoId);
-    }
+    this.cargarCargosLider("lider", procesoId);
   }
 
-  cargarCargosLiderMacroproceso(procesoId: number) {
-    const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
+  manejarCambioLider() {
+    this.cargarCargosResponsable("responsable");
+  }
 
-    let cargosLider: any[] = [];
-
+  cargarOpciones(campoNombre: string, tipoParametroId: number) {
     this.parametrosService
       .get(
-        `parametro?query=TipoParametroId:${cargosLiderId},ParametroPadreId.ParametroPadreId.Id:${procesoId}&limit=0&fields=Id,Nombre&sortby=Nombre&order=asc`
+        `parametro?query=TipoParametroId:${tipoParametroId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
       )
       .subscribe((res) => {
-        cargosLider = res.Data;
-
-        // Actualiza las opciones del select 'lider'
-        const selectLider = this.formularioInformacion!.campos!.find(
-          (campo) => campo.nombre === "lider"
-        );
-        selectLider!.parametros!.opciones = cargosLider;
+        const campo = this.obtenerCampoFormulario(campoNombre);
+        if (campo) campo.parametros!.opciones = res.Data;
       });
   }
 
-  cargarCargosLiderProceso(procesoId: number) {
+  cargarCargosLider(campoNombre: string, procesoId: number) {
     const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
-
-    let cargosLider: any[] = [];
+    const query =
+      this.tipoSeleccionado === "macroproceso"
+        ? `ParametroPadreId.ParametroPadreId.Id:${procesoId}`
+        : `ParametroPadreId:${procesoId}`;
 
     this.parametrosService
       .get(
-        `parametro?query=TipoParametroId:${cargosLiderId},ParametroPadreId:${procesoId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
+        `parametro?query=TipoParametroId:${cargosLiderId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
       )
       .subscribe((res) => {
-        cargosLider = res.Data;
-
-        // Actualiza las opciones del select 'lider'
-        const selectLider = this.formularioInformacion!.campos!.find(
-          (campo) => campo.nombre === "lider"
-        );
-        selectLider!.parametros!.opciones = cargosLider;
+        const campo = this.obtenerCampoFormulario(campoNombre);
+        if (campo) campo.parametros!.opciones = res.Data;
       });
   }
 
-  manejarCambioSelectLider(procesoId: number) {
-    console.log(procesoId);
-    if (this.tipoSeleccionado == "macroproceso") {
-      this.cargarCargosResponsableMacroproceso(procesoId);
-    } else if (this.tipoSeleccionado == "proceso") {
-      this.cargarCargosResponsableProceso(procesoId);
-    }
-  }
-
-  cargarCargosResponsableMacroproceso(procesoId: number) {
+  cargarCargosResponsable(campoNombre: string) {
     const cargosResponsableId =
       environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
-
-    let cargosResponsable: any[] = [];
+    const query =
+      this.tipoSeleccionado === "macroproceso"
+        ? `ParametroPadreId.ParametroPadreId.Id:${this.procesoElegido}`
+        : `ParametroPadreId:${this.procesoElegido}`;
 
     this.parametrosService
       .get(
-        `parametro?query=TipoParametroId:${cargosResponsableId},ParametroPadreId.ParametroPadreId.Id:${this.procesoElegido}&limit=0&fields=Id,Nombre&sortby=Nombre&order=asc`
+        `parametro?query=TipoParametroId:${cargosResponsableId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
       )
       .subscribe((res) => {
-        cargosResponsable = res.Data;
-
-        // Actualiza las opciones del select 'responsable'
-        const selectLider = this.formularioInformacion!.campos!.find(
-          (campo) => campo.nombre === "responsable"
-        );
-        selectLider!.parametros!.opciones = cargosResponsable;
+        const campo = this.obtenerCampoFormulario(campoNombre);
+        console.log(res.Data);
+        if (campo) campo.parametros!.opciones = res.Data;
       });
   }
 
-  cargarCargosResponsableProceso(procesoId: number) {
-    const cargosResponsableId =
-      environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
-
-    let cargosResponsable: any[] = [];
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${cargosResponsableId},ParametroPadreId:${this.procesoElegido}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        cargosResponsable = res.Data;
-
-        // Actualiza las opciones del select 'responsable'
-        const selectLider = this.formularioInformacion!.campos!.find(
-          (campo) => campo.nombre === "responsable"
-        );
-        selectLider!.parametros!.opciones = cargosResponsable;
-      });
+  obtenerCampoFormulario(nombreCampo: string) {
+    return this.formularioInformacion?.campos?.find(
+      (campo) => campo.nombre === nombreCampo
+    );
   }
 }

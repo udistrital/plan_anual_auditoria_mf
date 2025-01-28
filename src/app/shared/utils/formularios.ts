@@ -1,7 +1,7 @@
 import { FormularioDinamicoComponent } from "../elements/components/formulario-dinamico/formulario-dinamico.component";
 
 /**
- * Establece la lógica de campos secuenciales en un formulario dinámico
+ * Establece la lógica de selects secuenciales en un formulario dinámico
  * @param formComponent - Instancia del FormularioDinamicoComponent
  * @param sequentialFields - Array con los nombres de los campos en orden secuencial
  *
@@ -11,7 +11,7 @@ import { FormularioDinamicoComponent } from "../elements/components/formulario-d
  *   ['tipo', 'proceso', 'lider', 'responsable']
  * );
  */
-export function establecerCamposSecuenciales(
+export function establecerSelectsSecuenciales(
   formComponent: FormularioDinamicoComponent,
   sequentialFields: string[]
 ) {
