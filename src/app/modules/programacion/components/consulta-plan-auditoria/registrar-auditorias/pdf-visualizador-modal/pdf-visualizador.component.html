@@ -1,19 +1,29 @@
-<button mat-icon-button class="close-button" [mat-dialog-close]>
-  <mat-icon color="primary" class="btn">close</mat-icon>
-</button>
-<div  *ngIf="pdfLoaded">
- 
-  <pdf-viewer [src]="pdfSrc"
-              [render-text]="true"
-              [original-size]="false"
-              [show-all]="true"
-              [zoom]="1.0"
+<plantilla-modal 
+    [icono]="'list_alt'"
+    [titulo]="'Ver PAA'"
+    [descripcion]="'Plan Anual de Auditoria'"
+    [contenido]="contenidoDeModal"
+    [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row">
+      <div class="col-12">
+          <div class="d-flex flex-row-reverse my-2">
+              <button mat-button color="primary" (click)="descargarPDF()">
+                Descargar PDF <mat-icon> insert_drive_file</mat-icon>
+              </button>
+          </div>
+          <div *ngIf="pdfLoaded">
+            <pdf-viewer [src]="pdfSrc" [render-text]="true" [original-size]="false" [show-all]="true" [zoom]="1.0"
               class="pdf-container"
-              style="min-width: 200px; min-height: 550px; width: 100%; height: auto; margin-top: 60px;"
-  ></pdf-viewer>
-  <div class="footer">
-    <button mat-raised-button color="primary" (click)="guardarPdf()" >
-      Guardar
-    </button>
+              style="min-width: 200px; min-height: 520px; width: 100%; height: auto;"></pdf-viewer>
+          </div>
+      </div>
   </div>
-</div>
+</ng-template>
+<ng-template #footerDeModal>
+  <button mat-raised-button color="primary" (click)="guardarPdf()">
+    Guardar
+  </button>
+</ng-template>

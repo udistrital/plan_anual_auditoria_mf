@@ -6,12 +6,14 @@ import {
   Inject,
 } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { NuxeoService } from "src/app/core/services/nuxeo.service";
-import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
 import { environment } from "src/environments/environment";
 
+//servicios
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { DescargaService } from "src/app/shared/services/descarga.service";
 
 @Component({
   selector: "app-modal-pdf-visualizador",
@@ -31,6 +33,8 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     private nuxeoService: NuxeoService,
     private alertService: AlertService,
     private referenciaPdfService: ReferenciaPdfService,
+    private descargaService: DescargaService,
+    private alertaService: AlertService,
   ) { }
 
   ngOnInit() {
@@ -102,4 +106,18 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     }
   }
   
+
+  async descargarPDF(): Promise<void> {
+    try {
+      const base64File = this.data.base64Document;
+      await this.descargaService.descargarArchivo(
+        base64File,
+        'application/pdf',
+        'Plan Anual de Auditoria'
+      );
+    } catch (error) {
+      console.error("Error al descargar el PAA:", error);
+      this.alertaService.showErrorAlert("Error al descargarel el PAA");
+    }
+  }
 }
