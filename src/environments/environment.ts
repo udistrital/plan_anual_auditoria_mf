@@ -50,7 +50,10 @@ export const environment = {
     PLAN_ANUAL_AUDITORIA: 6810,
   },
 
-  
+
+  ROLES_CONSULTA: ['JEFE_CONTROL_INTERNO'],
+  ROLES_CONSULTA_EDICION: ['ADMIN_SISIFO', 'AUDITOR_EXPERTO']
+
 
   // idsCamposFormulario: {
   //   Objetivo: 6770,
