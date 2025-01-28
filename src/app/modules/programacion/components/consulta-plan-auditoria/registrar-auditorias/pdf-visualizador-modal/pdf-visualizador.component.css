@@ -1,16 +1,3 @@
-.close-button {
-    padding: 1px;
-    position: absolute;
-    right: 16px;
-    top: 16px;
-}
-
-.footer {
-    display: flex;
-    margin-top: 16px;
-    justify-content: center;
-}
-
 .pdf-container {
     background-color: #f3f3f3; 
   }
