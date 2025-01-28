@@ -48,6 +48,31 @@ export const environment = {
     ACTA_COMITE_COORDINADOR: 6820,
     MATRIZ_FUNCION_PUBLICA: 6811,
     PLAN_ANUAL_AUDITORIA: 6810,
+    PROGRAMA_TRABAJO: 6812,
+    SOLICITUD_INFORMACION: 6813,
+    CARTA_PRESENTACION: 6814,
+    COMPROMISO_ETICO: 6815,
+  },
+
+  INFO_AUDITORIA: {
+    TIPOS_PROCESO: {
+      ID: 140,
+      VALORES: {
+        MACROPROCESO: {
+          PARAMETRO_ID: 6796,
+          TIPO_PARAMETRO_ID: 148,
+        },
+        PROCESO: {
+          PARAMETRO_ID: 6797,
+          TIPO_PARAMETRO_ID: 149,
+        },
+        DEPENDENCIA: {
+          PARAMETRO_ID: 6798,
+        },
+      },
+    },
+    CARGOS_LIDER_ID: 150,
+    CARGOS_RESPONSABLE_ID: 151,
   },
 
 

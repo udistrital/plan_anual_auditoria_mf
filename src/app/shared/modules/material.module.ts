@@ -17,6 +17,7 @@ import { MatStepperModule } from "@angular/material/stepper";
 import { MatTableModule } from "@angular/material/table";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatListModule } from "@angular/material/list";
+import { MatTooltipModule } from "@angular/material/tooltip";
 
 @NgModule({
   exports: [
@@ -38,6 +39,7 @@ import { MatListModule } from "@angular/material/list";
     MatSortModule,
     MatStepperModule,
     MatTableModule,
+    MatTooltipModule,
     MatListModule,
   ],
 })

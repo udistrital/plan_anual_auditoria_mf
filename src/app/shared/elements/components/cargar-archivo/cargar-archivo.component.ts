@@ -1,8 +1,8 @@
-import { PlanAnualAuditoriaMid } from './../../../../core/services/plan-anual-auditoria-mid.service';
+import { PlanAnualAuditoriaMid } from "./../../../../core/services/plan-anual-auditoria-mid.service";
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
-import { ModalService } from 'src/app/shared/services/modal.service';
+import { ModalService } from "src/app/shared/services/modal.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
@@ -23,7 +23,8 @@ export class CargarArchivoComponent {
     private modalService: ModalService,
     private referenciaPdfService: ReferenciaPdfService,
 
-    @Inject(MAT_DIALOG_DATA) public data: {
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
       tipoArchivo: string;
       idTipoDocumento: number;
       descripcion: string;
@@ -33,7 +34,7 @@ export class CargarArchivoComponent {
       tipo: string;
       tipoIdReferencia: number;
     }
-  ) { }
+  ) {}
 
   onArchivoSelecionado(event: any): void {
     const input = event.target as HTMLInputElement;
@@ -43,10 +44,12 @@ export class CargarArchivoComponent {
       if (
         (this.data.tipoArchivo === "pdf" && file.type !== "application/pdf") ||
         (this.data.tipoArchivo === "xlsx" &&
-          file.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
+          file.type !==
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
       ) {
-        alert("Por favor seleccione un archivo válido según el tipo especificado.");
+        alert(
+          "Por favor seleccione un archivo válido según el tipo especificado."
+        );
         this.removerArchivo();
         return;
       }
@@ -70,19 +73,29 @@ export class CargarArchivoComponent {
       return;
     }
 
-
     if (this.data.cargaLambda) {
-      this.cargarConLambda().then(success => {
+      this.cargarConLambda().then((success) => {
         if (success) {
-          this.cargarConNuxeo().then(nuxeoResponse => {
-            this.guardarReferencia(nuxeoResponse, "Plan Auditoria",this.data.id, 0, false);
-
+          this.cargarConNuxeo().then((nuxeoResponse) => {
+            this.guardarReferencia(
+              nuxeoResponse,
+              "Plan Auditoria",
+              this.data.id,
+              0,
+              false
+            );
           });
         }
       });
     } else {
-      this.cargarConNuxeo().then(nuxeoResponse => {
-        this.guardarReferencia(nuxeoResponse, "Plan Auditoria", this.data.id, this.data.tipoIdReferencia, true);
+      this.cargarConNuxeo().then((nuxeoResponse) => {
+        this.guardarReferencia(
+          nuxeoResponse,
+          "Plan Auditoria",
+          this.data.id,
+          this.data.tipoIdReferencia,
+          true
+        );
       });
     }
   }
@@ -90,14 +103,17 @@ export class CargarArchivoComponent {
   private async cargarConLambda(): Promise<boolean> {
     try {
       const base64 = await this.nuxeoService.fileABase64(this.archivo!);
-      console.log("vigencia Masivo",  this.data.vigenciaId);
+      console.log("vigencia Masivo", this.data.vigenciaId);
 
       let payload: any = {};
       switch (this.data.tipo) {
         case "auditorias":
           payload = {
             base64data: base64,
-            complement: { plan_auditoria_id: this.data.id, vigencia_id: this.data.vigenciaId },
+            complement: {
+              plan_auditoria_id: this.data.id,
+              vigencia_id: this.data.vigenciaId,
+            },
             type_upload: "auditorias",
           };
           break;
@@ -110,9 +126,10 @@ export class CargarArchivoComponent {
           break;
       }
 
-      const response: any = await this.PlanAnualAuditoriaMid
-        .post(`cargue-masivo/${this.data.tipo}`, payload)
-        .toPromise();
+      const response: any = await this.PlanAnualAuditoriaMid.post(
+        `cargue-masivo/${this.data.tipo}`,
+        payload
+      ).toPromise();
 
       if (response && response.Data) {
         console.log("Archivo enviado exitosamente al MID", response);
@@ -157,15 +174,28 @@ export class CargarArchivoComponent {
     });
   }
 
-  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, referencia_id: string, tipo_id: number, mostrarMensaje: boolean): void {
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number,
+    mostrarMensaje: boolean
+  ): void {
     if (nuxeoResponse.res.Enlace) {
       this.referenciaPdfService
-        .guardarReferencia(nuxeoResponse.res, referencia_tipo, referencia_id, tipo_id)
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id
+        )
         .subscribe({
           next: (response) => {
             console.log("Referencia guardada exitosamente", response);
             if (mostrarMensaje) {
-              this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+              this.alertService.showSuccessAlert(
+                "Archivo subido exitosamente."
+              );
             }
           },
           error: (error) => {
@@ -188,10 +218,9 @@ export class CargarArchivoComponent {
 
     if (data.Correctos?.length > 0) {
       mensaje += `<br><strong>Registros correctos:</strong><ul>`;
-      mensaje += data.Correctos.join(", ") + '<br><br>';
+      mensaje += data.Correctos.join(", ") + "<br><br>";
     }
 
-    this.modalService.mostrarModal(mensaje, 'warning', '');
+    this.modalService.mostrarModal(mensaje, "warning", "");
   }
-
 }

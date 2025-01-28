@@ -59,31 +59,35 @@ export class ModalPdfVisualizadorComponent implements OnInit {
   }
 
   base64ToArrayBuffer(base64: string): ArrayBuffer {
-    const binaryString = window.atob(base64); 
+    const binaryString = window.atob(base64);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
     for (let i = 0; i < len; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
-    return bytes.buffer; 
+    return bytes.buffer;
   }
-
 
   guardarPdf() {
     if (this.base64 !== "") {
       const payload = {
-          IdTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-          nombre: this.data.id, 
-          descripcion: "Documento pdf, auditorias de plan de auditoria",
-          metadatos: {},
-          file: this.base64,
-      }
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+        nombre: this.data.id,
+        descripcion: "Documento pdf, auditorias de plan de auditoria",
+        metadatos: {},
+        file: this.base64,
+      };
 
       this.nuxeoService.guardarArchivos([payload]).subscribe({
         next: (response: any) => {
           const documento = response[0];
           console.log("Documento subido exitosamente", documento);
-          this.guardarReferencia(documento, "Plan Auditoria", this.data.id, 6810);
+          this.guardarReferencia(
+            documento,
+            "Plan Auditoria",
+            this.data.id,
+            6810
+          );
         },
         error: (error) => {
           console.error("Error al subir el documento", error);
@@ -92,20 +96,31 @@ export class ModalPdfVisualizadorComponent implements OnInit {
     }
   }
 
-  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, referencia_id: string , tipo_id: number): void {
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number
+  ): void {
     if (nuxeoResponse.res.Enlace) {
-      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, referencia_id, tipo_id).subscribe({
-        next: (response) => {
-          console.log("Referencia guardada exitosamente", response);
-          this.alertService.showSuccessAlert("Archivo subido exitosamente.");
-        },
-        error: (error) => {
-          console.error("Error al guardar la referencia", error);
-        },
-      });
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id
+        )
+        .subscribe({
+          next: (response) => {
+            console.log("Referencia guardada exitosamente", response);
+            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+          },
+          error: (error) => {
+            console.error("Error al guardar la referencia", error);
+          },
+        });
     }
   }
-  
 
   async descargarPDF(): Promise<void> {
     try {

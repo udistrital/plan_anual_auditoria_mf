@@ -88,7 +88,10 @@
       >
         <mat-label>{{ campo.etiqueta }}</mat-label>
         <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <mat-select [formControlName]="campo.nombre">
+        <mat-select
+          [formControlName]="campo.nombre"
+          (selectionChange)="onSelectionChange($event, campo)"
+        >
           <mat-option
             *ngFor="let opcion of campo.parametros?.opciones || []"
             [value]="opcion.Id"
