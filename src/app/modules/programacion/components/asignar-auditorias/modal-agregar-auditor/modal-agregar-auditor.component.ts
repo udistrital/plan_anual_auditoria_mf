@@ -281,8 +281,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
             });
             const formData = {
               titulo: this.form.value.tituloAuditoria,
-              tipo_evaluacion_id: this.form.value.tipoEvaluacion,
-              cronograma_id: this.form.value.cronogramaActividades,
+              tipo_evaluacion_id: this.data.auditoria?.tipo_evaluacion_id,
+              cronograma_id: this.data.auditoria?.cronograma_id,
               //auditores: auditoresSeleccionados
             };
 

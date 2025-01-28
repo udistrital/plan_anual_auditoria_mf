@@ -86,7 +86,7 @@ export class TablaConsultaAuditoriasComponent {
       }
   
       const auditoresRequests = auditorias.map((auditoria) =>
-        this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria._id}`)
+        this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria._id},activo:true`)
       );
   
       forkJoin(auditoresRequests).subscribe((auditoresResponses) => {
@@ -113,7 +113,7 @@ export class TablaConsultaAuditoriasComponent {
     this.auditoriasContructorTabla = colocacionesContructorTabla.filter(column =>{
       return column.columnDef !== 'acciones' || this.permisoEdicion;
     });
-    
+
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
