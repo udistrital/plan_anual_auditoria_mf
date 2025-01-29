@@ -41,8 +41,7 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "list",
       tipo: "select",
       parametros: {
-        urlParametros:
-          "parametro?query=TipoParametroId:140&fields=Id,Nombre&limit=0",
+        urlParametros: `parametro?query=TipoParametroId:${environment.INFO_AUDITORIA.TIPOS_PROCESO.ID}&fields=Id,Nombre&limit=0`,
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
@@ -54,11 +53,7 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "work",
       tipo: "select",
       parametros: {
-        opciones: [
-          { Id: "1", Nombre: "Macroproceso" },
-          { Id: "2", Nombre: "Proceso" },
-          { Id: "3", Nombre: "Dependencia" },
-        ],
+        //vacio porque se llena en el componente editar auditoria
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
@@ -68,8 +63,11 @@ export const formularioInformacionAuditoria: Formulario = {
       nombre: "lider",
       etiqueta: "Líder",
       icono: "person",
-      tipo: "text",
+      tipo: "select",
       validaciones: [{ tipo: "requerido", valor: "" }],
+      parametros: {
+        //vacio porque se llena en el componente editar auditoria
+      },
       deshabilitado: false,
       claseGrid: "col-lg-5 col-md-6 col-sm-12 col-xs-12",
     },
@@ -77,9 +75,12 @@ export const formularioInformacionAuditoria: Formulario = {
       nombre: "responsable",
       etiqueta: "Responsable",
       icono: "supervisor_account",
-      tipo: "text",
+      tipo: "select",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
+      parametros: {
+        //vacio porque se llena en el componente editar auditoria
+      },
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {

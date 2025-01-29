@@ -5,7 +5,7 @@ import { RequestManager } from "../managers/requestManager";
   providedIn: "root",
 })
 export class PlanAnualAuditoriaMid {
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath("PLAN_ANUAL_AUDITORIA_MID");
   }
   get(endpoint: string) {

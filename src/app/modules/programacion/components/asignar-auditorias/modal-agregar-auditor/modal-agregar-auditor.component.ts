@@ -6,7 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
-import { Auditoria } from "src/app/shared/data/models/auditoria-auditor";
+import { auditorEliminar, Auditoria } from "src/app/shared/data/models/auditoria-auditor";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ModalService } from "src/app/shared/services/modal.service";
@@ -32,6 +32,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
   TODOS = "Todos";
   isEditMode = false;
   usuarioId: any;
+  auditorEliminar: auditorEliminar[] = [];
 
   constructor(
     private alertaService: AlertService,
@@ -114,7 +115,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
   eliminarAuditor(index: number) {
     const auditorSeleccionado = this.auditoresSeleccionados.at(index)?.value;
     console.log("Auditor seleccionado para eliminar:", auditorSeleccionado);
-
+    
     this.alertaService
       .showConfirmAlert(`¿Está seguro de eliminar este auditor?`)
       .then((result) => {
@@ -122,12 +123,17 @@ export class ModalAgregarAuditorComponent implements OnInit {
           this.PlanAnualAuditoriaMid.get(
             `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true,auditor_id:${auditorSeleccionado.auditor.id}`
           ).subscribe((res) => {
-            const auditorEliminar = res.Data[0] || null;
-            console.log("auditorEliminar", auditorEliminar);
+            this.auditorEliminar = res.Data.map((item: any) => ({
+              id: item._id,
+              activo: item.activo,
+              id_tercero: item.auditor_id,
+              auditoria_id: item.auditoria_id
+            }));                    
+            const idAuditor = this.auditorEliminar[0];
 
             if (auditorEliminar) {
               this.planAnualAuditoriaService
-                .delete("auditor", auditorEliminar._id)
+                .delete("auditor", idAuditor)
                 .subscribe({
                   next: (deleteResponse: any) => {
                     console.log("Auditor eliminado crud", deleteResponse);
@@ -168,15 +174,21 @@ export class ModalAgregarAuditorComponent implements OnInit {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       console.log("res", res);
       if (res && res.Data) {
-        this.auditores = res.Data.filter(
+        const auditorMap =new Map();
+
+        res.Data.filter(
           (auditor: any) =>
             auditor.finalizado === false &&
             ["AUDITOR", "AUDITOR EXPERTO"].includes(auditor.rol_usuario)
-        ).map((auditor: any) => ({
+        ).forEach((auditor: any) => {
+          auditorMap.set(auditor.id_tercero, {
           nombre: auditor.nombre,
           documento: auditor.documento,
           id: auditor.id_tercero,
-        }));
+        });
+      });
+
+        this.auditores = Array.from(auditorMap.values());
       }
       this.inicializarAuditoresSeleccionados();
       console.log("Auditores", this.auditores);
@@ -269,8 +281,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
             });
             const formData = {
               titulo: this.form.value.tituloAuditoria,
-              tipo_evaluacion_id: this.form.value.tipoEvaluacion,
-              cronograma_id: this.form.value.cronogramaActividades,
+              tipo_evaluacion_id: this.data.auditoria?.tipo_evaluacion_id,
+              cronograma_id: this.data.auditoria?.cronograma_id,
               //auditores: auditoresSeleccionados
             };
 
