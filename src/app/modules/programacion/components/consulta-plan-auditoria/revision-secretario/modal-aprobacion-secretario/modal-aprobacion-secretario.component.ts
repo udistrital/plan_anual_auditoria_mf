@@ -1,5 +1,9 @@
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from "@angular/material/dialog";
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogRef,
+} from "@angular/material/dialog";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -56,7 +60,6 @@ export class ModalAprobacionSecretarioComponent {
     this.fileInput.nativeElement.value = "";
   }
 
-  
   cargarArchivo(): void {
     if (!this.archivo) {
       this.alertService.showErrorAlert("Debe seleccionar un archivo");
@@ -76,7 +79,12 @@ export class ModalAprobacionSecretarioComponent {
     this.nuxeoService.guardarArchivos(payload).subscribe({
       next: (response) => {
         console.log("Archivo cargado exitosamente", response);
-        this.guardarReferencia(response[0], "Plan Auditoria", this.infoModal.planAuditoriaId, 6820);
+        this.guardarReferencia(
+          response[0],
+          "Plan Auditoria",
+          this.infoModal.planAuditoriaId,
+          6820
+        );
         this.aceptarPlanAuditoria();
       },
       error: (error) => {
@@ -86,23 +94,35 @@ export class ModalAprobacionSecretarioComponent {
     });
   }
 
-  guardarReferencia(nuxeoResponse: any, referencia_tipo: string, referencia_id: string, tipo_id: number): void {
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number
+  ): void {
     if (nuxeoResponse.res.Enlace) {
-      this.referenciaPdfService.guardarReferencia(nuxeoResponse.res, referencia_tipo, referencia_id, tipo_id).subscribe({
-        next: (response) => {
-          console.log("Referencia guardada exitosamente", response);
-          this.alertService.showSuccessAlert("Archivo subido exitosamente.");
-        },
-        error: (error) => {
-          console.error("Error al guardar la referencia", error);
-        },
-      });
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id
+        )
+        .subscribe({
+          next: (response) => {
+            console.log("Referencia guardada exitosamente", response);
+            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+          },
+          error: (error) => {
+            console.error("Error al guardar la referencia", error);
+          },
+        });
     }
   }
 
   aceptarPlanAuditoria(): void {
     const planEstado = this.construirObjetoPlanEstado(
-      this.infoModal.planAuditoriaId, 
+      this.infoModal.planAuditoriaId,
       environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
     );
 
@@ -110,9 +130,7 @@ export class ModalAprobacionSecretarioComponent {
       () => {
         this.alertService.showSuccessAlert("Plan aprobado");
         this.dialogRef.close();
-        this.router.navigate([
-          `/programacion/plan-auditoria/`
-        ]);
+        this.router.navigate([`/programacion/plan-auditoria/`]);
       },
       (error) => {
         this.alertService.showErrorAlert("Error al aprobar el plan");
@@ -121,7 +139,11 @@ export class ModalAprobacionSecretarioComponent {
     );
   }
 
-  construirObjetoPlanEstado(planId: string, estadoId: number, observacion = "") {
+  construirObjetoPlanEstado(
+    planId: string,
+    estadoId: number,
+    observacion = ""
+  ) {
     return {
       plan_auditoria_id: planId,
       usuario_id: this.infoModal.usuarioId,

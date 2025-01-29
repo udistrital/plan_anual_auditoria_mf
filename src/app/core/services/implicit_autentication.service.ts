@@ -1,7 +1,7 @@
  
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
- 
+import { environment } from 'src/environments/environment';
  
 @Injectable({
     providedIn: 'root',
@@ -13,7 +13,10 @@ export class ImplicitAutenticationService {
     payload: any;
     timeActiveAlert: number = 4000;
     isLogin = false;
- 
+  
+    rolesConsulta = environment.ROLES_CONSULTA;
+    rolesEdicion = environment.ROLES_CONSULTA_EDICION;
+
     private userSubject = new BehaviorSubject({});
     public user$ = this.userSubject.asObservable();
  
@@ -66,4 +69,12 @@ export class ImplicitAutenticationService {
         });
         return rolePromise;
     }
+
+    public PermisoEdicion(roles: string[]): boolean {
+        return roles.some(rol =>this.rolesEdicion.includes(rol));
+      }
+    
+      public PermisoConsulta(roles: string[]): boolean {
+        return roles.some(rol =>this.rolesConsulta.includes(rol));
+      }
 }

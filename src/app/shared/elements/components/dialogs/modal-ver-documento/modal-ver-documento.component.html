@@ -28,4 +28,15 @@
   >
     <mat-icon>toll</mat-icon>Regresar
   </button>
+  <button
+    mat-raised-button
+    color="primary"
+    [mat-dialog-close]
+    class="my-3"
+    *ngIf="botonGuardar.texto"
+    (click)="guardar()"
+  >
+    <mat-icon>{{ botonGuardar.icono }}</mat-icon
+    >{{ botonGuardar.texto }}
+  </button>
 </ng-template>

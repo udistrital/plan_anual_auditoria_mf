@@ -10,6 +10,7 @@ import { colocacionesContructorTabla } from "./tabla-consulta-auditorias.utilida
 import { MatSort } from "@angular/material/sort";
 import { ModalAgregarAuditorComponent } from "../modal-agregar-auditor/modal-agregar-auditor.component";
 import { forkJoin } from "rxjs";
+import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 
 @Component({
   selector: "app-tabla-consulta-auditorias",
@@ -31,14 +32,32 @@ export class TablaConsultaAuditoriasComponent {
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
+  permisoEdicion: boolean = false;
+  permisoConsulta: boolean = false;
 
   constructor(
     private alertaService: AlertService,
+    private autenticacionService: ImplicitAutenticationService,
     private changeDetector: ChangeDetectorRef,
     private dialog: MatDialog,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
     private router: Router
   ) {}
+
+  ngOnInit() {
+    this.autenticacionService
+      .getRole()
+      .then((roles) => {
+        this.permisoEdicion = this.autenticacionService.PermisoEdicion(roles as string[]);
+        console.log('Permiso de edición:', this.permisoEdicion);
+        this.permisoConsulta = this.autenticacionService.PermisoConsulta(roles as string[]);
+        console.log('Permiso de consulta:', this.permisoConsulta);
+        
+      })
+      .catch((error) => {
+        console.error('Error al obtener los roles del usuario:', error);
+      });
+  }
 
   
   listarAuditoriasPorVigencia(
@@ -49,9 +68,8 @@ export class TablaConsultaAuditoriasComponent {
     this.auditoriasPorVigencia = [];
   
     const auditorias$ = this.planAuditoriaMid.get(
-      `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
+      `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}&auditores`
     );
-  
     auditorias$.subscribe((res) => {
       const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
       console.log("Consulta aud Mid: ", auditorias);
@@ -66,23 +84,16 @@ export class TablaConsultaAuditoriasComponent {
         return;
       }
   
-      const auditoresRequests = auditorias.map((auditoria) =>
-        this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria._id}`)
-      );
-  
-      forkJoin(auditoresRequests).subscribe((auditoresResponses) => {
-        
-        auditorias.forEach((auditoria, index) => {
-          auditoria.auditores = Array.isArray(auditoresResponses[index]?.Data)
-            ? auditoresResponses[index].Data
-            : [];
-        });
-  
-        this.auditoriasPorVigencia = auditorias;
-        this.totalRegistros = res.MetaData?.Count ?? 0;
-        this.banderaTablaAuditoriasInternas = true;
-        this.construirTabla();
+      auditorias.forEach((auditoria) => {
+        auditoria.auditores = Array.isArray(auditoria.auditores)
+          ? auditoria.auditores
+          : [];
       });
+
+      this.auditoriasPorVigencia = auditorias;
+      this.totalRegistros = res.MetaData?.Count ?? 0;
+      this.banderaTablaAuditoriasInternas = true;
+      this.construirTabla();
     }, 
     (error) => {
       console.error("Error al cargar auditorías:", error);
@@ -91,7 +102,10 @@ export class TablaConsultaAuditoriasComponent {
   }
 
   construirTabla() {
-    this.auditoriasContructorTabla = colocacionesContructorTabla;
+    this.auditoriasContructorTabla = colocacionesContructorTabla.filter(column =>{
+      return column.columnDef !== 'acciones' || this.permisoEdicion;
+    });
+
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
