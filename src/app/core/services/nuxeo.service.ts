@@ -1,30 +1,26 @@
 import { Injectable } from "@angular/core";
 import { RequestManager } from "../managers/requestManager";
 import { GestorDocumentalService } from "./gestor-documental.service";
-import { Subject, lastValueFrom, forkJoin } from 'rxjs';
+import { Subject, lastValueFrom, forkJoin } from "rxjs";
 import { Documento } from "src/app/shared/data/models/documento/documento";
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
 })
-
 export class NuxeoService {
-
-  constructor(
-    private gestorDocumentalService: GestorDocumentalService,
-  ) { }
+  constructor(private gestorDocumentalService: GestorDocumentalService) {}
 
   obtenerUrlFile(base64: any, minetype: any) {
     return new Promise<string>((resolve, reject) => {
       const url = `data:${minetype};base64,${base64}`;
       fetch(url)
-        .then(res => res.blob())
-        .then(blob => {
-          const file = new File([blob], "File name", { type: minetype })
+        .then((res) => res.blob())
+        .then((blob) => {
+          const file = new File([blob], "File name", { type: minetype });
           const url = URL.createObjectURL(file);
           resolve(url);
-        })
+        });
     });
   }
 
@@ -33,13 +29,13 @@ export class NuxeoService {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
-        let encoded = reader.result!.toString().replace(/^data:(.*,)?/, '');
-        if ((encoded.length % 4) > 0) {
-          encoded += '='.repeat(4 - (encoded.length % 4));
+        let encoded = reader.result!.toString().replace(/^data:(.*,)?/, "");
+        if (encoded.length % 4 > 0) {
+          encoded += "=".repeat(4 - (encoded.length % 4));
         }
         resolve(encoded);
       };
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   }
 
@@ -53,7 +49,7 @@ export class NuxeoService {
       let fileData: any;
 
       // Detectar si el archivo ya está en formato Base64
-      if (typeof file.file === 'string') {
+      if (typeof file.file === "string") {
         fileData = file.file; // Ya es Base64
       } else if (file.file instanceof File) {
         fileData = await this.fileABase64(file.file); // Convertir a Base64
@@ -61,15 +57,18 @@ export class NuxeoService {
         throw new Error("Formato de archivo no soportado");
       }
 
-      const sendFileData = [{
-        IdTipoDocumento: file.IdTipoDocumento,
-        nombre: file.nombre.replace(/[\.]/g),
-        metadatos: file.metadatos ? file.metadatos : {},
-        descripcion: file.descripcion ? file.descripcion : "",
-        file: fileData
-      }];
+      const sendFileData = [
+        {
+          IdTipoDocumento: file.IdTipoDocumento,
+          nombre: file.nombre.replace(/[\.]/g),
+          metadatos: file.metadatos ? file.metadatos : {},
+          descripcion: file.descripcion ? file.descripcion : "",
+          file: fileData,
+        },
+      ];
 
-      this.gestorDocumentalService.postAny('document/uploadAnyFormat', sendFileData)
+      this.gestorDocumentalService
+        .postAny("document/uploadAnyFormat", sendFileData)
         .subscribe((dataResponse) => {
           documentos.push(dataResponse);
           if (documentos.length === files.length) {
@@ -87,19 +86,24 @@ export class NuxeoService {
         this.gestorDocumentalService.get(`document/${uuid}`).pipe(
           map((response) => {
             if (!response?.file) {
-              throw new Error('El campo "file" no se encontró en la respuesta.');
+              throw new Error(
+                'El campo "file" no se encontró en la respuesta.'
+              );
             }
             return response.file;
           }),
           catchError((error) => {
-            console.error(`Error al obtener el documento con UUID ${uuid}:`, error);
-            return ''; // Retorna un string vacío en caso de error
+            console.error(
+              `Error al obtener el documento con UUID ${uuid}:`,
+              error
+            );
+            return ""; // Retorna un string vacío en caso de error
           })
         )
       );
       return response;
     } catch (error) {
-      console.error('Error en getByUUID:', error);
+      console.error("Error en getByUUID:", error);
       throw error;
     }
   }
@@ -110,24 +114,28 @@ export class NuxeoService {
         this.gestorDocumentalService.get(`document/${uuid}`).pipe(
           map((response) => {
             if (!response?.file) {
-              throw new Error('El campo "file" no se encontró en la respuesta.');
+              throw new Error(
+                'El campo "file" no se encontró en la respuesta.'
+              );
             }
             return response.file;
           }),
           catchError((error) => {
-            console.error(`Error al obtener el documento con UUID ${uuid}:`, error);
-            return ''; 
+            console.error(
+              `Error al obtener el documento con UUID ${uuid}:`,
+              error
+            );
+            return "";
           })
         )
       );
-  
+
       // Combina todas las promesas en un solo arreglo
       const results = await lastValueFrom(forkJoin(requests));
       return results as string[]; // Devuelve un arreglo de archivos en Base64
     } catch (error) {
-      console.error('Error en obtenerPorUUIDss:', error);
+      console.error("Error en obtenerPorUUIDss:", error);
       throw error;
     }
   }
-
 }

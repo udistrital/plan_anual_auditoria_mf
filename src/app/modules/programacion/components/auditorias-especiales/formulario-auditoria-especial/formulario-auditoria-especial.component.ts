@@ -1,3 +1,5 @@
+import { map } from 'rxjs/operators';
+import { auditorEliminar } from './../../../../../shared/data/models/auditoria-auditor';
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { UserService } from "./../../../../../core/services/user.service";
 import { AutenticacionMidService } from "./../../../../../core/services/autenticacion-mid.service";
@@ -28,7 +30,8 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   meses: Parametro[] = [];
   TODOS = "Todos";
   usuarioId: any;
-  isEditMode = false;
+  isEditMode = false;  
+  auditorEliminar: auditorEliminar[] = [];
 
   constructor(
     private alertaService: AlertService,
@@ -112,7 +115,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   eliminarAuditor(index: number) {
     const auditorSeleccionado = this.auditoresSeleccionados.at(index)?.value;
     console.log("Auditor seleccionado para eliminar:", auditorSeleccionado);
-
+    
     this.alertaService
       .showConfirmAlert(`¿Está seguro de eliminar este auditor?`)
       .then((result) => {
@@ -120,10 +123,14 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
           this.PlanAnualAuditoriaMid.get(
             `auditor?query=auditoria_id:${this.data.auditoria?.id},activo:true,auditor_id:${auditorSeleccionado.auditor.id}`
           ).subscribe((res) => {
-            const auditorEliminar = res.Data[0] || null;
-            console.log("auditorEliminar", auditorEliminar._id);
-            const idAuditor = auditorEliminar._id;
-
+            this.auditorEliminar = res.Data.map((item: any) => ({
+              id: item._id,
+              activo: item.activo,
+              id_tercero: item.auditor_id,
+              auditoria_id: item.auditoria_id
+            }));                    
+            const idAuditor = this.auditorEliminar[0];
+            
             if (auditorEliminar) {
               console.log("auditorIdEliminar", idAuditor);
               this.planAnualAuditoriaService
@@ -207,15 +214,21 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       console.log("res", res);
       if (res && res.Data) {
-        this.auditores = res.Data.filter(
+        const auditorMap =new Map();
+
+        res.Data.filter(
           (auditor: any) =>
             auditor.finalizado === false &&
             ["AUDITOR", "AUDITOR EXPERTO"].includes(auditor.rol_usuario)
-        ).map((auditor: any) => ({
+        ).forEach((auditor: any) => {
+          auditorMap.set(auditor.id_tercero, {
           nombre: auditor.nombre,
           documento: auditor.documento,
           id: auditor.id_tercero,
-        }));
+        });
+      });
+
+        this.auditores = Array.from(auditorMap.values());
       }
       this.inicializarAuditoresSeleccionados();
       console.log("Auditores", this.auditores);

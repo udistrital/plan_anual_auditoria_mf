@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, Input, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 
 @Component({
@@ -7,9 +7,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
   styleUrl: "./modal-ver-documento.component.css",
 })
 export class ModalVerDocumentoComponent implements OnInit {
+  @Input() botonGuardar = { icono: "", texto: "" };
   documentoSrc: any;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public documentoBase64: any) {}
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public documentoBase64: any,
+    public dialogRef: MatDialogRef<ModalVerDocumentoComponent>
+  ) {}
 
   ngOnInit(): void {
     const arrayBuffer = this.base64ToArrayBuffer(this.documentoBase64);
@@ -24,5 +28,11 @@ export class ModalVerDocumentoComponent implements OnInit {
       bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes.buffer;
+  }
+
+  guardar() {
+    this.dialogRef.close({
+      accion: "guardarDocumento",
+    });
   }
 }

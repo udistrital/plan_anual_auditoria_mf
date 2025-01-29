@@ -1,3 +1,4 @@
+import { AutenticacionMidService } from './../../../../core/services/autenticacion-mid.service';
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { MatTableDataSource } from "@angular/material/table";
@@ -10,6 +11,13 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { forkJoin } from "rxjs";
+import { ImplicitAutenticationService } from 'src/app/core/services/implicit_autentication.service';
+
+export interface RolRegistro {
+  Nombre: string;
+  NombreWso2: string;
+  Id: number;
+}
 
 @Component({
   selector: "app-registro-auditorias-especiales",
@@ -31,6 +39,9 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   id: string = "";
   years: Parametro[] = [];
   selectedYearId: number | null = null;
+  permisoEdicion: boolean = false;
+  permisoConsulta: boolean = false;
+  roles: RolRegistro[] = [];
 
   constructor(
     private alertaService: AlertService,
@@ -38,12 +49,30 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private parametrosService: ParametrosService
+    private parametrosService: ParametrosService,
+    private autenticacionService: ImplicitAutenticationService
   ) {}
 
   ngOnInit(): void {
     this.cargarAuditorias();
     this.cargarVigencias();
+
+    this.autenticacionService
+      .getRole()
+      .then((roles) => {
+        this.permisoEdicion = this.autenticacionService.PermisoEdicion(roles as string[]);
+        console.log('Permiso de edición:', this.permisoEdicion);
+        this.permisoConsulta = this.autenticacionService.PermisoConsulta(roles as string[]);
+        console.log('Permiso de consulta:', this.permisoConsulta);
+        if (!this.permisoEdicion) {
+          this.displayedColumns = this.displayedColumns.filter(
+            (col) => col !== 'acciones'
+          );
+        }
+      })
+      .catch((error) => {
+        console.error('Error al obtener los roles del usuario:', error);
+      });
   }
 
   cargarVigencias() {

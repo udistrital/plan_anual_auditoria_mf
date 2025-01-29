@@ -12,11 +12,12 @@ export class FormularioDinamicoComponent implements OnInit {
   @Input() formulario: Formulario = { campos: [] };
   // @Input() modo: 'crear' | 'editar' = 'crear';
   @Output() submitFormulario = new EventEmitter<any>();
+  @Output() campoSeleccionado = new EventEmitter<{ campo: any; valor: any }>();
   form: FormGroup = this.fb.group({});
 
   constructor(
-    private fb: FormBuilder,
-    private parametrosService: ParametrosService
+    private readonly fb: FormBuilder,
+    private readonly parametrosService: ParametrosService
   ) {}
 
   ngOnInit(): void {
@@ -99,5 +100,10 @@ export class FormularioDinamicoComponent implements OnInit {
       this.form.markAllAsTouched();
       this.submitFormulario.emit(null);
     }
+  }
+
+  onSelectionChange(event: any, campo: any): void {
+    const valorSeleccionado = event.value;
+    this.campoSeleccionado.emit({ campo, valor: valorSeleccionado });
   }
 }
