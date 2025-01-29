@@ -68,9 +68,8 @@ export class TablaConsultaAuditoriasComponent {
     this.auditoriasPorVigencia = [];
   
     const auditorias$ = this.planAuditoriaMid.get(
-      `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
+      `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}&auditores`
     );
-  
     auditorias$.subscribe((res) => {
       const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
       console.log("Consulta aud Mid: ", auditorias);
@@ -85,23 +84,16 @@ export class TablaConsultaAuditoriasComponent {
         return;
       }
   
-      const auditoresRequests = auditorias.map((auditoria) =>
-        this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria._id},activo:true`)
-      );
-  
-      forkJoin(auditoresRequests).subscribe((auditoresResponses) => {
-        
-        auditorias.forEach((auditoria, index) => {
-          auditoria.auditores = Array.isArray(auditoresResponses[index]?.Data)
-            ? auditoresResponses[index].Data
-            : [];
-        });
-  
-        this.auditoriasPorVigencia = auditorias;
-        this.totalRegistros = res.MetaData?.Count ?? 0;
-        this.banderaTablaAuditoriasInternas = true;
-        this.construirTabla();
+      auditorias.forEach((auditoria) => {
+        auditoria.auditores = Array.isArray(auditoria.auditores)
+          ? auditoria.auditores
+          : [];
       });
+
+      this.auditoriasPorVigencia = auditorias;
+      this.totalRegistros = res.MetaData?.Count ?? 0;
+      this.banderaTablaAuditoriasInternas = true;
+      this.construirTabla();
     }, 
     (error) => {
       console.error("Error al cargar auditorías:", error);

@@ -86,43 +86,29 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.planAuditoriaMid.get(`auditoria?query=activo:true`).subscribe(
+    this.planAuditoriaMid.get(`auditoria?query=activo:true&auditores`).subscribe(
       (res) => {
         if (res && res.Data) {
           const auditorias: Auditoria[] = res.Data
-            .filter((item: any) => !item.plan_auditoria_id)
+            .filter((item: any) => !item.plan_auditoria_id) 
             .map((item: any, index: number) => ({
               numero: index + 1,
               id: item._id ?? 0,
               auditoria: item.titulo ?? "Sin Título",
               tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
               tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
-              auditores: [],
+              auditores: Array.isArray(item.auditores) ? item.auditores : [], 
               cronograma: item.cronograma_nombre ?? "Sin Cronograma",
               cronogramaId: item.cronograma_id ?? 0,
               estado: item.estado_id ?? "Desconocido",
-            })); 
-          
-          const auditorRequests = auditorias.map((auditoria) =>
-            this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria.id},activo:true`)
-          ); 
-          
-          forkJoin(auditorRequests).subscribe(
-            (auditorResponses) => {
-              auditorias.forEach((auditoria, index) => {
-                auditoria.auditores = auditorResponses[index]?.Data ?? [];
-              });
+            }));
   
-              this.dataSource.data = auditorias;
-              console.log("Auditorías con Auditores:", auditorias);
-            },
-            (error) => {
-              this.alertaService.showErrorAlert("Error al cargar auditores");
-            }
-          );
+          this.dataSource.data = auditorias;
+          console.log("Auditorías con Auditores:", auditorias);
         }
       },
       (error) => {
+        console.error("Error al cargar las auditorías:", error);
         this.alertaService.showErrorAlert("Error al cargar las auditorías");
       }
     );
