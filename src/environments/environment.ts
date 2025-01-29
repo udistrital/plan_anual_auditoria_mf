@@ -7,12 +7,15 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
-  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
+  PLAN_ANUAL_AUDITORIA_SERVICE: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_MID: "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
+  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:3001/",
 
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
+
+  PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
@@ -45,7 +48,36 @@ export const environment = {
     ACTA_COMITE_COORDINADOR: 6820,
     MATRIZ_FUNCION_PUBLICA: 6811,
     PLAN_ANUAL_AUDITORIA: 6810,
+    PROGRAMA_TRABAJO: 6812,
+    SOLICITUD_INFORMACION: 6813,
+    CARTA_PRESENTACION: 6814,
+    COMPROMISO_ETICO: 6815,
   },
+
+  INFO_AUDITORIA: {
+    TIPOS_PROCESO: {
+      ID: 140,
+      VALORES: {
+        MACROPROCESO: {
+          PARAMETRO_ID: 6796,
+          TIPO_PARAMETRO_ID: 148,
+        },
+        PROCESO: {
+          PARAMETRO_ID: 6797,
+          TIPO_PARAMETRO_ID: 149,
+        },
+        DEPENDENCIA: {
+          PARAMETRO_ID: 6798,
+        },
+      },
+    },
+    CARGOS_LIDER_ID: 150,
+    CARGOS_RESPONSABLE_ID: 151,
+  },
+
+
+  ROLES_CONSULTA: ['JEFE_CONTROL_INTERNO'],
+  ROLES_CONSULTA_EDICION: ['ADMIN_SISIFO', 'AUDITOR_EXPERTO']
 
   // idsCamposFormulario: {
   //   Objetivo: 6770,
