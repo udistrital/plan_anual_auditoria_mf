@@ -10,13 +10,15 @@ import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
-import { Router, ActivatedRoute  } from "@angular/router";
+import { Router, ActivatedRoute } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
-import {CrearActividadComponent} from './actividades-auditoria/crear-actividad/crear-actividad.component'
+import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
+import { ParametrosService } from "src/app/core/services/parametros.service";
+import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -40,19 +42,21 @@ export class EditarAuditoriaComponent implements OnInit {
   auditoria!: Auditoria;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
+  tipoSeleccionado: "macroproceso" | "proceso" | null = null;
+  procesoElegido = 0;
 
   constructor(
-    private alertaService: AlertService,
-    private breakpointObserver: BreakpointObserver,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
+    private readonly parametrosService: ParametrosService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 
   ngOnInit() {
-    
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
@@ -65,6 +69,13 @@ export class EditarAuditoriaComponent implements OnInit {
         this.registroPlan.onStepLeave();
       }
     });
+
+    establecerSelectsSecuenciales(this.formularioInformacionComponent, [
+      "tipo",
+      "proceso",
+      "lider",
+      "responsable",
+    ]);
   }
 
   obtenerAuditoria(auditoriaId: string) {
@@ -192,19 +203,19 @@ export class EditarAuditoriaComponent implements OnInit {
     this.router.navigate([`/planeacion/auditorias-internas`]);
   }
 
-    subirArchivoCargueMasivo(): void {
-      const dialogRef = this.dialog.open(CargarArchivoComponent, {
-        width: "800px",
-        data: {
-          tipoArchivo: 'xlsx',
-          id: this.auditoriaId,
-          idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-          descripcion: 'Archivo para cargue masivo de actividades',
-          cargaLambda: true,
-          tipo: "actividades"
-        },
-      });
-    }
+  subirArchivoCargueMasivo(): void {
+    this.dialog.open(CargarArchivoComponent, {
+      width: "800px",
+      data: {
+        tipoArchivo: "xlsx",
+        id: this.auditoriaId,
+        idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+        descripcion: "Archivo para cargue masivo de actividades",
+        cargaLambda: true,
+        tipo: "actividades",
+      },
+    });
+  }
 
   cargarFormulariosConAuditoria() {
     this.formularioInformacionComponent.form.patchValue({
@@ -227,11 +238,115 @@ export class EditarAuditoriaComponent implements OnInit {
       humanos: this.auditoria.rec_humano,
       fisicos: this.auditoria.rec_fisico,
     });
+
+    if (this.auditoria.tipo_id) {
+      this.manejarCambioTipo(this.auditoria.tipo_id);
+
+      if (this.auditoria.macroproceso) {
+        this.manejarCambioProceso(this.auditoria.macroproceso);
+
+        if (this.auditoria.lider_id) {
+          this.manejarCambioLider();
+        }
+      }
+    }
   }
-  crearActividad(){
-    const dialogRef = this.dialog.open(CrearActividadComponent, {
-          width: '1100px',
-          data: { auditoriaId: this.auditoriaId },
-        });
+
+  crearActividad() {
+    this.dialog.open(CrearActividadComponent, {
+      width: "1100px",
+      data: { auditoriaId: this.auditoriaId },
+    });
+  }
+
+  private readonly selectActions: Record<string, (valor: any) => void> = {
+    tipo: (valor) => this.manejarCambioTipo(valor),
+    proceso: (valor) => this.manejarCambioProceso(valor),
+    lider: () => this.manejarCambioLider(),
+  };
+
+  manejarCambioSelect(event: any): void {
+    this.selectActions[event.campo.nombre]?.(event.valor);
+  }
+
+  manejarCambioTipo(tipoProcesoId: any) {
+    const { MACROPROCESO, PROCESO } =
+      environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
+
+    this.tipoSeleccionado = null;
+    if (tipoProcesoId === MACROPROCESO.PARAMETRO_ID) {
+      this.tipoSeleccionado = "macroproceso";
+    } else if (tipoProcesoId === PROCESO.PARAMETRO_ID) {
+      this.tipoSeleccionado = "proceso";
+    }
+
+    const tipoParametroId =
+      this.tipoSeleccionado === "macroproceso"
+        ? MACROPROCESO.TIPO_PARAMETRO_ID
+        : PROCESO.TIPO_PARAMETRO_ID;
+
+    this.cargarOpciones("proceso", tipoParametroId);
+  }
+
+  manejarCambioProceso(procesoId: number) {
+    this.procesoElegido = procesoId;
+    this.cargarCargosLider("lider", procesoId);
+  }
+
+  manejarCambioLider() {
+    this.cargarCargosResponsable("responsable");
+  }
+
+  cargarOpciones(campoNombre: string, tipoParametroId: number) {
+    this.parametrosService
+      .get(
+        `parametro?query=TipoParametroId:${tipoParametroId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
+      )
+      .subscribe((res) => {
+        const campo = this.obtenerCampoFormulario(campoNombre);
+        if (campo) campo.parametros!.opciones = res.Data;
+      });
+  }
+
+  cargarCargosLider(campoNombre: string, procesoId: number) {
+    const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
+    const query =
+      this.tipoSeleccionado === "macroproceso"
+        ? `ParametroPadreId.ParametroPadreId.Id:${procesoId}`
+        : `ParametroPadreId:${procesoId}`;
+
+    this.parametrosService
+      .get(
+        `parametro?query=TipoParametroId:${cargosLiderId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
+      )
+      .subscribe((res) => {
+        const campo = this.obtenerCampoFormulario(campoNombre);
+        if (campo) campo.parametros!.opciones = res.Data;
+      });
+  }
+
+  cargarCargosResponsable(campoNombre: string) {
+    const cargosResponsableId =
+      environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
+    const query =
+      this.tipoSeleccionado === "macroproceso"
+        ? `ParametroPadreId.ParametroPadreId.Id:${this.procesoElegido}`
+        : `ParametroPadreId:${this.procesoElegido}`;
+
+    this.parametrosService
+      .get(
+        `parametro?query=TipoParametroId:${cargosResponsableId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
+      )
+      .subscribe((res) => {
+        const campo = this.obtenerCampoFormulario(campoNombre);
+        console.log(res.Data);
+        if (campo) campo.parametros!.opciones = res.Data;
+      });
+  }
+
+  obtenerCampoFormulario(nombreCampo: string) {
+    return this.formularioInformacion?.campos?.find(
+      (campo) => campo.nombre === nombreCampo
+    );
   }
 }

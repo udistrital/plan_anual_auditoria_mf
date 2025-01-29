@@ -11,3 +11,10 @@ export class Auditoria {
     estado!: string;
     auditores!: number[];
 }
+
+export class auditorEliminar{
+    id!: string;
+    activo!: boolean;
+    id_tercero!: number;
+    auditoria_id!: string;
+}

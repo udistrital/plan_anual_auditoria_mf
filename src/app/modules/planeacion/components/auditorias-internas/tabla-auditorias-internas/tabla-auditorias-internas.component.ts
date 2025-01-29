@@ -48,14 +48,14 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   permisoConsulta: boolean = false;
 
   constructor(
-    private alertaService: AlertService,
-    private autenticationService: ImplicitAutenticationService,
-    private changeDetector: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router,
-    private userService: UserService
+    private readonly alertaService: AlertService,
+    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit() {
@@ -135,6 +135,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .get(`plantilla/plan-trabajo/${auditoriaId}`)
       .subscribe((res) => {
         const documentoBase64 = res.Data;
+        console.log(documentoBase64);
         const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
           width: "1000px",
           data: documentoBase64,

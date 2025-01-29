@@ -3,10 +3,16 @@
   class="documento-card"
 >
   <div class="documento-content">
-    <span>{{ documento.nombre }}</span>
+    <span class="mb-md">{{ documento.nombre }}</span>
     <div class="icon-buttons">
       <!-- Botón para seleccionar archivo -->
-      <button mat-icon-button color="primary" (click)="fileInput.click()">
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="fileInput.click()"
+        *ngIf="!documento.plantilla"
+        class="width-100-md"
+      >
         <mat-icon>upload</mat-icon>
       </button>
       <input
@@ -16,14 +22,18 @@
         hidden
       />
 
-      <!-- Botón para ver archivo -->
-      <button mat-icon-button color="accent" [disabled]="!documento.archivo">
-        <mat-icon>visibility</mat-icon>
+      <button
+        mat-stroked-button
+        *ngIf="documento.plantilla"
+        class="width-100-md"
+        (click)="generarDocumento(documento)"
+        matTooltip="En esta opción, puede revisar los cambios realizados. Si todo
+        está correcto, puede proceder a guardar el documento."
+        [matTooltipPosition]="'above'"
+      >
+        <mat-icon style="color: var(--md-warning-600)">picture_as_pdf</mat-icon>
+        Ver documento
       </button>
     </div>
   </div>
 </mat-card>
-
-<!-- <div class="button-container">
-    <button mat-raised-button color="primary" (click)="onGuardar()">Guardar y Cerrar</button>
-  </div> -->
