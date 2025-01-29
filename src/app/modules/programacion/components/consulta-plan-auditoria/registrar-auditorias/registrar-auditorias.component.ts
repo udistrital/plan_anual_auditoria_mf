@@ -118,7 +118,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
-      const base64File = await this.nuxeoService.obtenerPorUUID("dac4dc08-3034-4f1c-8f7a-8ea799f2703c");
+      const base64File = await this.nuxeoService.obtenerPorUUID("8e51a50e-9b80-4c93-a917-20b958fd3d2b");
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; 
       const fileName = "plantilla"; 
 
