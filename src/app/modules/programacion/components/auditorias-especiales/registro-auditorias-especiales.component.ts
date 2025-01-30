@@ -1,4 +1,4 @@
-import { AutenticacionMidService } from './../../../../core/services/autenticacion-mid.service';
+import { AutenticacionMidService } from "./../../../../core/services/autenticacion-mid.service";
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { MatTableDataSource } from "@angular/material/table";
@@ -11,7 +11,8 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { forkJoin } from "rxjs";
-import { ImplicitAutenticationService } from 'src/app/core/services/implicit_autentication.service';
+import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { SpinnerService } from "src/app/shared/services/spinner.service";
 
 export interface RolRegistro {
   Nombre: string;
@@ -60,18 +61,22 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     this.autenticacionService
       .getRole()
       .then((roles) => {
-        this.permisoEdicion = this.autenticacionService.PermisoEdicion(roles as string[]);
-        console.log('Permiso de edición:', this.permisoEdicion);
-        this.permisoConsulta = this.autenticacionService.PermisoConsulta(roles as string[]);
-        console.log('Permiso de consulta:', this.permisoConsulta);
+        this.permisoEdicion = this.autenticacionService.PermisoEdicion(
+          roles as string[]
+        );
+        console.log("Permiso de edición:", this.permisoEdicion);
+        this.permisoConsulta = this.autenticacionService.PermisoConsulta(
+          roles as string[]
+        );
+        console.log("Permiso de consulta:", this.permisoConsulta);
         if (!this.permisoEdicion) {
           this.displayedColumns = this.displayedColumns.filter(
-            (col) => col !== 'acciones'
+            (col) => col !== "acciones"
           );
         }
       })
       .catch((error) => {
-        console.error('Error al obtener los roles del usuario:', error);
+        console.error("Error al obtener los roles del usuario:", error);
       });
   }
 
@@ -88,31 +93,33 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   cargarAuditorias(): void {
     this.planAuditoriaMid.get(`auditoria?query=activo:true`).subscribe(
       (res) => {
-        if (res && res.Data) {
-          const auditorias: Auditoria[] = res.Data
-            .filter((item: any) => !item.plan_auditoria_id)
-            .map((item: any, index: number) => ({
-              numero: index + 1,
-              id: item._id ?? 0,
-              auditoria: item.titulo ?? "Sin Título",
-              tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
-              tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
-              auditores: [],
-              cronograma: item.cronograma_nombre ?? "Sin Cronograma",
-              cronogramaId: item.cronograma_id ?? 0,
-              estado: item.estado_id ?? "Desconocido",
-            })); 
-          
+        if (res.Data) {
+          const auditorias: Auditoria[] = res.Data.filter(
+            (item: any) => !item.plan_auditoria_id
+          ).map((item: any, index: number) => ({
+            numero: index + 1,
+            id: item._id ?? 0,
+            auditoria: item.titulo ?? "Sin Título",
+            tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
+            tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
+            auditores: [],
+            cronograma: item.cronograma ?? "Sin Cronograma",
+            cronogramaId: item.cronograma_id ?? 0,
+            estado: item.estado_id ?? "Desconocido",
+          }));
+
           const auditorRequests = auditorias.map((auditoria) =>
-            this.planAuditoriaMid.get(`auditor?query=auditoria_id:${auditoria.id},activo:true`)
-          ); 
-          
+            this.planAuditoriaMid.get(
+              `auditor?query=auditoria_id:${auditoria.id},activo:true`
+            )
+          );
+
           forkJoin(auditorRequests).subscribe(
             (auditorResponses) => {
               auditorias.forEach((auditoria, index) => {
                 auditoria.auditores = auditorResponses[index]?.Data ?? [];
               });
-  
+
               this.dataSource.data = auditorias;
               console.log("Auditorías con Auditores:", auditorias);
             },
@@ -208,7 +215,9 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   getAuditoresNombres(element: any): string {
-    return element.auditores.map((auditor: any) => auditor.auditor_nombre).join(", ");
+    return element.auditores
+      .map((auditor: any) => auditor.auditor_nombre)
+      .join(", ");
   }
 
   editarAuditoria(auditoria: Auditoria) {

@@ -53,7 +53,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   ngOnInit() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-    console.log(this.auditoriaId);
   }
 
   onArchivoSeleccionado(event: any, index: number): void {}

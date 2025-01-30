@@ -42,18 +42,18 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     "vigencia",
     "fechaCreacion",
     "estado",
-    "acciones"
+    "acciones",
   ];
 
   constructor(
-    private alertaService: AlertService,
-    private dialog: MatDialog,
-    private router: Router,
-    private parametrosService: ParametrosService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private autenticationService: ImplicitAutenticationService,
-    private userService: UserService
+    private readonly alertaService: AlertService,
+    private readonly dialog: MatDialog,
+    private readonly router: Router,
+    private readonly parametrosService: ParametrosService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit(): void {
@@ -72,7 +72,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     });
   }
 
-
   iniciarPaginacion() {
     this.paginator.pageIndex = 0;
     this.paginator.pageSize = this.opcionesPagina[0];
@@ -87,7 +86,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       }
 
       this.IsSecretario = roles.includes("SECRETARIO_AUDITOR");
-      this.IsAuditor =roles.some((role: string) => role === "AUDITOR_EXPERTO" ||  role === "AUDITOR");
+      this.IsAuditor = roles.some(
+        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
+      );
       this.IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
 
       this.role = this.IsSecretario
@@ -230,58 +231,65 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   enviarPlan(element: any) {
-    this.alertaService.showConfirmAlert(
+    this.alertaService
+      .showConfirmAlert(
         "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?"
-    ).then((result) => {
+      )
+      .then((result) => {
         if (result.isConfirmed) {
-            // Verificar si existe el documento con referencia_id
-            this.planAnualAuditoriaService.get(`documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`).subscribe(
-                (documentos) => {
-                    if (documentos && documentos.Data.length > 0) {
-                        const nuevoEstado = this.construirEstado(
-                            element.id,
-                            environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
-                        );
+          // Verificar si existe el documento con referencia_id
+          this.planAnualAuditoriaService
+            .get(
+              `documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`
+            )
+            .subscribe(
+              (documentos) => {
+                if (documentos && documentos.Data.length > 0) {
+                  const nuevoEstado = this.construirEstado(
+                    element.id,
+                    environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
+                  );
 
-                        this.planAnualAuditoriaService.post("estado", nuevoEstado).subscribe(
-                            (nuevoEstadoResponse: any) => {
-                                if (nuevoEstadoResponse.Status === 201) {
-                                    this.alertaService.showSuccessAlert(
-                                        "Plan enviado exitosamente"
-                                    );
-                                    this.iniciarPaginacion();
-                                    this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
-                                } else {
-                                    this.alertaService.showErrorAlert(
-                                        "Error al asociar el estado al plan"
-                                    );
-                                }
-                            },
-                            (nuevoEstadoError) => {
-                                this.alertaService.showErrorAlert(
-                                    "Error al asociar el estado al plan"
-                                );
-                                console.error(nuevoEstadoError);
-                            }
-                        );
-                    } else {
-                        // Si no existe el documento, mostrar alerta
+                  this.planAnualAuditoriaService
+                    .post("estado", nuevoEstado)
+                    .subscribe(
+                      (nuevoEstadoResponse: any) => {
+                        if (nuevoEstadoResponse.Status === 201) {
+                          this.alertaService.showSuccessAlert(
+                            "Plan enviado exitosamente"
+                          );
+                          this.iniciarPaginacion();
+                          this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
+                        } else {
+                          this.alertaService.showErrorAlert(
+                            "Error al asociar el estado al plan"
+                          );
+                        }
+                      },
+                      (nuevoEstadoError) => {
                         this.alertaService.showErrorAlert(
-                            "No cuenta con el PDF del Plan Anual de Auditoría creado"
+                          "Error al asociar el estado al plan"
                         );
-                    }
-                },
-                (error) => {
-                    this.alertaService.showErrorAlert(
-                        "Error al verificar la existencia del documento asociado."
+                        console.error(nuevoEstadoError);
+                      }
                     );
-                    console.error(error);
+                } else {
+                  // Si no existe el documento, mostrar alerta
+                  this.alertaService.showErrorAlert(
+                    "No cuenta con el PDF del Plan Anual de Auditoría creado"
+                  );
                 }
+              },
+              (error) => {
+                this.alertaService.showErrorAlert(
+                  "Error al verificar la existencia del documento asociado."
+                );
+                console.error(error);
+              }
             );
         }
-    });
-}
-
+      });
+  }
 
   construirEstado(planId: string, estadoId: number, observacion = "") {
     return {
