@@ -115,7 +115,6 @@ export class EditarAuditoriaComponent implements OnInit {
   guardarInformacion(informacion: any) {
     const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
-    console.log(informacionEditar);
 
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
@@ -187,7 +186,6 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   manejarEnvioDocumentos(documentos: any) {
-    console.log("Documentos guardados:", documentos);
     this.stepper.next();
   }
 
@@ -339,7 +337,6 @@ export class EditarAuditoriaComponent implements OnInit {
       )
       .subscribe((res) => {
         const campo = this.obtenerCampoFormulario(campoNombre);
-        console.log(res.Data);
         if (campo) campo.parametros!.opciones = res.Data;
       });
   }

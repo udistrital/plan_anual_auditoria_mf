@@ -1,11 +1,11 @@
-import { map } from 'rxjs/operators';
+import { map } from "rxjs/operators";
 export const colocacionesContructorTabla = [
   {
     columnDef: "numero",
     header: "No.",
     cell: (auditoria: any) => "",
     sortable: true,
-  }, 
+  },
   {
     columnDef: "auditoria",
     header: "Auditoria",
@@ -21,13 +21,15 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "auditores",
     header: "Auditor(es)",
-    cell: (auditoria: any) => auditoria.auditores?.map((a: any) => a.auditor_nombre).join(", ") || "Sin Auditor(es)",
+    cell: (auditoria: any) =>
+      auditoria.auditores?.map((a: any) => a.auditor_nombre).join(", ") ||
+      "Sin Auditor(es)",
     sortable: true,
   },
   {
     columnDef: "cronograma",
     header: "Cronograma de Actividades",
-    cell: (auditoria: any) => auditoria.cronograma_nombre,
+    cell: (auditoria: any) => auditoria.cronograma,
     sortable: true,
   },
   {
