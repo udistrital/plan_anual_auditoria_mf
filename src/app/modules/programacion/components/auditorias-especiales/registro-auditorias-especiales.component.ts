@@ -91,7 +91,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.planAuditoriaMid.get(`auditoria?query=activo:true`).subscribe(
+    this.planAuditoriaMid.get(`auditoria?query=activo:true&auditores`).subscribe(
       (res) => {
         if (res.Data) {
           const auditorias: Auditoria[] = res.Data.filter(
@@ -130,6 +130,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
         }
       },
       (error) => {
+        console.error("Error al cargar las auditorías:", error);
         this.alertaService.showErrorAlert("Error al cargar las auditorías");
       }
     );
