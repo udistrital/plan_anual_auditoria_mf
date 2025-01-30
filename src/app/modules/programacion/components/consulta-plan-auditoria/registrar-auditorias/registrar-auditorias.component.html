@@ -137,8 +137,11 @@
             <button class="mx-2" mat-raised-button color="primary" (click)="renderizar()">
               <mat-icon>visibility</mat-icon>Ver
             </button>
-            <button class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
+            <button *ngIf="base64Matriz===null" class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
               <mat-icon>file_upload</mat-icon>Matriz
+            </button>
+            <button *ngIf="base64Matriz!==null" class="mx-2" mat-raised-button color="primary" (click)="verMatriz()">
+              <mat-icon>visibility</mat-icon>Ver Matriz
             </button>
             <button class="mx-2" mat-raised-button color="primary" (click)="guardarPaa()">
               <mat-icon>save</mat-icon>

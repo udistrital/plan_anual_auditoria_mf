@@ -35,6 +35,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
   id: string = "";
   mostrarBotones: boolean = true;
   vigenciaId: number = 6619;
+  idMatriz: any = null;
+  base64Matriz: string = "";
 
   constructor(
     private alertaService: AlertService,
@@ -51,10 +53,14 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.cargarVigencia();
     this.cargarAuditorias();
+    this.idMatriz = this.buscarMatriz()
+    if (this.idMatriz !== null) {
+      this.buscarBase64(this.idMatriz);
+    }
     await this.obtenerEstadoActual();
   }
 
-  cargarVigencia(): void{
+  cargarVigencia(): void {
     this.planAnualAuditoriaService
       .get(`plan-auditoria/${this.id}?fields=vigencia_id`)
       .subscribe(
@@ -102,13 +108,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "cronograma",
       "estado",
     ];
-  
+
     // Agrega la columna de acciones solo si mostrarBotones es true
     if (this.mostrarBotones) {
       this.displayedColumns.push("acciones");
     }
   }
-  
+
   async obtenerEstadoActual(): Promise<void> {
     try {
       const response = await this.planAnualAuditoriaService
@@ -179,10 +185,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
             );
         }
       },
-      (error) => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
-      }
-    );
+        (error) => {
+          this.alertaService.showErrorAlert("Error al eliminar el registro");
+        }
+      );
   }
 
   guardarPaa() {
@@ -308,6 +314,32 @@ export class RegistrarAuditoriasComponent implements OnInit {
       data: {
         planAuditoriaId: this.id,
       },
+    });
+  }
+  buscarMatriz(): any {
+    this.PlanAnualAuditoriaMid.get(`documento/query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA}`).subscribe(
+      (res) => {
+        if (res && res.Data) {
+          return res.Data.nuxeo_enlace
+        } else {
+          return null
+        }
+      },
+      (error) => {
+        console.log("-----------", error);
+        this.alertaService.showErrorAlert("Error al buscar Matriz");
+        return null
+      }
+    );
+  }
+  async buscarBase64(nuxeoId: string) {
+    this.base64Matriz = await this.nuxeoService.obtenerPorUUID(nuxeoId);
+  }
+  verMatriz() {
+    this.dialog.open(ModalPdfVisualizadorComponent, {
+      data: { base64Document: this.base64Matriz },
+      width: "80%",
+      height: "80vh",
     });
   }
 }
