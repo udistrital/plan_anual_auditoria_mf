@@ -8,7 +8,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
-import {ModalVisualizarRecargarDocumentoComponent} from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
+import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/modal-ver-documentos-plan.component";
@@ -50,14 +50,14 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private descargaService: DescargaService,
     private router: Router,
     private spinnerService: SpinnerService
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.cargarVigencia();
     this.cargarAuditorias();
     try {
-      this.idMatriz = await this.buscarMatriz();    
+      this.idMatriz = await this.buscarMatriz();
       if (this.idMatriz !== null) {
         this.buscarBase64(this.idMatriz);
       }
@@ -194,12 +194,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
                 }
               );
           }
-        },
-        (error) => {
-          this.alertaService.showErrorAlert("Error al eliminar el registro");
-        }
 
-      },
+
+        },
         (error) => {
           this.alertaService.showErrorAlert("Error al eliminar el registro");
         }
@@ -358,7 +355,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
   verMatriz() {
     this.dialog.open(ModalVisualizarRecargarDocumentoComponent, {
-      data: { base64Document: this.base64Matriz,  id: this.id},
+      data: { base64Document: this.base64Matriz, id: this.id },
       width: "80%",
       height: "80vh",
     });
