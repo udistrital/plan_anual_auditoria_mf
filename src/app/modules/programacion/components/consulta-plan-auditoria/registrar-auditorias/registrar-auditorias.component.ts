@@ -8,6 +8,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
+import {ModalVisualizarRecargarDocumentoComponent} from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/modal-ver-documentos-plan.component";
@@ -36,7 +37,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   mostrarBotones: boolean = true;
   vigenciaId: number = 6619;
   idMatriz: any = null;
-  base64Matriz: string = "";
+  base64Matriz: any = null;
 
   constructor(
     private alertaService: AlertService,
@@ -53,9 +54,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.cargarVigencia();
     this.cargarAuditorias();
-    this.idMatriz = this.buscarMatriz()
-    if (this.idMatriz !== null) {
-      this.buscarBase64(this.idMatriz);
+    try {
+      this.idMatriz = await this.buscarMatriz();    
+      if (this.idMatriz !== null) {
+        this.buscarBase64(this.idMatriz);
+      }
+    } catch (error) {
+      console.error("Error al cargar Matriz", error);
     }
     await this.obtenerEstadoActual();
   }
@@ -316,28 +321,31 @@ export class RegistrarAuditoriasComponent implements OnInit {
       },
     });
   }
-  buscarMatriz(): any {
-    this.PlanAnualAuditoriaMid.get(`documento/query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA}`).subscribe(
-      (res) => {
-        if (res && res.Data) {
-          return res.Data.nuxeo_enlace
-        } else {
-          return null
-        }
-      },
-      (error) => {
-        console.log("-----------", error);
-        this.alertaService.showErrorAlert("Error al buscar Matriz");
-        return null
-      }
-    );
+  buscarMatriz(): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)
+        .subscribe(
+          (res) => {
+            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+              resolve(res.Data[0].nuxeo_enlace); // Tomar el primer valor
+            } else {
+              resolve(null);
+            }
+          },
+          (error) => {
+            console.error("Error al buscar Matriz", error);
+            this.alertaService.showErrorAlert("Error al buscar Matriz");
+            reject(error);
+          }
+        );
+    });
   }
   async buscarBase64(nuxeoId: string) {
     this.base64Matriz = await this.nuxeoService.obtenerPorUUID(nuxeoId);
   }
   verMatriz() {
-    this.dialog.open(ModalPdfVisualizadorComponent, {
-      data: { base64Document: this.base64Matriz },
+    this.dialog.open(ModalVisualizarRecargarDocumentoComponent, {
+      data: { base64Document: this.base64Matriz,  id: this.id},
       width: "80%",
       height: "80vh",
     });

@@ -1,0 +1,23 @@
+<plantilla-modal 
+    [icono]="'list_alt'"
+    [titulo]="'Ver Matriz de Funcion Pública'"
+    [descripcion]="'Matriz de Funcion Públic'"
+    [contenido]="contenidoDeModal"
+    [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row">
+      <div class="col-12">
+        <app-pdf-visualizador
+        [base64Document]="base64"
+      ></app-pdf-visualizador>
+      </div>
+  </div>
+</ng-template>
+<ng-template #footerDeModal>
+  <button mat-raised-button color="primary" (click)="actualizarDocuemnto()">
+    <mat-icon>file_upload</mat-icon>
+    Actiualizar
+  </button>
+</ng-template>

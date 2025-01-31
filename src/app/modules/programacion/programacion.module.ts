@@ -14,6 +14,7 @@ import { SharedModule } from "src/app/shared/shared.module";
 import { ModalAprobacionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component";
 import { ModalMotivosRechazoComponent } from "./components/consulta-plan-auditoria/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { PdfVisualizadorComponent } from "./components/consulta-plan-auditoria/revision-jefe/pdf-visualizador/pdf-visualizador.component";
+import {ModalVisualizarRecargarDocumentoComponent}from "./components/consulta-plan-auditoria/registrar-auditorias/modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { RevisionJefeComponent } from "./components/consulta-plan-auditoria/revision-jefe/revision-jefe.component";
 import { RevisionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/revision-secretario.component";
 import { AddAuditoriaModalComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/add-auditoria-modal/add-auditoria-modal.component";
@@ -46,6 +47,7 @@ import { UnirConComaPipe } from 'src/app/shared/pipes/unir-con-coma.pipe';
     RegistrarPlanComponent,
     RegistroAuditoriasEspecialesComponent,
     TablaConsultaAuditoriasComponent,
+    ModalVisualizarRecargarDocumentoComponent,
   ],
   imports: [
     CommonModule,
