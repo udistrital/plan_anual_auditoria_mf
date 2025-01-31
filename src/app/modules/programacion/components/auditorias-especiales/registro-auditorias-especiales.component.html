@@ -83,9 +83,13 @@
             <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
           </ng-container> -->
           <ng-container matColumnDef="auditor">
-            <mat-header-cell *matHeaderCellDef><b>Auditor (es)</b></mat-header-cell>
+            <mat-header-cell *matHeaderCellDef
+              ><b>Auditor (es)</b></mat-header-cell
+            >
             <mat-cell *matCellDef="let element">
-              <ng-container *ngIf="element.auditores?.length > 0; else noAuditores">
+              <ng-container
+                *ngIf="element.auditores?.length > 0; else noAuditores"
+              >
                 {{ getAuditoresNombres(element) }}
               </ng-container>
               <ng-template #noAuditores>
@@ -101,7 +105,7 @@
               ><b>Cronograma de actividades</b></mat-header-cell
             >
             <mat-cell *matCellDef="let element">
-              {{ element.cronograma | unirConComa }}
+              {{ element.cronograma }}
             </mat-cell>
             <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
           </ng-container>

@@ -7,7 +7,7 @@ import {
   provideHttpClient,
   withInterceptors,
 } from "@angular/common/http";
-import { SpinnerIntercerptor } from "./core/intercerptors/spinner.interceptor";
+import { SpinnerInterceptor } from "./core/intercerptors/spinner.interceptor";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
@@ -22,7 +22,7 @@ import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.c
   ],
   providers: [
     PlanAnualAuditoriaService,
-    provideHttpClient(withInterceptors([SpinnerIntercerptor])),
+    provideHttpClient(withInterceptors([SpinnerInterceptor])),
   ],
   bootstrap: [AppComponent],
 })

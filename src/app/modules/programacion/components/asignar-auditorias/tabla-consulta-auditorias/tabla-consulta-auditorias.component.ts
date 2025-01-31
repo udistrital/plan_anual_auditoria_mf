@@ -36,40 +36,43 @@ export class TablaConsultaAuditoriasComponent {
   permisoConsulta: boolean = false;
 
   constructor(
-    private alertaService: AlertService,
-    private autenticacionService: ImplicitAutenticationService,
-    private changeDetector: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private router: Router
+    private readonly alertaService: AlertService,
+    private readonly autenticacionService: ImplicitAutenticationService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly router: Router
   ) {}
 
   ngOnInit() {
     this.autenticacionService
       .getRole()
       .then((roles) => {
-        this.permisoEdicion = this.autenticacionService.PermisoEdicion(roles as string[]);
-        console.log('Permiso de edición:', this.permisoEdicion);
-        this.permisoConsulta = this.autenticacionService.PermisoConsulta(roles as string[]);
-        console.log('Permiso de consulta:', this.permisoConsulta);
-        
+        this.permisoEdicion = this.autenticacionService.PermisoEdicion(
+          roles as string[]
+        );
+        console.log("Permiso de edición:", this.permisoEdicion);
+        this.permisoConsulta = this.autenticacionService.PermisoConsulta(
+          roles as string[]
+        );
+        console.log("Permiso de consulta:", this.permisoConsulta);
       })
       .catch((error) => {
-        console.error('Error al obtener los roles del usuario:', error);
+        console.error("Error al obtener los roles del usuario:", error);
       });
   }
 
-  
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
   ): void {
     this.auditoriasPorVigencia = [];
-  
+
     const auditorias$ = this.planAuditoriaMid.get(
       `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}&auditores`
     );
+
     auditorias$.subscribe((res) => {
       const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
       console.log("Consulta aud Mid: ", auditorias);
@@ -102,9 +105,11 @@ export class TablaConsultaAuditoriasComponent {
   }
 
   construirTabla() {
-    this.auditoriasContructorTabla = colocacionesContructorTabla.filter(column =>{
-      return column.columnDef !== 'acciones' || this.permisoEdicion;
-    });
+    this.auditoriasContructorTabla = colocacionesContructorTabla.filter(
+      (column) => {
+        return column.columnDef !== "acciones" || this.permisoEdicion;
+      }
+    );
 
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
@@ -137,7 +142,7 @@ export class TablaConsultaAuditoriasComponent {
   }
 
   agregarAuditor(auditoria?: Auditoria) {
-    console.log("Row: ",auditoria);
+    console.log("Row: ", auditoria);
     const dialogRef = this.dialog.open(ModalAgregarAuditorComponent, {
       width: "1100px",
       data: {
