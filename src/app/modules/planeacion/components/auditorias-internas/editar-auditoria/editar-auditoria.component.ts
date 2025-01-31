@@ -19,6 +19,7 @@ import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
+import { OikosService } from "src/app/core/services/oikos.service";
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -53,7 +54,8 @@ export class EditarAuditoriaComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
     private readonly parametrosService: ParametrosService,
-    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly oikosSevice: OikosService
   ) {}
 
   ngOnInit() {
@@ -268,7 +270,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   manejarCambioTipo(tipoProcesoId: any) {
-    const { MACROPROCESO, PROCESO } =
+    const { MACROPROCESO, PROCESO, DEPENDENCIA } =
       environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
 
     this.tipoSeleccionado = null;
@@ -276,6 +278,8 @@ export class EditarAuditoriaComponent implements OnInit {
       this.tipoSeleccionado = "macroproceso";
     } else if (tipoProcesoId === PROCESO.PARAMETRO_ID) {
       this.tipoSeleccionado = "proceso";
+    } else if (tipoProcesoId === DEPENDENCIA.PARAMETRO_ID) {
+      return this.cargarDependencias();
     }
 
     const tipoParametroId =
@@ -345,5 +349,16 @@ export class EditarAuditoriaComponent implements OnInit {
     return this.formularioInformacion?.campos?.find(
       (campo) => campo.nombre === nombreCampo
     );
+  }
+
+  cargarDependencias() {
+    this.oikosSevice
+      .get(
+        `dependencia?query=Activo:true&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
+      )
+      .subscribe((res) => {
+        const campo = this.obtenerCampoFormulario("proceso");
+        if (campo) campo.parametros!.opciones = res;
+      });
   }
 }
