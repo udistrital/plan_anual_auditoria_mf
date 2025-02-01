@@ -86,11 +86,10 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.planAuditoriaMid.get(`auditoria?query=activo:true&auditores`).subscribe(
+    this.planAuditoriaMid.get(`auditoria?query=activo:true,plan_auditoria_id__isnull:true&limit=0&auditores`).subscribe(
       (res) => {
         if (res && res.Data) {
           const auditorias: Auditoria[] = res.Data
-            .filter((item: any) => !item.plan_auditoria_id) 
             .map((item: any, index: number) => ({
               numero: index + 1,
               id: item._id ?? 0,
@@ -102,7 +101,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
               cronogramaId: item.cronograma_id ?? 0,
               estado: item.estado_id ?? "Desconocido",
             }));
-  
+            console.log("AUDITORIAS ",auditorias)
           this.dataSource.data = auditorias;
           console.log("Auditorías con Auditores:", auditorias);
         }
@@ -141,10 +140,12 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
 
   nuevaAuditoria() {
     if (this.selectedYearId) {
+      const payload={
+        vigencia_id: this.selectedYearId,
+        plan_auditoria_id:null,
+      }
       this.planAnualAuditoriaService
-        .post("auditoria", {
-          vigencia_id: this.selectedYearId,
-        })
+        .post("auditoria", payload)
         .subscribe(
           (response: any) => {
             if (response.Status === 201) {
