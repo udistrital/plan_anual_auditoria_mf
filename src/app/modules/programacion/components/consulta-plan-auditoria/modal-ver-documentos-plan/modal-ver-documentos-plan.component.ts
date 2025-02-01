@@ -1,31 +1,33 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom } from "rxjs";
 import { environment } from "src/environments/environment";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
-  selector: 'app-modal-ver-documentos-plan',
-  templateUrl: './modal-ver-documentos-plan.component.html',
-  styleUrl: './modal-ver-documentos-plan.component.css'
+  selector: "app-modal-ver-documentos-plan",
+  templateUrl: "./modal-ver-documentos-plan.component.html",
+  styleUrl: "./modal-ver-documentos-plan.component.css",
 })
-export class ModalVerDocumentosPlanComponent implements OnInit{
+export class ModalVerDocumentosPlanComponent implements OnInit {
   selectedTab: number = 0;
   documentos: { base64: string; tipo_id: number }[] = [];
   documentoPAA: string = "";
   documentoMatrizPublica: string = "";
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { planAuditoriaId: string; },
+    @Inject(MAT_DIALOG_DATA) public data: { planAuditoriaId: string },
     public dialogRef: MatDialogRef<ModalVerDocumentosPlanComponent>,
-    private referenciaPdfService: ReferenciaPdfService,
-    private nuxeoService: NuxeoService,
-    private descargaService: DescargaService,
-  ){}
+    private readonly alertService: AlertService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService
+  ) {}
 
   async ngOnInit() {
     try {
@@ -37,8 +39,10 @@ export class ModalVerDocumentosPlanComponent implements OnInit{
 
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
-      const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
+      const tipoIdPAA =
+        environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA;
+      const tipoIdMatrizPublica =
+        environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
 
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.data.planAuditoriaId)
@@ -54,13 +58,20 @@ export class ModalVerDocumentosPlanComponent implements OnInit{
         if (doc.tipo_id === tipoIdPAA && !this.documentoPAA) {
           this.documentoPAA = base64;
         }
-        if (doc.tipo_id === tipoIdMatrizPublica && !this.documentoMatrizPublica) {
+        if (
+          doc.tipo_id === tipoIdMatrizPublica &&
+          !this.documentoMatrizPublica
+        ) {
           this.documentoMatrizPublica = base64;
         }
       });
-
     } catch (error) {
       console.error("Error al renderizar los documentos:", error);
+      this.alertService.showAlert(
+        "No se encontraron documentos",
+        "El plan anual de auditoría no cuenta con documentos"
+      );
+      this.dialogRef.close();
     }
   }
 
@@ -70,10 +81,12 @@ export class ModalVerDocumentosPlanComponent implements OnInit{
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos( this.documentos, 'documentosPAA.zip');
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        "documentosPAA.zip"
+      );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }
   }
-  
 }

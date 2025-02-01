@@ -8,6 +8,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
+import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/modal-ver-documentos-plan.component";
@@ -16,6 +17,7 @@ import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/mo
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { SpinnerService } from "src/app/shared/services/spinner.service";
 
 @Component({
   selector: "app-registrar-auditorias",
@@ -35,6 +37,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
   id: string = "";
   mostrarBotones: boolean = true;
   vigenciaId: number = 6619;
+  idMatriz: any = null;
+  base64Matriz: any = null;
 
   constructor(
     private alertaService: AlertService,
@@ -44,17 +48,26 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private nuxeoService: NuxeoService,
     private descargaService: DescargaService,
-    private router: Router
+    private router: Router,
+    private spinnerService: SpinnerService
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.cargarVigencia();
     this.cargarAuditorias();
+    try {
+      this.idMatriz = await this.buscarMatriz();
+      if (this.idMatriz !== null) {
+        this.buscarBase64(this.idMatriz);
+      }
+    } catch (error) {
+      console.error("Error al cargar Matriz", error);
+    }
     await this.obtenerEstadoActual();
   }
 
-  cargarVigencia(): void{
+  cargarVigencia(): void {
     this.planAnualAuditoriaService
       .get(`plan-auditoria/${this.id}?fields=vigencia_id`)
       .subscribe(
@@ -70,28 +83,28 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.PlanAnualAuditoriaMid
-      .get(`auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`)
-      .subscribe(
-        (res) => {
-          if (res && res.Data) {
-            this.dataSource.data = res.Data.map((item: any) => ({
-              id: item._id ?? 0,
-              auditoria: item.titulo ?? "Sin Título",
-              tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
-              tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
-              cronograma: item.cronograma_nombre ?? "Sin Cronograma",
-              cronogramaId: item.cronograma_id ?? [],
-              estado: item.estado_id ?? "Borrador",
-            }));
-            this.vigenciaId = res.Data[0].plan_auditoria_id?.vigencia_id;
-            this.actualizarColumnas();
-          }
-        },
-        (error) => {
-          this.alertaService.showErrorAlert("Error al cargar las auditorías");
+    this.PlanAnualAuditoriaMid.get(
+      `auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`
+    ).subscribe(
+      (res) => {
+        if (res.Data) {
+          this.dataSource.data = res.Data.map((item: any) => ({
+            id: item._id ?? 0,
+            auditoria: item.titulo ?? "Sin Título",
+            tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
+            tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
+            cronograma: item.cronograma ?? "Sin Cronograma",
+            cronogramaId: item.cronograma_id ?? [],
+            estado: item.estado_id ?? "Borrador",
+          }));
+          this.vigenciaId = res.Data[0].plan_auditoria_id?.vigencia_id;
+          this.actualizarColumnas();
         }
-      );
+      },
+      (error) => {
+        this.alertaService.showErrorAlert("Error al cargar las auditorías");
+      }
+    );
   }
 
   actualizarColumnas(): void {
@@ -102,13 +115,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "cronograma",
       "estado",
     ];
-  
+
     // Agrega la columna de acciones solo si mostrarBotones es true
     if (this.mostrarBotones) {
       this.displayedColumns.push("acciones");
     }
   }
-  
+
   async obtenerEstadoActual(): Promise<void> {
     try {
       const response = await this.planAnualAuditoriaService
@@ -138,11 +151,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
-      const base64File = await this.nuxeoService.obtenerPorUUID(environment.PLANTILLA_CARGUE_MASIVO);
+      const base64File = await this.nuxeoService.obtenerPorUUID(
+        environment.PLANTILLA_CARGUE_MASIVO
+      );
       await this.descargaService.descargarArchivo(
         base64File,
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'plantilla'
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "plantilla"
       );
     } catch (error) {
       console.error("Error al descargar la plantilla:", error);
@@ -154,35 +169,38 @@ export class RegistrarAuditoriasComponent implements OnInit {
   borrarAuditoria(element: Auditoria) {
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
-      .then((result) => {
-        if (result.isConfirmed) {
-          this.planAnualAuditoriaService
-            .delete(`auditoria`, element)
-            .subscribe(
-              (response) => {
-                if (response) {
-                  this.alertaService.showSuccessAlert("Registro eliminado");
-                  this.dataSource.data = this.dataSource.data.filter(
-                    (e) => e.id !== element.id
-                  );
-                } else {
+      .then(
+        (result) => {
+          if (result.isConfirmed) {
+            this.planAnualAuditoriaService
+              .delete(`auditoria`, element)
+              .subscribe(
+                (response) => {
+                  if (response) {
+                    this.alertaService.showSuccessAlert("Registro eliminado");
+                    this.dataSource.data = this.dataSource.data.filter(
+                      (e) => e.id !== element.id
+                    );
+                  } else {
+                    this.alertaService.showErrorAlert(
+                      "Error al eliminar el registro"
+                    );
+                  }
+                },
+                (error) => {
                   this.alertaService.showErrorAlert(
                     "Error al eliminar el registro"
                   );
                 }
-              },
-              (error) => {
-                this.alertaService.showErrorAlert(
-                  "Error al eliminar el registro"
-                );
-              }
-            );
+              );
+          }
+
+
+        },
+        (error) => {
+          this.alertaService.showErrorAlert("Error al eliminar el registro");
         }
-      },
-      (error) => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
-      }
-    );
+      );
   }
 
   guardarPaa() {
@@ -192,7 +210,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
       )
       .then((result) => {
         if (result.isConfirmed) {
-          const auditoriaIds = this.dataSource.data.map(auditoria => auditoria.id);
+          const auditoriaIds = this.dataSource.data.map(
+            (auditoria) => auditoria.id
+          );
 
           const payload = {
             auditorias: auditoriaIds,
@@ -221,13 +241,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
-        tipoArchivo: 'xlsx',
+        tipoArchivo: "xlsx",
         id: this.id,
         vigenciaId: this.vigenciaId,
         idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-        descripcion: 'Archivo para cargue masivo',
+        descripcion: "Archivo para cargue masivo",
         cargaLambda: true,
-        tipo: "auditorias"
+        tipo: "auditorias",
       },
     });
   }
@@ -236,12 +256,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
-        tipoArchivo: 'pdf',
+        tipoArchivo: "pdf",
         id: this.id,
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
-        descripcion: 'Matriz funcion publica',
+        descripcion: "Matriz funcion publica",
         cargaLambda: false,
-        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
+        tipoIdReferencia:
+          environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
       },
     });
   }
@@ -259,7 +280,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       data: {
         planAuditoriaId: this.id,
         vigenciaId: this.vigenciaId,
-        auditoria
+        auditoria,
       },
     });
 
@@ -308,6 +329,35 @@ export class RegistrarAuditoriasComponent implements OnInit {
       data: {
         planAuditoriaId: this.id,
       },
+    });
+  }
+  buscarMatriz(): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)
+        .subscribe(
+          (res) => {
+            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+              resolve(res.Data[0].nuxeo_enlace); // Tomar el primer valor
+            } else {
+              resolve(null);
+            }
+          },
+          (error) => {
+            console.error("Error al buscar Matriz", error);
+            this.alertaService.showErrorAlert("Error al buscar Matriz");
+            reject(error);
+          }
+        );
+    });
+  }
+  async buscarBase64(nuxeoId: string) {
+    this.base64Matriz = await this.nuxeoService.obtenerPorUUID(nuxeoId);
+  }
+  verMatriz() {
+    this.dialog.open(ModalVisualizarRecargarDocumentoComponent, {
+      data: { base64Document: this.base64Matriz, id: this.id },
+      width: "80%",
+      height: "80vh",
     });
   }
 }
