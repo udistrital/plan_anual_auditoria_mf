@@ -149,5 +149,11 @@ export class TablaConsultaAuditoriasComponent {
         auditoria,
       },
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) { 
+        this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
+      }
+    });
   }
 }
