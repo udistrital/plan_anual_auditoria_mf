@@ -81,7 +81,11 @@ export const environment = {
   },
 
   ROLES_CONSULTA: ["JEFE_CONTROL_INTERNO"],
-  ROLES_CONSULTA_EDICION: ["ADMIN_SISIFO", "AUDITOR_EXPERTO"],
+  ROLES_CONSULTA_EDICION: [
+    "ADMIN_SISIFO",
+    "AUDITOR_EXPERTO",
+    "JEFE_CONTROL_INTERNO",
+  ],
 
   // idsCamposFormulario: {
   //   Objetivo: 6770,

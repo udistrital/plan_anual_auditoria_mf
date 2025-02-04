@@ -66,8 +66,8 @@ export class RevisionDocumentosComponent implements OnInit {
       )
       .subscribe((res) => {
         this.estadoAuditoriaId =
-          res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.BORRADOR_ID;
-        console.log(this.estadoAuditoriaId);
+          res.Data[0]?.estado_interno_id ??
+          environment.AUDITORIA_ESTADO.BORRADOR_ID;
       });
   }
 

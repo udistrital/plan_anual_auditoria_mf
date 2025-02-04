@@ -226,8 +226,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`)
       .subscribe((res) => {
         auditoria.estado_interno_id =
-          res.Data[0]?.estado_id ?? this.auditoriaEstados.BORRADOR_ID;
-        console.log(auditoria.estado_interno_id);
+          res.Data[0]?.estado_interno_id ?? this.auditoriaEstados.BORRADOR_ID;
       });
   }
 
