@@ -1,4 +1,4 @@
-import { TablaConsultaAuditoriasComponent } from './components/asignar-auditorias/tabla-consulta-auditorias/tabla-consulta-auditorias.component';
+import { TablaConsultaAuditoriasComponent } from "./components/asignar-auditorias/tabla-consulta-auditorias/tabla-consulta-auditorias.component";
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
@@ -13,8 +13,7 @@ import { FormularioAuditoriaEspecialComponent } from "./components/auditorias-es
 import { SharedModule } from "src/app/shared/shared.module";
 import { ModalAprobacionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component";
 import { ModalMotivosRechazoComponent } from "./components/consulta-plan-auditoria/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
-import { PdfVisualizadorComponent } from "./components/consulta-plan-auditoria/revision-jefe/pdf-visualizador/pdf-visualizador.component";
-import {ModalVisualizarRecargarDocumentoComponent}from "./components/consulta-plan-auditoria/registrar-auditorias/modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
+import { ModalVisualizarRecargarDocumentoComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { RevisionJefeComponent } from "./components/consulta-plan-auditoria/revision-jefe/revision-jefe.component";
 import { RevisionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/revision-secretario.component";
 import { AddAuditoriaModalComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/add-auditoria-modal/add-auditoria-modal.component";
@@ -24,9 +23,8 @@ import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/mo
 import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
 import { ModalVerDocumentosPlanComponent } from "./components/consulta-plan-auditoria/modal-ver-documentos-plan/modal-ver-documentos-plan.component";
 
-
 import { MatTooltip } from "@angular/material/tooltip";
-import { UnirConComaPipe } from 'src/app/shared/pipes/unir-con-coma.pipe';
+import { UnirConComaPipe } from "src/app/shared/pipes/unir-con-coma.pipe";
 
 @NgModule({
   declarations: [
@@ -39,7 +37,6 @@ import { UnirConComaPipe } from 'src/app/shared/pipes/unir-con-coma.pipe';
     ModalListaRechazosComponent,
     ModalMotivosRechazoComponent,
     ModalVerDocumentosPlanComponent,
-    PdfVisualizadorComponent,
     ModalPdfVisualizadorComponent,
     RevisionJefeComponent,
     RevisionSecretarioComponent,
@@ -56,7 +53,7 @@ import { UnirConComaPipe } from 'src/app/shared/pipes/unir-con-coma.pipe';
     MaterialModule,
     MatTooltip,
     IconosModule,
-    UnirConComaPipe
+    UnirConComaPipe,
   ],
 })
 export class ProgramacionModule {}

@@ -15,7 +15,7 @@ const routes: Routes = [
   },
   {
     path: "programacion",
-    canActivate: [],
+    canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/programacion/programacion.module").then(
         (m) => m.ProgramacionModule

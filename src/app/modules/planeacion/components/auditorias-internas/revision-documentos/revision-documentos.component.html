@@ -33,19 +33,39 @@
           <div class="borde-redondo">
             <div *ngIf="selectedTab === 0">
               <h3>Programa de trabajo</h3>
-              <div class="row"></div>
+              <div class="row">
+                <app-pdf-visualizador
+                  class="mt-3"
+                  [base64Document]="docProgramaTrabajo"
+                ></app-pdf-visualizador>
+              </div>
             </div>
             <div *ngIf="selectedTab === 1">
               <h3>Oficio Anuncio Solicitud de Información</h3>
-              <div class="row"></div>
+              <div class="row">
+                <app-pdf-visualizador
+                  class="mt-3"
+                  [base64Document]="docSolicitudInformacion"
+                ></app-pdf-visualizador>
+              </div>
             </div>
             <div *ngIf="selectedTab === 2">
               <h3>Carta de presentación</h3>
-              <div class="row"></div>
+              <div class="row">
+                <app-pdf-visualizador
+                  class="mt-3"
+                  [base64Document]="docCartaPresentacion"
+                ></app-pdf-visualizador>
+              </div>
             </div>
             <div *ngIf="selectedTab === 3">
               <h3>Compromiso Ético del Auditor Interno</h3>
-              <div class="row"></div>
+              <div class="row">
+                <app-pdf-visualizador
+                  class="mt-3"
+                  [base64Document]="docCompromisoEstico"
+                ></app-pdf-visualizador>
+              </div>
             </div>
           </div>
         </div>

@@ -14,6 +14,7 @@ import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-
 import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 import { IconosModule } from "./modules/iconos.module";
+import { PdfVisualizadorComponent } from "../modules/programacion/components/consulta-plan-auditoria/revision-jefe/pdf-visualizador/pdf-visualizador.component";
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import { IconosModule } from "./modules/iconos.module";
     CargarArchivoComponent,
     ModalVerDocumentoComponent,
     PlantillaTarjetaContenedoraComponent,
-    PlantillaModalComponent
+    PlantillaModalComponent,
+    PdfVisualizadorComponent,
   ],
   imports: [
     CommonModule,
@@ -45,7 +47,8 @@ import { IconosModule } from "./modules/iconos.module";
     IconosModule,
     DragDropModule,
     ReactiveFormsModule,
-    PdfViewerModule
+    PdfViewerModule,
+    PdfVisualizadorComponent,
   ],
   providers: [
     { provide: MAT_DIALOG_DATA, useValue: {} },
