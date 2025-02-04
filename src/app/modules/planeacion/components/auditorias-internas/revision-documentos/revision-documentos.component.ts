@@ -1,15 +1,19 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { ModalRechazoAuditoriaComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
+import { MatDialog } from "@angular/material/dialog";
+import { environment } from "src/environments/environment";
+import { documentos, rolesAprobacion } from "./revision-documentos.utilidades";
+
+
+//Servicios
+import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ModalRechazoAuditoriaComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
-import { MatDialog } from "@angular/material/dialog";
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
-import { environment } from "src/environments/environment";
-import { documentos, rolesAprobacion } from "./revision-documentos.utilidades";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
+import { DescargaService } from "src/app/shared/services/descarga.service";
 
 @Component({
   selector: "app-revision-documentos",
@@ -25,7 +29,7 @@ export class RevisionDocumentosComponent implements OnInit {
   rolauditoriaIdesAprobacion: any;
   rolesAprobacion: any;
   usuarioId: any;
-
+  documentos: { base64: string; tipo_id: number }[] = [];
   docProgramaTrabajo: string = "";
   docSolicitudInformacion: string = "";
   docCartaPresentacion: string = "";
@@ -40,7 +44,8 @@ export class RevisionDocumentosComponent implements OnInit {
     private readonly router: Router,
     private readonly userService: UserService,
     private readonly referenciaPdfService: ReferenciaPdfService,
-    private readonly nuxeoService: NuxeoService
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService
   ) {}
 
   ngOnInit(): void {
@@ -209,15 +214,29 @@ export class RevisionDocumentosComponent implements OnInit {
       .consultarDocumentos(this.auditoriaId)
       .subscribe(async (res) => {
         const promesas = res.map(async (documento) => {
+          const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
           const propiedad = tipoDocumentoMap[documento.tipo_id];
           if (propiedad) {
-            (this as any)[propiedad] = await this.nuxeoService.obtenerPorUUID(
-              documento.nuxeo_enlace
-            );
+            (this as any)[propiedad] = base64;
           }
+    
+          this.documentos.push({ base64, tipo_id: documento.tipo_id });
         });
 
         await Promise.all(promesas);
       });
   }
+
+  async descargarTodo() {
+    try {
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        "documentosAuditoria.zip"
+      );
+    } catch (error) {
+      console.error("Error al crear el archivo ZIP:", error);
+    }
+  }
+
 }
