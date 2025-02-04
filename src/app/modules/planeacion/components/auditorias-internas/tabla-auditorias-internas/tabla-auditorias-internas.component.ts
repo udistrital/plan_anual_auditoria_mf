@@ -20,6 +20,8 @@ import { ImplicitAutenticationService } from "src/app/core/services/implicit_aut
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -48,10 +50,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   permisoConsulta: boolean = false;
 
   constructor(
-    private readonly alertaService: AlertService,
+    private readonly alertService: AlertService,
     private readonly autenticationService: ImplicitAutenticationService,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly nuxeoService: NuxeoService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly router: Router,
@@ -82,7 +86,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         if (!(auditorias.length > 0)) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
-          return this.alertaService.showAlert(
+          return this.alertService.showAlert(
             "No hay auditorías registradas",
             "Actualmente no hay auditorías registradas para la vigencia seleccionada."
           );
@@ -96,9 +100,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   construirTabla() {
-    this.auditoriasContructorTabla = colocacionesContructorTabla.filter(column =>{
-      return column.columnDef !== 'acciones' || this.permisoEdicion;
-    });
+    this.auditoriasContructorTabla = colocacionesContructorTabla.filter(
+      (column) => {
+        return column.columnDef !== "acciones" || this.permisoEdicion;
+      }
+    );
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
@@ -135,13 +141,79 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .get(`plantilla/plan-trabajo/${auditoriaId}`)
       .subscribe((res) => {
         const documentoBase64 = res.Data;
-        console.log(documentoBase64);
         const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
           width: "1000px",
           data: documentoBase64,
           autoFocus: false,
         });
+
+        const modalInstance = dialogRef.componentInstance;
+        modalInstance.botonGuardar = {
+          icono: "save",
+          texto: "Guardar documento",
+        };
+
+        dialogRef.afterClosed().subscribe((res) => {
+          if (!res) return;
+
+          if (res.accion === "guardarDocumento") {
+            this.guardarDocumento(documentoBase64, auditoria);
+          }
+        });
       });
+  }
+
+  guardarDocumento(documentoBase64: any, auditoria: any) {
+    if (documentoBase64 !== "") {
+      const payload = {
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        nombre: "Programa de trabajo",
+        descripcion:
+          "Documento pdf (Programa de trabajo) de auditoría de plan de auditoría",
+        metadatos: {},
+        file: documentoBase64,
+      };
+
+      this.nuxeoService.guardarArchivos([payload]).subscribe({
+        next: (response: any) => {
+          const documentoRefNuxeo = response[0];
+          this.guardarReferencia(
+            documentoRefNuxeo,
+            "Auditoria",
+            auditoria._id,
+            environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO
+          );
+        },
+        error: (error) => {
+          console.error("Error al subir el documento", error);
+        },
+      });
+    }
+  }
+
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number
+  ): void {
+    if (nuxeoResponse.res.Enlace) {
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id
+        )
+        .subscribe({
+          next: (response) => {
+            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+          },
+          error: (error) => {
+            console.error("Error al guardar la referencia", error);
+          },
+        });
+    }
   }
 
   cargarEstadoAuditoria(auditoria: Auditoria) {
@@ -160,8 +232,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   editarAuditoria(auditoria: Auditoria) {
-    console.log("ROOOLEEEEE2", this.role)
-
     const auditoriaId = auditoria._id;
     this.router.navigate([
       `/planeacion/auditorias-internas/editar/${auditoriaId}`,
@@ -176,7 +246,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    this.alertaService
+    this.alertService
       .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
       .then((confirmado) => {
         if (!confirmado.value) {
@@ -193,13 +263,13 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .post("auditoria-estado", auditoriaEstado)
       .subscribe(
         () => {
-          this.alertaService.showSuccessAlert(
+          this.alertService.showSuccessAlert(
             "Auditoria enviada a aprobación por Jefe",
             "Auditoria enviada"
           );
         },
         (error) => {
-          this.alertaService.showErrorAlert("Error al enviar el plan.");
+          this.alertService.showErrorAlert("Error al enviar el plan.");
         }
       );
   }
@@ -217,9 +287,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   buscarRol() {
-    this.autenticationService
-    .getRole()
-    .then((roles: any) => {
+    this.autenticationService.getRole().then((roles: any) => {
       if (!roles || roles.length === 0) {
         return;
       }
@@ -240,19 +308,23 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         : null;
     });
   }
-  permisos(){
+
+  permisos() {
     this.autenticationService
-    .getRole()
-    .then((roles) => {
-      this.permisoEdicion = this.autenticationService.PermisoEdicion(roles as string[]);
-      console.log('Permiso de edición:', this.permisoEdicion);
-      this.permisoConsulta = this.autenticationService.PermisoConsulta(roles as string[]);
-      console.log('Permiso de consulta:', this.permisoConsulta);
-      
-    })
-    .catch((error) => {
-      console.error('Error al obtener los roles del usuario:', error);
-    });
+      .getRole()
+      .then((roles) => {
+        this.permisoEdicion = this.autenticationService.PermisoEdicion(
+          roles as string[]
+        );
+        console.log("Permiso de edición:", this.permisoEdicion);
+        this.permisoConsulta = this.autenticationService.PermisoConsulta(
+          roles as string[]
+        );
+        console.log("Permiso de consulta:", this.permisoConsulta);
+      })
+      .catch((error) => {
+        console.error("Error al obtener los roles del usuario:", error);
+      });
   }
 
   esEditableAuditoria(estadoId: number): boolean {
