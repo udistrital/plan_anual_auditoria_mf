@@ -16,7 +16,7 @@ export const environment = {
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
-  PLANTILLA_CARGUE_MASIVO: "f0c3d702-b5e8-46ff-8f0b-0c9c7511276c",
+  PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
