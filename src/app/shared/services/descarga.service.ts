@@ -46,25 +46,22 @@ export class DescargaService {
    */
   async descargarMultiplesArchivos(documentos: any[], archivoZip: string): Promise<void> {
     const zip = new JSZip();
-
-    // Define los IDs de tipos específicos.
-    const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA;
-    const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
-
+  
     try {
       documentos.forEach((doc, index) => {
-        let fileName = `documento_${index + 1}.pdf`;
-
-        // Asignar nombres específicos según tipo_id.
-        if (doc.tipo_id === tipoIdPAA) {
-          fileName = `plan_anual_auditoria.pdf`;
-        } else if (doc.tipo_id === tipoIdMatrizPublica) {
-          fileName = `matriz_funcion_publica.pdf`;
-        }
-
+        // Buscar la clave correspondiente al tipo_id en TIPO_DOCUMENTO_PARAMETROS
+        const tipoDocumento = Object.entries(environment.TIPO_DOCUMENTO_PARAMETROS)
+          .find(([_, id]) => id === doc.tipo_id)?.[0]; // Obtener la clave (nombre del documento)
+  
+        console.log(tipoDocumento)
+        // Asignar un nombre adecuado al archivo
+        const fileName = tipoDocumento 
+          ? `${tipoDocumento.toLowerCase().replaceAll('_', '-')}.pdf` 
+          : `documento_${index + 1}.pdf`;
+  
         zip.file(fileName, doc.base64, { base64: true });
       });
-
+  
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       saveAs(zipBlob, archivoZip);
     } catch (error) {

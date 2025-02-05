@@ -14,7 +14,7 @@ import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-
 import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 import { IconosModule } from "./modules/iconos.module";
-import { PdfVisualizadorComponent } from "../modules/programacion/components/consulta-plan-auditoria/revision-jefe/pdf-visualizador/pdf-visualizador.component";
+import { PdfVisualizadorComponent } from "./elements/components/pdf-visualizador/pdf-visualizador.component";
 
 @NgModule({
   declarations: [
