@@ -1,11 +1,9 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
-import { ModalService } from "src/app/shared/services/modal.service";
 import { UserService } from "src/app/core/services/user.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { MatTableDataSource } from "@angular/material/table";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
@@ -15,6 +13,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
 import { ModalVerDocumentosPlanComponent } from "./modal-ver-documentos-plan/modal-ver-documentos-plan.component";
+import { RolService } from "src/app/core/services/rol.service";
+import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -22,19 +22,14 @@ import { ModalVerDocumentosPlanComponent } from "./modal-ver-documentos-plan/mod
   styleUrls: ["./consulta-plan-auditoria.component.css"],
 })
 export class ConsultaPlanAuditoriaComponent implements OnInit {
-  role: string | null = null;
-  IsSecretario = false;
-  IsAuditor = false;
-  IsJefe = false;
+  roles: string[] = [];
   usuarioId: any;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   total!: number;
   opcionesPagina: number[] = [5, 10, 25];
   offset = 0;
-
   years: Parametro[] = [];
   selectedYearId: number | null = null;
-
   dataSource = new MatTableDataSource<Plan>([]);
   displayedColumns: string[] = [
     "no",
@@ -52,12 +47,15 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly parametrosService: ParametrosService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly autenticationService: ImplicitAutenticationService,
+    private rolService: RolService,
     private readonly userService: UserService
   ) {}
 
   ngOnInit(): void {
-    this.buscarRol();
+    this.roles = this.rolService.getRoles();
+    if (this.rolCreacion()) {
+      this.cargarVigencias();
+    }
     this.cargarPlanesAuditoria(this.opcionesPagina[0], this.offset);
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
@@ -78,32 +76,69 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     this.offset = 0;
   }
 
-  buscarRol() {
-    this.autenticationService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        console.error("No roles found for the user");
-        return;
+  getAccionesPorRolYEstado(plan: any) {
+    const estado = plan.estadoId;
+
+    // Usar un conjunto para evitar duplicados en las acciones
+    const accionesSet = new Set<string>();
+    this.roles.forEach((rol) => {
+      const acciones = accionesProgramacion[rol]?.[estado];
+      if (acciones) {
+        acciones.forEach((accion: any) => accionesSet.add(accion));
       }
-
-      this.IsSecretario = roles.includes("SECRETARIO_AUDITOR");
-      this.IsAuditor = roles.some(
-        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
-      );
-      this.IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = this.IsSecretario
-        ? "secretario"
-        : this.IsAuditor
-        ? "auditor"
-        : this.IsJefe
-        ? "jefe"
-        : null;
-
-      if (this.IsAuditor) {
-        this.cargarVigencias();
-      }
-      console.log(this.role);
     });
+    return Array.from(accionesSet);
+  }
+
+  // Permiso de creación de un plan en base a los roles
+  rolCreacion(): boolean {
+    return (
+      this.roles.includes("ADMIN_SISIFO") ||
+      this.roles.includes("AUDITOR_EXPERTO")
+    );
+  }
+
+  // Obtener el icono dependiendo de la acción
+  getIconoAccion(accion: string): string {
+    const iconos: { [key: string]: string } = {
+      Ver: "visibility",
+      "Ver Plan": "visibility",
+      "Ver Auditorias": "visibility",
+      "Ver Documentos": "visibility",
+      Editar: "edit",
+      "Registrar Auditorías": "add_circle",
+      "Motivos de rechazo": "report",
+      "Enviar Aprobación": "send",
+    };
+    return iconos[accion] || "help"; // Devuelve 'help' si no se encuentra un ícono
+  }
+
+  // Acciones
+  realizarAccion(plan: any, accion: string) {
+    switch (accion) {
+      case "Ver":
+        console.log("Ver Plan");
+        break;
+      case "Ver Plan":
+        console.log();
+        break;
+      case "Ver Auditorias":
+        console.log();
+        break;
+      case "Ver Documentos":
+        console.log();
+        break;
+      case "Editar":
+        console.log();
+        break;
+      case "Registrar Auditorías":
+      case "Motivos de rechazo":
+      case "Enviar Aprobación":
+        console.log();
+        break;
+      default:
+        break;
+    }
   }
 
   cargarVigencias() {
@@ -129,7 +164,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           this.dataSource.data = res.Data.filter((item: any) => {
             this.total = res.MetaData.Count;
 
-            if (!this.IsAuditor && item.estado?.estado_id === 6790) {
+            if (!this.rolCreacion() && item.estado?.estado_id === 6790) {
               return false;
             }
             return item.activo === true;
@@ -140,6 +175,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
             estado: item.estado?.estado_nombre ?? "Borrador",
             estadoId: item.estado?.estado_id ?? 6790,
+          }));
+
+          this.dataSource.data = this.dataSource.data.map((plan) => ({
+            ...plan,
+            accionesPorRolYEstado: this.getAccionesPorRolYEstado(plan),
           }));
         }
       },
