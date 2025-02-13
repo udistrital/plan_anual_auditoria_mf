@@ -5,14 +5,14 @@ export const accionesProgramacion: {
 } = {
   ADMIN_SISIFO: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [
-      "Ver Plan",
       "Editar",
+      "Ver Plan",
       "Motivos de rechazo",
       "Registrar Auditorías",
     ],
     [environment.PLAN_ESTADO.EN_RECHAZO_ID]: [
-      "Ver Plan",
       "Editar",
+      "Ver Plan",
       "Motivos de rechazo",
       "Registrar Auditorías",
     ],
@@ -38,14 +38,14 @@ export const accionesProgramacion: {
       "Motivos de rechazo",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
-      "Ver",
       "Editar",
+      "Ver Plan",
       "Motivos de rechazo",
       "Registrar Auditorías",
     ],
   },
   JEFE_CONTROL_INTERNO: {
-    [environment.PLAN_ESTADO.EN_BORRADOR_ID]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
     [environment.PLAN_ESTADO.EN_RECHAZO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
@@ -53,7 +53,7 @@ export const accionesProgramacion: {
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan"],
   },
   SECRETARIO_AUDITOR: {
-    [environment.PLAN_ESTADO.EN_BORRADOR_ID]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
     [environment.PLAN_ESTADO.EN_RECHAZO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
@@ -64,7 +64,6 @@ export const accionesProgramacion: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [
       "Editar",
       "Enviar Aprobación",
-      "Motivos de rechazo",
       "Registrar Auditorías",
     ],
     [environment.PLAN_ESTADO.EN_RECHAZO_ID]: [

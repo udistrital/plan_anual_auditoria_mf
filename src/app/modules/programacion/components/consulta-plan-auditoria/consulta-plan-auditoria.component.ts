@@ -22,15 +22,16 @@ import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado
   styleUrls: ["./consulta-plan-auditoria.component.css"],
 })
 export class ConsultaPlanAuditoriaComponent implements OnInit {
-  roles: string[] = [];
-  usuarioId: any;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   total!: number;
   opcionesPagina: number[] = [5, 10, 25];
   offset = 0;
+  roles: string[] = [];
+  usuarioId: any;
   years: Parametro[] = [];
   selectedYearId: number | null = null;
   dataSource = new MatTableDataSource<Plan>([]);
+
   displayedColumns: string[] = [
     "no",
     "creadoPor",
@@ -39,6 +40,17 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     "estado",
     "acciones",
   ];
+
+  iconosAccion = new Map<string, string>([
+    ["Ver", "visibility"],
+    ["Ver Plan", "visibility"],
+    ["Ver Auditorias", "visibility"],
+    ["Ver Documentos", "visibility"],
+    ["Editar", "edit"],
+    ["Registrar Auditorías", "add_circle"],
+    ["Motivos de rechazo", "report"],
+    ["Enviar Aprobación", "send"],
+  ]);
 
   constructor(
     private readonly alertaService: AlertService,
@@ -76,69 +88,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     this.offset = 0;
   }
 
-  getAccionesPorRolYEstado(plan: any) {
-    const estado = plan.estadoId;
-
-    // Usar un conjunto para evitar duplicados en las acciones
-    const accionesSet = new Set<string>();
-    this.roles.forEach((rol) => {
-      const acciones = accionesProgramacion[rol]?.[estado];
-      if (acciones) {
-        acciones.forEach((accion: any) => accionesSet.add(accion));
-      }
-    });
-    return Array.from(accionesSet);
-  }
-
-  // Permiso de creación de un plan en base a los roles
-  rolCreacion(): boolean {
-    return (
-      this.roles.includes("ADMIN_SISIFO") ||
-      this.roles.includes("AUDITOR_EXPERTO")
-    );
-  }
-
-  // Obtener el icono dependiendo de la acción
-  getIconoAccion(accion: string): string {
-    const iconos: { [key: string]: string } = {
-      Ver: "visibility",
-      "Ver Plan": "visibility",
-      "Ver Auditorias": "visibility",
-      "Ver Documentos": "visibility",
-      Editar: "edit",
-      "Registrar Auditorías": "add_circle",
-      "Motivos de rechazo": "report",
-      "Enviar Aprobación": "send",
+  construirEstado(planId: string, estadoId: number, observacion = "") {
+    return {
+      plan_auditoria_id: planId,
+      usuario_id: this.usuarioId,
+      observacion,
+      estado_id: estadoId,
     };
-    return iconos[accion] || "help"; // Devuelve 'help' si no se encuentra un ícono
-  }
-
-  // Acciones
-  realizarAccion(plan: any, accion: string) {
-    switch (accion) {
-      case "Ver":
-        console.log("Ver Plan");
-        break;
-      case "Ver Plan":
-        console.log();
-        break;
-      case "Ver Auditorias":
-        console.log();
-        break;
-      case "Ver Documentos":
-        console.log();
-        break;
-      case "Editar":
-        console.log();
-        break;
-      case "Registrar Auditorías":
-      case "Motivos de rechazo":
-      case "Enviar Aprobación":
-        console.log();
-        break;
-      default:
-        break;
-    }
   }
 
   cargarVigencias() {
@@ -156,34 +112,30 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
+    const EN_BORRADOR_ID = environment.PLAN_ESTADO.EN_BORRADOR_ID;
     this.PlanAnualAuditoriaMid.get(
       `plan-auditoria?query=&limit=${limit}&offset=${offset}`
     ).subscribe(
       (res) => {
-        if (res && res.Data) {
-          this.dataSource.data = res.Data.filter((item: any) => {
-            this.total = res.MetaData.Count;
-
-            if (!this.rolCreacion() && item.estado?.estado_id === 6790) {
-              return false;
-            }
-            return item.activo === true;
-          }).map((item: any, index: number) => ({
+        if (res?.Data) {
+          this.total = res.MetaData?.Count;
+          this.dataSource.data = res.Data.filter(
+            (item: any) =>
+              item.activo &&
+              (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)
+          ).map((item: any) => ({
             id: item._id,
             creadoPor: item.creado_por_id ?? "Sin asignar",
             vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
             estado: item.estado?.estado_nombre ?? "Borrador",
-            estadoId: item.estado?.estado_id ?? 6790,
-          }));
-
-          this.dataSource.data = this.dataSource.data.map((plan) => ({
-            ...plan,
-            accionesPorRolYEstado: this.getAccionesPorRolYEstado(plan),
+            estadoId: item.estado?.estado_id ?? EN_BORRADOR_ID,
+            acciones: this.getAccionesPorRolYEstado(item.estado?.estado_id),
           }));
         }
       },
-      (error) => {
+      (error: any) => {
+        console.error("Error al cargar los planes de auditoría:", error);
         this.alertaService.showErrorAlert(
           "Error al cargar los planes de auditoría"
         );
@@ -253,6 +205,46 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         "Debe seleccionar un año"
       );
     }
+  }
+
+  // Usar un conjunto para evitar duplicados en las acciones
+  getAccionesPorRolYEstado(estado: number) {
+    const accionesSet = new Set<string>();
+    this.roles.forEach((rol) => {
+      const acciones = accionesProgramacion[rol]?.[estado];
+      if (acciones) {
+        acciones.forEach((accion: any) => accionesSet.add(accion));
+      }
+    });
+    return Array.from(accionesSet);
+  }
+
+  // Permiso de creación de un plan en base a los roles
+  rolCreacion(): boolean {
+    return (
+      this.roles.includes("ADMIN_SISIFO") ||
+      this.roles.includes("AUDITOR_EXPERTO")
+    );
+  }
+
+  // Obtener el icono dependiendo de la acción
+  getIconoAccion(accion: string): string {
+    return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  // Acciones
+  realizarAccion(plan: any, accion: string) {
+    const acciones: Record<string, Function | null> = {
+      Ver: () => this.verReporte(plan),
+      "Ver Plan": () => this.verPlanPorRol(plan),
+      "Ver Auditorias": () => this.editarActividades(plan),
+      "Registrar Auditorías": () => this.editarActividades(plan),
+      "Ver Documentos": () => this.verDocumentos(plan),
+      Editar: () => this.editarReporte(plan),
+      "Motivos de rechazo": () => this.verMotivosRechazo(plan),
+      "Enviar Aprobación": () => this.enviarPlan(plan),
+    };
+    acciones[accion]?.();
   }
 
   editarReporte(element: any) {
@@ -331,13 +323,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       });
   }
 
-  construirEstado(planId: string, estadoId: number, observacion = "") {
-    return {
-      plan_auditoria_id: planId,
-      usuario_id: this.usuarioId,
-      observacion,
-      estado_id: estadoId,
-    };
+  private verPlanPorRol(plan: any) {
+    if (this.roles.includes("JEFE_CONTROL_INTERNO")) {
+      this.verPlanJefe(plan);
+    } else if (this.roles.includes("SECRETARIO_AUDITOR")) {
+      this.verPlanSecretario(plan);
+    }
   }
 
   verPlanJefe(element: any) {
@@ -362,6 +353,15 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     });
   }
 
+  verDocumentos(element: any) {
+    const dialogRef = this.dialog.open(ModalVerDocumentosPlanComponent, {
+      width: "1200px",
+      data: {
+        planAuditoriaId: element.id,
+      },
+    });
+  }
+
   verificarRechazos(plan: any) {
     const planId = plan.id;
     const estadoRechazadoId = environment.PLAN_ESTADO.RECHAZADO;
@@ -376,14 +376,5 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           plan.numRechazos = res.MetaData.Count;
         }
       });
-  }
-
-  verDocumentos(element: any) {
-    const dialogRef = this.dialog.open(ModalVerDocumentosPlanComponent, {
-      width: "1200px",
-      data: {
-        planAuditoriaId: element.id,
-      },
-    });
   }
 }
