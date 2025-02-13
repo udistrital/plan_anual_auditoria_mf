@@ -31,7 +31,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   years: Parametro[] = [];
   selectedYearId: number | null = null;
   dataSource = new MatTableDataSource<Plan>([]);
-
   displayedColumns: string[] = [
     "no",
     "creadoPor",
@@ -40,7 +39,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     "estado",
     "acciones",
   ];
-
   iconosAccion = new Map<string, string>([
     ["Ver", "visibility"],
     ["Ver Plan", "visibility"],
@@ -145,10 +143,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   crearPlan() {
     if (this.selectedYearId) {
-      const Plan: any = {
-        vigencia_id: this.selectedYearId,
-      };
-
+      const Plan: any = { vigencia_id: this.selectedYearId };
       this.planAnualAuditoriaService.post("plan-auditoria", Plan).subscribe(
         (response: any) => {
           if (response.Status === 201 && response.Data) {
@@ -209,14 +204,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   // Usar un conjunto para evitar duplicados en las acciones
   getAccionesPorRolYEstado(estado: number) {
-    const accionesSet = new Set<string>();
-    this.roles.forEach((rol) => {
-      const acciones = accionesProgramacion[rol]?.[estado];
-      if (acciones) {
-        acciones.forEach((accion: any) => accionesSet.add(accion));
-      }
-    });
-    return Array.from(accionesSet);
+    return Array.from(
+      new Set(
+        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] || [])
+      )
+    );
   }
 
   // Permiso de creación de un plan en base a los roles
@@ -365,7 +357,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   verificarRechazos(plan: any) {
     const planId = plan.id;
     const estadoRechazadoId = environment.PLAN_ESTADO.RECHAZADO;
-
     this.planAnualAuditoriaService
       .get(
         `estado?query=plan_auditoria_id:${planId},estado_id:${estadoRechazadoId},activo:true&limit=1&fields=_id`
