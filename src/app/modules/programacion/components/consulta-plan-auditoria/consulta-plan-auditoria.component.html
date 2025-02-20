@@ -107,26 +107,20 @@
                       mat-icon-button
                       color="primary"
                       [matMenuTriggerFor]="menu"
-                      (click)="verificarRechazos(element)"
                     >
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu" class="acciones">
-                      <ng-container *ngFor="let accion of element.acciones">
-                        <button
-                          mat-menu-item
-                          (click)="realizarAccion(element, accion)"
-                          *ngIf="
-                            accion !== 'Motivos de rechazo' ||
-                            element.tieneRechazos
-                          "
-                        >
-                          <mat-icon color="primary">{{
-                            getIconoAccion(accion)
-                          }}</mat-icon>
-                          <span>{{ accion }}</span>
-                        </button>
-                      </ng-container>
+                      <button
+                        mat-menu-item
+                        (click)="realizarAccion(element, accion)"
+                        *ngFor="let accion of element.acciones"
+                      >
+                        <mat-icon color="primary">{{
+                          getIconoAccion(accion)
+                        }}</mat-icon>
+                        <span>{{ accion }}</span>
+                      </button>
                     </mat-menu>
                   </ng-container>
                 </td>

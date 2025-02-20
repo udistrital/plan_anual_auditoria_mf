@@ -46,7 +46,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Ver Documentos", "visibility"],
     ["Editar", "edit"],
     ["Registrar Auditorías", "add_circle"],
-    ["Motivos de rechazo", "report"],
+    ["Historial de rechazo", "report"],
     ["Enviar Aprobación", "send"],
   ]);
 
@@ -115,22 +115,30 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       `plan-auditoria?query=&limit=${limit}&offset=${offset}`
     ).subscribe(
       (res) => {
-        if (res?.Data) {
-          this.total = res.MetaData?.Count;
-          this.dataSource.data = res.Data.filter(
-            (item: any) =>
-              item.activo &&
-              (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)
-          ).map((item: any) => ({
+        if (!res?.Data) return;
+        this.total = res.MetaData?.Count;
+        this.dataSource.data = res.Data.filter(
+          (item: any) =>
+            item.activo &&
+            (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)
+        ).map((item: any) => {
+          const estadoId = item.estado?.estado_id ?? EN_BORRADOR_ID;
+          let acciones = this.getAccionesPorRolYEstado(estadoId);
+          if (!item.tiene_rechazos) {
+            acciones = acciones.filter(
+              (accion) => accion !== "Historial de rechazo"
+            );
+          }
+          return {
             id: item._id,
-            creadoPor: item.creado_por_id ?? "Sin asignar",
+            creadoPor: item.creado_por_nombre ?? "Sin asignar",
             vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
             estado: item.estado?.estado_nombre ?? "Borrador",
-            estadoId: item.estado?.estado_id ?? EN_BORRADOR_ID,
-            acciones: this.getAccionesPorRolYEstado(item.estado?.estado_id),
-          }));
-        }
+            estadoId,
+            acciones,
+          };
+        });
       },
       (error: any) => {
         console.error("Error al cargar los planes de auditoría:", error);
@@ -143,8 +151,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   crearPlan() {
     if (this.selectedYearId) {
-      const Plan: any = { vigencia_id: this.selectedYearId };
-      this.planAnualAuditoriaService.post("plan-auditoria", Plan).subscribe(
+      const plan: any = {
+        vigencia_id: this.selectedYearId,
+        creado_por_id: this.usuarioId,
+      };
+      this.planAnualAuditoriaService.post("plan-auditoria", plan).subscribe(
         (response: any) => {
           if (response.Status === 201 && response.Data) {
             const planAuditoriaId = response.Data._id;
@@ -184,9 +195,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             error.error?.Data &&
             error.error.Data.includes("Ya existe un plan")
           ) {
-            this.alertaService.showConfirmAlert(
-              "Ya existe un plan de auditoría para la vigencia seleccionada.",
-              "VIGENCIA DUPLICADA"
+            this.alertaService.showAlert(
+              "VIGENCIA DUPLICADA",
+              "Ya existe un plan de auditoría para la vigencia seleccionada."
             );
           } else {
             this.alertaService.showErrorAlert("Error al crear el plan");
@@ -233,7 +244,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Registrar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
       Editar: () => this.editarReporte(plan),
-      "Motivos de rechazo": () => this.verMotivosRechazo(plan),
+      "Historial de rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
     };
     acciones[accion]?.();
@@ -352,20 +363,5 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         planAuditoriaId: element.id,
       },
     });
-  }
-
-  verificarRechazos(plan: any) {
-    const planId = plan.id;
-    const estadoRechazadoId = environment.PLAN_ESTADO.RECHAZADO;
-    this.planAnualAuditoriaService
-      .get(
-        `estado?query=plan_auditoria_id:${planId},estado_id:${estadoRechazadoId},activo:true&limit=1&fields=_id`
-      )
-      .subscribe((res) => {
-        if (res.MetaData.Count) {
-          plan.tieneRechazos = true;
-          plan.numRechazos = res.MetaData.Count;
-        }
-      });
   }
 }
