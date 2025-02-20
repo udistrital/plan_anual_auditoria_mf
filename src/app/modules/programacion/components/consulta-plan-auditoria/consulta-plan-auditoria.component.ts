@@ -119,8 +119,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         this.total = res.MetaData?.Count;
         this.dataSource.data = res.Data.filter(
           (item: any) =>
-            item.activo &&
-            (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)
+            item.activo
+            // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
         ).map((item: any) => {
           const estadoId = item.estado?.estado_id ?? EN_BORRADOR_ID;
           let acciones = this.getAccionesPorRolYEstado(estadoId);
@@ -332,6 +332,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     } else if (this.roles.includes("SECRETARIO_AUDITOR")) {
       this.verPlanSecretario(plan);
     }
+    // ToDo (complementar validación con estado)
   }
 
   verPlanJefe(element: any) {
