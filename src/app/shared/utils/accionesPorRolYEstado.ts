@@ -6,40 +6,34 @@ export const accionesProgramacion: {
   ADMIN_SISIFO: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [
       "Editar",
-      "Ver Plan",
       "Historial de rechazo",
       "Registrar Auditorías",
     ],
     [environment.PLAN_ESTADO.EN_RECHAZO_ID]: [
       "Editar",
-      "Ver Plan",
       "Historial de rechazo",
       "Registrar Auditorías",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [
       "Ver",
-      "Ver Plan",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de rechazo",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
       "Ver",
-      "Ver Plan",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de rechazo",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
       "Ver",
-      "Ver Plan",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de rechazo",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar",
-      "Ver Plan",
       "Historial de rechazo",
       "Registrar Auditorías",
     ],
@@ -55,7 +49,7 @@ export const accionesProgramacion: {
   SECRETARIO_AUDITOR: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
     [environment.PLAN_ESTADO.EN_RECHAZO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan"],
