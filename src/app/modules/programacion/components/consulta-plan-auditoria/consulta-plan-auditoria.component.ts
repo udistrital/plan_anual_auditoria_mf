@@ -31,13 +31,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   years: Parametro[] = [];
   selectedYearId: number | null = null;
   dataSource = new MatTableDataSource<Plan>([]);
+  permiso: boolean = false;
   displayedColumns: string[] = [
     "no",
     "creadoPor",
     "vigencia",
     "fechaCreacion",
     "estado",
-    "acciones",
   ];
   iconosAccion = new Map<string, string>([
     ["Ver", "visibility"],
@@ -63,13 +63,21 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   ngOnInit(): void {
     this.roles = this.rolService.getRoles();
-    if (this.rolCreacion()) {
-      this.cargarVigencias();
-    }
+    this.setPermisos();
     this.cargarPlanesAuditoria(this.opcionesPagina[0], this.offset);
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  setPermisos() {
+    this.permiso = this.rolService.permisoAccion(
+      environment.ROLES_ACCION.PROGRAMACION
+    );
+    if (this.permiso && !this.displayedColumns.includes("acciones")) {
+      this.displayedColumns.push("acciones");
+    }
+    if (this.permiso) this.cargarVigencias();
   }
 
   ngAfterViewInit() {
@@ -118,11 +126,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         if (!res?.Data) return;
         this.total = res.MetaData?.Count;
         this.dataSource.data = res.Data.filter(
-          (item: any) =>
-            item.activo
-            // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
+          (item: any) => item.activo
+          // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
         ).map((item: any) => {
-          const estadoId = item.estado?.estado_id ?? EN_BORRADOR_ID;
+          const estadoId = item.estado?.estado_id;
           let acciones = this.getAccionesPorRolYEstado(estadoId);
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
@@ -219,14 +226,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       new Set(
         this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] || [])
       )
-    );
-  }
-
-  // Permiso de creación de un plan en base a los roles
-  rolCreacion(): boolean {
-    return (
-      this.roles.includes("ADMIN_SISIFO") ||
-      this.roles.includes("AUDITOR_EXPERTO")
     );
   }
 
@@ -332,7 +331,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     } else if (this.roles.includes("SECRETARIO_AUDITOR")) {
       this.verPlanSecretario(plan);
     }
-    // ToDo (complementar validación con estado)
   }
 
   verPlanJefe(element: any) {

@@ -1,6 +1,4 @@
-import { AutenticacionMidService } from "./../../../../core/services/autenticacion-mid.service";
 import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup } from "@angular/forms";
 import { MatTableDataSource } from "@angular/material/table";
 import { FormularioAuditoriaEspecialComponent } from "./formulario-auditoria-especial/formulario-auditoria-especial.component";
 import { MatDialog } from "@angular/material/dialog";
@@ -11,14 +9,8 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { forkJoin } from "rxjs";
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
-import { SpinnerService } from "src/app/shared/services/spinner.service";
-
-export interface RolRegistro {
-  Nombre: string;
-  NombreWso2: string;
-  Id: number;
-}
+import { RolService } from "src/app/core/services/rol.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-registro-auditorias-especiales",
@@ -26,7 +18,11 @@ export interface RolRegistro {
   styleUrls: ["./registro-auditorias-especiales.component.css"],
 })
 export class RegistroAuditoriasEspecialesComponent implements OnInit {
-  formUsuarios: FormGroup | undefined;
+  dataSource = new MatTableDataSource<Auditoria>([]);
+  id: string = "";
+  years: Parametro[] = [];
+  selectedYearId: number | null = null;
+  permiso: boolean = false;
   displayedColumns: string[] = [
     "numero",
     "auditoria",
@@ -34,50 +30,30 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     "auditor",
     "cronograma",
     "estado",
-    "acciones",
   ];
-  dataSource = new MatTableDataSource<Auditoria>([]);
-  id: string = "";
-  years: Parametro[] = [];
-  selectedYearId: number | null = null;
-  permisoEdicion: boolean = false;
-  permisoConsulta: boolean = false;
-  roles: RolRegistro[] = [];
 
   constructor(
     private alertaService: AlertService,
-    private fb: FormBuilder,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
     private parametrosService: ParametrosService,
-    private autenticacionService: ImplicitAutenticationService
+    private rolService: RolService
   ) {}
 
   ngOnInit(): void {
     this.cargarAuditorias();
     this.cargarVigencias();
+    this.setPermisos();
+  }
 
-    this.autenticacionService
-      .getRole()
-      .then((roles) => {
-        this.permisoEdicion = this.autenticacionService.PermisoEdicion(
-          roles as string[]
-        );
-        console.log("Permiso de edición:", this.permisoEdicion);
-        this.permisoConsulta = this.autenticacionService.PermisoConsulta(
-          roles as string[]
-        );
-        console.log("Permiso de consulta:", this.permisoConsulta);
-        if (!this.permisoEdicion) {
-          this.displayedColumns = this.displayedColumns.filter(
-            (col) => col !== "acciones"
-          );
-        }
-      })
-      .catch((error) => {
-        console.error("Error al obtener los roles del usuario:", error);
-      });
+  setPermisos() {
+    this.permiso = this.rolService.permisoAccion(
+      environment.ROLES_ACCION.PROGRAMACION
+    );
+    if (this.permiso && !this.displayedColumns.includes("acciones")) {
+      this.displayedColumns.push("acciones");
+    }
   }
 
   cargarVigencias() {
@@ -91,47 +67,53 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.planAuditoriaMid.get(`auditoria?query=activo:true,plan_auditoria_id__isnull:true&limit=0&auditores`).subscribe(
-      (res) => {
-        if (res.Data) {
-          const auditorias: Auditoria[] = res.Data.map((item: any, index: number) => ({
-            numero: index + 1,
-            id: item._id ?? 0,
-            auditoria: item.titulo ?? "Sin Título",
-            tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
-            tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
-            auditores: [],
-            cronograma: item.cronograma ?? "Sin Cronograma",
-            cronogramaId: item.cronograma_id ?? 0,
-            estado: item.estado_id ?? "Desconocido",
-          }));
+    this.planAuditoriaMid
+      .get(
+        `auditoria?query=activo:true,plan_auditoria_id__isnull:true&limit=0&auditores`
+      )
+      .subscribe(
+        (res) => {
+          if (res.Data) {
+            const auditorias: Auditoria[] = res.Data.map(
+              (item: any, index: number) => ({
+                numero: index + 1,
+                id: item._id ?? 0,
+                auditoria: item.titulo ?? "Sin Título",
+                tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
+                tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
+                auditores: [],
+                cronograma: item.cronograma ?? "Sin Cronograma",
+                cronogramaId: item.cronograma_id ?? 0,
+                estado: item.estado_id ?? "Desconocido",
+              })
+            );
 
-          const auditorRequests = auditorias.map((auditoria) =>
-            this.planAuditoriaMid.get(
-              `auditor?query=auditoria_id:${auditoria.id},activo:true`
-            )
-          );
+            const auditorRequests = auditorias.map((auditoria) =>
+              this.planAuditoriaMid.get(
+                `auditor?query=auditoria_id:${auditoria.id},activo:true`
+              )
+            );
 
-          forkJoin(auditorRequests).subscribe(
-            (auditorResponses) => {
-              auditorias.forEach((auditoria, index) => {
-                auditoria.auditores = auditorResponses[index]?.Data ?? [];
-              });
+            forkJoin(auditorRequests).subscribe(
+              (auditorResponses) => {
+                auditorias.forEach((auditoria, index) => {
+                  auditoria.auditores = auditorResponses[index]?.Data ?? [];
+                });
 
-              this.dataSource.data = auditorias;
-              console.log("Auditorías con Auditores:", auditorias);
-            },
-            (error) => {
-              this.alertaService.showErrorAlert("Error al cargar auditores");
-            }
-          );
+                this.dataSource.data = auditorias;
+                console.log("Auditorías con Auditores:", auditorias);
+              },
+              (error) => {
+                this.alertaService.showErrorAlert("Error al cargar auditores");
+              }
+            );
+          }
+        },
+        (error) => {
+          console.error("Error al cargar las auditorías:", error);
+          this.alertaService.showErrorAlert("Error al cargar las auditorías");
         }
-      },
-      (error) => {
-        console.error("Error al cargar las auditorías:", error);
-        this.alertaService.showErrorAlert("Error al cargar las auditorías");
-      }
-    );
+      );
   }
 
   cargarAuditores(auditorias: any[]): void {
@@ -161,35 +143,33 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
 
   nuevaAuditoria() {
     if (this.selectedYearId) {
-      const payload={
+      const payload = {
         vigencia_id: this.selectedYearId,
-        plan_auditoria_id:null,
-      }
-      this.planAnualAuditoriaService
-        .post("auditoria", payload)
-        .subscribe(
-          (response: any) => {
-            if (response.Status === 201) {
-              this.alertaService.showSuccessAlert(
-                "Auditoría especial creada exitosamente"
-              );
-              this.cargarAuditorias();
-            }
-          },
-          (error) => {
-            if (
-              error.error?.Data &&
-              error.error.Data.includes("Ya existe una auditoría")
-            ) {
-              this.alertaService.showAlert(
-                "Vigencia duplicada",
-                "Ya existe una auditoría para la vigencia seleccionada."
-              );
-            } else {
-              this.alertaService.showErrorAlert("Error al crear la auditoría");
-            }
+        plan_auditoria_id: null,
+      };
+      this.planAnualAuditoriaService.post("auditoria", payload).subscribe(
+        (response: any) => {
+          if (response.Status === 201) {
+            this.alertaService.showSuccessAlert(
+              "Auditoría especial creada exitosamente"
+            );
+            this.cargarAuditorias();
           }
-        );
+        },
+        (error) => {
+          if (
+            error.error?.Data &&
+            error.error.Data.includes("Ya existe una auditoría")
+          ) {
+            this.alertaService.showAlert(
+              "Vigencia duplicada",
+              "Ya existe una auditoría para la vigencia seleccionada."
+            );
+          } else {
+            this.alertaService.showErrorAlert("Error al crear la auditoría");
+          }
+        }
+      );
     } else {
       this.alertaService.showAlert(
         "Selección requerida",
