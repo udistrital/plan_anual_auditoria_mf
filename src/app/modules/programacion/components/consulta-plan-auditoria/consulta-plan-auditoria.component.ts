@@ -31,7 +31,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   years: Parametro[] = [];
   selectedYearId: number | null = null;
   dataSource = new MatTableDataSource<Plan>([]);
-  permiso: boolean = false;
+  permisoCreacion: boolean = false;
   displayedColumns: string[] = [
     "no",
     "creadoPor",
@@ -46,7 +46,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Ver Documentos", "visibility"],
     ["Editar", "edit"],
     ["Registrar Auditorías", "add_circle"],
-    ["Historial de rechazo", "report"],
+    ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
   ]);
 
@@ -71,13 +71,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   setPermisos() {
-    this.permiso = this.rolService.permisoAccion(
+    this.permisoCreacion = this.rolService.permisoCreacion(
       environment.ROLES_ACCION.PROGRAMACION
     );
-    if (this.permiso && !this.displayedColumns.includes("acciones")) {
+    if (this.rolService.mostrarAcciones(accionesProgramacion)) {
       this.displayedColumns.push("acciones");
     }
-    if (this.permiso) this.cargarVigencias();
+    if (this.permisoCreacion) this.cargarVigencias();
   }
 
   ngAfterViewInit() {
@@ -133,7 +133,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           let acciones = this.getAccionesPorRolYEstado(estadoId);
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
-              (accion) => accion !== "Historial de rechazo"
+              (accion) => accion !== "Historial de Rechazo"
             );
           }
           return {
@@ -243,7 +243,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Registrar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
       Editar: () => this.editarReporte(plan),
-      "Historial de rechazo": () => this.verMotivosRechazo(plan),
+      "Historial de Rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
     };
     acciones[accion]?.();

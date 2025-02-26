@@ -45,7 +45,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
-  permiso: boolean = false;
+  mostrarAcciones: boolean = false;
   iconosAccion = new Map<string, string>([
     ["Ver Documento", "description"],
     ["Ver Auditoría", "visibility"],
@@ -69,12 +69,16 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   ngOnInit() {
     this.roles = this.rolService.getRoles();
-    this.permiso = this.rolService.permisoAccion(
-      environment.ROLES_ACCION.PLANEACION
-    );
+    this.setPermisos();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  setPermisos() {
+    if (this.rolService.mostrarAcciones(accionesPlaneacion)) {
+      this.mostrarAcciones = true;
+    }
   }
 
   listarAuditoriasPorVigencia(
@@ -113,7 +117,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   construirTabla() {
     this.auditoriasContructorTabla = colocacionesContructorTabla.filter(
       (column) => {
-        return column.columnDef !== "acciones" || this.permiso;
+        return column.columnDef !== "acciones" || this.mostrarAcciones;
       }
     );
     this.tablaColumnas = this.auditoriasContructorTabla.map(
@@ -285,7 +289,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   enviarAprobacionPorJefe(auditoriaId: string) {
-    const auditoriaEstado = this.construirObjetoAuditoriaEstado(auditoriaId);
+    const auditoriaEstado = {
+      auditoria_id: auditoriaId,
+      usuario_id: this.usuarioId,
+      usuario_rol: this.roles.includes("AUDITOR_EXPERTO")
+        ? "AUDITOR_EXPERTO"
+        : "AUDITOR",
+      observacion: "",
+      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
+      //todo por implementar
+      estado_id: 0,
+    };
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
       .subscribe(
@@ -299,17 +313,5 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           this.alertService.showErrorAlert("Error al enviar el plan.");
         }
       );
-  }
-
-  construirObjetoAuditoriaEstado(auditoriaId: string) {
-    return {
-      auditoria_id: auditoriaId,
-      usuario_id: this.usuarioId,
-      usuario_rol: this.roles[0], //ToDo: AJUSTAR DEPENDIENDO DEL ESTADO
-      observacion: "",
-      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
-      //todo por implementar
-      estado_id: 0,
-    };
   }
 }

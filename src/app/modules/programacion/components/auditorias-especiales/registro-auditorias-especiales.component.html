@@ -117,13 +117,13 @@
                 <mat-icon color="primary">more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon color="primary">send</mat-icon>
+                  <span>Enviar a Auditor(a)</span>
+                </button>
                 <button mat-menu-item (click)="editarAuditoria(element)">
                   <mat-icon color="primary">edit</mat-icon>
                   <span>Editar Auditoria Especial</span>
-                </button>
-                <button mat-menu-item>
-                  <mat-icon color="primary">send</mat-icon>
-                  <span>Enviar a Auditor (a)</span>
                 </button>
               </mat-menu>
             </mat-cell>

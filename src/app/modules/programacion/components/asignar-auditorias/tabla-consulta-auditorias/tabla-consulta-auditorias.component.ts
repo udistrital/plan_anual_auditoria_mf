@@ -41,7 +41,11 @@ export class TablaConsultaAuditoriasComponent {
   ) {}
 
   ngOnInit() {
-    this.permiso = this.rolService.permisoAccion(
+    this.setPermisos();
+  }
+
+  setPermisos() {
+    this.permiso = this.rolService.permisoCreacion(
       environment.ROLES_ACCION.PROGRAMACION
     );
   }

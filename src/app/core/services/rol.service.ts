@@ -22,7 +22,12 @@ export class RolService {
   }
 
   // Permiso para creación y edición
-  permisoAccion(roles: string[]): boolean {
+  permisoCreacion(roles: string[]): boolean {
     return roles.some((rol) => this.roles.includes(rol));
+  }
+
+  // Permiso para mostrar columna de acciones en un módulo en especifico
+  mostrarAcciones(accionesModulo: any) {
+    return this.roles.some((rol) => accionesModulo[rol]);
   }
 }

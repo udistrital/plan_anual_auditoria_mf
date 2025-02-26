@@ -48,7 +48,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   setPermisos() {
-    this.permiso = this.rolService.permisoAccion(
+    this.permiso = this.rolService.permisoCreacion(
       environment.ROLES_ACCION.PROGRAMACION
     );
     if (this.permiso && !this.displayedColumns.includes("acciones")) {
