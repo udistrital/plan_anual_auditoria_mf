@@ -35,61 +35,29 @@
                   <span>{{ pageIndex * pageSize + i + 1 }}</span>
                 </div>
 
+                <!-- Acciones -->
                 <div *ngSwitchCase="'acciones'">
-                  <button
-                    mat-icon-button
-                    [matMenuTriggerFor]="menu"
-                    color="primary"
-                    (click)="cargarEstadoAuditoria(row)"
-                  >
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
+                  <ng-container *ngIf="row.acciones?.length > 0">
                     <button
-                      (click)="revisarAuditoria(row)"
-                      mat-menu-item
-                      *ngIf="role !== 'auditor'"
+                      mat-icon-button
+                      color="primary"
+                      [matMenuTriggerFor]="menu"
                     >
-                      <mat-icon color="primary">content_paste_search</mat-icon>
-                      Revisar auditoría
+                      <mat-icon>more_vert</mat-icon>
                     </button>
-                    <button
-                      (click)="editarAuditoria(row)"
-                      mat-menu-item
-                      *ngIf="
-                        role === 'auditor' &&
-                        esEditableAuditoria(row.estado_interno_id)
-                      "
-                    >
-                      <mat-icon color="primary">edit</mat-icon>
-                      Editar auditoría
-                    </button>
-                    <button
-                      mat-menu-item
-                      *ngIf="
-                        role === 'auditor' &&
-                        !esEditableAuditoria(row.estado_interno_id)
-                      "
-                    >
-                      <mat-icon color="primary">visibility</mat-icon>
-                      Ver auditoría
-                    </button>
-                    <button
-                      (click)="preguntarEnvioAprobacionPorJefe(row)"
-                      mat-menu-item
-                      *ngIf="
-                        role === 'auditor' &&
-                        esEditableAuditoria(row.estado_interno_id)
-                      "
-                    >
-                      <mat-icon color="primary">send</mat-icon>
-                      Enviar a aprobación por Jefe
-                    </button>
-                    <button (click)="verDocumento(row)" mat-menu-item>
-                      <mat-icon color="primary">description</mat-icon>
-                      Ver documento
-                    </button>
-                  </mat-menu>
+                    <mat-menu #menu="matMenu">
+                      <button
+                        mat-menu-item
+                        (click)="realizarAccion(row, accion)"
+                        *ngFor="let accion of row.acciones"
+                      >
+                        <mat-icon color="primary">{{
+                          getIconoAccion(accion)
+                        }}</mat-icon>
+                        <span>{{ accion }}</span>
+                      </button>
+                    </mat-menu>
+                  </ng-container>
                 </div>
                 <span *ngSwitchDefault>{{ columna.cell(row) }}</span>
               </ng-container>

@@ -2,15 +2,14 @@ import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-import { Router } from "@angular/router";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria-auditor";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { colocacionesContructorTabla } from "./tabla-consulta-auditorias.utilidades";
 import { MatSort } from "@angular/material/sort";
 import { ModalAgregarAuditorComponent } from "../modal-agregar-auditor/modal-agregar-auditor.component";
-import { forkJoin } from "rxjs";
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { RolService } from "src/app/core/services/rol.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-tabla-consulta-auditorias",
@@ -20,46 +19,35 @@ import { ImplicitAutenticationService } from "src/app/core/services/implicit_aut
 export class TablaConsultaAuditoriasComponent {
   @Input() vigenciaId: any;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   auditoriasPorVigencia: Auditoria[] = [];
   auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
   auditoriasContructorTabla: any;
   banderaTablaAuditoriasInternas: boolean = false;
   tablaColumnas: any;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   totalRegistros: number = 0;
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
-  permisoEdicion: boolean = false;
-  permisoConsulta: boolean = false;
+  permiso: boolean = false;
 
   constructor(
     private readonly alertaService: AlertService,
-    private readonly autenticacionService: ImplicitAutenticationService,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly router: Router
+    private readonly rolService: RolService
   ) {}
 
   ngOnInit() {
-    this.autenticacionService
-      .getRole()
-      .then((roles) => {
-        this.permisoEdicion = this.autenticacionService.PermisoEdicion(
-          roles as string[]
-        );
-        console.log("Permiso de edición:", this.permisoEdicion);
-        this.permisoConsulta = this.autenticacionService.PermisoConsulta(
-          roles as string[]
-        );
-        console.log("Permiso de consulta:", this.permisoConsulta);
-      })
-      .catch((error) => {
-        console.error("Error al obtener los roles del usuario:", error);
-      });
+    this.setPermisos();
+  }
+
+  setPermisos() {
+    this.permiso = this.rolService.permisoCreacion(
+      environment.ROLES_CREACION.PROGRAMACION
+    );
   }
 
   listarAuditoriasPorVigencia(
@@ -73,41 +61,43 @@ export class TablaConsultaAuditoriasComponent {
       `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}&auditores`
     );
 
-    auditorias$.subscribe((res) => {
-      const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
-      console.log("Consulta aud Mid: ", auditorias);
-  
-      if (auditorias.length === 0) {
-        this.banderaTablaAuditoriasInternas = false;
-        this.auditoriasDataSource.data = [];
-        this.alertaService.showAlert(
-          "No hay auditorías registradas",
-          "Actualmente no hay auditorías registradas para la vigencia seleccionada."
-        );
-        return;
-      }
-  
-      auditorias.forEach((auditoria) => {
-        auditoria.auditores = Array.isArray(auditoria.auditores)
-          ? auditoria.auditores
-          : [];
-      });
+    auditorias$.subscribe(
+      (res) => {
+        const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
+        console.log("Consulta aud Mid: ", auditorias);
 
-      this.auditoriasPorVigencia = auditorias;
-      this.totalRegistros = res.MetaData?.Count ?? 0;
-      this.banderaTablaAuditoriasInternas = true;
-      this.construirTabla();
-    }, 
-    (error) => {
-      console.error("Error al cargar auditorías:", error);
-      this.alertaService.showErrorAlert("Error al cargar las auditorías.");
-    });
+        if (auditorias.length === 0) {
+          this.banderaTablaAuditoriasInternas = false;
+          this.auditoriasDataSource.data = [];
+          this.alertaService.showAlert(
+            "No hay auditorías registradas",
+            "Actualmente no hay auditorías registradas para la vigencia seleccionada."
+          );
+          return;
+        }
+
+        auditorias.forEach((auditoria) => {
+          auditoria.auditores = Array.isArray(auditoria.auditores)
+            ? auditoria.auditores
+            : [];
+        });
+
+        this.auditoriasPorVigencia = auditorias;
+        this.totalRegistros = res.MetaData?.Count ?? 0;
+        this.banderaTablaAuditoriasInternas = true;
+        this.construirTabla();
+      },
+      (error) => {
+        console.error("Error al cargar auditorías:", error);
+        this.alertaService.showErrorAlert("Error al cargar las auditorías.");
+      }
+    );
   }
 
   construirTabla() {
     this.auditoriasContructorTabla = colocacionesContructorTabla.filter(
       (column) => {
-        return column.columnDef !== "acciones" || this.permisoEdicion;
+        return column.columnDef !== "acciones" || this.permiso;
       }
     );
 
@@ -150,9 +140,13 @@ export class TablaConsultaAuditoriasComponent {
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) { 
-        this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.listarAuditoriasPorVigencia(
+          this.vigenciaId,
+          this.pageSize,
+          this.pageIndex * this.pageSize
+        );
       }
     });
   }

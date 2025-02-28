@@ -10,7 +10,7 @@
   <div class="row mt-3">
     <div class="col-12">
       <!-- Selector -->
-      <div class="section" *ngIf="rolCreacion()">
+      <div class="section" *ngIf="permisoCreacion">
         <div class="filter-section">
           <mat-form-field appearance="outline" style="width: 320px">
             <mat-label>Seleccione el año del plan:</mat-label>
@@ -110,7 +110,7 @@
                     >
                       <mat-icon>more_vert</mat-icon>
                     </button>
-                    <mat-menu #menu="matMenu" class="acciones">
+                    <mat-menu #menu="matMenu">
                       <button
                         mat-menu-item
                         (click)="realizarAccion(element, accion)"

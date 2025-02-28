@@ -13,10 +13,8 @@ export const environment = {
   // PLAN_ANUAL_AUDITORIA_MID:
   //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
-
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
-
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
 
@@ -87,12 +85,10 @@ export const environment = {
     "AUDITOR_EXPERTO",
     "AUDITOR",
   ],
-  ROLES_CONSULTA: ["JEFE_CONTROL_INTERNO"],
-  ROLES_CONSULTA_EDICION: [
-    "ADMIN_SISIFO",
-    "AUDITOR_EXPERTO",
-    "JEFE_CONTROL_INTERNO",
-  ],
+  ROLES_CREACION: {
+    PROGRAMACION: ["ADMIN_SISIFO", "AUDITOR_EXPERTO"],
+    PLANEACION: ["ADMIN_SISIFO", "AUDITOR_EXPERTO", "AUDITOR"],
+  },
 
   // idsCamposFormulario: {
   //   Objetivo: 6770,

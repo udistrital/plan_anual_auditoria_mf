@@ -31,13 +31,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   years: Parametro[] = [];
   selectedYearId: number | null = null;
   dataSource = new MatTableDataSource<Plan>([]);
+  permisoCreacion: boolean = false;
   displayedColumns: string[] = [
     "no",
     "creadoPor",
     "vigencia",
     "fechaCreacion",
     "estado",
-    "acciones",
   ];
   iconosAccion = new Map<string, string>([
     ["Ver", "visibility"],
@@ -46,7 +46,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Ver Documentos", "visibility"],
     ["Editar", "edit"],
     ["Registrar Auditorías", "add_circle"],
-    ["Historial de rechazo", "report"],
+    ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
   ]);
 
@@ -63,13 +63,21 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   ngOnInit(): void {
     this.roles = this.rolService.getRoles();
-    if (this.rolCreacion()) {
-      this.cargarVigencias();
-    }
+    this.setPermisos();
     this.cargarPlanesAuditoria(this.opcionesPagina[0], this.offset);
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  setPermisos() {
+    this.permisoCreacion = this.rolService.permisoCreacion(
+      environment.ROLES_CREACION.PROGRAMACION
+    );
+    if (this.rolService.mostrarAcciones(accionesProgramacion)) {
+      this.displayedColumns.push("acciones");
+    }
+    if (this.permisoCreacion) this.cargarVigencias();
   }
 
   ngAfterViewInit() {
@@ -118,15 +126,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         if (!res?.Data) return;
         this.total = res.MetaData?.Count;
         this.dataSource.data = res.Data.filter(
-          (item: any) =>
-            item.activo
-            // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
+          (item: any) => item.activo
+          // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
         ).map((item: any) => {
-          const estadoId = item.estado?.estado_id ?? EN_BORRADOR_ID;
+          const estadoId = item.estado?.estado_id;
           let acciones = this.getAccionesPorRolYEstado(estadoId);
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
-              (accion) => accion !== "Historial de rechazo"
+              (accion) => accion !== "Historial de Rechazo"
             );
           }
           return {
@@ -222,14 +229,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     );
   }
 
-  // Permiso de creación de un plan en base a los roles
-  rolCreacion(): boolean {
-    return (
-      this.roles.includes("ADMIN_SISIFO") ||
-      this.roles.includes("AUDITOR_EXPERTO")
-    );
-  }
-
   // Obtener el icono dependiendo de la acción
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
@@ -244,7 +243,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Registrar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
       Editar: () => this.editarReporte(plan),
-      "Historial de rechazo": () => this.verMotivosRechazo(plan),
+      "Historial de Rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
     };
     acciones[accion]?.();
@@ -332,7 +331,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     } else if (this.roles.includes("SECRETARIO_AUDITOR")) {
       this.verPlanSecretario(plan);
     }
-    // ToDo (complementar validación con estado)
   }
 
   verPlanJefe(element: any) {

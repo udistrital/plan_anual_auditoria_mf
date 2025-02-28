@@ -12,16 +12,16 @@ import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilida
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
-
 import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import { RolService } from "src/app/core/services/rol.service";
+import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -31,27 +31,32 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
   @ViewChild(MatSort) sort!: MatSort;
-  auditoriaEstados = environment.AUDITORIA_ESTADO;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  auditoriasPorVigencia: Auditoria[] = [];
   auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
+  auditoriaEstados = environment.AUDITORIA_ESTADO;
+  auditoriasPorVigencia: Auditoria[] = [];
   auditoriasContructorTabla: any;
   banderaTablaAuditoriasInternas: boolean = false;
   tablaColumnas: any;
-  role: string | null = null;
+  roles: string[] = [];
   usuarioId: any;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   totalRegistros: number = 0;
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
-  permisoEdicion: boolean = false;
-  permisoConsulta: boolean = false;
+  mostrarAcciones: boolean = false;
+  iconosAccion = new Map<string, string>([
+    ["Ver Documento", "description"],
+    ["Ver Auditoría", "visibility"],
+    ["Editar Auditoría", "edit"],
+    ["Revisar Auditoría", "content_paste_search"],
+    ["Enviar a Aprobación por Jefe", "send"],
+  ]);
 
   constructor(
     private readonly alertService: AlertService,
-    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly rolService: RolService,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly referenciaPdfService: ReferenciaPdfService,
@@ -63,11 +68,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.buscarRol();
-    this.permisos();
+    this.roles = this.rolService.getRoles();
+    this.setPermisos();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  setPermisos() {
+    if (this.rolService.mostrarAcciones(accionesPlaneacion)) {
+      this.mostrarAcciones = true;
+    }
   }
 
   listarAuditoriasPorVigencia(
@@ -81,7 +92,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
       )
       .subscribe((res) => {
-        const auditorias: any[] = res.Data;
+        const auditorias: any[] = res.Data.map((auditoria: any) => {
+          const estadoId = auditoria.estado?.estado_interno_id;
+          const acciones = this.getAccionesPorRolYEstado(estadoId);
+          return { ...auditoria, acciones };
+        });
 
         if (!(auditorias.length > 0)) {
           this.banderaTablaAuditoriasInternas = false;
@@ -102,7 +117,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   construirTabla() {
     this.auditoriasContructorTabla = colocacionesContructorTabla.filter(
       (column) => {
-        return column.columnDef !== "acciones" || this.permisoEdicion;
+        return column.columnDef !== "acciones" || this.mostrarAcciones;
       }
     );
     this.tablaColumnas = this.auditoriasContructorTabla.map(
@@ -135,6 +150,33 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     this.paginator.pageIndex = this.pageIndex;
   }
 
+  // Usar un conjunto para evitar duplicados en las acciones
+  getAccionesPorRolYEstado(estado: number) {
+    return Array.from(
+      new Set(
+        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] || [])
+      )
+    );
+  }
+
+  // Obtener el icono dependiendo de la acción
+  getIconoAccion(accion: string): string {
+    return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  // Acciones
+  realizarAccion(auditoria: any, accion: string) {
+    const acciones: Record<string, Function | null> = {
+      "Ver Documento": () => this.verDocumento(auditoria),
+      "Ver Auditoría": () => this.verAuditoria(auditoria),
+      "Editar Auditoría": () => this.editarAuditoria(auditoria),
+      "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
+      "Enviar a Aprobación por Jefe": () =>
+        this.preguntarEnvioAprobacionPorJefe(auditoria),
+    };
+    acciones[accion]?.();
+  }
+
   verDocumento(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     this.planAuditoriaMid
@@ -160,6 +202,36 @@ export class TablaAuditoriasInternasComponent implements OnInit {
             this.guardarDocumento(documentoBase64, auditoria);
           }
         });
+      });
+  }
+
+  verAuditoria(auditoria: Auditoria) {
+    console.log(auditoria);
+  }
+
+  editarAuditoria(auditoria: Auditoria) {
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/auditorias-internas/editar/${auditoriaId}`,
+    ]);
+  }
+
+  revisarAuditoria(auditoria: Auditoria) {
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/auditorias-internas/revision/${auditoriaId}`,
+    ]);
+  }
+
+  preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
+    this.alertService
+      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+        this.enviarAprobacionPorJefe(auditoria._id);
+        delete auditoria.estado_interno_id;
       });
   }
 
@@ -216,48 +288,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
-  cargarEstadoAuditoria(auditoria: Auditoria) {
-    if (auditoria.estado_interno_id) {
-      return;
-    }
-
-    const auditoriaId = auditoria._id;
-    this.planAuditoriaService
-      .get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`)
-      .subscribe((res) => {
-        auditoria.estado_interno_id =
-          res.Data[0]?.estado_interno_id ?? this.auditoriaEstados.BORRADOR_ID;
-      });
-  }
-
-  editarAuditoria(auditoria: Auditoria) {
-    const auditoriaId = auditoria._id;
-    this.router.navigate([
-      `/planeacion/auditorias-internas/editar/${auditoriaId}`,
-    ]);
-  }
-
-  revisarAuditoria(auditoria: Auditoria) {
-    const auditoriaId = auditoria._id;
-    this.router.navigate([
-      `/planeacion/auditorias-internas/revision/${auditoriaId}`,
-    ]);
-  }
-
-  preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    this.alertService
-      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.enviarAprobacionPorJefe(auditoria._id);
-        delete auditoria.estado_interno_id;
-      });
-  }
-
   enviarAprobacionPorJefe(auditoriaId: string) {
-    const auditoriaEstado = this.construirObjetoAuditoriaEstado(auditoriaId);
+    const auditoriaEstado = {
+      auditoria_id: auditoriaId,
+      usuario_id: this.usuarioId,
+      usuario_rol: this.roles.includes("AUDITOR_EXPERTO")
+        ? "AUDITOR_EXPERTO"
+        : "AUDITOR",
+      observacion: "",
+      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
+      //todo por implementar
+      estado_id: 0,
+    };
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
       .subscribe(
@@ -271,65 +313,5 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           this.alertService.showErrorAlert("Error al enviar el plan.");
         }
       );
-  }
-
-  construirObjetoAuditoriaEstado(auditoriaId: string) {
-    return {
-      auditoria_id: auditoriaId,
-      usuario_id: this.usuarioId,
-      usuario_rol: this.role,
-      observacion: "",
-      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
-      //todo por implementar
-      estado_id: 0,
-    };
-  }
-
-  buscarRol() {
-    this.autenticationService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        return;
-      }
-      console.log(roles);
-
-      const esSecretario = roles.includes("SECRETARIO_AUDITOR");
-      const esAuditor = roles.some(
-        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
-      );
-      const esJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = esSecretario
-        ? "secretario"
-        : esAuditor
-        ? "auditor"
-        : esJefe
-        ? "jefe"
-        : null;
-    });
-  }
-
-  permisos() {
-    this.autenticationService
-      .getRole()
-      .then((roles) => {
-        this.permisoEdicion = this.autenticationService.PermisoEdicion(
-          roles as string[]
-        );
-        console.log("Permiso de edición:", this.permisoEdicion);
-        this.permisoConsulta = this.autenticationService.PermisoConsulta(
-          roles as string[]
-        );
-        console.log("Permiso de consulta:", this.permisoConsulta);
-      })
-      .catch((error) => {
-        console.error("Error al obtener los roles del usuario:", error);
-      });
-  }
-
-  esEditableAuditoria(estadoId: number): boolean {
-    return (
-      estadoId === this.auditoriaEstados.RECHAZADO_ID ||
-      estadoId === this.auditoriaEstados.BORRADOR_ID
-    );
   }
 }
