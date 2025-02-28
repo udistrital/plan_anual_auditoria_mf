@@ -85,7 +85,7 @@ export const environment = {
     "AUDITOR_EXPERTO",
     "AUDITOR",
   ],
-  ROLES_ACCION: {
+  ROLES_CREACION: {
     PROGRAMACION: ["ADMIN_SISIFO", "AUDITOR_EXPERTO"],
     PLANEACION: ["ADMIN_SISIFO", "AUDITOR_EXPERTO", "AUDITOR"],
   },

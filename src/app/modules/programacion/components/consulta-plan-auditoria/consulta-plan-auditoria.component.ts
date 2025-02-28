@@ -72,7 +72,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   setPermisos() {
     this.permisoCreacion = this.rolService.permisoCreacion(
-      environment.ROLES_ACCION.PROGRAMACION
+      environment.ROLES_CREACION.PROGRAMACION
     );
     if (this.rolService.mostrarAcciones(accionesProgramacion)) {
       this.displayedColumns.push("acciones");

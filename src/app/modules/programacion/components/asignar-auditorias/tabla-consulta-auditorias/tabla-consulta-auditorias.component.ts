@@ -46,7 +46,7 @@ export class TablaConsultaAuditoriasComponent {
 
   setPermisos() {
     this.permiso = this.rolService.permisoCreacion(
-      environment.ROLES_ACCION.PROGRAMACION
+      environment.ROLES_CREACION.PROGRAMACION
     );
   }
 
