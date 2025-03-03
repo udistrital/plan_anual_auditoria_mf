@@ -56,7 +56,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
       plan_auditoria_id: this.infoModal.planAuditoriaId,
       usuario_id: this.infoModal.usuarioId,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_id: environment.PLAN_ESTADO.EN_RECHAZO_ID,
+      estado_id: environment.PLAN_ESTADO.RECHAZADO,
     };
   
     this.planAuditoriaService.post("estado", planEstado).subscribe(

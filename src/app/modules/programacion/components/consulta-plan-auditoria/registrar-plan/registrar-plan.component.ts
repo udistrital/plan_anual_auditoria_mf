@@ -85,7 +85,7 @@ export class RegistrarPlanComponent implements OnInit {
       this.modoEditar,
         (this.modoEditar =
           this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-          this.estadoIdActual === environment.PLAN_ESTADO.EN_RECHAZO_ID);
+          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO);
       this.actualizarEstadoCampos();
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
