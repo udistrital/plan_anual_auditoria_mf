@@ -18,27 +18,30 @@ export const colocacionesContructorTabla = [
     sortable: true,
   },
   {
-    columnDef: "dependencia",
-    header: "Dependencia",
-    cell: (auditoria: any) => "",
+    columnDef: "tipo",
+    header: "Tipo",
+    cell: (auditoria: any) => auditoria.tipo_nombre,
     sortable: true,
   },
   {
     columnDef: "auditores",
     header: "Auditor(es)",
-    cell: (auditoria: any) => "",
+    cell: (auditoria: any) =>
+      auditoria.auditores
+        .map((auditor: any) => auditor.auditor_nombre)
+        .join(", "),
     sortable: true,
   },
   {
     columnDef: "lider",
     header: "Líder",
-    cell: (auditoria: any) => "",
+    cell: (auditoria: any) => auditoria.lider_nombre,
     sortable: true,
   },
   {
     columnDef: "responsable",
     header: "Responsable",
-    cell: (auditoria: any) => "",
+    cell: (auditoria: any) => auditoria.responsable_nombre,
     sortable: true,
   },
   {
