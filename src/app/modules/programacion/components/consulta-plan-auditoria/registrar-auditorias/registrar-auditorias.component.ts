@@ -132,7 +132,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.mostrarBotones =
         estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-        estadoIdActual === environment.PLAN_ESTADO.EN_RECHAZO_ID;
+        estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.mostrarBotones = false;

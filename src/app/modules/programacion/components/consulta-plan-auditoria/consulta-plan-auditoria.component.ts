@@ -326,10 +326,18 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   private verPlanPorRol(plan: any) {
-    if (this.roles.includes("JEFE_CONTROL_INTERNO")) {
-      this.verPlanJefe(plan);
-    } else if (this.roles.includes("SECRETARIO_AUDITOR")) {
+    const esSecretario = this.roles.includes("SECRETARIO_AUDITOR");
+    const esJefe = this.roles.includes("JEFE_CONTROL_INTERNO");
+    if (esSecretario && esJefe) {
+      if (plan.estadoId === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID) {
+        this.verPlanSecretario(plan);
+      } else {
+        this.verPlanJefe(plan);
+      }
+    } else if (esSecretario) {
       this.verPlanSecretario(plan);
+    } else if (esJefe) {
+      this.verPlanJefe(plan);
     }
   }
 
