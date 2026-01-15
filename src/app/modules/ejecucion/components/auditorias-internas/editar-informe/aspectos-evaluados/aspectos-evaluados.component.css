@@ -1,0 +1,42 @@
+.tema-header,
+.subtema-header,
+.hallazgo-header {
+  gap: 10px;
+}
+
+.tema-input,
+.subtema-input,
+.hallazgo-input {
+  flex-grow: 1;
+}
+
+.indice {
+  font-weight: bold;
+  font-size: 1.2em;
+  padding: 4px 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  min-width: 35px;
+}
+
+
+.tema-box {
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+}
+
+.subtema-box,
+.hallazgo-box {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+
+.hallazgo-input {
+  width: 100%;
+}

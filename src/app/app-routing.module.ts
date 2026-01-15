@@ -21,6 +21,14 @@ const routes: Routes = [
         (m) => m.ProgramacionModule
       ),
   },
+  {
+    path: "ejecucion",
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import("./modules/ejecucion/ejecucion.module").then(
+        (m) => m.EjecucionModule
+      ),
+  },
 ];
 
 @NgModule({

@@ -1,0 +1,201 @@
+<plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="
+    '<p>Gestión Auditoría / Ejecución / Auditorías Internas </p>'
+  " [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
+        <ng-template matStepperIcon="number">
+          <mat-icon>lens</mat-icon>
+        </ng-template>
+        <!-- Paso 1: Información -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 1</p>
+            <b style="color: var(--primary)">Información</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Informacion general de la Auditoría
+            </div>
+          </div>
+          <div *ngIf="formularioInformacion != null" class="mt-4">
+            <app-formulario-dinamico #formularioInformacionComp [formulario]="formularioInformacion"
+              (submitFormulario)="preguntarGuardadoInformacion($event)">
+            </app-formulario-dinamico>
+            <div class="d-flex justify-content-end mt-4">
+              <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+                Guardar y continuar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 2: Aspectos Generales -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 2</p>
+            <b style="color: var(--primary)">Aspectos Generales</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assessment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Aspectos Generales</h2>
+              Aspectos generales
+            </div>
+          </div>
+          <div class="mt-4">
+            <form [formGroup]="form" (ngSubmit)="onSubmitAspectosGenerales()">
+              <app-editor-enriquecido formControlName="contenido"
+                placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <div class="d-flex justify-content-end mt-4">
+                <button matStepperPrevious mat-stroked-button color="primary">
+                  Volver
+                </button>
+                <button matStepperNext mat-flat-button color="primary" type="submit" class="mx-2">
+                  Guardar y continuar
+                </button>
+              </div>
+            </form>
+          </div>
+        </mat-step>
+
+        <!-- Paso 3: Aspectos Evaluados -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 3</p>
+            <b style="color: var(--primary)">Aspectos Evaluados</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assessment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Aspectos Evaluados</h2>
+              Aspectos evaluados
+            </div>
+          </div>
+          <div class="mt-4">
+            <app-aspectos-evaluados></app-aspectos-evaluados>
+            <div class="d-flex justify-content-end mt-4">
+              <button mat-stroked-button color="primary" matStepperPrevious>
+                Volver
+              </button>
+              <button mat-flat-button color="primary" class="mx-2">
+                Guardar y continuar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 4: Resumen de Hallazgos -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 4</p>
+            <b style="color: var(--primary)">Resumen de Hallazgos</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>visibility</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Resumen de Hallazgos</h2>
+              Resumen de hallazgos
+            </div>
+          </div>
+          <div class="mt-4">
+            <app-resumen-hallazgos></app-resumen-hallazgos>
+            <div class="d-flex justify-content-end mt-4">
+              <button matStepperPrevious mat-stroked-button color="primary">
+                Volver
+              </button>
+              <button matStepperNext mat-flat-button color="primary" class="mx-2">
+                Guardar y cerrar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 5: Respuesta Preliminar -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 5</p>
+            <b style="color: var(--primary)">Respuesta Preliminar</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>description</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Respuesta Preliminar</h2>
+              Respuesta preliminar
+            </div>
+          </div>
+          <div class="mt-4">
+            <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="onSubmitRespuestaPreliminar()">
+              <app-editor-enriquecido formControlName="contenido"
+                placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <div class="d-flex justify-content-end mt-4">
+                <button matStepperPrevious mat-stroked-button color="primary">
+                  Volver
+                </button>
+                <button matStepperNext mat-flat-button color="primary" type="submit" class="mx-2">
+                  Guardar y continuar
+                </button>
+              </div>
+            </form>
+          </div>
+        </mat-step>
+
+        <!-- Paso 6: Informe Final -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 6</p>
+            <b style="color: var(--primary)">Informe Final</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>description</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Informe Final</h2>
+              Informe final
+            </div>
+          </div>
+          <div class="mt-4">
+            <form [formGroup]="formInformeFinal" (ngSubmit)="onSubmitInformeFinal()">
+              <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
+              <app-editor-enriquecido formControlName="informe"
+                placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <hr class="my-2 separador">
+
+              <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
+              <app-editor-enriquecido formControlName="observaciones"
+                placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <hr class="my-2 separador">
+
+              <h3 style="color: var(--primary)" class="my-2">Notas</h3>
+              <app-editor-enriquecido formControlName="notas" placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <div class="d-flex justify-content-end mt-4">
+                <button matStepperPrevious mat-stroked-button color="primary">
+                  Volver
+                </button>
+                <button matStepperNext mat-flat-button color="primary" type="submit" class="mx-2">
+                  Guardar y continuar
+                </button>
+              </div>
+            </form>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </div>
+  </div>
+</ng-template>

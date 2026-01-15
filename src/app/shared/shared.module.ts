@@ -15,6 +15,8 @@ import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 import { IconosModule } from "./modules/iconos.module";
 import { PdfVisualizadorComponent } from "./elements/components/pdf-visualizador/pdf-visualizador.component";
+import { EditorEnriquecidoComponent } from "./elements/components/editor-enriquecido/editor-enriquecido.component";
+import { QuillModule } from "ngx-quill";
 
 @NgModule({
   declarations: [
@@ -25,6 +27,7 @@ import { PdfVisualizadorComponent } from "./elements/components/pdf-visualizador
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,
+    EditorEnriquecidoComponent,
   ],
   imports: [
     CommonModule,
@@ -33,6 +36,7 @@ import { PdfVisualizadorComponent } from "./elements/components/pdf-visualizador
     IconosModule,
     ReactiveFormsModule,
     PdfViewerModule,
+    QuillModule.forRoot(),
   ],
   exports: [
     //Componentes
@@ -42,13 +46,15 @@ import { PdfVisualizadorComponent } from "./elements/components/pdf-visualizador
     ModalVerDocumentoComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
+    PdfVisualizadorComponent,
+    EditorEnriquecidoComponent,
     //modulos
     FormsModule,
     IconosModule,
     DragDropModule,
     ReactiveFormsModule,
     PdfViewerModule,
-    PdfVisualizadorComponent,
+    QuillModule,
   ],
   providers: [
     { provide: MAT_DIALOG_DATA, useValue: {} },

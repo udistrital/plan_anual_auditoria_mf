@@ -1,0 +1,33 @@
+quill-editor {
+  height: 200px;
+  width: 100%;
+}
+
+.toolbar {
+  background-color: var(--md-accent-100);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: 5px;
+}
+
+
+.toolbar .ql-formats button {
+  color: var(--md-accent-contrast-500);
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
+.toolbar .ql-formats button:hover {
+  background-color: var(--md-accent-400);
+}
+
+
+.toolbar .ql-picker-label:hover,
+.toolbar .ql-picker-item:hover {
+  background-color: var(--md-accent-300);
+}
+
+.toolbar .ql-active {
+  background-color: var(--md-accent-300);
+  border-radius: 4px;
+}

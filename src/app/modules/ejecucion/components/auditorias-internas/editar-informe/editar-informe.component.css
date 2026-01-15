@@ -1,0 +1,10 @@
+.separador {
+  border: 0;
+  height: 2px;
+  background: var(--primary);
+  opacity: 0.5;
+}
+
+button.mat-flat-button {
+  color: var(--md-primary-contrast-500);
+}
