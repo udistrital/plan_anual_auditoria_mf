@@ -3,7 +3,7 @@ import { RequestManager } from '../managers/requestManager';
 import { Observable } from 'rxjs';
 
 /** Endpoint for sending templated emails */
-export const TEMPLATED_EMAIL_ENDPOINT = '/email/enviar_templated_email';
+export const TEMPLATED_EMAIL_ENDPOINT = 'email/enviar_templated_email';
 /** Name of the template for request emails */
 export const PLANTILLA_SOLICITUD_NOMBRE = 'SISIFO_PLANTILLA_SOLICITUD';
 /** Name of the template for rejection emails */

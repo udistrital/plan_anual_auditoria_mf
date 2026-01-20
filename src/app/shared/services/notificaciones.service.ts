@@ -6,6 +6,7 @@ import {
   PLANTILLA_SOLICITUD_NOMBRE,
   PLANTILLA_RECHAZO_NOMBRE
 } from '../../core/services/notificaciones-mid.service';
+import { environment } from '../../../environments/environment';
 
 
 /**
@@ -101,8 +102,7 @@ export class NotificacionesService {
   constructor(private notificacionesMidService: NotificacionesMidService) {}
 
   /** Sender email address used for notifications */
-  // TODO: Move to environment variable
-  private remitenteEmail = 'sisifo@udistrital.edu.co';
+  private remitenteEmail = environment['ORIGEN_CORREO_NOTIFICACIONES'];
 
   /**
    * Send a notification email for a request using the NOTIFICACIONES_MID_SERVICE.
