@@ -4,7 +4,9 @@ export const environment = {
   AUTENTICACION_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
   NOTIFICACIONES_MID_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1",
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
+  ORIGEN_CORREO_NOTIFICACIONES:
+    "notificacionPolux@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
