@@ -9,25 +9,50 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 
+export interface TabDocumento {
+  nombre: string;
+  tipoId: number;
+}
+
+export interface ModalVerDocumentosData {
+  entityId: string;
+  titulo?: string;
+  descripcion?: string;
+  tabs?: TabDocumento[];
+  textoBotonCerrar?: string;
+}
+
 @Component({
-  selector: "app-modal-ver-documentos-plan",
-  templateUrl: "./modal-ver-documentos-plan.component.html",
-  styleUrl: "./modal-ver-documentos-plan.component.css",
+  selector: "app-modal-ver-documentos",
+  templateUrl: "./modal-ver-documentos.component.html",
+  styleUrl: "./modal-ver-documentos.component.css",
 })
-export class ModalVerDocumentosPlanComponent implements OnInit {
+export class ModalVerDocumentosComponent implements OnInit {
   selectedTab: number = 0;
   documentos: { base64: string; tipo_id: number }[] = [];
-  documentoPAA: string = "";
-  documentoMatrizPublica: string = "";
+  documentosPorTab: { [key: number]: string } = {};
+
+  titulo: string = "Ver documentos";
+  descripcion: string = "Documentos del Plan Anual de Auditoria";
+  textoBotonCerrar: string = "Regresar";
+  tabs: TabDocumento[] = [
+    { nombre: "Formato PAA", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA },
+    { nombre: "Matriz Función Pública", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA },
+  ];
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { planAuditoriaId: string },
-    public dialogRef: MatDialogRef<ModalVerDocumentosPlanComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: ModalVerDocumentosData,
+    public dialogRef: MatDialogRef<ModalVerDocumentosComponent>,
     private readonly alertService: AlertService,
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly nuxeoService: NuxeoService,
     private readonly descargaService: DescargaService
-  ) {}
+  ) {
+    if (data.titulo) this.titulo = data.titulo;
+    if (data.descripcion) this.descripcion = data.descripcion;
+    if (data.tabs) this.tabs = data.tabs;
+    if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
+  }
 
   async ngOnInit() {
     try {
@@ -39,13 +64,8 @@ export class ModalVerDocumentosPlanComponent implements OnInit {
 
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA =
-        environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA;
-      const tipoIdMatrizPublica =
-        environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
-
       const enlacesConTipo = await lastValueFrom(
-        this.referenciaPdfService.consultarDocumentos(this.data.planAuditoriaId)
+        this.referenciaPdfService.consultarDocumentos(this.data.entityId)
       );
 
       const enlaces = enlacesConTipo.map((doc) => doc.nuxeo_enlace);
@@ -55,21 +75,17 @@ export class ModalVerDocumentosPlanComponent implements OnInit {
         const base64 = base64Files[index];
         this.documentos.push({ base64, tipo_id: doc.tipo_id });
 
-        if (doc.tipo_id === tipoIdPAA && !this.documentoPAA) {
-          this.documentoPAA = base64;
-        }
-        if (
-          doc.tipo_id === tipoIdMatrizPublica &&
-          !this.documentoMatrizPublica
-        ) {
-          this.documentoMatrizPublica = base64;
+        // Asignar documento al tab correspondiente
+        const tabIndex = this.tabs.findIndex(tab => tab.tipoId === doc.tipo_id);
+        if (tabIndex !== -1 && !this.documentosPorTab[tabIndex]) {
+          this.documentosPorTab[tabIndex] = base64;
         }
       });
     } catch (error) {
       console.error("Error al renderizar los documentos:", error);
       this.alertService.showAlert(
         "No se encontraron documentos",
-        "El plan anual de auditoría no cuenta con documentos"
+        "No se encontraron documentos asociados"
       );
       this.dialogRef.close();
     }
@@ -83,7 +99,7 @@ export class ModalVerDocumentosPlanComponent implements OnInit {
     try {
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        "documentosPAA.zip"
+        "documentos.zip"
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
