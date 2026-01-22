@@ -12,7 +12,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
-import { ModalVerDocumentosPlanComponent } from "./modal-ver-documentos-plan/modal-ver-documentos-plan.component";
+import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 
@@ -364,10 +364,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verDocumentos(element: any) {
-    const dialogRef = this.dialog.open(ModalVerDocumentosPlanComponent, {
+    this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
-        planAuditoriaId: element.id,
+        entityId: element.id,
       },
     });
   }

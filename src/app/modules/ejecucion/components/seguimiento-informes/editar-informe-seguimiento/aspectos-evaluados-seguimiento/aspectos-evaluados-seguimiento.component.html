@@ -1,0 +1,40 @@
+<div class="tabla-container" [formGroup]="aspectosForm">
+  <div class="control-buttons">
+    <button mat-raised-button color="primary" (click)="agregarTema()">Agregar Tema</button>
+  </div>
+  <div formArrayName="temas">
+    <mat-card *ngFor="let tema of temas.controls; let i = index" [formGroupName]="i" class="tema-box">
+      <div class="d-flex align-items-center tema-header">
+        <span class="indice">{{ i + 1 }}</span>
+        <mat-form-field appearance="outline" class="tema-input">
+          <mat-label>Tema</mat-label>
+          <input matInput formControlName="nombre" placeholder="Nombre del Tema">
+        </mat-form-field>
+        <button mat-icon-button color="warn" (click)="eliminarTema(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <div formArrayName="subtemas" class="ms-4">
+        <div *ngFor="let subtema of getSubtemas(i).controls; let j = index" [formGroupName]="j" class="subtema-box">
+          <div class="d-flex align-items-center subtema-header">
+            <span class="indice">{{ i + 1 }}.{{ j + 1 }}</span>
+            <mat-form-field appearance="outline" class="subtema-input">
+              <mat-label>Subtema</mat-label>
+              <input matInput formControlName="nombre" placeholder="Nombre del Subtema">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="eliminarSubtema(i, j)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mt-2">
+          <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
+            <mat-icon>add</mat-icon>
+            Agregar Subtema
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>
