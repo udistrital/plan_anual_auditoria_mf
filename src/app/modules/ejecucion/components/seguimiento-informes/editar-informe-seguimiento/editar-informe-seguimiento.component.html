@@ -13,8 +13,18 @@
         <!-- Paso 1: Información -->
         <mat-step>
           <ng-template matStepLabel>
-            <b style="color: var(--primary)">INFORMACIÓN</b>
+            <p>Paso 1</p>
+            <b style="color: var(--primary)">Información</b>
           </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Información general del seguimiento
+            </div>
+          </div>
           <div *ngIf="formularioInformacion != null" class="mt-4">
             <app-formulario-dinamico #formularioInformacionComp [formulario]="formularioInformacion"
               (submitFormulario)="preguntarGuardadoInformacion($event)">
@@ -30,10 +40,19 @@
         <!-- Paso 2: Aspectos Generales -->
         <mat-step>
           <ng-template matStepLabel>
-            <b style="color: var(--primary)">ASPECTOS GENERALES</b>
+            <p>Paso 2</p>
+            <b style="color: var(--primary)">Aspectos Generales</b>
           </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assessment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Aspectos Generales</h2>
+              Aspectos generales del seguimiento
+            </div>
+          </div>
           <div class="mt-4">
-            <h3 class="titulo-seccion">Aspectos Generales</h3>
             <form [formGroup]="formAspectosGenerales" (ngSubmit)="onSubmitAspectosGenerales()">
               <app-editor-enriquecido formControlName="contenido"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
@@ -52,10 +71,19 @@
         <!-- Paso 3: Aspectos Evaluados -->
         <mat-step>
           <ng-template matStepLabel>
-            <b style="color: var(--primary)">ASPECTOS EVALUADOS</b>
+            <p>Paso 3</p>
+            <b style="color: var(--primary)">Aspectos Evaluados</b>
           </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assessment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Aspectos Evaluados</h2>
+              Aspectos evaluados del seguimiento
+            </div>
+          </div>
           <div class="mt-4">
-            <h3 class="titulo-seccion">Aspectos Evaluados</h3>
             <app-aspectos-evaluados-seguimiento></app-aspectos-evaluados-seguimiento>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" matStepperPrevious class="me-2">
@@ -71,11 +99,20 @@
         <!-- Paso 4: Observaciones y Conclusiones -->
         <mat-step>
           <ng-template matStepLabel>
-            <b style="color: var(--primary)">OBSERVACIONES Y CONCLUSIONES</b>
+            <p>Paso 4</p>
+            <b style="color: var(--primary)">Observaciones y Conclusiones</b>
           </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>description</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Observaciones y Conclusiones</h2>
+              Observaciones y conclusiones del seguimiento
+            </div>
+          </div>
           <div class="mt-4">
             <form [formGroup]="formObservaciones" (ngSubmit)="onSubmitObservaciones()">
-              <h3 class="titulo-seccion">Observaciones y Conclusiones</h3>
               <app-editor-enriquecido formControlName="observaciones"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
 

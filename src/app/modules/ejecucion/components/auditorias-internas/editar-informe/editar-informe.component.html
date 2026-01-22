@@ -1,5 +1,5 @@
 <plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="
-    '<p>Gestión Auditoría / Ejecución / Auditorías Internas </p>'
+    '<p>Gestión Auditoría / Ejecución / <b>Auditorías Internas</b> </p>'
   " [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
 
@@ -175,12 +175,10 @@
               <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
               <app-editor-enriquecido formControlName="informe"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
-              <hr class="my-2 separador">
 
               <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
               <app-editor-enriquecido formControlName="observaciones"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
-              <hr class="my-2 separador">
 
               <h3 style="color: var(--primary)" class="my-2">Notas</h3>
               <app-editor-enriquecido formControlName="notas" placeholder="Edita tu texto..."></app-editor-enriquecido>

@@ -108,7 +108,7 @@ export const formularioInformacionAuditoria: Formulario = {
       descripcion: "En caso de no aplicr se debe indicar (N/A)",
       tipo: "textarea",
       validaciones: [{ valor: "" }],
-      valor: "En caso de no aplicar se debe indicar (N/A)",
+      placeholder: "En caso de no aplicar se debe indicar (N/A)",
       deshabilitado: false,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
     },
