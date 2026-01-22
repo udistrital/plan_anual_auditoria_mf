@@ -127,6 +127,24 @@
               (submitFormulario)="preguntarGuardadoRecursos($event)"
             >
             </app-formulario-dinamico>
+          </div>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>memory</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Temas</h2>
+              Información para la ejecución de la auditoría
+            </div>
+          </div>
+          <div *ngIf="formularioTemas != null" class="mt-4">
+            <app-formulario-dinamico
+              #formularioTemasComp
+              [formulario]="formularioTemas"
+              >
+            </app-formulario-dinamico>
+          </div>
+          <div class="mt-4">
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" matStepperPrevious>
                 <mat-icon>arrow_back_ios</mat-icon>

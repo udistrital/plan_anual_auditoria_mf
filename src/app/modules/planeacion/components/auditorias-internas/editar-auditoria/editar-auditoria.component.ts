@@ -5,6 +5,7 @@ import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
   formularioInformacionAuditoria,
   formularioRecursosAuditoria,
+  formularioTemasAuditoria,
 } from "./editar-auditoria.utilidades";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -38,6 +39,10 @@ export class EditarAuditoriaComponent implements OnInit {
   @ViewChild("formularioRecursosComp")
   formularioRecursosComponent!: FormularioDinamicoComponent;
   formularioRecursos: Formulario | undefined;
+
+  @ViewChild("formularioTemasComp")
+  formularioTemasComponent!: FormularioDinamicoComponent;
+  formularioTemas: Formulario | undefined;
 
   auditoriaId!: string;
   auditoria!: Auditoria;
@@ -90,6 +95,7 @@ export class EditarAuditoriaComponent implements OnInit {
   cargarFormularios(): void {
     this.formularioInformacion = formularioInformacionAuditoria;
     this.formularioRecursos = formularioRecursosAuditoria;
+    this.formularioTemas = formularioTemasAuditoria;
   }
 
   enviarFormInformacion() {
@@ -147,10 +153,11 @@ export class EditarAuditoriaComponent implements OnInit {
 
   enviarFormRecursos() {
     this.formularioRecursosComponent.onSubmit();
+    this.formularioTemasComponent.onSubmit();
   }
 
   preguntarGuardadoRecursos(dataForm: any) {
-    if (!dataForm) {
+    if (!dataForm || !this.formularioTemasComponent.form.valid) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
         "Debe llenar todos los campos obligatorios"
@@ -158,7 +165,7 @@ export class EditarAuditoriaComponent implements OnInit {
     }
 
     this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de guardar los recursos?")
+      .showConfirmAlert("¿Está seguro(a) de guardar los recursos y temas?")
       .then((confirmado) => {
         if (!confirmado.value) {
           return;
@@ -173,6 +180,7 @@ export class EditarAuditoriaComponent implements OnInit {
       rec_tecnologico: recursos.tecnologicos,
       rec_humano: recursos.humanos,
       rec_fisico: recursos.fisicos,
+      temas: this.formularioTemasComponent.form.value.temas,
     };
 
     this.planAuditoriaService
@@ -237,6 +245,10 @@ export class EditarAuditoriaComponent implements OnInit {
       tecnologicos: this.auditoria.rec_tecnologico,
       humanos: this.auditoria.rec_humano,
       fisicos: this.auditoria.rec_fisico,
+    });
+
+    this.formularioTemasComponent.form.patchValue({
+      temas: this.auditoria.temas,
     });
 
     if (this.auditoria.tipo_id) {
