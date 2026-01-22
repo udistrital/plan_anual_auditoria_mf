@@ -15,6 +15,14 @@ import { MatPaginator } from "@angular/material/paginator";
 import { ModalVerDocumentosPlanComponent } from "./modal-ver-documentos-plan/modal-ver-documentos-plan.component";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import { catchError, exhaustMap, Observable, of, throwError } from "rxjs";
+import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import {
+  NotificacionesService,
+  DestinatariosEmail,
+  VariablesSolicitud,
+} from "src/app/shared/services/notificaciones.service";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -58,7 +66,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private rolService: RolService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly tercerosService: TercerosService,
   ) {}
 
   ngOnInit(): void {
@@ -276,8 +286,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             .get(
               `documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`
             )
-            .subscribe(
-              (documentos) => {
+            .subscribe({
+              next: (documentos) => {
                 if (documentos && documentos.Data.length > 0) {
                   const nuevoEstado = this.construirEstado(
                     element.id,
@@ -286,12 +296,33 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
                   this.planAnualAuditoriaService
                     .post("estado", nuevoEstado)
-                    .subscribe(
-                      (nuevoEstadoResponse: any) => {
+                    .subscribe({
+                      next: (nuevoEstadoResponse: any) => {
                         if (nuevoEstadoResponse.Status === 201) {
-                          this.alertaService.showSuccessAlert(
-                            "Plan enviado exitosamente"
-                          );
+                          this.notificarEnvioPlan(element).pipe(
+
+                            exhaustMap((response: any) => {
+                              if (response.Status == 200) {
+                                this.alertaService.showSuccessAlert(
+                                  "Plan enviado exitosamente"
+                                );
+                                return of(response);
+                              }                               
+
+                              console.error("Solicitud de notificación fallida:", response);
+                              return throwError(() => new Error("Solicitud de notificación fallida"));
+                            }),
+
+                            catchError((error) => {
+                              this.alertaService.showAlert(
+                                "Error en notificación",
+                                "El plan fue asociado exitosamente, pero hubo un problema al enviar la notificación."
+                              );
+
+                              return throwError(() => new Error("Error en notificación", error));
+                            }),
+
+                          ).subscribe();
                           this.iniciarPaginacion();
                           this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
                         } else {
@@ -300,13 +331,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                           );
                         }
                       },
-                      (nuevoEstadoError) => {
+                      error: (nuevoEstadoError) => {
                         this.alertaService.showErrorAlert(
                           "Error al asociar el estado al plan"
                         );
                         console.error(nuevoEstadoError);
                       }
-                    );
+                    });
                 } else {
                   // Si no existe el documento, mostrar alerta
                   this.alertaService.showErrorAlert(
@@ -314,15 +345,54 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                   );
                 }
               },
-              (error) => {
+              error: (error) => {
                 this.alertaService.showErrorAlert(
                   "Error al verificar la existencia del documento asociado."
                 );
                 console.error(error);
               }
-            );
+            });
         }
       });
+  }
+
+  /**
+   * Sends an email notification upon sending the audit plan for approval.
+   * @param element The audit plan element containing details such as vigencia.
+   * @returns An observable representing the notification sending process.
+   */
+  notificarEnvioPlan(element: any): Observable<any> {
+    return this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      // Fetch the full name of the sender
+      exhaustMap((terceroIdentification) => of(terceroIdentification.NombreCompleto)),
+
+      // Send notification using the sender's name
+      exhaustMap((nombreRemitente) => {
+        const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Usuario";
+        const destinatarios: DestinatariosEmail = environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"];
+        const variablesSolicitud: VariablesSolicitud = {
+          titulo_solicitud: "Aprobación de Plan Anual de Auditoría",
+          tipo_solicitud: "revisión y aprobación",
+          nombre_documento: "Plan Anual de Auditoría",
+          vigencia: element.vigencia,
+          rol_remitente: rolRemitente,
+          nombre_remitente: nombreRemitente || rolRemitente,
+          fecha_envio: new Date().toLocaleDateString()
+        };
+
+        console.debug("Sending email notification:", {
+              "element": element,
+              "destinatarios": destinatarios,
+              "variablesSolicitud": variablesSolicitud
+            });
+        return this.notificacionesService.enviarNotificacionSolicitud(destinatarios, variablesSolicitud);
+      }),
+
+      catchError((error) => {
+        return throwError(() => new Error("Error sending notification", error));
+      })
+    );
   }
 
   private verPlanPorRol(plan: any) {

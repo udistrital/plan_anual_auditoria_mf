@@ -22,6 +22,15 @@ export const environment = {
 
   PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
 
+  // TODO: Replace with dependency and chief emails. Current are for testing purposes only.
+  NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS: {
+    ToAddresses: [
+      "cjgonzalezp@udistrital.edu.co",
+      "hegranadosl@udistrital.edu.co",
+      "ndsabogalv@udistrital.edu.co",
+    ]
+  },
+
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
     EN_REVISION_JEFE_ID: 6791,
