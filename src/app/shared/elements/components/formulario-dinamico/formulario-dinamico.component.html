@@ -192,6 +192,7 @@
           style="height: 72px; resize: none"
           matInput
           [formControlName]="campo.nombre"
+          [placeholder]="campo.placeholder || ''"
         ></textarea>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
