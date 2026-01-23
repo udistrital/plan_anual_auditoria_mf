@@ -1,8 +1,6 @@
 <plantilla-tarjeta-contenedora
-  [title]="'Registrar plan anual auditoría - PAA'"
-  [breadcrumb]="
-    '<p>Gestión Auditoría / Programación / Plan anual de auditorías / <b>Registrar</b></p>'
-  "
+  [title]="title"
+  [breadcrumb]="breadcrumb"
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
@@ -35,7 +33,7 @@
             mat-raised-button
             color="primary"
             (click)="descargarPlantilla()"
-            *ngIf="mostrarBotones"
+            *ngIf="modoEditar"
           >
             <mat-icon svgIcon="excel"></mat-icon>Plantilla Cargue Masivo
           </button>
@@ -51,6 +49,9 @@
         <table
           mat-table
           [dataSource]="dataSource"
+          cdkDropList
+          [cdkDropListDisabled]="!modoEditar"
+          (cdkDropListDropped)="drop($event)"
         >
           <!-- No Column (Generado automáticamente) -->
           <ng-container matColumnDef="no">
@@ -133,7 +134,7 @@
       <div class="row mt-3">
         <div
           class="d-flex justify-content-end"
-          *ngIf="!mostrarBotones; else botonesAcciones"
+          *ngIf="!modoEditar; else botonesAcciones"
         >
           <button
             class="mx-2"
