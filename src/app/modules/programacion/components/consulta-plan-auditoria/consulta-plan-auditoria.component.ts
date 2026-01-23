@@ -44,7 +44,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Ver Plan", "visibility"],
     ["Ver Auditorias", "visibility"],
     ["Ver Documentos", "visibility"],
-    ["Editar", "edit"],
+    ["Editar Marco General", "edit"],
     ["Registrar Auditorías", "add_circle"],
     ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
@@ -176,7 +176,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
               (estadoResponse: any) => {
                 if (estadoResponse.Status === 201) {
                   this.alertaService.showSuccessAlert(
-                    "Plan creado exitosamente"
+                    "El Plan Anual de Auditorías fue creado correctamente en estado Borrador.",
+                    "Creación exitosa"
                   );
                   this.iniciarPaginacion();
                   this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
@@ -203,8 +204,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             error.error.Data.includes("Ya existe un plan")
           ) {
             this.alertaService.showAlert(
-              "VIGENCIA DUPLICADA",
-              "Ya existe un plan de auditoría para la vigencia seleccionada."
+              // TODO: I think this title makes it seems like there are now multiple vigencias created, which is not the case
+              "Vigencia creada",
+              "Ya existe un Plan Anual de Auditorías registrado para el año seleccionado."
             );
           } else {
             this.alertaService.showErrorAlert("Error al crear el plan");
@@ -237,12 +239,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   // Acciones
   realizarAccion(plan: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      Ver: () => this.verReporte(plan),
+      "Ver": () => this.verReporte(plan),
       "Ver Plan": () => this.verPlanPorRol(plan),
       "Ver Auditorias": () => this.editarActividades(plan),
       "Registrar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
-      Editar: () => this.editarReporte(plan),
+      "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
     };
@@ -267,7 +269,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   enviarPlan(element: any) {
     this.alertaService
       .showConfirmAlert(
-        "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?"
+        "¿Está seguro(a) de enviar el Plan Anual de Auditoría (PAA)?"
       )
       .then((result) => {
         if (result.isConfirmed) {

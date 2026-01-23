@@ -35,10 +35,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
   ];
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
-  mostrarBotones: boolean = true;
+  modoEditar: boolean = true;
   vigenciaId: number = 6619;
   idMatriz: any = null;
   base64Matriz: any = null;
+  title: string = "";
+  breadcrumb: string = "";
 
   constructor(
     private alertaService: AlertService,
@@ -65,6 +67,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
       console.error("Error al cargar Matriz", error);
     }
     await this.obtenerEstadoActual();
+    this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
+    this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
 
   cargarVigencia(): void {
@@ -116,8 +120,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "estado",
     ];
 
-    // Agrega la columna de acciones solo si mostrarBotones es true
-    if (this.mostrarBotones) {
+    // Agrega la columna de acciones solo si modoEditar es true
+    if (this.modoEditar) {
       this.displayedColumns.push("acciones");
     }
   }
@@ -130,18 +134,18 @@ export class RegistrarAuditoriasComponent implements OnInit {
       const estadoActual = response?.Data?.[0];
       const estadoIdActual = estadoActual?.estado_id || null;
 
-      this.mostrarBotones =
+      this.modoEditar =
         estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
         estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
-      this.mostrarBotones = false;
+      this.modoEditar = false;
     }
   }
 
   // Función para manejar el evento de drag-and-drop
   drop(event: CdkDragDrop<Auditoria[]>): void {
-    if (!this.mostrarBotones) {
+    if (!this.modoEditar) {
       return;
     }
     const prevData = [...this.dataSource.data];
@@ -206,7 +210,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   guardarPaa() {
     this.alertaService
       .showConfirmAlert(
-        "¿Está seguro(a) de guardar el Plan Anual de Auditoría - PAA?"
+        "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?"
       )
       .then((result) => {
         if (result.isConfirmed) {
