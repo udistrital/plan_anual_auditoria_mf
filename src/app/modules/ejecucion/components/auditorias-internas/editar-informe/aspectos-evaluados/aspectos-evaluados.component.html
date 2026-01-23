@@ -1,0 +1,65 @@
+<div class="tabla-container" [formGroup]="aspectosForm">
+  <div class="control-buttons">
+    <button mat-raised-button color="primary" (click)="agregarTema()">Agregar Tema</button>
+  </div>
+  <div formArrayName="temas">
+    <mat-card *ngFor="let tema of temas.controls; let i = index" [formGroupName]="i" class="tema-box">
+      <div class="d-flex align-items-center tema-header">
+        <span class="indice">{{ i + 1 }}</span>
+        <mat-form-field appearance="outline" class="tema-input">
+          <mat-label>Tema</mat-label>
+          <input matInput formControlName="nombre" placeholder="Nombre del Tema">
+        </mat-form-field>
+        <button mat-icon-button color="warn" (click)="eliminarTema(i)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <div formArrayName="subtemas" class="ms-2">
+        <button mat-raised-button color="primary" (click)="agregarSubtema(i)">Agregar Subtema</button>
+        <div *ngFor="let subtema of getSubtemas(i).controls; let j = index" [formGroupName]="j" class="subtema-box">
+          <div class="d-flex align-items-center subtema-header">
+            <span class="indice">{{ i + 1 }}.{{ j + 1 }}</span>
+            <mat-form-field appearance="outline" class="subtema-input">
+              <mat-label>Subtema</mat-label>
+              <input matInput formControlName="nombre" placeholder="Nombre del Subtema">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="eliminarSubtema(i, j)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <div formArrayName="hallazgos">
+            <button mat-raised-button color="primary" (click)="agregarHallazgo(i, j)">Agregar Hallazgo</button>
+            <div *ngFor="let hallazgo of getHallazgos(i, j).controls; let k = index" [formGroupName]="k"
+              class="hallazgo-box">
+              <div class="d-flex hallazgo-header">
+                <div class="d-flex align-items-start">
+                  <span class="indice">{{ i + 1 }}.{{ j + 1 }}.{{ k + 1 }}</span>
+                </div>
+                <div class="flex-grow-1">
+                  <mat-form-field appearance="outline" class="hallazgo-input">
+                    <mat-label>Criterio</mat-label>
+                    <input matInput formControlName="criterio" placeholder="Criterio">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="hallazgo-input">
+                    <mat-label>Hallazgo</mat-label>
+                    <input matInput formControlName="hallazgo" placeholder="Hallazgo">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="hallazgo-input">
+                    <mat-label>Descripción</mat-label>
+                    <textarea matInput formControlName="descripcion" placeholder="Descripción"></textarea>
+                  </mat-form-field>
+                </div>
+                <button mat-icon-button color="warn" (click)="eliminarHallazgo(i, j, k)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+  <button mat-raised-button color="primary" (click)="guardarAspectos()">Guardar</button>
+</div>
