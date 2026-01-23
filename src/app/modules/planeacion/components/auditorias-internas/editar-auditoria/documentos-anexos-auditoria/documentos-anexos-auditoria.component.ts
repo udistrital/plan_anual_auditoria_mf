@@ -35,6 +35,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       nombre: "Compromiso Ético",
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
     },
+    {
+      nombre: "Programa de Trabajo",
+      plantilla: "programa-trabajo",
+      parametro: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
+    }
   ];
 
   constructor(
