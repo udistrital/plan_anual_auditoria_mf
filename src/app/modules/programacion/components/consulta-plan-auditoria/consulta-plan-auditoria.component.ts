@@ -15,6 +15,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { catchError, exhaustMap, Observable, of, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
@@ -130,7 +131,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   cargarPlanesAuditoria(limit: number, offset: number) {
     const EN_BORRADOR_ID = environment.PLAN_ESTADO.EN_BORRADOR_ID;
     this.PlanAnualAuditoriaMid.get(
-      `plan-auditoria?query=&limit=${limit}&offset=${offset}`
+      `plan-auditoria?sortby=vigencia_id&order=desc&query=&limit=${limit}&offset=${offset}`
     ).subscribe(
       (res) => {
         if (!res?.Data) return;
@@ -151,6 +152,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             creadoPor: item.creado_por_nombre ?? "Sin asignar",
             vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
+            colorEstado: this.escogerEmojiColorEstado(item.estado?.estado_nombre ?? "Borrador"),
             estado: item.estado?.estado_nombre ?? "Borrador",
             estadoId,
             acciones,
@@ -164,6 +166,19 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         );
       }
     );
+  }
+
+  /**
+   * Chooses an emoji color icon based on the prefix of the state name.
+   * @param {string} estado The full state name.
+   * @returns {string} The corresponding emoji color icon (see {@link emojiColorPorPrefijoEstado}) or ⚪ if no match is found.
+   */
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado)
+      if (estado.startsWith(prefijo))
+        return emojiColorPorPrefijoEstado[prefijo];
+
+    return "⚪"; // Default icon if no prefix matches
   }
 
   crearPlan() {
