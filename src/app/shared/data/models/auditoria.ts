@@ -21,6 +21,7 @@ export interface Auditoria {
   rec_tecnologico: string;
   rec_humano: string;
   rec_fisico: string;
+  temas: string
   activo: boolean;
   fecha_creacion: string;
   fecha_modificacion: string;
