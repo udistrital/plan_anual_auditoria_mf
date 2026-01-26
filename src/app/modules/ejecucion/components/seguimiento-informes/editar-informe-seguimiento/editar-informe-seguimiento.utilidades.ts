@@ -1,15 +1,14 @@
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { environment } from "src/environments/environment";
 
-export const formularioInformacionAuditoria: Formulario = {
+export const formularioInformacionSeguimiento: Formulario = {
   campos: [
     {
       nombre: "no_auditoria",
-      descripcion: "No Auditoria y/o seguimiento",
-      etiqueta: "No Auditoria y/o seguimiento",
+      descripcion: "No de Auditoría",
+      etiqueta: "No de Auditoría",
       icono: "format_list_numbered",
       tipo: "number",
-      placeholder: "Escriba aquí el número de la auditoria",
+      placeholder: "Número de auditoría",
       deshabilitado: true,
       validaciones: [{ tipo: "requerido", valor: "" }],
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
@@ -29,7 +28,7 @@ export const formularioInformacionAuditoria: Formulario = {
     },
     {
       nombre: "proceso",
-      etiqueta: "Proceso",
+      etiqueta: "Macroproceso, Proceso o Dependencia",
       icono: "work",
       tipo: "select",
       parametros: {
@@ -63,7 +62,7 @@ export const formularioInformacionAuditoria: Formulario = {
     },
     {
       nombre: "fecha_emision_informe",
-      etiqueta: "Fecha de Emisión Informe",
+      etiqueta: "Fecha Emisión de Informe",
       icono: "event",
       parametros: {
         vista: "year",
@@ -102,10 +101,10 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
     },
     {
-      nombre: "Muestra",
+      nombre: "muestra",
       etiqueta: "Muestra",
       icono: "assignment",
-      descripcion: "En caso de no aplicr se debe indicar (N/A)",
+      descripcion: "En caso de no aplicar se debe indicar (N/A)",
       tipo: "textarea",
       validaciones: [{ valor: "" }],
       placeholder: "En caso de no aplicar se debe indicar (N/A)",

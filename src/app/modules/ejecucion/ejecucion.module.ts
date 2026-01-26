@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuditoriasExternasComponent } from './components/auditorias-externas/auditorias-externas.component';
 import { SeguimientoInformesComponent } from './components/seguimiento-informes/seguimiento-informes.component';
 import { AuditoriasInternasComponent } from './components/auditorias-internas/auditorias-internas.component';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -11,18 +10,21 @@ import { TablaAuditoriasInternasComponent } from './components/auditorias-intern
 import { AspectosGeneralesComponent } from './components/auditorias-internas/editar-informe/aspectos-generales/aspectos-generales.component';
 import { AspectosEvaluadosComponent } from './components/auditorias-internas/editar-informe/aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './components/auditorias-internas/editar-informe/resumen-hallazgos/resumen-hallazgos.component';
+import { AspectosEvaluadosSeguimientoComponent } from './components/seguimiento-informes/editar-informe-seguimiento/aspectos-evaluados-seguimiento/aspectos-evaluados-seguimiento.component';
+import { EditarInformeSeguimientoComponent } from './components/seguimiento-informes/editar-informe-seguimiento/editar-informe-seguimiento.component';
 
 
 @NgModule({
   declarations: [
-    AuditoriasExternasComponent,
     SeguimientoInformesComponent,
     AuditoriasInternasComponent,
     EditarInformeComponent,
     TablaAuditoriasInternasComponent,
     AspectosGeneralesComponent,
     AspectosEvaluadosComponent,
-    ResumenHallazgosComponent
+    ResumenHallazgosComponent,
+    AspectosEvaluadosSeguimientoComponent,
+    EditarInformeSeguimientoComponent
   ],
   imports: [
     CommonModule,

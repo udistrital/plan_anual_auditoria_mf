@@ -11,7 +11,7 @@ import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visu
 import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
-import { ModalVerDocumentosPlanComponent } from "../modal-ver-documentos-plan/modal-ver-documentos-plan.component";
+import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -324,10 +324,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   verDocumentos() {
-    const dialogRef = this.dialog.open(ModalVerDocumentosPlanComponent, {
+    this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
-        planAuditoriaId: this.id,
+        entityId: this.id,
       },
     });
   }

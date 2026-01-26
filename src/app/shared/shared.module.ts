@@ -11,6 +11,7 @@ import { FormularioDinamicoComponent } from "./elements/components/formulario-di
 import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
 import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/plantilla-modal.component";
 import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
+import { ModalVerDocumentosComponent } from "./elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 import { IconosModule } from "./modules/iconos.module";
@@ -24,6 +25,7 @@ import { QuillModule } from "ngx-quill";
     FormularioDinamicoComponent,
     CargarArchivoComponent,
     ModalVerDocumentoComponent,
+    ModalVerDocumentosComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,
@@ -44,6 +46,7 @@ import { QuillModule } from "ngx-quill";
     CargarArchivoComponent,
     FormularioDinamicoComponent,
     ModalVerDocumentoComponent,
+    ModalVerDocumentosComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,
