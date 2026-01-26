@@ -3,6 +3,10 @@ export const environment = {
 
   AUTENTICACION_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
+  NOTIFICACIONES_MID_SERVICE:
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
+  ORIGEN_CORREO_NOTIFICACIONES:
+    "notificacionPolux@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
@@ -19,6 +23,15 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
 
   PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
+
+  // TODO: Replace with dependency and chief emails. Current are for testing purposes only.
+  NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS: {
+    ToAddresses: [
+      "cjgonzalezp@udistrital.edu.co",
+      "hegranadosl@udistrital.edu.co",
+      "ndsabogalv@udistrital.edu.co",
+    ]
+  },
 
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
