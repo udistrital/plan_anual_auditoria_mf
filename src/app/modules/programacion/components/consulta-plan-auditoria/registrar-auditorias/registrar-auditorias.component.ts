@@ -13,6 +13,7 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
+import descargarAuditorias from "src/app/shared/utils/descargarAuditorias";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -380,4 +381,26 @@ export class RegistrarAuditoriasComponent implements OnInit {
       height: "80vh",
     });
   }
+
+  /** Download the Excel file for bulk audit upload */
+  async descargarArchivoDescargueMasivo() {
+    try {
+      this.spinnerService.show();
+      const base64File = await this.nuxeoService.obtenerPorUUID(
+        environment.PLANTILLA_CARGUE_MASIVO
+      );
+      const buffer = await descargarAuditorias(this.dataSource.data, base64File);
+      await this.descargaService.descargarArchivoBuffer(
+        buffer,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Auditorias_PAA.xlsx"
+      );
+    } catch (error) {
+      console.error("Error al descargar el archivo de auditorías:", error);
+      this.alertaService.showErrorAlert("Error al descargar el archivo de auditorías");
+    } finally {
+      this.spinnerService.hide();
+    }
+  }
+
 }
