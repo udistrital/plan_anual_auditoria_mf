@@ -167,3 +167,16 @@ export const formularioRecursosAuditoria: Formulario = {
     },
   ],
 };
+
+export const formularioTemasAuditoria: Formulario = {
+  campos: [
+    {
+      nombre: "temas",
+      etiqueta: "Temas",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+    }
+  ]
+}

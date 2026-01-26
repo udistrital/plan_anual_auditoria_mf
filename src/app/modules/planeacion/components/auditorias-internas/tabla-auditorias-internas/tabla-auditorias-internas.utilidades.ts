@@ -47,7 +47,7 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "estado",
     header: "Estado",
-    cell: (auditoria: any) => auditoria.estado_id,
+    cell: (auditoria: any) => auditoria.estado_nombre,
     sortable: true,
   },
   {

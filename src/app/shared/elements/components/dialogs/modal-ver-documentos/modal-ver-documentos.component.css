@@ -1,0 +1,13 @@
+.selected {
+  background-color: #ffd7ce !important;
+  color: #731514 !important;
+  border: 1px solid #731514 !important;
+  font-weight: 600;
+}
+
+.tab-btn {
+  line-height: 1.3;
+  padding: 8px 0px;
+  min-height: 40px;
+  height: auto;
+}
