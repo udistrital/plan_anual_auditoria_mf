@@ -12,7 +12,7 @@ export class Auditoria {
     auditores!: number[];
 }
 
-export class auditorEliminar{
+export class AuditorEliminar {
     id!: string;
     activo!: boolean;
     id_tercero!: number;
