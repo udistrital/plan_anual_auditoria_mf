@@ -24,6 +24,9 @@ export const environment = {
 
   PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
 
+  /** Name for the bulk download file of audits. Excludes file extension. */
+  NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
+
   // TODO: Replace with dependency and chief emails. Current are for testing purposes only.
   NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS: {
     ToAddresses: [
