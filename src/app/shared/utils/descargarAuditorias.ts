@@ -7,6 +7,9 @@ const ExcelJS = require('exceljs');
 const MESES_ARCHIVO =
     ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
+/** Headers for the Excel file */
+const HEADERS = ['ID', 'Auditoria', 'Tipo de Evaluación', ...MESES_ARCHIVO];
+
 /** Interface representing an audit entry */
 interface Auditoria {
   /** The title or name of the audit */
@@ -64,10 +67,13 @@ function cronogramaAMeses(cronograma: string): string[] {
 function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
   // 1. Load basic data from dataSource in the desired format
   let data: {[key: string]: Array<string>} = {
-    'ID': Array.from(Array(dataSource.length).keys())
-            .map(i => (i + 1).toString()),
-    'Auditoria': dataSource.map(a => a.auditoria),
-    'Tipo de Evaluación': dataSource.map(a => a.tipoEvaluacion),
+    // ID
+    [HEADERS[0]]: Array.from(Array(dataSource.length).keys())
+                    .map(i => (i + 1).toString()),
+    // Auditoria
+    [HEADERS[1]]: dataSource.map(a => a.auditoria),
+    // Tipo de Evaluación
+    [HEADERS[2]]: dataSource.map(a => a.tipoEvaluacion),
   };
 
   // 2. Transform cronograma into month columns
@@ -80,11 +86,6 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
   });
 
   data = { ...data, ...mesesData };
-
-  // TODO: If Estado column is needed, uncomment the following lines; else, remove this comment block.
-  // // 3. Add Estado column
-  // data = { ...data, 'Estado': dataSource.map(a => a.estado) };
-
 
   // Create final array of arrays for Excel
   const headers = Object.keys(data);
@@ -120,13 +121,8 @@ export async function descargarAuditorias(
     await workbook.xlsx.load(inputBuffer);
     const worksheet = workbook.worksheets[0];
 
-    // Prepare data for Excel, if no data, return template as is
-    const rows = dataSourceToExcelData(dataSource);
-    if (rows.length === 0)
-      return await workbook.xlsx.writeBuffer();
-
     // Prepare to write data starting from row 2, skipping header row
-    const headers = Object.keys(rows[0] as {[key: string]: any});
+    const rows = dataSourceToExcelData(dataSource);
     const startRowIndex = 2;
     const originalMaxRows = 35;
     const maxRowIndex = Math.max(originalMaxRows, startRowIndex + rows.length - 1);
@@ -134,20 +130,19 @@ export async function descargarAuditorias(
     // Write data into worksheet by modifying existing rows (keep styles)
     rows.forEach((rowObj, rowIdx) => {
       const excelRow = worksheet.getRow(startRowIndex + rowIdx);
-      headers.forEach((hdr, colIdx) => {
+      HEADERS.forEach((hdr, colIdx) => {
         const cell = excelRow.getCell(colIdx + 1);
         const value = (rowObj as any)[hdr] ?? '';
         cell.value = value;
       });
       excelRow.commit();
     });
-    // TODO: If Estado column is needed, add the logic to to add the header and format.
 
     // Give new rows the same style and border as the original template rows
     const sourceRow = worksheet.getRow(originalMaxRows);
     for (let r = originalMaxRows + 1; r <= maxRowIndex; r++) {
       const targetRow = worksheet.getRow(r);
-      headers.forEach((_, colIdx) => {
+      HEADERS.forEach((_, colIdx) => {
         const sourceCell = sourceRow.getCell(colIdx + 1);
         const targetCell = targetRow.getCell(colIdx + 1);
         targetCell.style = sourceCell.style;
@@ -157,7 +152,7 @@ export async function descargarAuditorias(
     }
 
     // Add back data validation for 'Tipo de Evaluación' column
-    const tipoEvaluacionColIdx = headers.indexOf('Tipo de Evaluación') + 1;
+    const tipoEvaluacionColIdx = HEADERS.indexOf('Tipo de Evaluación') + 1;
     worksheet.getColumn(tipoEvaluacionColIdx)
         .eachCell({ includeEmpty: true }, (cell: any, rowNumber: number) => {
           if (rowNumber >= startRowIndex && rowNumber <= maxRowIndex) {

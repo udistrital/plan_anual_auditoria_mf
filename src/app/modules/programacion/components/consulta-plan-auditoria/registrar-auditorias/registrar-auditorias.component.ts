@@ -393,7 +393,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       await this.descargaService.descargarArchivoBuffer(
         buffer,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Auditorias_PAA.xlsx"
+        environment.NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS,
       );
     } catch (error) {
       console.error("Error al descargar el archivo de auditorías:", error);
