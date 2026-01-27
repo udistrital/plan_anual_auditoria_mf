@@ -43,13 +43,14 @@
       </div>
 
       <!-- Agregar cdkDropList a la tabla -->
-      <div class="table-container">
+      <div class="table-container" 
+           cdkDropList
+           [cdkDropListDisabled]="!mostrarBotones"
+           (cdkDropListDropped)="drop($event)"
+           cdkDropListAutoScrollDisabled="false">
         <table
           mat-table
           [dataSource]="dataSource"
-          cdkDropList
-          [cdkDropListDisabled]="!mostrarBotones"
-          (cdkDropListDropped)="drop($event)"
         >
           <!-- No Column (Generado automáticamente) -->
           <ng-container matColumnDef="no">
