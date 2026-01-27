@@ -12,14 +12,19 @@
   <div class="row mt-3">
     <div class="col-12">
       <div class="d-flex justify-content-between">
-        <div class="filter-section">
+        <div class="filter-section" *ngIf="mostrarOrdenamiento">
           <label for="select" class="label-select">Ordenado por: </label>
           <mat-form-field appearance="outline">
             <mat-label>Selección </mat-label>
-            <mat-select id="select">
-              <mat-option value="opcion1">Opción 1</mat-option>
+            <mat-select id="select" [(ngModel)]="ordenSeleccionado">
+              <mat-option value="">Revertir</mat-option>
+              <mat-option value="tipo_evaluacion">Tipo de evaluación A-Z</mat-option>
+              <mat-option value="titulo">Nombre de auditoría A-Z</mat-option>
             </mat-select>
           </mat-form-field>
+          <button mat-icon-button (click)="aplicarOrdenamiento()">
+            <mat-icon color="primary">sort</mat-icon>
+          </button>
         </div>
         <div>
           <button mat-icon-button>
