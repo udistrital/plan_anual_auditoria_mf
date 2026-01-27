@@ -1,0 +1,14 @@
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-section mat-form-field {
+  margin-bottom: -1.25em;
+}
+
+.label-select {
+  margin-right: 8px;
+  font-weight: 500;
+}

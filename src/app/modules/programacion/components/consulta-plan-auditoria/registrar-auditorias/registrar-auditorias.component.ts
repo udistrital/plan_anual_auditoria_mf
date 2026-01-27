@@ -12,6 +12,7 @@ import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-re
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { RolService } from "src/app/core/services/rol.service";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -39,6 +40,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
   vigenciaId: number = 6619;
   idMatriz: any = null;
   base64Matriz: any = null;
+  ordenSeleccionado: string = '';
+  mostrarOrdenamiento: boolean = false;
+  estadoIdActual: number | null = null;
 
   constructor(
     private alertaService: AlertService,
@@ -49,7 +53,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private nuxeoService: NuxeoService,
     private descargaService: DescargaService,
     private router: Router,
-    private spinnerService: SpinnerService
+    private spinnerService: SpinnerService,
+    private rolService: RolService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -83,9 +88,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    this.PlanAnualAuditoriaMid.get(
-      `auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`
-    ).subscribe(
+    let url = `auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`;
+    
+    if (this.ordenSeleccionado) {
+      url += `&orderBy=${this.ordenSeleccionado}&orderDirection=ASC`;
+    }
+
+    this.PlanAnualAuditoriaMid.get(url).subscribe(
       (res) => {
         if (res.Data) {
           this.dataSource.data = res.Data.map((item: any) => ({
@@ -105,6 +114,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
         this.alertaService.showErrorAlert("Error al cargar las auditorías");
       }
     );
+  }
+
+  aplicarOrdenamiento(): void {
+    this.cargarAuditorias();
   }
 
   actualizarColumnas(): void {
@@ -128,14 +141,21 @@ export class RegistrarAuditoriasComponent implements OnInit {
         .get(`estado?query=plan_auditoria_id:${this.id},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
-      const estadoIdActual = estadoActual?.estado_id || null;
+      this.estadoIdActual = estadoActual?.estado_id || null;
 
       this.mostrarBotones =
-        estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-        estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
+        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
+
+      await this.rolService.cargarRoles();
+      const roles = this.rolService.getRoles();
+      this.mostrarOrdenamiento = 
+        roles.includes('AUDITOR_EXPERTO') && 
+        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.mostrarBotones = false;
+      this.mostrarOrdenamiento = false;
     }
   }
 
