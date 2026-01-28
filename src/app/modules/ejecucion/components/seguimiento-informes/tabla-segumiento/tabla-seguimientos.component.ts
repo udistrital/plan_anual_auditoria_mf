@@ -47,7 +47,7 @@ export class TablaSeguimientosComponent {
     console.log(this.role);
     this.seguimientosPorVigencia = [];
 
-    // 🔥 DATOS MOCK TEMPORAL - COMENTAR CUANDO TENGAS EL BACKEND
+    //DATOS MOCK TEMPORAL
     const seguimientosMock = [
       {
         _id: "1",
