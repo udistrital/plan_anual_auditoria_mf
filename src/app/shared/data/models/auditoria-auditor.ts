@@ -18,3 +18,12 @@ export class AuditorEliminar {
     id_tercero!: number;
     auditoria_id!: string;
 }
+
+export interface Auditor {
+    _id: string;
+    id: number;
+    nombre: string;
+    documento: number;
+    auditor_lider?: boolean;
+    auditor_id?: number;
+}

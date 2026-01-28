@@ -1,4 +1,4 @@
-import { AuditorEliminar } from 'src/app/shared/data/models/auditoria-auditor';
+import { AuditorEliminar, Auditor } from 'src/app/shared/data/models/auditoria-auditor';
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
@@ -11,11 +11,6 @@ import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 
-interface Auditor {
-  nombre: string;
-  documento: number;
-  id: number;
-}
 @Component({
   selector: "app-formulario-auditoria-especial",
   templateUrl: "./formulario-auditoria-especial.component.html",
@@ -26,11 +21,12 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   evaluaciones: Parametro[] = [];
   auditores: Auditor[] = [];
   auditoresSeleccionados: FormArray<FormGroup>;
+  auditoresAsignados: Auditor[] = [];
   meses: Parametro[] = [];
   TODOS = "Todos";
   usuarioId: any;
   isEditMode = false;  
-  auditorEliminar: AuditorEliminar[] = [];
+  auditorEliminar: AuditorEliminar | null = null;
 
   constructor(
     private alertaService: AlertService,
@@ -69,9 +65,9 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         this.auditoresSeleccionados.clear();
-        const auditoresAsignados: any[] = res.Data || [];
+        this.auditoresAsignados = res.Data || [];
 
-        auditoresAsignados.forEach((auditorAsignado) => {
+        this.auditoresAsignados.forEach((auditorAsignado) => {
           const auditorEncontrado = this.auditores.find(
             (a) => a.id === auditorAsignado.auditor_id
           );
@@ -114,40 +110,38 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       .showConfirmAlert(`¿Está seguro de eliminar este auditor?`)
       .then((result) => {
         if (result.isConfirmed) {
-          this.PlanAnualAuditoriaMid.get(
-            `auditor?query=auditoria_id:${this.data.auditoria?.id},activo:true,auditor_id:${auditorSeleccionado.auditor.id}`
-          ).subscribe((res) => {
-            this.auditorEliminar = res.Data.map((item: any) => ({
-              id: item._id,
-              activo: item.activo,
-              id_tercero: item.auditor_id,
-              auditoria_id: item.auditoria_id
-            }));
-            
-            if (this.auditorEliminar.length > 0) {
-              const idAuditor = this.auditorEliminar[0];
-              this.planAnualAuditoriaService
-                .delete("auditor", idAuditor)
-                .subscribe({
-                  next: (deleteResponse: any) => {
-                    this.auditoresSeleccionados.removeAt(index);
-                    this.alertaService.showSuccessAlert(
-                      "Auditor eliminado correctamente."
-                    );
-                  },
-                  error: (err) => {
-                    this.alertaService.showErrorAlert(
-                      "Error al eliminar el auditor. Inténtelo de nuevo."
-                    );
-                  },
-                });
-            } else {
-              this.auditoresSeleccionados.removeAt(index);
-              this.alertaService.showSuccessAlert(
-                "Auditor eliminado correctamente."
-              );
-            }
-          });
+          const auditorEncontrado = this.auditoresAsignados.find((a) => a.auditor_id === auditorSeleccionado.auditor.id);
+
+          if (auditorEncontrado) {
+            this.auditorEliminar = {
+              id: auditorEncontrado._id,
+              activo: false,
+              id_tercero: auditorEncontrado.auditor_id!,
+              auditoria_id: auditorEncontrado._id
+            };
+
+            this.planAnualAuditoriaService
+              .delete("auditor", this.auditorEliminar)
+              .subscribe({
+                next: (deleteResponse: any) => {
+                  this.auditoresSeleccionados.removeAt(index);
+                  this.auditoresAsignados = this.auditoresAsignados.filter(a => a.auditor_id !== auditorSeleccionado.auditor.id);
+                  this.alertaService.showSuccessAlert(
+                    "Auditor eliminado correctamente."
+                  );
+                },
+                error: (err) => {
+                  this.alertaService.showErrorAlert(
+                    "Error al eliminar el auditor. Inténtelo de nuevo."
+                  );
+                },
+              });
+          } else {
+            this.auditoresSeleccionados.removeAt(index);
+            this.alertaService.showSuccessAlert(
+              "Auditor eliminado correctamente."
+            );
+          }
         }
       });
   }
