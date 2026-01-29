@@ -6,10 +6,12 @@ import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
   formularioInformacionAuditoria,
 } from "./editar-informe.utilidades";
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
-import { EditorEnriquecidoComponent } from 'src/app/shared/elements/components/editor-enriquecido/editor-enriquecido.component';
+import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
+import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
+import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 
 @Component({
   selector: 'app-editar-informe',
@@ -17,17 +19,25 @@ import { EditorEnriquecidoComponent } from 'src/app/shared/elements/components/e
   styleUrls: ['./editar-informe.component.css']
 })
 
-export class EditarInformeComponent {
+export class EditarInformeComponent implements OnInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild("formularioInformacionComp")
   formularioInformacionComponent!: FormularioDinamicoComponent;
+
+  @ViewChild("aspectosEvaluadosComp")
+  aspectosEvaluadosComponent!: AspectosEvaluadosComponent;
+
+  @ViewChild("resumenHallazgosComp")
+  resumenHallazgosComponent!: ResumenHallazgosComponent;
+
   formularioInformacion: Formulario | undefined;
   form: FormGroup;
   formInformeFinal: FormGroup;
   formRespuestaPreliminar: FormGroup;
 
-  auditoriaId!: string;
+  informeId!: string;
+  informeData: any = null;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
 
@@ -36,26 +46,83 @@ export class EditarInformeComponent {
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private route: ActivatedRoute,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private planAnualAuditoriaService: PlanAnualAuditoriaService
   ) {
     this.form = this.fb.group({
-      contenido: ['Texto inicial del editor'],
+      contenido: [''],
     });
     this.formInformeFinal = this.fb.group({
-      informe: ['Texto inicial del editor informe'],
-      observaciones: ['Texto inicial del editor informe'],
-      notas: ['Texto inicial del editor informe'],
+      informe: [''],
+      observaciones: [''],
+      notas: [''],
     });
     this.formRespuestaPreliminar = this.fb.group({
-      contenido: ['Texto inicial del editor'],
+      contenido: [''],
     });
   }
 
   ngOnInit() {
     this.cargarFormularios();
     this.manejarResponsiveStepper();
-    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
+    this.informeId = this.route.snapshot.paramMap.get("id")!;
+    this.cargarInforme();
+  }
 
+  manejarResponsiveStepper() {
+    this.breakpointObserver
+      .observe(["(max-width: 992px)"])
+      .subscribe((result) => {
+        this.orientation = result.matches ? "vertical" : "horizontal";
+      });
+  }
+
+  regresarRuta() {
+    this.router.navigate([`/ejecucion/auditorias-internas`]);
+  }
+
+  // Carga el informe desde la base de datos por informeId
+  cargarInforme(): void {
+    this.planAnualAuditoriaService.get(`informe/${this.informeId}`).subscribe({
+      next: (response: any) => {
+        if (response && response.Data) {
+          this.informeData = response.Data;
+          this.poblarFormularios();
+          this.poblarFormularioInformacion();
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar el informe:', error);
+      }
+    });
+  }
+
+  // Pobla los formularios con los datos del informe cargado
+  poblarFormularios(): void {
+    if (!this.informeData) return;
+
+    // Poblar formulario de aspectos generales (paso 2)
+    if (this.informeData.aspectos_generales) {
+      this.form.patchValue({
+        contenido: this.informeData.aspectos_generales
+      });
+    }
+  }
+
+  // Pobla el formulario de información una vez que el componente esté listo
+  poblarFormularioInformacion(): void {
+    if (!this.informeData || !this.formularioInformacionComponent) return;
+
+    const valoresIniciales: any = {};
+
+    if (this.informeData.fecha_emision) {
+      valoresIniciales.fecha_emision_informe = new Date(this.informeData.fecha_emision);
+    }
+    if (this.informeData.muestra) {
+      valoresIniciales.Muestra = this.informeData.muestra;
+    }
+
+    this.formularioInformacionComponent.form.patchValue(valoresIniciales);
   }
 
   cargarFormularios(): void {
@@ -80,55 +147,65 @@ export class EditarInformeComponent {
         if (!confirmado.value) {
           return;
         }
-        this.guardarInformacion(dataForm);
+        this.onSubmitInformacion(dataForm);
       });
   }
 
-  guardarInformacion(informacion: any) {
-    const auditoriaId = this.auditoriaId;
-    const informacionEditar = this.mapearInfoFormInformacion(informacion);
-    console.log(informacionEditar);
+  private guardarPaso(camposActualizados: any, mensajeExito: string, mensajeError: string): void {
+    const payload = { ...this.informeData, ...camposActualizados };
 
+    this.planAnualAuditoriaService.put(`informe/${this.informeId}`, payload).subscribe({
+      next: () => {
+        this.alertaService.showAlert("Guardado exitoso", mensajeExito);
+        this.informeData = { ...this.informeData, ...camposActualizados };
+        this.stepper.next();
+      },
+      error: (error) => {
+        console.error('Error al guardar:', error);
+        this.alertaService.showAlert("Error", mensajeError);
+      }
+    });
   }
 
-  mapearInfoFormInformacion(informacion: any) {
-    return {
-      alcance: informacion.alcance_auditoria,
-      consecutivo_IE: informacion.consecutivo_IE,
-      consecutivo_OCI: informacion.consecutivo_OCI,
-      criterio: informacion.criterios,
-      fecha_fin: informacion.fecha_ejecucion_final,
-      fecha_inicio: informacion.fecha_ejecucion_inicial,
-      lider_id: informacion.lider,
-      no_auditoria: informacion.no_auditoria,
-      objetivo: informacion.objetivo_auditoria,
-      macroproceso: informacion.proceso,
-      responsable_id: informacion.responsable,
-      tipo_id: informacion.tipo,
+  onSubmitInformacion(informacion: any) {
+    const campos = {
+      fecha_emision: informacion.fecha_emision_informe,
+      muestra: informacion.Muestra || null,
     };
-  }
 
-  manejarResponsiveStepper() {
-    this.breakpointObserver
-      .observe(["(max-width: 992px)"])
-      .subscribe((result) => {
-        this.orientation = result.matches ? "vertical" : "horizontal";
-      });
-  }
-
-  regresarRuta() {
-    this.router.navigate([`/ejecucion/auditorias-internas`]);
+    this.guardarPaso(campos, "La informacion se ha guardado correctamente", "No se pudo guardar la informacion");
   }
 
   onSubmitAspectosGenerales() {
-    console.log(this.form.value);
+    const campos = { aspectos_generales: this.form.value.contenido };
+    this.guardarPaso(campos, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales");
+  }
+
+  // Guarda los aspectos evaluados (temas, subtemas, hallazgos) y avanza al siguiente paso
+  async onSubmitAspectosEvaluados(): Promise<void> {
+    if (this.aspectosEvaluadosComponent) {
+      await this.aspectosEvaluadosComponent.guardarAspectos();
+      this.stepper.next();
+
+      // Recargar resumen de hallazgos después de guardar
+      if (this.resumenHallazgosComponent) {
+        this.resumenHallazgosComponent.cargarHallazgos();
+      }
+    }
+  }
+
+  onSubmitRespuestaPreliminar() {
+    console.log(this.formRespuestaPreliminar.value);
   }
 
   onSubmitInformeFinal() {
     console.log(this.formInformeFinal.value);
   }
 
-  onSubmitRespuestaPreliminar() {
-    console.log(this.formRespuestaPreliminar.value);
+  // Se ejecuta cuando se eliminan temas, subtemas o hallazgos
+  onDatosActualizados(): void {
+    if (this.resumenHallazgosComponent) {
+      this.resumenHallazgosComponent.cargarHallazgos();
+    }
   }
 }

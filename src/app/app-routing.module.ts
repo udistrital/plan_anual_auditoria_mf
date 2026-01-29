@@ -23,7 +23,7 @@ const routes: Routes = [
   },
   {
     path: "ejecucion",
-    canActivate: [AuthGuard],
+    // canActivate: [AuthGuard],
     loadChildren: () =>
       import("./modules/ejecucion/ejecucion.module").then(
         (m) => m.EjecucionModule
