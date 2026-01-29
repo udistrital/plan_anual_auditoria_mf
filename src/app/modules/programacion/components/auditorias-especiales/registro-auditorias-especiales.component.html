@@ -7,135 +7,43 @@
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row mt-3" *ngIf="permiso">
-    <div class="col-12">
-      <mat-form-field appearance="outline">
-        <mat-label>Seleccione el año: </mat-label>
+  <div class="row mt-3">
+    <form [formGroup]="vigenciaForm" class="col-12 d-flex justify-content-between align-items-center">
+      <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+        <mat-label>Seleccione una vigencia: </mat-label>
         <mat-icon color="primary" matPrefix>today</mat-icon>
-        <mat-select id="ano-select" [(value)]="selectedYearId">
-          <mat-option *ngFor="let year of years" [value]="year.Id">
-            {{ year.Nombre }}
+        <mat-select 
+          formControlName="vigencia"
+          (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
+          track vigencia
+        >
+          <mat-option disabled value="">--Seleccionar--</mat-option>
+          <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia">
+            {{ vigencia.Nombre }}
           </mat-option>
         </mat-select>
       </mat-form-field>
       <button
+        *ngIf="permiso"
         class="mx-3"
         mat-raised-button
         color="primary"
         (click)="nuevaAuditoria()"
       >
-        Crear
+        Crear Auditoría Especial
       </button>
-    </div>
+    </form>
     <p>Seleccione el año de auditoría especial a realizar</p>
   </div>
 
   <div class="row mt-3">
-    <h3 class="my-3">Lista de auditorías especiales</h3>
+    <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA) especiales</h3>
     <div class="col-12">
-      <p>
-        Seleccione la auditoría especial a realizar modificaciones o enviar a
-        aprobación
-      </p>
-
-      <div class="table-container">
-        <table mat-table [dataSource]="dataSource" class="mt-3">
-          <!-- Numero Columna -->
-          <ng-container matColumnDef="numero">
-            <mat-header-cell *matHeaderCellDef><b>No.</b></mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              {{ element.numero }}
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
-          </ng-container>
-
-          <!-- Auditoria Columna -->
-          <ng-container matColumnDef="auditoria">
-            <mat-header-cell *matHeaderCellDef
-              ><b>Auditoría</b></mat-header-cell
-            >
-            <mat-cell *matCellDef="let element">
-              {{ element.auditoria }}
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
-          </ng-container>
-
-          <!-- Evaluacion Columna -->
-          <ng-container matColumnDef="tipoEvaluacion">
-            <mat-header-cell *matHeaderCellDef
-              ><b>Tipo de evaluación</b></mat-header-cell
-            >
-            <mat-cell *matCellDef="let element">
-              {{ element.tipoEvaluacion }}
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
-          </ng-container>
-
-          <!-- Auditor Columna -->
-          <ng-container matColumnDef="auditor">
-            <mat-header-cell *matHeaderCellDef
-              ><b>Auditor (es)</b></mat-header-cell
-            >
-            <mat-cell *matCellDef="let element">
-              <ng-container
-                *ngIf="element.auditores?.length > 0; else noAuditores"
-              >
-                {{ getAuditoresNombres(element) }}
-              </ng-container>
-              <ng-template #noAuditores>
-                <span>Sin auditores asignados</span>
-              </ng-template>
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
-          </ng-container>
-
-          <!-- cronograma Columna -->
-          <ng-container matColumnDef="cronograma">
-            <mat-header-cell *matHeaderCellDef
-              ><b>Cronograma de actividades</b></mat-header-cell
-            >
-            <mat-cell *matCellDef="let element">
-              {{ element.cronograma }}
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
-          </ng-container>
-
-          <!-- Estado Columna -->
-          <ng-container matColumnDef="estado">
-            <mat-header-cell *matHeaderCellDef><b>Estado</b></mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              {{ element.estado }}
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
-          </ng-container>
-
-          <!-- Acciones Columna -->
-          <ng-container matColumnDef="acciones">
-            <mat-header-cell *matHeaderCellDef><b>Acciones</b></mat-header-cell>
-            <mat-cell *matCellDef="let element">
-              <button mat-icon-button [matMenuTriggerFor]="menu">
-                <mat-icon color="primary">more_vert</mat-icon>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item>
-                  <mat-icon color="primary">send</mat-icon>
-                  <span>Enviar a Auditor(a)</span>
-                </button>
-                <button mat-menu-item (click)="editarAuditoria(element)">
-                  <mat-icon color="primary">edit</mat-icon>
-                  <span>Editar Auditoria Especial</span>
-                </button>
-              </mat-menu>
-            </mat-cell>
-            <mat-footer-cell *matFooterCellDef> </mat-footer-cell>
-          </ng-container>
-
-          <!-- Definir las filas y columnas a mostrar -->
-          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-          <mat-footer-row *matFooterRowDef="displayedColumns"></mat-footer-row>
-          <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
-        </table>
-      </div>
+      <app-tabla-auditorias-especiales
+        [vigenciaId]="vigenciaSeleccionada"
+        [permiso]="permiso"
+      ></app-tabla-auditorias-especiales>
     </div>
   </div>
+
 </ng-template>

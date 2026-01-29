@@ -72,7 +72,7 @@
           <div class="row d-flex align-items-center">
             <div
               *ngFor="let auditorControl of auditoresSeleccionados.controls; let i = index" [formGroup]="auditorControl"
-              class="col-12 d-flex align-items-center mt-3"
+              class="col-12 d-flex align-items-center mt-3" track auditorControl
             >
               <mat-form-field appearance="outline" class="col-8">
                 <mat-label>Seleccione un auditor</mat-label>

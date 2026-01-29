@@ -24,12 +24,25 @@ export const environment = {
 
   PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
 
-  // TODO: Replace with dependency and chief emails. Current are for testing purposes only.
+  /** Name for the bulk download file of audits. Excludes file extension. */
+  NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
+
+  /**
+   * Destination emails for audit plan notifications.
+   * TODO: Add with dependency and chief emails.
+   */
   NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS: {
+    /** Direct recipient emails go here */
     ToAddresses: [
-      "cjgonzalezp@udistrital.edu.co",
-      "hegranadosl@udistrital.edu.co",
-      "ndsabogalv@udistrital.edu.co",
+      // "send.to@ejemplo.com"
+    ],
+    /** Carbon copy recipient emails go here */
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    /** Blind carbon copy recipient emails go here */
+    BccAddresses: [
+      // "blind.copy.to@ejemplo.com"
     ]
   },
 

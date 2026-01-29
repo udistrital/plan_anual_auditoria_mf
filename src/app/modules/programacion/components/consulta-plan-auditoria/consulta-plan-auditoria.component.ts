@@ -15,6 +15,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { catchError, exhaustMap, Observable, of, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
@@ -52,7 +53,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Ver Plan", "visibility"],
     ["Ver Auditorias", "visibility"],
     ["Ver Documentos", "visibility"],
-    ["Editar", "edit"],
+    ["Editar Marco General", "edit"],
     ["Registrar Auditorías", "add_circle"],
     ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
@@ -130,7 +131,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   cargarPlanesAuditoria(limit: number, offset: number) {
     const EN_BORRADOR_ID = environment.PLAN_ESTADO.EN_BORRADOR_ID;
     this.PlanAnualAuditoriaMid.get(
-      `plan-auditoria?query=&limit=${limit}&offset=${offset}`
+      `plan-auditoria?sortby=vigencia_id&order=desc&query=&limit=${limit}&offset=${offset}`
     ).subscribe(
       (res) => {
         if (!res?.Data) return;
@@ -151,6 +152,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             creadoPor: item.creado_por_nombre ?? "Sin asignar",
             vigencia: item.vigencia_nombre ?? "No encontrada",
             fechaCreacion: item.fecha_creacion ?? "No encontrada",
+            colorEstado: this.escogerEmojiColorEstado(item.estado?.estado_nombre ?? "Borrador"),
             estado: item.estado?.estado_nombre ?? "Borrador",
             estadoId,
             acciones,
@@ -164,6 +166,19 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         );
       }
     );
+  }
+
+  /**
+   * Chooses an emoji color icon based on the prefix of the state name.
+   * @param {string} estado The full state name.
+   * @returns {string} The corresponding emoji color icon (see {@link emojiColorPorPrefijoEstado}) or ⚪ if no match is found.
+   */
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado)
+      if (estado.startsWith(prefijo))
+        return emojiColorPorPrefijoEstado[prefijo];
+
+    return "⚪"; // Default icon if no prefix matches
   }
 
   crearPlan() {
@@ -186,7 +201,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
               (estadoResponse: any) => {
                 if (estadoResponse.Status === 201) {
                   this.alertaService.showSuccessAlert(
-                    "Plan creado exitosamente"
+                    "El Plan Anual de Auditorías fue creado correctamente en estado Borrador.",
+                    "Creación exitosa"
                   );
                   this.iniciarPaginacion();
                   this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
@@ -213,8 +229,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             error.error.Data.includes("Ya existe un plan")
           ) {
             this.alertaService.showAlert(
-              "VIGENCIA DUPLICADA",
-              "Ya existe un plan de auditoría para la vigencia seleccionada."
+              "SELECCIONE OTRA VIGENCIA",
+              "Ya existe un Plan Anual de Auditorías registrado para el año seleccionado."
             );
           } else {
             this.alertaService.showErrorAlert("Error al crear el plan");
@@ -247,12 +263,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   // Acciones
   realizarAccion(plan: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      Ver: () => this.verReporte(plan),
+      "Ver": () => this.verReporte(plan),
       "Ver Plan": () => this.verPlanPorRol(plan),
       "Ver Auditorias": () => this.editarActividades(plan),
       "Registrar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
-      Editar: () => this.editarReporte(plan),
+      "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
     };
@@ -277,7 +293,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   enviarPlan(element: any) {
     this.alertaService
       .showConfirmAlert(
-        "¿Está seguro(a) de enviar el Plan Anual de Auditoría - PAA?"
+        "¿Está seguro(a) de enviar el Plan Anual de Auditoría (PAA)?"
       )
       .then((result) => {
         if (result.isConfirmed) {

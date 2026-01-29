@@ -12,7 +12,7 @@ import { AspectosEvaluadosComponent } from './components/auditorias-internas/edi
 import { ResumenHallazgosComponent } from './components/auditorias-internas/editar-informe/resumen-hallazgos/resumen-hallazgos.component';
 import { AspectosEvaluadosSeguimientoComponent } from './components/seguimiento-informes/editar-informe-seguimiento/aspectos-evaluados-seguimiento/aspectos-evaluados-seguimiento.component';
 import { EditarInformeSeguimientoComponent } from './components/seguimiento-informes/editar-informe-seguimiento/editar-informe-seguimiento.component';
-
+import { TablaSeguimientosComponent } from './components/seguimiento-informes/tabla-segumiento/tabla-seguimientos.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +24,8 @@ import { EditarInformeSeguimientoComponent } from './components/seguimiento-info
     AspectosEvaluadosComponent,
     ResumenHallazgosComponent,
     AspectosEvaluadosSeguimientoComponent,
-    EditarInformeSeguimientoComponent
+    EditarInformeSeguimientoComponent,
+    TablaSeguimientosComponent
   ],
   imports: [
     CommonModule,
