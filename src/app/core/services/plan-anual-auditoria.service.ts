@@ -8,6 +8,7 @@ export class PlanAnualAuditoriaService {
   constructor(private requestManager: RequestManager) {
     this.requestManager.setPath("PLAN_ANUAL_AUDITORIA_SERVICE");
   }
+  
   get(endpoint: string) {
     this.requestManager.setPath("PLAN_ANUAL_AUDITORIA_SERVICE");
     return this.requestManager.get(endpoint);
