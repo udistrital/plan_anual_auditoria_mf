@@ -91,7 +91,7 @@ export class RevisionJefeComponent implements OnInit {
 
     this.alertService
       .showConfirmAlert(
-        "¿Está seguro de enviar el Plan Anual de Auditoría? - PAA?"
+        "¿Está seguro de enviar el Plan Anual de Auditoría? (PAA)?"
       )
       .then((confirmado) => {
         if (!confirmado.value) {
