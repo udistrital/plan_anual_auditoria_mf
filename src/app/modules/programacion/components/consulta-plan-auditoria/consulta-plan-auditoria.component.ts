@@ -229,8 +229,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             error.error.Data.includes("Ya existe un plan")
           ) {
             this.alertaService.showAlert(
-              // TODO: I think this title makes it seems like there are now multiple vigencias created, which is not the case
-              "Vigencia creada",
+              "SELECCIONE OTRA VIGENCIA",
               "Ya existe un Plan Anual de Auditorías registrado para el año seleccionado."
             );
           } else {
