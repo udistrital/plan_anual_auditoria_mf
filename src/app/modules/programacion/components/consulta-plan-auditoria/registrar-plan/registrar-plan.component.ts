@@ -44,8 +44,8 @@ export class RegistrarPlanComponent implements OnInit {
       try {
         const planData = await this.obtenerPlanAuditoria();
         await this.obtenerEstadoActual();
-        this.labelAccion = this.modoEditar ? "Editar" : "Ver";
-        this.breadcrumb = `Gestión Auditoría / Programación / Plan anual de auditorías / <b>${this.labelAccion}</b>`;
+        this.labelAccion = this.modoEditar ? "Editar Marco General" : "Ver Detalle";
+        this.breadcrumb = `Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.labelAccion}</b>`;
 
         if (planData) {
           this.actualizarValoresFormulario(planData);

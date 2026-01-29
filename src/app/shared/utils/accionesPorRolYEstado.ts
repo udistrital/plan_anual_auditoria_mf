@@ -5,7 +5,7 @@ export const accionesProgramacion: {
 } = {
   ADMIN_SISIFO: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [
-      "Editar",
+      "Editar Marco General",
       "Historial de Rechazo",
       "Registrar Auditorías",
     ],
@@ -28,7 +28,7 @@ export const accionesProgramacion: {
       "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
-      "Editar",
+      "Editar Marco General",
       "Historial de Rechazo",
       "Registrar Auditorías",
     ],
@@ -49,9 +49,9 @@ export const accionesProgramacion: {
   },
   AUDITOR_EXPERTO: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [
-      "Editar",
-      "Enviar Aprobación",
+      "Editar Marco General",
       "Registrar Auditorías",
+      "Enviar Aprobación",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [
       "Ver",
@@ -72,10 +72,10 @@ export const accionesProgramacion: {
       "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
-      "Editar",
-      "Enviar Aprobación",
+      "Editar Marco General",
       "Historial de Rechazo",
       "Registrar Auditorías",
+      "Enviar Aprobación",
     ],
   },
 };

@@ -13,6 +13,7 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
+import descargarAuditorias from "src/app/shared/utils/descargarAuditorias";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -36,13 +37,15 @@ export class RegistrarAuditoriasComponent implements OnInit {
   ];
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
-  mostrarBotones: boolean = true;
+  modoEditar: boolean = true;
   vigenciaId: number = 6619;
   idMatriz: any = null;
   base64Matriz: any = null;
   ordenSeleccionado: string = '';
   mostrarOrdenamiento: boolean = false;
   estadoIdActual: number | null = null;
+  title: string = "";
+  breadcrumb: string = "";
 
   constructor(
     private alertaService: AlertService,
@@ -70,6 +73,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
       console.error("Error al cargar Matriz", error);
     }
     await this.obtenerEstadoActual();
+    this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
+    this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
 
   cargarVigencia(): void {
@@ -129,8 +134,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "estado",
     ];
 
-    // Agrega la columna de acciones solo si mostrarBotones es true
-    if (this.mostrarBotones) {
+    // Agrega la columna de acciones solo si modoEditar es true
+    if (this.modoEditar) {
       this.displayedColumns.push("acciones");
     }
   }
@@ -143,7 +148,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       const estadoActual = response?.Data?.[0];
       this.estadoIdActual = estadoActual?.estado_id || null;
 
-      this.mostrarBotones =
+      this.modoEditar =
         this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
         this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
 
@@ -154,14 +159,14 @@ export class RegistrarAuditoriasComponent implements OnInit {
         this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
-      this.mostrarBotones = false;
+      this.modoEditar = false;
       this.mostrarOrdenamiento = false;
     }
   }
 
   // Función para manejar el evento de drag-and-drop
   drop(event: CdkDragDrop<Auditoria[]>): void {
-    if (!this.mostrarBotones) {
+    if (!this.modoEditar) {
       return;
     }
     const prevData = [...this.dataSource.data];
@@ -226,7 +231,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   guardarPaa() {
     this.alertaService
       .showConfirmAlert(
-        "¿Está seguro(a) de guardar el Plan Anual de Auditoría - PAA?"
+        "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?"
       )
       .then((result) => {
         if (result.isConfirmed) {
@@ -380,4 +385,26 @@ export class RegistrarAuditoriasComponent implements OnInit {
       height: "80vh",
     });
   }
+
+  /** Download the Excel file for bulk audit upload */
+  async descargarArchivoDescargueMasivo() {
+    try {
+      this.spinnerService.show();
+      const base64File = await this.nuxeoService.obtenerPorUUID(
+        environment.PLANTILLA_CARGUE_MASIVO
+      );
+      const buffer = await descargarAuditorias(this.dataSource.data, base64File);
+      await this.descargaService.descargarArchivoBuffer(
+        buffer,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        environment.NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS,
+      );
+    } catch (error) {
+      console.error("Error al descargar el archivo de auditorías:", error);
+      this.alertaService.showErrorAlert("Error al descargar el archivo de auditorías");
+    } finally {
+      this.spinnerService.hide();
+    }
+  }
+
 }

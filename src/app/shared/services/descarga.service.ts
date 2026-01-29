@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import * as JSZip from 'jszip'; 
 import { saveAs } from 'file-saver'; 
 import { environment } from "src/environments/environment";
-
+import base64ToArrayBuffer from '../utils/base64ToArrayBuffer';
 
 @Injectable({
   providedIn: 'root',
@@ -18,22 +18,50 @@ export class DescargaService {
    */
   async descargarArchivo(base64File: string, fileType: string, fileName: string): Promise<void> {
     try {
-      const arrayBuffer = this.base64ToArrayBuffer(base64File);
+      const arrayBuffer = base64ToArrayBuffer(base64File);
       const blob = new Blob([arrayBuffer], { type: fileType });
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${fileName}.${this.obtenerExtencionMimeType(fileType)}`;
-      link.target = '_blank';
-      link.click();
-
-      // Limpiar la URL temporal para liberar memoria.
-      window.URL.revokeObjectURL(url);
+      this.descargarArchivoBlob(blob, fileType, fileName);
     } catch (error) {
       console.error('Error al descargar el archivo:', error);
       throw error; 
     }
+  }
+
+  /**
+   * Downloads an individual file based on its ArrayBuffer content.
+   * @param buffer The ArrayBuffer content of the file.
+   * @param fileType The MIME type of the file (e.g., 'application/pdf').
+   * @param fileName The name of the file (without extension).
+   * @throws Error if any issue occurs during the download process.
+   */
+  async descargarArchivoBuffer(buffer: ArrayBuffer, fileType: string, fileName: string): Promise<void> {
+    try {
+      const blob = new Blob([buffer], { type: fileType });
+      this.descargarArchivoBlob(blob, fileType, fileName);
+    } catch (error) {
+      console.error('Error al descargar el archivo:', error);
+      throw error; 
+    }
+  }
+
+  /**
+   * Helper method to trigger the download of a Blob as a file.
+   * @param blob The Blob representing the file content.
+   * @param fileType The MIME type of the file.
+   * @param fileName The name of the file (without extension).
+   * @throws Error if any issue occurs during the download process.
+   */
+  private descargarArchivoBlob(blob: Blob, fileType: string, fileName: string): void {
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileName}.${this.obtenerExtencionMimeType(fileType)}`;
+    link.target = '_blank';
+    link.click();
+
+    // Limpiar la URL temporal para liberar memoria.
+    window.URL.revokeObjectURL(url);
   }
 
   /**
@@ -68,21 +96,6 @@ export class DescargaService {
       console.error('Error al crear el archivo ZIP:', error);
       throw error;
     }
-  }
-
-  /**
-   * Convierte una cadena en Base64 a un ArrayBuffer.
-   * @param base64 - La cadena en formato Base64.
-   * @returns Un ArrayBuffer representando el contenido binario del archivo.
-   */
-  private base64ToArrayBuffer(base64: string): ArrayBuffer {
-    const binaryString = window.atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
   }
 
   /**
