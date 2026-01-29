@@ -60,7 +60,7 @@
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button matStepperNext mat-flat-button color="primary" type="submit" class="mx-2">
+                <button mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
                 </button>
               </div>
@@ -84,12 +84,12 @@
             </div>
           </div>
           <div class="mt-4">
-            <app-aspectos-evaluados></app-aspectos-evaluados>
+            <app-aspectos-evaluados [informeId]="informeId" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" matStepperPrevious>
                 Volver
               </button>
-              <button mat-flat-button color="primary" class="mx-2">
+              <button mat-flat-button color="primary" class="mx-2" (click)="onSubmitAspectosEvaluados()">
                 Guardar y continuar
               </button>
             </div>
@@ -112,7 +112,7 @@
             </div>
           </div>
           <div class="mt-4">
-            <app-resumen-hallazgos></app-resumen-hallazgos>
+            <app-resumen-hallazgos [informeId]="informeId" #resumenHallazgosComp></app-resumen-hallazgos>
             <div class="d-flex justify-content-end mt-4">
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
@@ -147,7 +147,7 @@
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button matStepperNext mat-flat-button color="primary" type="submit" class="mx-2">
+                <button mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
                 </button>
               </div>
@@ -186,7 +186,7 @@
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button matStepperNext mat-flat-button color="primary" type="submit" class="mx-2">
+                <button mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
                 </button>
               </div>
