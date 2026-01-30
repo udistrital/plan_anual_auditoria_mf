@@ -62,7 +62,7 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "fecha_emision_informe",
+      nombre: "fecha_emision",
       etiqueta: "Fecha de Emisión Informe",
       icono: "event",
       parametros: {
