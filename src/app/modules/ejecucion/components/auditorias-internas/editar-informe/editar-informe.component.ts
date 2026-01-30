@@ -3,9 +3,7 @@ import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import {
-  formularioInformacionAuditoria,
-} from "./editar-informe.utilidades";
+import { formularioInformacionAuditoria } from "./editar-informe.utilidades";
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -31,8 +29,8 @@ export class EditarInformeComponent implements OnInit {
   @ViewChild("resumenHallazgosComp")
   resumenHallazgosComponent!: ResumenHallazgosComponent;
 
-  formularioInformacion: Formulario | undefined;
-  form: FormGroup;
+  formInformacion: Formulario | undefined;
+  formAspectosGenerales: FormGroup;
   formInformeFinal: FormGroup;
   formRespuestaPreliminar: FormGroup;
 
@@ -49,16 +47,16 @@ export class EditarInformeComponent implements OnInit {
     private fb: FormBuilder,
     private planAnualAuditoriaService: PlanAnualAuditoriaService
   ) {
-    this.form = this.fb.group({
-      contenido: [''],
-    });
-    this.formInformeFinal = this.fb.group({
-      informe: [''],
-      observaciones: [''],
-      notas: [''],
+    this.formAspectosGenerales = this.fb.group({
+      aspectos_generales: [''],
     });
     this.formRespuestaPreliminar = this.fb.group({
-      contenido: [''],
+      respuesta_preliminar: [''],
+    });
+    this.formInformeFinal = this.fb.group({
+      informe_final: [''],
+      observaciones_conclusiones: [''],
+      notas: [''],
     });
   }
 
@@ -102,11 +100,21 @@ export class EditarInformeComponent implements OnInit {
     if (!this.informeData) return;
 
     // Poblar formulario de aspectos generales (paso 2)
-    if (this.informeData.aspectos_generales) {
-      this.form.patchValue({
-        contenido: this.informeData.aspectos_generales
-      });
-    }
+    this.formAspectosGenerales.patchValue({
+      aspectos_generales: this.informeData.aspectos_generales
+    });
+
+    // Poblar formulario de respuesta preliminar (paso 5)
+    this.formRespuestaPreliminar.patchValue({
+      respuesta_preliminar: this.informeData.respuesta_preliminar
+    });
+
+    // Poblar formulario de informe final (paso 6)
+    this.formInformeFinal.patchValue({
+      informe_final: this.informeData.informe_final,
+      observaciones_conclusiones: this.informeData.observaciones_conclusiones,
+      notas: this.informeData.notas,
+    });
   }
 
   // Pobla el formulario de información una vez que el componente esté listo
@@ -116,7 +124,7 @@ export class EditarInformeComponent implements OnInit {
     const valoresIniciales: any = {};
 
     if (this.informeData.fecha_emision) {
-      valoresIniciales.fecha_emision_informe = new Date(this.informeData.fecha_emision);
+      valoresIniciales.fecha_emision = new Date(this.informeData.fecha_emision);
     }
     if (this.informeData.muestra) {
       valoresIniciales.Muestra = this.informeData.muestra;
@@ -126,7 +134,7 @@ export class EditarInformeComponent implements OnInit {
   }
 
   cargarFormularios(): void {
-    this.formularioInformacion = formularioInformacionAuditoria;
+    this.formInformacion = formularioInformacionAuditoria;
   }
 
   enviarFormInformacion() {
@@ -135,10 +143,7 @@ export class EditarInformeComponent implements OnInit {
 
   preguntarGuardadoInformacion(dataForm: any) {
     if (!dataForm) {
-      return this.alertaService.showAlert(
-        "Formulario incompleto",
-        "Debe llenar todos los campos obligatorios"
-      );
+      return this.alertaService.showAlert("Formulario incompleto", "Debe llenar todos los campos obligatorios");
     }
 
     this.alertaService
@@ -168,17 +173,12 @@ export class EditarInformeComponent implements OnInit {
   }
 
   onSubmitInformacion(informacion: any) {
-    const campos = {
-      fecha_emision: informacion.fecha_emision_informe,
-      muestra: informacion.Muestra || null,
-    };
-
+    const campos = { fecha_emision: informacion.fecha_emision, muestra: informacion.Muestra || null };
     this.guardarPaso(campos, "La informacion se ha guardado correctamente", "No se pudo guardar la informacion");
   }
 
   onSubmitAspectosGenerales() {
-    const campos = { aspectos_generales: this.form.value.contenido };
-    this.guardarPaso(campos, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales");
+    this.guardarPaso(this.formAspectosGenerales.value, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales");
   }
 
   // Guarda los aspectos evaluados (temas, subtemas, hallazgos) y avanza al siguiente paso
@@ -195,11 +195,11 @@ export class EditarInformeComponent implements OnInit {
   }
 
   onSubmitRespuestaPreliminar() {
-    console.log(this.formRespuestaPreliminar.value);
+    this.guardarPaso(this.formRespuestaPreliminar.value, "La respuesta preliminar se ha guardado correctamente", "No se pudo guardar la respuesta preliminar");
   }
 
   onSubmitInformeFinal() {
-    console.log(this.formInformeFinal.value);
+    this.guardarPaso(this.formInformeFinal.value, "El infrorme final se ha guardado correctamente", "No se pudo guardar el informe final");
   }
 
   // Se ejecuta cuando se eliminan temas, subtemas o hallazgos

@@ -7,7 +7,6 @@ import { EjecucionRoutingModule } from './ejecucion-routing.module';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 import { EditarInformeComponent } from './components/auditorias-internas/editar-informe/editar-informe.component';
 import { TablaAuditoriasInternasComponent } from './components/auditorias-internas/tabla-auditorias-internas/tabla-auditorias-internas.component';
-import { AspectosGeneralesComponent } from './components/auditorias-internas/editar-informe/aspectos-generales/aspectos-generales.component';
 import { AspectosEvaluadosComponent } from './components/auditorias-internas/editar-informe/aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './components/auditorias-internas/editar-informe/resumen-hallazgos/resumen-hallazgos.component';
 import { AspectosEvaluadosSeguimientoComponent } from './components/seguimiento-informes/editar-informe-seguimiento/aspectos-evaluados-seguimiento/aspectos-evaluados-seguimiento.component';
@@ -20,7 +19,6 @@ import { TablaSeguimientosComponent } from './components/seguimiento-informes/ta
     AuditoriasInternasComponent,
     EditarInformeComponent,
     TablaAuditoriasInternasComponent,
-    AspectosGeneralesComponent,
     AspectosEvaluadosComponent,
     ResumenHallazgosComponent,
     AspectosEvaluadosSeguimientoComponent,
