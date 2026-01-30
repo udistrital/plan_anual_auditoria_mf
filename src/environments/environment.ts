@@ -13,7 +13,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
    PLAN_ANUAL_AUDITORIA_SERVICE:
    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "httudistrital/sisifo_documentacion/issues/454p://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
   PLAN_ANUAL_AUDITORIA_MID:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   // PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
