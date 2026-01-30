@@ -22,7 +22,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 })
 export class RevisionDocumentosComponent implements OnInit {
   auditoriaId: string = "";
-  estadoAuditoriaId!: number;
+  estadoProgramaId!: number;
   selectedTab: number = 0;
   opcionesDocumentos: any;
   role: string | null = null;
@@ -33,7 +33,7 @@ export class RevisionDocumentosComponent implements OnInit {
   docProgramaTrabajo: string = "";
   docSolicitudInformacion: string = "";
   docCartaPresentacion: string = "";
-  docCompromisoEstico: string = "";
+  docCompromisoEtico: string = "";
 
   constructor(
     public dialog: MatDialog,
@@ -50,7 +50,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
   ngOnInit(): void {
     this.inicializarDatos();
-    this.cargarEstadoAuditoria();
+    this.cargarEstadoPrograma();
   }
 
   inicializarDatos() {
@@ -64,15 +64,15 @@ export class RevisionDocumentosComponent implements OnInit {
     this.cargarDocumentos();
   }
 
-  cargarEstadoAuditoria() {
+  cargarEstadoPrograma() {
     this.planAuditoriaService
       .get(
-        `auditoria-estado?query=auditoria_id:${this.auditoriaId},actual:true`
+        `programa-estado?query=auditoria_id:${this.auditoriaId},actual:true`
       )
       .subscribe((res) => {
-        this.estadoAuditoriaId =
-          res.Data[0]?.estado_interno_id ??
-          environment.AUDITORIA_ESTADO.BORRADOR_ID;
+        this.estadoProgramaId =
+          res.Data[0]?.estado_id ??
+          environment.PROGRAMA_ESTADO.BORRADOR_ID;
       });
   }
 
@@ -118,11 +118,11 @@ export class RevisionDocumentosComponent implements OnInit {
 
   async aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
     try {
-      const auditoriaEstado =
-        this.construirObjetoAuditoriaEstado(estadoAprobacion);
+      const programaEstado =
+        this.construirObjetoProgramaEstado(estadoAprobacion);
 
       await this.planAuditoriaService
-        .post("auditoria-estado", auditoriaEstado)
+        .post("programa-estado", programaEstado)
         .toPromise();
 
       this.alertService.showSuccessAlert(
@@ -135,7 +135,7 @@ export class RevisionDocumentosComponent implements OnInit {
     }
   }
 
-  construirObjetoAuditoriaEstado(estadoAprobacion: number) {
+  construirObjetoProgramaEstado(estadoAprobacion: number) {
     return {
       auditoria_id: this.auditoriaId,
       usuario_id: this.usuarioId,
@@ -189,13 +189,13 @@ export class RevisionDocumentosComponent implements OnInit {
     });
   }
 
-  mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
+  mostrarAcciones(role: string, estadoProgramaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID],
-      auditado: [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID],
+      jefe: [environment.PROGRAMA_ESTADO.EN_REVISION_POR_JEFE_ID],
+      auditado: [environment.PROGRAMA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID],
     };
     // retorna true, si el rol coincide con el estado de revision del rol
-    return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
+    return condicionesVisibilidad[role]?.includes(estadoProgramaId) || false;
   }
 
   cargarDocumentos() {

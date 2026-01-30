@@ -51,9 +51,9 @@ export class ModalRechazoAuditoriaComponent {
   }
 
   rechazarPlanAuditoria() {
-    const auditoriaEstado = this.construirObjetoAuditoriaEstado();
+    const programaEstado = this.construirObjetoProgramaEstado();
     this.planAuditoriaService
-      .post("auditoria-estado", auditoriaEstado)
+      .post("programa-estado", programaEstado)
       .subscribe(
         () => {
           this.alertService.showAlert(
@@ -72,13 +72,13 @@ export class ModalRechazoAuditoriaComponent {
       );
   }
 
-  construirObjetoAuditoriaEstado() {
+  construirObjetoProgramaEstado() {
     return {
       auditoria_id: this.infoModal.auditoriaId,
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.role,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_interno_id: environment.AUDITORIA_ESTADO.RECHAZADO_ID,
+      estado_interno_id: environment.PROGRAMA_ESTADO.RECHAZADO_ID,
       //todo por implementar
       estado_id: 0,
     };

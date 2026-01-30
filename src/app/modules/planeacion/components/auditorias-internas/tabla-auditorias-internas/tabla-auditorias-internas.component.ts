@@ -34,7 +34,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
-  auditoriaEstados = environment.AUDITORIA_ESTADO;
+  programaEstados = environment.PROGRAMA_ESTADO;
   auditoriasPorVigencia: Auditoria[] = [];
   auditoriasContructorTabla: any;
   banderaTablaAuditoriasInternas: boolean = false;
@@ -93,7 +93,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       )
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_interno_id;
+          const estadoId = auditoria.estado?.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -289,19 +289,19 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   enviarAprobacionPorJefe(auditoriaId: string) {
-    const auditoriaEstado = {
+    const programaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: this.roles.includes("AUDITOR_EXPERTO")
         ? "AUDITOR_EXPERTO"
         : "AUDITOR",
       observacion: "",
-      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
+      estado_interno_id: this.programaEstados.EN_REVISION_POR_JEFE_ID,
       //todo por implementar
       estado_id: 0,
     };
     this.planAuditoriaService
-      .post("auditoria-estado", auditoriaEstado)
+      .post("programa-estado", programaEstado)
       .subscribe(
         () => {
           this.alertService.showSuccessAlert(
