@@ -192,7 +192,7 @@ export class RevisionDocumentosComponent implements OnInit {
   mostrarAcciones(role: string, estadoProgramaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
       jefe: [environment.PROGRAMA_ESTADO.EN_REVISION_POR_JEFE_ID],
-      auditado: [environment.PROGRAMA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID],
+      auditado: [environment.PROGRAMA_ESTADO.EN_REVISION_POR_AUDITOR_ID],
     };
     // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoProgramaId) || false;

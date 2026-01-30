@@ -94,12 +94,12 @@ export const accionesPlaneacion: {
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.PROGRAMA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.EN_REVISION_POR_AUDITOR_ID]: [
       "Ver Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITOR_ID]: [
       "Ver Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
@@ -119,11 +119,11 @@ export const accionesPlaneacion: {
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.PROGRAMA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.EN_REVISION_POR_AUDITOR_ID]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITOR_ID]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
@@ -142,11 +142,11 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.PROGRAMA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.EN_REVISION_POR_AUDITOR_ID]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITOR_ID]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
@@ -166,11 +166,11 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.PROGRAMA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.EN_REVISION_POR_AUDITOR_ID]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.PROGRAMA_ESTADO.APROBADO_POR_AUDITOR_ID]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
