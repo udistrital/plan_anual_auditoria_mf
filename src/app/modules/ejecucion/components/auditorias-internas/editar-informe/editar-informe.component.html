@@ -25,8 +25,8 @@
               Informacion general de la Auditoría
             </div>
           </div>
-          <div *ngIf="formularioInformacion != null" class="mt-4">
-            <app-formulario-dinamico #formularioInformacionComp [formulario]="formularioInformacion"
+          <div *ngIf="formInformacion != null" class="mt-4">
+            <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
               (submitFormulario)="preguntarGuardadoInformacion($event)">
             </app-formulario-dinamico>
             <div class="d-flex justify-content-end mt-4">
@@ -53,8 +53,8 @@
             </div>
           </div>
           <div class="mt-4">
-            <form [formGroup]="form" (ngSubmit)="onSubmitAspectosGenerales()">
-              <app-editor-enriquecido formControlName="contenido"
+            <form [formGroup]="formAspectosGenerales" (ngSubmit)="onSubmitAspectosGenerales()">
+              <app-editor-enriquecido formControlName="aspectos_generales"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
@@ -141,7 +141,7 @@
           </div>
           <div class="mt-4">
             <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="onSubmitRespuestaPreliminar()">
-              <app-editor-enriquecido formControlName="contenido"
+              <app-editor-enriquecido formControlName="respuesta_preliminar"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
@@ -173,11 +173,11 @@
           <div class="mt-4">
             <form [formGroup]="formInformeFinal" (ngSubmit)="onSubmitInformeFinal()">
               <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
-              <app-editor-enriquecido formControlName="informe"
+              <app-editor-enriquecido formControlName="informe_final"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
-              <app-editor-enriquecido formControlName="observaciones"
+              <app-editor-enriquecido formControlName="observaciones_conclusiones"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <h3 style="color: var(--primary)" class="my-2">Notas</h3>
