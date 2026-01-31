@@ -19,6 +19,7 @@ export interface ModalVerDocumentosData {
   titulo?: string;
   descripcion?: string;
   tabs?: TabDocumento[];
+  inferTabs?: boolean;
   textoBotonCerrar?: string;
 }
 
@@ -56,13 +57,19 @@ export class ModalVerDocumentosComponent implements OnInit {
 
   async ngOnInit() {
     try {
+      await this.cargarDocumentos();
+      if (this.data.inferTabs)
+        this.inferirPestanasDeDocumentos();
       await this.renderizarDocumentos();
     } catch (error) {
       console.error("Error al inicializar los documentos:", error);
     }
   }
 
-  async renderizarDocumentos() {
+  /**
+   * Loads documents associated with the given entity ID.
+   */
+  async cargarDocumentos() {
     try {
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.data.entityId)
@@ -74,18 +81,56 @@ export class ModalVerDocumentosComponent implements OnInit {
       enlacesConTipo.forEach((doc, index) => {
         const base64 = base64Files[index];
         this.documentos.push({ base64, tipo_id: doc.tipo_id });
-
-        // Asignar documento al tab correspondiente
-        const tabIndex = this.tabs.findIndex(tab => tab.tipoId === doc.tipo_id);
-        if (tabIndex !== -1 && !this.documentosPorTab[tabIndex]) {
-          this.documentosPorTab[tabIndex] = base64;
-        }
       });
     } catch (error) {
-      console.error("Error al renderizar los documentos:", error);
+      console.error("Error al cargar los documentos:", error);
       this.alertService.showAlert(
         "No se encontraron documentos",
         "No se encontraron documentos asociados"
+      );
+      this.dialogRef.close();
+    }
+  }
+
+  /**
+   * Inferes the tabs to display based on the types of documents loaded.
+   */
+  inferirPestanasDeDocumentos() {
+    const tabsInferidas: TabDocumento[] = [];
+    this.documentos.forEach((doc) => {
+      const tipoDocumentoEntry = Object.entries(environment.TIPO_DOCUMENTO_PARAMETROS)
+                                       .find(([_, id]) => id === doc.tipo_id);
+      if (tipoDocumentoEntry) {
+        const nombreParametro = tipoDocumentoEntry[0]
+                                  .toLowerCase()
+                                  .replaceAll("_", " ")
+                                  // Capitalize first letter of each word
+                                  .replace(/\b\w/g, char => char.toUpperCase());
+        tabsInferidas.push({ nombre: nombreParametro, tipoId: doc.tipo_id });
+      }
+    });
+
+    this.tabs = tabsInferidas;
+  }
+
+  async renderizarDocumentos() {
+    try {
+      // ! This method assumes that a document will be well matched to any tab of the same tipo_id, no matter the name.
+      // Map tabs into availability holders
+      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }))
+      this.documentos.forEach((doc) => {
+        // Assign document to the first available tab that matches its tipo_id
+        const holderIdx = tabHolders.findIndex(holder => holder.tab.tipoId === doc.tipo_id);
+        if (holderIdx !== -1 && !this.documentosPorTab[tabHolders[holderIdx].idx])
+          this.documentosPorTab[tabHolders[holderIdx].idx] = doc.base64;
+
+        // Remove the used holder to prevent multiple assignments
+        tabHolders.splice(holderIdx, 1);
+      });
+    } catch (error) {
+      console.error("Error al renderizar los documentos:", error);
+      this.alertService.showErrorAlert(
+        "Ocurrió un error inesperado al renderizar los documentos"
       );
       this.dialogRef.close();
     }

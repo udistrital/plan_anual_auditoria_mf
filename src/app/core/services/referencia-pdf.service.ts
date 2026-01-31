@@ -49,12 +49,12 @@ export class ReferenciaPdfService {
   }
 
   consultarDocumento(
-    planAuditoriaId: string,
+    referenciaId: string,
     tipoId: number
   ): Observable<string> {
     return this.planAnualAuditoriaService
       .get(
-        `documento?query=referencia_id:${planAuditoriaId},tipo_id:${tipoId},activo:true&fields=nuxeo_enlace`
+        `documento?query=referencia_id:${referenciaId},tipo_id:${tipoId},activo:true&fields=nuxeo_enlace`
       )
       .pipe(
         map((response: any) => {
@@ -79,11 +79,11 @@ export class ReferenciaPdfService {
   }
 
   consultarDocumentos(
-    planAuditoriaId: string
+    referenciaId: string
   ): Observable<{ nuxeo_enlace: string; tipo_id: number }[]> {
     return this.planAnualAuditoriaService
       .get(
-        `documento?query=referencia_id:${planAuditoriaId},activo:true&fields=nuxeo_enlace,tipo_id`
+        `documento?query=referencia_id:${referenciaId},activo:true&fields=nuxeo_enlace,tipo_id`
       )
       .pipe(
         map((response: any) => {
