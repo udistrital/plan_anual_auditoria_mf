@@ -1,0 +1,49 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Seguimiento e Informes'"
+  [breadcrumb]="
+    '<p>Gestión Auditoría / Planeación / <b>Seguimiento e Informes</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <form [formGroup]="vigenciaForm">
+        <div class="row">
+          <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+            <mat-label>Seleccione una vigencia:</mat-label>
+            <mat-icon color="primary" matPrefix>today</mat-icon>
+            <mat-select
+              formControlName="vigencia"
+              (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
+              color="primary"
+            >
+              <mat-option disabled value="">--Seleccionar--</mat-option>
+              <mat-option
+                *ngFor="let vigencia of vigencias"
+                [value]="vigencia"
+                >{{ vigencia.Nombre }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+          <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
+            <mat-icon color="primary" class="me-2">info</mat-icon>
+            <p style="font-size: 14px">
+              Se cargarán las auditorías correspondientes a la vigencia
+              seleccionada.
+            </p>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <app-tabla-seguimiento
+        [vigenciaId]="vigenciaSeleccionada"
+      ></app-tabla-seguimiento>
+    </div>
+  </div>
+</ng-template>
