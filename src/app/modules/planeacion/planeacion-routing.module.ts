@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuditoriasInternasComponent } from "./components/auditorias-internas/auditorias-internas.component";
+import { SeguimientoComponent } from "./components/seguimiento/seguimiento.component";
 import { EditarAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/editar-auditoria.component";
 import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
 
@@ -20,6 +21,7 @@ const routes: Routes = [
       },
     ],
   },
+  { path: "seguimiento", component: SeguimientoComponent },
 ];
 
 @NgModule({

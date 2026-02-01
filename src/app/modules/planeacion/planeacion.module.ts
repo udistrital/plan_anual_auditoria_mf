@@ -16,6 +16,10 @@ import { EditarActividadComponent } from "./components/auditorias-internas/edita
 import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
 import { ModalRechazoAuditoriaComponent } from "./components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component";
 
+// Seguimiento e Informes
+import { SeguimientoComponent } from "./components/seguimiento/seguimiento.component";
+import { TablaSeguimientoComponent } from "./components/seguimiento/tabla-seguimiento/tabla-seguimiento.component";
+
 @NgModule({
   declarations: [
     ActividadesAuditoriaComponent,
@@ -28,6 +32,10 @@ import { ModalRechazoAuditoriaComponent } from "./components/auditorias-internas
     EditarActividadComponent,
     RevisionDocumentosComponent,
     ModalRechazoAuditoriaComponent,
+
+    // Seguimiento e Informes
+    SeguimientoComponent,
+    TablaSeguimientoComponent,
   ],
   imports: [
     CommonModule,
