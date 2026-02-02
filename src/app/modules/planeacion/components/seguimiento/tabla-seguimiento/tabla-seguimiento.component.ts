@@ -23,6 +23,14 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { OikosService } from "src/app/core/services/oikos.service";
+import { Observable, map, catchError, of } from "rxjs";
+
+/** Extends the Auditoria interface to add dependencia display field and acciones */
+interface AuditoriaSeguimieto extends Auditoria {
+  acciones?: string[];
+  dependencia?: string;
+}
 
 @Component({
   selector: "app-tabla-seguimiento",
@@ -36,7 +44,7 @@ export class TablaSeguimientoComponent implements OnInit {
 
   auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
   auditoriaEstados = environment.AUDITORIA_ESTADO;
-  auditoriasPorVigencia: Auditoria[] = [];
+  auditoriasPorVigencia: AuditoriaSeguimieto[] = [];
   auditoriasContructorTabla: any;
   banderaTablaSeguimiento: boolean = false;
   tablaColumnas: any;
@@ -65,7 +73,8 @@ export class TablaSeguimientoComponent implements OnInit {
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly router: Router,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly oikosService: OikosService
   ) {}
 
   ngOnInit() {
@@ -121,6 +130,15 @@ export class TablaSeguimientoComponent implements OnInit {
         }
 
         this.auditoriasPorVigencia = auditorias;
+        this.auditoriasPorVigencia.forEach(
+          // populate dependencia display field
+          (auditoria) => this.resolverDependencia(auditoria).subscribe({
+            next: (dependenciaNombre: string) => {
+              auditoria.dependencia = dependenciaNombre;
+            }
+          })
+        )
+
         this.totalRegistros = res.MetaData.Count;
         this.banderaTablaSeguimiento = true;
         this.construirTabla();
@@ -233,7 +251,7 @@ export class TablaSeguimientoComponent implements OnInit {
     //   `/planeacion/seguimiento/editar/${auditoriaId}`,
     // ]);
     // TODO: Implement the edit functionality
-    this.alertService.showSuccessAlert(
+    this.alertService.showAlert(
       "Funcionalidad en desarrollo",
       "La funcionalidad de edición de auditorías está en desarrollo."
     );
@@ -330,17 +348,17 @@ export class TablaSeguimientoComponent implements OnInit {
     };
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.alertService.showSuccessAlert(
             "Auditoria enviada a aprobación por Jefe",
             "Auditoria enviada"
           );
         },
-        (error) => {
+        error: () => {
           this.alertService.showErrorAlert("Error al enviar el plan.");
         }
-      );
+      });
   }
 
   verDocumentos(auditoria: any) {
@@ -353,5 +371,37 @@ export class TablaSeguimientoComponent implements OnInit {
         inferTabs: true,
       },
     });
+  }
+
+  /**
+   * Resolves the dependencia name for a given auditoria.
+   * If the auditoria type is Macroproceso or Proceso, it returns the type name directly.
+   * If it's Dependencia, it fetches the name from the Oikos service.
+   * @param auditoria The auditoria object containing type and macroproceso information.
+   * @returns An Observable that emits the appropriate dependencia display field.
+   */
+  resolverDependencia(auditoria: any): Observable<string> {
+    switch (auditoria.tipo_id) {
+      case environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.PARAMETRO_ID:
+        return of("Macroproceso");
+      case environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.PARAMETRO_ID:
+        return of("Proceso");
+      case environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.DEPENDENCIA.PARAMETRO_ID:
+        break;
+      default:
+        return of("Indeterminado");
+    }
+
+    if (!auditoria.macroproceso)
+      return of("Indeterminado");
+
+    const url = `parametro/${auditoria.macroproceso}`;
+    return this.oikosService.get(url).pipe(
+      map((res: any) => res.Data[0]?.Nombre || "Indeterminado"),
+      catchError((error) => {
+        console.error("Error al resolver la dependencia:", error);
+        return of("Indeterminado");
+      })
+    );
   }
 }
