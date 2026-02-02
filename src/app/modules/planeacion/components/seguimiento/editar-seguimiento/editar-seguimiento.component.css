@@ -1,0 +1,11 @@
+.area-texto {
+  height: 100px; /* Ajusta esta altura según tus necesidades */
+  resize: none; /* Evita que el usuario redimensione el área */
+}
+
+.info {
+  background-color: #fff4ed;
+  padding: 20px;
+  color: #3c1513;
+  border-radius: 10px;
+}

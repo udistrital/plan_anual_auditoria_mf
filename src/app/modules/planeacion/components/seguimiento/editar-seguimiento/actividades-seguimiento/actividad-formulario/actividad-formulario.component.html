@@ -1,0 +1,171 @@
+<div class="row">
+    <div class="col-12">
+      <div class="row">
+        <form [formGroup]="form">
+          <!-- Actividad -->
+          <div class="row mt-2">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Actividad</b>
+            </div>
+
+            <!-- Campo: Nombre de Actividad -->
+            <div class="col-12">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Nombre de Actividad</mat-label>
+                <mat-icon matPrefix color="primary">task</mat-icon>
+                <input
+                  matInput
+                  placeholder="Nombre de la actividad"
+                  formControlName="actividad"
+                />
+              </mat-form-field>
+            </div>
+  
+            <!-- Campo: Fecha Inicio -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Fecha de Inicio</mat-label>
+                <mat-icon matPrefix color="primary">event</mat-icon>
+                <input
+                  matInput
+                  [matDatepicker]="pickerInicio"
+                  placeholder="Seleccione una fecha"
+                  formControlName="fechaInicio"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="pickerInicio"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #pickerInicio></mat-datepicker>
+              </mat-form-field>
+            </div>
+  
+            <!-- Campo: Fecha Fin -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Fecha de Fin</mat-label>
+                <mat-icon matPrefix color="primary">event</mat-icon>
+                <input
+                  matInput
+                  [matDatepicker]="pickerFin"
+                  placeholder="Seleccione una fecha"
+                  formControlName="fechaFin"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="pickerFin"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #pickerFin></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Papeles de trabajo -->
+          <!-- ? In the mockup "papeles" is plural, but only one set of fields is shown
+          with no add/remove functionality. Is it truly meant to be plural? -->
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Papeles de trabajo</b>
+              </div>
+            </div>
+
+            <!-- Referencia -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Referencia</mat-label>
+                <mat-icon matPrefix color="primary">bookmark</mat-icon>
+                <input
+                  matInput
+                  placeholder="Referencia"
+                  formControlName="papelTrabajoReferencia"
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- Descripción -->
+            <div class="col-12 col-md-6 col-xl-8">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Descripción</mat-label>
+                <mat-icon matPrefix color="primary">description</mat-icon>
+                <input
+                  matInput
+                  placeholder="Descripción"
+                  formControlName="papelTrabajoDescripcion"
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- Folios -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Folios</mat-label>
+                <mat-icon matPrefix color="primary">numbers</mat-icon>
+                <input
+                  matInput
+                  type="number"
+                  placeholder="Folios"
+                  formControlName="papelTrabajoFolios"
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- Medio -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Medio</mat-label>
+                <mat-icon matPrefix color="primary">folder_open</mat-icon>
+                <mat-select
+                  placeholder="Medio"
+                  formControlName="papelTrabajoMedio"
+                >
+                  <mat-option disabled value="">--Seleccionar--</mat-option>
+                  <mat-option value="Físico">Físico</mat-option>
+                  <mat-option value="Digital">Digital</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- Carpeta -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Carpeta</mat-label>
+                <mat-icon matPrefix color="primary">folder</mat-icon>
+                <input
+                  matInput
+                  placeholder="Carpeta"
+                  formControlName="papelTrabajoCarpeta"
+                />
+              </mat-form-field>
+            </div>
+          </div>
+  
+          <!-- Botones de acción -->
+          <div class="d-flex justify-content-center align-items-center my-4">
+            <mat-icon color="primary">info</mat-icon>
+            <p class="mx-2">¿Guardar cambios?</p>
+          </div>
+          <mat-dialog-actions align="center">
+            <button
+              mat-stroked-button
+              color="primary"
+              style="border: 1px solid var(--md-primary-500)"
+              [mat-dialog-close]
+              class="mb-sm"
+            >
+              <mat-icon>close</mat-icon>No, cerrar
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="guardarActividad()"
+              class="mb-sm"
+            >
+              <mat-icon>save</mat-icon>
+              Si, guardar y cerrar
+            </button>
+          </mat-dialog-actions>
+        </form>
+      </div>
+    </div>
+  </div>
