@@ -63,6 +63,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
+    this.vigenciaNombre = localStorage.getItem('vigencia') || '';
     await this.obtenerEstadoActual();
     this.cargarAuditorias();
     try {
@@ -97,10 +98,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
             estado: item.estado_id ?? "Borrador",
           }));
           
-          // Obtener vigencia desde el primer elemento
-          if (res.Data[0].vigencia_nombre) {
-            this.vigenciaNombre = res.Data[0].vigencia_nombre;
-          }
           if (res.Data[0].vigencia_id) {
             this.vigenciaId = res.Data[0].vigencia_id;
           }
