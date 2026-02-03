@@ -4,9 +4,6 @@ import { ActividadesSeguimientoComponent as ActividadesSeguimientoComponent } fr
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
   formularioInformacionAuditoria,
-  // TODO: Restore or remove after checking on Recursos step
-  // formularioRecursosAuditoria,
-  formularioTemasAuditoria,
 } from "./editar-seguimiento.utilidades";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -39,15 +36,6 @@ export class EditarSeguimientoComponent implements OnInit {
   formularioInformacionComponent!: FormularioDinamicoComponent;
   formularioInformacion: Formulario | undefined;
 
-  // ? The Recursos step is not on the mock up, should we remove it?
-  // @ViewChild("formularioRecursosComp")
-  // formularioRecursosComponent!: FormularioDinamicoComponent;
-  // formularioRecursos: Formulario | undefined;
-
-  // @ViewChild("formularioTemasComp")
-  // formularioTemasComponent!: FormularioDinamicoComponent;
-  // formularioTemas: Formulario | undefined;
-
   auditoriaId!: string;
   auditoria!: Auditoria;
   esLineal = false;
@@ -76,7 +64,6 @@ export class EditarSeguimientoComponent implements OnInit {
 
   ngAfterViewInit() {
     this.stepper.selectionChange.subscribe((event) => {
-      // TODO: Update after checking if the number of steps stays in 3
       if (event.previouslySelectedIndex === 2 && event.selectedIndex !== 2) {
         this.registroPlan.onStepLeave();
       }
@@ -99,9 +86,6 @@ export class EditarSeguimientoComponent implements OnInit {
 
   cargarFormularios(): void {
     this.formularioInformacion = formularioInformacionAuditoria;
-    // TODO: Restore or remove after checking on Recursos step
-    // this.formularioRecursos = formularioRecursosAuditoria;
-    // this.formularioTemas = formularioTemasAuditoria;
   }
 
   enviarFormInformacion() {
@@ -151,53 +135,8 @@ export class EditarSeguimientoComponent implements OnInit {
       macroproceso: informacion.proceso,
       responsable_id: informacion.responsable,
       tipo_id: informacion.tipo,
-      // ? The following fields are not in the mockup, should we remove them?
-      // objetivo: informacion.objetivo_auditoria,
-      // alcance: informacion.alcance_auditoria,
-      // criterio: informacion.criterios,
     };
   }
-
-  // TODO: Restore or remove after checking on Recursos step
-  // enviarFormRecursos() {
-  //   this.formularioRecursosComponent.onSubmit();
-  //   this.formularioTemasComponent.onSubmit();
-  // }
-
-  // preguntarGuardadoRecursos(dataForm: any) {
-  //   if (!dataForm || !this.formularioTemasComponent.form.valid) {
-  //     return this.alertaService.showAlert(
-  //       "Formulario incompleto",
-  //       "Debe llenar todos los campos obligatorios"
-  //     );
-  //   }
-
-  //   this.alertaService
-  //     .showConfirmAlert("¿Está seguro(a) de guardar los recursos y temas?")
-  //     .then((confirmado) => {
-  //       if (!confirmado.value) {
-  //         return;
-  //       }
-  //       this.guardarRecursos(dataForm);
-  //     });
-  // }
-
-  // guardarRecursos(recursos: any) {
-  //   const auditoriaId = this.auditoria._id;
-  //   const recursosEditar = {
-  //     rec_tecnologico: recursos.tecnologicos,
-  //     rec_humano: recursos.humanos,
-  //     rec_fisico: recursos.fisicos,
-  //     temas: this.formularioTemasComponent.form.value.temas,
-  //   };
-
-  //   this.planAuditoriaService
-  //     .put(`auditoria/${auditoriaId}`, recursosEditar)
-  //     .subscribe((res) => {
-  //       this.alertaService.showSuccessAlert("Recursos editados correctamente");
-  //       this.stepper.next();
-  //     });
-  // }
 
   finalizarAuditoria(): void {
     console.log("Auditoría finalizada");
@@ -244,22 +183,7 @@ export class EditarSeguimientoComponent implements OnInit {
       responsable: this.auditoria.responsable_id,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
-      // TODO: Restore or remove after checking on mockup fields
-      // objetivo_auditoria: this.auditoria.objetivo,
-      // alcance_auditoria: this.auditoria.alcance,
-      // criterios: this.auditoria.criterio,
     });
-
-    // TODO: Restore or remove after checking on Recursos step
-    // this.formularioRecursosComponent.form.patchValue({
-    //   tecnologicos: this.auditoria.rec_tecnologico,
-    //   humanos: this.auditoria.rec_humano,
-    //   fisicos: this.auditoria.rec_fisico,
-    // });
-
-    // this.formularioTemasComponent.form.patchValue({
-    //   temas: this.auditoria.temas,
-    // });
 
     if (this.auditoria.tipo_id) {
       this.manejarCambioTipo(this.auditoria.tipo_id);
@@ -373,6 +297,10 @@ export class EditarSeguimientoComponent implements OnInit {
     );
   }
 
+  /**
+   * Loads the list of dependencies into the "proceso" field options.
+   * TODO: Currently, the domain of the depenencia id is not part of the proceso field in parametros API.
+   */
   cargarDependencias() {
     this.oikosSevice
       .get(

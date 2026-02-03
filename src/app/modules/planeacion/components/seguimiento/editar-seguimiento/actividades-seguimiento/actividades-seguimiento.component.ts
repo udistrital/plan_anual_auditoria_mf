@@ -16,28 +16,6 @@ export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
   datos: any;
   
-  /*datos = [
-    {
-      actividad: "Título de la actividad 1",
-      fechaInicio: "2024-01-01",
-      fechaFin: "2024-01-10",
-      ref: "Ref 1",
-      descripcion: "Descripción 1",
-      folios: "10",
-      medio: "Digital",
-      carpeta: "Carpeta A",
-    },
-    {
-      actividad: "Título de la actividad 2",
-      fechaInicio: "2024-02-01",
-      fechaFin: "2024-02-05",
-      ref: "Ref 2",
-      descripcion: "Descripción 2",
-      folios: "15",
-      medio: "Físico",
-      carpeta: "Carpeta B",
-    },
-  ];*/
   columnsToDisplay: string[] = [
     "no",
     "actividad",
@@ -80,17 +58,17 @@ export class ActividadesSeguimientoComponent implements OnInit {
             "Actualmente no hay actividades registradas para la vigencia seleccionada."
           );
         }
-        //console.log("ACTB", actividades)
         this.datos = actividades.map((item) => ({
           id: item._id,
           actividad: item.titulo,
           fechaInicio: new Date(item.fecha_inicio)?.toLocaleDateString(),
           fechaFin: new Date(item.fecha_fin)?.toLocaleDateString(),
-          //ref: item.referencia,
-          //descripcion: item.descripcion,
-          //folios: item.folio?.toString() || "",
-          //medio: item.medio_id || "",  
-          //carpeta: item.carpeta || ""
+          // TODO: update papelTrabajo fields when business logic is clear
+          //ref: item.papeltrabajo_referencia,
+          //descripcion: item.papeltrabajo_descripcion,
+          //folios: item.papeltrabajo_folios?.toString() || "",
+          //medio: item.papeltrabajo_medio || "",  
+          //carpeta: item.papeltrabajo_carpeta || ""
         }));
       });
       

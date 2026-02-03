@@ -105,70 +105,9 @@
           </div>
         </mat-step>
 
-        <!-- ? Recursos is not on the mock up, should we remove it? -->
-        <!-- Paso 3: Recursos -->
-        <!-- <mat-step>
-          <ng-template matStepLabel>
-            <p>Paso 3</p>
-            <b style="color: var(--primary)">Recursos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>memory</mat-icon>
-            </div>
-            <div class="mx-3">
-              <h2>Recursos</h2>
-              Recursos para la ejecución de la auditoría
-            </div>
-          </div>
-          <div *ngIf="formularioRecursos != null" class="mt-4">
-            <app-formulario-dinamico
-              #formularioRecursosComp
-              [formulario]="formularioRecursos"
-              (submitFormulario)="preguntarGuardadoRecursos($event)"
-            >
-            </app-formulario-dinamico>
-          </div>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>memory</mat-icon>
-            </div>
-            <div class="mx-3">
-              <h2>Temas</h2>
-              Información para la ejecución de la auditoría
-            </div>
-          </div>
-          <div *ngIf="formularioTemas != null" class="mt-4">
-            <app-formulario-dinamico
-              #formularioTemasComp
-              [formulario]="formularioTemas"
-              >
-            </app-formulario-dinamico>
-          </div>
-          <div class="mt-4">
-            <div class="d-flex justify-content-end mt-4">
-              <button mat-stroked-button color="primary" matStepperPrevious>
-                <mat-icon>arrow_back_ios</mat-icon>
-                Volver
-              </button>
-              <button
-                mat-flat-button
-                color="primary"
-                (click)="enviarFormRecursos()"
-                class="mx-2"
-              >
-                <mat-icon>save</mat-icon>
-                Guardar y continuar
-              </button>
-            </div>
-          </div>
-        </mat-step> -->
-
-        <!-- Paso 4: Documentos anexos -->
+        <!-- Paso 3: Documentos anexos -->
         <mat-step>
           <ng-template matStepLabel>
-            <!-- TODO: Update after checking on Recursos step -->
-            <!-- <p>Paso 4</p> -->
             <p>Paso 3</p>
             <b style="color: var(--primary)">Documentos anexos</b>
           </ng-template>
