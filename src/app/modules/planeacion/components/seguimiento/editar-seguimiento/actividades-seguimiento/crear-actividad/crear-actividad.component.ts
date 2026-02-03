@@ -23,17 +23,17 @@ export class CrearActividadSeguimientoComponent {
   }
 
   crearActividad(actividadData: any) {
-    // ? The mock shows papelTrabajo fields, but where should the data be sent to?
     let actividadJson={
       auditoria_id:this.auditoriaId,
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
-      papeltrabajo_referencia:actividadData.papelTrabajoReferencia,
-      papeltrabajo_descripcion:actividadData.papelTrabajoDescripcion,
-      papeltrabajo_folios:actividadData.papelTrabajoFolios,
-      papeltrabajo_medio:actividadData.papelTrabajoMedio,
-      papeltrabajo_carpeta:actividadData.papelTrabajoCarpeta,
+      // TODO: update papelTrabajo fields when business logic is clear
+      // papeltrabajo_referencia:actividadData.papelTrabajoReferencia,
+      // papeltrabajo_descripcion:actividadData.papelTrabajoDescripcion,
+      // papeltrabajo_folios:actividadData.papelTrabajoFolios,
+      // papeltrabajo_medio:actividadData.papelTrabajoMedio,
+      // papeltrabajo_carpeta:actividadData.papelTrabajoCarpeta,
     };
 
     console.debug('Crear actividad json:', actividadJson);
@@ -42,29 +42,27 @@ export class CrearActividadSeguimientoComponent {
       .showConfirmAlert("¿Está seguro(a) de crear la actividad?")
       .then((result) => {
         if (result.isConfirmed) {
-          // TODO: Uncomment and update when papelTrabajo queries are resolved
-          // this.planAnualAuditoriaService
-          //   .post(`actividad`, actividadJson)
-          //   .subscribe(
-          //     (response) => {
-          //       if (response) {
-                  // TODO: Update UI accordingly
+          this.planAnualAuditoriaService
+            .post(`actividad`, actividadJson)
+            .subscribe(
+              (response) => {
+                if (response) {
                   this.alertaService.showSuccessAlert("Mock Registro Creado");
-          //         this.datos.push(response);
+                  this.datos.push(response);
                   this.dialogRef.close(true);
-          //       } else {
-          //         this.alertaService.showErrorAlert(
-          //           "Error al crear el registro"
-          //         );
-          //       }
-          //     },
-          //     (error) => {
-          //       console.error("error al crear actividad:", error);
-          //       this.alertaService.showErrorAlert(
-          //         "Error al crear el registro"
-          //       );
-          //     }
-          //   );
+                } else {
+                  this.alertaService.showErrorAlert(
+                    "Error al crear el registro"
+                  );
+                }
+              },
+              (error) => {
+                console.error("error al crear actividad:", error);
+                this.alertaService.showErrorAlert(
+                  "Error al crear el registro"
+                );
+              }
+            );
         }
       })
       .catch((error) => {

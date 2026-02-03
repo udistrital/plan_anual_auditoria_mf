@@ -21,7 +21,6 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
   formularioDocumentos: FormGroup;
 
   documentos = [
-    // ? Should any other documents be added here? Are they the same for seguimiento and informes?
     {
       nombre: "Oficio Anuncio Solicitud de Información",
       plantilla: "solicitud-informacion",

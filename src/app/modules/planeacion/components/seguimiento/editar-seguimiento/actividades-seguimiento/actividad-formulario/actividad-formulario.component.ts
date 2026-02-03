@@ -18,11 +18,12 @@ export class ActividadSeguimientoFormularioComponent {
       actividad: [''],
       fechaInicio: [''],
       fechaFin: [''],
-      papelTrabajoReferencia: [''],
-      papelTrabajoDescripcion: [''],
-      papelTrabajoFolios: [''],
-      papelTrabajoMedio: [''],
-      papelTrabajoCarpeta: [''],
+      // TODO: update papelTrabajo fields when business logic is clear
+      // papelTrabajoReferencia: [''],
+      // papelTrabajoDescripcion: [''],
+      // papelTrabajoFolios: [''],
+      // papelTrabajoMedio: [''],
+      // papelTrabajoCarpeta: [''],
       id:[''],
     });
   }
