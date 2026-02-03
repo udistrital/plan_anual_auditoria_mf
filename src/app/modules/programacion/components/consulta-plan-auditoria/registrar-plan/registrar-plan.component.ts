@@ -42,6 +42,7 @@ export class RegistrarPlanComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.route.params.subscribe(async (params) => {
       this.planId = params["id"];
+      this.vigenciaNombre = localStorage.getItem('vigencia') || '';
       this.inicializarFormulario();
 
       try {
@@ -72,11 +73,6 @@ export class RegistrarPlanComponent implements OnInit {
         .get(`plan-auditoria/${this.planId}`)
         .toPromise();
       
-      if (response?.Data) {
-        if (response.Data.vigencia_nombre) {
-          this.vigenciaNombre = response.Data.vigencia_nombre;
-        }
-      }
       return response?.Data;
     } catch (error) {
       console.error("Error al obtener el plan de auditoría:", error);
