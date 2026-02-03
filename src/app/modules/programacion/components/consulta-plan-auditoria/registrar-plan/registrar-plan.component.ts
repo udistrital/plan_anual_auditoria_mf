@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ChangeDetectorRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
@@ -25,6 +26,7 @@ export class RegistrarPlanComponent implements OnInit {
   breadcrumb: string = "";
   labelAccion: string = "";
   auditoriaItems: any;
+  vigenciaNombre: string = "";
 
   // parametros: Record<string, any> = {};
 
@@ -32,6 +34,7 @@ export class RegistrarPlanComponent implements OnInit {
     private alertaService: AlertService,
     private cdr: ChangeDetectorRef,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -65,9 +68,15 @@ export class RegistrarPlanComponent implements OnInit {
 
   async obtenerPlanAuditoria(): Promise<any> {
     try {
-      const response = await this.planAnualAuditoriaService
+      const response = await this.PlanAnualAuditoriaMid
         .get(`plan-auditoria/${this.planId}`)
         .toPromise();
+      
+      if (response?.Data) {
+        if (response.Data.vigencia_nombre) {
+          this.vigenciaNombre = response.Data.vigencia_nombre;
+        }
+      }
       return response?.Data;
     } catch (error) {
       console.error("Error al obtener el plan de auditoría:", error);
