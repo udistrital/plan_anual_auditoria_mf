@@ -63,6 +63,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.cargarVigencia();
+    await this.obtenerEstadoActual();
     this.cargarAuditorias();
     try {
       this.idMatriz = await this.buscarMatriz();
@@ -72,7 +73,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
     } catch (error) {
       console.error("Error al cargar Matriz", error);
     }
-    await this.obtenerEstadoActual();
     this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
     this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
