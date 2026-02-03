@@ -43,7 +43,7 @@
       <!-- Agregar cdkDropList a la tabla -->
       <div class="table-container" 
            cdkDropList
-           [cdkDropListDisabled]="!mostrarBotones"
+           [cdkDropListDisabled]="!modoEditar"
            (cdkDropListDropped)="drop($event)"
            cdkDropListAutoScrollDisabled="false">
         <table
