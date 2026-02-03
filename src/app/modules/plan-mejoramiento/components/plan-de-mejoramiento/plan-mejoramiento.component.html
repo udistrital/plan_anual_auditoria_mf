@@ -1,0 +1,47 @@
+<plantilla-tarjeta-contenedora [title]="'Plan de Mejoramiento'"
+  [breadcrumb]="'<p>Gestión de Planes / <b>Plan de Mejoramiento</b></p>'" [contenido]="contenidoDePlantilla">
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <form [formGroup]="planMejoramientoForm">
+        <div class="row d-flex align-items-center">
+
+          <!-- FILTRO: VIGENCIA -->
+          <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+            <mat-label>Vigencia</mat-label>
+            <mat-icon color="primary" matPrefix>today</mat-icon>
+            <mat-select formControlName="vigencia" (selectionChange)="onVigenciaChange($event.value)" color="primary">
+              <mat-option disabled value="">--Seleccionar--</mat-option>
+              <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia">{{ vigencia.Nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- TEXTO: Seleccione la vigencia a consultar -->
+          <div class="col-md-2 col-12 d-flex align-items-center mt-4">
+            <p style="font-size: 14px; margin-bottom: 0;">Seleccione la vigencia a consultar</p>
+          </div>
+
+          <!-- FILTRO: TIPO DE EVALUACIÓN -->
+          <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+            <mat-label>Tipo de Evaluación</mat-label>
+            <mat-icon color="primary" matPrefix>assessment</mat-icon>
+            <mat-select formControlName="tipoEvaluacion" (selectionChange)="onTipoEvaluacionChange($event.value)" color="primary">
+              <mat-option disabled value="">--Seleccionar--</mat-option>
+              <mat-option *ngFor="let tipo of tiposEvaluacion" [value]="tipo">{{ tipo.Nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLA DE PLANES DE MEJORAMIENTO -->
+  <div class="row">
+    <div class="col-12">
+      <app-tabla-plan-mejoramiento [vigenciaId]="vigenciaSeleccionada" [tipoEvaluacionId]="tipoEvaluacionSeleccionado" [role]="role"></app-tabla-plan-mejoramiento>
+    </div>
+  </div>
+</ng-template>
