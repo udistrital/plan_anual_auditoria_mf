@@ -246,15 +246,10 @@ export class TablaSeguimientoComponent implements OnInit {
   }
 
   editarAuditoria(auditoria: Auditoria) {
-    // const auditoriaId = auditoria._id;
-    // this.router.navigate([
-    //   `/planeacion/seguimiento/editar/${auditoriaId}`,
-    // ]);
-    // TODO: Implement the edit functionality
-    this.alertService.showAlert(
-      "Funcionalidad en desarrollo",
-      "La funcionalidad de edición de auditorías está en desarrollo."
-    );
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/seguimiento/editar/${auditoriaId}`,
+    ]);
   }
 
   revisarAuditoria(auditoria: Auditoria) {
@@ -361,6 +356,10 @@ export class TablaSeguimientoComponent implements OnInit {
       });
   }
 
+  /**
+   * Shows the Solicitud de Información document for the given auditoria in a modal.
+   * @param auditoria The auditoria whose document is to be viewed.
+   */
   verDocumentos(auditoria: any) {
     const auditoriaId = auditoria._id;
     this.dialog.open(ModalVerDocumentosComponent, {
@@ -368,7 +367,12 @@ export class TablaSeguimientoComponent implements OnInit {
       data: {
         entityId: auditoriaId,
         descripcion: "Documentos de la Auditoría de Seguimiento",
-        inferTabs: true,
+        tabs: [
+          {
+            nombre: "Oficio Anuncio Solicitud de Información",
+            tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION
+          }
+        ]
       },
     });
   }
