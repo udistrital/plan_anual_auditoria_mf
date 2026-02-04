@@ -24,7 +24,8 @@ import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { OikosService } from "src/app/core/services/oikos.service";
-import { Observable, map, catchError, of } from "rxjs";
+import { Observable, map, catchError, of, firstValueFrom } from "rxjs";
+import { TerceroIdentification, TercerosService } from "src/app/shared/services/terceros.service";
 
 /** Extends the Auditoria interface to add dependencia display field and acciones */
 interface AuditoriaSeguimieto extends Auditoria {
@@ -74,7 +75,8 @@ export class TablaSeguimientoComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly router: Router,
     private readonly userService: UserService,
-    private readonly oikosService: OikosService
+    private readonly oikosService: OikosService,
+    private readonly tercerosService: TercerosService,
   ) {}
 
   ngOnInit() {
@@ -91,28 +93,23 @@ export class TablaSeguimientoComponent implements OnInit {
     }
   }
 
-  listarAuditoriasPorVigencia(
+  async listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
   ) {
+    let url;
+    if (this.rolService.getRoles().includes("AUDITOR"))
+      url = await this.urlAuditoriasPorVigenciaFiltroAuditor(vigenciaId, limit, offset);
+    else
+      url = this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
 
-    let endpoint = "auditoria";
-
-    // Construct the query to fetch audits of type seguimiento and informe for the given vigencia
-    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
-    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
-    let queryParams = `query=vigencia_id:${vigenciaId}`;
-    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
-    queryParams += `,activo:true`;
-
-    // Add pagination parameters
-    queryParams += `&limit=${limit}`
-    queryParams += `&offset=${offset}`;
+    if (!url)
+      return;
 
     this.auditoriasPorVigencia = [];
     this.planAuditoriaMid
-      .get(endpoint + "?" + queryParams)
+      .get(url)
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
           const estadoId = auditoria.estado?.estado_interno_id;
@@ -143,6 +140,74 @@ export class TablaSeguimientoComponent implements OnInit {
         this.banderaTablaSeguimiento = true;
         this.construirTabla();
       });
+  }
+
+  /**
+   * Constructs the URL to fetch audits of type seguimiento and informe for a given vigencia.
+   * @param vigenciaId The ID of the vigencia.
+   * @param limit The maximum number of records to return.
+   * @param offset The number of records to skip.
+   * @returns The constructed URL string.
+   */
+  urlAuditoriasPorVigenciaTodas(
+    vigenciaId: number,
+    limit: number = this.itemsPerPage[0],
+    offset: number = 0
+  ): string {
+    let endpoint = "auditoria";
+
+    // Construct the query to fetch audits of type seguimiento and informe for the given vigencia
+    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
+    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
+    let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
+    queryParams += `,activo:true`;
+
+    // Add pagination parameters
+    queryParams += `&limit=${limit}`
+    queryParams += `&offset=${offset}`;
+
+    return `${endpoint}?${queryParams}`;
+  }
+
+  /**
+   * Constructs the URL to fetch audits for a given vigencia filtered by the authenticated auditor.
+   * @param vigenciaId The ID of the vigencia.
+   * @param limit The maximum number of records to return.
+   * @param offset The number of records to skip.
+   * @returns The constructed URL string.
+   */
+  async urlAuditoriasPorVigenciaFiltroAuditor(
+    vigenciaId: number,
+    limit: number = this.itemsPerPage[0],
+    offset: number = 0
+  ): Promise<string | null> {
+
+    // Get the tercero ID of the authenticated user
+    let terceroId: number;
+    try {
+      terceroId = await firstValueFrom(
+        this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+          map((tercero: TerceroIdentification) => tercero.Id)
+        )
+      );
+    } catch (error) {
+      console.error("Error al obtener el tercero del usuario autenticado:", error);
+      this.alertService.showErrorAlert(
+        "Error al obtener el tercero del usuario autenticado. No se podrá filtrar por auditor."
+      );
+      return null;
+    }
+    console.debug("Tercero ID del usuario autenticado:", terceroId);
+
+    // Construct the URL to fetch audits filtered by the auditor's tercero ID
+    // TODO: Replace with the logic to construct the URL for fetching audits filtered by auditor
+    this.alertService.showAlert(
+      "Funcionalidad en desarrollo",
+      `La funcionalidad de filtrar por auditor #${terceroId} (terceroId) está en desarrollo.
+      Actualmente se muestran todas las auditorías.`
+    );
+    return this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
   }
 
   construirTabla() {
