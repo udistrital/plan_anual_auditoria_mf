@@ -25,6 +25,8 @@ import { ActividadSeguimientoFormularioComponent } from "./components/seguimient
 import { CrearActividadSeguimientoComponent } from "./components/seguimiento/editar-seguimiento/actividades-seguimiento/crear-actividad/crear-actividad.component";
 import { EditarActividadSeguimientoComponent } from "./components/seguimiento/editar-seguimiento/actividades-seguimiento/editar-actividad/editar-actividad.component";
 import { DocumentosAnexosSeguimientoComponent } from "./components/seguimiento/editar-seguimiento/documentos-anexos-seguimiento/documentos-anexos-seguimiento.component";
+import { RevisionDocumentosSeguimientoComponent } from "./components/seguimiento/revision-documentos/revision-documentos.component";
+import { ModalRechazoSeguimientoComponent } from "./components/seguimiento/revision-documentos/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component";
 
 @NgModule({
   declarations: [
@@ -49,6 +51,8 @@ import { DocumentosAnexosSeguimientoComponent } from "./components/seguimiento/e
     CrearActividadSeguimientoComponent,
     EditarActividadSeguimientoComponent,
     DocumentosAnexosSeguimientoComponent,
+    RevisionDocumentosSeguimientoComponent,
+    ModalRechazoSeguimientoComponent
   ],
   imports: [
     CommonModule,
