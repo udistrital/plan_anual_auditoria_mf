@@ -155,7 +155,7 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   regresarRuta() {
-    this.router.navigate([`/planeacion/auditorias-internas`]);
+    this.router.navigate([`/planeacion/seguimiento`]);
   }
 
   subirArchivoCargueMasivo(): void {
