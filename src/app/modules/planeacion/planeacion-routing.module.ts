@@ -5,6 +5,7 @@ import { SeguimientoComponent } from "./components/seguimiento/seguimiento.compo
 import { EditarAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/editar-auditoria.component";
 import { EditarSeguimientoComponent } from "./components/seguimiento/editar-seguimiento/editar-seguimiento.component";
 import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
+import { RevisionDocumentosSeguimientoComponent } from "./components/seguimiento/revision-documentos/revision-documentos.component";
 
 const routes: Routes = [
   { path: "", component: AuditoriasInternasComponent },
@@ -29,6 +30,10 @@ const routes: Routes = [
       {
         path: "editar/:id",
         component: EditarSeguimientoComponent,
+      },
+      {
+        path: "revision/:id",
+        component: RevisionDocumentosSeguimientoComponent,
       },
     ],
   },

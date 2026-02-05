@@ -318,15 +318,11 @@ export class TablaSeguimientoComponent implements OnInit {
   }
 
   revisarAuditoria(auditoria: Auditoria) {
-    // const auditoriaId = auditoria._id;
-    // this.router.navigate([
-    //   `/planeacion/seguimiento/revisar/${auditoriaId}`,
-    // ]);
-    // TODO: Implement the review functionality
-    this.alertService.showAlert(
-      "Funcionalidad en desarrollo",
-      "La funcionalidad de revisión de auditorías está en desarrollo."
-    );
+    const auditoriaId = auditoria._id;
+    const tipoEvaluacionId = auditoria.tipo_evaluacion_id;
+
+    let route = `planeacion/seguimiento/revision/${auditoriaId}`;
+    this.router.navigate([route], { queryParams: { tipoEvaluacionId } });
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
