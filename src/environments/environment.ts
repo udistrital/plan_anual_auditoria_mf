@@ -11,8 +11,8 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-   PLAN_ANUAL_AUDITORIA_SERVICE:
-   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+  PLAN_ANUAL_AUDITORIA_SERVICE:
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
   // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
   PLAN_ANUAL_AUDITORIA_MID:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
@@ -62,6 +62,23 @@ export const environment = {
     EN_REVISIÓN_POR_AUDITADO_ID: 6826,
     APROBADO_POR_AUDITADO_ID: 6827,
     RECHAZADO_ID: 6828,
+  },
+
+  INFORME_ESTADO: {
+    
+    // INFORME PRELIMINAR
+    INFORME_PRELIMINAR_CREANDO_ID: 7070,
+    INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID: 7071,
+    INFORME_PRELIMINAR_APROBADO_POR_JEFE_ID: 7072,
+    INFORME_PRELIMINAR_RECHAZADO_POR_JEFE_ID: 7073,
+    INFORME_PRELIMINAR_EN_REVISION_POR_AUDITADO_ID: 7074,
+    INFORME_PRELIMINAR_APROBADO_POR_AUDITADO_ID: 7075,
+    INFORME_PRELIMINAR_RESPUESTA_POR_AUDITADO_ID: 7076,
+    // INFORME FINAL
+    INFORME_FINAL_CREANDO_ID: 7077,
+    INFORME_FINAL_EN_REVISION_POR_JEFE_ID: 7078,
+    INFORME_FINAL_APROBADO_POR_JEFE_ID: 7079,
+    INFORME_FINAL_RECHAZADO_POR_JEFE_ID: 7080
   },
 
   TIPO_DOCUMENTO: {

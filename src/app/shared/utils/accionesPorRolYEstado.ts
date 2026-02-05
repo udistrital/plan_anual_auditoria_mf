@@ -193,7 +193,7 @@ export const accionesEjecucion: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   ADMIN_SISIFO: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_CREANDO_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -230,30 +230,6 @@ export const accionesEjecucion: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.INFORME_ESTADO.INFORME_PRELIMINAR_RESPUESTA_POR_AUDITADO_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_GENEARCION]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_RECHAZADO_POR_JEFE_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -262,7 +238,7 @@ export const accionesEjecucion: {
   },
 
   JEFE_CONTROL_INTERNO: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_CREANDO_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -299,30 +275,6 @@ export const accionesEjecucion: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.INFORME_ESTADO.INFORME_PRELIMINAR_RESPUESTA_POR_AUDITADO_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_GENEARCION]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_RECHAZADO_POR_JEFE_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -331,7 +283,7 @@ export const accionesEjecucion: {
   },
 
   AUDITOR_EXPERTO: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_CREANDO_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -368,30 +320,6 @@ export const accionesEjecucion: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.INFORME_ESTADO.INFORME_PRELIMINAR_RESPUESTA_POR_AUDITADO_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_GENEARCION]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_RECHAZADO_POR_JEFE_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -400,7 +328,7 @@ export const accionesEjecucion: {
   },
 
   AUDITOR: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_CREANDO_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -437,30 +365,6 @@ export const accionesEjecucion: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.INFORME_ESTADO.INFORME_PRELIMINAR_RESPUESTA_POR_AUDITADO_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_GENEARCION]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
-      "Editar Preinforme",
-      "Editar informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.INFORME_ESTADO.INFORME_FINAL_RECHAZADO_POR_JEFE_ID]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
@@ -474,17 +378,17 @@ export const accionesSeguimiento: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   ADMIN_SISIFO: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_CREANDO_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_APROBADO_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
@@ -492,17 +396,17 @@ export const accionesSeguimiento: {
   },
 
   JEFE_CONTROL_INTERNO: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_CREANDO_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_APROBADO_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
@@ -510,17 +414,17 @@ export const accionesSeguimiento: {
   },
 
   AUDITOR_EXPERTO: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_CREANDO_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_APROBADO_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
@@ -528,17 +432,17 @@ export const accionesSeguimiento: {
   },
 
   AUDITOR: {
-    [environment.INFORME_ESTADO.BORRADOR_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_CREANDO_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_EN_REVISION_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.INFORME_ESTADO.INFORME_PRELIMINAR_APROBADO_POR_JEFE_ID]: [
+    [environment.INFORME_ESTADO.INFORME_FINAL_APROBADO_POR_JEFE_ID]: [
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
