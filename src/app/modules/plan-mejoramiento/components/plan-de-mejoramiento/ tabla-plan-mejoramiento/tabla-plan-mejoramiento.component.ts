@@ -7,6 +7,8 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
+import Swal from "sweetalert2";
 
 @Component({
   selector: "app-tabla-plan-mejoramiento",
@@ -45,44 +47,57 @@ export class TablaPlanMejoramientoComponent {
     limit: number = this.itemsPerPage[0],
     offset: number = 0
   ) {
-    console.log("Rol:", this.role, "| Vigencia:", vigenciaId, "| Tipo:", tipoEvaluacionId);
+    console.log("Consultando auditorías - Rol:", this.role, "| Vigencia:", vigenciaId, "| Tipo:", tipoEvaluacionId);
+    
+    const estadoAprobadoInformeFinal = environment.AUDITORIA_ESTADO.APROBADO_INFORME_FINAL_ID;
+    
     this.planesPorVigencia = [];
 
-    const planesMock = [
-      { _id: "1", vigencia_nombre: "2025", titulo: "Auditoría de Gestión Financiera", auditores_nombres: "Pepito Pérez", dependencia_nombre: "Proceso o Dependencia", lider_nombre: "Nombre Líder", responsable_nombre: "Nombre Responsable", estado_nombre: "Formulación" },
-      { _id: "2", vigencia_nombre: "2025", titulo: "Auditoría de Recursos Humanos", auditores_nombres: "María García", dependencia_nombre: "Gestión Humana", lider_nombre: "Carlos Rodríguez", responsable_nombre: "Ana Martínez", estado_nombre: "Formulación" },
-      { _id: "3", vigencia_nombre: "2025", titulo: "Auditoría de Control Interno", auditores_nombres: "Pedro López, Diana Torres", dependencia_nombre: "Control Interno", lider_nombre: "Luis Hernández", responsable_nombre: "Sandra Gómez", estado_nombre: "En ejecución" },
-      { _id: "4", vigencia_nombre: "2025", titulo: "Auditoría de Compras y Contratación", auditores_nombres: "Fernando Castro", dependencia_nombre: "Departamento de Compras", lider_nombre: "Gabriela Moreno", responsable_nombre: "Jorge Ramírez", estado_nombre: "En revisión" },
-      { _id: "5", vigencia_nombre: "2025", titulo: "Auditoría de Tecnología", auditores_nombres: "Carolina Vega", dependencia_nombre: "Tecnología e Informática", lider_nombre: "Ricardo Ortiz", responsable_nombre: "Mónica Vargas", estado_nombre: "Formulación" },
-      { _id: "6", vigencia_nombre: "2025", titulo: "Auditoría de Seguridad y Salud", auditores_nombres: "Julián Rojas", dependencia_nombre: "Seguridad y Salud", lider_nombre: "Laura Sánchez", responsable_nombre: "Eduardo Jiménez", estado_nombre: "En ejecución" },
-      { _id: "7", vigencia_nombre: "2025", titulo: "Auditoría de Calidad", auditores_nombres: "Beatriz Morales", dependencia_nombre: "Gestión de Calidad", lider_nombre: "Alejandro Cruz", responsable_nombre: "Valeria Gutiérrez", estado_nombre: "Completado" },
-      { _id: "8", vigencia_nombre: "2025", titulo: "Auditoría Ambiental", auditores_nombres: "Natalia Pineda", dependencia_nombre: "Gestión Ambiental", lider_nombre: "Sergio Medina", responsable_nombre: "Claudia Ríos", estado_nombre: "Formulación" },
-    ];
-
-    const inicio = offset;
-    const fin = inicio + limit;
-    const planesPaginados = planesMock.slice(inicio, fin);
-
-    const respuestaMock = {
-      Data: planesPaginados,
-      MetaData: { Count: planesMock.length }
-    };
-
-    const planes: any[] = respuestaMock.Data;
-
-    if (!(planes.length > 0)) {
-      this.banderaTablePlanes = false;
-      this.planesDataSource.data = [];
-      return this.alertaService.showAlert(
-        "No hay planes registrados",
-        "Actualmente no hay planes de mejoramiento para los filtros seleccionados."
-      );
-    }
-
-    this.planesPorVigencia = planes;
-    this.totalRegistros = respuestaMock.MetaData.Count;
-    this.banderaTablePlanes = true;
-    this.construirTabla();
+    this.planAuditoriaMid
+      .get(`auditoria?query=vigencia_id:${vigenciaId},tipo_evaluacion_id:${tipoEvaluacionId},estado_id:${estadoAprobadoInformeFinal},activo:true&limit=${limit}&offset=${offset}`)
+      .subscribe({
+        next: (res) => {
+          const auditorias: any[] = res.Data;
+          
+          // Verificar si hay datos
+          if (!auditorias || auditorias.length === 0) {
+            Swal.fire({
+              title: "No hay planes registrados",
+              text: `No se encontraron auditorías en estado "Aprobado informe final" para la vigencia y tipo de evaluación seleccionados.`,
+              icon: "info",
+            });
+            this.planesPorVigencia = [];
+            this.totalRegistros = 0;
+            this.banderaTablePlanes = false;
+            this.planesDataSource.data = [];
+            if (this.paginator) {
+              this.paginator.length = 0;
+            }
+            return;
+          }
+          
+          // Asignar datos y construir tabla
+          this.planesPorVigencia = auditorias;
+          this.totalRegistros = res.MetaData.Count;
+          this.banderaTablePlanes = true;
+          this.construirTabla();
+        },
+        error: (error) => {
+          console.error('Error al consultar auditorías:', error);
+          Swal.fire({
+            title: "Error",
+            text: "Ocurrió un error al consultar las auditorías. Por favor, intente nuevamente.",
+            icon: "error",
+          });
+          this.planesPorVigencia = [];
+          this.totalRegistros = 0;
+          this.banderaTablePlanes = false;
+          this.planesDataSource.data = [];
+          if (this.paginator) {
+            this.paginator.length = 0;
+          }
+        }
+      });
   }
 
   construirTabla() {
@@ -90,8 +105,13 @@ export class TablaPlanMejoramientoComponent {
     this.tablaColumnas = this.planesConstructorTabla.map((column: any) => column.columnDef);
     this.planesDataSource = new MatTableDataSource(this.planesPorVigencia);
 
-    if (!this.paginator) {
+    if (this.paginator) {
       this.planesDataSource.paginator = this.paginator;
+      this.paginator.length = this.totalRegistros;
+      this.paginator.pageSize = this.pageSize;
+      this.paginator.pageIndex = this.pageIndex;
+    }
+    if (this.sort) {
       this.planesDataSource.sort = this.sort;
     }
     this.changeDetector.detectChanges();
@@ -102,9 +122,6 @@ export class TablaPlanMejoramientoComponent {
     this.pageIndex = evento.pageIndex;
     const offset = this.pageIndex * this.pageSize;
     this.listarPlanesPorFiltros(this.vigenciaId, this.tipoEvaluacionId, this.pageSize, offset);
-    this.paginator.length = this.totalRegistros;
-    this.paginator.pageSize = this.pageSize;
-    this.paginator.pageIndex = this.pageIndex;
   }
 
   registrarPlan(plan: any) {
