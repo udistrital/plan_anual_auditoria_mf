@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Inject, Input, OnInit, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
@@ -23,7 +23,8 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
   documentos = [
     {
       nombre: "Oficio Anuncio Solicitud de Información",
-      plantilla: "solicitud-informacion",
+      // plantilla: "solicitud-informacion",
+      plantilla: null,
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
     },
   ];
@@ -46,7 +47,22 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
   }
 
-  onArchivoSeleccionado(event: any, index: number): void {}
+  /**
+   * Handles the file selection event, reads the selected file, and opens it for viewing.
+   * @param event The file selection event containing the selected file.
+   * @param index The index of the document in the documentos array.
+   */
+  onArchivoSeleccionado(event: any, index: number): void {
+    const archivo = event.target.files[0];
+    if (archivo) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = (reader.result as string).split(",")[1];
+        this.verDocumento(base64String, this.documentos[index]);
+      };
+      reader.readAsDataURL(archivo);
+    }
+  }
 
   onGuardar() {
     if (this.formularioDocumentos.valid) {
