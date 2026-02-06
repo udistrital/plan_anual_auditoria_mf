@@ -6,6 +6,7 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { TablaAuditoriasInternasComponent } from "./tabla-auditorias-internas/tabla-auditorias-internas.component";
 import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { decrypt } from "src/app/shared/utils/util-encrypt";
 
 @Component({
   selector: "app-auditorias-internas",
@@ -20,8 +21,10 @@ export class AuditoriasInternasComponent implements OnInit {
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada!: number;
   role: string | null = null;
+  personaId: string | null = null;
   IsSecretario = false;
   IsAuditor = false;
+  IsAuditorExperto = false;
   IsJefe = false;
 
   constructor(
@@ -31,6 +34,14 @@ export class AuditoriasInternasComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    const personaIdEncriptado = localStorage.getItem("persona_id");
+    if (personaIdEncriptado) {
+      this.personaId = decrypt(personaIdEncriptado);
+      console.log("ID de la persona:", this.personaId);
+    } else {
+      console.log("No se encontró persona_id en localStorage");
+    }
+
     this.buscarRol();
     this.iniciarvigenciaForm();
     this.cargarVigencias();
@@ -44,18 +55,21 @@ export class AuditoriasInternasComponent implements OnInit {
       }
 
       this.IsSecretario = roles.includes("SECRETARIO_AUDITOR");
-      this.IsAuditor = roles.some((role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR");
+      this.IsAuditorExperto = roles.includes("AUDITOR_EXPERTO");
+      this.IsAuditor = roles.includes("AUDITOR");
       this.IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
 
       this.role = this.IsSecretario
         ? "secretario"
-        : this.IsAuditor
-          ? "auditor"
-          : this.IsJefe
-            ? "jefe"
-            : null;
+        : this.IsAuditorExperto
+          ? "auditor_experto"
+          : this.IsAuditor
+            ? "auditor"
+            : this.IsJefe
+              ? "jefe"
+              : null;
 
-      if (this.IsAuditor) {
+      if (this.IsAuditor || this.IsAuditorExperto) {
         this.cargarVigencias();
       }
       console.log(this.role);

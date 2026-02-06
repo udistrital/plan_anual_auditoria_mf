@@ -71,10 +71,13 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     offset: number = 0
   ) {
     this.auditoriasPorVigencia = [];
+    
+    const endpoint = this.role === 'auditor' && this.personaId
+      ? `auditoria/auditor/${this.personaId}?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
+      : `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`;
+
     this.planAuditoriaMid
-      .get(
-        `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
-      )
+      .get(endpoint)
       .subscribe((res) => {
         // const auditorias: any[] = res.Data.map((auditoria: any) => {
         //   const estadoId = auditoria.estado?.estado_interno_id;
