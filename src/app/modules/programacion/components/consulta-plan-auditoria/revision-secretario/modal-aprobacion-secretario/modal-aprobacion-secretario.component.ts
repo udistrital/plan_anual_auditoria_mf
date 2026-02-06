@@ -126,17 +126,41 @@ export class ModalAprobacionSecretarioComponent {
       environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
     );
 
-    this.planAuditoriaService.post("estado", planEstado).subscribe(
-      () => {
-        this.alertService.showSuccessAlert("Plan aprobado");
-        this.dialogRef.close();
-        this.router.navigate([`/programacion/plan-auditoria/`]);
+    this.planAuditoriaService.post("estado", planEstado).subscribe({
+      next: (resp: any) => {
+        if (resp.Success) {
+          const estadoAuditorias = {
+            usuario_id: this.infoModal.usuarioId,
+            usuario_rol: this.infoModal.usuarioRol,
+            fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+            estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+          }
+          this.planAuditoriaService.put(`auditoria-gestion/${this.infoModal.planAuditoriaId}`, estadoAuditorias)
+            .subscribe({
+              next: (response: any) => {
+                if (response.Status === 200) {
+                  this.alertService.showSuccessAlert(
+                    "Plan aprobado exitosamente."
+                  ).then(() => {
+                    this.dialogRef.close();
+                    this.router.navigate([`/programacion/plan-auditoria/`]);
+                  });
+                } else {
+                  console.error("Error al actualizar el estado de las auditorías.");
+                }
+              },
+              error: (error) => {
+                this.alertService.showErrorAlert("Error al actualizar el estado de las auditorías.");
+                console.error(error);
+              }
+            });
+        }
       },
-      (error) => {
+      error: (error) => {
         this.alertService.showErrorAlert("Error al aprobar el plan");
         console.error(error);
       }
-    );
+    });
   }
 
   construirObjetoPlanEstado(

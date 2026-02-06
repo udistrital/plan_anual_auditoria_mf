@@ -7,12 +7,12 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
 
 //servicios
-import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { RolService } from "src/app/core/services/rol.service";
 
 @Component({
   selector: "app-revision-secretario",
@@ -29,7 +29,6 @@ export class RevisionSecretarioComponent {
 
   constructor(
     public dialog: MatDialog,
-    private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
     private referenciaPdfService: ReferenciaPdfService,
     private nuxeoService: NuxeoService,
@@ -37,6 +36,7 @@ export class RevisionSecretarioComponent {
     private router: Router,
     private route: ActivatedRoute,
     private descargaService: DescargaService,
+    private rolService: RolService
   ) { }
 
   botonSeleccionado: string = "formato";
@@ -44,6 +44,8 @@ export class RevisionSecretarioComponent {
   documentoPAA: string = "";
   documentoMatrizPublica: string = "";
   usuarioId: any;
+  usuarioRol: string = "";
+  roles: string[] = [];
 
   async ngOnInit() {
     // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
@@ -54,26 +56,30 @@ export class RevisionSecretarioComponent {
     } catch (error) {
       console.log("no se genero el base 64");
     }
+    this.roles = this.rolService.getRoles();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+    this.usuarioRol = this.roles.filter(
+      (role: string) => environment.ROLES.includes(role) && !role.includes("ADMIN")
+    )[0];
   }
 
   obtenerEstadoActual(): void {
     this.planAuditoriaService
       .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
-      .subscribe(
-        (response: any) => {
+      .subscribe({
+        next: (response: any) => {
           const estadoActual = response?.Data?.[0];
           this.estadoIdActual = estadoActual?.estado_id || null;
           this.mostrarBotones =
             this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
         },
-        (error) => {
+        error: (error) => {
           console.error("Error al obtener el estado actual:", error);
           this.mostrarBotones = false;
         }
-      );
+      });
   }
 
   abrirModalRechazo(): void {
@@ -94,6 +100,7 @@ export class RevisionSecretarioComponent {
       width: "600px",
       data: {
         usuarioId: this.usuarioId,
+        usuarioRol: this.usuarioRol,
         planAuditoriaId: this.planAuditoriaId,
       },
     });
