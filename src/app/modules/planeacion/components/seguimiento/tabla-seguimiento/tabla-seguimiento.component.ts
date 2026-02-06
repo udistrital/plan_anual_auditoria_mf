@@ -194,20 +194,30 @@ export class TablaSeguimientoComponent implements OnInit {
     } catch (error) {
       console.error("Error al obtener el tercero del usuario autenticado:", error);
       this.alertService.showErrorAlert(
-        "Error al obtener el tercero del usuario autenticado. No se podrá filtrar por auditor."
+        // TODO: Restore actual error message when test user has a valid terceroId
+        "Error al obtener el tercero del usuario autenticado. Se usará el terceroId de prueba 9840 para continuar con la funcionalidad de auditor."
+        // "Error al obtener el tercero del usuario autenticado. No se podrá filtrar por auditor."
       );
-      return null;
+      // TODO: Restore actual terceroId retrieval when test user has a valid terceroId
+      terceroId = 9840;
+      // return null;
     }
     console.debug("Tercero ID del usuario autenticado:", terceroId);
 
-    // Construct the URL to fetch audits filtered by the auditor's tercero ID
-    // TODO: Replace with the logic to construct the URL for fetching audits filtered by auditor
-    this.alertService.showAlert(
-      "Funcionalidad en desarrollo",
-      `La funcionalidad de filtrar por auditor #${terceroId} (terceroId) está en desarrollo.
-      Actualmente se muestran todas las auditorías.`
-    );
-    return this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
+    // Construct the query to fetch audits of type seguimiento and informe for the given vigencia
+    const endpoint = "auditoria/auditor/" + terceroId;
+
+    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
+    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
+    let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
+    queryParams += `,activo:true`;
+
+    // Add pagination parameters
+    queryParams += `&limit=${limit}`
+    queryParams += `&offset=${offset}`;
+
+    return `${endpoint}?${queryParams}`;
   }
 
   construirTabla() {
