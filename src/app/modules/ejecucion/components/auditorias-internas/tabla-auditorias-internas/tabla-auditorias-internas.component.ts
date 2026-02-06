@@ -19,6 +19,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 export class TablaAuditoriasInternasComponent {
   @Input() vigenciaId: any;
   @Input() role: any;
+  @Input() personaId: any;
   @ViewChild(MatSort) sort!: MatSort;
 
   auditoriasPorVigencia: Auditoria[] = [];
@@ -48,10 +49,13 @@ export class TablaAuditoriasInternasComponent {
   ) {
     console.log(this.role)
     this.auditoriasPorVigencia = [];
+    
+    const endpoint = this.role === 'auditor' && this.personaId
+      ? `auditoria/auditor/${this.personaId}?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
+      : `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`;
+
     this.planAuditoriaMid
-      .get(
-        `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
-      )
+      .get(endpoint)
       .subscribe((res) => {
         const auditorias: any[] = res.Data;
 
