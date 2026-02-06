@@ -8,6 +8,7 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { environment } from 'src/environments/environment';
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { TablaAuditoriasEspecialesComponent } from "./tabla-auditorias-especiales/tabla-auditorias-especiales.component";
+import { UserService } from "src/app/core/services/user.service";
 
 @Component({
   selector: "app-registro-auditorias-especiales",
@@ -22,12 +23,15 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   vigencias: Parametro[] = [];
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada: number | null = null;
+  usuarioId: number | null = null;
+  usuarioRol: string = ""
 
   constructor(
     private fb: FormBuilder,
     private alertaService: AlertService, 
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private parametrosService: ParametrosService,
+    private userService: UserService,
     private rolService: RolService
   ) {}
 
@@ -35,6 +39,12 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     this.iniciarvigenciaForm();
     this.cargarVigencias();
     this.setPermisos();
+    this.userService.getPersonaId().then((usuarioId) => {
+      this.usuarioId = usuarioId;
+    });
+    this.usuarioRol = this.rolService.getRoles().filter(
+      (role: string) => environment.ROLES_CREACION.PROGRAMACION.includes(role) && !role.includes("ADMIN")
+    )[0];
   }
 
   setPermisos() {
@@ -64,17 +74,23 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
         "¿Está seguro de crear una nueva auditoría especial para la vigencia seleccionada?"
       ).then((result) => {
         if (result.isConfirmed) {
-          const payload = {
+          const auditoria = {
             vigencia_id: this.vigenciaSeleccionada,
             plan_auditoria_id: null,
           };
-          this.planAnualAuditoriaService.post("auditoria", payload).subscribe({
+          const estado = {
+            usuario_id: this.usuarioId!,
+            usuario_rol: this.usuarioRol,
+            fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+            estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+          };
+          this.planAnualAuditoriaService.post("auditoria-gestion", {...auditoria, ...estado}).subscribe({
             next: (response: any) => {
               if (response.Status === 201) {
                 this.alertaService.showSuccessAlert(
                   "Auditoría especial creada exitosamente"
                 );
-                this.tablaAuditoriasEspeciales.cargarAuditorias(payload.vigencia_id!);
+                this.tablaAuditoriasEspeciales.cargarAuditorias(auditoria.vigencia_id!);
               }
             },
             error: (error) => {
