@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-modal-rechazo-auditoria-ejecucion",
@@ -92,11 +93,11 @@ export class ModalRechazoAuditoriaEjecucionComponent {
   construirObjetoAuditoriaEstado() {
     return {
       auditoria_id: this.infoModal.auditoriaId,
+      fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+      estado_id: this.infoModal.estadoRechazo,
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.role,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_interno_id: this.infoModal.estadoRechazo,
-      estado_id: 0,
     };
   }
 }

@@ -408,9 +408,8 @@ export class TablaSeguimientoComponent implements OnInit {
         ? "AUDITOR_EXPERTO"
         : "AUDITOR",
       observacion: "",
-      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
-      //todo por implementar
-      estado_id: 0,
+      estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)

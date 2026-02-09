@@ -74,12 +74,13 @@ export class ModalRechazoSeguimientoComponent {
       .post("auditoria-estado", auditoriaEstado)
       .subscribe({
         next: () => {
-          this.alertService.showAlert(
+          this.alertService.showSuccessAlert(
             this.mensajes[this.tiposMensaje.titulo],
             this.mensajes[this.tiposMensaje.mensaje],
-          );
-          this.dialogRef.close();
-          this.router.navigate([`/planeacion/seguimiento/`]);
+          ).then(() => {
+            this.dialogRef.close();
+            this.router.navigate([`/planeacion/seguimiento/`]);
+          });
         },
         error: (error) => {
           this.alertService.showErrorAlert(
@@ -96,9 +97,8 @@ export class ModalRechazoSeguimientoComponent {
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.role,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_interno_id: environment.AUDITORIA_ESTADO.RECHAZADO_ID,
-      //todo por implementar
-      estado_id: 0,
+      estado_interno_id: environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
   }
 }
