@@ -31,6 +31,14 @@ export class PlantillaTarjetaContenedoraComponent {
    */
   @Input() title: string = "";
 
+   /**
+   * Subtitulo que se muestra en el encabezado de la tarjeta.
+   * @default ""
+   * @example "Mi Subtitulo Personalizado"
+   */
+   @Input() subtitle: string = "";
+
+
   /**
    * Contenido dinámico que será renderizado dentro de la tarjeta.
    * Debe ser un TemplateRef que se define en el componente padre.
