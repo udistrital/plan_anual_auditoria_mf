@@ -50,6 +50,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   usuario_id: number | null = null;
   usuario_rol: string = "";
   roles: string[] = [];
+  vigenciaNombre: string = "";
 
   constructor(
     private alertaService: AlertService,
@@ -67,7 +68,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
-    this.cargarVigencia();
+    this.vigenciaNombre = localStorage.getItem('vigencia') || '';
     await this.obtenerEstadoActual();
     this.cargarAuditorias();
     try {
@@ -88,21 +89,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
 
-  cargarVigencia(): void {
-    this.planAnualAuditoriaService
-      .get(`plan-auditoria/${this.id}?fields=vigencia_id`)
-      .subscribe(
-        (res) => {
-          if (res && res.Data) {
-            this.vigenciaId = res.Data.vigencia_id;
-          }
-        },
-        (error) => {
-          this.alertaService.showErrorAlert("Error al cargar la vigencia");
-        }
-      );
-  }
-
   cargarAuditorias(): void {
     let url = `auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`;
     
@@ -112,7 +98,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
     this.PlanAnualAuditoriaMid.get(url).subscribe(
       (res) => {
-        if (res.Data) {
+        if (res.Data && res.Data.length > 0) {
           this.dataSource.data = res.Data.map((item: any) => ({
             id: item._id ?? 0,
             auditoria: item.titulo ?? "Sin Título",
@@ -122,7 +108,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
             cronogramaId: item.cronograma_id ?? [],
             estado: item.estado_nombre ?? "Sin estado",
           }));
-          this.vigenciaId = res.Data[0].plan_auditoria_id?.vigencia_id;
+          
+          if (res.Data[0].vigencia_id) {
+            this.vigenciaId = res.Data[0].vigencia_id;
+          }
+          
           this.actualizarColumnas();
         }
       },

@@ -1,8 +1,11 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuditoriasInternasComponent } from "./components/auditorias-internas/auditorias-internas.component";
+import { SeguimientoComponent } from "./components/seguimiento/seguimiento.component";
 import { EditarAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/editar-auditoria.component";
+import { EditarSeguimientoComponent } from "./components/seguimiento/editar-seguimiento/editar-seguimiento.component";
 import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
+import { RevisionDocumentosSeguimientoComponent } from "./components/seguimiento/revision-documentos/revision-documentos.component";
 
 const routes: Routes = [
   { path: "", component: AuditoriasInternasComponent },
@@ -17,6 +20,20 @@ const routes: Routes = [
       {
         path: "revision/:id",
         component: RevisionDocumentosComponent,
+      },
+    ],
+  },
+  { path: "seguimiento", component: SeguimientoComponent },
+  {
+    path: "seguimiento",
+    children: [
+      {
+        path: "editar/:id",
+        component: EditarSeguimientoComponent,
+      },
+      {
+        path: "revision/:id",
+        component: RevisionDocumentosSeguimientoComponent,
       },
     ],
   },

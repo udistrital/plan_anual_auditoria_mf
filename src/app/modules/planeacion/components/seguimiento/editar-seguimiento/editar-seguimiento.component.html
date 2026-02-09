@@ -1,0 +1,140 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Editar Auditoría'"
+  [breadcrumb]="
+    '<p>Gestión Auditoría / Planeación / Seguimiento e Informes / <b>Editar Auditoría</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <mat-stepper
+        [linear]="esLineal"
+        #stepper
+        labelPosition="bottom"
+        color="primary"
+        [orientation]="orientation"
+      >
+        <ng-template matStepperIcon="number">
+          <mat-icon>lens</mat-icon>
+        </ng-template>
+        <!-- Paso 1: Información -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 1</p>
+            <b style="color: var(--primary)">Información</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Informacion general de la auditoría
+            </div>
+          </div>
+          <div *ngIf="formularioInformacion != null" class="mt-4">
+            <app-formulario-dinamico
+              #formularioInformacionComp
+              [formulario]="formularioInformacion"
+              (submitFormulario)="preguntarGuardadoInformacion($event)"
+              (campoSeleccionado)="manejarCambioSelect($event)"
+            >
+            </app-formulario-dinamico>
+            <div class="d-flex justify-content-end mt-4">
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="enviarFormInformacion()"
+              >
+                <mat-icon>save</mat-icon>
+                Guardar y continuar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 2: Actividades -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 2</p>
+            <b style="color: var(--primary)">Actividades</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assessment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Actividades</h2>
+              Actividades de la auditoría
+            </div>
+          </div>
+          <app-actividades-seguimiento
+            [idAuditoria]="auditoriaId"
+          ></app-actividades-seguimiento>
+          <div class="d-flex justify-content-end mt-4">
+            <button matStepperPrevious mat-stroked-button color="primary">
+              <mat-icon>arrow_back_ios</mat-icon>
+              Volver
+            </button>
+            <button
+              matStepperNext
+              mat-flat-button
+              color="primary"
+              class="mx-2"
+              (click)="crearActividad()"
+            >
+              <mat-icon>add_box</mat-icon>
+              Crear Actividad
+            </button>
+            <button matStepperNext mat-flat-button color="primary" class="mx-2">
+              <mat-icon>save</mat-icon>
+              Guardar y continuar
+            </button>
+            <button
+              class="mx-2"
+              mat-raised-button
+              color="primary"
+              (click)="subirArchivoCargueMasivo()"
+            >
+              <mat-icon>file_upload</mat-icon> Cargue Masivo
+            </button>
+          </div>
+        </mat-step>
+
+        <!-- Paso 3: Documentos anexos -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 3</p>
+            <b style="color: var(--primary)">Documentos anexos</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>description</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Documentos anexos</h2>
+              Documentos anexos para la auditoría
+            </div>
+          </div>
+          <app-documentos-anexos-seguimiento
+            (guardarDocumentos)="manejarEnvioDocumentos($event)"
+          ></app-documentos-anexos-seguimiento>
+          <div class="d-flex justify-content-end mt-4">
+            <button matStepperPrevious mat-stroked-button color="primary">
+              <mat-icon>arrow_back_ios</mat-icon>
+              Volver
+            </button>
+            <button (click)="regresarRuta()" mat-flat-button color="primary" class="mx-2">
+              <mat-icon>close</mat-icon>
+              Cerrar
+            </button>
+          </div>
+        </mat-step>
+      </mat-stepper>
+    </div>
+  </div>
+</ng-template>
