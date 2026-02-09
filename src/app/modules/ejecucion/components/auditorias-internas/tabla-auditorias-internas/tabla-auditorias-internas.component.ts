@@ -45,14 +45,20 @@ export class TablaAuditoriasInternasComponent {
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0
+    offset: number = 0,
+    estadoId?: number
   ) {
     console.log(this.role)
     this.auditoriasPorVigencia = [];
     
+    let query = `vigencia_id:${vigenciaId},activo:true`;
+    if (estadoId) {
+      query += `,estado_id:${estadoId}`;
+    }
+
     const endpoint = this.role === 'auditor' && this.personaId
-      ? `auditoria/auditor/${this.personaId}?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
-      : `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`;
+      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}&estado_id=${estadoId || ''}`
+      : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
 
     this.planAuditoriaMid
       .get(endpoint)
