@@ -29,6 +29,12 @@ const routes: Routes = [
         (m) => m.EjecucionModule
       ),
   },
+  {
+    path: 'plan-mejoramiento',
+    canActivate: [AuthGuard], 
+    loadChildren: () => import('./modules/plan-mejoramiento/plan-mejoramiento.module').then(
+      (m) => m.PlanesModule)
+  },
 ];
 
 @NgModule({
