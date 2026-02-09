@@ -5,7 +5,6 @@ import { SeguimientoInformesComponent } from "./components/seguimiento-informes/
 import { EditarInformeComponent } from "./components/auditorias-internas/editar-informe/editar-informe.component";
 import { EditarInformeSeguimientoComponent } from "./components/seguimiento-informes/editar-informe-seguimiento/editar-informe-seguimiento.component";
 import { RevisionDocumentosEjecucionComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
-import { RevisionDocumentosSeguimientoComponent } from "./components/seguimiento-informes/revision-documentos-seguimiento/revision-documentos-seguimiento.component";
 
 const routes: Routes = [
   {
