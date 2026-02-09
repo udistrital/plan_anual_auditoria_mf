@@ -296,22 +296,21 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         ? "AUDITOR_EXPERTO"
         : "AUDITOR",
       observacion: "",
-      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
-      //todo por implementar
-      estado_id: 0,
+      estado_id: this.auditoriaEstados.PLANEACION.REVISON_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.alertService.showSuccessAlert(
-            "Auditoria enviada a aprobación por Jefe",
+            "Auditoria enviada a revisión del programa por Jefe",
             "Auditoria enviada"
           );
         },
-        (error) => {
-          this.alertService.showErrorAlert("Error al enviar el plan.");
+        error: (error) => {
+          this.alertService.showErrorAlert("Error al enviar el programa.");
         }
-      );
+    });
   }
 }
