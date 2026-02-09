@@ -14,7 +14,8 @@ export class Auditoria {
     cronograma!: string;
     cronogramaId!: number[];
     vigencia_id!: number;
-    estado!: string;
+    estado_nombre!: string;
+    estado_id!: number;
     auditores!: number[];
 }
 export class Actividad{

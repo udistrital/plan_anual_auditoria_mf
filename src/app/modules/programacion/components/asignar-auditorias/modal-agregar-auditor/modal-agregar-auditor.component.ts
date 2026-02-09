@@ -8,6 +8,7 @@ import { UserService } from "src/app/core/services/user.service";
 import { AuditorEliminar, Auditoria, Auditor } from "src/app/shared/data/models/auditoria-auditor";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-modal-agregar-auditor",
@@ -35,7 +36,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
     public dialogRef: MatDialogRef<ModalAgregarAuditorComponent>,
     private AutenticacionMidService: AutenticacionMidService,
     private userService: UserService,
-    @Inject(MAT_DIALOG_DATA) public data: { auditoria?: Auditoria }
+    @Inject(MAT_DIALOG_DATA) public data: { auditoria?: Auditoria, usuarioRol: string }
   ) {
     this.auditoresSeleccionados = this.fb.array<FormGroup>([]);
   }
@@ -223,6 +224,17 @@ export class ModalAgregarAuditorComponent implements OnInit {
     });
   }
 
+  cambiarEstado(estado: number) {
+    const estadoPayload = {
+      auditoria_id: this.data.auditoria?._id,
+      estado_id: estado,
+      fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+      usuario_id: this.usuarioId,
+      usuario_rol: this.data.usuarioRol
+    }
+    return this.planAnualAuditoriaService.post("auditoria-estado", estadoPayload)
+  }
+
   guardarAuditoria() {
     if (this.form.valid) {
       this.alertaService
@@ -256,12 +268,29 @@ export class ModalAgregarAuditorComponent implements OnInit {
               .subscribe({
                 next: (response: any) => {
                   if (response.Status === 200) {
-                    this.alertaService.showSuccessAlert(
-                      `Auditoría actualizada exitosamente.`
-                    );
-                    this.dialogRef.close({ saved: true });
+                    const nuevoEstado = auditoresSeleccionados.length > 0 || this.auditoresAsignados.length > 0 ?
+                      environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO :
+                      environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR;
+                    if (nuevoEstado !== this.data.auditoria?.estado_id) { 
+                      this.cambiarEstado(nuevoEstado)
+                        .subscribe({
+                          next: (resp: any) => {
+                            this.alertaService.showSuccessAlert(
+                              `Auditoría actualizada exitosamente.`
+                            );
+                            this.dialogRef.close({ saved: true });
+                          }, error: (error) => {
+                            this.alertaService.showErrorAlert("Error al cambiar el estado de la auditoría después de asignar auditores");
+                          }
+                        });
+                    } else {
+                      this.alertaService.showSuccessAlert(
+                        `Auditoría actualizada exitosamente.`
+                      );
+                      this.dialogRef.close({ saved: true });
+                    }
                   } else {
-                    this.alertaService.showSuccessAlert(
+                    this.alertaService.showErrorAlert(
                       `Error al actualizar la auditoría. Código de estado inesperado: ${response.Status}`
                     );
                   }

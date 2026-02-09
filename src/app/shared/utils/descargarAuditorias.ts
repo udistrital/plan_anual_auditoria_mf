@@ -19,7 +19,7 @@ interface Auditoria {
   /** The cronogram string representing scheduled months */
   cronograma: string;
   /** The current status of the audit */
-  estado: string;
+  estado_nombre: string;
 }
 
 /** Allowed values for the "Tipo de Evaluación" field */
