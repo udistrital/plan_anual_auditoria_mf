@@ -6,6 +6,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-add-auditoria-modal",
@@ -26,7 +27,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: { planAuditoriaId: string; vigenciaId: number; auditoria?: Auditoria }
+    public data: { usuario_id: number; usuario_rol: string; planAuditoriaId: string; vigenciaId: number; auditoria?: Auditoria }
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +101,6 @@ export class AddAuditoriaModalComponent implements OnInit {
           } la auditoría?`
         )
         .then((result) => {
-          console.log(this.data.vigenciaId)
           if (result.isConfirmed) {
             const formData = {
               plan_auditoria_id: this.data.planAuditoriaId,
@@ -110,12 +110,19 @@ export class AddAuditoriaModalComponent implements OnInit {
               vigencia_id: this.data.vigenciaId
             };
 
+            const estadoInicial = {
+              usuario_id: this.data.usuario_id,
+              usuario_rol: this.data.usuario_rol,
+              fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+              estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+            };
+
             const request$ = this.isEditMode
               ? this.planAnualAuditoriaService.put(
                   `auditoria/${this.data.auditoria!.id}`,
                   formData
                 )
-              : this.planAnualAuditoriaService.post("auditoria", formData);
+              : this.planAnualAuditoriaService.post("auditoria-gestion", {...formData, ...estadoInicial});
 
             request$.subscribe({
               next: (response) => {

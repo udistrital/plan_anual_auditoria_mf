@@ -20,6 +20,7 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { SpinnerService } from "src/app/shared/services/spinner.service";
+import { UserService } from "src/app/core/services/user.service";
 
 @Component({
   selector: "app-registrar-auditorias",
@@ -46,6 +47,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
   estadoIdActual: number | null = null;
   title: string = "";
   breadcrumb: string = "";
+  usuario_id: number | null = null;
+  usuario_rol: string = "";
+  roles: string[] = [];
   vigenciaNombre: string = "";
 
   constructor(
@@ -58,7 +62,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private descargaService: DescargaService,
     private router: Router,
     private spinnerService: SpinnerService,
-    private rolService: RolService
+    private rolService: RolService,
+    private userService: UserService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -74,6 +79,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
     } catch (error) {
       console.error("Error al cargar Matriz", error);
     }
+    this.userService.getPersonaId().then((id) => {
+      this.usuario_id = id;
+    });
+    this.usuario_rol = this.roles.filter(
+      (role: string) => environment.ROLES_CREACION.PROGRAMACION.includes(role) && !role.includes("ADMIN")
+    )[0];
     this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
     this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
@@ -95,7 +106,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
             tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
             cronograma: item.cronograma ?? "Sin Cronograma",
             cronogramaId: item.cronograma_id ?? [],
-            estado: item.estado_id ?? "Borrador",
+            estado: item.estado_nombre ?? "Sin estado",
           }));
           
           if (res.Data[0].vigencia_id) {
@@ -143,9 +154,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
         this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
 
       await this.rolService.cargarRoles();
-      const roles = this.rolService.getRoles();
+      this.roles = this.rolService.getRoles();
       this.mostrarOrdenamiento = 
-        roles.includes('AUDITOR_EXPERTO') && 
+        this.roles.includes('AUDITOR_EXPERTO') && 
         this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
@@ -256,6 +267,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
+        usuario_id: this.usuario_id,
+        usuario_rol: this.usuario_rol,
         tipoArchivo: "xlsx",
         id: this.id,
         vigenciaId: this.vigenciaId,
@@ -293,6 +306,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: "1000px",
       data: {
+        usuario_id: this.usuario_id,
+        usuario_rol: this.usuario_rol,
         planAuditoriaId: this.id,
         vigenciaId: this.vigenciaId,
         auditoria,
