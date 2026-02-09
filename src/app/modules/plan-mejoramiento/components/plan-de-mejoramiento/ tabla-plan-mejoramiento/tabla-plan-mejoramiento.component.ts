@@ -49,7 +49,7 @@ export class TablaPlanMejoramientoComponent {
   ) {
     console.log("Consultando auditorías - Rol:", this.role, "| Vigencia:", vigenciaId, "| Tipo:", tipoEvaluacionId);
     
-    const estadoAprobadoInformeFinal = environment.AUDITORIA_ESTADO.APROBADO_INFORME_FINAL_ID;
+    const estadoAprobadoInformeFinal = environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE;
     
     this.planesPorVigencia = [];
 

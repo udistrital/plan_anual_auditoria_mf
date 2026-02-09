@@ -71,8 +71,8 @@ export class RevisionDocumentosComponent implements OnInit {
       )
       .subscribe((res) => {
         this.estadoAuditoriaId =
-          res.Data[0]?.estado_interno_id ??
-          environment.AUDITORIA_ESTADO.BORRADOR_ID;
+          res.Data[0]?.estado_id ??
+          environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID;
       });
   }
 
@@ -121,15 +121,17 @@ export class RevisionDocumentosComponent implements OnInit {
       const auditoriaEstado =
         this.construirObjetoAuditoriaEstado(estadoAprobacion);
 
-      await this.planAuditoriaService
+      this.planAuditoriaService
         .post("auditoria-estado", auditoriaEstado)
-        .toPromise();
+        .subscribe((res) => {
+          this.alertService.showSuccessAlert(
+            mensajeAprobacion,
+            "Auditoria enviada"
+          ).then(() => {
+            this.router.navigate([`/planeacion/auditorias-internas/`]);
+          });
+        });
 
-      this.alertService.showSuccessAlert(
-        mensajeAprobacion,
-        "Auditoria enviada"
-      );
-      this.router.navigate([`/planeacion/auditorias-internas/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el plan.");
     }
@@ -141,9 +143,8 @@ export class RevisionDocumentosComponent implements OnInit {
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
       observacion: "",
-      estado_interno_id: estadoAprobacion,
-      //todo por implementar
-      estado_id: 0,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
+      estado_id: estadoAprobacion,
     };
   }
 
@@ -191,8 +192,8 @@ export class RevisionDocumentosComponent implements OnInit {
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID],
-      auditado: [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID],
+      jefe: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
+      auditado: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
     };
     // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
