@@ -31,6 +31,7 @@ export class TablaConsultaAuditoriasComponent {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   permiso: boolean = false;
+  usuarioRol: string = "";
 
   constructor(
     private readonly alertaService: AlertService,
@@ -48,6 +49,9 @@ export class TablaConsultaAuditoriasComponent {
     this.permiso = this.rolService.permisoCreacion(
       environment.ROLES_CREACION.PROGRAMACION
     );
+    this.usuarioRol = this.rolService.getRoles().filter(
+      (role: string) => environment.ROLES_CREACION.PROGRAMACION.includes(role) && !role.includes("ADMIN")
+    )[0];
   }
 
   listarAuditoriasPorVigencia(
@@ -61,11 +65,9 @@ export class TablaConsultaAuditoriasComponent {
       `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}&auditores`
     );
 
-    auditorias$.subscribe(
-      (res) => {
+    auditorias$.subscribe({
+      next: (res) => {
         const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
-        console.log("Consulta aud Mid: ", auditorias);
-
         if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
@@ -87,11 +89,11 @@ export class TablaConsultaAuditoriasComponent {
         this.banderaTablaAuditoriasInternas = true;
         this.construirTabla();
       },
-      (error) => {
+      error: (error) => {
         console.error("Error al cargar auditorías:", error);
         this.alertaService.showErrorAlert("Error al cargar las auditorías.");
       }
-    );
+    });
   }
 
   construirTabla() {
@@ -137,6 +139,7 @@ export class TablaConsultaAuditoriasComponent {
       width: "1100px",
       data: {
         auditoria,
+        usuarioRol: this.usuarioRol,
       },
     });
 
