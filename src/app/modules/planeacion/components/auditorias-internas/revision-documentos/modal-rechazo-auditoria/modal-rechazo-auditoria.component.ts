@@ -54,22 +54,23 @@ export class ModalRechazoAuditoriaComponent {
     const auditoriaEstado = this.construirObjetoAuditoriaEstado();
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
-      .subscribe(
-        () => {
-          this.alertService.showAlert(
+      .subscribe({
+        next: () => {
+          this.alertService.showSuccessAlert(
             "Auditoría rechazada",
             "La auditoría fue devuelta al auditor(a)."
-          );
-          this.dialogRef.close();
-          this.router.navigate([`/planeacion/auditorias-internas/`]);
+          ).then(() => {
+            this.dialogRef.close();
+            this.router.navigate([`/planeacion/auditorias-internas/`]);
+          });
         },
-        (error) => {
+        error: (error) => {
           this.alertService.showErrorAlert(
             "Error al asociar el nuevo estado a la auditoría."
           );
           console.error(error);
         }
-      );
+      });
   }
 
   construirObjetoAuditoriaEstado() {
@@ -78,9 +79,8 @@ export class ModalRechazoAuditoriaComponent {
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.role,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_interno_id: environment.AUDITORIA_ESTADO.RECHAZADO_ID,
-      //todo por implementar
-      estado_id: 0,
+      estado_id: environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
   }
 }

@@ -296,7 +296,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         ? "AUDITOR_EXPERTO"
         : "AUDITOR",
       observacion: "",
-      estado_id: this.auditoriaEstados.PLANEACION.REVISON_PROGRAMA_JEFE,
+      estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
     this.planAuditoriaService
