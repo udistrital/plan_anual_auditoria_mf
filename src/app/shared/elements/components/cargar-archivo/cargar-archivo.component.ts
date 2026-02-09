@@ -5,6 +5,7 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ModalService } from "src/app/shared/services/modal.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-cargar-archivo",
@@ -25,6 +26,8 @@ export class CargarArchivoComponent {
 
     @Inject(MAT_DIALOG_DATA)
     public data: {
+      usuario_id: number;
+      usuario_rol: string;
       tipoArchivo: string;
       idTipoDocumento: number;
       descripcion: string;
@@ -113,6 +116,10 @@ export class CargarArchivoComponent {
             complement: {
               plan_auditoria_id: this.data.id,
               vigencia_id: this.data.vigenciaId,
+              usuario_id: this.data.usuario_id,
+              usuario_rol: this.data.usuario_rol,
+              fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+              estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
             },
             type_upload: "auditorias",
           };

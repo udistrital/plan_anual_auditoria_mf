@@ -16,6 +16,8 @@ import { FormularioAuditoriaEspecialComponent } from "../formulario-auditoria-es
 export class TablaAuditoriasEspecialesComponent {
   @Input() vigenciaId: number | null = null;
   @Input() permiso: boolean = false;
+  @Input() usuarioId: number | null = null;
+  @Input() usuarioRol: string = "";
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   dataSource = new MatTableDataSource<Auditoria>([]);
   totalRegistros: number = 0;
@@ -60,7 +62,7 @@ export class TablaAuditoriasEspecialesComponent {
               auditores: [],
               cronograma: item.cronograma ?? "Sin Cronograma",
               cronogramaId: item.cronograma_id ?? 0,
-              estado: item.estado_id ?? "Desconocido",
+              estado: item.estado_nombre ?? "Sin estado",
             })
           );
 
@@ -105,6 +107,8 @@ export class TablaAuditoriasEspecialesComponent {
       autoFocus: false,
       data: {
         auditoria,
+        usuarioRol: this.usuarioRol,
+        usuarioId: this.usuarioId
       },
     });
 

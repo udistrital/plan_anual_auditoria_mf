@@ -8,7 +8,8 @@ export class Auditoria {
     cronograma_id!: number[];
     vigencia_id!: number;
     vigencia_nombre!: string;
-    estado!: string;
+    estado_nombre!: string;
+    estado_id!: number
     auditores!: number[];
 }
 
