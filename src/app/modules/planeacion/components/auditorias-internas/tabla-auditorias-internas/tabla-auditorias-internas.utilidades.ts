@@ -28,8 +28,8 @@ export const colocacionesContructorTabla = [
     header: "Auditor(es)",
     cell: (auditoria: any) =>
       auditoria.auditores
-        .map((auditor: any) => auditor.auditor_nombre)
-        .join(", "),
+        ?.map((auditor: any) => auditor.auditor_nombre)
+        ?.join(", ") ?? "",
     sortable: true,
   },
   {
