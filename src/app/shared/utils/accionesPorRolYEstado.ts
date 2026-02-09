@@ -87,27 +87,27 @@ export const accionesPlaneacion: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   ADMIN_SISIFO: {
-    [environment.AUDITORIA_ESTADO.BORRADOR_ID]: [
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Editar Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.RECHAZADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
       "Ver Documento",
       "Revisar Auditoría",
@@ -115,47 +115,47 @@ export const accionesPlaneacion: {
   },
 
   JEFE_CONTROL_INTERNO: {
-    [environment.AUDITORIA_ESTADO.BORRADOR_ID]: [
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
-    [environment.AUDITORIA_ESTADO.RECHAZADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Ver Documento",
       "Revisar Auditoría",
     ],
   },
 
   AUDITOR_EXPERTO: {
-    [environment.AUDITORIA_ESTADO.BORRADOR_ID]: [
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.AUDITORIA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.AUDITORIA_ESTADO.RECHAZADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
@@ -163,24 +163,24 @@ export const accionesPlaneacion: {
   },
 
   AUDITOR: {
-    [environment.AUDITORIA_ESTADO.BORRADOR_ID]: [
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISION_POR_JEFE_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.AUDITORIA_ESTADO.EN_REVISIÓN_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.AUDITORIA_ESTADO.APROBADO_POR_AUDITADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documento",
     ],
-    [environment.AUDITORIA_ESTADO.RECHAZADO_ID]: [
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
