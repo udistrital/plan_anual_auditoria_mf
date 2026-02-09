@@ -35,18 +35,18 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   rolesAprobacion: { [key: string]: any } = {
     jefe: {
       estadoAprobacion: [
-        environment.INFORME_ESTADO.INFORME_PRELIMINAR_APROBADO_POR_JEFE_ID,
-        environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_AUDITADO_ID,
+        environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
+        environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
       ],
-      estadoRechazo: environment.INFORME_ESTADO.INFORME_PRELIMINAR_RECHAZADO_POR_JEFE_ID,
+      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
       preguntaAprobacion: "¿Está seguro(a) de enviar el informe preliminar al auditado?",
       mensajeAprobacion: "El informe fue enviado al auditado",
       botonAprobacion: "Aprobar y Enviar a Auditado",
       botonRechazo: "Rechazar Informe",
     },
     auditado: {
-      estadoAprobacion: [environment.INFORME_ESTADO.INFORME_PRELIMINAR_APROBADO_POR_AUDITADO_ID],
-      estadoRechazo: environment.INFORME_ESTADO.INFORME_PRELIMINAR_RESPUESTA_POR_AUDITADO_ID,
+      estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO],
+      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
       preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
       mensajeAprobacion: "El informe fue enviado al auditor(a)",
       botonAprobacion: "Aceptar informe",
@@ -151,11 +151,11 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
     return {
       auditoria_id: this.auditoriaId,
+      fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+      estado_id: estadoAprobacion,
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
       observacion: "",
-      estado_interno_id: estadoAprobacion,
-      estado_id: 0,
     };
   }
 
@@ -184,14 +184,14 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   cargarEstadoInforme() {
     // TODO: Cargar el estado del informe y cambiar:
-    // this.estadoInformeId = environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID; // TODO: Eliminar, utillizado pruebas (Para el jefe)
-    this.estadoInformeId = environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_AUDITADO_ID // TODO: Eliminar, utillizado pruebas (Para el auditado)
+    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
+    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO // TODO: Eliminar, utillizado pruebas (Para el auditado)
   }
 
   mostrarAcciones(): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_JEFE_ID],
-      auditado: [environment.INFORME_ESTADO.INFORME_PRELIMINAR_EN_REVISION_POR_AUDITADO_ID],
+      jefe: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
+      auditado: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
     };
 
     return condicionesVisibilidad[this.role!]?.includes(this.estadoInformeId) || false;
