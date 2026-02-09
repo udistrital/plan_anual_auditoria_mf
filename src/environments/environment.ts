@@ -11,12 +11,12 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
-  PLAN_ANUAL_AUDITORIA_MID:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
-  // PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
+  // PLAN_ANUAL_AUDITORIA_SERVICE:
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+  PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_MID:
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
+  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
   TERCEROS_SERVICE:
@@ -62,12 +62,12 @@ export const environment = {
       AUDITOR_ASIGNADO: 7062,
     },
     PLANEACION: {
-      CREANDO_PROGRAMA: 7063, // BORRADOR_ID: 6823,
-      REVISION_PROGRAMA_JEFE: 7064, // EN_REVISION_POR_JEFE_ID: 6824,
-      APROBADO_PROGRAMA_JEFE: 7065, // APROBADO_PROGRAMA_POR_JEFE_ID: 6825,
-      RECHAZADO_PROGRAMA_JEFE: 7066, // RECHAZADO_ID: 6828,
-      REVISION_PROGRAMA_AUDITADO: 7067, // EN_REVISIÓN_POR_AUDITADO_ID: 6826,
-      APROBADO_PROGRAMA_AUDITADO: 7068, // APROBADO_POR_AUDITADO_ID: 6827,
+      CREANDO_PROGRAMA: 7063,
+      REVISION_PROGRAMA_JEFE: 7064,
+      APROBADO_PROGRAMA_JEFE: 7065,
+      RECHAZADO_PROGRAMA_JEFE: 7066,
+      REVISION_PROGRAMA_AUDITADO: 7067,
+      APROBADO_PROGRAMA_AUDITADO: 7068,
     },
     EJECUCION: {
       // INFORME PRELIMINAR
