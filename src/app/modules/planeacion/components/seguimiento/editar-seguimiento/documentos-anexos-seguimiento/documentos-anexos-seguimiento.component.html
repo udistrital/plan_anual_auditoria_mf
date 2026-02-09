@@ -1,0 +1,39 @@
+<mat-card
+  *ngFor="let documento of documentos; let i = index"
+  class="documento-card"
+>
+  <div class="documento-content">
+    <span class="mb-md">{{ documento.nombre }}</span>
+    <div class="icon-buttons">
+      <!-- Botón para seleccionar archivo -->
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="fileInput.value = ''; fileInput.click()"
+        *ngIf="!documento.plantilla"
+        class="width-100-md"
+      >
+        <mat-icon>upload</mat-icon>
+      </button>
+      <input
+        type="file"
+        (change)="onArchivoSeleccionado($event, i)"
+        #fileInput
+        hidden
+      />
+
+      <button
+        mat-stroked-button
+        *ngIf="documento.plantilla"
+        class="width-100-md"
+        (click)="generarDocumento(documento)"
+        matTooltip="En esta opción, puede revisar los cambios realizados. Si todo
+        está correcto, puede proceder a guardar el documento."
+        [matTooltipPosition]="'above'"
+      >
+        <mat-icon style="color: var(--md-warning-600)">picture_as_pdf</mat-icon>
+        Generar documento
+      </button>
+    </div>
+  </div>
+</mat-card>
