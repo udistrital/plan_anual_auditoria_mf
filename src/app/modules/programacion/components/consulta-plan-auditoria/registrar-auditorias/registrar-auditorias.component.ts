@@ -21,6 +21,11 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { SpinnerService } from "src/app/shared/services/spinner.service";
 import { UserService } from "src/app/core/services/user.service";
+import { ParametrosService } from "src/app/core/services/parametros.service";
+import { OikosService } from "src/app/core/services/oikos.service";
+
+
+import { catchError, firstValueFrom, map, throwError } from "rxjs";
 
 @Component({
   selector: "app-registrar-auditorias",
@@ -63,7 +68,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private router: Router,
     private spinnerService: SpinnerService,
     private rolService: RolService,
-    private userService: UserService
+    private userService: UserService,
+    private parametrosService: ParametrosService,
+    private oikosService: OikosService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -391,23 +398,101 @@ export class RegistrarAuditoriasComponent implements OnInit {
     });
   }
 
+  /**
+   * Loads options for a given parameter type from the Parametros API.
+   * @param {string} tipoParametroNombre Descriptive name of the parameter type (for error messages).
+   * @param {number} tipoParametroId ID of the parameter type to load.
+   * @returns {Promise<string[]>} A promise that resolves with an array of options (strings) for the given parameter type.
+   */
+  async cargarOpciones(tipoParametroNombre: string, tipoParametroId: number): Promise<string[]> {
+    const mensajeError = `Error al cargar opciones para el tipo de parámetro: ${tipoParametroNombre} (${tipoParametroId})`;
+
+    return firstValueFrom(
+      this.parametrosService.get(
+        `parametro?query=tipo_parametro_id:${tipoParametroId}&limit=0`
+      ).pipe(
+        map((res: any) => {
+          if (res && res.Data)
+            return res.Data.map((item: any) => item.Nombre);
+
+          return [];
+        }),
+        catchError((error) => throwError(
+          () => new Error(mensajeError, error)
+        ))
+      )
+    );
+  }
+
+  /**
+   * Loads the list of active dependencies from the Oikos API.
+   * @returns {Promise<string[]>} A promise that resolves with an array of dependency names.
+   */
+  async cargarDependencias(): Promise<string[]> {
+    return firstValueFrom(this.oikosService
+      .get(
+        `dependencia?query=Activo:true&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
+      )
+      .pipe(
+        map((res: any) => {
+          if (res)
+            return res.map((item: any) => item.Nombre);
+
+          return [];
+        }),
+        catchError((error) => throwError(
+          () => new Error("Error al cargar dependencias", error)
+        ))
+      )
+    );
+  }
+
   /** Download the Excel file for bulk audit upload */
   async descargarArchivoDescargueMasivo() {
     try {
       this.spinnerService.show();
-      const base64File = await this.nuxeoService.obtenerPorUUID(
+
+      // Types of parameters to load from Parametros API for validation in Excel
+      const tiposDeParametros = [
+        { nombre: "Tipo de Evaluación", id: environment.TIPO_EVALUACION.TIPO_PARAMETRO_ID },
+        { nombre: "Macroproceso", id: environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.TIPO_PARAMETRO_ID },
+        { nombre: "Proceso", id: environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID },
+      ];
+
+      // Load options for each parameter type and for Dependencias.
+      let headersValidacionOpciones: { [header: string]: string[] } = {};
+      for (const tipo of tiposDeParametros)
+        headersValidacionOpciones[tipo.nombre] = await this.cargarOpciones(tipo.nombre, tipo.id);
+      headersValidacionOpciones["Dependencia"] = await this.cargarDependencias();
+
+      const plantillaNuxeoBase64 = await this.nuxeoService.obtenerPorUUID(
         environment.PLANTILLA_CARGUE_MASIVO
       );
-      const buffer = await descargarAuditorias(this.dataSource.data, base64File);
+
+      const dataSource = this.dataSource.data.map(a => ({
+          ...a,
+          // TODO: load the actual value of these fields
+          macroproceso: '',
+          proceso: '',
+          dependencia: '',
+        }));
+      const xlsxDataBuffer = await descargarAuditorias(
+                              dataSource,
+                              plantillaNuxeoBase64,
+                              headersValidacionOpciones,
+                            );
+
       await this.descargaService.descargarArchivoBuffer(
-        buffer,
+        xlsxDataBuffer,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         environment.NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS,
       );
     } catch (error) {
       console.error("Error al descargar el archivo de auditorías:", error);
       this.alertaService.showErrorAlert("Error al descargar el archivo de auditorías");
-    } finally {
+    }
+
+    finally {
       this.spinnerService.hide();
     }
   }

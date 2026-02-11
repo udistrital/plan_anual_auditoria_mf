@@ -1,4 +1,5 @@
 import base64ToArrayBuffer from './base64ToArrayBuffer';
+import { ParametrosService } from 'src/app/core/services/parametros.service';
 
 /** The ExcelJS library for handling Excel files */
 const ExcelJS = require('exceljs');
@@ -8,7 +9,11 @@ const MESES_ARCHIVO =
     ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 /** Headers for the Excel file */
-const HEADERS = ['ID', 'Auditoria', 'Tipo de Evaluación', ...MESES_ARCHIVO];
+const HEADERS = [
+  'ID', 'Auditoria', 'Tipo de Evaluación',
+  'Macroproceso', 'Proceso', 'Dependencia',
+  ...MESES_ARCHIVO
+];
 
 /** Interface representing an audit entry */
 interface Auditoria {
@@ -16,19 +21,17 @@ interface Auditoria {
   auditoria: string;
   /** The type of evaluation for the audit */
   tipoEvaluacion: string;
+  /** The macroprocess associated with the audit */
+  macroproceso: string;
+  /** The process associated with the audit */
+  proceso: string;
+  /** The dependency or department responsible for the audit */
+  dependencia: string;
   /** The cronogram string representing scheduled months */
   cronograma: string;
   /** The current status of the audit */
   estado_nombre: string;
 }
-
-/** Allowed values for the "Tipo de Evaluación" field */
-const TIPOS_EVALUACION = [
-  "Auditoria Interna",
-  "Seguimiento",
-  "Informe",
-  "Otro",
-];
 
 /**
  * Converts a chronogram string to an array of months representation
@@ -74,6 +77,12 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
     [HEADERS[1]]: dataSource.map(a => a.auditoria),
     // Tipo de Evaluación
     [HEADERS[2]]: dataSource.map(a => a.tipoEvaluacion),
+    // Macroproceso
+    [HEADERS[3]]: dataSource.map(a => a.macroproceso),
+    // Proceso
+    [HEADERS[4]]: dataSource.map(a => a.proceso),
+    // Dependencia
+    [HEADERS[5]]: dataSource.map(a => a.dependencia),
   };
 
   // 2. Transform cronograma into month columns
@@ -104,17 +113,21 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
 
 /**
  * Creates the Excel file for the given audit data.
- * @param dataSource The array of audit data to be exported.
+ * @param {Array<Auditoria>} dataSource The array of audit data to be exported.
  *   See {@link Auditoria} for structure.
- * @param base64File The Base64 encoded Excel template file.
- * @returns A Promise that resolves to an ArrayBuffer containing the Excel file data.
- * @throws Error if any issue occurs during the Excel generation process.
+ * @param {string} base64File The Base64 encoded Excel template file.
+ * @param {Object} headersValidacion An object mapping header names to arrays of valid values for data validation.
+ * @returns {Promise<ArrayBuffer>} A Promise that resolves to an ArrayBuffer containing the Excel file data.
+ * @throws {Error} If any issue occurs during the Excel generation process.
  */
 export async function descargarAuditorias(
     dataSource: Array<Auditoria>,
     base64File: string,
+    headersValidacion: { [header: string]: string[] }
 ): Promise<ArrayBuffer> {
   try{
+    console.debug('headersValidacion in descargarAuditorias:', headersValidacion);
+
     // Load the template workbook from the Base64 string and select the first worksheet
     const workbook = new ExcelJS.Workbook();
     const inputBuffer = base64ToArrayBuffer(base64File);
@@ -151,20 +164,27 @@ export async function descargarAuditorias(
       targetRow.commit();
     }
 
-    // Add back data validation for 'Tipo de Evaluación' column
-    const tipoEvaluacionColIdx = HEADERS.indexOf('Tipo de Evaluación') + 1;
-    worksheet.getColumn(tipoEvaluacionColIdx)
-        .eachCell({ includeEmpty: true }, (cell: any, rowNumber: number) => {
-          if (rowNumber >= startRowIndex && rowNumber <= maxRowIndex) {
-            cell.dataValidation = {
-              type: 'list',
-              allowBlank: true,
-              formulae: [`"${TIPOS_EVALUACION.join(',')}"`],
-              showErrorMessage: true,
-              errorStyle: 'error',
-            }
-          };
-        });
+    // Add back data validation for each header that requires it, applying to all rows up to maxRowIndex
+    Object.keys(headersValidacion).forEach(header => {
+      const headerColIdx = HEADERS.indexOf(header) + 1;
+      try {
+        worksheet
+          .getColumn(headerColIdx)
+          .eachCell({ includeEmpty: true }, (cell: any, rowNumber: number) => {
+            if (rowNumber >= startRowIndex && rowNumber <= maxRowIndex) {
+              cell.dataValidation = {
+                type: 'list',
+                allowBlank: true,
+                formulae: [`"${headersValidacion[header].join(',')}"`],
+                showErrorMessage: true,
+                errorStyle: 'error',
+              }
+            };
+          });
+      } catch (error) {
+        console.warn(`Error applying data validation for header "${header}":`, error);
+      }
+    });
 
     // Remove other worksheets if any
     workbook.worksheets.forEach((ws: any) => {
