@@ -21,6 +21,7 @@ import { ModalPdfVisualizadorComponent } from "./components/consulta-plan-audito
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
 import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
+import { ModalSinAuditoriasComponent } from "./components/asignar-auditorias/tabla-consulta-auditorias/tabla-consulta-auditorias.component";
 
 import { MatTooltip } from "@angular/material/tooltip";
 import { UnirConComaPipe } from "src/app/shared/pipes/unir-con-coma.pipe";
@@ -45,6 +46,7 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     RegistroAuditoriasEspecialesComponent,
     TablaConsultaAuditoriasComponent,
     ModalVisualizarRecargarDocumentoComponent,
+    ModalSinAuditoriasComponent,
   ],
   imports: [
     CommonModule,
