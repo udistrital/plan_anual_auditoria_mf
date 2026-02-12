@@ -16,6 +16,9 @@
                   placeholder="Nombre de la actividad"
                   formControlName="actividad"
                 />
+                <mat-error *ngIf="form.get('actividad')?.hasError('required')">
+                  El nombre de la actividad es requerido
+                </mat-error>
               </mat-form-field>
             </div>
   
@@ -38,6 +41,9 @@
                   [for]="pickerInicio"
                 ></mat-datepicker-toggle>
                 <mat-datepicker #pickerInicio></mat-datepicker>
+                <mat-error *ngIf="form.get('fechaInicio')?.hasError('required')">
+                  La fecha de inicio es requerida
+                </mat-error>
               </mat-form-field>
             </div>
   
@@ -60,6 +66,9 @@
                   [for]="pickerFin"
                 ></mat-datepicker-toggle>
                 <mat-datepicker #pickerFin></mat-datepicker>
+                <mat-error *ngIf="form.get('fechaFin')?.hasError('required')">
+                  La fecha de fin es requerida
+                </mat-error>
               </mat-form-field>
             </div>
           </div>
