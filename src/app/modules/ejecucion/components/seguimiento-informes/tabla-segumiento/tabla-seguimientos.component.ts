@@ -1,50 +1,73 @@
-import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+} from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { seguimientosConstructorTabla } from "./tabla-seguimientos.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { RolService } from "src/app/core/services/rol.service";
+import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
   selector: "app-tabla-seguimientos",
   templateUrl: "./tabla-seguimientos.component.html",
   styleUrls: ["./tabla-seguimientos.component.css"],
 })
-export class TablaSeguimientosComponent {
+export class TablaSeguimientosComponent implements OnInit {
   @Input() vigenciaId: any;
-  @Input() role: any;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   seguimientosPorVigencia: any[] = [];
   seguimientosDataSource: MatTableDataSource<any> = new MatTableDataSource();
   seguimientosConstructorTabla: any;
   banderaTablaSeguimientos: boolean = false;
   tablaColumnas: any;
-
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  roles: string[] = [];
   totalRegistros: number = 0;
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
+  mostrarAcciones: boolean = false;
+  iconosAccion = new Map<string, string>([
+    ["Editar Informe", "edit"],
+    ["Ver Documentos del informe", "description"],
+    ["Enviar a Aprobación por Jefe", "send"],
+  ]);
 
   constructor(
     private alertaService: AlertService,
+    private rolService: RolService,
     private changeDetector: ChangeDetectorRef,
     private dialog: MatDialog,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
     private router: Router
-  ) {}
+  ) { }
+
+  ngOnInit() {
+    this.roles = this.rolService.getRoles();
+    this.setPermisos();
+  }
+
+  setPermisos() {
+    if (this.rolService.mostrarAcciones(accionesEjecucionFinal)) {
+      this.mostrarAcciones = true;
+    }
+  }
 
   listarSeguimientosPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
   ) {
-    console.log(this.role);
     this.seguimientosPorVigencia = [];
 
     //DATOS MOCK TEMPORAL
@@ -221,7 +244,14 @@ export class TablaSeguimientosComponent {
     };
 
     // Procesar como si viniera del backend
-    const seguimientos: any[] = respuestaMock.Data;
+    // TODO: Descomentar la sección de arriba y quitar esta:
+    const seguimientos: any[] = respuestaMock.Data.map((seguimiento: any) => {
+      const estadoId = seguimiento.estado_id;
+      const acciones = this.getAccionesPorRolYEstado(estadoId).length > 0
+        ? this.getAccionesPorRolYEstado(estadoId)
+        : ["Editar Informe", "Ver Documentos del informe", "Enviar a Aprobación por Jefe"];
+      return { ...seguimiento, acciones };
+    });
 
     if (!(seguimientos.length > 0)) {
       this.banderaTablaSeguimientos = false;
@@ -240,7 +270,11 @@ export class TablaSeguimientosComponent {
   }
 
   construirTabla() {
-    this.seguimientosConstructorTabla = seguimientosConstructorTabla;
+    this.seguimientosConstructorTabla = seguimientosConstructorTabla.filter(
+      (column) => {
+        return column.columnDef !== "acciones" || this.mostrarAcciones;
+      }
+    );
     this.tablaColumnas = this.seguimientosConstructorTabla.map(
       (column: any) => column.columnDef
     );
@@ -271,8 +305,25 @@ export class TablaSeguimientosComponent {
     this.paginator.pageIndex = this.pageIndex;
   }
 
-  verDocumento(seguimiento: any) {
-    console.log("Ver documento de seguimiento:", seguimiento);
+  getAccionesPorRolYEstado(estado: number) {
+    return Array.from(
+      new Set(
+        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] || [])
+      )
+    );
+  }
+
+  getIconoAccion(accion: string): string {
+    return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  realizarAccion(seguimiento: any, accion: string) {
+    const acciones: Record<string, Function | null> = {
+      "Editar Informe": () => this.editarInformeSeguimiento(seguimiento),
+      "Ver Documentos del informe": () => this.verDocumentosInforme(seguimiento),
+      "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(seguimiento),
+    };
+    acciones[accion]?.();
   }
 
   editarInformeSeguimiento(seguimiento: any) {
@@ -280,5 +331,16 @@ export class TablaSeguimientosComponent {
     this.router.navigate([
       `/ejecucion/seguimiento-informes/editar-informe/${seguimientoId}`,
     ]);
+  }
+
+  verDocumentosInforme(seguimiento: any) {
+    const seguimientoId = seguimiento._id;
+    this.router.navigate([
+      `/ejecucion/seguimiento-informes/revision/${seguimientoId}`,
+    ]);
+  }
+
+  enviarAprobacionPorJefe(seguimiento: any) {
+    console.log("Enviar a Aprobación por Jefe", seguimiento);
   }
 }
