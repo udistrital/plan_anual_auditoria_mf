@@ -93,7 +93,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       )
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_interno_id;
+          const estadoId = auditoria.estado?.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -307,6 +307,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
             "Auditoria enviada a revisión del programa por Jefe",
             "Auditoria enviada"
           );
+          this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
         },
         error: (error) => {
           this.alertService.showErrorAlert("Error al enviar el programa.");

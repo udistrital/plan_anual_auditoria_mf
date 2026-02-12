@@ -54,6 +54,8 @@ export class EditarAuditoriaComponent implements OnInit {
   procesoElegido = 0;
   usuarioId: number = 0;
   usuarioRol: string = "";
+  paso1Guardado: boolean = false;
+  paso3Guardado: boolean = false;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -158,6 +160,7 @@ export class EditarAuditoriaComponent implements OnInit {
             );
           });
         }
+        this.paso1Guardado = true;
         this.stepper.next();
       });
   }
@@ -220,12 +223,31 @@ export class EditarAuditoriaComponent implements OnInit {
             this.alertaService.showSuccessAlert("Recursos editados correctamente");
           });
         }
+        this.paso3Guardado = true;
         this.stepper.next();
       });
   }
 
   finalizarAuditoria(): void {
-    console.log("Auditoría finalizada");
+    if (!this.paso1Guardado || !this.paso3Guardado) {
+      return this.alertaService.showAlert(
+        "Formulario incompleto",
+        "Debe guardar todos los pasos del formulario antes de enviar (Paso 1: Información y Paso 3: Recursos)"
+      );
+    }
+
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de enviar el formulario?")
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+        this.alertaService.showSuccessAlert(
+          "Formulario enviado correctamente",
+          "Los datos han sido guardados exitosamente"
+        );
+        this.regresarRuta();
+      });
   }
 
   manejarEnvioDocumentos(documentos: any) {
@@ -298,9 +320,15 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   crearActividad() {
-    this.dialog.open(CrearActividadComponent, {
+    const dialogRef = this.dialog.open(CrearActividadComponent, {
       width: "1100px",
       data: { auditoriaId: this.auditoriaId },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      if (this.registroPlan) {
+        this.registroPlan.listaractividades();
+      }
     });
   }
 
