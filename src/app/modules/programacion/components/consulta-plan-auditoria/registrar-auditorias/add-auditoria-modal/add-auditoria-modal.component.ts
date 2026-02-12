@@ -64,8 +64,12 @@ export class AddAuditoriaModalComponent implements OnInit {
       ],
     });
 
+    console.debug("Datos recibidos para edición:", this.data.auditoria);
+    console.debug("Valor inicial del formulario:", this.auditoriaForm.value);
+
     this.cargarTiposEvaluacion();
     this.cargarMacroprocesos();
+    this.cargarProcesos();
     this.cargarDependencias();
     this.cargarMeses();
 
@@ -73,9 +77,6 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.auditoriaForm.get("macroproceso").valueChanges.subscribe((valor: number) => {
       this.auditoriaForm.patchValue({ proceso: [] });
       this.procesos = [];
-
-      if (valor || valor === 0)
-        this.cargarProcesos()
     });
   }
 
@@ -130,8 +131,11 @@ export class AddAuditoriaModalComponent implements OnInit {
    * @param callback Optional callback function to execute after loading procesos
    */
   cargarProcesos(callback?: () => void) {
-    const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
     const macroprocesoId = this.auditoriaForm.get("macroproceso").value;
+    if (!macroprocesoId && macroprocesoId !== 0)
+      return;
+
+    const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId:${macroprocesoId}&limit=0`)
       .subscribe((res) => {
@@ -153,7 +157,6 @@ export class AddAuditoriaModalComponent implements OnInit {
       )
       .subscribe((res) => {
         if (res) {
-          console.log(res);
           this.dependencias = res;
           if (callback) callback();
         }
@@ -234,7 +237,7 @@ export class AddAuditoriaModalComponent implements OnInit {
           }
         });
     } else {
-      console.log("El formulario es inválido");
+      console.warn("El formulario es inválido");
       this.auditoriaForm.markAllAsTouched();
     }
   }
