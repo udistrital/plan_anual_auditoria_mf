@@ -77,6 +77,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.auditoriaForm.get("macroproceso").valueChanges.subscribe((valor: number) => {
       this.auditoriaForm.patchValue({ proceso: [] });
       this.procesos = [];
+      this.cargarProcesos();
     });
   }
 
