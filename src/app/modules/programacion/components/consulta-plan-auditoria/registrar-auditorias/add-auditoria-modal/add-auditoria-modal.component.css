@@ -1,0 +1,11 @@
+.cursor-pointer-field {
+  cursor: pointer;
+}
+
+.cursor-pointer-field input {
+  cursor: text;
+}
+
+.cursor-pointer-field mat-icon {
+  cursor: pointer;
+}

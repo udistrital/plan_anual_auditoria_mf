@@ -139,17 +139,27 @@
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Dependencia</b>
             </div>
-            <mat-form-field class="col-12" appearance="outline">
+            <mat-form-field class="col-12 cursor-pointer-field" appearance="outline">
               <mat-label>Seleccionar </mat-label>
               <mat-icon matPrefix color="primary">account_balance</mat-icon>
-              <mat-select formControlName="dependencia">
+              <mat-icon matSuffix>arrow_drop_down</mat-icon>
+              <input
+                type="text"
+                matInput
+                formControlName="dependencia"
+                [matAutocomplete]="autoDependencia"
+              />
+              <mat-autocomplete
+                #autoDependencia="matAutocomplete"
+                [displayWith]="displayFnDependencia"
+              >
                 <mat-option
-                  *ngFor="let dependencia of dependencias"
-                  [value]="dependencia.Id"
+                  *ngFor="let dependencia of filteredDependencias | async"
+                  [value]="dependencia"
                 >
                   {{ dependencia.Nombre }}
                 </mat-option>
-              </mat-select>
+              </mat-autocomplete>
               <mat-error
                 *ngIf="
                   auditoriaForm.get('dependencia').hasError('required') &&
