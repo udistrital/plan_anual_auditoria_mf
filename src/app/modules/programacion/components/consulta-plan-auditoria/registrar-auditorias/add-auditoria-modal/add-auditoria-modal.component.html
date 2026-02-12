@@ -74,21 +74,16 @@
             <mat-form-field class="col-12" appearance="outline">
               <mat-label>Seleccionar </mat-label>
               <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <!-- TODO: remove placeholders and uncomment actual code
-              <mat-select formControlName="macroproceso">
+              <mat-select
+                formControlName="macroproceso"
+              >
                 <mat-option
                   *ngFor="let macro of macroprocesos"
                   [value]="macro.Id"
                 >
                   {{ macro.Nombre }}
                 </mat-option>
-              -->
-              <mat-select>
-                <mat-option value="1">Macroproceso 1</mat-option>
-                <mat-option value="2">Macroproceso 2</mat-option>
-                <mat-option value="3">Macroproceso 3</mat-option>
               </mat-select>
-              <!-- TODO: uncomment when actual code is used
               <mat-error
                 *ngIf="
                   auditoriaForm.get('macroproceso').hasError('required') &&
@@ -97,7 +92,6 @@
               >
                 Seleccione el macroproceso
               </mat-error>
-              -->
             </mat-form-field>
           </div>
 
@@ -110,7 +104,6 @@
             <mat-form-field class="col-12" appearance="outline">
               <mat-label>Seleccionar </mat-label>
               <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <!-- TODO: remove placeholders and uncomment actual code
               <mat-select formControlName="proceso">
                 <mat-option
                   *ngFor="let proceso of procesos"
@@ -118,22 +111,25 @@
                 >{{
                   proceso.Nombre
                 }}</mat-option>
-              -->
-              <mat-select>
-                <mat-option value="1">Proceso 1</mat-option>
-                <mat-option value="2">Proceso 2</mat-option>
-                <mat-option value="3">Proceso 3</mat-option>
               </mat-select>
-              <!-- TODO: uncomment when actual code is used
               <mat-error
                 *ngIf="
                   auditoriaForm.get('proceso').hasError('required') &&
-                  auditoriaForm.get('proceso').touched
+                  auditoriaForm.get('proceso').touched &&
+                  procesos.length > 0
                 "
               >
                 Seleccione el proceso
               </mat-error>
-              -->
+              <mat-error
+                *ngIf="
+                  auditoriaForm.get('proceso').hasError('required') &&
+                  auditoriaForm.get('proceso').touched &&
+                  procesos.length === 0
+                "
+              >
+                Seleccione un macroproceso con procesos.
+              </mat-error>
             </mat-form-field>
           </div>
 
@@ -146,7 +142,6 @@
             <mat-form-field class="col-12" appearance="outline">
               <mat-label>Seleccionar </mat-label>
               <mat-icon matPrefix color="primary">account_balance</mat-icon>
-              <!-- TODO: remove placeholders and uncomment actual code
               <mat-select formControlName="dependencia">
                 <mat-option
                   *ngFor="let dependencia of dependencias"
@@ -154,13 +149,7 @@
                 >
                   {{ dependencia.Nombre }}
                 </mat-option>
-              -->
-              <mat-select>
-                <mat-option value="1">Dependencia 1</mat-option>
-                <mat-option value="2">Dependencia 2</mat-option>
-                <mat-option value="3">Dependencia 3</mat-option>
               </mat-select>
-              <!-- TODO: uncomment when actual code is used
               <mat-error
                 *ngIf="
                   auditoriaForm.get('dependencia').hasError('required') &&
@@ -169,7 +158,6 @@
               >
                 Seleccione la dependencia
               </mat-error>
-              -->
             </mat-form-field>
            </div>
 
