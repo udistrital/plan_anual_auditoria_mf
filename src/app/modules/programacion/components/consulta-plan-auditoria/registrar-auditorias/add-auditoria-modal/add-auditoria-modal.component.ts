@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { ParametrosService } from "src/app/core/services/parametros.service";
+import { OikosService } from "src/app/core/services/oikos.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
@@ -17,6 +18,9 @@ export class AddAuditoriaModalComponent implements OnInit {
   auditoriaForm: FormGroup | any;
   evaluaciones: Parametro[] = [];
   meses: Parametro[] = [];
+  macroprocesos: Parametro[] = [];
+  procesos: Parametro[] = [];
+  dependencias: Parametro[] = [];
   isEditMode = false;
   TODOS = "Todos";
 
@@ -24,6 +28,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
+    private oikosSevice: OikosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
@@ -41,19 +46,43 @@ export class AddAuditoriaModalComponent implements OnInit {
         this.data.auditoria?.tipoEvaluacionId || [],
         Validators.required,
       ],
+      macroproceso: [
+        this.data.auditoria?.macroprocesoId || [],
+        Validators.required,
+      ],
+      proceso: [
+        this.data.auditoria?.procesoId || [],
+        Validators.required,
+      ],
+      dependencia: [
+        this.data.auditoria?.dependenciaId || [],
+        Validators.required,
+      ],
       cronogramaActividades: [
         this.data.auditoria?.cronogramaId || [],
         Validators.required,
       ],
     });
 
-    this.cargarVigencia();
+    this.cargarTiposEvaluacion();
+    this.cargarMacroprocesos();
+    this.cargarDependencias();
     this.cargarMeses();
+
+    // When the macroproceso changes, clear the proceso selection and reload procesos.
+    this.auditoriaForm.get("macroproceso").valueChanges.subscribe((valor: number) => {
+      this.auditoriaForm.patchValue({ proceso: [] });
+      this.procesos = [];
+
+      if (valor || valor === 0)
+        this.cargarProcesos()
+    });
   }
 
   cargarMeses(callback?: () => void) {
+    const meses_id = environment.MESES.TIPO_PARAMETRO_ID;
     this.parametrosService
-      .get("parametro?query=TipoParametroId:139&limit=0")
+      .get(`parametro?query=TipoParametroId:${meses_id}&limit=0`)
       .subscribe((res) => {
         if (res && res.Data) {
           this.meses = res.Data;
@@ -62,12 +91,70 @@ export class AddAuditoriaModalComponent implements OnInit {
       });
   }
 
-  cargarVigencia(callback?: () => void) {
+  /**
+   * Load evaluation types from the Parametros API and execute a callback function.
+   * @param callback Optional callback function to execute after loading evaluation types
+   */
+  cargarTiposEvaluacion(callback?: () => void) {
+    const tipo_evaluacion_id = environment.TIPO_EVALUACION.TIPO_PARAMETRO_ID;
     this.parametrosService
-      .get("parametro?query=TipoParametroId:136&limit=0")
+      .get(`parametro?query=TipoParametroId:${tipo_evaluacion_id}&limit=0`)
       .subscribe((res) => {
         if (res && res.Data) {
           this.evaluaciones = res.Data;
+          if (callback) callback();
+        }
+      });
+  }
+
+  /**
+   * Load macroprocesos from the Parametros API and execute a callback function
+   * once the data is loaded.
+   * @param callback Optional callback function to execute after loading macroprocesos
+   */
+  cargarMacroprocesos(callback?: () => void) {
+    const macroprocesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.TIPO_PARAMETRO_ID;
+    this.parametrosService
+      .get(`parametro?query=TipoParametroId:${macroprocesos_id}&limit=0`)
+      .subscribe((res) => {
+        if (res && res.Data) {
+          this.macroprocesos = res.Data;
+          if (callback) callback();
+        }
+      });
+  }
+
+  /**
+   * Load procesos from the Parametros API based on the selected macroproceso and
+   * execute a callback function once the data is loaded.
+   * @param callback Optional callback function to execute after loading procesos
+   */
+  cargarProcesos(callback?: () => void) {
+    const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
+    const macroprocesoId = this.auditoriaForm.get("macroproceso").value;
+    this.parametrosService
+      .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId:${macroprocesoId}&limit=0`)
+      .subscribe((res) => {
+        if (res && res.Data) {
+          this.procesos = res.Data;
+          if (callback) callback();
+        }
+      });
+  }
+
+  /**
+   * Load dependencias from the Oikos API and execute a callback function once the data is loaded.
+   * @param callback Optional callback function to execute after loading dependencias
+   */
+  cargarDependencias(callback?: () => void) {
+    this.oikosSevice
+      .get(
+        `dependencia?query=Activo:true&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
+      )
+      .subscribe((res) => {
+        if (res) {
+          console.log(res);
+          this.dependencias = res;
           if (callback) callback();
         }
       });
@@ -106,6 +193,9 @@ export class AddAuditoriaModalComponent implements OnInit {
               plan_auditoria_id: this.data.planAuditoriaId,
               titulo: this.auditoriaForm.value.tituloActividad,
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
+              macroproceso_id: this.auditoriaForm.value.macroproceso,
+              proceso_id: this.auditoriaForm.value.proceso,
+              dependencia_id: this.auditoriaForm.value.dependencia,
               cronograma_id: this.auditoriaForm.value.cronogramaActividades,
               vigencia_id: this.data.vigenciaId
             };
