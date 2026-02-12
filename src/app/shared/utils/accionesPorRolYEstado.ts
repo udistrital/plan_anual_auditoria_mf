@@ -189,7 +189,7 @@ export const accionesPlaneacion: {
 };
 
 // TODO: Ajustar correctamente las acciones de acuerdo al rol y el estado
-export const accionesEjecucion: {
+export const accionesEjecucionPreliminar: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   ADMIN_SISIFO: {
@@ -367,6 +367,103 @@ export const accionesEjecucion: {
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Editar informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+  },
+};
+
+// TODO: Ajustar correctamente las acciones de acuerdo al rol y el estado
+export const accionesEjecucionFinal: {
+  [rol: string]: { [estado: number]: string[] };
+} = {
+  ADMIN_SISIFO: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+  },
+
+  JEFE_CONTROL_INTERNO: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+  },
+
+  AUDITOR_EXPERTO: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+  },
+
+  AUDITOR: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
+      "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],

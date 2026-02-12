@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { ModalRechazoAuditoriaEjecucionComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
+import { ModalRechazoSeguimientoComponent } from "./modal-rechazo-seguimiento/modal-rechazo-seguimiento.component";
 import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 
@@ -14,53 +14,30 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 
 @Component({
-  selector: "app-revision-documentos-ejecucion",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+  selector: "app-revision-documentos-seguimiento",
+  templateUrl: "./revision-documentos-seguimiento.component.html",
+  styleUrl: "./revision-documentos-seguimiento.component.css",
 })
-export class RevisionDocumentosEjecucionComponent implements OnInit {
-  auditoriaId: string = "";
+export class RevisionDocumentosSeguimientoComponent implements OnInit {
+  seguimientoId: string = "";
   estadoInformeId!: number;
   selectedTab: number = 0;
   role: string | null = null;
   usuarioId: any;
   documentos: { base64: string; tipo_id: number }[] = [];
   opcionesDocumentos: { nombre: string; base64: string }[] = [
-    { nombre: "Informe Preliminar", base64: "" },
-    { nombre: "Programa de Trabajo", base64: "" },
-    { nombre: "Oficio Anuncio Solicitud Información", base64: "" },
-    { nombre: "Carta de Representación", base64: "" },
-    { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
+    { nombre: "Informe final", base64: "" },
+    { nombre: "Oficio Anuncio Solicitud Información", base64: "" }
   ];
   rolesAprobacion: { [key: string]: any } = {
     jefe: {
-      estadoAprobacion: [
-        environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
-        environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
-      ],
-      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
-      preguntaAprobacion: "¿Está seguro(a) de enviar el informe preliminar al auditado?",
-      mensajeAprobacion: "El informe fue enviado al auditado",
+      estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE],
+      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE,
+      preguntaAprobacion: "¿Está seguro(a) de enviar el informe final a auditado?",
+      mensajeAprobacion: "El informe fue enviado a auditado",
       botonAprobacion: "Aprobar y Enviar a Auditado",
       botonRechazo: "Rechazar Informe",
-    },
-    auditado: {
-      estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO],
-      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
-      preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
-      mensajeAprobacion: "El informe fue enviado al auditor(a)",
-      botonAprobacion: "Aceptar informe",
-      botonRechazo: "Respuesta Preliminar",
-      modalRechazo: {
-        titulo: "Respuesta Preliminar",
-        descripcion: "Descripción respuesta del auditado",
-        labelTextarea: "Descripción respuesta del auditado",
-        botonConfirmar: "Guardar",
-        mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
-        mensajeExito: "Informe preliminar enviado",
-        descripcionExito: "El informe fue enviado al auditor(a)",
-      },
-    },
+    }
   };
 
   constructor(
@@ -82,7 +59,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   inicializarDatos() {
-    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
+    this.seguimientoId = this.route.snapshot.paramMap.get("id")!;
     this.buscarRol();
     this.userService.getPersonaId().then((usuarioId) => { this.usuarioId = usuarioId; });
     this.cargarDocumentos();
@@ -109,8 +86,6 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
           : esJefe
             ? "jefe"
             : null;
-
-      this.role = "auditado"; // TODO: Eliminar, se utilizo solo para pruebas
     });
   }
 
@@ -130,28 +105,28 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       .showConfirmAlert(rolAprobacion.preguntaAprobacion)
       .then(confirmado => {
         if (!confirmado.value) return;
-        this.aprobarAuditoria(estados, rolAprobacion.mensajeAprobacion);
+        this.aprobarSeguimiento(estados, rolAprobacion.mensajeAprobacion);
       });
   }
 
-  async aprobarAuditoria(estados: number[], mensajeAprobacion: string) {
+  async aprobarSeguimiento(estados: number[], mensajeAprobacion: string) {
     try {
       for (const estado of estados) {
-        const auditoriaEstado = this.construirObjetoAuditoriaEstado(estado);
-        await this.planAuditoriaService.post("auditoria-estado", auditoriaEstado).toPromise();
+        const seguimientoEstado = this.construirObjetoSeguimientoEstado(estado);
+        await this.planAuditoriaService.post("auditoria-estado", seguimientoEstado).toPromise();
       }
 
-      this.alertService.showSuccessAlert(mensajeAprobacion, "Informe preliminar enviado");
-      this.router.navigate([`/ejecucion/auditorias-internas/`]);
+      this.alertService.showSuccessAlert(mensajeAprobacion, "Informe final enviado");
+      this.router.navigate([`/ejecucion/seguimiento-informes/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
     }
   }
 
-  construirObjetoAuditoriaEstado(estadoAprobacion: number) {
+  construirObjetoSeguimientoEstado(estadoAprobacion: number) {
     return {
-      auditoria_id: this.auditoriaId,
-      fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+      seguimiento_id: this.seguimientoId,
+      fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
       estado_id: estadoAprobacion,
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
@@ -162,12 +137,12 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   abrirModalRechazo(): void {
     const rolConfig = this.rolesAprobacion[this.role!];
     const modalConfig = rolConfig?.modalRechazo;
-    this.dialog.open(ModalRechazoAuditoriaEjecucionComponent, {
+    this.dialog.open(ModalRechazoSeguimientoComponent, {
       width: "40%",
       data: {
         usuarioId: this.usuarioId,
         role: this.role,
-        auditoriaId: this.auditoriaId,
+        seguimientoId: this.seguimientoId,
         estadoRechazo: rolConfig?.estadoRechazo,
         ...modalConfig,
       },
@@ -179,28 +154,24 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   regresarRuta() {
-    this.router.navigate([`/ejecucion/auditorias-internas`]);
+    this.router.navigate([`/ejecucion/seguimiento-informes`]);
   }
 
   cargarEstadoInforme() {
     // TODO: Cargar el estado del informe y cambiar:
-    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
-    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO // TODO: Eliminar, utillizado pruebas (Para el auditado)
+    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
   }
 
   mostrarAcciones(): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
-      auditado: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+      jefe: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE],
     };
-
     return condicionesVisibilidad[this.role!]?.includes(this.estadoInformeId) || false;
-    // return true // TODO: Eliminar, sirve para probar (ver todas las acciones)
   }
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos(this.documentos, "documentos.zip");
+      await this.descargaService.descargarMultiplesArchivos(this.documentos, "documentos-seguimiento.zip");
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }

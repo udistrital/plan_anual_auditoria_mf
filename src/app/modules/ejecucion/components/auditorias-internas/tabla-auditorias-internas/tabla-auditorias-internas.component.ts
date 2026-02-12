@@ -15,7 +15,7 @@ import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
-import { accionesEjecucion } from "src/app/shared/utils/accionesPorRolYEstado";
+import { accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -60,7 +60,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   setPermisos() {
-    if (this.rolService.mostrarAcciones(accionesEjecucion)) {
+    if (this.rolService.mostrarAcciones(accionesEjecucionPreliminar)) {
       this.mostrarAcciones = true;
     }
   }
@@ -146,7 +146,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || [])
       )
     );
   }
