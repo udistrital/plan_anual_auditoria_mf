@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { parse } from 'date-fns';
 
 @Component({
@@ -15,9 +15,9 @@ export class ActividadFormularioComponent {
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      actividad: [''],
-      fechaInicio: [''],
-      fechaFin: [''],
+      actividad: ['', Validators.required],
+      fechaInicio: ['', Validators.required],
+      fechaFin: ['', Validators.required],
       id:[''],
     });
   }
@@ -39,6 +39,10 @@ export class ActividadFormularioComponent {
   }
 
   guardarActividad() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.formSubmit.emit(this.form.value); // Envía los datos al componente padre
   }
 }

@@ -143,6 +143,11 @@ export const accionesPlaneacion: {
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
+      "Editar Auditoría",
+      "Ver Documento",
+      "Enviar a Aprobación por Jefe",
+    ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
       "Ver Documento",
@@ -164,6 +169,11 @@ export const accionesPlaneacion: {
 
   AUDITOR: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
+      "Editar Auditoría",
+      "Ver Documento",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
