@@ -138,7 +138,7 @@ export const accionesPlaneacion: {
   },
 
   AUDITOR_EXPERTO: {
-    [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
@@ -168,7 +168,7 @@ export const accionesPlaneacion: {
   },
 
   AUDITOR: {
-    [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
       "Ver Documento",
       "Enviar a Aprobación por Jefe",
