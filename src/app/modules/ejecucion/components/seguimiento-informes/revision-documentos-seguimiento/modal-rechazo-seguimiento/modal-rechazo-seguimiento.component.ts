@@ -92,7 +92,7 @@ export class ModalRechazoSeguimientoComponent {
 
   construirObjetoSeguimientoEstado() {
     return {
-      seguimiento_id: this.infoModal.seguimientoId,
+      auditoria_id: this.infoModal.auditoriaId,
       fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
       estado_id: this.infoModal.estadoRechazo,
       usuario_id: this.infoModal.usuarioId,

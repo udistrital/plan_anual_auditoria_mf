@@ -19,7 +19,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
   styleUrl: "./revision-documentos-seguimiento.component.css",
 })
 export class RevisionDocumentosSeguimientoComponent implements OnInit {
-  seguimientoId: string = "";
+  auditoriaId: string = "";
   estadoInformeId!: number;
   selectedTab: number = 0;
   role: string | null = null;
@@ -59,7 +59,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   inicializarDatos() {
-    this.seguimientoId = this.route.snapshot.paramMap.get("id")!;
+    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.buscarRol();
     this.userService.getPersonaId().then((usuarioId) => { this.usuarioId = usuarioId; });
     this.cargarDocumentos();
@@ -125,7 +125,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
 
   construirObjetoSeguimientoEstado(estadoAprobacion: number) {
     return {
-      seguimiento_id: this.seguimientoId,
+      auditoria_id: this.auditoriaId,
       fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
       estado_id: estadoAprobacion,
       usuario_id: this.usuarioId,
@@ -142,7 +142,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
       data: {
         usuarioId: this.usuarioId,
         role: this.role,
-        seguimientoId: this.seguimientoId,
+        auditoriaId: this.auditoriaId,
         estadoRechazo: rolConfig?.estadoRechazo,
         ...modalConfig,
       },
