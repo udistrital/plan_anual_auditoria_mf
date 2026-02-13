@@ -1,5 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 @Component({
@@ -14,6 +14,7 @@ export class CrearActividadComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     private alertaService: AlertService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private dialogRef: MatDialogRef<CrearActividadComponent>
   ) {
     this.auditoriaId = data.auditoriaId;
   }
@@ -43,6 +44,7 @@ export class CrearActividadComponent {
                 if (response) {
                   this.alertaService.showSuccessAlert("Registro Creado");
                   this.datos.push(response);
+                  this.dialogRef.close();
                 } else {
                   this.alertaService.showErrorAlert(
                     "Error al crear el registro"

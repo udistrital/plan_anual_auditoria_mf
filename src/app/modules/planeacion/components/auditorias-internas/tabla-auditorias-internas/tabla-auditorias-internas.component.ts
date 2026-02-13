@@ -107,7 +107,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .get(endpoint)
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_interno_id;
+          const estadoId = auditoria.estado?.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -310,22 +310,22 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         ? "AUDITOR_EXPERTO"
         : "AUDITOR",
       observacion: "",
-      estado_interno_id: this.auditoriaEstados.EN_REVISION_POR_JEFE_ID,
-      //todo por implementar
-      estado_id: 0,
+      estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.alertService.showSuccessAlert(
-            "Auditoria enviada a aprobación por Jefe",
+            "Auditoria enviada a revisión del programa por Jefe",
             "Auditoria enviada"
           );
+          this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
         },
-        (error) => {
-          this.alertService.showErrorAlert("Error al enviar el plan.");
+        error: (error) => {
+          this.alertService.showErrorAlert("Error al enviar el programa.");
         }
-      );
+    });
   }
 }

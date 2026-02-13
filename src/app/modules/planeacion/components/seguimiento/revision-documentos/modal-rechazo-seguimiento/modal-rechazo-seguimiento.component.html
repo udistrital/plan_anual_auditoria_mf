@@ -1,0 +1,55 @@
+<plantilla-modal
+  [icono]="'block_flipped'"
+  [titulo]="'Rechazar plan'"
+  [descripcion]="'Motivos del rechazo'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-3">
+    <div class="col-12">
+      <form [formGroup]="formObservaciones">
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12">
+            <mat-label>Motivos del rechazo</mat-label>
+            <mat-icon color="primary" matPrefix>format_list_bulleted</mat-icon>
+            <textarea
+              style="height: 100px; resize: none"
+              matInput
+              formControlName="observaciones"
+            ></textarea>
+          </mat-form-field>
+        </div>
+      </form>
+      <div
+        class="d-flex justify-content-center align-items-center fondo-acento-50 my-1"
+      >
+        <mat-icon> info </mat-icon>
+        <p class="mx-2">{{ mensajes[tiposMensaje.pregunta] }}</p>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #footerDeModal>
+  <div class="mb-3">
+    <button
+      mat-stroked-button
+      color="primary"
+      style="border: 1px solid var(--md-primary-500)"
+      [mat-dialog-close]
+    >
+      <mat-icon>toll</mat-icon>
+      No, regresar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      id="btn-rechazar"
+      (click)="preguntarConfirmacionRechazo()"
+    >
+      <mat-icon>disabled_by_default</mat-icon>
+      Sí, rechazar
+    </button>
+  </div>
+</ng-template>

@@ -276,14 +276,17 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   editarReporte(element: any) {
+    localStorage.setItem('vigencia', element.vigencia);
     this.router.navigate([`/programacion/plan-auditoria/editar/`, element.id]);
   }
 
   verReporte(element: any) {
+    localStorage.setItem('vigencia', element.vigencia);
     this.router.navigate([`/programacion/plan-auditoria/ver/`, element.id]);
   }
 
   editarActividades(element: any) {
+    localStorage.setItem('vigencia', element.vigencia);
     this.router.navigate([
       `/programacion/plan-auditoria/registrar-auditorias/`,
       element.id,
