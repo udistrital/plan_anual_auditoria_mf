@@ -90,9 +90,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     estadoId?: number
   ) {
     this.auditoriasPorVigencia = [];
-    // this.personaId = 9810;
+    // this.personaId = 9840;
     // this.role = 'auditor'; 
-    // estadoId = 6827
+    // estadoId = 7062;
 
     let query = `vigencia_id:${vigenciaId},activo:true`;
     if (estadoId) {
@@ -100,7 +100,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
 
     const endpoint = this.role === 'auditor' && this.personaId
-      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}&estado_id=${estadoId || ''}`
+      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
       : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
 
     this.planAuditoriaMid
