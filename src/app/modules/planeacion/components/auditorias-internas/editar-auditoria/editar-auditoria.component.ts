@@ -294,6 +294,9 @@ export class EditarAuditoriaComponent implements OnInit {
       objetivo_auditoria: this.auditoria.objetivo,
       alcance_auditoria: this.auditoria.alcance,
       criterios: this.auditoria.criterio,
+      correo_lider: this.auditoria.correo_lider,
+      correo_responsable: this.auditoria.correo_responsable,
+      correo_dependencia: this.auditoria.correo_dependencia,
     });
 
     this.formularioRecursosComponent.form.patchValue({
