@@ -157,6 +157,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.modoEditar =
         this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID ||
         this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
 
       await this.rolService.cargarRoles();

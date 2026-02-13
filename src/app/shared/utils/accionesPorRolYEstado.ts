@@ -10,19 +10,19 @@ export const accionesProgramacion: {
       "Registrar Auditorías",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [
-      "Ver",
+      "Ver Marco General",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
-      "Ver",
+      "Ver Marco General",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
-      "Ver",
+      "Ver Marco General",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
@@ -36,7 +36,7 @@ export const accionesProgramacion: {
 
   JEFE_CONTROL_INTERNO: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
-    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías"],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan"],
@@ -57,19 +57,19 @@ export const accionesProgramacion: {
       "Enviar Aprobación",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [
-      "Ver",
+      "Ver Marco General",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
-      "Ver",
+      "Ver Marco General",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
-      "Ver",
+      "Ver Marco General",
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
