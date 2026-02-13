@@ -175,16 +175,10 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   buscarRol() {
-    // ROL QUEMADO PARA PRUEBAS
-    this.role = "jefe";
-    console.log('Rol quemado para pruebas:', this.role);
-    
-    /* CÓDIGO ORIGINAL COMENTADO
     this.autenticationService.getRole().then((roles: any) => {
       if (!roles || roles.length === 0) {
         return;
       }
-      console.log('Roles del usuario:', roles);
 
       const esSecretario = roles.includes("SECRETARIO_AUDITOR");
       const esAuditor = roles.some(
@@ -199,9 +193,7 @@ export class RevisionDocumentosComponent implements OnInit {
         : esJefe
         ? "jefe"
         : null;
-      console.log('Rol asignado en buscarRol:', this.role);
     });
-    */
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
