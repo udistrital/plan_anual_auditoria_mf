@@ -49,12 +49,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     "estado",
   ];
   iconosAccion = new Map<string, string>([
-    ["Ver", "visibility"],
+    ["Ver Marco General", "visibility"],
     ["Ver Plan", "visibility"],
     ["Ver Auditorias", "visibility"],
     ["Ver Documentos", "visibility"],
     ["Editar Marco General", "edit"],
     ["Registrar Auditorías", "add_circle"],
+    ["Editar Auditorías", "edit"],
     ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
   ]);
@@ -70,7 +71,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly userService: UserService,
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.roles = this.rolService.getRoles();
@@ -263,10 +264,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   // Acciones
   realizarAccion(plan: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      "Ver": () => this.verReporte(plan),
+      "Ver Marco General": () => this.verReporte(plan),
       "Ver Plan": () => this.verPlanPorRol(plan),
       "Ver Auditorias": () => this.editarActividades(plan),
       "Registrar Auditorías": () => this.editarActividades(plan),
+      "Editar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
       "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
@@ -326,7 +328,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                                   "Plan enviado exitosamente"
                                 );
                                 return of(response);
-                              }                               
+                              }
 
                               console.error("Solicitud de notificación fallida:", response);
                               return throwError(() => new Error("Solicitud de notificación fallida"));
@@ -401,10 +403,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         };
 
         console.debug("Sending email notification:", {
-              "element": element,
-              "destinatarios": destinatarios,
-              "variablesSolicitud": variablesSolicitud
-            });
+          "element": element,
+          "destinatarios": destinatarios,
+          "variablesSolicitud": variablesSolicitud
+        });
         return this.notificacionesService.enviarNotificacionSolicitud(destinatarios, variablesSolicitud);
       }),
 
