@@ -5,7 +5,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 
 //Servicios
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { RolService } from "src/app/core/services/rol.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -33,7 +33,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
   ];
   rolesAprobacion: { [key: string]: any } = {
-    jefe: {
+    [environment.ROL.JEFE]: {
       estadoAprobacion: [
         environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
         environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
@@ -66,7 +66,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     private readonly alertService: AlertService,
-    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -88,30 +88,15 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     this.cargarDocumentos();
   }
 
-  // TODO: No se abarcan todos los roles
   buscarRol() {
-    this.autenticationService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        return;
-      }
-      console.log(roles);
-
-      const esSecretario = roles.includes("SECRETARIO_AUDITOR");
-      const esAuditor = roles.some(
-        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
-      );
-      const esJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = esSecretario
-        ? "secretario"
-        : esAuditor
-          ? "auditor"
-          : esJefe
-            ? "jefe"
-            : null;
-
-      this.role = "auditado"; // TODO: Eliminar, se utilizo solo para pruebas
-    });
+    const rolPrioridad = [
+      environment.ROL.SECRETARIO,
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+      environment.ROL.JEFE,
+    ];
+    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
   }
 
   cargarDocumentos() {
@@ -190,7 +175,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   mostrarAcciones(): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
+      [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
       auditado: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
     };
 

@@ -15,7 +15,9 @@ import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
+import { UserService } from "src/app/core/services/user.service";
 import { accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -24,8 +26,6 @@ import { accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRol
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
-  @Input() role: any;
-  @Input() personaId: any;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -40,6 +40,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   mostrarAcciones: boolean = false;
+  tipoConsulta: 'general' | 'auditor' | 'dependencia' = 'general';
+  personaId: number = 0;
+  cargoId: number = 0;
   iconosAccion = new Map<string, string>([
     ["Editar Preinforme", "edit_note"],
     ["Editar informe", "edit"],
@@ -50,15 +53,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   constructor(
     private alertaService: AlertService,
     private rolService: RolService,
+    private userService: UserService,
     private changeDetector: ChangeDetectorRef,
     private dialog: MatDialog,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
     private router: Router
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.roles = this.rolService.getRoles();
     this.setPermisos();
+    await this.configurarTipoConsulta();
   }
 
   setPermisos() {
@@ -67,25 +72,48 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
+  private async configurarTipoConsulta() {
+    if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
+      this.tipoConsulta = 'dependencia';
+      this.cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+      this.personaId = await this.userService.getPersonaId();
+    } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      this.tipoConsulta = 'dependencia';
+      this.cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+      this.personaId = await this.userService.getPersonaId();
+    } else if (
+      this.rolService.tieneRol(environment.ROL.AUDITOR) ||
+      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)
+    ) {
+      this.tipoConsulta = 'auditor';
+      this.personaId = await this.userService.getPersonaId();
+    }
+    // ADMIN, AUDITOR_EXPERTO, JEFE → tipoConsulta = 'general' (default)
+  }
+
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0,
-    estadoId?: number
+    offset: number = 0
   ) {
     this.auditoriasPorVigencia = [];
-    
-    let query = `vigencia_id:${vigenciaId},activo:true`;
-    if (estadoId) {
-      query += `,estado_id:${estadoId}`;
+
+    const queryBase = `query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`;
+    let url: string;
+    switch (this.tipoConsulta) {
+      case 'dependencia':
+        url = `auditoria/dependencia/${this.personaId}/${this.cargoId}?${queryBase}`;
+        break;
+      case 'auditor':
+        url = `auditoria/auditor/${this.personaId}?${queryBase}`;
+        break;
+      default:
+        url = `auditoria?${queryBase}`;
+        break;
     }
 
-    const endpoint = this.role === 'auditor' && this.personaId
-      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}&estado_id=${estadoId || ''}`
-      : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
-
     this.planAuditoriaMid
-      .get(endpoint)
+      .get(url)
       .subscribe((res) => {
         // const auditorias: any[] = res.Data.map((auditoria: any) => {
         //   const estadoId = auditoria.estado?.estado_interno_id;

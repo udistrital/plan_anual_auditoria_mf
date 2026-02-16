@@ -19,7 +19,6 @@ export class PlanDeMejoramientoComponent implements OnInit {
   planMejoramientoForm!: FormGroup;
   vigenciaSeleccionada!: number;
   tipoEvaluacionSeleccionado!: number;
-  role: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -28,25 +27,9 @@ export class PlanDeMejoramientoComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.buscarRol();
     this.iniciarForm();
     this.cargarVigencias();
     this.cargarTiposEvaluacion();
-  }
-
-  buscarRol() {
-    this.autenticacionService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        console.error("No se encontraron roles para este usuario");
-        return;
-      }
-      const IsSecretario = roles.includes("SECRETARIO_AUDITOR");
-      const IsAuditor = roles.some((role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR");
-      const IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = IsSecretario ? "secretario" : IsAuditor ? "auditor" : IsJefe ? "jefe" : null;
-      console.log("Rol actual:", this.role);
-    });
   }
 
   cargarVigencias() {
