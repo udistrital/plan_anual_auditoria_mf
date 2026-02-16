@@ -99,6 +99,7 @@ export const environment = {
   },
 
   TIPO_EVALUACION: {
+    TIPO_PARAMETRO_ID: 136,
     AUDITORIA_INTERNA_ID: 6770,
     SEGUIMIENTO_ID: 6771,
     INFORME_ID: 6772,
