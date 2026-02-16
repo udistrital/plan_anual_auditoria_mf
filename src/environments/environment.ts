@@ -11,12 +11,10 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE:
+  PLAN_ANUAL_AUDITORIA_SERVICE: 
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
   PLAN_ANUAL_AUDITORIA_MID:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
-  // PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
   TERCEROS_SERVICE:
@@ -114,7 +112,7 @@ export const environment = {
     EJECUCION_FINAL: "EJECUCION FINAL",
     PLAN_MEJORAMIENTO: "PLAN DE MEJORAMIENTO",
   },
-  
+
   INFORME_ESTADO: {
     // INFORME PRELIMINAR
     INFORME_PRELIMINAR_CREANDO_ID: 7070,
