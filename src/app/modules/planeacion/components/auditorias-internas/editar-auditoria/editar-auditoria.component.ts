@@ -176,9 +176,8 @@ export class EditarAuditoriaComponent implements OnInit {
       lider_id: informacion.lider,
       no_auditoria: informacion.no_auditoria,
       objetivo: informacion.objetivo_auditoria,
-      macroproceso: informacion.proceso,
       responsable_id: informacion.responsable,
-      tipo_id: informacion.tipo,
+      correo_complementario: informacion.correo_complementario,
     };
   }
 
@@ -285,8 +284,9 @@ export class EditarAuditoriaComponent implements OnInit {
       no_auditoria: this.auditoria.no_auditoria,
       consecutivo_OCI: this.auditoria.consecutivo_OCI,
       consecutivo_IE: this.auditoria.consecutivo_IE,
-      tipo: this.auditoria.tipo_id,
-      proceso: this.auditoria.macroproceso,
+      macroproceso: this.auditoria.macroproceso_nombre,
+      proceso: this.auditoria.proceso_nombre,
+      dependencia: this.auditoria.dependencia_nombre,
       lider: this.auditoria.lider_id,
       responsable: this.auditoria.responsable_id,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
@@ -297,6 +297,7 @@ export class EditarAuditoriaComponent implements OnInit {
       correo_lider: this.auditoria.correo_lider,
       correo_responsable: this.auditoria.correo_responsable,
       correo_dependencia: this.auditoria.correo_dependencia,
+      correo_complementario: this.auditoria.correo_complementario,
     });
 
     this.formularioRecursosComponent.form.patchValue({
@@ -309,11 +310,11 @@ export class EditarAuditoriaComponent implements OnInit {
       temas: this.auditoria.temas,
     });
 
-    if (this.auditoria.tipo_id) {
-      this.manejarCambioTipo(this.auditoria.tipo_id);
+    if (this.auditoria.macroproceso_id) {
+      this.manejarCambioTipo(this.auditoria.macroproceso_id);
 
-      if (this.auditoria.macroproceso) {
-        this.manejarCambioProceso(this.auditoria.macroproceso);
+      if (this.auditoria.proceso_id) {
+        this.manejarCambioProceso(this.auditoria.proceso_id);
 
         if (this.auditoria.lider_id) {
           this.manejarCambioLider();

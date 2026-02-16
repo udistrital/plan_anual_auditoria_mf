@@ -73,13 +73,6 @@ export class TablaConsultaAuditoriasComponent {
     });
   }
 
-  private mostrarModalSinAuditorias(): void {
-    this.dialog.open(ModalSinAuditoriasComponent, {
-      width: "450px",
-      disableClose: false,
-    });
-  }
-
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
@@ -94,7 +87,10 @@ export class TablaConsultaAuditoriasComponent {
       .then((tienePAAAprobado) => {
         if (!tienePAAAprobado) {
           // No hay PAA aprobado, mostrar modal
-          this.mostrarModalSinAuditorias();
+          this.alertaService.showAlert(
+            "Sin auditorias aprobadas",
+            "No se han encontrado auditorías aprobadas para la vigencia seleccionada."
+          );
           return;
         }
 
@@ -112,7 +108,10 @@ export class TablaConsultaAuditoriasComponent {
 
             if (auditorias.length === 0) {
               // Hay PAA aprobado pero no hay auditorías en estado válido
-              this.mostrarModalSinAuditorias();
+              this.alertaService.showAlert(
+                "Sin auditorias aprobadas",
+                "No se han encontrado auditorías aprobadas para la vigencia seleccionada."
+              );
               return;
             }
 
@@ -198,43 +197,5 @@ export class TablaConsultaAuditoriasComponent {
         );
       }
     });
-  }
-}
-
-@Component({
-  selector: 'app-modal-sin-auditorias',
-  template: `
-    <div class="modal-container" style="padding: 20px; text-align: center;">
-      <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-        <mat-icon color="warn" style="font-size: 60px; width: 60px; height: 60px;">
-          info
-        </mat-icon>
-      </div>
-      <p style="font-size: 16px; margin-bottom: 30px;">
-        No existen auditorías aprobadas para la vigencia seleccionada.
-      </p>
-      <mat-dialog-actions align="center">
-        <button 
-          mat-raised-button 
-          color="primary" 
-          (click)="cerrar()"
-          style="min-width: 120px;">
-          Aceptar
-        </button>
-      </mat-dialog-actions>
-    </div>
-  `,
-  styles: [`
-    .modal-container {
-      min-width: 400px;
-    }
-  `]
-})
-export class ModalSinAuditoriasComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ModalSinAuditoriasComponent>
-  ) {}
-  cerrar(): void {
-    this.dialogRef.close();
   }
 }

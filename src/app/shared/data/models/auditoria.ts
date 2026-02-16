@@ -9,8 +9,9 @@ export interface Auditoria {
   vigencia_id: number;
   consecutivo_OCI: string;
   consecutivo_IE: string;
-  tipo_id: number;
-  macroproceso: number;
+  macroproceso_id: number;
+  proceso_id: number;
+  dependencia_id: number;
   lider_id: number;
   responsable_id: number;
   fecha_inicio: string;
@@ -31,10 +32,13 @@ export interface Auditoria {
   tipo_nombre: string;
   vigencia_nombre: string;
   macroproceso_nombre: string;
+  proceso_nombre: string;
+  dependencia_nombre: string;
   lider_nombre: string;
   responsable_nombre: string;
   estado_interno_id?: number;
   correo_lider?: string;
   correo_responsable?: string;
   correo_dependencia?: string;
+  correo_complementario?: string;
 }
