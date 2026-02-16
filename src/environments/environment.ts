@@ -11,12 +11,12 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
-  PLAN_ANUAL_AUDITORIA_MID:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
-  // PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
+  //  PLAN_ANUAL_AUDITORIA_SERVICE:
+  //  "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+  PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_MID:
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
+  PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
   TERCEROS_SERVICE:
@@ -96,7 +96,12 @@ export const environment = {
     },
   },
 
+  MESES: {
+    TIPO_PARAMETRO_ID: 139,
+  },
+
   TIPO_EVALUACION: {
+    TIPO_PARAMETRO_ID: 136,
     AUDITORIA_INTERNA_ID: 6770,
     SEGUIMIENTO_ID: 6771,
     INFORME_ID: 6772,

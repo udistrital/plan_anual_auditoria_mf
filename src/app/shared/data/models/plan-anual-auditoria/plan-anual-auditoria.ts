@@ -11,6 +11,12 @@ export class Auditoria {
     auditoria!: string;
     tipoEvaluacion!: string;
     tipoEvaluacionId!: number;
+    macroproceso!: string;
+    macroprocesoId!: number
+    proceso!: string;
+    procesoId!: number;
+    dependencia!: string;
+    dependenciaId!: number;
     cronograma!: string;
     cronogramaId!: number[];
     vigencia_id!: number;

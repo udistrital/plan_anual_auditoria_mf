@@ -10,7 +10,11 @@
     <div class="col-12">
       <form [formGroup]="auditoriaForm" class="form-container">
         <div class="row mt-2">
-          <div class="col-12 col-md-6 col-xl-4">
+
+
+
+          <!-- Auditoría -->
+          <div class="col-12 col-md-6 col-xl-8">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Auditoría</b>
             </div>
@@ -32,6 +36,9 @@
               </mat-error>
             </mat-form-field>
           </div>
+
+
+          <!-- Tipo de Evaluación -->
           <div class="col-12 col-md-6 col-xl-4">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Tipo de evaluación</b>
@@ -57,7 +64,116 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="col-12 col-md-6 col-xl-4">
+
+
+          <!-- Macroproceso -->
+          <div class="col-12 col-md-4 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Macroproceso</b>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-label>Seleccionar </mat-label>
+              <mat-icon matPrefix color="primary">account_tree</mat-icon>
+              <mat-select
+                formControlName="macroproceso"
+              >
+                <mat-option
+                  *ngFor="let macro of macroprocesos"
+                  [value]="macro.Id"
+                >
+                  {{ macro.Nombre }}
+                </mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  auditoriaForm.get('macroproceso').hasError('required') &&
+                  auditoriaForm.get('macroproceso').touched
+                "
+              >
+                Seleccione el macroproceso
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+
+          <!-- Proceso -->
+          <div class="col-12 col-md-4 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Proceso</b>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-label>Seleccionar </mat-label>
+              <mat-icon matPrefix color="primary">account_tree</mat-icon>
+              <mat-select formControlName="proceso">
+                <mat-option
+                  *ngFor="let proceso of procesos"
+                  [value]="proceso.Id"
+                >{{
+                  proceso.Nombre
+                }}</mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  auditoriaForm.get('proceso').hasError('required') &&
+                  auditoriaForm.get('proceso').touched &&
+                  procesos.length > 0
+                "
+              >
+                Seleccione el proceso
+              </mat-error>
+              <mat-error
+                *ngIf="
+                  auditoriaForm.get('proceso').hasError('required') &&
+                  auditoriaForm.get('proceso').touched &&
+                  procesos.length === 0
+                "
+              >
+                Seleccione un macroproceso con procesos.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+
+          <!-- Dependencia -->
+          <div class="col-12 col-md-4 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Dependencia</b>
+            </div>
+            <mat-form-field class="col-12 cursor-pointer-field" appearance="outline">
+              <mat-label>Seleccionar </mat-label>
+              <mat-icon matPrefix color="primary">account_balance</mat-icon>
+              <mat-icon matSuffix>arrow_drop_down</mat-icon>
+              <input
+                type="text"
+                matInput
+                formControlName="dependencia"
+                [matAutocomplete]="autoDependencia"
+              />
+              <mat-autocomplete
+                #autoDependencia="matAutocomplete"
+                [displayWith]="displayFnDependencia"
+              >
+                <mat-option
+                  *ngFor="let dependencia of filteredDependencias | async"
+                  [value]="dependencia"
+                >
+                  {{ dependencia.Nombre }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error
+                *ngIf="
+                  auditoriaForm.get('dependencia').hasError('required') &&
+                  auditoriaForm.get('dependencia').touched
+                "
+              >
+                Seleccione la dependencia
+              </mat-error>
+            </mat-form-field>
+           </div>
+
+
+          <!-- Cronograma de Actividades -->
+          <div class="col-12 col-md-12 col-xl-12">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Cronograma de actividades</b>
             </div>
@@ -88,6 +204,8 @@
               </mat-error>
             </mat-form-field>
           </div>
+
+
         </div>
       </form>
       <div class="d-flex justify-content-center align-items-center my-2">

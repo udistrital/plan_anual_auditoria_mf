@@ -34,4 +34,7 @@ export interface Auditoria {
   lider_nombre: string;
   responsable_nombre: string;
   estado_interno_id?: number;
+  correo_lider?: string;
+  correo_responsable?: string;
+  correo_dependencia?: string;
 }
