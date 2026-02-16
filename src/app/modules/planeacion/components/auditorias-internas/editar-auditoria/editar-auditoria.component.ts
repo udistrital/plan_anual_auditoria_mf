@@ -53,7 +53,6 @@ export class EditarAuditoriaComponent implements OnInit {
   tipoSeleccionado: "macroproceso" | "proceso" | null = null;
   procesoElegido = 0;
   usuarioId: number = 0;
-  usuarioRol: string = "";
   paso1Guardado: boolean = false;
   paso3Guardado: boolean = false;
 
@@ -79,9 +78,6 @@ export class EditarAuditoriaComponent implements OnInit {
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
-    this.usuarioRol = this.rolService.getRoles().filter(
-      (role: string) => environment.ROLES.includes(role) && !role.includes("ADMIN")
-    )[0];
   }
 
   ngAfterViewInit() {
@@ -122,7 +118,7 @@ export class EditarAuditoriaComponent implements OnInit {
       estado_id: environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
       usuario_id: this.usuarioId,
-      usuario_rol: this.usuarioRol
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol))
     }
     return this.planAuditoriaService.post("auditoria-estado", estadoPayload)
   }

@@ -417,8 +417,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   private verPlanPorRol(plan: any) {
-    const esSecretario = this.roles.includes("SECRETARIO_AUDITOR");
-    const esJefe = this.roles.includes("JEFE_CONTROL_INTERNO");
+    const esSecretario = this.rolService.tieneRol(environment.ROL.SECRETARIO);
+    const esJefe = this.rolService.tieneRol(environment.ROL.JEFE);
     if (esSecretario && esJefe) {
       if (plan.estadoId === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID) {
         this.verPlanSecretario(plan);

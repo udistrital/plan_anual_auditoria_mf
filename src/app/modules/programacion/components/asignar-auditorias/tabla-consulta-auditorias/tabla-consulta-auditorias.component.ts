@@ -31,7 +31,6 @@ export class TablaConsultaAuditoriasComponent {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   permiso: boolean = false;
-  usuarioRol: string = "";
 
   constructor(
     private readonly alertaService: AlertService,
@@ -49,9 +48,6 @@ export class TablaConsultaAuditoriasComponent {
     this.permiso = this.rolService.permisoCreacion(
       environment.ROLES_CREACION.PROGRAMACION
     );
-    this.usuarioRol = this.rolService.getRoles().filter(
-      (role: string) => environment.ROLES_CREACION.PROGRAMACION.includes(role) && !role.includes("ADMIN")
-    )[0];
   }
 
   private verificarPAAAprobado(vigenciaId: number): Promise<boolean> {
@@ -185,7 +181,7 @@ export class TablaConsultaAuditoriasComponent {
       width: "1100px",
       data: {
         auditoria,
-        usuarioRol: this.usuarioRol,
+        usuarioRol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
       },
     });
 

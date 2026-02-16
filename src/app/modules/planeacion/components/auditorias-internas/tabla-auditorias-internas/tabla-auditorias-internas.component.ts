@@ -306,9 +306,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
-      usuario_rol: this.roles.includes("AUDITOR_EXPERTO")
-        ? "AUDITOR_EXPERTO"
-        : "AUDITOR",
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
       observacion: "",
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,

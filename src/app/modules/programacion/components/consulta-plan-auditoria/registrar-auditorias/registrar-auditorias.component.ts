@@ -48,7 +48,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
   title: string = "";
   breadcrumb: string = "";
   usuario_id: number | null = null;
-  usuario_rol: string = "";
   roles: string[] = [];
   vigenciaNombre: string = "";
 
@@ -82,9 +81,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.userService.getPersonaId().then((id) => {
       this.usuario_id = id;
     });
-    this.usuario_rol = this.roles.filter(
-      (role: string) => environment.ROLES_CREACION.PROGRAMACION.includes(role) && !role.includes("ADMIN")
-    )[0];
     this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
     this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
@@ -163,7 +159,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       await this.rolService.cargarRoles();
       this.roles = this.rolService.getRoles();
       this.mostrarOrdenamiento = 
-        this.roles.includes('AUDITOR_EXPERTO') && 
+        this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO) &&
         this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
@@ -274,7 +270,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "800px",
       data: {
         usuario_id: this.usuario_id,
-        usuario_rol: this.usuario_rol,
+        usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
         tipoArchivo: "xlsx",
         id: this.id,
         vigenciaId: this.vigenciaId,
@@ -313,7 +309,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "1000px",
       data: {
         usuario_id: this.usuario_id,
-        usuario_rol: this.usuario_rol,
+        usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
         planAuditoriaId: this.id,
         vigenciaId: this.vigenciaId,
         auditoria,

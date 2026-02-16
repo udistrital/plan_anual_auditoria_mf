@@ -1,7 +1,7 @@
 import { environment } from "src/environments/environment";
 
 export const rolesAprobacion: { [key: string]: any } = {
-  jefe: {
+  [environment.ROL.JEFE]: {
     estadoAprobacion: [
       environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE,
       environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO,
