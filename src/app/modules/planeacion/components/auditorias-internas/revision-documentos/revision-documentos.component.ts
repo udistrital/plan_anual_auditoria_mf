@@ -102,39 +102,46 @@ export class RevisionDocumentosComponent implements OnInit {
       });
   }
 
-  //funcion para registrar estados de auditoria secuencialmente,
   async aprobarAuditoriaSecuencial(
     estadoAprobacion: number[],
     mensajeAprobacion: string
   ) {
     try {
-      for (const estado of estadoAprobacion) {
-        await this.aprobarAuditoria(estado, mensajeAprobacion);
+      for (let i = 0; i < estadoAprobacion.length; i++) {
+        const esUltimoEstado = i === estadoAprobacion.length - 1;
+        await this.aprobarAuditoria(estadoAprobacion[i], mensajeAprobacion, esUltimoEstado);
       }
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el plan.");
     }
   }
 
-  async aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
-    try {
-      const auditoriaEstado =
-        this.construirObjetoAuditoriaEstado(estadoAprobacion);
+  aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string, mostrarMensaje: boolean = true): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const auditoriaEstado = this.construirObjetoAuditoriaEstado(estadoAprobacion);
 
       this.planAuditoriaService
         .post("auditoria-estado", auditoriaEstado)
-        .subscribe((res) => {
-          this.alertService.showSuccessAlert(
-            mensajeAprobacion,
-            "Auditoria enviada"
-          ).then(() => {
-            this.router.navigate([`/planeacion/auditorias-internas/`]);
-          });
+        .subscribe({
+          next: (res) => {
+            if (mostrarMensaje) {
+              this.alertService.showSuccessAlert(
+                mensajeAprobacion,
+                "Auditoria enviada"
+              ).then(() => {
+                this.router.navigate([`/planeacion/auditorias-internas/`]);
+                resolve();
+              });
+            } else {
+              resolve();
+            }
+          },
+          error: (error) => {
+            this.alertService.showErrorAlert("Error al aprobar el plan.");
+            reject(error);
+          }
         });
-
-    } catch (error) {
-      this.alertService.showErrorAlert("Error al aprobar el plan.");
-    }
+    });
   }
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
@@ -172,7 +179,6 @@ export class RevisionDocumentosComponent implements OnInit {
       if (!roles || roles.length === 0) {
         return;
       }
-      console.log(roles);
 
       const esSecretario = roles.includes("SECRETARIO_AUDITOR");
       const esAuditor = roles.some(
