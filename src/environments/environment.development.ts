@@ -94,6 +94,10 @@ export const environment = {
     },
   },
 
+  MESES: {
+    TIPO_PARAMETRO_ID: 139,
+  },
+
   TIPO_EVALUACION: {
     AUDITORIA_INTERNA_ID: 6770,
     SEGUIMIENTO_ID: 6771,
