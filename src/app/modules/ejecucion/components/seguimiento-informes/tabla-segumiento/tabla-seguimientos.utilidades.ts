@@ -48,12 +48,6 @@ export const seguimientosConstructorTabla = [
     sortable: true,
   },
   {
-    columnDef: "documentos",
-    header: "Documentos",
-    cell: (seguimiento: any) => "",
-    sortable: false,
-  },
-  {
     columnDef: "acciones",
     header: "Acciones",
     cell: (seguimiento: any) => "",

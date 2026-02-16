@@ -21,40 +21,21 @@
                   <span>{{ pageIndex * pageSize + i + 1 }}</span>
                 </div>
 
-                <!-- Columna Acciones -->
+                <!-- Acciones -->
                 <div *ngSwitchCase="'acciones'">
-                  <button mat-icon-button [matMenuTriggerFor]="menu" color="primary">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
-                    <ng-container [ngSwitch]="role">
-                      <ng-container *ngSwitchCase="'auditor'">
-                        <button (click)="editarInformeSeguimiento(row)" mat-menu-item>
-                          <mat-icon color="primary">edit</mat-icon> Editar Informe
-                        </button>
-                        <button mat-menu-item>
-                          <mat-icon color="primary">send</mat-icon> Enviar Aprobación Jefe OCI
-                        </button>
-                      </ng-container>
-                      <ng-container *ngSwitchCase="'jefe'">
-                        <button mat-menu-item>
-                          <mat-icon color="primary">send</mat-icon> Enviar Aprobación Secretario
-                        </button>
-                      </ng-container>
-                      <ng-container *ngSwitchCase="'secretario'">
-                        <button mat-menu-item>
-                          <mat-icon color="primary">send</mat-icon> Enviar Aprobación Secretario
-                        </button>
-                      </ng-container>
-                    </ng-container>
-                  </mat-menu>
-                </div>
-
-                <!-- Columna Documentos -->
-                <div *ngSwitchCase="'documentos'">
-                  <mat-icon (click)="verDocumento(row)" color="primary" class="link">
-                    description
-                  </mat-icon>
+                  <ng-container *ngIf="row.acciones?.length > 0">
+                    <button mat-icon-button color="primary" [matMenuTriggerFor]="menu">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                      <button mat-menu-item (click)="realizarAccion(row, accion)" *ngFor="let accion of row.acciones">
+                        <mat-icon color="primary">{{
+                          getIconoAccion(accion)
+                          }}</mat-icon>
+                        <span>{{ accion }}</span>
+                      </button>
+                    </mat-menu>
+                  </ng-container>
                 </div>
 
                 <!-- Resto de columnas -->
