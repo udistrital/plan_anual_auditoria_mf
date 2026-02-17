@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { TablaConsultaAuditoriasComponent } from "./tabla-consulta-auditorias/tabla-consulta-auditorias.component";
@@ -18,7 +17,6 @@ export class AsignarAuditoriasComponent implements OnInit {
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada!: number;
   constructor(
-    private dialog: MatDialog,
     private fb: FormBuilder,
     private parametrosUtilsService: ParametrosUtilsService
   ) {}
