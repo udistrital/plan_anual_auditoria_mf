@@ -37,6 +37,7 @@ export const environment = {
     /** Carbon copy recipient emails go here */
     CcAddresses: [
       // "copy.to@ejemplo.com"
+      "pruebaspaa26@yopmail.com",
     ],
     /** Blind carbon copy recipient emails go here */
     BccAddresses: [
