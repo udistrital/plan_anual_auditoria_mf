@@ -143,7 +143,7 @@ export class AddAuditoriaModalComponent implements OnInit {
    */
   cargarProcesos(callback?: () => void) {
     const macroprocesoId = this.auditoriaForm.get("macroproceso").value;
-    if (!macroprocesoId && macroprocesoId !== 0)
+    if ((macroprocesoId == false || macroprocesoId == null) && macroprocesoId !== 0)
       return;
 
     const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
@@ -212,7 +212,16 @@ export class AddAuditoriaModalComponent implements OnInit {
           nombre
         )}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
       )
-      .pipe(catchError(() => of([])));
+      .pipe(
+        // Filter out dependencies with empty names
+        map((res: any) => res.filter(
+          (dep: Parametro) => dep.Nombre.length > 0
+        )),
+        catchError((error) => {
+          console.error("Error al buscar dependencias", error);
+          return of([])
+        })
+      );
   }
 
   /**
