@@ -29,7 +29,7 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "dependencia",
     header: "Dependencia",
-    cell: (auditoria: any) => auditoria.dependencia,
+    cell: (auditoria: any) => auditoria.dependencia_nombre,
     sortable: true,
   },
   {
