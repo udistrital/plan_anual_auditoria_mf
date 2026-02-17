@@ -44,6 +44,10 @@ export const environment = {
     ]
   },
 
+  VIGENCIAS : {
+    TIPO_PARAMETRO_ID: 121,
+  },
+
   PLAN_ESTADO: {
     EN_BORRADOR_ID: 6790,
     EN_REVISION_JEFE_ID: 6791,

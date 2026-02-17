@@ -1,9 +1,7 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
-import { AlertService } from "src/app/shared/services/alert.service";
-import { ParametrosService } from "src/app/core/services/parametros.service";
-import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { TablaAuditoriasInternasComponent } from "./tabla-auditorias-internas/tabla-auditorias-internas.component";
 import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import { decrypt } from "src/app/shared/utils/util-encrypt";
@@ -29,7 +27,7 @@ export class AuditoriasInternasComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private parametrosService: ParametrosService,
+    private parametrosUtilsService: ParametrosUtilsService,
     private autenticacionService: ImplicitAutenticationService,
   ) { }
 
@@ -77,13 +75,14 @@ export class AuditoriasInternasComponent implements OnInit {
   }
 
   cargarVigencias() {
-    this.parametrosService
-      .get(
-        "parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc"
-      )
-      .subscribe((res) => {
-        this.vigencias = res.Data;
-      });
+    this.parametrosUtilsService.getVigencias().subscribe({
+      next: (data) => {
+        this.vigencias = data;
+      },
+      error: (err) => {
+        console.error("Error load vigencias", err);
+      }
+    });
   }
 
   mostrarAuditoriasPorVigencia(vigencia: Vigencia) {
