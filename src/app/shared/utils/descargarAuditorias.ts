@@ -24,7 +24,7 @@ interface Auditoria {
 
 /** Allowed values for the "Tipo de Evaluación" field */
 const TIPOS_EVALUACION = [
-  "Auditoria Interna",
+  "Auditoría Interna",
   "Seguimiento",
   "Informe",
   "Otro",
