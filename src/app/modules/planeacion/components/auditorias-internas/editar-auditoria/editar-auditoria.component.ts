@@ -20,7 +20,6 @@ import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
-import { OikosService } from "src/app/core/services/oikos.service";
 import { UserService } from "src/app/core/services/user.service";
 import { RolService } from "src/app/core/services/rol.service";
 @Component({
@@ -65,7 +64,6 @@ export class EditarAuditoriaComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly parametrosService: ParametrosService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly oikosSevice: OikosService,
     private readonly userService: UserService,
     private readonly rolService: RolService,
   ) {}
@@ -88,7 +86,6 @@ export class EditarAuditoriaComponent implements OnInit {
     });
 
     establecerSelectsSecuenciales(this.formularioInformacionComponent, [
-      "tipo",
       "proceso",
       "lider",
       "responsable",
@@ -306,17 +303,14 @@ export class EditarAuditoriaComponent implements OnInit {
       temas: this.auditoria.temas,
     });
 
-    if (this.auditoria.macroproceso_id) {
-      this.manejarCambioTipo(this.auditoria.macroproceso_id);
+    if (this.auditoria.proceso_id) {
+      this.manejarCambioProceso(this.auditoria.proceso_id);
 
-      if (this.auditoria.proceso_id) {
-        this.manejarCambioProceso(this.auditoria.proceso_id);
-
-        if (this.auditoria.lider_id) {
-          this.manejarCambioLider();
-        }
+      if (this.auditoria.lider_id) {
+        this.manejarCambioLider();
       }
     }
+    
   }
 
   crearActividad() {
@@ -343,7 +337,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   manejarCambioTipo(tipoProcesoId: any) {
-    const { MACROPROCESO, PROCESO, DEPENDENCIA } =
+    const { MACROPROCESO, PROCESO } =
       environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
 
     this.tipoSeleccionado = null;
@@ -351,8 +345,6 @@ export class EditarAuditoriaComponent implements OnInit {
       this.tipoSeleccionado = "macroproceso";
     } else if (tipoProcesoId === PROCESO.PARAMETRO_ID) {
       this.tipoSeleccionado = "proceso";
-    } else if (tipoProcesoId === DEPENDENCIA.PARAMETRO_ID) {
-      return this.cargarDependencias();
     }
 
     const tipoParametroId =
@@ -424,14 +416,4 @@ export class EditarAuditoriaComponent implements OnInit {
     );
   }
 
-  cargarDependencias() {
-    this.oikosSevice
-      .get(
-        `dependencia?query=Activo:true&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario("proceso");
-        if (campo) campo.parametros!.opciones = res;
-      });
-  }
 }
