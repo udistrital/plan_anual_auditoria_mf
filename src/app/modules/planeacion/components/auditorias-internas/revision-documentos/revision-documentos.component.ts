@@ -127,7 +127,7 @@ export class RevisionDocumentosComponent implements OnInit {
             if (mostrarMensaje) {
               this.alertService.showSuccessAlert(
                 mensajeAprobacion,
-                "Auditoria enviada"
+                "Auditoría enviada"
               ).then(() => {
                 this.router.navigate([`/planeacion/auditorias-internas/`]);
                 resolve();

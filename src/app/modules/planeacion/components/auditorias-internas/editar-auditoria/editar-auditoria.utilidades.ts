@@ -5,11 +5,11 @@ export const formularioInformacionAuditoria: Formulario = {
   campos: [
     {
       nombre: "no_auditoria",
-      descripcion: "No Auditoria y/o seguimiento",
-      etiqueta: "No Auditoria y/o seguimiento",
+      descripcion: "No Auditoría y/o seguimiento",
+      etiqueta: "No Auditoría y/o seguimiento",
       icono: "format_list_numbered",
       tipo: "number",
-      placeholder: "Escriba aquí el número de la auditoria",
+      placeholder: "Escriba aquí el número de la auditoría",
       deshabilitado: false,
       validaciones: [{ tipo: "requerido", valor: "" }],
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",

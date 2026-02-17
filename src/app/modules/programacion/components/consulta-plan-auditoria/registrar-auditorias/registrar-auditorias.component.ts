@@ -289,7 +289,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         tipoArchivo: "pdf",
         id: this.id,
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
-        descripcion: "Matriz funcion publica",
+        descripcion: "Matriz función pública",
         cargaLambda: false,
         tipoIdReferencia:
           environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
