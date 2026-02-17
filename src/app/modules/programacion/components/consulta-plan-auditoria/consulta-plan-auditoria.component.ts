@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { UserService } from "src/app/core/services/user.service";
-import { ParametrosService } from "src/app/core/services/parametros.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatTableDataSource } from "@angular/material/table";
@@ -64,7 +64,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly alertaService: AlertService,
     private readonly dialog: MatDialog,
     private readonly router: Router,
-    private readonly parametrosService: ParametrosService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private rolService: RolService,
@@ -116,17 +116,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarVigencias() {
-    this.parametrosService
-      .get(
-        "parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc"
-      )
-      .subscribe((res) => {
-        if (res !== null) {
-          this.years = res.Data;
-        } else {
-          console.warn("vigencias no encontradas");
-        }
-      });
+    this.parametrosUtilsService.getVigencias().subscribe({
+      next: (data) => {
+        this.years = data;
+      },
+      error: (err) => {
+        console.error("Error load vigencias", err);
+      }
+    });
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
