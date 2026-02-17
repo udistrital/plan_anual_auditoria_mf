@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
-import { ParametrosService } from "src/app/core/services/parametros.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from 'src/app/core/services/rol.service';
 import { environment } from 'src/environments/environment';
@@ -30,7 +30,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     private fb: FormBuilder,
     private alertaService: AlertService, 
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private parametrosService: ParametrosService,
+    private parametrosUtilsService: ParametrosUtilsService,
     private userService: UserService,
     private rolService: RolService
   ) {}
@@ -54,13 +54,14 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   cargarVigencias() {
-    this.parametrosService
-      .get("parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc")
-      .subscribe((res) => {
-        if (res !== null) {
-          this.vigencias = res.Data;
-        }
-      });
+    this.parametrosUtilsService.getVigencias().subscribe({
+      next: (data) => {
+        this.vigencias = data;
+      },
+      error: (err) => {
+        console.error("Error load vigencias", err);
+      }
+    });
   }
 
   mostrarAuditoriasPorVigencia(vigencia: Vigencia) {
