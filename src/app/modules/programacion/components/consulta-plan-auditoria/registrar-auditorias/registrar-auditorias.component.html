@@ -26,18 +26,23 @@
           </button>
         </div>
         <div>
-          <button mat-icon-button>
-            <mat-icon color="primary" class="icon">view_list</mat-icon>
-          </button>
-          <button
-            class="mx-2"
-            mat-raised-button
-            color="primary"
-            (click)="descargarPlantilla()"
-            *ngIf="modoEditar"
-          >
-            <mat-icon svgIcon="excel"></mat-icon>Plantilla Cargue Masivo
-          </button>
+          <div class="d-flex flex-column" *ngIf="modoEditar">
+            <button
+              class="mb-2"
+              mat-raised-button
+              color="primary"
+              (click)="descargarPlantilla()"
+            >
+              <mat-icon svgIcon="excel"></mat-icon>Plantilla Cargue Masivo
+            </button>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="descargarArchivoDescargueMasivo()"
+            >
+              <mat-icon>file_download</mat-icon> Exportar tabla
+            </button>
+          </div>
         </div>
       </div>
 
@@ -79,6 +84,36 @@
             </th>
             <td mat-cell *matCellDef="let element" class="cell">
               {{ element.tipoEvaluacion }}
+            </td>
+          </ng-container>
+
+          <!-- Macroproceso Column -->
+          <ng-container matColumnDef="macroproceso">
+            <th mat-header-cell *matHeaderCellDef class="header">
+              <b>Macroproceso</b>
+            </th>
+            <td mat-cell *matCellDef="let element" class="cell">
+              {{ element.macroproceso }}
+            </td>
+          </ng-container>
+
+          <!-- Proceso Column -->
+          <ng-container matColumnDef="proceso">
+            <th mat-header-cell *matHeaderCellDef class="header">
+              <b>Proceso</b>
+            </th>
+            <td mat-cell *matCellDef="let element" class="cell">
+              {{ element.proceso }}
+            </td>
+          </ng-container>
+
+          <!-- Dependencia Column -->
+          <ng-container matColumnDef="dependencia">
+            <th mat-header-cell *matHeaderCellDef class="header">
+              <b>Dependencia</b>
+            </th>
+            <td mat-cell *matCellDef="let element" class="cell">
+              {{ element.dependencia }}
             </td>
           </ng-container>
 
@@ -152,7 +187,7 @@
             color="primary"
             (click)="descargarArchivoDescargueMasivo()"
           >
-            <mat-icon>file_download</mat-icon> Descargue Masivo
+            <mat-icon>file_download</mat-icon> Exportar tabla
           </button>
         </div>
         <ng-template #botonesAcciones>
@@ -173,14 +208,6 @@
               (click)="subirArchivoCargueMasivo()"
             >
               <mat-icon>file_upload</mat-icon> Cargue Masivo
-            </button>
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="descargarArchivoDescargueMasivo()"
-            >
-              <mat-icon>file_download</mat-icon> Descargue Masivo
             </button>
             <button
               class="mx-2"

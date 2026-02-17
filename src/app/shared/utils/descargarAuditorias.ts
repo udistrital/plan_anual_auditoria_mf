@@ -8,7 +8,7 @@ const MESES_ARCHIVO =
     ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
 /** Headers for the Excel file */
-const HEADERS = ['ID', 'Auditoria', 'Tipo de Evaluación', ...MESES_ARCHIVO];
+const HEADERS = ['ID', 'Auditoria', 'Tipo de Evaluación', 'Macroproceso', 'Proceso', 'Dependencia', ...MESES_ARCHIVO];
 
 /** Interface representing an audit entry */
 interface Auditoria {
@@ -16,6 +16,12 @@ interface Auditoria {
   auditoria: string;
   /** The type of evaluation for the audit */
   tipoEvaluacion: string;
+  /** The macroprocess name */
+  macroproceso: string;
+  /** The process name */
+  proceso: string;
+  /** The dependency name */
+  dependencia: string;
   /** The cronogram string representing scheduled months */
   cronograma: string;
   /** The current status of the audit */
@@ -74,6 +80,12 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
     [HEADERS[1]]: dataSource.map(a => a.auditoria),
     // Tipo de Evaluación
     [HEADERS[2]]: dataSource.map(a => a.tipoEvaluacion),
+    // Macroproceso
+    [HEADERS[3]]: dataSource.map(a => a.macroproceso || ''),
+    // Proceso
+    [HEADERS[4]]: dataSource.map(a => a.proceso || ''),
+    // Dependencia
+    [HEADERS[5]]: dataSource.map(a => a.dependencia || ''),
   };
 
   // 2. Transform cronograma into month columns
@@ -87,13 +99,12 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
 
   data = { ...data, ...mesesData };
 
-  // Create final array of arrays for Excel
-  const headers = Object.keys(data);
+  // Create final array of objects maintaining HEADERS order
   const numRows = dataSource.length;
   let finalData: Array<object> = [];
   for (let i = 0; i < numRows; i++) {
     let row: {[key: string]: string} = {};
-    headers.forEach(header => {
+    HEADERS.forEach(header => {
       row[header] = data[header][i];
     });
     finalData.push(row);
@@ -120,6 +131,24 @@ export async function descargarAuditorias(
     const inputBuffer = base64ToArrayBuffer(base64File);
     await workbook.xlsx.load(inputBuffer);
     const worksheet = workbook.worksheets[0];
+
+    // Insert 3 new columns after "Tipo de Evaluación" (column 3)
+    worksheet.spliceColumns(4, 0, [], [], []);
+
+    // Update header row with new column names
+    const headerRow = worksheet.getRow(1);
+    headerRow.getCell(4).value = 'Macroproceso';
+    headerRow.getCell(5).value = 'Proceso';
+    headerRow.getCell(6).value = 'Dependencia';
+    
+    // Copy style from adjacent header cell
+    const styleReference = headerRow.getCell(3);
+    [4, 5, 6].forEach(colIdx => {
+      const cell = headerRow.getCell(colIdx);
+      cell.style = styleReference.style;
+      cell.border = styleReference.border;
+    });
+    headerRow.commit();
 
     // Prepare to write data starting from row 2, skipping header row
     const rows = dataSourceToExcelData(dataSource);
