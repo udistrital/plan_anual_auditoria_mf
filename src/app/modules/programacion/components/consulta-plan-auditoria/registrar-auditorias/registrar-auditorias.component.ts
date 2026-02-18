@@ -110,7 +110,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
             procesoId: item.proceso_id ?? 0,
             dependencia: item.dependencia_nombre ?? "Sin Dependencia",
             dependenciaId: item.dependencia_id ?? 0,
-            cronograma: this.procesarCronograma(item.cronograma_id, item.cronograma),
+            cronograma: item.cronograma ?? "Sin Cronograma",
             cronogramaId: item.cronograma_id ?? [],
             estado: item.estado_nombre ?? "Sin estado",
           }));
@@ -126,13 +126,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
         this.alertaService.showErrorAlert("Error al cargar las auditorías");
       }
     );
-  }
-
-  procesarCronograma(cronogramaIds: number[], cronogramaNombre: string): string {
-    if (Array.isArray(cronogramaIds) && cronogramaIds.length === 12) {
-      return 'Todos';
-    }
-    return cronogramaNombre ?? "Sin Cronograma";
   }
 
   aplicarOrdenamiento(): void {
@@ -156,14 +149,20 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async obtenerEstadoActual(): Promise<void> {
     try {
+      await this.rolService.cargarRoles();
+      this.roles = this.rolService.getRoles();
+      
       const response = await this.planAnualAuditoriaService
         .get(`estado?query=plan_auditoria_id:${this.id},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
       this.estadoIdActual = estadoActual?.estado_id || null;
 
-      await this.rolService.cargarRoles();
-      this.roles = this.rolService.getRoles();
+      // Si no hay estado, asumir que está en borrador
+      if (this.estadoIdActual === null) {
+        console.warn('Plan sin estado asignado, asumiendo estado EN_BORRADOR');
+        this.estadoIdActual = environment.PLAN_ESTADO.EN_BORRADOR_ID;
+      }
 
       const esAuditorExperto = this.roles.includes('AUDITOR_EXPERTO');
       const enRevisionJefe = this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
