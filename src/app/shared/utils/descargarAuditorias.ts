@@ -135,19 +135,32 @@ export async function descargarAuditorias(
     // Insert 3 new columns after "Tipo de Evaluación" (column 3)
     worksheet.spliceColumns(4, 0, [], [], []);
 
+    // Apply styles to all rows for the new columns
+    const totalRows = worksheet.rowCount;
+    for (let rowNum = 1; rowNum <= totalRows; rowNum++) {
+      const row = worksheet.getRow(rowNum);
+      const styleReference = row.getCell(3);
+      
+      [4, 5, 6].forEach(colIdx => {
+        const cell = row.getCell(colIdx);
+        cell.font = styleReference.font;
+        cell.alignment = styleReference.alignment;
+        cell.fill = styleReference.fill;
+        cell.border = {
+          top: styleReference.border?.top,
+          left: styleReference.border?.left,
+          bottom: styleReference.border?.bottom,
+          right: styleReference.border?.right
+        };
+      });
+      row.commit();
+    }
+
     // Update header row with new column names
     const headerRow = worksheet.getRow(1);
     headerRow.getCell(4).value = 'Macroproceso';
     headerRow.getCell(5).value = 'Proceso';
     headerRow.getCell(6).value = 'Dependencia';
-    
-    // Copy style from adjacent header cell
-    const styleReference = headerRow.getCell(3);
-    [4, 5, 6].forEach(colIdx => {
-      const cell = headerRow.getCell(colIdx);
-      cell.style = styleReference.style;
-      cell.border = styleReference.border;
-    });
     headerRow.commit();
 
     // Prepare to write data starting from row 2, skipping header row
