@@ -81,7 +81,11 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.cargarProcesos();
     this.inicializarBusquedaDependencias();
     this.cargarDependenciaInicial();
-    this.cargarMeses();
+    this.cargarMeses(() => {
+      if (this.isEditMode) {
+        this.verificarTodosMeses();
+      }
+    });
 
     // When the macroproceso changes, clear the proceso selection and reload procesos.
     this.auditoriaForm.get("macroproceso").valueChanges.subscribe((valor: number) => {
@@ -233,6 +237,17 @@ export class AddAuditoriaModalComponent implements OnInit {
     return dependencia && dependencia.Nombre ? dependencia.Nombre : '';
   }
 
+  verificarTodosMeses(): void {
+    const cronogramaIds = this.auditoriaForm.get('cronogramaActividades').value;
+    if (Array.isArray(cronogramaIds) && cronogramaIds.length === this.meses.length) {
+      const todosLosIds = this.meses.map(mes => mes.Id);
+      const tieneTodasLosIds = todosLosIds.every(id => cronogramaIds.includes(id));
+      if (tieneTodasLosIds) {
+        this.auditoriaForm.get('cronogramaActividades').setValue([this.TODOS]);
+      }
+    }
+  }
+
   asignarTodos(): void {
     const seleccion = [this.TODOS];
     this.auditoriaForm.get("cronogramaActividades").setValue(seleccion);
@@ -262,6 +277,11 @@ export class AddAuditoriaModalComponent implements OnInit {
         )
         .then((result) => {
           if (result.isConfirmed) {
+            const cronogramaSeleccionado = this.auditoriaForm.value.cronogramaActividades;
+            const cronogramaIds = cronogramaSeleccionado.includes(this.TODOS)
+              ? this.meses.map(mes => mes.Id)
+              : cronogramaSeleccionado;
+
             const formData = {
               plan_auditoria_id: this.data.planAuditoriaId,
               titulo: this.auditoriaForm.value.tituloActividad,
@@ -269,7 +289,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               macroproceso_id: this.auditoriaForm.value.macroproceso,
               proceso_id: this.auditoriaForm.value.proceso,
               dependencia_id: this.auditoriaForm.value.dependencia?.Id || this.auditoriaForm.value.dependencia,
-              cronograma_id: this.auditoriaForm.value.cronogramaActividades,
+              cronograma_id: cronogramaIds,
               vigencia_id: this.data.vigenciaId
             };
 
