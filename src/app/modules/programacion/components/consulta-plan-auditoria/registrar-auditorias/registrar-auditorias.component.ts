@@ -39,7 +39,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
   modoEditar: boolean = true;
-  vigenciaId: number = 6619;
+  vigenciaId: number = 0;
   idMatriz: any = null;
   base64Matriz: any = null;
   ordenSeleccionado: string = '';
@@ -67,7 +67,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
-    this.vigenciaNombre = localStorage.getItem('vigencia') || '';
+    const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
+    this.vigenciaId = vigencia?.Id || 0;
+    this.vigenciaNombre = vigencia?.Nombre || '';
+    localStorage.removeItem('vigencia');
     await this.obtenerEstadoActual();
     this.cargarAuditorias();
     try {
@@ -110,10 +113,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
             cronogramaId: item.cronograma_id ?? [],
             estado: item.estado_nombre ?? "Sin estado",
           }));
-          
-          if (res.Data[0].vigencia_id) {
-            this.vigenciaId = res.Data[0].vigencia_id;
-          }
           
           this.actualizarColumnas();
         }
