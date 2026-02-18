@@ -3,13 +3,30 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  Validators
+} from "@angular/forms";
 import { ParametrosService } from "src/app/core/services/parametros.service";
+import { OikosService } from "src/app/core/services/oikos.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from 'src/environments/environment';
+import {
+  of,
+  map,
+  forkJoin,
+  startWith,
+  switchMap,
+  catchError,
+  Observable,
+  debounceTime,
+  distinctUntilChanged,
+} from 'rxjs';
 
 @Component({
   selector: "app-formulario-auditoria-especial",
@@ -23,6 +40,9 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   auditoresSeleccionados: FormArray<FormGroup>;
   auditoresAsignados: Auditor[] = [];
   meses: Parametro[] = [];
+  macroprocesos: Parametro[] = [];
+  procesos: Parametro[] = [];
+  filteredDependencias!: Observable<Parametro[]>;
   TODOS = "Todos";
   isEditMode = false;  
   auditorEliminar: AuditorEliminar | null = null;
@@ -31,6 +51,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
+    private oikosSevice: OikosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     public dialogRef: MatDialogRef<FormularioAuditoriaEspecialComponent>,
@@ -38,20 +59,123 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { auditoria?: Auditoria, usuarioRol: string, usuarioId: number }
   ) {
     this.auditoresSeleccionados = this.fb.array<FormGroup>([]);
+    this.form = this.fb.group({
+      tituloAuditoria: [ "", Validators.required],
+      tipoEvaluacion: [[], Validators.required],
+      macroproceso: [[], Validators.required],
+      proceso: [[], Validators.required],
+      dependencia: [[], Validators.required],
+      cronogramaActividades: [[], Validators.required],
+      auditoresSeleccionados: this.auditoresSeleccionados,
+    });
   }
 
   ngOnInit(): void {
     this.isEditMode = !!this.data.auditoria;
-    this.form = this.fb.group({
-      tituloAuditoria: [this.data.auditoria?.auditoria || ""],
-      tipoEvaluacion: [this.data.auditoria?.tipoEvaluacionId || []],
-      cronogramaActividades: [this.data.auditoria?.cronogramaId || []],
-      auditoresSeleccionados: this.auditoresSeleccionados,
-      auditor: [""],
+    
+    forkJoin<void[]>([
+      of(this.CargarEvaluaciones()),
+      of(this.cargarMacroprocesos()),
+      of(this.inicializarBusquedaDependencias()),
+      of(this.cargarMeses()),
+      of(this.cargarAuditores())
+    ]).subscribe(() => {
+      this.form.patchValue({
+        tituloAuditoria: this.data.auditoria?.auditoria || "",
+        tipoEvaluacion: this.data.auditoria?.tipoEvaluacionId || [],
+        macroproceso: this.data.auditoria?.macroprocesoId || [],
+        proceso: this.data.auditoria?.procesoId || [],
+        dependencia: this.data.auditoria?.dependenciaId || [],
+        cronogramaActividades: this.data.auditoria?.cronogramaId || [],
+      });
+      this.cargarDependenciaInicial();
+      this.cargarProcesos();
+    })
+
+    this.form.get("macroproceso").valueChanges.subscribe((valor: number) => {
+      this.form.patchValue({ proceso: [] });
+      this.procesos = [];
+      this.cargarProcesos();
     });
-    this.CargarEvaluaciones();
-    this.cargarMeses();
-    this.cargarAuditores();
+  }
+
+  cargarMacroprocesos() {
+    const macroprocesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.TIPO_PARAMETRO_ID;
+    this.parametrosService
+      .get(`parametro?query=TipoParametroId:${macroprocesos_id}&limit=0`)
+      .subscribe((res) => {
+        if (res && res.Data) {
+          this.macroprocesos = res.Data;
+        }
+      });
+  }
+
+  cargarProcesos() {
+    const macroprocesoId = this.form.get("macroproceso").value;
+    if ((macroprocesoId == false || macroprocesoId == null) && macroprocesoId !== 0)
+      return;
+
+    const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
+    this.parametrosService
+      .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId:${macroprocesoId}&limit=0`)
+      .subscribe((res) => {
+        if (res && res.Data) {
+          this.procesos = res.Data;
+        }
+      });
+  }
+
+  cargarDependenciaInicial(): void {
+    const dependenciaId = this.data.auditoria?.dependenciaId;
+    if (!this.isEditMode || !dependenciaId) {
+      return;
+    }
+
+    this.oikosSevice
+      .get(`dependencia?query=Id:${dependenciaId}&limit=1&fields=Id,Nombre`)
+      .pipe(catchError(() => of([])))
+      .subscribe((res: Parametro[]) => {
+        if (res && res.length) {
+          this.form.patchValue({ dependencia: res[0] });
+        }
+      });
+  }
+
+  inicializarBusquedaDependencias(): void {
+    const dependenciaControl = this.form.get("dependencia");
+    this.filteredDependencias = dependenciaControl.valueChanges.pipe(
+      startWith(dependenciaControl.value || ""),
+      map((value: string | Parametro) =>
+        typeof value === "string" ? value : value?.Nombre || ""
+      ),
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((value: string) => this.buscarDependencias(value))
+    );
+  }
+
+  buscarDependencias(value: string): Observable<Parametro[]> {
+    const nombre = (value || "").trim();
+    return this.oikosSevice
+      .get(
+        `dependencia?query=Activo:true,Nombre:${encodeURIComponent(
+          nombre
+        )}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
+      )
+      .pipe(
+        // Filter out dependencies with empty names
+        map((res: any) => res.filter(
+          (dep: Parametro) => dep.Nombre.length > 0
+        )),
+        catchError((error) => {
+          console.error("Error al buscar dependencias", error);
+          return of([])
+        })
+      );
+  }
+
+  displayFnDependencia(dependencia: Parametro): string {
+    return dependencia && dependencia.Nombre ? dependencia.Nombre : '';
   }
 
   inicializarAuditoresSeleccionados(): void {
@@ -142,8 +266,9 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   }
 
   cargarMeses() {
+    const meses_id = environment.MESES.TIPO_PARAMETRO_ID;
     this.parametrosService
-      .get("parametro?query=TipoParametroId:139&limit=0")
+      .get(`parametro?query=TipoParametroId:${meses_id}&limit=0`)
       .subscribe((res) => {
         if (res !== null) {
           this.meses = res.Data;
@@ -152,8 +277,9 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   }
 
   CargarEvaluaciones() {
+    const eval_id = environment.TIPO_EVALUACION.TIPO_PARAMETRO_ID;
     this.parametrosService
-      .get("parametro?query=TipoParametroId:136&limit=0")
+      .get(`parametro?query=TipoParametroId:${eval_id}&limit=0`)
       .subscribe((res) => {
         if (res !== null) {
           this.evaluaciones = res.Data;
@@ -295,6 +421,9 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
               titulo: this.form.value.tituloAuditoria,
               tipo_evaluacion_id: this.form.value.tipoEvaluacion,
               cronograma_id: this.form.value.cronogramaActividades,
+              macroproceso_id: this.form.value.macroproceso,
+              proceso_id: this.form.value.proceso,
+              dependencia_id: this.form.value.dependencia.Id,
               //auditores: auditoresSeleccionados
             };
 
@@ -340,12 +469,6 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
         });
     } else {
       this.form.markAllAsTouched();
-    }
-  }
-
-  guardar() {
-    if (this.form.valid) {
-      this.dialogRef.close(this.form.value);
     }
   }
 }

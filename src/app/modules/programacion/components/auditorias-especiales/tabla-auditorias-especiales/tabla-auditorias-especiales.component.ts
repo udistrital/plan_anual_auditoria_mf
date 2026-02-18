@@ -62,6 +62,9 @@ export class TablaAuditoriasEspecialesComponent {
               auditores: [],
               cronograma: item.cronograma ?? "Sin Cronograma",
               cronogramaId: item.cronograma_id ?? 0,
+              macroprocesoId: item.macroproceso_id ?? 0,
+              procesoId: item.proceso_id ?? 0,
+              dependenciaId: item.dependencia_id ?? 0,
               estado: item.estado_nombre ?? "Sin estado",
             })
           );
