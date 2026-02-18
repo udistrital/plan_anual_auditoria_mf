@@ -36,8 +36,10 @@
               <mat-icon svgIcon="excel"></mat-icon>Plantilla Cargue Masivo
             </button>
             <button
-              mat-raised-button
+              class="mx-2"
+              mat-stroked-button
               color="primary"
+              style="border: 1px solid var(--md-primary-500) !important"
               (click)="descargarArchivoDescargueMasivo()"
             >
               <mat-icon>file_download</mat-icon> Exportar tabla
@@ -183,8 +185,9 @@
           </button>
           <button
             class="mx-2"
-            mat-raised-button
+            mat-stroked-button
             color="primary"
+            style="border: 1px solid var(--md-primary-500)"
             (click)="descargarArchivoDescargueMasivo()"
           >
             <mat-icon>file_download</mat-icon> Exportar tabla
