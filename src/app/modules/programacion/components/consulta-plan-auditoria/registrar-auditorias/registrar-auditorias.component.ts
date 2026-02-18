@@ -148,21 +148,31 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async obtenerEstadoActual(): Promise<void> {
     try {
+      await this.rolService.cargarRoles();
+      this.roles = this.rolService.getRoles();
+      
       const response = await this.planAnualAuditoriaService
         .get(`estado?query=plan_auditoria_id:${this.id},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
       this.estadoIdActual = estadoActual?.estado_id || null;
 
-      this.modoEditar =
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID ||
-        this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO;
+      // Si no hay estado, asumir que está en borrador
+      if (this.estadoIdActual === null) {
+        console.warn('Plan sin estado asignado, asumiendo estado EN_BORRADOR');
+        this.estadoIdActual = environment.PLAN_ESTADO.EN_BORRADOR_ID;
+      }
 
-      await this.rolService.cargarRoles();
-      this.roles = this.rolService.getRoles();
+      const esAuditorExperto = this.roles.includes('AUDITOR_EXPERTO');
+      const enRevisionJefe = this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
+
+      this.modoEditar =
+        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) ||
+        (enRevisionJefe && !esAuditorExperto);
+
       this.mostrarOrdenamiento = 
-        this.roles.includes('AUDITOR_EXPERTO') && 
+        esAuditorExperto && 
         this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
