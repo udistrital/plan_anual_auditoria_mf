@@ -87,6 +87,16 @@ export const accionesPlaneacion: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   [environment.ROL.ADMIN]: {
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
+      "Editar Auditoría",
+      "Ver Documento",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
+      "Editar Auditoría",
+      "Ver Documento",
+      "Enviar a Aprobación por Jefe",
+    ],
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Editar Auditoría",
       "Ver Documento",
