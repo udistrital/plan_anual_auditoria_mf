@@ -308,8 +308,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   agregarAuditoria(auditoria?: Auditoria) {
-    // const nombreFormulario = 'sisifo_form2';
-    // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: "1000px",
       data: {
@@ -331,8 +329,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   // Editar auditoría
   editarAuditoria(auditoria: Auditoria) {
-    // const nombreFormulario = 'sisifo_form2';
-    // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
     this.agregarAuditoria(auditoria);
   }
 
@@ -350,7 +346,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
         }
       },
       (error) => {
-        console.log("-----------", error);
         this.alertaService.showErrorAlert("Error al cargar el PDF");
       }
     );
