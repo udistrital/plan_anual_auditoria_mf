@@ -20,7 +20,7 @@ export const environment = {
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
-  PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
+  PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
