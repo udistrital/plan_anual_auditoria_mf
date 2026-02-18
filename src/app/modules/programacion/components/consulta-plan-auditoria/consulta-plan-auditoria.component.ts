@@ -139,6 +139,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
         ).map((item: any) => {
           const estadoId = item.estado?.estado_id;
+          const vigenciaId = item.vigencia_id;
           let acciones = this.getAccionesPorRolYEstado(estadoId);
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
@@ -153,6 +154,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             colorEstado: this.escogerEmojiColorEstado(item.estado?.estado_nombre ?? "Borrador"),
             estado: item.estado?.estado_nombre ?? "Borrador",
             estadoId,
+            vigenciaId,
             acciones,
           };
         });
@@ -285,7 +287,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   editarActividades(element: any) {
-    localStorage.setItem('vigencia', element.vigencia);
+    localStorage.setItem('vigencia', JSON.stringify({Id: element.vigenciaId, Nombre: element.vigencia}));
     this.router.navigate([
       `/programacion/plan-auditoria/registrar-auditorias/`,
       element.id,
