@@ -262,6 +262,11 @@ export class AddAuditoriaModalComponent implements OnInit {
         )
         .then((result) => {
           if (result.isConfirmed) {
+            const cronogramaSeleccionado = this.auditoriaForm.value.cronogramaActividades;
+            const cronogramaIds = cronogramaSeleccionado.includes(this.TODOS)
+              ? this.meses.map(mes => mes.Id)
+              : cronogramaSeleccionado;
+
             const formData = {
               plan_auditoria_id: this.data.planAuditoriaId,
               titulo: this.auditoriaForm.value.tituloActividad,
@@ -269,7 +274,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               macroproceso_id: this.auditoriaForm.value.macroproceso,
               proceso_id: this.auditoriaForm.value.proceso,
               dependencia_id: this.auditoriaForm.value.dependencia?.Id || this.auditoriaForm.value.dependencia,
-              cronograma_id: this.auditoriaForm.value.cronogramaActividades,
+              cronograma_id: cronogramaIds,
               vigencia_id: this.data.vigenciaId
             };
 
