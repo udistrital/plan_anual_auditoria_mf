@@ -13,7 +13,8 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
-import descargarAuditorias from "src/app/shared/utils/descargarAuditorias";
+import { descargarAuditorias, setupValidationDomains } from "src/app/shared/utils/descargarAuditorias";
+import base64ToArrayBuffer from "src/app/shared/utils/base64ToArrayBuffer";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -206,17 +207,32 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
+      this.spinnerService.show();
+
       const base64File = await this.nuxeoService.obtenerPorUUID(
         environment.PLANTILLA_CARGUE_MASIVO
       );
-      await this.descargaService.descargarArchivo(
-        base64File,
+
+      const headersValidacionOpciones = await this.prepararHeadersValidacion();
+      const arrayBufferConValidacion =
+          await setupValidationDomains(
+            headersValidacionOpciones,
+            [ { sheetIndex: 0 }, { sheetIndex: 1 }, ],
+            base64ToArrayBuffer(base64File)
+          );
+
+      await this.descargaService.descargarArchivoBuffer(
+        arrayBufferConValidacion,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "plantilla"
       );
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error al descargar la plantilla:", error);
       this.alertaService.showErrorAlert("Error al descargar la plantilla");
+    }
+    finally {
+      this.spinnerService.hide();
     }
   }
 
@@ -469,31 +485,26 @@ export class RegistrarAuditoriasComponent implements OnInit {
     try {
       this.spinnerService.show();
 
-      // Types of parameters to load from Parametros API for validation in Excel
-      const tiposDeParametros = [
-        { nombre: "Tipo de Evaluación", id: environment.TIPO_EVALUACION.TIPO_PARAMETRO_ID },
-        { nombre: "Macroproceso", id: environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.TIPO_PARAMETRO_ID },
-        { nombre: "Proceso", id: environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID },
-      ];
-
-      // Load options for each parameter type and for Dependencias.
-      let headersValidacionOpciones: { [header: string]: string[] } = {};
-      for (const tipo of tiposDeParametros)
-        headersValidacionOpciones[tipo.nombre] = await this.cargarOpciones(tipo.nombre, tipo.id);
-      headersValidacionOpciones["Dependencia"] = await this.cargarDependencias();
-
       const plantillaNuxeoBase64 = await this.nuxeoService.obtenerPorUUID(
         environment.PLANTILLA_CARGUE_MASIVO
       );
-
-      const xlsxDataBuffer = await descargarAuditorias(
-                              this.dataSource.data,
-                              plantillaNuxeoBase64,
-                              headersValidacionOpciones,
-                            );
+      
+      const xlsxDataBuffer =
+        await descargarAuditorias(
+          this.dataSource.data,
+          base64ToArrayBuffer(plantillaNuxeoBase64)
+        );
+      
+      const headersValidacionOpciones = await this.prepararHeadersValidacion();
+      const xsxlDataBufferConValidacion =
+         await setupValidationDomains(
+            headersValidacionOpciones,
+            [ { sheetIndex: 0, length: this.dataSource.data.length } ],
+            xlsxDataBuffer
+          );
 
       await this.descargaService.descargarArchivoBuffer(
-        xlsxDataBuffer,
+        xsxlDataBufferConValidacion,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         environment.NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS,
       );
@@ -505,6 +516,27 @@ export class RegistrarAuditoriasComponent implements OnInit {
     finally {
       this.spinnerService.hide();
     }
+  }
+
+  /**
+   * Prepares the validation domains for the Excel file by loading the necessary options from the Parametros API and Oikos API.
+   * @returns A promise that resolves with an object mapping Excel headers to their corresponding validation options.
+   */
+  async prepararHeadersValidacion(): Promise<{ [header: string]: string[] }> {
+    // Types of parameters to load from Parametros API for validation in Excel
+    const tiposDeParametros = [
+      { nombre: "Tipo de Evaluación", id: environment.TIPO_EVALUACION.TIPO_PARAMETRO_ID },
+      { nombre: "Macroproceso", id: environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.TIPO_PARAMETRO_ID },
+      { nombre: "Proceso", id: environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID },
+    ];
+
+    // Load options for each parameter type and for Dependencias.
+    let headersValidacionOpciones: { [header: string]: string[] } = {};
+    for (const tipo of tiposDeParametros)
+      headersValidacionOpciones[tipo.nombre] = await this.cargarOpciones(tipo.nombre, tipo.id);
+    headersValidacionOpciones["Dependencia"] = await this.cargarDependencias();
+
+    return headersValidacionOpciones;
   }
 
 }
