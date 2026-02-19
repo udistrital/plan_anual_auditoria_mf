@@ -1,5 +1,4 @@
 import base64ToArrayBuffer from './base64ToArrayBuffer';
-import { ParametrosService } from 'src/app/core/services/parametros.service';
 
 /** The ExcelJS library for handling Excel files */
 const ExcelJS = require('exceljs');
@@ -125,20 +124,13 @@ export async function descargarAuditorias(
     headersValidacion: { [header: string]: string[] }
 ): Promise<ArrayBuffer> {
   try{
-    console.debug('headersValidacion in descargarAuditorias:', headersValidacion);
+    // --- Audit data injection into template ---
 
     // Load the template workbook from the Base64 string and select the first worksheet
     const workbook = new ExcelJS.Workbook();
     const inputBuffer = base64ToArrayBuffer(base64File);
     await workbook.xlsx.load(inputBuffer);
     const worksheet = workbook.worksheets[0];
-
-    // Update header row with new column names
-    const headerRow = worksheet.getRow(1);
-    headerRow.getCell(4).value = 'Macroproceso';
-    headerRow.getCell(5).value = 'Proceso';
-    headerRow.getCell(6).value = 'Dependencia';
-    headerRow.commit();
 
     // Prepare to write data starting from row 2, skipping header row
     const rows = dataSourceToExcelData(dataSource);
@@ -170,9 +162,63 @@ export async function descargarAuditorias(
       targetRow.commit();
     }
 
+    
+    // --- Validation setup ---
+    console.debug('headersValidacion in descargarAuditorias:', headersValidacion);
+
+    // TODO: Temporarily remove empty string values from test environment
+    Object.keys(headersValidacion).forEach(header => {
+      headersValidacion[header] =
+          headersValidacion[header].filter(value => value !== '');
+    });
+
+    // Calculate the maximum length of the validation domains to determine how many rows to fill in the 'origen' sheet
+    let maxDomainLength = 0;
+    Object.keys(headersValidacion).forEach(header => {
+      const domainLength = headersValidacion[header].length;
+      if (domainLength > maxDomainLength)
+        maxDomainLength = domainLength;
+    });
+
+    // Update the domain sheet with the valid options for each header that requires validation
+    const domainSheet = workbook.getWorksheet('origen');
+    const columnOffset = 2; // ! because A is empty
+    const rowOffset = 3;    // ! because row 1 is empty and row 2 has the header titles
+    for (let i = 1 + rowOffset; i <= maxDomainLength + rowOffset; i++) {
+      const currentRow = domainSheet.getRow(i);
+      Object.keys(headersValidacion).forEach((header, index) => {
+        const headerColIdx =  index + columnOffset;
+        const currentCell = currentRow.getCell(headerColIdx);
+        currentCell.value = headersValidacion[header][i - rowOffset] ?? '';
+      });
+      currentRow.commit();
+    }
+
+    // Calculate the range of valid options for each header to be used in data validation
+    let validationRanges: { 
+      [header: string]: {
+        colIdx: number;
+        fromRowIdx: number;
+        toRowIdx: number;
+      }
+    } = {};
+
+    Object.keys(headersValidacion).forEach((header, index) => {
+      validationRanges[header] = {
+        colIdx: index + columnOffset,
+        fromRowIdx: rowOffset,
+        toRowIdx: headersValidacion[header].length - 1 + rowOffset,
+      };
+    });
+
     // Add back data validation for each header that requires it, applying to all rows up to maxRowIndex
     Object.keys(headersValidacion).forEach(header => {
       const headerColIdx = HEADERS.indexOf(header) + 1;
+      const originColumnLetter = String.fromCharCode(64 + validationRanges[header].colIdx);
+      const originFirstRow = validationRanges[header].fromRowIdx;
+      const originLastRow = validationRanges[header].toRowIdx;
+      const formulae = `origen!$${originColumnLetter}$${originFirstRow}:$${originColumnLetter}$${originLastRow}`;
+
       try {
         worksheet
           .getColumn(headerColIdx)
@@ -181,7 +227,7 @@ export async function descargarAuditorias(
               cell.dataValidation = {
                 type: 'list',
                 allowBlank: true,
-                formulae: [`"${headersValidacion[header].join(',')}"`],
+                formulae: [formulae],
                 showErrorMessage: true,
                 errorStyle: 'error',
               }
@@ -192,16 +238,14 @@ export async function descargarAuditorias(
       }
     });
 
-    // Remove other worksheets if any
-    workbook.worksheets.forEach((ws: any) => {
-      if (ws !== worksheet) {
-        workbook.removeWorksheet(ws.id);
-      }
-    });
+    // Remove example worksheet
+    const exampleSheet = workbook.getWorksheet('ejemplo');
+    if (exampleSheet)
+      workbook.removeWorksheet(exampleSheet.id);
 
     return await workbook.xlsx.writeBuffer();
-
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error al generar el archivo Excel:', error);
     throw error;
   }

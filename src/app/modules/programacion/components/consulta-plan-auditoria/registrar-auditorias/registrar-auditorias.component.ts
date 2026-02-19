@@ -486,15 +486,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
         environment.PLANTILLA_CARGUE_MASIVO
       );
 
-      const dataSource = this.dataSource.data.map(a => ({
-          ...a,
-          // TODO: load the actual value of these fields
-          macroproceso: '',
-          proceso: '',
-          dependencia: '',
-        }));
       const xlsxDataBuffer = await descargarAuditorias(
-                              dataSource,
+                              this.dataSource.data,
                               plantillaNuxeoBase64,
                               headersValidacionOpciones,
                             );
