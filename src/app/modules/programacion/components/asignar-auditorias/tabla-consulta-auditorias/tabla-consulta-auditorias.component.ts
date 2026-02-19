@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
+import { Component, Input, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
@@ -22,9 +22,8 @@ export class TablaConsultaAuditoriasComponent {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   auditoriasPorVigencia: Auditoria[] = [];
-  auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
+  auditoriasDataSource: MatTableDataSource<Auditoria> = new MatTableDataSource<Auditoria>([]);
   auditoriasContructorTabla: any;
-  banderaTablaAuditoriasInternas: boolean = false;
   tablaColumnas: any;
   totalRegistros: number = 0;
   pageSize: number = 5;
@@ -32,10 +31,10 @@ export class TablaConsultaAuditoriasComponent {
   itemsPerPage: number[] = [5, 10, 20];
   permiso: boolean = false;
   usuarioRol: string = "";
+  planAuditoriaId: string = "";
 
   constructor(
     private readonly alertaService: AlertService,
-    private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly rolService: RolService
@@ -43,6 +42,7 @@ export class TablaConsultaAuditoriasComponent {
 
   ngOnInit() {
     this.setPermisos();
+    this.construirTabla();
   }
 
   setPermisos() {
@@ -54,46 +54,92 @@ export class TablaConsultaAuditoriasComponent {
     )[0];
   }
 
+  private verificarPAAAprobado(vigenciaId: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.planAuditoriaMid
+        .get(
+          `plan-auditoria?query=vigencia_id:${vigenciaId},activo:true`
+        )
+        .subscribe({
+          next: (res) => {
+            const plan_estado = res.Data[0]?.estado.estado_id;
+            const tienePAAAprobado = plan_estado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID;
+            this.planAuditoriaId = tienePAAAprobado ? res.Data[0]?._id : "";
+            resolve(tienePAAAprobado);
+          },
+          error: (error) => {
+            console.error("Error al verificar PAA aprobado:", error);
+            reject(error);
+          }
+        });
+    });
+  }
+
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
   ): void {
     this.auditoriasPorVigencia = [];
+    this.auditoriasDataSource.data = [];
 
-    const auditorias$ = this.planAuditoriaMid.get(
-      `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}&auditores`
-    );
-
-    auditorias$.subscribe({
-      next: (res) => {
-        const auditorias: Auditoria[] = Array.isArray(res.Data) ? res.Data : [];
-        if (auditorias.length === 0) {
-          this.banderaTablaAuditoriasInternas = false;
-          this.auditoriasDataSource.data = [];
+    // Primero verificar si hay PAAs aprobados
+    this.verificarPAAAprobado(vigenciaId)
+      .then((tienePAAAprobado) => {
+        if (!tienePAAAprobado) {
+          // No hay PAA aprobado, mostrar modal
           this.alertaService.showAlert(
-            "No hay auditorías registradas",
-            "Actualmente no hay auditorías registradas para la vigencia seleccionada."
+            "Sin plan de auditorias aprobado",
+            "No se ha encontrado un plan de auditorías aprobado para la vigencia seleccionada."
           );
           return;
         }
 
-        auditorias.forEach((auditoria) => {
-          auditoria.auditores = Array.isArray(auditoria.auditores)
-            ? auditoria.auditores
-            : [];
-        });
+        // Si hay PAA aprobado, consultar auditorías que NO estén en borrador
+        const auditorias$ = this.planAuditoriaMid.get(
+          `auditoria?query=activo:true,plan_auditoria_id:${this.planAuditoriaId},` +
+          `estado_id__ne:${environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID}&` +
+          `limit=${limit}&offset=${offset}&auditores`
+        );
 
-        this.auditoriasPorVigencia = auditorias;
-        this.totalRegistros = res.MetaData?.Count ?? 0;
-        this.banderaTablaAuditoriasInternas = true;
-        this.construirTabla();
-      },
-      error: (error) => {
-        console.error("Error al cargar auditorías:", error);
-        this.alertaService.showErrorAlert("Error al cargar las auditorías.");
-      }
-    });
+        auditorias$.subscribe({
+          next: (res) => {
+            const auditorias: Auditoria[] = Array.isArray(res.Data)
+              ? res.Data
+              : [];
+
+            if (auditorias.length === 0) {
+              // Hay PAA aprobado pero no hay auditorías en estado válido
+              this.alertaService.showAlert(
+                "Sin auditorias por asignar",
+                "No se han encontrado auditorías para asignación de auditores en la vigencia seleccionada."
+              );
+              return;
+            }
+
+            // Procesar auditorías
+            auditorias.forEach((auditoria) => {
+              auditoria.auditores = Array.isArray(auditoria.auditores)
+                ? auditoria.auditores
+                : [];
+            });
+
+            this.auditoriasPorVigencia = auditorias;
+            this.totalRegistros = res.MetaData.Count;
+            this.auditoriasDataSource.data = this.auditoriasPorVigencia;
+          },
+          error: (error) => {
+            console.error("Error al cargar auditorías:", error);
+            this.alertaService.showErrorAlert("Error al cargar las auditorías.");
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error al verificar PAA:", error);
+        this.alertaService.showErrorAlert(
+          "Error al verificar el Plan Anual de Auditoría."
+        );
+      });
   }
 
   construirTabla() {
@@ -107,17 +153,12 @@ export class TablaConsultaAuditoriasComponent {
       (column: any) => column.columnDef
     );
 
-    this.auditoriasDataSource = new MatTableDataSource(
-      this.auditoriasPorVigencia
-    );
-
     //si no hay paginador, se crea
     if (!this.paginator) {
       this.auditoriasDataSource.paginator = this.paginator;
       this.auditoriasDataSource.sort = this.sort;
     }
 
-    this.changeDetector.detectChanges();
   }
 
   manejarCambioPaginado(evento: PageEvent) {
@@ -126,7 +167,7 @@ export class TablaConsultaAuditoriasComponent {
     this.pageIndex = evento.pageIndex;
 
     const offset = this.pageIndex * this.pageSize;
-    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, offset);
+    this.listarAuditoriasPorVigencia(this.vigenciaId!, this.pageSize, offset);
     // Actualizar el paginador después de realizar la consulta
     this.paginator.length = this.totalRegistros;
     this.paginator.pageSize = this.pageSize;
@@ -134,7 +175,6 @@ export class TablaConsultaAuditoriasComponent {
   }
 
   agregarAuditor(auditoria?: Auditoria) {
-    console.log("Row: ", auditoria);
     const dialogRef = this.dialog.open(ModalAgregarAuditorComponent, {
       width: "1100px",
       data: {

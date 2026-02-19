@@ -15,7 +15,7 @@ import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
-import { accionesEjecucion } from "src/app/shared/utils/accionesPorRolYEstado";
+import { accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -24,6 +24,8 @@ import { accionesEjecucion } from "src/app/shared/utils/accionesPorRolYEstado";
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
+  @Input() role: any;
+  @Input() personaId: any;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -60,7 +62,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   setPermisos() {
-    if (this.rolService.mostrarAcciones(accionesEjecucion)) {
+    if (this.rolService.mostrarAcciones(accionesEjecucionPreliminar)) {
       this.mostrarAcciones = true;
     }
   }
@@ -68,13 +70,22 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0
+    offset: number = 0,
+    estadoId?: number
   ) {
     this.auditoriasPorVigencia = [];
+    
+    let query = `vigencia_id:${vigenciaId},activo:true`;
+    if (estadoId) {
+      query += `,estado_id:${estadoId}`;
+    }
+
+    const endpoint = this.role === 'auditor' && this.personaId
+      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}&estado_id=${estadoId || ''}`
+      : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+
     this.planAuditoriaMid
-      .get(
-        `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
-      )
+      .get(endpoint)
       .subscribe((res) => {
         // const auditorias: any[] = res.Data.map((auditoria: any) => {
         //   const estadoId = auditoria.estado?.estado_interno_id;
@@ -146,7 +157,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || [])
       )
     );
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
@@ -10,6 +10,7 @@ interface Hallazgo {
   subtema_id?: string;
   titulo: string;
   criterio: string;
+  activo?: boolean;
   descripcion: string;
   isNew?: boolean;
   isModified?: boolean;
@@ -18,6 +19,7 @@ interface Hallazgo {
 interface Subtema {
   _id?: string;
   tema_id?: string;
+  activo?: boolean;
   titulo: string;
   hallazgos: Hallazgo[];
   isNew?: boolean;
@@ -27,6 +29,7 @@ interface Subtema {
 interface Tema {
   _id?: string;
   informe_id?: string;
+  activo?: boolean;
   titulo: string;
   subtema: Subtema[];
   isNew?: boolean;
@@ -61,6 +64,10 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     this.aspectosForm = this.fb.group({
       temas: this.fb.array([]),
     });
+
+    if (this.informeId) {
+      this.cargarTemas();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -74,7 +81,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     if (!this.informeId) return;
 
     this.cargando = true;
-    this.planAnualAuditoriaService.get(`informe/${this.informeId}/tema`).subscribe({
+    this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
       next: (response: any) => {
         this.temasData = response?.Data || [];
         this.construirFormulario();
@@ -92,12 +99,21 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     const temasArray = this.fb.array([]);
 
     this.temasData.forEach((tema) => {
+      //Solo temas activos
+      if (!tema.activo) return;
+
       const subtemasArray = this.fb.array([]);
 
       (tema.subtema || []).forEach((subtema: any) => {
+        //Solo subtemas activos
+        if (!subtema.activo) return;
+
         const hallazgosArray = this.fb.array([]);
 
         (subtema.hallazgo || []).forEach((hallazgo: any) => {
+          //Solo hallazgos activos
+          if (!hallazgo.activo) return;
+
           hallazgosArray.push(this.fb.group({
             _id: [hallazgo._id || null],
             criterio: [hallazgo.criterio || '', Validators.required],
@@ -206,17 +222,15 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Elimina un subtema y sus hallazgos en cascada
   eliminarSubtema(temaIndex: number, subtemaIndex: number): void {
-    const tema = this.temas.at(temaIndex);
     const subtema = this.getSubtemas(temaIndex).at(subtemaIndex);
-    const temaId = tema.get('_id')?.value;
     const subtemaId = subtema.get('_id')?.value;
 
-    if (temaId && subtemaId) {
+    if (subtemaId) {
       this.alertaService.showConfirmAlert('¿Eliminar este subtema y todos sus hallazgos?')
         .then((confirmado) => {
           if (!confirmado.value) return;
 
-          this.planAnualAuditoriaService.delete(`tema/${temaId}/subtemas`, {id: subtemaId}).subscribe({
+          this.planAnualAuditoriaService.delete(`subtema`, {id: subtemaId}).subscribe({
             next: () => {
               this.getSubtemas(temaIndex).removeAt(subtemaIndex);
               this.alertaService.showAlert('Eliminado', 'El subtema ha sido eliminado correctamente');
@@ -235,19 +249,15 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Elimina un hallazgo
   eliminarHallazgo(temaIndex: number, subtemaIndex: number, hallazgoIndex: number): void {
-    const tema = this.temas.at(temaIndex);
-    const subtema = this.getSubtemas(temaIndex).at(subtemaIndex);
     const hallazgo = this.getHallazgos(temaIndex, subtemaIndex).at(hallazgoIndex);
-    const temaId = tema.get('_id')?.value;
-    const subtemaId = subtema.get('_id')?.value;
     const hallazgoId = hallazgo.get('_id')?.value;
 
-    if (temaId && subtemaId && hallazgoId) {
+    if (hallazgoId) {
       this.alertaService.showConfirmAlert('¿Eliminar este hallazgo?')
         .then((confirmado) => {
           if (!confirmado.value) return;
 
-          this.planAnualAuditoriaService.delete(`tema/${temaId}/subtemas/${subtemaId}/hallazgos`, {id: hallazgoId}).subscribe({
+          this.planAnualAuditoriaService.delete(`hallazgo`, {id: hallazgoId}).subscribe({
             next: () => {
               this.getHallazgos(temaIndex, subtemaIndex).removeAt(hallazgoIndex);
               this.alertaService.showAlert('Eliminado', 'El hallazgo ha sido eliminado correctamente');
@@ -264,7 +274,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     }
   }
 
-  //  Guarda todos los aspectos evaluados (temas, subtemas, hallazgos)
+  // Guarda todos los aspectos evaluados (temas, subtemas, hallazgos)
   async guardarAspectos(): Promise<void> {
     // Validar formulario
     if (this.aspectosForm.invalid) {
@@ -290,17 +300,17 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
           this.temas.at(i).patchValue({ _id: temaId, isNew: false });
         } catch (error) {
           console.error('Error al crear tema:', error);
+          this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
           continue;
         }
       } else {
         try {
           await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-            informe_id: this.informeId,
-            titulo: temaForm.nombre,
-            Id: null
+            titulo: temaForm.nombre
           }));
         } catch (error) {
           console.error('Error al actualizar tema:', error);
+          this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
         }
       }
 
@@ -312,26 +322,27 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         // Crear o actualizar subtema
         if (!subtemaId) {
           try {
-            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post(`tema/${temaId}/subtemas`, {
+            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post(`subtema`, {
+              tema_id: temaId,
               titulo: subtemaForm.nombre
             }));
-            // El servidor devuelve el tema completo, buscar el subtema recién creado
-            const subtemas = response?.Data?.subtema || [];
-            const ultimoSubtema = subtemas[subtemas.length - 1];
-            subtemaId = ultimoSubtema?._id;
+            // El servidor devuelve el subtema creado
+            subtemaId = subtemaId = response?.Data?.subtema?.[0]?._id;
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {
             console.error('Error al crear subtema:', error);
+            this.alertaService.showAlert('Error', `No se pudo crear el subtema "${subtemaForm.nombre}"`);
             continue;
           }
         } else {
           try {
-            await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}/subtemas/${subtemaId}`, {
-              titulo: subtemaForm.nombre,
-              Id: null
+            // Log para verificar que el ID llega correctamente
+            await firstValueFrom(this.planAnualAuditoriaService.put(`subtema/${subtemaId}`, {
+              titulo: subtemaForm.nombre
             }));
           } catch (error) {
             console.error('Error al actualizar subtema:', error);
+            this.alertaService.showAlert('Error', `No se pudo actualizar el subtema "${subtemaForm.nombre}"`);
           }
         }
 
@@ -343,30 +354,29 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
           // Crear o actualizar hallazgo
           if (!hallazgoId) {
             try {
-              const response: any = await firstValueFrom(this.planAnualAuditoriaService.post(`tema/${temaId}/subtemas/${subtemaId}/hallazgos`, {
+              const response: any = await firstValueFrom(this.planAnualAuditoriaService.post(`hallazgo`, {
+                subtema_id: subtemaId,
                 titulo: hallazgoForm.hallazgo,
                 criterio: hallazgoForm.criterio,
                 descripcion: hallazgoForm.descripcion
               }));
-              // El servidor devuelve el tema completo, buscar el hallazgo recién creado
-              const subtemaActualizado = response?.Data?.subtema?.find((s: any) => s._id === subtemaId);
-              const hallazgos = subtemaActualizado?.hallazgo || [];
-              const ultimoHallazgo = hallazgos[hallazgos.length - 1];
-              hallazgoId = ultimoHallazgo?._id;
+              // El servidor devuelve el hallazgo creado
+              hallazgoId = response?.Data?._id || response?.hallazgo?._id;
               this.getHallazgos(i, j).at(k).patchValue({ _id: hallazgoId, isNew: false });
             } catch (error) {
               console.error('Error al crear hallazgo:', error);
+              this.alertaService.showAlert('Error', `No se pudo crear el hallazgo "${hallazgoForm.hallazgo}"`);
             }
           } else {
             try {
-              await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}/subtemas/${subtemaId}/hallazgos/${hallazgoId}`, {
+              await firstValueFrom(this.planAnualAuditoriaService.put(`hallazgo/${hallazgoId}`, {
                 titulo: hallazgoForm.hallazgo,
                 criterio: hallazgoForm.criterio,
-                descripcion: hallazgoForm.descripcion,
-                Id: null
+                descripcion: hallazgoForm.descripcion
               }));
             } catch (error) {
               console.error('Error al actualizar hallazgo:', error);
+              this.alertaService.showAlert('Error', `No se pudo actualizar el hallazgo "${hallazgoForm.hallazgo}"`);
             }
           }
         }

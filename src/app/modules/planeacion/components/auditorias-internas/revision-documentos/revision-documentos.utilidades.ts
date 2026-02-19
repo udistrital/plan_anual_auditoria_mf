@@ -13,7 +13,7 @@ export const rolesAprobacion: { [key: string]: any } = {
   auditado: {
     estadoAprobacion: environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO,
     preguntaAprobacion: "¿Está seguro(a) de firmar y enviar auditoría?",
-    mensajeAprobacion: "La auditoria fue enviada al auditor",
+    mensajeAprobacion: "La auditoría fue enviada al auditor",
     botonAprobacion: "Firmar y enviar a Auditor",
   },
 };

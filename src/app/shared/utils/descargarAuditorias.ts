@@ -78,11 +78,11 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
     // Tipo de Evaluación
     [HEADERS[2]]: dataSource.map(a => a.tipoEvaluacion),
     // Macroproceso
-    [HEADERS[3]]: dataSource.map(a => a.macroproceso),
+    [HEADERS[3]]: dataSource.map(a => a.macroproceso || ''),
     // Proceso
-    [HEADERS[4]]: dataSource.map(a => a.proceso),
+    [HEADERS[4]]: dataSource.map(a => a.proceso || ''),
     // Dependencia
-    [HEADERS[5]]: dataSource.map(a => a.dependencia),
+    [HEADERS[5]]: dataSource.map(a => a.dependencia || ''),
   };
 
   // 2. Transform cronograma into month columns
@@ -96,13 +96,12 @@ function dataSourceToExcelData(dataSource: Array<Auditoria>): Array<object> {
 
   data = { ...data, ...mesesData };
 
-  // Create final array of arrays for Excel
-  const headers = Object.keys(data);
+  // Create final array of objects maintaining HEADERS order
   const numRows = dataSource.length;
   let finalData: Array<object> = [];
   for (let i = 0; i < numRows; i++) {
     let row: {[key: string]: string} = {};
-    headers.forEach(header => {
+    HEADERS.forEach(header => {
       row[header] = data[header][i];
     });
     finalData.push(row);
@@ -133,6 +132,13 @@ export async function descargarAuditorias(
     const inputBuffer = base64ToArrayBuffer(base64File);
     await workbook.xlsx.load(inputBuffer);
     const worksheet = workbook.worksheets[0];
+
+    // Update header row with new column names
+    const headerRow = worksheet.getRow(1);
+    headerRow.getCell(4).value = 'Macroproceso';
+    headerRow.getCell(5).value = 'Proceso';
+    headerRow.getCell(6).value = 'Dependencia';
+    headerRow.commit();
 
     // Prepare to write data starting from row 2, skipping header row
     const rows = dataSourceToExcelData(dataSource);

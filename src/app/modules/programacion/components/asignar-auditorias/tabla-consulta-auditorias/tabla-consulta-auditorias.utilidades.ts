@@ -1,4 +1,3 @@
-import { map } from "rxjs/operators";
 export const colocacionesContructorTabla = [
   {
     columnDef: "numero",

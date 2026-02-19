@@ -30,6 +30,8 @@ import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
+  @Input() role: any;
+  @Input() personaId: any;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -84,16 +86,28 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0
+    offset: number = 0,
+    estadoId?: number
   ) {
     this.auditoriasPorVigencia = [];
+    // this.personaId = 9840;
+    // this.role = 'auditor'; 
+    // estadoId = 7062;
+
+    let query = `vigencia_id:${vigenciaId},activo:true`;
+    if (estadoId) {
+      query += `,estado_id:${estadoId}`;
+    }
+
+    const endpoint = this.role === 'auditor' && this.personaId
+      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
+      : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+
     this.planAuditoriaMid
-      .get(
-        `auditoria?query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`
-      )
+      .get(endpoint)
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_interno_id;
+          const estadoId = auditoria.estado?.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -304,9 +318,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .subscribe({
         next: () => {
           this.alertService.showSuccessAlert(
-            "Auditoria enviada a revisión del programa por Jefe",
-            "Auditoria enviada"
+            "Auditoría enviada a revisión del programa por Jefe",
+            "Auditoría enviada"
           );
+          this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
         },
         error: (error) => {
           this.alertService.showErrorAlert("Error al enviar el programa.");

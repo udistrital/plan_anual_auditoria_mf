@@ -6,23 +6,21 @@ export const environment = {
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
   ORIGEN_CORREO_NOTIFICACIONES:
-    "notificacionPolux@udistrital.edu.co",
+    "sisifonotificaciones@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE:
+  PLAN_ANUAL_AUDITORIA_SERVICE: 
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
-  // PLAN_ANUAL_AUDITORIA_SERVICE: "http://localhost:8080/",
   PLAN_ANUAL_AUDITORIA_MID:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
-  // PLAN_ANUAL_AUDITORIA_MID: "http://localhost:8081/",
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
 
-  PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
+  PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -39,11 +37,16 @@ export const environment = {
     /** Carbon copy recipient emails go here */
     CcAddresses: [
       // "copy.to@ejemplo.com"
+      "pruebaspaa26@yopmail.com",
     ],
     /** Blind carbon copy recipient emails go here */
     BccAddresses: [
       // "blind.copy.to@ejemplo.com"
     ]
+  },
+
+  VIGENCIAS : {
+    TIPO_PARAMETRO_ID: 121,
   },
 
   PLAN_ESTADO: {
@@ -94,6 +97,10 @@ export const environment = {
       RECHAZADO_PLAN_MEJORAMIENTO: 7085,
       FIN_PLAN_MEJORAMIENTO: 7086,
     },
+  },
+
+  MESES: {
+    TIPO_PARAMETRO_ID: 139,
   },
 
   TIPO_EVALUACION: {

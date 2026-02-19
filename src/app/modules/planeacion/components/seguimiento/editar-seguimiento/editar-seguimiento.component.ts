@@ -18,7 +18,6 @@ import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadSeguimientoComponent } from "./actividades-seguimiento/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
-import { OikosService } from "src/app/core/services/oikos.service";
 
 
 @Component({
@@ -52,7 +51,6 @@ export class EditarSeguimientoComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly parametrosService: ParametrosService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly oikosSevice: OikosService
   ) {}
 
   ngOnInit() {
@@ -70,7 +68,6 @@ export class EditarSeguimientoComponent implements OnInit {
     });
 
     establecerSelectsSecuenciales(this.formularioInformacionComponent, [
-      "tipo",
       "proceso",
       "lider",
       "responsable",
@@ -132,9 +129,8 @@ export class EditarSeguimientoComponent implements OnInit {
       fecha_inicio: informacion.fecha_ejecucion_inicial,
       lider_id: informacion.lider,
       no_auditoria: informacion.no_auditoria,
-      macroproceso: informacion.proceso,
       responsable_id: informacion.responsable,
-      tipo_id: informacion.tipo,
+      correo_complementario: informacion.correo_complementario,
     };
   }
 
@@ -177,25 +173,27 @@ export class EditarSeguimientoComponent implements OnInit {
       no_auditoria: this.auditoria.no_auditoria,
       consecutivo_OCI: this.auditoria.consecutivo_OCI,
       consecutivo_IE: this.auditoria.consecutivo_IE,
-      tipo: this.auditoria.tipo_id,
-      proceso: this.auditoria.macroproceso,
+      macroproceso: this.auditoria.macroproceso_nombre,
+      proceso: this.auditoria.proceso_nombre,
+      dependencia: this.auditoria.dependencia_nombre,
       lider: this.auditoria.lider_id,
       responsable: this.auditoria.responsable_id,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
+      correo_lider: this.auditoria.correo_lider,
+      correo_responsable: this.auditoria.correo_responsable,
+      correo_dependencia: this.auditoria.correo_dependencia,
+      correo_complementario: this.auditoria.correo_complementario,
     });
 
-    if (this.auditoria.tipo_id) {
-      this.manejarCambioTipo(this.auditoria.tipo_id);
+    if (this.auditoria.proceso_id) {
+      this.manejarCambioProceso(this.auditoria.proceso_id);
 
-      if (this.auditoria.macroproceso) {
-        this.manejarCambioProceso(this.auditoria.macroproceso);
-
-        if (this.auditoria.lider_id) {
-          this.manejarCambioLider();
-        }
+      if (this.auditoria.lider_id) {
+        this.manejarCambioLider();
       }
     }
+    
   }
 
   crearActividad() {
@@ -216,7 +214,7 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   manejarCambioTipo(tipoProcesoId: any) {
-    const { MACROPROCESO, PROCESO, DEPENDENCIA } =
+    const { MACROPROCESO, PROCESO } =
       environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
 
     this.tipoSeleccionado = null;
@@ -224,8 +222,6 @@ export class EditarSeguimientoComponent implements OnInit {
       this.tipoSeleccionado = "macroproceso";
     } else if (tipoProcesoId === PROCESO.PARAMETRO_ID) {
       this.tipoSeleccionado = "proceso";
-    } else if (tipoProcesoId === DEPENDENCIA.PARAMETRO_ID) {
-      return this.cargarDependencias();
     }
 
     const tipoParametroId =
@@ -297,18 +293,4 @@ export class EditarSeguimientoComponent implements OnInit {
     );
   }
 
-  /**
-   * Loads the list of dependencies into the "proceso" field options.
-   * TODO: Currently, the domain of the depenencia id is not part of the proceso field in parametros API.
-   */
-  cargarDependencias() {
-    this.oikosSevice
-      .get(
-        `dependencia?query=Activo:true&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario("proceso");
-        if (campo) campo.parametros!.opciones = res;
-      });
-  }
 }

@@ -141,7 +141,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
         .subscribe(() => {
           this.alertService.showSuccessAlert(
             mensajeAprobacion,
-            "Auditoria enviada"
+            "Auditoría enviada"
           ).then(() => {
             this.router.navigate([`/planeacion/seguimiento`]);
           });

@@ -416,8 +416,8 @@ export class TablaSeguimientoComponent implements OnInit {
       .subscribe({
         next: () => {
           this.alertService.showSuccessAlert(
-            "Auditoria enviada a aprobación por Jefe",
-            "Auditoria enviada"
+            "Auditoría enviada a aprobación por Jefe",
+            "Auditoría enviada"
           );
         },
         error: () => {

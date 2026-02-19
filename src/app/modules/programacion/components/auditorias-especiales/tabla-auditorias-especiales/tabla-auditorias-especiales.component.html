@@ -1,10 +1,9 @@
 <ng-container>
   <div class="row mt-3">
-    <h3 class="my-3">Lista de auditorías especiales</h3>
+    <h3 class="my-3">Listado de Auditorías Especiales Registradas</h3>
     <div class="col-12">
       <p>
-        Seleccione la auditoría especial a realizar modificaciones o enviar a
-        aprobación
+        Seleccione la auditoría especial para modificación o asignación de auditores
       </p>
 
       <div class="table-container">
@@ -86,13 +85,15 @@
                 <mat-icon color="primary">more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
+                <!-- TODO: this feature is disabled for now
                 <button mat-menu-item (click)="enviaraAuditor(element)">
                   <mat-icon color="primary">send</mat-icon>
                   <span>Enviar a Auditor(a)</span>
                 </button>
+                -->
                 <button mat-menu-item (click)="editarAuditoria(element)">
                   <mat-icon color="primary">edit</mat-icon>
-                  <span>Editar Auditoria Especial</span>
+                  <span>Editar Auditoría Especial</span>
                 </button>
               </mat-menu>
             </mat-cell>

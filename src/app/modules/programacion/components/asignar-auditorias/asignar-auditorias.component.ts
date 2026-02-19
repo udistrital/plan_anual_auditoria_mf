@@ -1,8 +1,5 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
-import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
-import { ModalAgregarAuditorComponent } from "./modal-agregar-auditor/modal-agregar-auditor.component";
-import { ParametrosService } from "src/app/core/services/parametros.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { TablaConsultaAuditoriasComponent } from "./tabla-consulta-auditorias/tabla-consulta-auditorias.component";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
@@ -20,9 +17,8 @@ export class AsignarAuditoriasComponent implements OnInit {
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada!: number;
   constructor(
-    private dialog: MatDialog,
     private fb: FormBuilder,
-    private parametrosService: ParametrosService
+    private parametrosUtilsService: ParametrosUtilsService
   ) {}
 
   ngOnInit() {
@@ -33,13 +29,14 @@ export class AsignarAuditoriasComponent implements OnInit {
   fechaAsignacion: Date | null = null;
 
   cargarVigencias() {
-    this.parametrosService
-      .get(
-        "parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc"
-      )
-      .subscribe((res) => {
-        this.vigencias = res.Data;
-      });
+    this.parametrosUtilsService.getVigencias().subscribe({
+      next: (data) => {
+        this.vigencias = data;
+      },
+      error: (err) => {
+        console.error("Error load vigencias", err);
+      }
+    });
   }
 
   mostrarAuditoriasPorVigencia(vigencia: Vigencia) {

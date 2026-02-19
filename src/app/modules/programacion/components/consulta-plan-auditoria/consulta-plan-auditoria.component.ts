@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { UserService } from "src/app/core/services/user.service";
-import { ParametrosService } from "src/app/core/services/parametros.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatTableDataSource } from "@angular/material/table";
@@ -49,12 +49,13 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     "estado",
   ];
   iconosAccion = new Map<string, string>([
-    ["Ver", "visibility"],
+    ["Ver Marco General", "visibility"],
     ["Ver Plan", "visibility"],
     ["Ver Auditorias", "visibility"],
     ["Ver Documentos", "visibility"],
     ["Editar Marco General", "edit"],
     ["Registrar Auditorías", "add_circle"],
+    ["Editar Auditorías", "edit"],
     ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
   ]);
@@ -63,14 +64,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly alertaService: AlertService,
     private readonly dialog: MatDialog,
     private readonly router: Router,
-    private readonly parametrosService: ParametrosService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private rolService: RolService,
     private readonly userService: UserService,
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.roles = this.rolService.getRoles();
@@ -115,17 +116,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarVigencias() {
-    this.parametrosService
-      .get(
-        "parametro?query=TipoParametroId:121&fields=Id,Nombre&limit=0&sortby=nombre&order=desc"
-      )
-      .subscribe((res) => {
-        if (res !== null) {
-          this.years = res.Data;
-        } else {
-          console.warn("vigencias no encontradas");
-        }
-      });
+    this.parametrosUtilsService.getVigencias().subscribe({
+      next: (data) => {
+        this.years = data;
+      },
+      error: (err) => {
+        console.error("Error load vigencias", err);
+      }
+    });
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
@@ -141,6 +139,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
         ).map((item: any) => {
           const estadoId = item.estado?.estado_id;
+          const vigenciaId = item.vigencia_id;
           let acciones = this.getAccionesPorRolYEstado(estadoId);
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
@@ -155,6 +154,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             colorEstado: this.escogerEmojiColorEstado(item.estado?.estado_nombre ?? "Borrador"),
             estado: item.estado?.estado_nombre ?? "Borrador",
             estadoId,
+            vigenciaId,
             acciones,
           };
         });
@@ -263,10 +263,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   // Acciones
   realizarAccion(plan: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      "Ver": () => this.verReporte(plan),
+      "Ver Marco General": () => this.verReporte(plan),
       "Ver Plan": () => this.verPlanPorRol(plan),
       "Ver Auditorias": () => this.editarActividades(plan),
       "Registrar Auditorías": () => this.editarActividades(plan),
+      "Editar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan),
       "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
@@ -286,7 +287,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   editarActividades(element: any) {
-    localStorage.setItem('vigencia', element.vigencia);
+    localStorage.setItem('vigencia', JSON.stringify({Id: element.vigenciaId, Nombre: element.vigencia}));
     this.router.navigate([
       `/programacion/plan-auditoria/registrar-auditorias/`,
       element.id,
@@ -326,7 +327,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                                   "Plan enviado exitosamente"
                                 );
                                 return of(response);
-                              }                               
+                              }
 
                               console.error("Solicitud de notificación fallida:", response);
                               return throwError(() => new Error("Solicitud de notificación fallida"));
@@ -401,10 +402,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         };
 
         console.debug("Sending email notification:", {
-              "element": element,
-              "destinatarios": destinatarios,
-              "variablesSolicitud": variablesSolicitud
-            });
+          "element": element,
+          "destinatarios": destinatarios,
+          "variablesSolicitud": variablesSolicitud
+        });
         return this.notificacionesService.enviarNotificacionSolicitud(destinatarios, variablesSolicitud);
       }),
 
