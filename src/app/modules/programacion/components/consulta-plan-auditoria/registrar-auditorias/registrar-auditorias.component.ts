@@ -179,7 +179,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.mostrarOrdenamiento = 
         esAuditorExperto && 
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
+        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO);
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
