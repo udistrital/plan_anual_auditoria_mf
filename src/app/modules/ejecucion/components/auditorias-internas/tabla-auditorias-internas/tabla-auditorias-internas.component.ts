@@ -40,7 +40,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   mostrarAcciones: boolean = false;
-  tipoConsulta: 'general' | 'auditor' | 'dependencia' = 'general';
+  tipoConsulta: 'general' | 'auditor' | 'auditado' = 'general';
   personaId: number = 0;
   cargoId: number = 0;
   iconosAccion = new Map<string, string>([
@@ -74,11 +74,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   private async configurarTipoConsulta() {
     if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
-      this.tipoConsulta = 'dependencia';
+      this.tipoConsulta = 'auditado';
       this.cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
       this.personaId = await this.userService.getPersonaId();
     } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
-      this.tipoConsulta = 'dependencia';
+      this.tipoConsulta = 'auditado';
       this.cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
       this.personaId = await this.userService.getPersonaId();
     } else if (
@@ -101,8 +101,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const queryBase = `query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`;
     let url: string;
     switch (this.tipoConsulta) {
-      case 'dependencia':
-        url = `auditoria/dependencia/${this.personaId}/${this.cargoId}?${queryBase}`;
+      case 'auditado':
+        url = `auditoria/auditado/${this.personaId}/${this.cargoId}?${queryBase},estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}`;
         break;
       case 'auditor':
         url = `auditoria/auditor/${this.personaId}?${queryBase}`;
