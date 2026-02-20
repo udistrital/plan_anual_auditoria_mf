@@ -60,12 +60,12 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
 
   inicializarDatos() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-    this.buscarRol();
+    this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => { this.usuarioId = usuarioId; });
     this.cargarDocumentos();
   }
 
-  buscarRol() {
+  obtenerRolPrioritario() {
     const rolPrioridad = [
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,

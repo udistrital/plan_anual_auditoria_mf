@@ -10,7 +10,7 @@ const rolesValidos = Object.values(environment.ROL);
 export class RolService {
   private roles: string[] = [];
 
-  constructor(private autenticationService: ImplicitAutenticationService) {}
+  constructor(private autenticationService: ImplicitAutenticationService) { }
 
   async cargarRoles() {
     const rolesObtenidos: any = await this.autenticationService.getRole();

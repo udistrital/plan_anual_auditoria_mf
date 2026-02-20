@@ -66,7 +66,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
 
     this.opcionesDocumentos = documentos;
     this.rolesAprobacion = rolesAprobacion;
-    this.buscarRol();
+    this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
@@ -182,7 +182,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     this.router.navigate([`/planeacion/seguimiento`]);
   }
 
-  buscarRol() {
+  obtenerRolPrioritario() {
     const rolPrioridad = [
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,
@@ -196,7 +196,8 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
       [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
-      auditado: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
     };
     // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;

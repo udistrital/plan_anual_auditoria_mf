@@ -13,6 +13,38 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 
+const configAuditado = {
+  estadoAprobacion: [
+    environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO
+  ],
+  estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
+  preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
+  mensajeAprobacion: "El informe fue enviado al auditor(a)",
+  botonAprobacion: "Aceptar informe",
+  botonRechazo: "Respuesta Preliminar",
+  modalRechazo: {
+    titulo: "Respuesta Preliminar",
+    descripcion: "Descripción respuesta del auditado",
+    labelTextarea: "Descripción respuesta del auditado",
+    botonConfirmar: "Guardar",
+    mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
+    mensajeExito: "Informe preliminar enviado",
+    descripcionExito: "El informe fue enviado al auditor(a)",
+  },
+};
+
+const configJefe = {
+  estadoAprobacion: [
+    environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
+    environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
+  ],
+  estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
+  preguntaAprobacion: "¿Está seguro(a) de enviar el informe preliminar al auditado?",
+  mensajeAprobacion: "El informe fue enviado al auditado",
+  botonAprobacion: "Aprobar y Enviar a Auditado",
+  botonRechazo: "Rechazar Informe",
+};
+
 @Component({
   selector: "app-revision-documentos-ejecucion",
   templateUrl: "./revision-documentos.component.html",
@@ -33,34 +65,9 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
   ];
   rolesAprobacion: { [key: string]: any } = {
-    [environment.ROL.JEFE]: {
-      estadoAprobacion: [
-        environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
-        environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
-      ],
-      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
-      preguntaAprobacion: "¿Está seguro(a) de enviar el informe preliminar al auditado?",
-      mensajeAprobacion: "El informe fue enviado al auditado",
-      botonAprobacion: "Aprobar y Enviar a Auditado",
-      botonRechazo: "Rechazar Informe",
-    },
-    auditado: {
-      estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO],
-      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
-      preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
-      mensajeAprobacion: "El informe fue enviado al auditor(a)",
-      botonAprobacion: "Aceptar informe",
-      botonRechazo: "Respuesta Preliminar",
-      modalRechazo: {
-        titulo: "Respuesta Preliminar",
-        descripcion: "Descripción respuesta del auditado",
-        labelTextarea: "Descripción respuesta del auditado",
-        botonConfirmar: "Guardar",
-        mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
-        mensajeExito: "Informe preliminar enviado",
-        descripcionExito: "El informe fue enviado al auditor(a)",
-      },
-    },
+    [environment.ROL.JEFE]: configJefe,
+    [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
+    [environment.ROL.ASISTENTE_DEPENDENCIA]: configAuditado,
   };
 
   constructor(
@@ -83,12 +90,12 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   inicializarDatos() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-    this.buscarRol();
+    this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => { this.usuarioId = usuarioId; });
     this.cargarDocumentos();
   }
 
-  buscarRol() {
+  obtenerRolPrioritario() {
     const rolPrioridad = [
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,
@@ -169,14 +176,15 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   cargarEstadoInforme() {
     // TODO: Cargar el estado del informe y cambiar:
-    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
-    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO // TODO: Eliminar, utillizado pruebas (Para el auditado)
+    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
+    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO; // TODO: Eliminar, utillizado pruebas (Para el auditado)
   }
 
   mostrarAcciones(): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
       [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
-      auditado: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
     };
 
     return condicionesVisibilidad[this.role!]?.includes(this.estadoInformeId) || false;
