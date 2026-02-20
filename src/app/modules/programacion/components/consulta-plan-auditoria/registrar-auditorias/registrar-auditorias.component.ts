@@ -32,6 +32,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
     "no",
     "auditoria",
     "tipoEvaluacion",
+    "macroproceso",
+    "proceso",
+    "dependencia",
     "cronograma",
     "estado",
     "acciones",
@@ -39,7 +42,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
   modoEditar: boolean = true;
-  vigenciaId: number = 6619;
+  vigenciaId: number = 0;
   idMatriz: any = null;
   base64Matriz: any = null;
   ordenSeleccionado: string = '';
@@ -68,7 +71,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
-    this.vigenciaNombre = localStorage.getItem('vigencia') || '';
+    const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
+    this.vigenciaId = vigencia?.Id || 0;
+    this.vigenciaNombre = vigencia?.Nombre || '';
+    localStorage.removeItem('vigencia');
     await this.obtenerEstadoActual();
     this.cargarAuditorias();
     try {
@@ -115,10 +121,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
             estado: item.estado_nombre ?? "Sin estado",
           }));
           
-          if (res.Data[0].vigencia_id) {
-            this.vigenciaId = res.Data[0].vigencia_id;
-          }
-          
           this.actualizarColumnas();
         }
       },
@@ -137,6 +139,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "no",
       "auditoria",
       "tipoEvaluacion",
+      "macroproceso",
+      "proceso",
+      "dependencia",
       "cronograma",
       "estado",
     ];
@@ -176,7 +181,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.mostrarOrdenamiento = 
         (esAuditorExperto || esJefeControlInterno) && 
-        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID || this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID);
+        ((this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) || this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID);
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
@@ -320,8 +326,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   agregarAuditoria(auditoria?: Auditoria) {
-    // const nombreFormulario = 'sisifo_form2';
-    // window.location.href = `http://localhost:4200/formularios-dinamicos/view-formulario/${nombreFormulario}`;
     const dialogRef = this.dialog.open(AddAuditoriaModalComponent, {
       width: "1000px",
       data: {
@@ -343,8 +347,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   // Editar auditoría
   editarAuditoria(auditoria: Auditoria) {
-    // const nombreFormulario = 'sisifo_form2';
-    // window.location.href = `http://localhost:4200/formularios-dinamicos/editInfo-formulario/${nombreFormulario}/${index + 1}`;
     this.agregarAuditoria(auditoria);
   }
 
@@ -362,7 +364,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
         }
       },
       (error) => {
-        console.log("-----------", error);
         this.alertaService.showErrorAlert("Error al cargar el PDF");
       }
     );
