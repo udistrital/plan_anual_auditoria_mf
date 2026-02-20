@@ -57,7 +57,7 @@ export class RevisionDocumentosComponent implements OnInit {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.opcionesDocumentos = documentos;
     this.rolesAprobacion = rolesAprobacion;
-    this.buscarRol();
+    this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
@@ -174,7 +174,7 @@ export class RevisionDocumentosComponent implements OnInit {
     this.router.navigate([`/planeacion/auditorias-internas`]);
   }
 
-  buscarRol() {
+  obtenerRolPrioritario() {
     const rolPrioridad = [
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,

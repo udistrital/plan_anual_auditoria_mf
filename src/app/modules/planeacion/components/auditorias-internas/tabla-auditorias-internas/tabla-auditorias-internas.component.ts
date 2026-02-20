@@ -99,7 +99,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       query += `,estado_id:${estadoId}`;
     }
 
-    const endpoint = this.role === 'auditor' && this.personaId
+    const endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
       ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
       : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
 

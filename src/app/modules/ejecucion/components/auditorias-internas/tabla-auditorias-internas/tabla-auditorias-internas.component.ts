@@ -83,7 +83,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.personaId = await this.userService.getPersonaId();
     } else if (
       this.rolService.tieneRol(environment.ROL.AUDITOR) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)
+      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE) ||
+      this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
     ) {
       this.tipoConsulta = 'auditor';
       this.personaId = await this.userService.getPersonaId();
