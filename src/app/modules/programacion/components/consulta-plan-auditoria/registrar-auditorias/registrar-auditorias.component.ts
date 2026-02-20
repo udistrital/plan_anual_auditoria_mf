@@ -160,7 +160,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
         this.estadoIdActual = environment.PLAN_ESTADO.EN_BORRADOR_ID;
       }
 
+      console.log('Roles del usuario:', this.roles);
       const esAuditorExperto = this.roles.includes('AUDITOR_EXPERTO');
+      const esJefeControlInterno = this.roles.includes('JEFE_CONTROL_INTERNO');
       const enRevisionJefe = this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
 
       this.modoEditar =
@@ -169,8 +171,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
         (enRevisionJefe && !esAuditorExperto);
 
       this.mostrarOrdenamiento = 
-        esAuditorExperto && 
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID;
+        (esAuditorExperto || esJefeControlInterno) && 
+        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID || this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID);
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
