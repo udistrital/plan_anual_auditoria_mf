@@ -6,7 +6,7 @@ export const environment = {
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
   ORIGEN_CORREO_NOTIFICACIONES:
-    "notificacionPolux@udistrital.edu.co",
+    "sisifonotificaciones@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
@@ -20,7 +20,7 @@ export const environment = {
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
-  PLANTILLA_CARGUE_MASIVO: "8e51a50e-9b80-4c93-a917-20b958fd3d2b",
+  PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -37,11 +37,16 @@ export const environment = {
     /** Carbon copy recipient emails go here */
     CcAddresses: [
       // "copy.to@ejemplo.com"
+      "pruebaspaa26@yopmail.com",
     ],
     /** Blind carbon copy recipient emails go here */
     BccAddresses: [
       // "blind.copy.to@ejemplo.com"
     ]
+  },
+
+  VIGENCIAS : {
+    TIPO_PARAMETRO_ID: 121,
   },
 
   PLAN_ESTADO: {
@@ -99,6 +104,7 @@ export const environment = {
   },
 
   TIPO_EVALUACION: {
+    TIPO_PARAMETRO_ID: 136,
     AUDITORIA_INTERNA_ID: 6770,
     SEGUIMIENTO_ID: 6771,
     INFORME_ID: 6772,

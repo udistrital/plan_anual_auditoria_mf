@@ -20,7 +20,6 @@ import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadComponent } from "./actividades-auditoria/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
-import { OikosService } from "src/app/core/services/oikos.service";
 import { UserService } from "src/app/core/services/user.service";
 import { RolService } from "src/app/core/services/rol.service";
 @Component({
@@ -65,7 +64,6 @@ export class EditarAuditoriaComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly parametrosService: ParametrosService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly oikosSevice: OikosService,
     private readonly userService: UserService,
     private readonly rolService: RolService,
   ) {}
@@ -88,7 +86,6 @@ export class EditarAuditoriaComponent implements OnInit {
     });
 
     establecerSelectsSecuenciales(this.formularioInformacionComponent, [
-      "tipo",
       "proceso",
       "lider",
       "responsable",
@@ -172,9 +169,8 @@ export class EditarAuditoriaComponent implements OnInit {
       lider_id: informacion.lider,
       no_auditoria: informacion.no_auditoria,
       objetivo: informacion.objetivo_auditoria,
-      macroproceso: informacion.proceso,
       responsable_id: informacion.responsable,
-      tipo_id: informacion.tipo,
+      correo_complementario: informacion.correo_complementario,
     };
   }
 
@@ -281,8 +277,9 @@ export class EditarAuditoriaComponent implements OnInit {
       no_auditoria: this.auditoria.no_auditoria,
       consecutivo_OCI: this.auditoria.consecutivo_OCI,
       consecutivo_IE: this.auditoria.consecutivo_IE,
-      tipo: this.auditoria.tipo_id,
-      proceso: this.auditoria.macroproceso,
+      macroproceso: this.auditoria.macroproceso_nombre,
+      proceso: this.auditoria.proceso_nombre,
+      dependencia: this.auditoria.dependencia_nombre,
       lider: this.auditoria.lider_id,
       responsable: this.auditoria.responsable_id,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
@@ -293,6 +290,7 @@ export class EditarAuditoriaComponent implements OnInit {
       correo_lider: this.auditoria.correo_lider,
       correo_responsable: this.auditoria.correo_responsable,
       correo_dependencia: this.auditoria.correo_dependencia,
+      correo_complementario: this.auditoria.correo_complementario,
     });
 
     this.formularioRecursosComponent.form.patchValue({
@@ -305,17 +303,14 @@ export class EditarAuditoriaComponent implements OnInit {
       temas: this.auditoria.temas,
     });
 
-    if (this.auditoria.tipo_id) {
-      this.manejarCambioTipo(this.auditoria.tipo_id);
+    if (this.auditoria.proceso_id) {
+      this.manejarCambioProceso(this.auditoria.proceso_id);
 
-      if (this.auditoria.macroproceso) {
-        this.manejarCambioProceso(this.auditoria.macroproceso);
-
-        if (this.auditoria.lider_id) {
-          this.manejarCambioLider();
-        }
+      if (this.auditoria.lider_id) {
+        this.manejarCambioLider();
       }
     }
+    
   }
 
   crearActividad() {
@@ -342,7 +337,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   manejarCambioTipo(tipoProcesoId: any) {
-    const { MACROPROCESO, PROCESO, DEPENDENCIA } =
+    const { MACROPROCESO, PROCESO } =
       environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
 
     this.tipoSeleccionado = null;
@@ -350,8 +345,6 @@ export class EditarAuditoriaComponent implements OnInit {
       this.tipoSeleccionado = "macroproceso";
     } else if (tipoProcesoId === PROCESO.PARAMETRO_ID) {
       this.tipoSeleccionado = "proceso";
-    } else if (tipoProcesoId === DEPENDENCIA.PARAMETRO_ID) {
-      return this.cargarDependencias();
     }
 
     const tipoParametroId =
@@ -423,14 +416,4 @@ export class EditarAuditoriaComponent implements OnInit {
     );
   }
 
-  cargarDependencias() {
-    this.oikosSevice
-      .get(
-        `dependencia?query=Activo:true&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario("proceso");
-        if (campo) campo.parametros!.opciones = res;
-      });
-  }
 }

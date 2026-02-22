@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 
 interface HallazgoResumen {
@@ -12,7 +12,7 @@ interface HallazgoResumen {
   templateUrl: './resumen-hallazgos.component.html',
   styleUrls: ['./resumen-hallazgos.component.css']
 })
-export class ResumenHallazgosComponent implements OnChanges {
+export class ResumenHallazgosComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
 
   displayedColumns: string[] = ['numero', 'criterio', 'descripcion'];
@@ -22,6 +22,12 @@ export class ResumenHallazgosComponent implements OnChanges {
   constructor(
     private planAnualAuditoriaService: PlanAnualAuditoriaService
   ) { }
+
+  ngOnInit(): void {
+    if (this.informeId) {
+      this.cargarHallazgos();
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['informeId'] && this.informeId) {
@@ -33,18 +39,36 @@ export class ResumenHallazgosComponent implements OnChanges {
     if (!this.informeId) return;
 
     this.cargando = true;
-    this.planAnualAuditoriaService.get(`informe/${this.informeId}/tema`).subscribe({
+    this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
       next: (response: any) => {
         const temas = response?.Data || [];
         const hallazgosList: HallazgoResumen[] = [];
 
-        temas.forEach((tema: any, i: number) => {
+        let temaCount = 0;
+
+        temas.forEach((tema: any) => {
+          //Solo temas activos
+          if (!tema.activo) return;
+
+          temaCount++;
+          let subtemaCount = 0;
+
           const subtemas = tema.subtema || [];
-          subtemas.forEach((subtema: any, j: number) => {
+          subtemas.forEach((subtema: any) => {
+            //Solo subtemas activos
+            if (!subtema.activo) return;
+
+            subtemaCount++;
+            let hallazgoCount = 0;
+
             const hallazgos = subtema.hallazgo || [];
-            hallazgos.forEach((hallazgo: any, k: number) => {
+            hallazgos.forEach((hallazgo: any) => {
+              //Solo hallazgos activos
+              if (!hallazgo.activo) return;
+
+              hallazgoCount++;
               hallazgosList.push({
-                numero: `${i + 2}.${j + 1}.${k + 1}`,
+                numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
                 criterio: hallazgo.criterio || '',
                 descripcion: hallazgo.descripcion || ''
               });

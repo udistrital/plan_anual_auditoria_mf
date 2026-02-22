@@ -36,7 +36,7 @@ export class ModalVisualizarRecargarDocumentoComponent {
         tipoArchivo: 'pdf',
         id: this.idPlan,
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
-        descripcion: 'Matriz funcion publica',
+        descripcion: 'Matriz función pública',
         cargaLambda: false,
         tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
       },

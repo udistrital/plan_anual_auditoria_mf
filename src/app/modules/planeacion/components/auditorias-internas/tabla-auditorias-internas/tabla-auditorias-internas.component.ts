@@ -316,8 +316,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .subscribe({
         next: () => {
           this.alertService.showSuccessAlert(
-            "Auditoria enviada a revisión del programa por Jefe",
-            "Auditoria enviada"
+            "Auditoría enviada a revisión del programa por Jefe",
+            "Auditoría enviada"
           );
           this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
         },

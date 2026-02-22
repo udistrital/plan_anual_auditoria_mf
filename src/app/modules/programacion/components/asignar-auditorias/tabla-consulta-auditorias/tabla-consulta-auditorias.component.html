@@ -1,4 +1,4 @@
-<ng-container *ngIf="banderaTablaAuditoriasInternas">
+<ng-container>
   <div class="row mt-4">
     <div class="col-12">
       <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
@@ -7,7 +7,7 @@
       </p>
     </div>
     <div class="col-12">
-      <div class="table-container rounded-table table-scroll">
+      <div class="table-container">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           <ng-container
             *ngFor="let columna of auditoriasContructorTabla"

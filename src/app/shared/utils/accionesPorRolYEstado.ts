@@ -6,8 +6,8 @@ export const accionesProgramacion: {
   [environment.ROL.ADMIN]: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [
       "Editar Marco General",
-      "Historial de Rechazo",
       "Registrar Auditorías",
+      "Historial de Rechazo",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [
       "Ver Marco General",
@@ -29,8 +29,8 @@ export const accionesProgramacion: {
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
-      "Historial de Rechazo",
       "Registrar Auditorías",
+      "Historial de Rechazo",
     ],
   },
 
@@ -76,9 +76,9 @@ export const accionesProgramacion: {
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
-      "Historial de Rechazo",
       "Registrar Auditorías",
       "Enviar Aprobación",
+      "Historial de Rechazo",
     ],
   },
 };
@@ -87,6 +87,16 @@ export const accionesPlaneacion: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   [environment.ROL.ADMIN]: {
+    [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
+      "Editar Auditoría",
+      "Ver Documento",
+      "Enviar a Aprobación por Jefe",
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
+      "Editar Auditoría",
+      "Ver Documento",
+      "Enviar a Aprobación por Jefe",
+    ],
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Editar Auditoría",
       "Ver Documento",

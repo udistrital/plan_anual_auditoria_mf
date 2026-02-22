@@ -1,12 +1,11 @@
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { environment } from "src/environments/environment";
 
 export const formularioInformacionAuditoria: Formulario = {
   campos: [
     {
       nombre: "no_auditoria",
-      descripcion: "No Auditoria y/o seguimiento",
-      etiqueta: "No Auditoria y/o seguimiento",
+      descripcion: "No Auditoría y/o seguimiento",
+      etiqueta: "No Auditoría y/o seguimiento",
       icono: "format_list_numbered",
       tipo: "number",
       placeholder: "Escriba aquí el número de la auditoria",
@@ -36,28 +35,28 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "tipo",
-      etiqueta: "Tipo",
-      icono: "list",
-      tipo: "select",
-      parametros: {
-        urlParametros: `parametro?query=TipoParametroId:${environment.INFO_AUDITORIA.TIPOS_PROCESO.ID}&fields=Id,Nombre&limit=0`,
-      },
-      validaciones: [{ tipo: "requerido", valor: "" }],
-      deshabilitado: false,
-      claseGrid: "col-lg-2 col-md-6 col-sm-12 col-xs-12",
+      nombre: "macroproceso",
+      etiqueta: "Macroproceso",
+      icono: "account_tree",
+      tipo: "text",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "proceso",
       etiqueta: "Proceso",
-      icono: "work",
-      tipo: "select",
-      parametros: {
-        //vacio porque se llena en el componente editar auditoria
-      },
-      validaciones: [{ tipo: "requerido", valor: "" }],
-      deshabilitado: false,
-      claseGrid: "col-lg-5 col-md-6 col-sm-12 col-xs-12",
+      icono: "account_tree",
+      tipo: "text",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "dependencia",
+      etiqueta: "Dependencia",
+      icono: "apartment",
+      tipo: "text",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "lider",
@@ -69,7 +68,7 @@ export const formularioInformacionAuditoria: Formulario = {
         //vacio porque se llena en el componente editar auditoria
       },
       deshabilitado: false,
-      claseGrid: "col-lg-5 col-md-6 col-sm-12 col-xs-12",
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "responsable",
@@ -81,6 +80,38 @@ export const formularioInformacionAuditoria: Formulario = {
       parametros: {
         //vacio porque se llena en el componente editar auditoria
       },
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_dependencia",
+      etiqueta: "Correo Dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_lider",
+      etiqueta: "Correo Jefe dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_responsable",
+      etiqueta: "Correo Asistente dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },{
+      nombre: "correo_complementario",
+      etiqueta: "Correo Complementario",
+      icono: "email",
+      tipo: "email",
+      validaciones: [{ tipo: "email", valor: "" }],
+      deshabilitado: false,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
