@@ -36,8 +36,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
     },
     {
-      nombre: "Programa de Trabajo",
-      plantilla: "programa-trabajo",
+      nombre: "Programa de Auditoria",
+      plantilla: "programa-auditoria",
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
     }
   ];
