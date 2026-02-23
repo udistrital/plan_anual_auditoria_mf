@@ -16,7 +16,7 @@ import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
-import { catchError, exhaustMap, Observable, of, throwError } from "rxjs";
+import { catchError, exhaustMap, Observable, of, tap, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
@@ -24,6 +24,7 @@ import {
   DestinatariosEmail,
   VariablesSolicitud,
 } from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 
 @Component({
   selector: "app-consulta-plan-auditoria",
@@ -71,6 +72,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly userService: UserService,
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
   ) { }
 
   ngOnInit(): void {
@@ -136,7 +138,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         this.total = res.MetaData?.Count;
         this.dataSource.data = res.Data.filter(
           (item: any) => item.activo
-          // && (this.rolCreacion() || item.estado?.estado_id !== EN_BORRADOR_ID)  ToDo
         ).map((item: any) => {
           const estadoId = item.estado?.estado_id;
           const vigenciaId = item.vigencia_id;
@@ -168,17 +169,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     );
   }
 
-  /**
-   * Chooses an emoji color icon based on the prefix of the state name.
-   * @param {string} estado The full state name.
-   * @returns {string} The corresponding emoji color icon (see {@link emojiColorPorPrefijoEstado}) or ⚪ if no match is found.
-   */
   escogerEmojiColorEstado(estado: string): string {
     for (const prefijo in emojiColorPorPrefijoEstado)
       if (estado.startsWith(prefijo))
         return emojiColorPorPrefijoEstado[prefijo];
 
-    return "⚪"; // Default icon if no prefix matches
+    return "⚪";
   }
 
   crearPlan() {
@@ -246,7 +242,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     }
   }
 
-  // Usar un conjunto para evitar duplicados en las acciones
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
@@ -255,12 +250,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     );
   }
 
-  // Obtener el icono dependiendo de la acción
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
   }
 
-  // Acciones
   realizarAccion(plan: any, accion: string) {
     const acciones: Record<string, Function | null> = {
       "Ver Marco General": () => this.verReporte(plan),
@@ -301,7 +294,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       )
       .then((result) => {
         if (result.isConfirmed) {
-          // Verificar si existe el documento con referencia_id
           this.planAnualAuditoriaService
             .get(
               `documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`
@@ -359,7 +351,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
                       }
                     });
                 } else {
-                  // Si no existe el documento, mostrar alerta
                   this.alertaService.showErrorAlert(
                     "No cuenta con el PDF del Plan Anual de Auditoría creado"
                   );
@@ -377,9 +368,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   /**
-   * Sends an email notification upon sending the audit plan for approval.
-   * @param element The audit plan element containing details such as vigencia.
-   * @returns An observable representing the notification sending process.
+   * Sends an email notification upon sending the audit plan for approval,
+   * then persists a log entry in the notificacion-registro backend.
+   * @param element The audit plan element containing details such as vigencia and id.
+   * @returns An observable representing the full notification + registration process.
    */
   notificarEnvioPlan(element: any): Observable<any> {
     return this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
@@ -387,7 +379,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       // Fetch the full name of the sender
       exhaustMap((terceroIdentification) => of(terceroIdentification.NombreCompleto)),
 
-      // Send notification using the sender's name
       exhaustMap((nombreRemitente) => {
         const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Usuario";
         const destinatarios: DestinatariosEmail = environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"];
@@ -406,13 +397,54 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           "destinatarios": destinatarios,
           "variablesSolicitud": variablesSolicitud
         });
-        return this.notificacionesService.enviarNotificacionSolicitud(destinatarios, variablesSolicitud);
+
+        return this.notificacionesService.enviarNotificacionSolicitud(destinatarios, variablesSolicitud).pipe(
+
+          // Only register the log entry if the email was sent successfully
+          tap((response: any) => {
+            if (response.Status == 200) {
+              this.registrarNotificacion(element, destinatarios, variablesSolicitud);
+            }
+          })
+
+        );
       }),
 
       catchError((error) => {
         return throwError(() => new Error("Error sending notification", error));
       })
     );
+  }
+
+  private registrarNotificacion(
+    element: any,
+    destinatarios: DestinatariosEmail,
+    variables: VariablesSolicitud
+  ): void {
+    const allDestinatarios = [
+      ...(destinatarios.ToAddresses ?? []),
+      ...(destinatarios.CcAddresses ?? []),
+      ...(destinatarios.BccAddresses ?? []),
+    ];
+
+    allDestinatarios.forEach((correo) => {
+      const payload = {
+        destinatario: correo,
+        fecha_envio: new Date(),
+        metadatos: {
+          ...variables,
+          tipo_notificacion: 'solicitud_aprobacion_paa',
+          destinatarios_copia: destinatarios.CcAddresses ?? [],
+          destinatarios_copia_oculta: destinatarios.BccAddresses ?? [],
+        },
+        referencia_id: element.id,
+      };
+
+      this.notificacionRegistroCrudService.post(payload).subscribe({
+        next: (res) => console.debug('Registro de notificación guardado:', res),
+        error: (err) => console.warn('Error guardando registro de notificación:', err),
+      });
+    });
   }
 
   private verPlanPorRol(plan: any) {
