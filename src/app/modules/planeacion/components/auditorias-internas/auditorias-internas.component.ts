@@ -27,7 +27,7 @@ export class AuditoriasInternasComponent implements OnInit {
     private parametrosUtilsService: ParametrosUtilsService,
     private rolService: RolService,
     private userService: UserService,
-  ) {}
+  ) { }
 
   async ngOnInit() {
     this.personaId = await this.userService.getPersonaId();

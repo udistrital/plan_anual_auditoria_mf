@@ -20,7 +20,7 @@ export class SeguimientoInformesComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private parametrosUtilsService: ParametrosUtilsService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.iniciarvigenciaForm();
