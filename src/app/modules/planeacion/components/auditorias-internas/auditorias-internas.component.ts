@@ -3,8 +3,9 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { TablaAuditoriasInternasComponent } from "./tabla-auditorias-internas/tabla-auditorias-internas.component";
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
-import { decrypt } from "src/app/shared/utils/util-encrypt";
+import { RolService } from "src/app/core/services/rol.service";
+import { UserService } from "src/app/core/services/user.service";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: "app-auditorias-internas",
@@ -19,59 +20,31 @@ export class AuditoriasInternasComponent implements OnInit {
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada!: number;
   role: string | null = null;
-  personaId: string | null = null;
-  IsSecretario = false;
-  IsAuditor = false;
-  IsAuditorExperto = false;
-  IsJefe = false;
+  personaId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private parametrosUtilsService: ParametrosUtilsService,
-    private autenticacionService: ImplicitAutenticationService,
-  ) {}
+    private rolService: RolService,
+    private userService: UserService,
+  ) { }
 
-  ngOnInit() {
-    const personaIdEncriptado = localStorage.getItem("persona_id");
-    if (personaIdEncriptado) {
-      this.personaId = decrypt(personaIdEncriptado);
-      console.log("ID de la persona:", this.personaId);
-    } else {
-      console.log("No se encontró persona_id en localStorage");
-    }
-
-    this.buscarRol();
+  async ngOnInit() {
+    this.personaId = await this.userService.getPersonaId();
+    this.obtenerRolPrioritario();
     this.iniciarvigenciaForm();
     this.cargarVigencias();
   }
 
-  buscarRol() {
-    this.autenticacionService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        console.error("No se encontraron roles para este usuario");
-        return;
-      }
-
-      this.IsSecretario = roles.includes("SECRETARIO_AUDITOR");
-      this.IsAuditorExperto = roles.includes("AUDITOR_EXPERTO");
-      this.IsAuditor = roles.includes("AUDITOR");
-      this.IsJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = this.IsSecretario
-        ? "secretario"
-        : this.IsAuditorExperto
-          ? "auditor_experto"
-          : this.IsAuditor
-            ? "auditor"
-            : this.IsJefe
-              ? "jefe"
-              : null;
-
-      if (this.IsAuditor || this.IsAuditorExperto) {
-        this.cargarVigencias();
-      }
-      console.log(this.role);
-    });
+  obtenerRolPrioritario() {
+    const rolPrioridad = [
+      environment.ROL.SECRETARIO,
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+      environment.ROL.JEFE,
+    ];
+    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
   }
 
   cargarVigencias() {

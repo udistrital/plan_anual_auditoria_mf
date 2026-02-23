@@ -7,7 +7,7 @@ import { documentos, rolesAprobacion } from "./revision-documentos.utilidades";
 
 
 //Servicios
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { RolService } from "src/app/core/services/rol.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -40,7 +40,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     private readonly alertService: AlertService,
-    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -66,7 +66,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
 
     this.opcionesDocumentos = documentos;
     this.rolesAprobacion = rolesAprobacion;
-    this.buscarRol();
+    this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
@@ -182,32 +182,22 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     this.router.navigate([`/planeacion/seguimiento`]);
   }
 
-  buscarRol() {
-    this.autenticationService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        return;
-      }
-
-      const esSecretario = roles.includes("SECRETARIO_AUDITOR");
-      const esAuditor = roles.some(
-        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
-      );
-      const esJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = esSecretario
-        ? "secretario"
-        : esAuditor
-        ? "auditor"
-        : esJefe
-        ? "jefe"
-        : null;
-    });
+  obtenerRolPrioritario() {
+    const rolPrioridad = [
+      environment.ROL.SECRETARIO,
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+      environment.ROL.JEFE,
+    ];
+    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
-      auditado: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
+      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
     };
     // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;

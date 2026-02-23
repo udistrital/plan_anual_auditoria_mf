@@ -24,7 +24,10 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada: number | null = null;
   usuarioId: number | null = null;
-  usuarioRol: string = ""
+
+  get usuarioRol(): string {
+    return Object.values(environment.ROL).find(rol => this.rolService.tieneRol(rol)) ?? '';
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -42,9 +45,6 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
-    this.usuarioRol = this.rolService.getRoles().filter(
-      (role: string) => environment.ROLES_CREACION.PROGRAMACION.includes(role) && !role.includes("ADMIN")
-    )[0];
   }
 
   setPermisos() {
@@ -81,7 +81,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
           };
           const estado = {
             usuario_id: this.usuarioId!,
-            usuario_rol: this.usuarioRol,
+            usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
             fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
             estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
           };

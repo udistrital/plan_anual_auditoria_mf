@@ -5,13 +5,45 @@ import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 
 //Servicios
-import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
+import { RolService } from "src/app/core/services/rol.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+
+const configAuditado = {
+  estadoAprobacion: [
+    environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO
+  ],
+  estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
+  preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
+  mensajeAprobacion: "El informe fue enviado al auditor(a)",
+  botonAprobacion: "Aceptar informe",
+  botonRechazo: "Respuesta Preliminar",
+  modalRechazo: {
+    titulo: "Respuesta Preliminar",
+    descripcion: "Descripción respuesta del auditado",
+    labelTextarea: "Descripción respuesta del auditado",
+    botonConfirmar: "Guardar",
+    mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
+    mensajeExito: "Informe preliminar enviado",
+    descripcionExito: "El informe fue enviado al auditor(a)",
+  },
+};
+
+const configJefe = {
+  estadoAprobacion: [
+    environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
+    environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
+  ],
+  estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
+  preguntaAprobacion: "¿Está seguro(a) de enviar el informe preliminar al auditado?",
+  mensajeAprobacion: "El informe fue enviado al auditado",
+  botonAprobacion: "Aprobar y Enviar a Auditado",
+  botonRechazo: "Rechazar Informe",
+};
 
 @Component({
   selector: "app-revision-documentos-ejecucion",
@@ -33,40 +65,15 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
   ];
   rolesAprobacion: { [key: string]: any } = {
-    jefe: {
-      estadoAprobacion: [
-        environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE,
-        environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
-      ],
-      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
-      preguntaAprobacion: "¿Está seguro(a) de enviar el informe preliminar al auditado?",
-      mensajeAprobacion: "El informe fue enviado al auditado",
-      botonAprobacion: "Aprobar y Enviar a Auditado",
-      botonRechazo: "Rechazar Informe",
-    },
-    auditado: {
-      estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO],
-      estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
-      preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
-      mensajeAprobacion: "El informe fue enviado al auditor(a)",
-      botonAprobacion: "Aceptar informe",
-      botonRechazo: "Respuesta Preliminar",
-      modalRechazo: {
-        titulo: "Respuesta Preliminar",
-        descripcion: "Descripción respuesta del auditado",
-        labelTextarea: "Descripción respuesta del auditado",
-        botonConfirmar: "Guardar",
-        mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
-        mensajeExito: "Informe preliminar enviado",
-        descripcionExito: "El informe fue enviado al auditor(a)",
-      },
-    },
+    [environment.ROL.JEFE]: configJefe,
+    [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
+    [environment.ROL.ASISTENTE_DEPENDENCIA]: configAuditado,
   };
 
   constructor(
     public dialog: MatDialog,
     private readonly alertService: AlertService,
-    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -83,35 +90,20 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   inicializarDatos() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-    this.buscarRol();
+    this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => { this.usuarioId = usuarioId; });
     this.cargarDocumentos();
   }
 
-  // TODO: No se abarcan todos los roles
-  buscarRol() {
-    this.autenticationService.getRole().then((roles: any) => {
-      if (!roles || roles.length === 0) {
-        return;
-      }
-      console.log(roles);
-
-      const esSecretario = roles.includes("SECRETARIO_AUDITOR");
-      const esAuditor = roles.some(
-        (role: string) => role === "AUDITOR_EXPERTO" || role === "AUDITOR"
-      );
-      const esJefe = roles.includes("JEFE_CONTROL_INTERNO");
-
-      this.role = esSecretario
-        ? "secretario"
-        : esAuditor
-          ? "auditor"
-          : esJefe
-            ? "jefe"
-            : null;
-
-      this.role = "auditado"; // TODO: Eliminar, se utilizo solo para pruebas
-    });
+  obtenerRolPrioritario() {
+    const rolPrioridad = [
+      environment.ROL.SECRETARIO,
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+      environment.ROL.JEFE,
+    ];
+    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
   }
 
   cargarDocumentos() {
@@ -184,14 +176,15 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   cargarEstadoInforme() {
     // TODO: Cargar el estado del informe y cambiar:
-    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
-    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO // TODO: Eliminar, utillizado pruebas (Para el auditado)
+    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
+    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO; // TODO: Eliminar, utillizado pruebas (Para el auditado)
   }
 
   mostrarAcciones(): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
-      jefe: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
-      auditado: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+      [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
+      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
     };
 
     return condicionesVisibilidad[this.role!]?.includes(this.estadoInformeId) || false;

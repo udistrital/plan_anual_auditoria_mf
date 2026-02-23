@@ -313,7 +313,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
         res.Data.filter(
           (auditor: any) =>
             auditor.finalizado === false &&
-            ["AUDITOR", "AUDITOR EXPERTO"].includes(auditor.rol_usuario)
+            ["AUDITOR", "AUDITOR EXPERTO", "AUDITOR ASISTENTE"].includes(auditor.rol_usuario)
         ).forEach((auditor: any) => {
           auditorMap.set(auditor.id_tercero, {
           nombre: auditor.nombre,

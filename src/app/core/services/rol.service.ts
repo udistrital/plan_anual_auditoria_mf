@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { ImplicitAutenticationService } from "./implicit_autentication.service";
 import { environment } from "src/environments/environment";
 
-const { ROLES } = environment;
+const rolesValidos = Object.values(environment.ROL);
 
 @Injectable({
   providedIn: "root",
@@ -10,15 +10,19 @@ const { ROLES } = environment;
 export class RolService {
   private roles: string[] = [];
 
-  constructor(private autenticationService: ImplicitAutenticationService) {}
+  constructor(private autenticationService: ImplicitAutenticationService) { }
 
   async cargarRoles() {
     const rolesObtenidos: any = await this.autenticationService.getRole();
-    this.roles = ROLES.filter((rol) => rolesObtenidos.includes(rol));
+    this.roles = rolesValidos.filter((rol) => rolesObtenidos.includes(rol));
   }
 
   getRoles(): string[] {
     return this.roles;
+  }
+
+  tieneRol(rol: string): boolean {
+    return this.roles.includes(rol);
   }
 
   // Permiso para creación y edición

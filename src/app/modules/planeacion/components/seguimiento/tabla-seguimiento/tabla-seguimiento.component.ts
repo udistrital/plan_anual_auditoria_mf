@@ -99,7 +99,7 @@ export class TablaSeguimientoComponent implements OnInit {
     offset: number = 0
   ) {
     let url;
-    if (this.rolService.getRoles().includes("AUDITOR"))
+    if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE))
       url = await this.urlAuditoriasPorVigenciaFiltroAuditor(vigenciaId, limit, offset);
     else
       url = this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
@@ -404,9 +404,7 @@ export class TablaSeguimientoComponent implements OnInit {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
-      usuario_rol: this.roles.includes("AUDITOR_EXPERTO")
-        ? "AUDITOR_EXPERTO"
-        : "AUDITOR",
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
       observacion: "",
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,

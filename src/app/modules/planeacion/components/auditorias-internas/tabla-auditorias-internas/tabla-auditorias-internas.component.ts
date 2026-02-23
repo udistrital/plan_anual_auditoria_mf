@@ -99,7 +99,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       query += `,estado_id:${estadoId}`;
     }
 
-    const endpoint = this.role === 'auditor' && this.personaId
+    const endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
       ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
       : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
 
@@ -306,9 +306,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
-      usuario_rol: this.roles.includes("AUDITOR_EXPERTO")
-        ? "AUDITOR_EXPERTO"
-        : "AUDITOR",
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
       observacion: "",
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
