@@ -133,9 +133,12 @@ export class EditarSeguimientoComponent implements OnInit {
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
       .subscribe((res) => {
-        this.alertaService.showSuccessAlert(
-          "Información editados correctamente"
-        );
+        this.cambiarEstado().subscribe(() => {
+          this.alertaService.showSuccessAlert(
+            "Información editados correctamente"
+          );
+          
+        });
         this.stepper.next();
       });
   }

@@ -99,10 +99,16 @@ export class TablaSeguimientoComponent implements OnInit {
     offset: number = 0
   ) {
     let url;
-    if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE))
+    if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)) {
       url = await this.urlAuditoriasPorVigenciaFiltroAuditor(vigenciaId, limit, offset);
-    else
+    }
+    else if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA) || this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      url = await this.urlAuditoriasPorVigenciaFiltroAuditado(vigenciaId, limit, offset);
+    } else {
       url = this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
+    }
+
+    console.log("Url: ", url)
 
     if (!url)
       return;
@@ -112,7 +118,7 @@ export class TablaSeguimientoComponent implements OnInit {
       .get(url)
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_interno_id;
+          const estadoId = auditoria.estado?.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -160,6 +166,7 @@ export class TablaSeguimientoComponent implements OnInit {
     const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
     const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
     let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO}`;
     queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
     queryParams += `,activo:true`;
 
@@ -218,6 +225,30 @@ export class TablaSeguimientoComponent implements OnInit {
     queryParams += `&offset=${offset}`;
 
     return `${endpoint}?${queryParams}`;
+  }
+
+  async urlAuditoriasPorVigenciaFiltroAuditado(
+    vigenciaId: number,
+    limit: number = this.itemsPerPage[0],
+    offset: number = 0
+  ) {
+    const endpoint = `auditoria/auditado/`
+    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
+    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
+    let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE}`
+    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
+    queryParams += `,activo:true`;
+    queryParams += `&limit=${limit}`
+    queryParams += `&offset=${offset}`;
+
+    const cargoId = this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)
+      ? environment.CARGO.JEFE_DEPENDENCIA_ID
+      : this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)
+        ? environment.CARGO.ASISTENTE_DEPENDENCIA_ID
+        : 0;
+
+    return `${endpoint}${this.usuarioId}/${cargoId}?${queryParams}`;
   }
 
   construirTabla() {
@@ -343,7 +374,6 @@ export class TablaSeguimientoComponent implements OnInit {
           return;
         }
         this.enviarAprobacionPorJefe(auditoria._id);
-        delete auditoria.estado_interno_id;
       });
   }
 
