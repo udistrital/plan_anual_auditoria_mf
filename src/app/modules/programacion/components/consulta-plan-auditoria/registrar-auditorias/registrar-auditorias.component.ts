@@ -250,7 +250,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       await this.descargaService.descargarArchivo(
         excel,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "plantilla"
+        "auditorias_plan_auditoria_" + this.vigenciaNombre
       );
     } catch (error) {
       console.error("Error al exportar la tabla:", error);
