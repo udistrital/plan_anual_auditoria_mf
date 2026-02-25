@@ -312,6 +312,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         cargaLambda: false,
         tipoIdReferencia:
           environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
+        referencia: "Plan Auditoria",
       },
     });
   }

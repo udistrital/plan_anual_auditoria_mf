@@ -6,11 +6,11 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
-import { ModalVisualizarRecargarDocumentoComponent } from "src/app/modules/programacion/components/consulta-plan-auditoria/registrar-auditorias/modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
+import { ModalVisualizarRecargarCompromisoEticoComponent } from "./modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
 
 @Component({
   selector: "app-documentos-anexos-auditoria",
@@ -83,14 +83,15 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
         descripcion: "Compromiso ético de auditoría interna",
         cargaLambda: false,
-        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO 
+        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
+        referencia: "Auditoria",
       }
     });
   }
 
   buscarCompromisoEtico(): Promise<string | null> {
     return new Promise((resolve, reject) => {
-      this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
+      this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
         .subscribe(
           (res) => {
             if (res && Array.isArray(res.Data) && res.Data.length > 0) {
@@ -113,7 +114,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   }
 
   verCompromisoEtico() {
-      this.dialog.open(ModalVisualizarRecargarDocumentoComponent, {
+      this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
         data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
         width: "80%",
         height: "80vh",

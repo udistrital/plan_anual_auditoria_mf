@@ -267,6 +267,7 @@ export class EditarAuditoriaComponent implements OnInit {
         descripcion: "Archivo para cargue masivo de actividades",
         cargaLambda: true,
         tipo: "actividades",
+        referencia: "Plan Auditoria",
       },
     });
   }
@@ -469,6 +470,7 @@ export class EditarAuditoriaComponent implements OnInit {
         },
         error: (error) => {
           this.alertaService.showErrorAlert("Error al enviar el programa.");
+          console.error(error);
         }
     });
   }
