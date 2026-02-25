@@ -37,7 +37,7 @@ export class ModalVerDocumentosComponent implements OnInit {
   descripcion: string = "Documentos del Plan Anual de Auditoria";
   textoBotonCerrar: string = "Regresar";
   tabs: TabDocumento[] = [
-    { nombre: "Formato PAA", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA },
+    { nombre: "Formato PAA Original", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL },
     { nombre: "Matriz Función Pública", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA },
   ];
 

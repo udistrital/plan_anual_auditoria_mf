@@ -486,10 +486,29 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verDocumentos(element: any) {
+    const formatoPaaActualizadoTab = {
+      nombre: "Formato PAA Actualizado",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
+    };
+    const formatoPaaOriginalTab = {
+      nombre: "Formato PAA Original",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
+    };
+    const matrizFuncionPublicaTab = {
+      nombre: "Matriz Función Pública",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
+    };
+
+    const tabs = (element.estadoId === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID)
+      ? [formatoPaaActualizadoTab, matrizFuncionPublicaTab, formatoPaaOriginalTab]
+      : [formatoPaaOriginalTab, matrizFuncionPublicaTab];
+
     this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
         entityId: element.id,
+        descripcion: `Documentos asociados al Plan Anual de Auditoría - Vigencia ${element.vigencia}`,
+        tabs: tabs,
       },
     });
   }
