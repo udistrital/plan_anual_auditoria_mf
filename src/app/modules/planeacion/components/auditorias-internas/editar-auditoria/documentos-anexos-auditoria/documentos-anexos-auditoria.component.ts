@@ -4,7 +4,10 @@ import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import { ModalVisualizarRecargarDocumentoComponent } from "src/app/modules/programacion/components/consulta-plan-auditoria/registrar-auditorias/modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
@@ -19,6 +22,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   auditoriaId: string = "";
   formularioDocumentos: FormGroup;
+  idCompromisoEtico: any = null;
+  base64CompromisoEtico: any = null;
 
   documentos = [
     {
@@ -49,18 +54,71 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     private readonly nuxeoService: NuxeoService,
     private readonly route: ActivatedRoute,
     private readonly referenciaPdfService: ReferenciaPdfService,
-    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService
   ) {
     this.formularioDocumentos = this.fb.group({
       campoDocumentos: ["", Validators.required],
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
+    try {
+      this.idCompromisoEtico = await this.buscarCompromisoEtico();
+      if (this.idCompromisoEtico !== null) {
+        this.buscarBase64(this.idCompromisoEtico);
+      }
+    } catch (error) {
+      console.error("Error al obtener el compromiso ético", error);
+    }
   }
 
-  onArchivoSeleccionado(event: any, index: number): void {}
+  subirCompromisoEtico(): void {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+      width: "800px",
+      data: {
+        tipoArchivo: "pdf",
+        id: this.auditoriaId,
+        idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        descripcion: "Compromiso ético de auditoría interna",
+        cargaLambda: false,
+        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO 
+      }
+    });
+  }
+
+  buscarCompromisoEtico(): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
+        .subscribe(
+          (res) => {
+            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+              resolve(res.Data[0].nuxeo_enlace);
+            } else {
+              resolve(null);
+            }
+          },
+          (error) => {
+            console.log("Error al buscar el compromiso Ético");
+            this.alertService.showErrorAlert("Error al buscar Compromiso Ético");
+            reject(error);
+          }
+        );
+    });
+  }
+
+  async buscarBase64(nuxeoId: string) {
+    this.base64CompromisoEtico = await this.nuxeoService.obtenerPorUUID(nuxeoId);
+  }
+
+  verCompromisoEtico() {
+      this.dialog.open(ModalVisualizarRecargarDocumentoComponent, {
+        data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+        width: "80%",
+        height: "80vh",
+      });
+    }
 
   onGuardar() {
     if (this.formularioDocumentos.valid) {

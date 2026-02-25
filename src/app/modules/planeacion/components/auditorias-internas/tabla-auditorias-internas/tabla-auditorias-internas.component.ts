@@ -22,6 +22,7 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import { forkJoin } from "rxjs";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -55,6 +56,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
   ]);
+  tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
 
   constructor(
     private readonly alertService: AlertService,
@@ -244,7 +246,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         if (!confirmado.value) {
           return;
         }
-        this.enviarAprobacionPorJefe(auditoria._id);
+        this.validarDocumentosAnexados(auditoria._id);
         delete auditoria.estado_interno_id;
       });
   }
@@ -311,6 +313,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
+
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
       .subscribe({
@@ -324,6 +327,39 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         error: (error) => {
           this.alertService.showErrorAlert("Error al enviar el programa.");
         }
+    });
+  }
+
+  validarDocumentosAnexados(auditoriaId: any) {
+    const docs = [
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: 'solicitud de información' },
+      { tipo: this.tipoDocumentoParametros.CARTA_PRESENTACION, nombre: 'carta de presentación' },
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' },
+      { tipo: this.tipoDocumentoParametros.PROGRAMA_TRABAJO, nombre: 'programa de auditoría' },
+    ];
+
+    const requests = docs.map(d =>
+      this.planAuditoriaService.get(
+        `documento?query=referencia_id:${auditoriaId},tipo_id:${d.tipo},activo:true`
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        for (let i = 0; i < responses.length; i++) {
+          if (!responses[i] || responses[i].Data.length === 0) {
+            this.alertService.showErrorAlert(
+              `No se ha encontrado el documento de  ${docs[i].nombre}. Por favor, asegúrese de subir todos los documentos requeridos antes de enviar a aprobación por Jefe.`
+            );
+            return;
+          }
+        }
+        this.enviarAprobacionPorJefe(auditoriaId);
+      },
+      error: (error) => {
+        console.error(error);
+        this.alertService.showErrorAlert("Error validando los documentos.");
+      }
     });
   }
 }
