@@ -94,7 +94,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     // this.role = 'auditor'; 
     // estadoId = 7062;
 
-    let query = `vigencia_id:${vigenciaId},activo:true`;
+    let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
     if (estadoId) {
       query += `,estado_id:${estadoId}`;
     }
@@ -245,7 +245,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           return;
         }
         this.enviarAprobacionPorJefe(auditoria._id);
-        delete auditoria.estado_interno_id;
       });
   }
 

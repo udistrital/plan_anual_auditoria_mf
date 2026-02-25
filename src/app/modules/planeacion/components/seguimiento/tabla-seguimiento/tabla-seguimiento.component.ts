@@ -23,15 +23,6 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { OikosService } from "src/app/core/services/oikos.service";
-import { Observable, map, catchError, of, firstValueFrom } from "rxjs";
-import { TerceroIdentification, TercerosService } from "src/app/shared/services/terceros.service";
-
-/** Extends the Auditoria interface to add dependencia display field and acciones */
-interface AuditoriaSeguimieto extends Auditoria {
-  acciones?: string[];
-  dependencia?: string;
-}
 
 @Component({
   selector: "app-tabla-seguimiento",
@@ -45,7 +36,7 @@ export class TablaSeguimientoComponent implements OnInit {
 
   auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
   auditoriaEstados = environment.AUDITORIA_ESTADO;
-  auditoriasPorVigencia: AuditoriaSeguimieto[] = [];
+  auditoriasPorVigencia: Auditoria[] = [];
   auditoriasContructorTabla: any;
   banderaTablaSeguimiento: boolean = false;
   tablaColumnas: any;
@@ -75,8 +66,6 @@ export class TablaSeguimientoComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly router: Router,
     private readonly userService: UserService,
-    private readonly oikosService: OikosService,
-    private readonly tercerosService: TercerosService,
   ) {}
 
   ngOnInit() {
@@ -99,10 +88,14 @@ export class TablaSeguimientoComponent implements OnInit {
     offset: number = 0
   ) {
     let url;
-    if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE))
-      url = await this.urlAuditoriasPorVigenciaFiltroAuditor(vigenciaId, limit, offset);
-    else
+    if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)) {
+      url = this.urlAuditoriasPorVigenciaFiltroAuditor(vigenciaId, limit, offset);
+    }
+    else if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA) || this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      url = this.urlAuditoriasPorVigenciaFiltroAuditado(vigenciaId, limit, offset);
+    } else {
       url = this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
+    }
 
     if (!url)
       return;
@@ -112,7 +105,7 @@ export class TablaSeguimientoComponent implements OnInit {
       .get(url)
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_interno_id;
+          const estadoId = auditoria.estado?.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -127,14 +120,6 @@ export class TablaSeguimientoComponent implements OnInit {
         }
 
         this.auditoriasPorVigencia = auditorias;
-        this.auditoriasPorVigencia.forEach(
-          // populate dependencia display field
-          (auditoria) => this.resolverDependencia(auditoria).subscribe({
-            next: (dependenciaNombre: string) => {
-              auditoria.dependencia = dependenciaNombre;
-            }
-          })
-        )
 
         this.totalRegistros = res.MetaData.Count;
         this.banderaTablaSeguimiento = true;
@@ -160,6 +145,7 @@ export class TablaSeguimientoComponent implements OnInit {
     const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
     const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
     let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO}`;
     queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
     queryParams += `,activo:true`;
 
@@ -177,35 +163,12 @@ export class TablaSeguimientoComponent implements OnInit {
    * @param offset The number of records to skip.
    * @returns The constructed URL string.
    */
-  async urlAuditoriasPorVigenciaFiltroAuditor(
+  urlAuditoriasPorVigenciaFiltroAuditor(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
-  ): Promise<string | null> {
-
-    // Get the tercero ID of the authenticated user
-    let terceroId: number;
-    try {
-      terceroId = await firstValueFrom(
-        this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
-          map((tercero: TerceroIdentification) => tercero.Id)
-        )
-      );
-    } catch (error) {
-      console.error("Error al obtener el tercero del usuario autenticado:", error);
-      this.alertService.showErrorAlert(
-        // TODO: Restore actual error message when test user has a valid terceroId
-        "Error al obtener el tercero del usuario autenticado. Se usará el terceroId de prueba 9840 para continuar con la funcionalidad de auditor."
-        // "Error al obtener el tercero del usuario autenticado. No se podrá filtrar por auditor."
-      );
-      // TODO: Restore actual terceroId retrieval when test user has a valid terceroId
-      terceroId = 9840;
-      // return null;
-    }
-    console.debug("Tercero ID del usuario autenticado:", terceroId);
-
-    // Construct the query to fetch audits of type seguimiento and informe for the given vigencia
-    const endpoint = "auditoria/auditor/" + terceroId;
+  ): string {
+    const endpoint = "auditoria/auditor/" + this.usuarioId;
 
     const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
     const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
@@ -218,6 +181,37 @@ export class TablaSeguimientoComponent implements OnInit {
     queryParams += `&offset=${offset}`;
 
     return `${endpoint}?${queryParams}`;
+  }
+
+  /**
+   * Constructs the URL to fetch audits of type seguimiento and informe for a given vigencia for the audited user.
+   * @param vigenciaId The ID of the vigencia.
+   * @param limit The maximum number of records to return.
+   * @param offset The number of records to skip.
+   * @returns The constructed URL string.
+   */
+  urlAuditoriasPorVigenciaFiltroAuditado(
+    vigenciaId: number,
+    limit: number = this.itemsPerPage[0],
+    offset: number = 0
+  ) {
+    const endpoint = `auditoria/auditado/`
+    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
+    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
+    let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE}`
+    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
+    queryParams += `,activo:true`;
+    queryParams += `&limit=${limit}`
+    queryParams += `&offset=${offset}`;
+
+    const cargoId = this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)
+      ? environment.CARGO.JEFE_DEPENDENCIA_ID
+      : this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)
+        ? environment.CARGO.ASISTENTE_DEPENDENCIA_ID
+        : 0;
+
+    return `${endpoint}${this.usuarioId}/${cargoId}?${queryParams}`;
   }
 
   construirTabla() {
@@ -343,7 +337,6 @@ export class TablaSeguimientoComponent implements OnInit {
           return;
         }
         this.enviarAprobacionPorJefe(auditoria._id);
-        delete auditoria.estado_interno_id;
       });
   }
 
@@ -445,35 +438,4 @@ export class TablaSeguimientoComponent implements OnInit {
     });
   }
 
-  /**
-   * Resolves the dependencia name for a given auditoria.
-   * If the auditoria type is Macroproceso or Proceso, it returns the type name directly.
-   * If it's Dependencia, it fetches the name from the Oikos service.
-   * @param auditoria The auditoria object containing type and macroproceso information.
-   * @returns An Observable that emits the appropriate dependencia display field.
-   */
-  resolverDependencia(auditoria: any): Observable<string> {
-    switch (auditoria.tipo_id) {
-      case environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.PARAMETRO_ID:
-        return of("Macroproceso");
-      case environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.PARAMETRO_ID:
-        return of("Proceso");
-      case environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.DEPENDENCIA.PARAMETRO_ID:
-        break;
-      default:
-        return of("Indeterminado");
-    }
-
-    if (!auditoria.macroproceso)
-      return of("Indeterminado");
-
-    const url = `parametro/${auditoria.macroproceso}`;
-    return this.oikosService.get(url).pipe(
-      map((res: any) => res.Data[0]?.Nombre || "Indeterminado"),
-      catchError((error) => {
-        console.error("Error al resolver la dependencia:", error);
-        return of("Indeterminado");
-      })
-    );
-  }
 }
