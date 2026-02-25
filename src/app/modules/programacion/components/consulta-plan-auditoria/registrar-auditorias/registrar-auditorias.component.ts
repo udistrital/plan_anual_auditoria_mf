@@ -234,7 +234,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       const excel = await firstValueFrom(
         this.PlanAnualAuditoriaMid.get(
-          'cargue-masivo/auditorias/' + this.id
+          'cargue-masivo/auditorias/plan/' + this.id
         )
         .pipe(
           map((res: any) => {
