@@ -6,6 +6,7 @@ import {
   TercerosCrudService,
   TERCERO_ID_POR_DOCUMENTO_ENDPOINT,
 } from "../../core/services/terceros-crud.service";
+import { DestinatariosEmail } from "./notificaciones.service";
 
 export interface TerceroIdentification {
   Id: number;
@@ -78,6 +79,45 @@ export class TercerosService {
 
       catchError(err => throwError(() => err))
     );
+  }
+
+  /**
+   * Retrieve a Tercero by their ID, including UsuarioWSO2 (email).
+   * Primarily used to obtain the email of a specific user (e.g. plan creator)
+   * when they are not the authenticated user.
+   * @param {number} id The Tercero ID (e.g. creado_por_id from plan-auditoria).
+   * @returns {Observable<any>} An Observable containing the full Tercero data including UsuarioWSO2.
+   */
+  public getTerceroById(id: number): Observable<any> {
+    return this.tercerosCrudService.get(`tercero/${id}`);
+  }
+
+  /**
+   * Combines dynamic recipient emails with those defined in the environment,
+   * avoiding duplicates across all address types.
+   * 
+   * The dynamic addresses go to ToAddresses (primary recipients),
+   * while the environment addresses are used as CC and BCC (monitoring/testing).
+   * @param {string[]} toAddresses Dynamic recipient emails obtained from Terceros API.
+   * @param {DestinatariosEmail} envDestinatarios Environment-defined recipients for CC and BCC.
+   * @returns {DestinatariosEmail} Combined recipients without duplicates.
+   */
+  public combinarDestinatarios(
+    toAddresses: string[],
+    envDestinatarios: DestinatariosEmail
+  ): DestinatariosEmail {
+    return {
+      ToAddresses: [...new Set([
+        ...toAddresses,
+        ...(envDestinatarios.ToAddresses ?? []),
+      ])],
+      CcAddresses: [...new Set([
+        ...(envDestinatarios.CcAddresses ?? []),
+      ])],
+      BccAddresses: [...new Set([
+        ...(envDestinatarios.BccAddresses ?? []),
+      ])],
+    };
   }
 
 }

@@ -5,6 +5,12 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Router } from "@angular/router";
+import { switchMap, catchError } from "rxjs/operators";
+import { throwError, of, forkJoin } from "rxjs";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import { NotificacionesService, VariablesRechazo } from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 
 @Component({
   selector: "app-modal-motivos-rechazo",
@@ -20,8 +26,11 @@ export class ModalMotivosRechazoComponent implements OnInit {
     private alertService: AlertService,
     private fb: FormBuilder,
     private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router
-
+    private router: Router,
+    private tercerosService: TercerosService,
+    private notificacionesService: NotificacionesService,
+    private notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private parametrosUtilsService: ParametrosUtilsService,
   ) {}
 
   ngOnInit() {
@@ -43,11 +52,8 @@ export class ModalMotivosRechazoComponent implements OnInit {
     this.alertService
       .showConfirmAlert("¿Está seguro de rechazar el Plan Anual de Auditoría?")
       .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
+        if (!confirmado.value) return;
         this.rechazarPlanAuditoria();
-        
       });
   }
 
@@ -66,9 +72,8 @@ export class ModalMotivosRechazoComponent implements OnInit {
           "El plan fue devuelto al auditor(a)."
         );
         this.dialogRef.close();
-        this.router.navigate([
-          `/programacion/plan-auditoria/`
-        ]);
+        this.router.navigate([`/programacion/plan-auditoria/`]);
+        this.notificarRechazo();
       },
       (error) => {
         this.alertService.showErrorAlert(
@@ -77,5 +82,127 @@ export class ModalMotivosRechazoComponent implements OnInit {
         console.error(error);
       }
     );
+  }
+
+  private notificarRechazo(): void {
+    const motivoRechazo = this.formObservaciones.get("observaciones")?.value;
+    // rolRemitente viene del componente padre — diferencia si rechazó Jefe o Secretario
+    const rolRemitente = this.infoModal.rolRemitente || "Jefe OCI";
+
+    this.planAuditoriaService.get(`plan-auditoria/${this.infoModal.planAuditoriaId}`).pipe(
+      switchMap((planResponse: any) => {
+        const creadoPorId = planResponse?.Data?.creado_por_id;
+        const vigenciaId  = planResponse?.Data?.vigencia_id;
+
+        console.log("creado_por_id:", creadoPorId);
+        console.log("vigencia_id:", vigenciaId);
+
+        // Observable para obtener el tercero (correo auditor)
+        // Si no hay creado_por_id se retorna objeto vacío para manejar el caso sin correo
+        const tercero$ = creadoPorId
+          ? this.tercerosService.getTerceroById(creadoPorId)
+          : of({ UsuarioWSO2: null });
+
+        // Observable para obtener las vigencias desde Parametross
+        const vigencias$ = vigenciaId
+          ? this.parametrosUtilsService.getVigencias()
+          : of([]);
+
+        return forkJoin({
+          tercero: tercero$,
+          vigencias: vigencias$,
+          vigenciaId: of(vigenciaId),
+        });
+      }),
+
+      switchMap(({ tercero, vigencias, vigenciaId }: any) => {
+
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        console.log("vigenciaNombre resuelta:", vigenciaNombre);
+
+        const correoAuditor = tercero?.UsuarioWSO2 || null;
+        console.log("UsuarioWSO2:", correoAuditor);
+
+        if (!correoAuditor) {
+          console.warn("No se encontró UsuarioWSO2 para el auditor, se notifica solo al environment de rechazo");
+        }
+
+        const destinatarios = this.tercerosService.combinarDestinatarios(
+          correoAuditor ? [correoAuditor] : [],
+          environment["NOTIFICACION_PLAN_AUDITORIA_RECHAZO_DESTINATARIOS"]
+        );
+
+        const variablesRechazo: VariablesRechazo = {
+          // Título diferenciado según el rol que rechaza
+          titulo_rechazo: `Rechazo de Plan Anual de Auditoría - ${rolRemitente}`,
+          nombre_documento: "Plan Anual de Auditoría",
+          vigencia: vigenciaNombre,
+          motivo_rechazo: motivoRechazo,
+          rol_remitente: rolRemitente,
+          nombre_remitente: this.infoModal.nombreRemitente || rolRemitente,
+          fecha_envio: new Date().toLocaleDateString(),
+        };
+
+        console.log("PAYLOAD RECHAZO:", JSON.stringify({ destinatarios, variablesRechazo }, null, 2));
+
+        return this.notificacionesService.enviarNotificacionRechazo(
+          destinatarios,
+          variablesRechazo
+        ).pipe(
+          switchMap((response: any) => of({ response, vigenciaNombre, correoAuditor }))
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("Error al enviar notificación de rechazo:", error);
+        console.warn("Status:", error.status);
+        console.warn("Body:", JSON.stringify(error.error));
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      next: ({ response, vigenciaNombre, correoAuditor }: any) => {
+        console.log("RESPUESTA NOTIFICACION:", JSON.stringify(response, null, 2));
+        // Solo se registra en MongoDB si el correo fue enviado exitosamente
+        if (response?.Status == 200) {
+          this.registrarNotificacionRechazo(motivoRechazo, rolRemitente, vigenciaNombre, correoAuditor);
+        }
+      },
+      error: (err) => console.warn("Error en notificación de rechazo:", err),
+    });
+  }
+
+  private registrarNotificacionRechazo(
+    motivoRechazo: string,
+    rolRemitente: string,
+    vigenciaNombre: string,
+    correoAuditor: string | null
+  ): void {
+    const destinatarioRegistro = correoAuditor
+      || environment["NOTIFICACION_PLAN_AUDITORIA_RECHAZO_DESTINATARIOS"]?.ToAddresses?.[0]
+      || "sin_correo";
+
+    const payload = {
+      destinatario: destinatarioRegistro,
+      fecha_envio: new Date(),
+      metadatos: {
+        titulo_rechazo: `Rechazo de Plan Anual de Auditoría - ${rolRemitente}`,
+        nombre_documento: "Plan Anual de Auditoría",
+        vigencia: vigenciaNombre,
+        motivo_rechazo: motivoRechazo,
+        rol_remitente: rolRemitente,
+        nombre_remitente: this.infoModal.nombreRemitente || rolRemitente,
+        fecha_envio: new Date().toLocaleDateString(),
+        tipo_notificacion: "rechazo_paa",
+      },
+      referencia_id: this.infoModal.planAuditoriaId,
+    };
+
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug("Registro de notificación de rechazo guardado:", res),
+      error: (err) => console.warn("Error guardando registro de notificación de rechazo:", err),
+    });
   }
 }
