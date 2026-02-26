@@ -177,8 +177,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.mostrarOrdenamiento =
         (esAuditorExperto || esJefeControlInterno) &&
-        ((this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) || this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID);
+        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) ||
+        (esJefeControlInterno && enRevisionJefe);
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
@@ -299,6 +300,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
         tipo: "auditorias",
       },
     });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
+    });
   }
 
   subirArchivoMatriz(): void {
@@ -313,6 +318,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
         tipoIdReferencia:
           environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
       },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
     });
   }
 
