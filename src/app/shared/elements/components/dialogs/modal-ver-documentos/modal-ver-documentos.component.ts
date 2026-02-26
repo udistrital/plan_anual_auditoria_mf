@@ -9,9 +9,17 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 
+export interface BotonTabDocumento {
+  nombre: string;
+  accion: () => void;
+  color?: string;
+  icono?: string;
+}
+
 export interface TabDocumento {
   nombre: string;
   tipoId: number;
+  botones?: BotonTabDocumento[];
 }
 
 export interface ModalVerDocumentosData {
@@ -36,10 +44,7 @@ export class ModalVerDocumentosComponent implements OnInit {
   titulo: string = "Ver documentos";
   descripcion: string = "Documentos del Plan Anual de Auditoria";
   textoBotonCerrar: string = "Regresar";
-  tabs: TabDocumento[] = [
-    { nombre: "Formato PAA Original", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL },
-    { nombre: "Matriz Función Pública", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA },
-  ];
+  tabs: TabDocumento[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ModalVerDocumentosData,
