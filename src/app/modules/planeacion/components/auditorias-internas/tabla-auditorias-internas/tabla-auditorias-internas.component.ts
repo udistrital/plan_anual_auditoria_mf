@@ -196,7 +196,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   verDocumento(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     this.planAuditoriaMid
-      .get(`plantilla/plan-trabajo/${auditoriaId}`)
+      .get(`plantilla/programa-auditoria/${auditoriaId}`)
       .subscribe((res) => {
         const documentoBase64 = res.Data;
         const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {

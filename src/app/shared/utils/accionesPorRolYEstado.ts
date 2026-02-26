@@ -236,6 +236,36 @@ export const accionesPlaneacion: {
       "Enviar a Aprobación por Jefe",
     ],
   },
+
+  [environment.ROL.JEFE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+      "Ver Documento",
+      "Revisar Auditoría"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+      "Ver Documento"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
+      "Ver Documento"
+    ]
+  },
+
+  [environment.ROL.ASISTENTE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+      "Ver Documento",
+      "Revisar Auditoría"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+      "Ver Documento"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
+      "Ver Documento"
+    ]
+  }
 };
 
 // TODO: Ajustar correctamente las acciones de acuerdo al rol y el estado
