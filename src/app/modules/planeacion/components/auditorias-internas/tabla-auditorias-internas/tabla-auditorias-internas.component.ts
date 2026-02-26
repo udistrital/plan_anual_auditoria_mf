@@ -49,6 +49,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   mostrarAcciones: boolean = false;
+  tipoConsulta: 'general' | 'auditor' | 'auditado' = 'general';
+  cargoId: number = 0;
   iconosAccion = new Map<string, string>([
     ["Ver Documento", "description"],
     ["Ver Auditoría", "visibility"],
@@ -77,11 +79,24 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+    this.configurarTipoConsulta();
   }
 
   setPermisos() {
     if (this.rolService.mostrarAcciones(accionesPlaneacion)) {
       this.mostrarAcciones = true;
+    }
+  }
+
+  private async configurarTipoConsulta() {
+    if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
+      this.tipoConsulta = 'auditado';
+      this.cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+      this.personaId = await this.userService.getPersonaId();
+    } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      this.tipoConsulta = 'auditado';
+      this.cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+      this.personaId = await this.userService.getPersonaId();
     }
   }
 
@@ -97,13 +112,21 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     // estadoId = 7062;
 
     let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
-    if (estadoId) {
-      query += `,estado_id:${estadoId}`;
-    }
+    let endpoint = "";
 
-    const endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-      ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
-      : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+    switch (this.tipoConsulta) {
+      case 'auditado':
+        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+        endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
+        break;
+      default:
+        if (estadoId) {
+          query += `,estado_id:${estadoId}`;
+        }
+          endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
+            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
+            : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+    }
 
     this.planAuditoriaMid
       .get(endpoint)
