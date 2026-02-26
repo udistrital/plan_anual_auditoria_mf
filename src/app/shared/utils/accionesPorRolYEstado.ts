@@ -39,7 +39,7 @@ export const accionesProgramacion: {
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías"],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo",],
   },
 
   [environment.ROL.SECRETARIO]: {
