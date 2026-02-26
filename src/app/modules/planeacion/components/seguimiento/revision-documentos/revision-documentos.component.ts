@@ -97,7 +97,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
 
     // At this point, the variables estadoAprobacion, mensajeAprobacion and
     // preguntaAprobacion are still objects with 'auditoria' and 'informe' properties.
-    estadoAprobacion = estadoAprobacion[this.tipoEvaluacion];
+    //estadoAprobacion = estadoAprobacion[this.tipoEvaluacion];
     mensajeAprobacion = mensajeAprobacion[this.tipoEvaluacion];
     preguntaAprobacion = preguntaAprobacion[this.tipoEvaluacion];
 

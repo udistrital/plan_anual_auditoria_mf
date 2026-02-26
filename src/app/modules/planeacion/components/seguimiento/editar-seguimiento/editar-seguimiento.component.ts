@@ -18,6 +18,8 @@ import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { CrearActividadSeguimientoComponent } from "./actividades-seguimiento/crear-actividad/crear-actividad.component";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
+import { RolService } from "src/app/core/services/rol.service";
+import { UserService } from "src/app/core/services/user.service";
 
 
 @Component({
@@ -41,6 +43,7 @@ export class EditarSeguimientoComponent implements OnInit {
   orientation: "horizontal" | "vertical" = "horizontal";
   tipoSeleccionado: "macroproceso" | "proceso" | null = null;
   procesoElegido = 0;
+  usuarioId: number = 0;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -51,6 +54,8 @@ export class EditarSeguimientoComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly parametrosService: ParametrosService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly rolService: RolService,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit() {
@@ -58,6 +63,9 @@ export class EditarSeguimientoComponent implements OnInit {
     this.manejarResponsiveStepper();
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.obtenerAuditoria(this.auditoriaId);
+    this.userService.getPersonaId().then((usuarioId) => {
+      this.usuarioId = usuarioId;
+    });
   }
 
   ngAfterViewInit() {
@@ -107,6 +115,17 @@ export class EditarSeguimientoComponent implements OnInit {
       });
   }
 
+  cambiarEstado() {
+    const estadoPayload = {
+      auditoria_id: this.auditoria._id,
+      estado_id: environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
+      usuario_id: this.usuarioId,
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol))
+    }
+    return this.planAuditoriaService.post("auditoria-estado", estadoPayload)
+  }
+
   guardarInformacion(informacion: any) {
     const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
@@ -114,9 +133,12 @@ export class EditarSeguimientoComponent implements OnInit {
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
       .subscribe((res) => {
-        this.alertaService.showSuccessAlert(
-          "Información editados correctamente"
-        );
+        this.cambiarEstado().subscribe(() => {
+          this.alertaService.showSuccessAlert(
+            "Información editados correctamente"
+          );
+          
+        });
         this.stepper.next();
       });
   }
