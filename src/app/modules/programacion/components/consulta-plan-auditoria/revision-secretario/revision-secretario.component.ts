@@ -5,26 +5,26 @@ import { ModalMotivosRechazoComponent } from "../revision-jefe/modal-motivos-rec
 import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretario/modal-aprobacion-secretario.component";
 import { ActivatedRoute, Router } from "@angular/router";
 import { lastValueFrom } from 'rxjs';
-
-//servicios
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import { RolService } from "src/app/core/services/rol.service";
+import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 
 @Component({
   selector: "app-revision-secretario",
   templateUrl: "./revision-secretario.component.html",
   styleUrl: "./revision-secretario.component.css",
 })
-
 export class RevisionSecretarioComponent {
   selectedTab: number = 0;
-
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
+  roles: string[] = [];
 
   constructor(
     public dialog: MatDialog,
@@ -35,6 +35,8 @@ export class RevisionSecretarioComponent {
     private router: Router,
     private route: ActivatedRoute,
     private descargaService: DescargaService,
+    private tercerosService: TercerosService,
+    private rolService: RolService,
   ) { }
 
   botonSeleccionado: string = "formato";
@@ -44,8 +46,8 @@ export class RevisionSecretarioComponent {
   usuarioId: any;
 
   async ngOnInit() {
-    // Asigna el Base64 a la variable, incluyendo el prefijo del tipo de archivo.
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.roles = this.rolService.getRoles();
     this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
@@ -76,13 +78,35 @@ export class RevisionSecretarioComponent {
 
   abrirModalRechazo(): void {
     if (!this.mostrarBotones) return;
-    console.log(this.usuarioId)
-    this.dialog.open(ModalMotivosRechazoComponent, {
-      width: "50%",
-      data: {
-        usuarioId: this.usuarioId,
-        planAuditoriaId: this.planAuditoriaId,
+
+    // Obtener nombre del secretario autenticado para pasarlo al modal
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().subscribe({
+      next: (tercero) => {
+        this.dialog.open(ModalMotivosRechazoComponent, {
+          width: "50%",
+          data: {
+            usuarioId: this.usuarioId,
+            planAuditoriaId: this.planAuditoriaId,
+            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Secretario Auditor",
+            nombreRemitente: tercero.NombreCompleto,
+            vigencia: null,
+          },
+        });
       },
+      error: (err) => {
+        console.warn("Error obteniendo datos del Secretario para el modal:", err);
+        // Abrir modal igualmente sin nombre del remitente
+        this.dialog.open(ModalMotivosRechazoComponent, {
+          width: "50%",
+          data: {
+            usuarioId: this.usuarioId,
+            planAuditoriaId: this.planAuditoriaId,
+            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Secretario Auditor",
+            nombreRemitente: "Secretario Auditor",
+            vigencia: null,
+          },
+        });
+      }
     });
   }
 
@@ -105,10 +129,10 @@ export class RevisionSecretarioComponent {
   regresarRuta() {
     this.router.navigate([`/programacion/plan-auditoria`]);
   }
-  
+
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA; 
+      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA;
       const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
 
       const enlacesConTipo = await lastValueFrom(
@@ -137,17 +161,9 @@ export class RevisionSecretarioComponent {
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos( this.documentos, 'documentosPAA.zip');
+      await this.descargaService.descargarMultiplesArchivos(this.documentos, 'documentosPAA.zip');
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }
   }
-  
-
 }
-/*
-
-export function documento() {
-  const base64 = consultarNuexo();
-  return base64;
-}*/

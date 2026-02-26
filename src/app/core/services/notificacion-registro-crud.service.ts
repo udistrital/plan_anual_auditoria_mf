@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { RequestManager } from '../managers/requestManager';
 import { Observable } from 'rxjs';
 
-export const NOTIFICACION_REGISTRO_ENDPOINT = 'notificacion-registro';
+export const NOTIFICACION_REGISTRO_ENDPOINT = 'notificacion';
 
 @Injectable({
   providedIn: 'root'
