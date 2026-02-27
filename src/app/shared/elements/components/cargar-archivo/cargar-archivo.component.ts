@@ -36,6 +36,7 @@ export class CargarArchivoComponent {
       cargaLambda: boolean;
       tipo: string;
       tipoIdReferencia: number;
+      referencia: string;
     }
   ) {}
 
@@ -82,7 +83,7 @@ export class CargarArchivoComponent {
           this.cargarConNuxeo().then((nuxeoResponse) => {
             this.guardarReferencia(
               nuxeoResponse,
-              "Plan Auditoria",
+              this.data.referencia,
               this.data.id,
               0,
               false
@@ -94,7 +95,7 @@ export class CargarArchivoComponent {
       this.cargarConNuxeo().then((nuxeoResponse) => {
         this.guardarReferencia(
           nuxeoResponse,
-          "Plan Auditoria",
+          this.data.referencia,
           this.data.id,
           this.data.tipoIdReferencia,
           true

@@ -6,7 +6,7 @@ export const environment = {
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
   ORIGEN_CORREO_NOTIFICACIONES:
-    "sisifonotificaciones@udistrital.edu.co",
+    "notificacionPolux@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
@@ -32,7 +32,7 @@ export const environment = {
   NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS: {
     /** Direct recipient emails go here */
     ToAddresses: [
-      // "send.to@ejemplo.com"
+      "pruebaspaa266jefe@yopmail.com",
     ],
     /** Carbon copy recipient emails go here */
     CcAddresses: [
@@ -43,6 +43,16 @@ export const environment = {
     BccAddresses: [
       // "blind.copy.to@ejemplo.com"
     ]
+  },
+
+  NOTIFICACION_PLAN_AUDITORIA_RECHAZO_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa26auditor@yopmail.com",  
+    ],
+    CcAddresses: [
+      "pruebaspaa26@yopmail.com",
+    ],
+    BccAddresses: []
   },
 
   VIGENCIAS : {
