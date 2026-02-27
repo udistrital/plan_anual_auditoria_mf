@@ -80,6 +80,7 @@ export class ModalVerDocumentosComponent implements OnInit {
         this.referenciaPdfService.consultarDocumentos(this.data.entityId)
       );
 
+      console.debug("Enlaces con tipo obtenidos:", enlacesConTipo);
       const enlaces = enlacesConTipo.map((doc) => doc.nuxeo_enlace);
       const base64Files = await this.nuxeoService.obtenerPorUUIDs(enlaces);
 
@@ -122,7 +123,7 @@ export class ModalVerDocumentosComponent implements OnInit {
     try {
       // ! This method assumes that a document will be well matched to any tab of the same tipo_id, no matter the name.
       // Map tabs into availability holders
-      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }))
+      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }));
       this.documentos.forEach((doc) => {
         // Assign document to the first available tab that matches its tipo_id
         const holderIdx = tabHolders.findIndex(holder => holder.tab.tipoId === doc.tipo_id);
@@ -130,7 +131,10 @@ export class ModalVerDocumentosComponent implements OnInit {
           this.documentosPorTab[tabHolders[holderIdx].idx] = doc.base64;
 
         // Remove the used holder to prevent multiple assignments
-        tabHolders.splice(holderIdx, 1);
+        if (holderIdx !== -1)
+          tabHolders.splice(holderIdx, 1);
+
+        console.debug(`Documento con tipo_id ${doc.tipo_id} asignado a la pestaña "${this.tabs[holderIdx]?.nombre || 'Sin pestaña coincidente'}"`);
       });
     } catch (error) {
       console.error("Error al renderizar los documentos:", error);
