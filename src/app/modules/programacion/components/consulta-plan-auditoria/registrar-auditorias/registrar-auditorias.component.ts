@@ -3,7 +3,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AddAuditoriaModalComponent } from "./add-auditoria-modal/add-auditoria-modal.component";
-import { MatDialog } from "@angular/material/dialog";
+import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
@@ -11,8 +11,9 @@ import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visu
 import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
+import { FormatoPaaUtils } from "../consulta-plan.auditoria.utils";
 import descargarAuditorias from "src/app/shared/utils/descargarAuditorias";
 
 //servicios
@@ -65,7 +66,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private router: Router,
     private spinnerService: SpinnerService,
     private rolService: RolService,
-    private userService: UserService
+    private userService: UserService,
+    private formatoPaaUtils: FormatoPaaUtils,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -370,15 +372,25 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   verDocumentos() {
-    const formatoPaaActualizadoTab = {
+    const dialogRefHolder: {
+      ref: MatDialogRef<ModalVerDocumentosComponent> | null
+    } = { ref: null };
+    const formatoPaaActualizadoTab: TabDocumento = {
       nombre: "Formato PAA Actualizado",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
+      botones: [
+        {
+          nombre: "Actualizar Documento",
+          accion: () => this.formatoPaaUtils.handleActualizarFormatoPaa(this.id, dialogRefHolder.ref, true),
+          icono: "update",
+        },
+      ],
     };
-    const formatoPaaOriginalTab = {
+    const formatoPaaOriginalTab: TabDocumento = {
       nombre: "Formato PAA Original",
       tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
     };
-    const matrizFuncionPublicaTab = {
+    const matrizFuncionPublicaTab: TabDocumento = {
       nombre: "Matriz Función Pública",
       tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
     };
@@ -387,7 +399,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       ? [formatoPaaActualizadoTab, matrizFuncionPublicaTab, formatoPaaOriginalTab]
       : [formatoPaaOriginalTab, matrizFuncionPublicaTab];
 
-    this.dialog.open(ModalVerDocumentosComponent, {
+    dialogRefHolder.ref = this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
         entityId: this.id,
