@@ -96,18 +96,41 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   obtenerRolPrioritario() {
-    const rolPrioridad = [
+    this.role = this.rolService.getRolPrioritario([
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
       environment.ROL.JEFE,
-    ];
-    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
+      environment.ROL.JEFE_DEPENDENCIA,
+      environment.ROL.ASISTENTE_DEPENDENCIA,
+    ]);
   }
 
   cargarDocumentos() {
-    console.log("Cargar documentos");
+    const tipoDocumentoIndiceMap: { [key: number]: number } = {
+      [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR]: 0,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO]: 1,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: 2,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION]: 3,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO]: 4,
+    };
+
+    this.referenciaPdfService
+      .consultarDocumentos(this.auditoriaId)
+      .subscribe(async (res) => {
+        const promesas = res.map(async (documento) => {
+          const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+          this.documentos.push({ base64, tipo_id: documento.tipo_id });
+
+          const indice = tipoDocumentoIndiceMap[documento.tipo_id];
+          if (indice !== undefined) {
+            this.opcionesDocumentos[indice] = { ...this.opcionesDocumentos[indice], base64 };
+          }
+        });
+
+        await Promise.all(promesas);
+      });
   }
 
   preguntarAprobacion() {
@@ -175,9 +198,12 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   cargarEstadoInforme() {
-    // TODO: Cargar el estado del informe y cambiar:
-    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE; // TODO: Eliminar, utillizado pruebas (Para el jefe)
-    // this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO; // TODO: Eliminar, utillizado pruebas (Para el auditado)
+    this.planAuditoriaService
+      .get(`auditoria-estado?query=auditoria_id:${this.auditoriaId},actual:true`)
+      .subscribe((res) => {
+        this.estadoInformeId =
+          res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
+      });
   }
 
   mostrarAcciones(): boolean {
@@ -188,7 +214,6 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     };
 
     return condicionesVisibilidad[this.role!]?.includes(this.estadoInformeId) || false;
-    // return true // TODO: Eliminar, sirve para probar (ver todas las acciones)
   }
 
   async descargarTodo() {
