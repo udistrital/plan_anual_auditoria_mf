@@ -62,6 +62,7 @@ export class ModalVerDocumentosComponent implements OnInit {
 
   async ngOnInit() {
     try {
+      this.documentos = [];
       await this.cargarDocumentos();
       if (this.data.inferTabs)
         this.inferirPestanasDeDocumentos();
@@ -127,12 +128,10 @@ export class ModalVerDocumentosComponent implements OnInit {
       this.documentos.forEach((doc) => {
         // Assign document to the first available tab that matches its tipo_id
         const holderIdx = tabHolders.findIndex(holder => holder.tab.tipoId === doc.tipo_id);
-        if (holderIdx !== -1 && !this.documentosPorTab[tabHolders[holderIdx].idx])
+        if (holderIdx !== -1) {
           this.documentosPorTab[tabHolders[holderIdx].idx] = doc.base64;
-
-        // Remove the used holder to prevent multiple assignments
-        if (holderIdx !== -1)
           tabHolders.splice(holderIdx, 1);
+        }
 
         console.debug(`Documento con tipo_id ${doc.tipo_id} asignado a la pestaña "${this.tabs[holderIdx]?.nombre || 'Sin pestaña coincidente'}"`);
       });
