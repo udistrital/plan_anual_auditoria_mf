@@ -225,11 +225,28 @@ export class DocumentoUtils {
       nombre: "Matriz Función Pública",
       tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
     };
+    const actaComiteTab: TabDocumento = {
+      nombre: "Acta de Comité",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR,
+    };
 
     // Filtrar las tabs a mostrar dependiendo del estado del plan y los roles del usuario
-    const tabs = (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID)
-      ? [formatoPaaActualizadoTab, matrizFuncionPublicaTab, formatoPaaOriginalTab]
-      : [formatoPaaOriginalTab, matrizFuncionPublicaTab];
+    let tabs = []
+    if (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID) {
+      tabs = [formatoPaaActualizadoTab, formatoPaaOriginalTab, matrizFuncionPublicaTab];
+
+      const rolesActaComite = [
+        environment.ROL.AUDITOR_EXPERTO,
+        environment.ROL.JEFE,
+        environment.ROL.SECRETARIO
+      ];
+
+      if (roles.some(role => rolesActaComite.includes(role))) {
+        tabs.push(actaComiteTab);
+      }
+    } else {
+      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
+    }
 
     dialogRefHolder.ref = this.matDialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
