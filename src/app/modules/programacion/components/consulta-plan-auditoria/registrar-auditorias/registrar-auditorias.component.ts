@@ -3,7 +3,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { ActivatedRoute, Router } from "@angular/router";
 import { AddAuditoriaModalComponent } from "./add-auditoria-modal/add-auditoria-modal.component";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
@@ -11,9 +11,8 @@ import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visu
 import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
-import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
-import { FormatoPaaUtils } from "../consulta-plan.auditoria.utils";
+import { DocumentoUtils } from "../consulta-plan.auditoria.utils";
 import { firstValueFrom, map, catchError } from "rxjs";
 
 //servicios
@@ -67,7 +66,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private spinnerService: SpinnerService,
     private rolService: RolService,
     private userService: UserService,
-    private formatoPaaUtils: FormatoPaaUtils,
+    private documentoUtils: DocumentoUtils,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -430,42 +429,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   verDocumentos() {
-    const dialogRefHolder: {
-      ref: MatDialogRef<ModalVerDocumentosComponent> | null
-    } = { ref: null };
-    const formatoPaaActualizadoTab: TabDocumento = {
-      nombre: "Formato PAA Actualizado",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
-      botones: [
-        {
-          nombre: "Actualizar Documento",
-          accion: () => this.formatoPaaUtils.handleActualizarFormatoPaa(this.id, dialogRefHolder.ref, true),
-          icono: "update",
-        },
-      ],
-    };
-    const formatoPaaOriginalTab: TabDocumento = {
-      nombre: "Formato PAA Original",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
-    };
-    const matrizFuncionPublicaTab: TabDocumento = {
-      nombre: "Matriz Función Pública",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
-    };
-
-    const tabs = (this.estadoIdActual === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID)
-      ? [formatoPaaActualizadoTab, matrizFuncionPublicaTab, formatoPaaOriginalTab]
-      : [formatoPaaOriginalTab, matrizFuncionPublicaTab];
-
-    dialogRefHolder.ref = this.dialog.open(ModalVerDocumentosComponent, {
-      width: "1200px",
-      data: {
-        entityId: this.id,
-        descripcion: `Documentos asociados al Plan Anual de Auditoría - Vigencia ${this.vigenciaNombre}`,
-        tabs: tabs,
-      },
-    });
+    this.documentoUtils.verDocumentos(this.id, this.estadoIdActual ?? 0, this.vigenciaNombre, this.roles);
   }
+
   buscarMatriz(): Promise<string | null> {
     return new Promise((resolve, reject) => {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)

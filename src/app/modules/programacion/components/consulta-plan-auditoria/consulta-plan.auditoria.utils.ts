@@ -4,8 +4,8 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
-import { MatDialogRef } from "@angular/material/dialog";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { catchError, concatMap, firstValueFrom, map, Observable, of, throwError } from "rxjs";
 
 /**
@@ -14,13 +14,14 @@ import { catchError, concatMap, firstValueFrom, map, Observable, of, throwError 
 @Injectable({
   providedIn: "root",
 })
-export class FormatoPaaUtils {
+export class DocumentoUtils {
 
   constructor(
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly nuxeoService: NuxeoService,
     private readonly planAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertaService: AlertService,
+    private readonly matDialog: MatDialog,
   ) {}
 
   /**
@@ -32,13 +33,14 @@ export class FormatoPaaUtils {
    * @param conEspeciales Un booleano que indica si se deben incluir caracteres especiales en el PDF generado.
    * @returns Una promesa que se resuelve cuando el proceso de actualización se completa.
    */
-  async handleActualizarFormatoPaa(
+  async handleActualizarDocumento(
     planId: string,
+    urlGeneracion: string,
     dialogRef: MatDialogRef<ModalVerDocumentosComponent, unknown> | null,
-    conEspeciales: boolean = false,
+    tipoDocumentoId: number,
   ): Promise<void> {
     try {
-      await this.actualizarFormatoPaa(planId, conEspeciales);
+      await this.actualizarDocumento(planId, urlGeneracion, tipoDocumentoId);
       this.alertaService.showSuccessAlert("Formato PAA actualizado exitosamente.")
         .then(() => {
           dialogRef?.componentInstance.ngOnInit();
@@ -52,15 +54,13 @@ export class FormatoPaaUtils {
   /**
    * Actualiza el formato PAA de un plan de auditoría específico generando un nuevo PDF y guardándolo en el sistema. 
    * @param planId El ID del plan de auditoría para el cual se actualizará el formato PAA.
-   * @param conEspeciales Un booleano que indica si se deben incluir caracteres especiales en el PDF generado.
+   * @param urlGeneracion La URL del servicio que genera el PDF.
+   * @param tipoDocumentoId El ID del tipo de documento que se está actualizando.
    * @returns Una promesa que se resuelve cuando el proceso de actualización se completa.
    * @throws Error si ocurre algún problema durante la generación o almacenamiento del PDF.
    */
-  async actualizarFormatoPaa(planId: string, conEspeciales: boolean = true): Promise<void> {
-    const documentoBase64 = await this.generarPdf(planId, conEspeciales);
-    const tipoDocumentoId = conEspeciales
-      ? environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
-      : environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL;
+  async actualizarDocumento(planId: string, urlGeneracion: string, tipoDocumentoId: number): Promise<void> {
+    const documentoBase64 = await this.generarPdf(urlGeneracion);
     await firstValueFrom(this.guardarYReferenciarPdf(documentoBase64, planId, tipoDocumentoId));
   }
 
@@ -71,9 +71,9 @@ export class FormatoPaaUtils {
    * @returns Una promesa que se resuelve con el contenido del PDF en formato Base64.
    * @throws Error si ocurre algún problema durante la generación del PDF.
    */
-  async generarPdf(planId: string, conEspeciales: boolean = true): Promise<string> {
+  async generarPdf(url: string): Promise<string> {
     return await firstValueFrom(
-      this.planAnualAuditoriaMid.get(`plantilla/${planId}?conEspeciales=${conEspeciales}`).pipe(
+      this.planAnualAuditoriaMid.get(url).pipe(
         map((response: any): string => {
           console.debug("Respuesta recibida del servicio de generación de PDF", response);
           if (response && response.Data)
@@ -181,5 +181,65 @@ export class FormatoPaaUtils {
         ))
       )
   }
+
+  /**
+   * Abre un modal para ver los documentos asociados a un plan de auditoría.
+   * @param planId El ID del plan de auditoría.
+   * @param planEstado El estado del plan de auditoría.
+   * @param planVigenciaNombre El nombre de la vigencia del plan de auditoría.
+   * @param roles Los roles del usuario actual, para determinar qué documentos mostrar en el modal.
+   */
+  verDocumentos(
+    planId: string,
+    planEstado: number,
+    planVigenciaNombre: string,
+    roles: string[]
+  ): void {
+    // Se utiliza un objeto para mantener la referencia al diálogo abierto, lo que permite actualizar su contenido después de realizar acciones como la actualización del formato PAA.
+    const dialogRefHolder: {
+      ref: MatDialogRef<ModalVerDocumentosComponent> | null
+    } = { ref: null };
+
+    //Tabs de documentos a mostrar en el modal, se muestran dependiendo del estado del plan y los roles del usuario
+    const formatoPaaActualizadoTab: TabDocumento = {
+      nombre: "Formato PAA Actualizado",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
+      botones: [
+        {
+          nombre: "Actualizar Documento",
+          accion: () => this.handleActualizarDocumento(
+            planId,
+            `Plantilla/${planId}?conEspeciales=true`,
+            dialogRefHolder.ref,
+            environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
+          ),
+          icono: "update",
+        },
+      ],
+    };
+    const formatoPaaOriginalTab: TabDocumento = {
+      nombre: "Formato PAA Original",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
+    };
+    const matrizFuncionPublicaTab: TabDocumento = {
+      nombre: "Matriz Función Pública",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
+    };
+
+    // Filtrar las tabs a mostrar dependiendo del estado del plan y los roles del usuario
+    const tabs = (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID)
+      ? [formatoPaaActualizadoTab, matrizFuncionPublicaTab, formatoPaaOriginalTab]
+      : [formatoPaaOriginalTab, matrizFuncionPublicaTab];
+
+    dialogRefHolder.ref = this.matDialog.open(ModalVerDocumentosComponent, {
+      width: "1200px",
+      data: {
+        entityId: planId,
+        descripcion: `Documentos asociados al Plan Anual de Auditoría - Vigencia ${planVigenciaNombre}`,
+        tabs: tabs,
+      },
+    });
+  }
+
 
 }
