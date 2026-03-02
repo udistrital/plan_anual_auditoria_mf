@@ -11,8 +11,6 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
-import { RolService } from "src/app/core/services/rol.service";
-import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 
 @Component({
   selector: "app-revision-secretario",
@@ -24,7 +22,6 @@ export class RevisionSecretarioComponent {
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
-  roles: string[] = [];
 
   constructor(
     public dialog: MatDialog,
@@ -36,7 +33,6 @@ export class RevisionSecretarioComponent {
     private route: ActivatedRoute,
     private descargaService: DescargaService,
     private tercerosService: TercerosService,
-    private rolService: RolService,
   ) { }
 
   botonSeleccionado: string = "formato";
@@ -47,7 +43,6 @@ export class RevisionSecretarioComponent {
 
   async ngOnInit() {
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
-    this.roles = this.rolService.getRoles();
     this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
@@ -79,7 +74,6 @@ export class RevisionSecretarioComponent {
   abrirModalRechazo(): void {
     if (!this.mostrarBotones) return;
 
-    // Obtener nombre del secretario autenticado para pasarlo al modal
     this.tercerosService.getAuthenticatedUserTerceroIdentification().subscribe({
       next: (tercero) => {
         this.dialog.open(ModalMotivosRechazoComponent, {
@@ -87,7 +81,7 @@ export class RevisionSecretarioComponent {
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
-            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Secretario Auditor",
+            rolRemitente: "Secretario Auditor",
             nombreRemitente: tercero.NombreCompleto,
             vigencia: null,
           },
@@ -95,13 +89,12 @@ export class RevisionSecretarioComponent {
       },
       error: (err) => {
         console.warn("Error obteniendo datos del Secretario para el modal:", err);
-        // Abrir modal igualmente sin nombre del remitente
         this.dialog.open(ModalMotivosRechazoComponent, {
           width: "50%",
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
-            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Secretario Auditor",
+            rolRemitente: "Secretario Auditor",
             nombreRemitente: "Secretario Auditor",
             vigencia: null,
           },

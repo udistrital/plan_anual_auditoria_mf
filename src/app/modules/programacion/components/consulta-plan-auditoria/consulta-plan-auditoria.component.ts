@@ -26,6 +26,8 @@ import {
 } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 
+const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
+
 @Component({
   selector: "app-consulta-plan-auditoria",
   templateUrl: "./consulta-plan-auditoria.component.html",
@@ -381,7 +383,10 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
       exhaustMap((nombreRemitente) => {
         const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Usuario";
-        const destinatarios: DestinatariosEmail = environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"];
+        const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
+          [],
+          environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"]
+        );
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Aprobación de Plan Anual de Auditoría",
           tipo_solicitud: "revisión y aprobación",
@@ -421,29 +426,22 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     destinatarios: DestinatariosEmail,
     variables: VariablesSolicitud
   ): void {
-    const allDestinatarios = [
-      ...(destinatarios.ToAddresses ?? []),
-      ...(destinatarios.CcAddresses ?? []),
-      ...(destinatarios.BccAddresses ?? []),
-    ];
+    const payload = {
+      template: PLANTILLA_SOLICITUD_NOMBRE,
+      fecha_envio: new Date(),
+      metadatos: {
+        ...variables,
+        tipo_notificacion: 'solicitud_aprobacion_paa',
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: element.id,
+    };
 
-    allDestinatarios.forEach((correo) => {
-      const payload = {
-        destinatario: correo,
-        fecha_envio: new Date(),
-        metadatos: {
-          ...variables,
-          tipo_notificacion: 'solicitud_aprobacion_paa',
-          destinatarios_copia: destinatarios.CcAddresses ?? [],
-          destinatarios_copia_oculta: destinatarios.BccAddresses ?? [],
-        },
-        referencia_id: element.id,
-      };
-
-      this.notificacionRegistroCrudService.post(payload).subscribe({
-        next: (res) => console.debug('Registro de notificación guardado:', res),
-        error: (err) => console.warn('Error guardando registro de notificación:', err),
-      });
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug('Registro de notificación guardado:', res),
+      error: (err) => console.warn('Error guardando registro de notificación:', err),
     });
   }
 

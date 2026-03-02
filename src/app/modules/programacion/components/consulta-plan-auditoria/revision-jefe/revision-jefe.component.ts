@@ -3,8 +3,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { ModalMotivosRechazoComponent } from "./modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { environment } from "src/environments/environment";
 import { ActivatedRoute, Router } from "@angular/router";
-import { lastValueFrom, throwError, forkJoin, of } from 'rxjs';
-import { switchMap, catchError, exhaustMap, tap, map } from 'rxjs/operators';
+import { lastValueFrom, throwError, forkJoin } from 'rxjs';
+import { switchMap, catchError, exhaustMap, tap } from 'rxjs/operators';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { UserService } from "src/app/core/services/user.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -15,8 +15,7 @@ import { TercerosService } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
-import { RolService } from "src/app/core/services/rol.service";
+import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 
 @Component({
   selector: "app-revision-jefe",
@@ -33,7 +32,6 @@ export class RevisionJefeComponent implements OnInit {
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
-  roles: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -49,13 +47,10 @@ export class RevisionJefeComponent implements OnInit {
     private notificacionesService: NotificacionesService,
     private notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private parametrosUtilsService: ParametrosUtilsService,
-    private rolService: RolService,
   ) {}
 
   async ngOnInit() {
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
-    // se obtienen los roles del usuario para usarlos en el nombre del remitente
-    this.roles = this.rolService.getRoles();
     this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
@@ -94,23 +89,20 @@ export class RevisionJefeComponent implements OnInit {
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
-            // nombre real del Jefe obtenido de Terceros
             nombreRemitente: tercero.NombreCompleto,
-            // rol en lenguaje natural para el correo
-            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Jefe OCI",
+            rolRemitente: "Jefe OCI",
           },
         });
       },
       error: (err) => {
         console.warn("Error obteniendo datos del Jefe para el modal:", err);
-        // Si falla Terceros, se abre el modal igualmente con valores por defecto
         this.dialog.open(ModalMotivosRechazoComponent, {
           width: "50%",
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
             nombreRemitente: "Jefe OCI",
-            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Jefe OCI",
+            rolRemitente: "Jefe OCI",
           },
         });
       }
@@ -153,7 +145,6 @@ export class RevisionJefeComponent implements OnInit {
             "Plan aceptado, el plan fue enviado al secretario."
           );
           this.router.navigate([`/programacion/plan-auditoria/`]);
-
           this.notificarEnvioAComite();
         },
         error: (error) => {
@@ -166,9 +157,8 @@ export class RevisionJefeComponent implements OnInit {
   }
 
   private notificarEnvioAComite(): void {
-    const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Jefe OCI";
+    const rolRemitente = "Jefe OCI";
 
-    // en paralelo consultar plan, vigencias y tercero del Jefe autenticado
     forkJoin({
       plan: this.planAuditoriaService.get(`plan-auditoria/${this.planAuditoriaId}`),
       vigencias: this.parametrosUtilsService.getVigencias(),
@@ -176,14 +166,12 @@ export class RevisionJefeComponent implements OnInit {
     }).pipe(
 
       exhaustMap(({ plan, vigencias, tercero }: any) => {
-        // Resolver nombre de vigencia desde el array de Parametros
         const vigenciaId = plan?.Data?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
 
         console.log("vigenciaNombre Caso 3:", vigenciaNombre);
 
-        // destinatarios del environment hasta definir flujo dinámico del Jefe
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
           environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"].ToAddresses,
           environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"]
@@ -193,7 +181,6 @@ export class RevisionJefeComponent implements OnInit {
           titulo_solicitud: "Envío a Revisión del Comité - Plan Anual de Auditoría",
           tipo_solicitud: "revisión y aprobación por el comité",
           nombre_documento: "Plan Anual de Auditoría",
-          // vigenciaNombre resuelta desde Parametros via forkJoin
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: tercero.NombreCompleto || rolRemitente,
@@ -209,10 +196,9 @@ export class RevisionJefeComponent implements OnInit {
           destinatarios,
           variablesSolicitud
         ).pipe(
-          // tap ejecuta el registro en MongoDB sin modificar el flujo del observable
           tap((response: any) => {
             if (response?.Status == 200) {
-              this.registrarNotificacion(destinatarios, variablesSolicitud, "envio_comite_paa");
+              this.registrarNotificacion(destinatarios, variablesSolicitud, "envio_comite_paa", PLANTILLA_SOLICITUD_NOMBRE);
             }
           })
         );
@@ -231,34 +217,25 @@ export class RevisionJefeComponent implements OnInit {
   private registrarNotificacion(
     destinatarios: DestinatariosEmail,
     variables: VariablesSolicitud,
-    tipoNotificacion: string
+    tipoNotificacion: string,
+    template: string
   ): void {
-    // Se registra un documento por cada destinatario (To + CC + BCC)
-    const allDestinatarios = [
-      ...(destinatarios.ToAddresses ?? []),
-      ...(destinatarios.CcAddresses ?? []),
-      ...(destinatarios.BccAddresses ?? []),
-    ];
+    const payload = {
+      template: template,
+      fecha_envio: new Date(),
+      metadatos: {
+        ...variables,
+        tipo_notificacion: tipoNotificacion,
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: this.planAuditoriaId,
+    };
 
-    allDestinatarios.forEach((correo) => {
-      const payload = {
-        destinatario: correo,
-        fecha_envio: new Date(),
-        metadatos: {
-          // spread de variables incluye todos los campos de VariablesSolicitud
-          ...variables,
-          tipo_notificacion: tipoNotificacion,
-          destinatarios_copia: destinatarios.CcAddresses ?? [],
-          destinatarios_copia_oculta: destinatarios.BccAddresses ?? [],
-        },
-        // referencia_id vincula el registro con el plan de auditoría en MongoDB
-        referencia_id: this.planAuditoriaId,
-      };
-
-      this.notificacionRegistroCrudService.post(payload).subscribe({
-        next: (res) => console.debug("Registro de notificación guardado:", res),
-        error: (err) => console.warn("Error guardando registro de notificación:", err),
-      });
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug("Registro de notificación guardado:", res),
+      error: (err) => console.warn("Error guardando registro de notificación:", err),
     });
   }
 
