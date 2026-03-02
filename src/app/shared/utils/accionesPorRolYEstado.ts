@@ -138,23 +138,29 @@ export const accionesPlaneacion: {
   [environment.ROL.AUDITOR_EXPERTO]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -162,47 +168,59 @@ export const accionesPlaneacion: {
   [environment.ROL.AUDITOR]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
       "Enviar a Aprobación por Jefe",
+      "Ver Documentos",
     ],
   },
 
   [environment.ROL.AUDITOR_ASISTENTE]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
+      "Ver Documentos",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -214,8 +232,10 @@ export const accionesPlaneacion: {
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos"
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
+      "Ver Documentos"
     ]
   },
 
@@ -226,8 +246,10 @@ export const accionesPlaneacion: {
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
+      "Ver Documentos"
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
+      "Ver Documentos"
     ]
   }
 };
