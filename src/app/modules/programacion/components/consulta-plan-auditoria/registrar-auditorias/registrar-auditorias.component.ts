@@ -102,7 +102,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       (res) => {
         if (res.Data && res.Data.length > 0) {
           this.dataSource.data = res.Data.map((item: any) => ({
-            id: item._id ?? 0,
+            id: item._id ?? "",
             auditoria: item.titulo ?? "Sin Título",
             tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
             tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
@@ -214,13 +214,18 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   // Eliminar auditoría
   borrarAuditoria(element: Auditoria) {
+    if (!element.id) {
+      this.alertaService.showErrorAlert("Error: ID de auditoría no válido");
+      return;
+    }
+    
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then(
         (result) => {
           if (result.isConfirmed) {
-            this.planAnualAuditoriaService
-              .delete(`auditoria`, element)
+            this.PlanAnualAuditoriaMid
+              .delete(`auditoria/${element.id}`, { id: this.id })
               .subscribe(
                 (response) => {
                   if (response) {
@@ -241,8 +246,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
                 }
               );
           }
-
-
         },
         (error) => {
           this.alertaService.showErrorAlert("Error al eliminar el registro");
