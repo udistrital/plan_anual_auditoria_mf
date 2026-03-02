@@ -24,7 +24,7 @@ export const rolesAprobacion: { [key: string]: any } = {
 };
 
 export const documentos = [
-  "Programa de trabajo",
+  "Programa de Auditoría",
   "Oficio Anuncio Solicitud de Información",
   "Carta de presentación",
   "Compromiso Ético del Auditor Interno",

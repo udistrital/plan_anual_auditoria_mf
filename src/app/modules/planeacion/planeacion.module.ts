@@ -27,6 +27,7 @@ import { EditarActividadSeguimientoComponent } from "./components/seguimiento/ed
 import { DocumentosAnexosSeguimientoComponent } from "./components/seguimiento/editar-seguimiento/documentos-anexos-seguimiento/documentos-anexos-seguimiento.component";
 import { RevisionDocumentosSeguimientoComponent } from "./components/seguimiento/revision-documentos/revision-documentos.component";
 import { ModalRechazoSeguimientoComponent } from "./components/seguimiento/revision-documentos/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component";
+import { ModalVisualizarRecargarCompromisoEticoComponent } from "./components/auditorias-internas/editar-auditoria/documentos-anexos-auditoria/modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { ModalRechazoSeguimientoComponent } from "./components/seguimiento/revis
     EditarActividadAuditoriaComponent,
     RevisionDocumentosComponent,
     ModalRechazoAuditoriaComponent,
+    ModalVisualizarRecargarCompromisoEticoComponent,
 
     // Seguimiento e Informes
     SeguimientoComponent,

@@ -38,7 +38,8 @@ export class ModalVisualizarRecargarDocumentoComponent {
         idTipoDocumento: environment.TIPO_DOCUMENTO.MATRIZ_FUNCION_PUBLICA,
         descripcion: 'Matriz función pública',
         cargaLambda: false,
-        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
+        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
+        referencia: "Plan Auditoria"
       },
     });
   }

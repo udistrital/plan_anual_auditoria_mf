@@ -13,7 +13,7 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
-import descargarAuditorias from "src/app/shared/utils/descargarAuditorias";
+import { firstValueFrom, map, catchError } from "rxjs";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -177,8 +177,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.mostrarOrdenamiento =
         (esAuditorExperto || esJefeControlInterno) &&
-        ((this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) || this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID);
+        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) ||
+        (esJefeControlInterno && enRevisionJefe);
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
@@ -198,17 +199,65 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
-      const base64File = await this.nuxeoService.obtenerPorUUID(
-        environment.PLANTILLA_CARGUE_MASIVO
-      );
+      this.spinnerService.show();
+
+      const plantilla = await firstValueFrom(
+        this.PlanAnualAuditoriaMid.get(
+          'cargue-masivo/auditorias/plantilla'
+        )
+        .pipe(
+          map((res: any) => {
+            if (!res || !res.base64)
+              throw new Error("Respuesta inválida del servidor: base64 no encontrado");
+
+            return res.base64;
+          }),
+          catchError((error) => { throw error; })
+        )
+      )
+
       await this.descargaService.descargarArchivo(
-        base64File,
+        plantilla,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "plantilla"
       );
     } catch (error) {
       console.error("Error al descargar la plantilla:", error);
       this.alertaService.showErrorAlert("Error al descargar la plantilla");
+    } finally {
+      this.spinnerService.hide();
+    }
+  }
+
+  async exportarTabla(): Promise<void> {
+    try {
+      this.spinnerService.show();
+
+      const excel = await firstValueFrom(
+        this.PlanAnualAuditoriaMid.get(
+          'cargue-masivo/auditorias/plan/' + this.id
+        )
+        .pipe(
+          map((res: any) => {
+            if (!res || !res.base64)
+              throw new Error("Respuesta inválida del servidor: base64 no encontrado");
+
+            return res.base64;
+          }),
+          catchError((error) => { throw error; })
+        )
+      )
+
+      await this.descargaService.descargarArchivo(
+        excel,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "auditorias_plan_auditoria_" + this.vigenciaNombre
+      );
+    } catch (error) {
+      console.error("Error al exportar la tabla:", error);
+      this.alertaService.showErrorAlert("Error al exportar la tabla");
+    } finally {
+      this.spinnerService.hide();
     }
   }
 
@@ -299,6 +348,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
         tipo: "auditorias",
       },
     });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
+    });
   }
 
   subirArchivoMatriz(): void {
@@ -312,7 +365,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
         cargaLambda: false,
         tipoIdReferencia:
           environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
+        referencia: "Plan Auditoria",
       },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
     });
   }
 
@@ -405,27 +463,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "80%",
       height: "80vh",
     });
-  }
-
-  /** Download the Excel file for bulk audit upload */
-  async descargarArchivoDescargueMasivo() {
-    try {
-      this.spinnerService.show();
-      const base64File = await this.nuxeoService.obtenerPorUUID(
-        environment.PLANTILLA_CARGUE_MASIVO
-      );
-      const buffer = await descargarAuditorias(this.dataSource.data, base64File);
-      await this.descargaService.descargarArchivoBuffer(
-        buffer,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        environment.NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS,
-      );
-    } catch (error) {
-      console.error("Error al descargar el archivo de auditorías:", error);
-      this.alertaService.showErrorAlert("Error al descargar el archivo de auditorías");
-    } finally {
-      this.spinnerService.hide();
-    }
   }
 
 }

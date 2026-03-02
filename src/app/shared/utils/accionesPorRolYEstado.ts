@@ -39,7 +39,7 @@ export const accionesProgramacion: {
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías"],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo",],
   },
 
   [environment.ROL.SECRETARIO]: {
@@ -89,60 +89,48 @@ export const accionesPlaneacion: {
   [environment.ROL.ADMIN]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Revisar Auditoría",
     ],
   },
 
   [environment.ROL.JEFE]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
-      "Ver Documento",
       "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
-      "Ver Documento",
       "Revisar Auditoría",
     ],
   },
@@ -150,29 +138,23 @@ export const accionesPlaneacion: {
   [environment.ROL.AUDITOR_EXPERTO]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -180,29 +162,23 @@ export const accionesPlaneacion: {
   [environment.ROL.AUDITOR]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -210,32 +186,50 @@ export const accionesPlaneacion: {
   [environment.ROL.AUDITOR_ASISTENTE]: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documento",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
-      "Ver Documento",
       "Enviar a Aprobación por Jefe",
     ],
   },
+
+  [environment.ROL.JEFE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+      "Revisar Auditoría"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
+    ]
+  },
+
+  [environment.ROL.ASISTENTE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+      "Revisar Auditoría"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
+      "Ver Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
+    ]
+  }
 };
 
 // TODO: Ajustar correctamente las acciones de acuerdo al rol y el estado
