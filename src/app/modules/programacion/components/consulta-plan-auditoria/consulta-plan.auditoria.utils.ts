@@ -183,6 +183,71 @@ export class DocumentoUtils {
   }
 
   /**
+    * Genera las tabs para visualizar los documentos asociados a un plan de auditoría, determinando qué documentos mostrar y qué acciones permitir dependiendo del estado del plan y los roles del usuarios.
+    * @param planId El ID del plan de auditoría para el cual se generarán las tabs de documentos.
+    * @param planEstado El estado actual del plan de auditoría, utilizado para determinar qué documentos mostrar.
+    * @param roles Los roles del usuario actual, utilizados para determinar qué documentos mostrar y qué acciones permitir.
+    * @param dialogRefHolder Un objeto que contiene una referencia al diálogo de visualización de documentos, utilizado para actualizar el contenido del diálogo después de realizar acciones como la actualización del formato PAA.
+    * @returns Un array de objetos TabDocumento que representan las tabs a mostrar en el diálogo de visualización de documentos.
+   */
+  getTabsVerDocumentos(
+    planId: string,
+    planEstado: number,
+    roles?: string[],
+    dialogRefHolder?: { ref: MatDialogRef<any> | null }
+  ): TabDocumento[] {
+    const formatoPaaActualizadoTab: TabDocumento = {
+      nombre: "Formato PAA Actualizado",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
+      botones: dialogRefHolder ? [
+        {
+          nombre: "Actualizar Documento",
+          accion: () => this.handleActualizarDocumento(
+            planId,
+            `Plantilla/${planId}?conEspeciales=true`,
+            dialogRefHolder.ref,
+            environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
+          ),
+          icono: "update",
+        },
+      ] : undefined,
+    };
+    const formatoPaaOriginalTab: TabDocumento = {
+      nombre: "Formato PAA Original",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
+    };
+    const matrizFuncionPublicaTab: TabDocumento = {
+      nombre: "Matriz Función Pública",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
+    };
+    const actaComiteTab: TabDocumento = {
+      nombre: "Acta de Comité",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR,
+    };
+
+    let tabs = [];
+    if (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID) {
+      tabs = [formatoPaaActualizadoTab, formatoPaaOriginalTab, matrizFuncionPublicaTab];
+
+      if (!roles || roles.length === 0) {
+        tabs.push(actaComiteTab);
+      } else {
+        const rolesActaComite = [
+          environment.ROL.AUDITOR_EXPERTO,
+          environment.ROL.JEFE,
+          environment.ROL.SECRETARIO
+        ];
+        if (roles.some(role => rolesActaComite.includes(role))) {
+          tabs.push(actaComiteTab);
+        }
+      }
+    } else {
+      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
+    }
+    return tabs;
+  }
+
+  /**
    * Abre un modal para ver los documentos asociados a un plan de auditoría.
    * @param planId El ID del plan de auditoría.
    * @param planEstado El estado del plan de auditoría.
@@ -200,53 +265,8 @@ export class DocumentoUtils {
       ref: MatDialogRef<ModalVerDocumentosComponent> | null
     } = { ref: null };
 
-    //Tabs de documentos a mostrar en el modal, se muestran dependiendo del estado del plan y los roles del usuario
-    const formatoPaaActualizadoTab: TabDocumento = {
-      nombre: "Formato PAA Actualizado",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
-      botones: [
-        {
-          nombre: "Actualizar Documento",
-          accion: () => this.handleActualizarDocumento(
-            planId,
-            `Plantilla/${planId}?conEspeciales=true`,
-            dialogRefHolder.ref,
-            environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
-          ),
-          icono: "update",
-        },
-      ],
-    };
-    const formatoPaaOriginalTab: TabDocumento = {
-      nombre: "Formato PAA Original",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
-    };
-    const matrizFuncionPublicaTab: TabDocumento = {
-      nombre: "Matriz Función Pública",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
-    };
-    const actaComiteTab: TabDocumento = {
-      nombre: "Acta de Comité",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR,
-    };
-
     // Filtrar las tabs a mostrar dependiendo del estado del plan y los roles del usuario
-    let tabs = []
-    if (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID) {
-      tabs = [formatoPaaActualizadoTab, formatoPaaOriginalTab, matrizFuncionPublicaTab];
-
-      const rolesActaComite = [
-        environment.ROL.AUDITOR_EXPERTO,
-        environment.ROL.JEFE,
-        environment.ROL.SECRETARIO
-      ];
-
-      if (roles.some(role => rolesActaComite.includes(role))) {
-        tabs.push(actaComiteTab);
-      }
-    } else {
-      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
-    }
+    const tabs = this.getTabsVerDocumentos(planId, planEstado, roles, dialogRefHolder);
 
     dialogRefHolder.ref = this.matDialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
