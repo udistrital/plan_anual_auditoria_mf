@@ -12,8 +12,8 @@ export interface Auditoria {
   macroproceso_id: number;
   proceso_id: number;
   dependencia_id: number;
-  lider_id: number;
-  responsable_id: number;
+  jefe_nombre: number;
+  asistente_nombre: number;
   fecha_inicio: string;
   fecha_fin: string;
   objetivo: string;
@@ -37,8 +37,8 @@ export interface Auditoria {
   lider_nombre: string;
   responsable_nombre: string;
   estado_interno_id?: number;
-  correo_lider?: string;
-  correo_responsable?: string;
+  jefe_correo?: string;
+  asistente_correo?: string;
   correo_dependencia?: string;
   correo_complementario?: string;
 }

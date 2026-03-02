@@ -87,8 +87,6 @@ export class EditarAuditoriaComponent implements OnInit {
 
     establecerSelectsSecuenciales(this.formularioInformacionComponent, [
       "proceso",
-      "lider",
-      "responsable",
     ]);
   }
 
@@ -280,15 +278,15 @@ export class EditarAuditoriaComponent implements OnInit {
       macroproceso: this.auditoria.macroproceso_nombre,
       proceso: this.auditoria.proceso_nombre,
       dependencia: this.auditoria.dependencia_nombre,
-      lider: this.auditoria.lider_id,
-      responsable: this.auditoria.responsable_id,
+      jefe_nombre: this.auditoria.jefe_nombre,
+      asistente_nombre: this.auditoria.asistente_nombre,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
       objetivo_auditoria: this.auditoria.objetivo,
       alcance_auditoria: this.auditoria.alcance,
       criterios: this.auditoria.criterio,
-      correo_lider: this.auditoria.correo_lider,
-      correo_responsable: this.auditoria.correo_responsable,
+      jefe_correo: this.auditoria.jefe_correo,
+      asistente_correo: this.auditoria.asistente_correo,
       correo_dependencia: this.auditoria.correo_dependencia,
       correo_complementario: this.auditoria.correo_complementario,
     });
@@ -302,14 +300,6 @@ export class EditarAuditoriaComponent implements OnInit {
     this.formularioTemasComponent.form.patchValue({
       temas: this.auditoria.temas,
     });
-
-    if (this.auditoria.proceso_id) {
-      this.manejarCambioProceso(this.auditoria.proceso_id);
-
-      if (this.auditoria.lider_id) {
-        this.manejarCambioLider();
-      }
-    }
     
   }
 
@@ -327,16 +317,14 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   private readonly selectActions: Record<string, (valor: any) => void> = {
-    tipo: (valor) => this.manejarCambioTipo(valor),
-    proceso: (valor) => this.manejarCambioProceso(valor),
-    lider: () => this.manejarCambioLider(),
+    macroproceso: (valor) => this.manejarCambioMacroproceso(valor),
   };
 
   manejarCambioSelect(event: any): void {
     this.selectActions[event.campo.nombre]?.(event.valor);
   }
 
-  manejarCambioTipo(tipoProcesoId: any) {
+  manejarCambioMacroproceso(tipoProcesoId: any) {
     const { MACROPROCESO, PROCESO } =
       environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
 
@@ -355,54 +343,11 @@ export class EditarAuditoriaComponent implements OnInit {
     this.cargarOpciones("proceso", tipoParametroId);
   }
 
-  manejarCambioProceso(procesoId: number) {
-    this.procesoElegido = procesoId;
-    this.cargarCargosLider("lider", procesoId);
-  }
-
-  manejarCambioLider() {
-    this.cargarCargosResponsable("responsable");
-  }
 
   cargarOpciones(campoNombre: string, tipoParametroId: number) {
     this.parametrosService
       .get(
         `parametro?query=TipoParametroId:${tipoParametroId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario(campoNombre);
-        if (campo) campo.parametros!.opciones = res.Data;
-      });
-  }
-
-  cargarCargosLider(campoNombre: string, procesoId: number) {
-    const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
-    const query =
-      this.tipoSeleccionado === "macroproceso"
-        ? `ParametroPadreId.ParametroPadreId.Id:${procesoId}`
-        : `ParametroPadreId:${procesoId}`;
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${cargosLiderId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario(campoNombre);
-        if (campo) campo.parametros!.opciones = res.Data;
-      });
-  }
-
-  cargarCargosResponsable(campoNombre: string) {
-    const cargosResponsableId =
-      environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
-    const query =
-      this.tipoSeleccionado === "macroproceso"
-        ? `ParametroPadreId.ParametroPadreId.Id:${this.procesoElegido}`
-        : `ParametroPadreId:${this.procesoElegido}`;
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${cargosResponsableId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
       )
       .subscribe((res) => {
         const campo = this.obtenerCampoFormulario(campoNombre);
