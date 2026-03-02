@@ -31,7 +31,14 @@ export class RolService {
   }
 
   // Permiso para mostrar columna de acciones en un módulo en especifico
-  mostrarAcciones(accionesModulo: any) {
-    return this.roles.some((rol) => accionesModulo[rol]);
+  mostrarAcciones(accionesModulo: { [rol: string]: { [estado: number]: string[] } }): boolean {
+    return this.roles.some((rol) => {
+      const accionesPorEstado = accionesModulo[rol];
+      return accionesPorEstado && Object.values(accionesPorEstado).some((acciones) => acciones.length > 0);
+    });
+  }
+
+  getRolPrioritario(rolPrioridad: string[]): string | null {
+    return rolPrioridad.find(rol => this.roles.includes(rol)) ?? null;
   }
 }

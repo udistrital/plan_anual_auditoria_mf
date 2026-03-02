@@ -183,14 +183,13 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   obtenerRolPrioritario() {
-    const rolPrioridad = [
+    this.role = this.rolService.getRolPrioritario([
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
       environment.ROL.JEFE,
-    ];
-    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
+    ]);
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
