@@ -1,9 +1,7 @@
 import { Injectable } from "@angular/core";
-import { RequestManager } from "../managers/requestManager";
 import { GestorDocumentalService } from "./gestor-documental.service";
-import { Subject, lastValueFrom, forkJoin } from "rxjs";
-import { Documento } from "src/app/shared/data/models/documento/documento";
-import { map, catchError } from "rxjs/operators";
+import { lastValueFrom, forkJoin, from, Observable } from "rxjs";
+import { map, catchError, mergeMap } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -39,45 +37,47 @@ export class NuxeoService {
     });
   }
 
-  guardarArchivos(files: any) {
-    const documentsSubject = new Subject<Documento[]>();
-    const documents$ = documentsSubject.asObservable();
+  guardarArchivos(files: any[]): Observable<any[]> {
+    if (!Array.isArray(files) || files.length === 0) {
+      return from([[] as any[]]);
+    }
 
-    const documentos: any[] = [];
+    const requests = files.map((file: any) =>
+      from(this.obtenerArchivoEnBase64(file)).pipe(
+        mergeMap((fileData: string) => {
+          const sendFileData = [
+            {
+              IdTipoDocumento: file.IdTipoDocumento,
+              nombre: (file.nombre || "").replace(/[\.]/g),
+              metadatos: file.metadatos ? file.metadatos : {},
+              descripcion: file.descripcion ? file.descripcion : "",
+              file: fileData,
+            },
+          ];
 
-    files.map(async (file: any) => {
-      let fileData: any;
+          return this.gestorDocumentalService.postAny(
+            "document/uploadAnyFormat",
+            sendFileData
+          );
+        })
+      )
+    );
 
-      // Detectar si el archivo ya está en formato Base64
-      if (typeof file.file === "string") {
-        fileData = file.file; // Ya es Base64
-      } else if (file.file instanceof File) {
-        fileData = await this.fileABase64(file.file); // Convertir a Base64
-      } else {
-        throw new Error("Formato de archivo no soportado");
-      }
+    return forkJoin(requests);
+  }
 
-      const sendFileData = [
-        {
-          IdTipoDocumento: file.IdTipoDocumento,
-          nombre: file.nombre.replace(/[\.]/g),
-          metadatos: file.metadatos ? file.metadatos : {},
-          descripcion: file.descripcion ? file.descripcion : "",
-          file: fileData,
-        },
-      ];
+  private async obtenerArchivoEnBase64(file: any): Promise<string> {
+    if (typeof file?.file === "string") {
+      return file.file;
+    }
 
-      this.gestorDocumentalService
-        .postAny("document/uploadAnyFormat", sendFileData)
-        .subscribe((dataResponse) => {
-          documentos.push(dataResponse);
-          if (documentos.length === files.length) {
-            documentsSubject.next(documentos);
-          }
-        });
-    });
+    if (file?.file instanceof File) {
+      return (await this.fileABase64(file.file)) as string;
+    }
 
-    return documents$;
+    throw new Error(
+      `Formato de archivo no soportado para ${file?.nombre || "archivo sin nombre"}`
+    );
   }
 
   async obtenerPorUUID(uuid: string): Promise<string> {

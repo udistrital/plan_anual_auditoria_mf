@@ -132,7 +132,7 @@ export class RevisionSecretarioComponent {
 
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA;
+      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL; 
       const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
 
       const enlacesConTipo = await lastValueFrom(

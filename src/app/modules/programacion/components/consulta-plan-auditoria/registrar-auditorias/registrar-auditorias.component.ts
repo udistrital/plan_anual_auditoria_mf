@@ -11,8 +11,8 @@ import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visu
 import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
+import { DocumentoUtils } from "../consulta-plan.auditoria.utils";
 import { firstValueFrom, map, catchError } from "rxjs";
 
 //servicios
@@ -65,7 +65,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private router: Router,
     private spinnerService: SpinnerService,
     private rolService: RolService,
-    private userService: UserService
+    private userService: UserService,
+    private documentoUtils: DocumentoUtils,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -428,13 +429,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   verDocumentos() {
-    this.dialog.open(ModalVerDocumentosComponent, {
-      width: "1200px",
-      data: {
-        entityId: this.id,
-      },
-    });
+    this.documentoUtils.verDocumentos(this.id, this.estadoIdActual ?? 0, this.vigenciaNombre, this.roles);
   }
+
   buscarMatriz(): Promise<string | null> {
     return new Promise((resolve, reject) => {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)
