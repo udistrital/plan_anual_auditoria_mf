@@ -8,6 +8,11 @@ import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { catchError, concatMap, firstValueFrom, map, Observable, of, throwError } from "rxjs";
 
+/** Constantes para identificar acciones que requieren refrescar la información en la interfaz de usuario después de su ejecución, como la actualización del formato PAA. Estas constantes se utilizan como claves en objetos de callback para asegurar que la función de refresco correcta sea llamada después de completar exitosamente la acción correspondiente. */
+export const REFRESHABLES = {
+  FORMATO_PAA_ACTUALIZADO: "formatoPaaActualizado",
+};
+
 /**
  * Servicio de utilidades para la gestión de documentos PDF relacionados con el plan de auditoría, incluyendo generación, almacenamiento y referencia de documentos.
  */
@@ -29,21 +34,24 @@ export class DocumentoUtils {
    * 
    * Muestra alertas de éxito o error según corresponda durante el proceso.
    * @param planId El ID del plan de auditoría para el cual se actualizará el formato PAA.
-   * @param dialogRef Una referencia al diálogo que muestra los documentos, para actualizar la información mostrada después de la actualización del formato PAA.
-   * @param conEspeciales Un booleano que indica si se deben incluir caracteres especiales en el PDF generado.
+   * @param urlGeneracion La URL del servicio que genera el PDF.
+   * @param tipoDocumentoId El ID del tipo de documento que se está actualizando.
+   * @param refreshCallback Función de callback opcional a ejecutar tras la actualización exitosa (por ejemplo, para recargar documentos en un componente o diálogo).
    * @returns Una promesa que se resuelve cuando el proceso de actualización se completa.
    */
   async handleActualizarDocumento(
     planId: string,
     urlGeneracion: string,
-    dialogRef: MatDialogRef<ModalVerDocumentosComponent, unknown> | null,
     tipoDocumentoId: number,
+    refreshCallback?: () => void | Promise<void>
   ): Promise<void> {
     try {
       await this.actualizarDocumento(planId, urlGeneracion, tipoDocumentoId);
       this.alertaService.showSuccessAlert("Formato PAA actualizado exitosamente.")
         .then(() => {
-          dialogRef?.componentInstance.ngOnInit();
+          if (refreshCallback) {
+            refreshCallback();
+          }
         });
     } catch (error) {
       this.alertaService.showErrorAlert("Error al actualizar el formato PAA.");
@@ -183,6 +191,71 @@ export class DocumentoUtils {
   }
 
   /**
+    * Genera las tabs para visualizar los documentos asociados a un plan de auditoría, determinando qué documentos mostrar y qué acciones permitir dependiendo del estado del plan y los roles del usuarios.
+    * @param planId El ID del plan de auditoría para el cual se generarán las tabs de documentos.
+    * @param planEstado El estado actual del plan de auditoría, utilizado para determinar qué documentos mostrar.
+    * @param roles Los roles opcionales del usuario actual, utilizados para determinar qué documentos mostrar y qué acciones permitir.
+    * @param refreshCallbacks Un objeto opcional que contiene funciones de callback para refrescar la información en la interfaz de usuario después de realizar acciones como la actualización de documentos. Las claves de este objeto deben coincidir con los valores definidos en la constante REFRESHABLES y las funciones serán llamadas después de completar exitosamente la acción correspondiente.
+    * @returns Un array de objetos TabDocumento que representan las tabs a mostrar en el panel de visualización de documentos.
+   */
+  getTabsVerDocumentos(
+    planId: string,
+    planEstado: number,
+    roles?: string[],
+    refreshCallbacks?: { [key: string]: () => void | Promise<void> }
+  ): TabDocumento[] {
+    const formatoPaaActualizadoTab: TabDocumento = {
+      nombre: "Formato PAA Actualizado",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
+      botones: refreshCallbacks?.[REFRESHABLES.FORMATO_PAA_ACTUALIZADO] ? [
+        {
+          nombre: "Actualizar Documento",
+          accion: () => this.handleActualizarDocumento(
+            planId,
+            `plantilla/${planId}?conEspeciales=true`,
+            environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
+            refreshCallbacks?.[REFRESHABLES.FORMATO_PAA_ACTUALIZADO],
+          ),
+          icono: "update",
+        },
+      ] : undefined,
+    };
+    const formatoPaaOriginalTab: TabDocumento = {
+      nombre: "Formato PAA Original",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
+    };
+    const matrizFuncionPublicaTab: TabDocumento = {
+      nombre: "Matriz Función Pública",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
+    };
+    const actaComiteTab: TabDocumento = {
+      nombre: "Acta de Comité",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR,
+    };
+
+    let tabs = [];
+    if (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID) {
+      tabs = [formatoPaaActualizadoTab, formatoPaaOriginalTab, matrizFuncionPublicaTab];
+
+      if (!roles || roles.length === 0) {
+        tabs.push(actaComiteTab);
+      } else {
+        const rolesActaComite = [
+          environment.ROL.AUDITOR_EXPERTO,
+          environment.ROL.JEFE,
+          environment.ROL.SECRETARIO
+        ];
+        if (roles.some(role => rolesActaComite.includes(role))) {
+          tabs.push(actaComiteTab);
+        }
+      }
+    } else {
+      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
+    }
+    return tabs;
+  }
+
+  /**
    * Abre un modal para ver los documentos asociados a un plan de auditoría.
    * @param planId El ID del plan de auditoría.
    * @param planEstado El estado del plan de auditoría.
@@ -200,53 +273,12 @@ export class DocumentoUtils {
       ref: MatDialogRef<ModalVerDocumentosComponent> | null
     } = { ref: null };
 
-    //Tabs de documentos a mostrar en el modal, se muestran dependiendo del estado del plan y los roles del usuario
-    const formatoPaaActualizadoTab: TabDocumento = {
-      nombre: "Formato PAA Actualizado",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
-      botones: [
-        {
-          nombre: "Actualizar Documento",
-          accion: () => this.handleActualizarDocumento(
-            planId,
-            `Plantilla/${planId}?conEspeciales=true`,
-            dialogRefHolder.ref,
-            environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
-          ),
-          icono: "update",
-        },
-      ],
+    const onSuccessCallbacks = {
+      [REFRESHABLES.FORMATO_PAA_ACTUALIZADO]:
+          () => dialogRefHolder.ref?.componentInstance.ngOnInit(),
     };
-    const formatoPaaOriginalTab: TabDocumento = {
-      nombre: "Formato PAA Original",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
-    };
-    const matrizFuncionPublicaTab: TabDocumento = {
-      nombre: "Matriz Función Pública",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA
-    };
-    const actaComiteTab: TabDocumento = {
-      nombre: "Acta de Comité",
-      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR,
-    };
-
     // Filtrar las tabs a mostrar dependiendo del estado del plan y los roles del usuario
-    let tabs = []
-    if (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID) {
-      tabs = [formatoPaaActualizadoTab, formatoPaaOriginalTab, matrizFuncionPublicaTab];
-
-      const rolesActaComite = [
-        environment.ROL.AUDITOR_EXPERTO,
-        environment.ROL.JEFE,
-        environment.ROL.SECRETARIO
-      ];
-
-      if (roles.some(role => rolesActaComite.includes(role))) {
-        tabs.push(actaComiteTab);
-      }
-    } else {
-      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
-    }
+    const tabs = this.getTabsVerDocumentos(planId, planEstado, roles, onSuccessCallbacks);
 
     dialogRefHolder.ref = this.matDialog.open(ModalVerDocumentosComponent, {
       width: "1200px",

@@ -17,6 +17,8 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { RolService } from "src/app/core/services/rol.service";
+import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
+import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
   selector: "app-revision-jefe",
@@ -27,8 +29,8 @@ export class RevisionJefeComponent implements OnInit {
   selectedTab: number = 0;
   botonSeleccionado: string = "formato";
   documentos: { base64: string; tipo_id: number }[] = [];
-  documentoPAA: string = "";
-  documentoMatrizPublica: string = "";
+  documentosPorTab: { [key: number]: string } = {};
+  tabs: TabDocumento[] = [];
   usuarioId: any;
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
@@ -50,13 +52,14 @@ export class RevisionJefeComponent implements OnInit {
     private notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private parametrosUtilsService: ParametrosUtilsService,
     private rolService: RolService,
+    private documentoUtils: DocumentoUtils,
   ) {}
 
   async ngOnInit() {
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     // se obtienen los roles del usuario para usarlos en el nombre del remitente
     this.roles = this.rolService.getRoles();
-    this.obtenerEstadoActual();
+    await this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
     } catch(error) {
@@ -67,21 +70,26 @@ export class RevisionJefeComponent implements OnInit {
     });
   }
 
-  obtenerEstadoActual(): void {
-    this.planAuditoriaService
-      .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
-      .subscribe(
-        (response: any) => {
-          const estadoActual = response?.Data?.[0];
-          this.estadoIdActual = estadoActual?.estado_id || null;
-          this.mostrarBotones =
-            this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
-        },
-        (error) => {
-          console.error("Error al obtener el estado actual:", error);
-          this.mostrarBotones = false;
-        }
+  async obtenerEstadoActual(): Promise<void> {
+    const callbacks = {
+      [REFRESHABLES.FORMATO_PAA_ACTUALIZADO]: () =>
+        this.renderizarDocumentos(),
+    };
+    try {
+      const response: any = await lastValueFrom(
+        this.planAuditoriaService.get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
       );
+      const estadoActual = response?.Data?.[0];
+      this.estadoIdActual = estadoActual?.estado_id || null;
+      this.mostrarBotones =
+        this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
+      
+      this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+    } catch (error) {
+      console.error("Error al obtener el estado actual:", error);
+      this.mostrarBotones = false;
+      this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, 0, this.roles, callbacks);
+    }
   }
 
   abrirModalRechazo(): void {
@@ -281,8 +289,8 @@ export class RevisionJefeComponent implements OnInit {
 
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL; 
-      const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
+      this.documentos = [];
+      this.documentosPorTab = {};
 
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.planAuditoriaId)
@@ -294,12 +302,14 @@ export class RevisionJefeComponent implements OnInit {
       enlacesConTipo.forEach((doc, index) => {
         const base64 = base64Files[index];
         this.documentos.push({ base64, tipo_id: doc.tipo_id });
+      });
 
-        if (doc.tipo_id === tipoIdPAA && !this.documentoPAA) {
-          this.documentoPAA = base64;
-        }
-        if (doc.tipo_id === tipoIdMatrizPublica && !this.documentoMatrizPublica) {
-          this.documentoMatrizPublica = base64;
+      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }));
+      this.documentos.forEach((doc) => {
+        const holderIdx = tabHolders.findIndex(holder => holder.tab.tipoId === doc.tipo_id);
+        if (holderIdx !== -1) {
+          this.documentosPorTab[tabHolders[holderIdx].idx] = doc.base64;
+          tabHolders.splice(holderIdx, 1);
         }
       });
 
