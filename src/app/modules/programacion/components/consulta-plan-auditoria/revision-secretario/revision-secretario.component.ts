@@ -4,7 +4,7 @@ import { environment } from "src/environments/environment";
 import { ModalMotivosRechazoComponent } from "../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretario/modal-aprobacion-secretario.component";
 import { ActivatedRoute, Router } from "@angular/router";
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, forkJoin } from 'rxjs';
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -12,6 +12,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { RolService } from "src/app/core/services/rol.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 
 @Component({
@@ -37,6 +38,7 @@ export class RevisionSecretarioComponent {
     private descargaService: DescargaService,
     private tercerosService: TercerosService,
     private rolService: RolService,
+    private parametrosUtilsService: ParametrosUtilsService,
   ) { }
 
   botonSeleccionado: string = "formato";
@@ -44,11 +46,14 @@ export class RevisionSecretarioComponent {
   documentoPAA: string = "";
   documentoMatrizPublica: string = "";
   usuarioId: any;
+  vigenciaNombre: string = "";
 
   async ngOnInit() {
+    console.debug("Inicializando RevisionSecretarioComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.roles = this.rolService.getRoles();
     this.obtenerEstadoActual();
+    this.obtenerVigenciaActual();
     try {
       await this.renderizarDocumentos();
     } catch (error) {
@@ -56,6 +61,22 @@ export class RevisionSecretarioComponent {
     }
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
+    });
+  }
+
+  obtenerVigenciaActual(): void {
+    forkJoin({
+      plan: this.planAuditoriaService.get(`plan-auditoria/${this.planAuditoriaId}`),
+      vigencias: this.parametrosUtilsService.getVigencias(),
+    }).subscribe({
+      next: ({ plan, vigencias }: any) => {
+        const vigenciaId = plan?.Data?.vigencia_id;
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        this.vigenciaNombre = vigenciaNombre || "";
+      },
+      error: (error) => {
+        console.error("Error al obtener la vigencia:", error);
+      }
     });
   }
 
@@ -161,7 +182,12 @@ export class RevisionSecretarioComponent {
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos(this.documentos, 'documentosPAA.zip');
+      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        `documentosPAA${suffix}.zip`,
+        suffix
+      );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }

@@ -35,6 +35,8 @@ export class RevisionJefeComponent implements OnInit {
   mostrarBotones: boolean = true;
   roles: string[] = [];
 
+  vigenciaNombre: string = "";
+
   constructor(
     private route: ActivatedRoute,
     public dialog: MatDialog,
@@ -53,10 +55,11 @@ export class RevisionJefeComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    console.debug("Inicializando RevisionJefeComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
-    // se obtienen los roles del usuario para usarlos en el nombre del remitente
     this.roles = this.rolService.getRoles();
     this.obtenerEstadoActual();
+    this.obtenerVigenciaActual();
     try {
       await this.renderizarDocumentos();
     } catch(error) {
@@ -64,6 +67,26 @@ export class RevisionJefeComponent implements OnInit {
     }
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
+    });
+  }
+
+  obtenerVigenciaActual(): void {
+    forkJoin({
+      plan: this.planAuditoriaService.get(`plan-auditoria/${this.planAuditoriaId}`),
+      vigencias: this.parametrosUtilsService.getVigencias(),
+    }).subscribe({
+      next: ({ plan, vigencias }: any) => {
+        console.debug("Plan obtenido:", plan);
+        console.debug("Vigencias obtenidas:", vigencias);
+        const vigenciaId = plan?.Data?.vigencia_id;
+        console.debug("Vigencia ID obtenida del plan:", vigenciaId);
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        console.debug("Vigencia Nombre encontrada:", vigenciaNombre);
+        this.vigenciaNombre = vigenciaNombre || "";
+      },
+      error: (error) => {
+        console.error("Error al obtener la vigencia:", error);
+      }
     });
   }
 
@@ -310,7 +333,12 @@ export class RevisionJefeComponent implements OnInit {
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos(this.documentos, 'documentosPAA.zip');
+      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        `documentosPAA${suffix}.zip`,
+        suffix
+      );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }
