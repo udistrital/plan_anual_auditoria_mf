@@ -33,15 +33,9 @@ export const colocacionesContructorTabla = [
     sortable: true,
   },
   {
-    columnDef: "lider",
-    header: "Líder",
-    cell: (auditoria: any) => auditoria.lider_nombre,
-    sortable: true,
-  },
-  {
-    columnDef: "responsable",
-    header: "Responsable",
-    cell: (auditoria: any) => auditoria.responsable_nombre,
+    columnDef: "dependencia",
+    header: "Dependencia",
+    cell: (auditoria: any) => auditoria.dependencia_nombre,
     sortable: true,
   },
   {
