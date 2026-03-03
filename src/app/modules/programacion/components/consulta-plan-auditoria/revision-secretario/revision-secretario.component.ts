@@ -56,7 +56,7 @@ export class RevisionSecretarioComponent {
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.roles = this.rolService.getRoles();
     this.obtenerVigenciaActual();
-    await this.obtenerEstadoActual();
+    this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
     } catch (error) {

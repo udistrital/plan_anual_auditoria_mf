@@ -61,8 +61,8 @@ export class RevisionJefeComponent implements OnInit {
     console.debug("Inicializando RevisionJefeComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.roles = this.rolService.getRoles();
-    this.obtenerEstadoActual();
     this.obtenerVigenciaActual();
+    this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
     } catch(error) {
