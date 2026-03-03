@@ -33,7 +33,7 @@ export class RevisionDocumentosComponent implements OnInit {
   docProgramaTrabajo: string = "";
   docSolicitudInformacion: string = "";
   docCartaPresentacion: string = "";
-  docCompromisoEstico: string = "";
+  docCompromisoEtico: string = "";
 
   constructor(
     public dialog: MatDialog,
@@ -78,7 +78,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
   preguntarAprobacionAuditoria() {
     const rolAprobacion = this.rolesAprobacion[this.role!];
-
+    
     if (!rolAprobacion) {
       return; //si no hay rol
     }
@@ -175,20 +175,23 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   obtenerRolPrioritario() {
-    const rolPrioridad = [
+    this.role = this.rolService.getRolPrioritario([
       environment.ROL.SECRETARIO,
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
       environment.ROL.JEFE,
-    ];
-    this.role = rolPrioridad.find(rol => this.rolService.tieneRol(rol)) ?? null;
+      environment.ROL.JEFE_DEPENDENCIA,
+      environment.ROL.ASISTENTE_DEPENDENCIA,
+    ]);
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
     const condicionesVisibilidad: { [key: string]: number[] } = {
       [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
       auditado: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
     };
     // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;

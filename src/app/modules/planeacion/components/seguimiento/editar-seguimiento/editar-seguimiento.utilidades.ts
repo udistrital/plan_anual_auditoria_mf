@@ -59,27 +59,19 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "lider",
-      etiqueta: "Líder",
+      nombre: "jefe_nombre",
+      etiqueta: "Jefe dependencia",
       icono: "person",
-      tipo: "select",
-      validaciones: [{ tipo: "requerido", valor: "" }],
-      parametros: {
-        //vacio porque se llena en el componente editar auditoria
-      },
-      deshabilitado: false,
+      tipo: "text",
+      deshabilitado: true,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "responsable",
-      etiqueta: "Responsable",
+      nombre: "asistente_nombre",
+      etiqueta: "Asistente dependencia",
       icono: "supervisor_account",
-      tipo: "select",
-      validaciones: [{ tipo: "requerido", valor: "" }],
-      deshabilitado: false,
-      parametros: {
-        //vacio porque se llena en el componente editar auditoria
-      },
+      tipo: "text",
+      deshabilitado: true,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
@@ -91,7 +83,7 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "correo_lider",
+      nombre: "jefe_correo",
       etiqueta: "Correo Jefe dependencia",
       icono: "email",
       tipo: "email",
@@ -99,7 +91,7 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "correo_responsable",
+      nombre: "asistente_correo",
       etiqueta: "Correo Asistente dependencia",
       icono: "email",
       tipo: "email",
@@ -120,7 +112,7 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "event",
       parametros: {
         vista: "year",
-        fecha_inicio: "2024-01-01T05:00:00.000Z",
+        fecha_inicio: "2026-01-01T05:00:00.000Z",
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
@@ -133,7 +125,7 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "event_available",
       parametros: {
         vista: "year",
-        fecha_inicio: "2024-01-01T05:00:00.000Z",
+        fecha_inicio: "2026-01-01T05:00:00.000Z",
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,

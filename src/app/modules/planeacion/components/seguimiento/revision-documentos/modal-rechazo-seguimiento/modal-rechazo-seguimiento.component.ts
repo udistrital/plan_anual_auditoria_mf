@@ -97,7 +97,7 @@ export class ModalRechazoSeguimientoComponent {
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.role,
       observacion: this.formObservaciones.get("observaciones")?.value,
-      estado_interno_id: environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE,
+      estado_id: environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
   }

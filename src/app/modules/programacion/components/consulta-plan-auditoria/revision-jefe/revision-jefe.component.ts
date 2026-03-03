@@ -16,6 +16,10 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "s
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
+import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
+import { RolService } from "src/app/core/services/rol.service";
+import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
+import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
   selector: "app-revision-jefe",
@@ -26,12 +30,14 @@ export class RevisionJefeComponent implements OnInit {
   selectedTab: number = 0;
   botonSeleccionado: string = "formato";
   documentos: { base64: string; tipo_id: number }[] = [];
-  documentoPAA: string = "";
-  documentoMatrizPublica: string = "";
+  documentosPorTab: { [key: number]: string } = {};
+  tabs: TabDocumento[] = [];
   usuarioId: any;
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
+
+  vigenciaNombre: string = "";
 
   constructor(
     private route: ActivatedRoute,
@@ -47,10 +53,15 @@ export class RevisionJefeComponent implements OnInit {
     private notificacionesService: NotificacionesService,
     private notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private parametrosUtilsService: ParametrosUtilsService,
+    private rolService: RolService,
+    private documentoUtils: DocumentoUtils,
   ) {}
 
   async ngOnInit() {
+    console.debug("Inicializando RevisionJefeComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.roles = this.rolService.getRoles();
+    this.obtenerVigenciaActual();
     this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
@@ -62,21 +73,48 @@ export class RevisionJefeComponent implements OnInit {
     });
   }
 
+  obtenerVigenciaActual(): void {
+    forkJoin({
+      plan: this.planAuditoriaService.get(`plan-auditoria/${this.planAuditoriaId}`),
+      vigencias: this.parametrosUtilsService.getVigencias(),
+    }).subscribe({
+      next: ({ plan, vigencias }: any) => {
+        console.debug("Plan obtenido:", plan);
+        console.debug("Vigencias obtenidas:", vigencias);
+        const vigenciaId = plan?.Data?.vigencia_id;
+        console.debug("Vigencia ID obtenida del plan:", vigenciaId);
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        console.debug("Vigencia Nombre encontrada:", vigenciaNombre);
+        this.vigenciaNombre = vigenciaNombre || "";
+      },
+      error: (error) => {
+        console.error("Error al obtener la vigencia:", error);
+      }
+    });
+  }
+
   obtenerEstadoActual(): void {
+    const callbacks = {
+      [REFRESHABLES.FORMATO_PAA_ACTUALIZADO]: () =>
+        this.renderizarDocumentos(),
+    };
     this.planAuditoriaService
       .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
-      .subscribe(
-        (response: any) => {
+      .subscribe({
+        next: (response: any) => {
           const estadoActual = response?.Data?.[0];
           this.estadoIdActual = estadoActual?.estado_id || null;
           this.mostrarBotones =
             this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
+
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
         },
-        (error) => {
+        error: (error) => {
           console.error("Error al obtener el estado actual:", error);
           this.mostrarBotones = false;
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, 0, this.roles, callbacks);
         }
-      );
+      });
   }
 
   abrirModalRechazo(): void {
@@ -258,8 +296,8 @@ export class RevisionJefeComponent implements OnInit {
 
   async renderizarDocumentos() {
     try {
-      const tipoIdPAA = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA;
-      const tipoIdMatrizPublica = environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA;
+      this.documentos = [];
+      this.documentosPorTab = {};
 
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.planAuditoriaId)
@@ -271,12 +309,14 @@ export class RevisionJefeComponent implements OnInit {
       enlacesConTipo.forEach((doc, index) => {
         const base64 = base64Files[index];
         this.documentos.push({ base64, tipo_id: doc.tipo_id });
+      });
 
-        if (doc.tipo_id === tipoIdPAA && !this.documentoPAA) {
-          this.documentoPAA = base64;
-        }
-        if (doc.tipo_id === tipoIdMatrizPublica && !this.documentoMatrizPublica) {
-          this.documentoMatrizPublica = base64;
+      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }));
+      this.documentos.forEach((doc) => {
+        const holderIdx = tabHolders.findIndex(holder => holder.tab.tipoId === doc.tipo_id);
+        if (holderIdx !== -1) {
+          this.documentosPorTab[tabHolders[holderIdx].idx] = doc.base64;
+          tabHolders.splice(holderIdx, 1);
         }
       });
 
@@ -287,7 +327,12 @@ export class RevisionJefeComponent implements OnInit {
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos(this.documentos, 'documentosPAA.zip');
+      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        `documentosPAA${suffix}.zip`,
+        suffix
+      );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }

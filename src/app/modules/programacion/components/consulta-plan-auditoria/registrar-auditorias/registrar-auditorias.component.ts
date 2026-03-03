@@ -11,9 +11,9 @@ import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visu
 import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
-import descargarAuditorias from "src/app/shared/utils/descargarAuditorias";
+import { DocumentoUtils } from "../consulta-plan.auditoria.utils";
+import { firstValueFrom, map, catchError } from "rxjs";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -65,7 +65,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private router: Router,
     private spinnerService: SpinnerService,
     private rolService: RolService,
-    private userService: UserService
+    private userService: UserService,
+    private documentoUtils: DocumentoUtils,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -102,7 +103,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       (res) => {
         if (res.Data && res.Data.length > 0) {
           this.dataSource.data = res.Data.map((item: any) => ({
-            id: item._id ?? 0,
+            id: item._id ?? "",
             auditoria: item.titulo ?? "Sin Título",
             tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
             tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
@@ -177,8 +178,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
       this.mostrarOrdenamiento =
         (esAuditorExperto || esJefeControlInterno) &&
-        ((this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) || this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID);
+        (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) ||
+        (esJefeControlInterno && enRevisionJefe);
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
@@ -198,29 +200,82 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async descargarPlantilla(): Promise<void> {
     try {
-      const base64File = await this.nuxeoService.obtenerPorUUID(
-        environment.PLANTILLA_CARGUE_MASIVO
-      );
+      this.spinnerService.show();
+
+      const plantilla = await firstValueFrom(
+        this.PlanAnualAuditoriaMid.get(
+          'cargue-masivo/auditorias/plantilla'
+        )
+        .pipe(
+          map((res: any) => {
+            if (!res || !res.base64)
+              throw new Error("Respuesta inválida del servidor: base64 no encontrado");
+
+            return res.base64;
+          }),
+          catchError((error) => { throw error; })
+        )
+      )
+
       await this.descargaService.descargarArchivo(
-        base64File,
+        plantilla,
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "plantilla"
       );
     } catch (error) {
       console.error("Error al descargar la plantilla:", error);
       this.alertaService.showErrorAlert("Error al descargar la plantilla");
+    } finally {
+      this.spinnerService.hide();
+    }
+  }
+
+  async exportarTabla(): Promise<void> {
+    try {
+      this.spinnerService.show();
+
+      const excel = await firstValueFrom(
+        this.PlanAnualAuditoriaMid.get(
+          'cargue-masivo/auditorias/plan/' + this.id
+        )
+        .pipe(
+          map((res: any) => {
+            if (!res || !res.base64)
+              throw new Error("Respuesta inválida del servidor: base64 no encontrado");
+
+            return res.base64;
+          }),
+          catchError((error) => { throw error; })
+        )
+      )
+
+      await this.descargaService.descargarArchivo(
+        excel,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "auditorias_plan_auditoria_" + this.vigenciaNombre
+      );
+    } catch (error) {
+      console.error("Error al exportar la tabla:", error);
+      this.alertaService.showErrorAlert("Error al exportar la tabla");
+    } finally {
+      this.spinnerService.hide();
     }
   }
 
   // Eliminar auditoría
   borrarAuditoria(element: Auditoria) {
+    if (!element.id) {
+      this.alertaService.showErrorAlert("Error: ID de auditoría no válido");
+      return;
+    }
+    
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then(
         (result) => {
           if (result.isConfirmed) {
-            this.planAnualAuditoriaService
-              .delete(`auditoria`, element)
+            this.PlanAnualAuditoriaMid
+              .delete(`auditoria/${element.id}`, { id: this.id })
               .subscribe(
                 (response) => {
                   if (response) {
@@ -241,8 +296,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
                 }
               );
           }
-
-
         },
         (error) => {
           this.alertaService.showErrorAlert("Error al eliminar el registro");
@@ -299,6 +352,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
         tipo: "auditorias",
       },
     });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
+    });
   }
 
   subirArchivoMatriz(): void {
@@ -312,7 +369,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
         cargaLambda: false,
         tipoIdReferencia:
           environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA,
+        referencia: "Plan Auditoria",
       },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
     });
   }
 
@@ -351,7 +413,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       (res) => {
         if (res && res.Data) {
           this.dialog.open(ModalPdfVisualizadorComponent, {
-            data: { base64Document: res.Data, id: this.id },
+            data: { base64Document: res.Data, id: this.id, vigenciaNombre: this.vigenciaNombre },
             width: "80%",
             height: "80vh",
           });
@@ -370,13 +432,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   verDocumentos() {
-    this.dialog.open(ModalVerDocumentosComponent, {
-      width: "1200px",
-      data: {
-        entityId: this.id,
-      },
-    });
+    this.documentoUtils.verDocumentos(this.id, this.estadoIdActual ?? 0, this.vigenciaNombre, this.roles);
   }
+
   buscarMatriz(): Promise<string | null> {
     return new Promise((resolve, reject) => {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)
@@ -405,27 +463,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "80%",
       height: "80vh",
     });
-  }
-
-  /** Download the Excel file for bulk audit upload */
-  async descargarArchivoDescargueMasivo() {
-    try {
-      this.spinnerService.show();
-      const base64File = await this.nuxeoService.obtenerPorUUID(
-        environment.PLANTILLA_CARGUE_MASIVO
-      );
-      const buffer = await descargarAuditorias(this.dataSource.data, base64File);
-      await this.descargaService.descargarArchivoBuffer(
-        buffer,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        environment.NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS,
-      );
-    } catch (error) {
-      console.error("Error al descargar el archivo de auditorías:", error);
-      this.alertaService.showErrorAlert("Error al descargar el archivo de auditorías");
-    } finally {
-      this.spinnerService.hide();
-    }
   }
 
 }

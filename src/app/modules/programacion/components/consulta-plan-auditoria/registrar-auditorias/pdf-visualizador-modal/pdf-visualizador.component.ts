@@ -29,7 +29,7 @@ export class ModalPdfVisualizadorComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { base64Document: string; id: string },
+    public data: { base64Document: string; id: string, vigenciaNombre: string },
     private nuxeoService: NuxeoService,
     private alertService: AlertService,
     private referenciaPdfService: ReferenciaPdfService,
@@ -128,7 +128,7 @@ export class ModalPdfVisualizadorComponent implements OnInit {
       await this.descargaService.descargarArchivo(
         base64File,
         'application/pdf',
-        'Plan Anual de Auditoria'
+        'Plan Anual de Auditoria ' + this.data.vigenciaNombre
       );
     } catch (error) {
       console.error("Error al descargar el PAA:", error);

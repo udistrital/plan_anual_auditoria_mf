@@ -22,6 +22,7 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
 import { UserService } from "src/app/core/services/user.service";
 import { RolService } from "src/app/core/services/rol.service";
+import { forkJoin } from "rxjs";
 @Component({
   selector: "app-editar-auditoria",
   templateUrl: "./editar-auditoria.component.html",
@@ -54,6 +55,8 @@ export class EditarAuditoriaComponent implements OnInit {
   usuarioId: number = 0;
   paso1Guardado: boolean = false;
   paso3Guardado: boolean = false;
+  tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
+  auditoriaEstados = environment.AUDITORIA_ESTADO;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -87,8 +90,6 @@ export class EditarAuditoriaComponent implements OnInit {
 
     establecerSelectsSecuenciales(this.formularioInformacionComponent, [
       "proceso",
-      "lider",
-      "responsable",
     ]);
   }
 
@@ -166,10 +167,8 @@ export class EditarAuditoriaComponent implements OnInit {
       criterio: informacion.criterios,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
-      lider_id: informacion.lider,
       no_auditoria: informacion.no_auditoria,
       objetivo: informacion.objetivo_auditoria,
-      responsable_id: informacion.responsable,
       correo_complementario: informacion.correo_complementario,
     };
   }
@@ -234,11 +233,7 @@ export class EditarAuditoriaComponent implements OnInit {
         if (!confirmado.value) {
           return;
         }
-        this.alertaService.showSuccessAlert(
-          "Formulario enviado correctamente",
-          "Los datos han sido guardados exitosamente"
-        );
-        this.regresarRuta();
+        this.validarDocumentosAnexados(this.auditoria._id);
       });
   }
 
@@ -268,6 +263,7 @@ export class EditarAuditoriaComponent implements OnInit {
         descripcion: "Archivo para cargue masivo de actividades",
         cargaLambda: true,
         tipo: "actividades",
+        referencia: "Plan Auditoria",
       },
     });
   }
@@ -280,15 +276,15 @@ export class EditarAuditoriaComponent implements OnInit {
       macroproceso: this.auditoria.macroproceso_nombre,
       proceso: this.auditoria.proceso_nombre,
       dependencia: this.auditoria.dependencia_nombre,
-      lider: this.auditoria.lider_id,
-      responsable: this.auditoria.responsable_id,
+      jefe_nombre: this.auditoria.jefe_nombre,
+      asistente_nombre: this.auditoria.asistente_nombre,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
       objetivo_auditoria: this.auditoria.objetivo,
       alcance_auditoria: this.auditoria.alcance,
       criterios: this.auditoria.criterio,
-      correo_lider: this.auditoria.correo_lider,
-      correo_responsable: this.auditoria.correo_responsable,
+      jefe_correo: this.auditoria.jefe_correo,
+      asistente_correo: this.auditoria.asistente_correo,
       correo_dependencia: this.auditoria.correo_dependencia,
       correo_complementario: this.auditoria.correo_complementario,
     });
@@ -302,14 +298,6 @@ export class EditarAuditoriaComponent implements OnInit {
     this.formularioTemasComponent.form.patchValue({
       temas: this.auditoria.temas,
     });
-
-    if (this.auditoria.proceso_id) {
-      this.manejarCambioProceso(this.auditoria.proceso_id);
-
-      if (this.auditoria.lider_id) {
-        this.manejarCambioLider();
-      }
-    }
     
   }
 
@@ -327,16 +315,14 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   private readonly selectActions: Record<string, (valor: any) => void> = {
-    tipo: (valor) => this.manejarCambioTipo(valor),
-    proceso: (valor) => this.manejarCambioProceso(valor),
-    lider: () => this.manejarCambioLider(),
+    macroproceso: (valor) => this.manejarCambioMacroproceso(valor),
   };
 
   manejarCambioSelect(event: any): void {
     this.selectActions[event.campo.nombre]?.(event.valor);
   }
 
-  manejarCambioTipo(tipoProcesoId: any) {
+  manejarCambioMacroproceso(tipoProcesoId: any) {
     const { MACROPROCESO, PROCESO } =
       environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES;
 
@@ -355,54 +341,11 @@ export class EditarAuditoriaComponent implements OnInit {
     this.cargarOpciones("proceso", tipoParametroId);
   }
 
-  manejarCambioProceso(procesoId: number) {
-    this.procesoElegido = procesoId;
-    this.cargarCargosLider("lider", procesoId);
-  }
-
-  manejarCambioLider() {
-    this.cargarCargosResponsable("responsable");
-  }
 
   cargarOpciones(campoNombre: string, tipoParametroId: number) {
     this.parametrosService
       .get(
         `parametro?query=TipoParametroId:${tipoParametroId}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario(campoNombre);
-        if (campo) campo.parametros!.opciones = res.Data;
-      });
-  }
-
-  cargarCargosLider(campoNombre: string, procesoId: number) {
-    const cargosLiderId = environment.INFO_AUDITORIA.CARGOS_LIDER_ID;
-    const query =
-      this.tipoSeleccionado === "macroproceso"
-        ? `ParametroPadreId.ParametroPadreId.Id:${procesoId}`
-        : `ParametroPadreId:${procesoId}`;
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${cargosLiderId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
-      )
-      .subscribe((res) => {
-        const campo = this.obtenerCampoFormulario(campoNombre);
-        if (campo) campo.parametros!.opciones = res.Data;
-      });
-  }
-
-  cargarCargosResponsable(campoNombre: string) {
-    const cargosResponsableId =
-      environment.INFO_AUDITORIA.CARGOS_RESPONSABLE_ID;
-    const query =
-      this.tipoSeleccionado === "macroproceso"
-        ? `ParametroPadreId.ParametroPadreId.Id:${this.procesoElegido}`
-        : `ParametroPadreId:${this.procesoElegido}`;
-
-    this.parametrosService
-      .get(
-        `parametro?query=TipoParametroId:${cargosResponsableId},${query}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`
       )
       .subscribe((res) => {
         const campo = this.obtenerCampoFormulario(campoNombre);
@@ -416,4 +359,62 @@ export class EditarAuditoriaComponent implements OnInit {
     );
   }
 
+  validarDocumentosAnexados(auditoriaId: any) {
+    const docs = [
+      { tipo: this.tipoDocumentoParametros.PROGRAMA_TRABAJO, nombre: 'programa de auditoría' },
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: 'solicitud de información' },
+      { tipo: this.tipoDocumentoParametros.CARTA_PRESENTACION, nombre: 'carta de representación' },
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
+    ];
+
+    const requests = docs.map(d =>
+      this.planAuditoriaService.get(
+        `documento?query=referencia_id:${auditoriaId},tipo_id:${d.tipo},activo:true`
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        for (let i = 0; i < responses.length; i++) {
+          if (!responses[i] || responses[i].Data.length === 0) {
+            this.alertaService.showErrorAlert(
+              `No se ha encontrado el documento de  ${docs[i].nombre}. Por favor, asegúrese de subir todos los documentos requeridos antes de enviar a aprobación por Jefe.`
+            );
+            return;
+          }
+        }
+        this.enviarAprobacionPorJefe(auditoriaId);
+      },
+      error: (error) => {
+        console.error(error);
+        this.alertaService.showErrorAlert("Error validando los documentos.");
+      }
+    });
+  }
+  enviarAprobacionPorJefe(auditoriaId: string) {
+    const auditoriaEstado = {
+      auditoria_id: auditoriaId,
+      usuario_id: this.usuarioId,
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+      observacion: "",
+      estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
+    };
+
+    this.planAuditoriaService
+      .post("auditoria-estado", auditoriaEstado)
+      .subscribe({
+        next: () => {
+          this.alertaService.showSuccessAlert(
+            "Auditoría enviada a revisión del programa por Jefe",
+            "Auditoría enviada"
+          );
+          this.regresarRuta();
+        },
+        error: (error) => {
+          this.alertaService.showErrorAlert("Error al enviar el programa.");
+          console.error(error);
+        }
+    });
+  }
 }

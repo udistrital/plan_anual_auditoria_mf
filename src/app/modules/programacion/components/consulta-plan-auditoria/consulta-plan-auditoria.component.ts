@@ -12,7 +12,6 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
 import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
@@ -25,6 +24,7 @@ import {
   VariablesSolicitud,
 } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -75,6 +75,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly documentoUtils: DocumentoUtils,
   ) { }
 
   ngOnInit(): void {
@@ -263,7 +264,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Ver Auditorias": () => this.editarActividades(plan),
       "Registrar Auditorías": () => this.editarActividades(plan),
       "Editar Auditorías": () => this.editarActividades(plan),
-      "Ver Documentos": () => this.verDocumentos(plan),
+      "Ver Documentos": () => this.verDocumentos(plan), 
       "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
@@ -483,12 +484,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     });
   }
 
-  verDocumentos(element: any) {
-    this.dialog.open(ModalVerDocumentosComponent, {
-      width: "1200px",
-      data: {
-        entityId: element.id,
-      },
-    });
+  verDocumentos(plan: any) {
+    this.documentoUtils.verDocumentos(plan.id, plan.estadoId, plan.vigencia, this.roles);
   }
+
 }

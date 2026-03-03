@@ -9,15 +9,24 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 
+export interface BotonTabDocumento {
+  nombre: string;
+  accion: () => void;
+  color?: string;
+  icono?: string;
+}
+
 export interface TabDocumento {
   nombre: string;
   tipoId: number;
+  botones?: BotonTabDocumento[];
 }
 
 export interface ModalVerDocumentosData {
   entityId: string;
   titulo?: string;
   descripcion?: string;
+  vigenciaNombre?: string;
   tabs?: TabDocumento[];
   inferTabs?: boolean;
   textoBotonCerrar?: string;
@@ -34,12 +43,10 @@ export class ModalVerDocumentosComponent implements OnInit {
   documentosPorTab: { [key: number]: string } = {};
 
   titulo: string = "Ver documentos";
-  descripcion: string = "Documentos del Plan Anual de Auditoria";
+  descripcion: string = "Documentos";
+  vigenciaSuffix: string = "";
   textoBotonCerrar: string = "Regresar";
-  tabs: TabDocumento[] = [
-    { nombre: "Formato PAA", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA },
-    { nombre: "Matriz Función Pública", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA },
-  ];
+  tabs: TabDocumento[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ModalVerDocumentosData,
@@ -53,10 +60,16 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.descripcion) this.descripcion = data.descripcion;
     if (data.tabs) this.tabs = data.tabs;
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
+    if (data.vigenciaNombre) {
+      this.vigenciaSuffix = data.vigenciaNombre
+          ? `-${data.vigenciaNombre.replace(/\s+/g, '-')}`
+          : '';
+    }
   }
 
   async ngOnInit() {
     try {
+      this.documentos = [];
       await this.cargarDocumentos();
       if (this.data.inferTabs)
         this.inferirPestanasDeDocumentos();
@@ -75,6 +88,7 @@ export class ModalVerDocumentosComponent implements OnInit {
         this.referenciaPdfService.consultarDocumentos(this.data.entityId)
       );
 
+      console.debug("Enlaces con tipo obtenidos:", enlacesConTipo);
       const enlaces = enlacesConTipo.map((doc) => doc.nuxeo_enlace);
       const base64Files = await this.nuxeoService.obtenerPorUUIDs(enlaces);
 
@@ -117,15 +131,16 @@ export class ModalVerDocumentosComponent implements OnInit {
     try {
       // ! This method assumes that a document will be well matched to any tab of the same tipo_id, no matter the name.
       // Map tabs into availability holders
-      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }))
+      const tabHolders = this.tabs.map((tab, i) => ({ idx: i, tab: tab }));
       this.documentos.forEach((doc) => {
         // Assign document to the first available tab that matches its tipo_id
         const holderIdx = tabHolders.findIndex(holder => holder.tab.tipoId === doc.tipo_id);
-        if (holderIdx !== -1 && !this.documentosPorTab[tabHolders[holderIdx].idx])
+        if (holderIdx !== -1) {
           this.documentosPorTab[tabHolders[holderIdx].idx] = doc.base64;
+          tabHolders.splice(holderIdx, 1);
+        }
 
-        // Remove the used holder to prevent multiple assignments
-        tabHolders.splice(holderIdx, 1);
+        console.debug(`Documento con tipo_id ${doc.tipo_id} asignado a la pestaña "${this.tabs[holderIdx]?.nombre || 'Sin pestaña coincidente'}"`);
       });
     } catch (error) {
       console.error("Error al renderizar los documentos:", error);
@@ -144,7 +159,8 @@ export class ModalVerDocumentosComponent implements OnInit {
     try {
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        "documentos.zip"
+        `documentos${this.vigenciaSuffix}.zip`,
+        this.vigenciaSuffix,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
