@@ -37,6 +37,8 @@ export class RevisionJefeComponent implements OnInit {
   mostrarBotones: boolean = true;
   roles: string[] = [];
 
+  vigenciaNombre: string = "";
+
   constructor(
     private route: ActivatedRoute,
     public dialog: MatDialog,
@@ -56,10 +58,11 @@ export class RevisionJefeComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    console.debug("Inicializando RevisionJefeComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
-    // se obtienen los roles del usuario para usarlos en el nombre del remitente
     this.roles = this.rolService.getRoles();
-    await this.obtenerEstadoActual();
+    this.obtenerVigenciaActual();
+    this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
     } catch(error) {
@@ -70,26 +73,48 @@ export class RevisionJefeComponent implements OnInit {
     });
   }
 
-  async obtenerEstadoActual(): Promise<void> {
+  obtenerVigenciaActual(): void {
+    forkJoin({
+      plan: this.planAuditoriaService.get(`plan-auditoria/${this.planAuditoriaId}`),
+      vigencias: this.parametrosUtilsService.getVigencias(),
+    }).subscribe({
+      next: ({ plan, vigencias }: any) => {
+        console.debug("Plan obtenido:", plan);
+        console.debug("Vigencias obtenidas:", vigencias);
+        const vigenciaId = plan?.Data?.vigencia_id;
+        console.debug("Vigencia ID obtenida del plan:", vigenciaId);
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        console.debug("Vigencia Nombre encontrada:", vigenciaNombre);
+        this.vigenciaNombre = vigenciaNombre || "";
+      },
+      error: (error) => {
+        console.error("Error al obtener la vigencia:", error);
+      }
+    });
+  }
+
+  obtenerEstadoActual(): void {
     const callbacks = {
       [REFRESHABLES.FORMATO_PAA_ACTUALIZADO]: () =>
         this.renderizarDocumentos(),
     };
-    try {
-      const response: any = await lastValueFrom(
-        this.planAuditoriaService.get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
-      );
-      const estadoActual = response?.Data?.[0];
-      this.estadoIdActual = estadoActual?.estado_id || null;
-      this.mostrarBotones =
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
-      
-      this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
-    } catch (error) {
-      console.error("Error al obtener el estado actual:", error);
-      this.mostrarBotones = false;
-      this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, 0, this.roles, callbacks);
-    }
+    this.planAuditoriaService
+      .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
+      .subscribe({
+        next: (response: any) => {
+          const estadoActual = response?.Data?.[0];
+          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.mostrarBotones =
+            this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
+
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+        },
+        error: (error) => {
+          console.error("Error al obtener el estado actual:", error);
+          this.mostrarBotones = false;
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, 0, this.roles, callbacks);
+        }
+      });
   }
 
   abrirModalRechazo(): void {
@@ -320,7 +345,12 @@ export class RevisionJefeComponent implements OnInit {
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos(this.documentos, 'documentosPAA.zip');
+      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        `documentosPAA${suffix}.zip`,
+        suffix
+      );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }

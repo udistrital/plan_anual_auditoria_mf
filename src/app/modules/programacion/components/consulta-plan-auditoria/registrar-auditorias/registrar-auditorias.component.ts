@@ -413,7 +413,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       (res) => {
         if (res && res.Data) {
           this.dialog.open(ModalPdfVisualizadorComponent, {
-            data: { base64Document: res.Data, id: this.id },
+            data: { base64Document: res.Data, id: this.id, vigenciaNombre: this.vigenciaNombre },
             width: "80%",
             height: "80vh",
           });

@@ -69,10 +69,15 @@ export class DescargaService {
    * @param documentos - Array de documentos, cada uno con las propiedades:
    *                     - base64: contenido en Base64 del archivo.
    *                     - tipo_id: identificador del tipo de documento (opcional).
-   * @param archivoZip - Nombre del archivo ZIP resultante.
+   * @param nombre - Nombre del archivo ZIP resultante.
+   * @param suffix - Sufijo opcional para agregar al nombre de los archivos dentro del ZIP (ejemplo: 2026).
    * @throws Error si ocurre algún problema durante el proceso de compresión o descarga.
    */
-  async descargarMultiplesArchivos(documentos: any[], archivoZip: string): Promise<void> {
+  async descargarMultiplesArchivos(
+    documentos: any[],
+    nombre: string,
+    suffix?: string
+  ): Promise<void> {
     const zip = new JSZip();
   
     try {
@@ -84,14 +89,14 @@ export class DescargaService {
         console.log(tipoDocumento)
         // Asignar un nombre adecuado al archivo
         const fileName = tipoDocumento 
-          ? `${tipoDocumento.toLowerCase().replaceAll('_', '-')}.pdf` 
-          : `documento_${index + 1}.pdf`;
+          ? `${tipoDocumento.toLowerCase().replaceAll('_', '-')}${suffix}.pdf` 
+          : `documento_${index + 1}${suffix}.pdf`;
   
         zip.file(fileName, doc.base64, { base64: true });
       });
   
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      saveAs(zipBlob, archivoZip);
+      saveAs(zipBlob, nombre);
     } catch (error) {
       console.error('Error al crear el archivo ZIP:', error);
       throw error;

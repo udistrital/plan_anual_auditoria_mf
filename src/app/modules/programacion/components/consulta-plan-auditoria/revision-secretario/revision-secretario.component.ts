@@ -4,7 +4,7 @@ import { environment } from "src/environments/environment";
 import { ModalMotivosRechazoComponent } from "../revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { ModalAprobacionSecretarioComponent } from "./modal-aprobacion-secretario/modal-aprobacion-secretario.component";
 import { ActivatedRoute, Router } from "@angular/router";
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, forkJoin } from 'rxjs';
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -12,6 +12,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { RolService } from "src/app/core/services/rol.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
@@ -39,6 +40,7 @@ export class RevisionSecretarioComponent {
     private descargaService: DescargaService,
     private tercerosService: TercerosService,
     private rolService: RolService,
+    private parametrosUtilsService: ParametrosUtilsService,
     private documentoUtils: DocumentoUtils,
   ) { }
 
@@ -47,11 +49,14 @@ export class RevisionSecretarioComponent {
   documentosPorTab: { [key: number]: string } = {};
   tabs: TabDocumento[] = [];
   usuarioId: any;
+  vigenciaNombre: string = "";
 
   async ngOnInit() {
+    console.debug("Inicializando RevisionSecretarioComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
     this.roles = this.rolService.getRoles();
-    await this.obtenerEstadoActual();
+    this.obtenerVigenciaActual();
+    this.obtenerEstadoActual();
     try {
       await this.renderizarDocumentos();
     } catch (error) {
@@ -62,26 +67,44 @@ export class RevisionSecretarioComponent {
     });
   }
 
-  async obtenerEstadoActual(): Promise<void> {
+  obtenerVigenciaActual(): void {
+    forkJoin({
+      plan: this.planAuditoriaService.get(`plan-auditoria/${this.planAuditoriaId}`),
+      vigencias: this.parametrosUtilsService.getVigencias(),
+    }).subscribe({
+      next: ({ plan, vigencias }: any) => {
+        const vigenciaId = plan?.Data?.vigencia_id;
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        this.vigenciaNombre = vigenciaNombre || "";
+      },
+      error: (error) => {
+        console.error("Error al obtener la vigencia:", error);
+      }
+    });
+  }
+
+  obtenerEstadoActual(): void {
     const callbacks = {
       [REFRESHABLES.FORMATO_PAA_ACTUALIZADO]: () =>
         this.renderizarDocumentos(),
     };
-    try {
-      const response: any = await lastValueFrom(
-        this.planAuditoriaService.get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
-      );
-      const estadoActual = response?.Data?.[0];
-      this.estadoIdActual = estadoActual?.estado_id || null;
-      this.mostrarBotones =
-        this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
-      
-      this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
-    } catch (error) {
-      console.error("Error al obtener el estado actual:", error);
-      this.mostrarBotones = false;
-      this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, 0, this.roles, callbacks);
-    }
+    this.planAuditoriaService
+      .get(`estado?query=plan_auditoria_id:${this.planAuditoriaId},actual:true`)
+      .subscribe({
+        next: (response: any) => {
+          const estadoActual = response?.Data?.[0];
+          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.mostrarBotones =
+              this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
+
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+        },
+        error: (error) => {
+          console.error("Error al obtener el estado actual:", error);
+          this.mostrarBotones = false;
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, 0, this.roles, callbacks);
+        }
+      });
   }
 
   abrirModalRechazo(): void {
@@ -171,7 +194,12 @@ export class RevisionSecretarioComponent {
 
   async descargarTodo() {
     try {
-      await this.descargaService.descargarMultiplesArchivos(this.documentos, 'documentosPAA.zip');
+      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      await this.descargaService.descargarMultiplesArchivos(
+        this.documentos,
+        `documentosPAA${suffix}.zip`,
+        suffix
+      );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }

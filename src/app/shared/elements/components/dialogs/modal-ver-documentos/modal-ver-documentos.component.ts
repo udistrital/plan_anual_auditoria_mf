@@ -26,6 +26,7 @@ export interface ModalVerDocumentosData {
   entityId: string;
   titulo?: string;
   descripcion?: string;
+  vigenciaNombre?: string;
   tabs?: TabDocumento[];
   inferTabs?: boolean;
   textoBotonCerrar?: string;
@@ -42,7 +43,8 @@ export class ModalVerDocumentosComponent implements OnInit {
   documentosPorTab: { [key: number]: string } = {};
 
   titulo: string = "Ver documentos";
-  descripcion: string = "Documentos del Plan Anual de Auditoria";
+  descripcion: string = "Documentos";
+  vigenciaSuffix: string = "";
   textoBotonCerrar: string = "Regresar";
   tabs: TabDocumento[] = [];
 
@@ -58,6 +60,11 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.descripcion) this.descripcion = data.descripcion;
     if (data.tabs) this.tabs = data.tabs;
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
+    if (data.vigenciaNombre) {
+      this.vigenciaSuffix = data.vigenciaNombre
+          ? `-${data.vigenciaNombre.replace(/\s+/g, '-')}`
+          : '';
+    }
   }
 
   async ngOnInit() {
@@ -152,7 +159,8 @@ export class ModalVerDocumentosComponent implements OnInit {
     try {
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        "documentos.zip"
+        `documentos${this.vigenciaSuffix}.zip`,
+        this.vigenciaSuffix,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);

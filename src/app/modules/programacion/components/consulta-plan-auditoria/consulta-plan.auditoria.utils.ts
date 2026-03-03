@@ -250,7 +250,7 @@ export class DocumentoUtils {
         }
       }
     } else {
-      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
+      tabs = [formatoPaaOriginalTab, matrizFuncionPublicaTab];
     }
     return tabs;
   }
@@ -286,6 +286,7 @@ export class DocumentoUtils {
         entityId: planId,
         descripcion: `Documentos asociados al Plan Anual de Auditoría - Vigencia ${planVigenciaNombre}`,
         tabs: tabs,
+        vigenciaNombre: planVigenciaNombre,
       },
     });
   }
