@@ -250,7 +250,7 @@ export class DocumentoUtils {
         }
       }
     } else {
-      tabs = [formatoPaaOriginalTab, formatoPaaActualizadoTab];
+      tabs = [formatoPaaOriginalTab, matrizFuncionPublicaTab];
     }
     return tabs;
   }
