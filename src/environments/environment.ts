@@ -15,10 +15,10 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
   PLAN_ANUAL_AUDITORIA_MID:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
-  OIKOS_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
+    OIKOS_SERVICE:
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
 
