@@ -418,10 +418,10 @@ export class EditarAuditoriaComponent implements OnInit {
 
   validarDocumentosAnexados(auditoriaId: any) {
     const docs = [
-      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: 'solicitud de información' },
-      { tipo: this.tipoDocumentoParametros.CARTA_PRESENTACION, nombre: 'carta de presentación' },
-      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' },
       { tipo: this.tipoDocumentoParametros.PROGRAMA_TRABAJO, nombre: 'programa de auditoría' },
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: 'solicitud de información' },
+      { tipo: this.tipoDocumentoParametros.CARTA_PRESENTACION, nombre: 'carta de representación' },
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
     ];
 
     const requests = docs.map(d =>

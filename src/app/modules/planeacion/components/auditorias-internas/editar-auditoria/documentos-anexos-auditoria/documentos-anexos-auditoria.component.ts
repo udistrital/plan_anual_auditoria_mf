@@ -27,6 +27,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   documentos = [
     {
+      nombre: "Programa de Auditoria",
+      plantilla: "programa-auditoria",
+      parametro: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
+    },
+    {
       nombre: "Oficio Anuncio Solicitud de Información",
       plantilla: "solicitud-informacion",
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
@@ -39,11 +44,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     {
       nombre: "Compromiso Ético",
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
-    },
-    {
-      nombre: "Programa de Auditoria",
-      plantilla: "programa-auditoria",
-      parametro: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
     }
   ];
 

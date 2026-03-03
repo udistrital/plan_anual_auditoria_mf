@@ -23,6 +23,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import { forkJoin } from "rxjs";
+import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -49,10 +50,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   mostrarAcciones: boolean = false;
-  tipoConsulta: 'general' | 'auditor' | 'auditado' = 'general';
+  tipoConsulta: 'general' | 'auditado' | 'jefe_OCI' = 'general';
   cargoId: number = 0;
   iconosAccion = new Map<string, string>([
     ["Ver Documento", "description"],
+    ["Ver Documentos", "description"],
     ["Ver Auditoría", "visibility"],
     ["Editar Auditoría", "edit"],
     ["Revisar Auditoría", "content_paste_search"],
@@ -97,6 +99,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.tipoConsulta = 'auditado';
       this.cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
       this.personaId = await this.userService.getPersonaId();
+    } else if (this.rolService.tieneRol(environment.ROL.JEFE)) {
+      this.tipoConsulta = 'jefe_OCI';
+      this.personaId = await this.userService.getPersonaId();
     }
   }
 
@@ -116,8 +121,14 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
     switch (this.tipoConsulta) {
       case 'auditado':
-        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO},estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO}`;
         endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
+        break;
+      case 'jefe_OCI':
+        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE}`;
+        endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
+            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
+            : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
         break;
       default:
         if (estadoId) {
@@ -207,6 +218,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
       "Ver Documento": () => this.verDocumento(auditoria),
+      "Ver Documentos": () => this.verDocumentos(auditoria),
       "Ver Auditoría": () => this.verAuditoria(auditoria),
       "Editar Auditoría": () => this.editarAuditoria(auditoria),
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
@@ -242,6 +254,26 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           }
         });
       });
+  }
+
+  verDocumentos(auditoria: Auditoria) {
+    const auditoriaId = auditoria._id;
+    this.dialog.open(ModalVerDocumentosComponent, {
+      width: "1200px",
+      data: {
+        entityId: auditoriaId,
+        inferTabs: false,
+        tabs: [
+          { nombre: "Programa de auditoría", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO },
+          { nombre: "Solicitud de información", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION },
+          { nombre: "Carta de representación", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION },
+          { nombre: "Compromiso ético", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO },
+        ],
+        titulo: `${auditoria.titulo}`,
+        descripcion: `Documentos asociados a la auditoría`
+      },
+      autoFocus: false,
+    });
   }
 
   verAuditoria(auditoria: Auditoria) {
