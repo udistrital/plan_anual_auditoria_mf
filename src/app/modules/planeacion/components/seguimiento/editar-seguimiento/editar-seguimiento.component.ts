@@ -147,9 +147,7 @@ export class EditarSeguimientoComponent implements OnInit {
       consecutivo_OCI: informacion.consecutivo_OCI,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
-      lider_id: informacion.lider,
       no_auditoria: informacion.no_auditoria,
-      responsable_id: informacion.responsable,
       correo_complementario: informacion.correo_complementario,
     };
   }

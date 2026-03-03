@@ -167,10 +167,8 @@ export class EditarAuditoriaComponent implements OnInit {
       criterio: informacion.criterios,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
-      lider_id: informacion.lider,
       no_auditoria: informacion.no_auditoria,
       objetivo: informacion.objetivo_auditoria,
-      responsable_id: informacion.responsable,
       correo_complementario: informacion.correo_complementario,
     };
   }
