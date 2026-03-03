@@ -9,7 +9,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 })
 export class CrearActividadComponent {
   auditoriaId: string;
-  datos: any;
+  datos: any | [] = [];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     private alertaService: AlertService,
@@ -23,15 +23,12 @@ export class CrearActividadComponent {
 
   }
   crearActividad(actividadData: any) {
-    console.log('Crear actividad:', actividadData);
-
     let actividadJson={
       auditoria_id:this.auditoriaId,
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
     };
-    console.log('Crear actividad json:', actividadJson);
 
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de crear la actividad?")
