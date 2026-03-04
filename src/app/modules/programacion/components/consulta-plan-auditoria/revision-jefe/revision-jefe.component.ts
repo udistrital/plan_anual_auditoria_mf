@@ -38,7 +38,6 @@ export class RevisionJefeComponent implements OnInit {
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
   vigenciaNombre: string = "";
-  roles: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
