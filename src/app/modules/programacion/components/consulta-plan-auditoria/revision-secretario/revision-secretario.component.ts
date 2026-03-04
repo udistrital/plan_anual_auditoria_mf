@@ -49,6 +49,7 @@ export class RevisionSecretarioComponent {
   tabs: TabDocumento[] = [];
   usuarioId: any;
   vigenciaNombre: string = "";
+  roles: string[] = [];
 
   async ngOnInit() {
     console.debug("Inicializando RevisionSecretarioComponent...");

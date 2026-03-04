@@ -36,8 +36,8 @@ export class RevisionJefeComponent implements OnInit {
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
-
   vigenciaNombre: string = "";
+  roles: string[] = [];
 
   constructor(
     private route: ActivatedRoute,
