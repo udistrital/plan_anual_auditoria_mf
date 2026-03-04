@@ -5,15 +5,26 @@ import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 import { documentos, rolesAprobacion } from "./revision-documentos.utilidades";
 
-
-//Servicios
+// Servicios
 import { RolService } from "src/app/core/services/rol.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import {
+  NotificacionesService,
+  DestinatariosEmail,
+  VariablesSolicitud,
+} from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { forkJoin, of, throwError } from "rxjs";
+import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 
 @Component({
   selector: "app-revision-documentos",
@@ -45,7 +56,12 @@ export class RevisionDocumentosComponent implements OnInit {
     private readonly userService: UserService,
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly nuxeoService: NuxeoService,
-    private readonly descargaService: DescargaService
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
   ) {}
 
   ngOnInit(): void {
@@ -78,9 +94,9 @@ export class RevisionDocumentosComponent implements OnInit {
 
   preguntarAprobacionAuditoria() {
     const rolAprobacion = this.rolesAprobacion[this.role!];
-    
+
     if (!rolAprobacion) {
-      return; //si no hay rol
+      return;
     }
 
     const { estadoAprobacion, mensajeAprobacion, preguntaAprobacion } =
@@ -94,7 +110,6 @@ export class RevisionDocumentosComponent implements OnInit {
         }
 
         if (Array.isArray(estadoAprobacion)) {
-          // Si es un array como en el caso del rol jefe, para hacer dos post para el flujo de estados
           this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
         } else {
           this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
@@ -110,6 +125,12 @@ export class RevisionDocumentosComponent implements OnInit {
       for (let i = 0; i < estadoAprobacion.length; i++) {
         const esUltimoEstado = i === estadoAprobacion.length - 1;
         await this.aprobarAuditoria(estadoAprobacion[i], mensajeAprobacion, esUltimoEstado);
+      }
+      // El Jefe aprueba y envía a revisión del auditado (último estado del array)
+      // Se notifica al auditado con copia al auditor
+      const ultimoEstado = estadoAprobacion[estadoAprobacion.length - 1];
+      if (ultimoEstado === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO) {
+        this.notificarEnvioAuditado(this.auditoriaId);
       }
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el plan.");
@@ -193,7 +214,6 @@ export class RevisionDocumentosComponent implements OnInit {
       [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
       [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
     };
-    // retorna true, si el rol coincide con el estado de revision del rol
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
   }
 
@@ -219,7 +239,7 @@ export class RevisionDocumentosComponent implements OnInit {
           if (propiedad) {
             (this as any)[propiedad] = base64;
           }
-    
+
           this.documentos.push({ base64, tipo_id: documento.tipo_id });
         });
 
@@ -238,4 +258,170 @@ export class RevisionDocumentosComponent implements OnInit {
     }
   }
 
+  /**
+   * Notifica a los actores de la dependencia (jefe, asistente, correo dependencia
+   * y correo complementario si existe) cuando el Jefe OCI aprueba y envía el
+   * programa de auditoría a revisión del auditado.
+   * Los auditores asignados reciben copia (Cc).
+   *
+   * Patrón: getAuthenticatedUserTerceroIdentification() primero y sola,
+   * luego forkJoin con auditoria, auditores y vigencias.
+   */
+  private notificarEnvioAuditado(auditoriaId: string): void {
+    const rolRemitente = "Jefe OCI";
+
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      exhaustMap((tercero) => {
+        console.log("Tercero autenticado:", tercero.NombreCompleto);
+        return forkJoin({
+          auditoria: this.planAuditoriaMid.get(`auditoria/${auditoriaId}`),
+          auditores: this.planAuditoriaService.get(
+            `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
+          ),
+          vigencias: this.parametrosUtilsService.getVigencias(),
+          nombreRemitente: of(tercero.NombreCompleto),
+        });
+      }),
+
+      exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
+        const datosAuditoria = auditoria?.Data;
+        const listaAuditores: any[] = auditores?.Data ?? [];
+
+        // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
+        const vigenciaId = datosAuditoria?.vigencia_id;
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        console.log("auditoria_id:", auditoriaId);
+        console.log("titulo auditoria:", datosAuditoria?.titulo);
+        console.log("vigencia_id:", vigenciaId);
+        console.log("vigencia_nombre resuelta:", vigenciaNombre);
+        console.log("dependencia_nombre:", datosAuditoria?.dependencia_nombre);
+        console.log("correo_dependencia:", datosAuditoria?.correo_dependencia);
+        console.log("jefe_correo:", datosAuditoria?.jefe_correo);
+        console.log("asistente_correo:", datosAuditoria?.asistente_correo);
+        console.log("correo_complementario:", datosAuditoria?.correo_complementario);
+        console.log("auditores encontrados:", listaAuditores.length);
+        console.log("auditores:", listaAuditores.map((a: any) => a.auditor_id));
+
+        const correosAuditores$ = listaAuditores.length > 0
+          ? forkJoin(
+              listaAuditores.map((a: any) =>
+                this.tercerosService.getTerceroById(a.auditor_id).pipe(
+                  catchError(() => of(null))
+                )
+              )
+            )
+          : of([]);
+
+        return correosAuditores$.pipe(
+          switchMap((terceros: any[]) => {
+            const correosAuditores = terceros
+              .filter((t) => t?.UsuarioWSO2)
+              .map((t) => t.UsuarioWSO2);
+
+            console.log("correos auditores resueltos (Cc):", correosAuditores);
+
+            // ToAddresses: actores de la dependencia (dinámico) + fijos del environment
+            const toAddressesDinamicos: string[] = [
+              datosAuditoria?.correo_dependencia,
+              datosAuditoria?.jefe_correo,
+              datosAuditoria?.asistente_correo,
+            ].filter((correo): correo is string =>
+              !!correo && correo !== "Correo no encontrado"
+            );
+
+            // correo_complementario solo si no es nulo ni vacío
+            if (datosAuditoria?.correo_complementario) {
+              toAddressesDinamicos.push(datosAuditoria.correo_complementario);
+            }
+
+            console.log("ToAddresses dinámicos (dependencia):", toAddressesDinamicos);
+
+            const fijosEnvioAuditado = environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS;
+            const destinatarios: DestinatariosEmail = {
+              ToAddresses: [
+                ...toAddressesDinamicos,
+                ...(fijosEnvioAuditado.ToAddresses ?? []),
+              ],
+              CcAddresses: [
+                ...correosAuditores,
+                ...(fijosEnvioAuditado.CcAddresses ?? []),
+              ],
+              BccAddresses: fijosEnvioAuditado.BccAddresses ?? [],
+            };
+
+            const variablesSolicitud: VariablesSolicitud = {
+              titulo_solicitud: "Revisión de Programa de Auditoría",
+              tipo_solicitud: "revisión y firma",
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              vigencia: vigenciaNombre,
+              rol_remitente: rolRemitente,
+              nombre_remitente: nombreRemitente || rolRemitente,
+              fecha_envio: new Date().toLocaleDateString(),
+            };
+
+            console.log("PAYLOAD ENVÍO AUDITADO:", JSON.stringify({ destinatarios, variablesSolicitud }, null, 2));
+
+            return this.notificacionesService.enviarNotificacionSolicitud(
+              destinatarios,
+              variablesSolicitud
+            ).pipe(
+              tap((response: any) => {
+                console.log("RESPUESTA NOTIFICACION:", JSON.stringify(response, null, 2));
+                if (response?.Status == 200) {
+                  this.registrarNotificacion(
+                    auditoriaId,
+                    destinatarios,
+                    variablesSolicitud,
+                    "envio_revision_auditado_programa_trabajo"
+                  );
+                }
+              })
+            );
+          })
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("Error al notificar envío a auditado:", error);
+        console.warn("Status:", error.status);
+        console.warn("Body:", JSON.stringify(error.error));
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      error: (err) => console.warn("Error en notificación envío a auditado:", err),
+    });
+  }
+
+  /**
+   * Registra un log de notificación enviada en el CRUD de notificaciones (MongoDB).
+   */
+  private registrarNotificacion(
+    auditoriaId: string,
+    destinatarios: DestinatariosEmail,
+    variables: VariablesSolicitud,
+    tipoNotificacion: string,
+    template: string = PLANTILLA_SOLICITUD_NOMBRE,
+  ): void {
+    const payload = {
+      template: template,
+      fecha_envio: new Date(),
+      metadatos: {
+        ...variables,
+        tipo_notificacion: tipoNotificacion,
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: auditoriaId,
+    };
+
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug("Registro de notificación guardado:", res),
+      error: (err) => console.warn("Error guardando registro de notificación:", err),
+    });
+  }
 }
