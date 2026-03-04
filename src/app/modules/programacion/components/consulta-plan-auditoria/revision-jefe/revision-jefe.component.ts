@@ -32,6 +32,7 @@ export class RevisionJefeComponent implements OnInit {
   documentos: { base64: string; tipo_id: number }[] = [];
   documentosPorTab: { [key: number]: string } = {};
   tabs: TabDocumento[] = [];
+  roles: string[] = [];
   usuarioId: any;
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;

@@ -47,6 +47,7 @@ export class RevisionSecretarioComponent {
   documentos: { base64: string; tipo_id: number }[] = [];
   documentosPorTab: { [key: number]: string } = {};
   tabs: TabDocumento[] = [];
+  roles: string[] = [];
   usuarioId: any;
   vigenciaNombre: string = "";
 
