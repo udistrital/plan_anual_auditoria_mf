@@ -50,6 +50,7 @@ export class RevisionSecretarioComponent {
   roles: string[] = [];
   usuarioId: any;
   vigenciaNombre: string = "";
+  roles: string[] = [];
 
   async ngOnInit() {
     console.debug("Inicializando RevisionSecretarioComponent...");
