@@ -50,8 +50,7 @@ export class RevisionSecretarioComponent {
   roles: string[] = [];
   usuarioId: any;
   vigenciaNombre: string = "";
-  roles: string[] = [];
-
+  
   async ngOnInit() {
     console.debug("Inicializando RevisionSecretarioComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
