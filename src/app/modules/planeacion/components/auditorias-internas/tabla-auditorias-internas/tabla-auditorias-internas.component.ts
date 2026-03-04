@@ -22,8 +22,18 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
-import { forkJoin } from "rxjs";
+import { forkJoin, of, throwError } from "rxjs";
+import { catchError, exhaustMap, tap } from "rxjs/operators";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import {
+  NotificacionesService,
+  DestinatariosEmail,
+  VariablesSolicitud,
+} from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -72,7 +82,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly router: Router,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly tercerosService: TercerosService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
   ) {}
 
   ngOnInit() {
@@ -112,16 +126,13 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     estadoId?: number
   ) {
     this.auditoriasPorVigencia = [];
-    // this.personaId = 9840;
-    // this.role = 'auditor'; 
-    // estadoId = 7062;
 
     let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
     let endpoint = "";
 
     switch (this.tipoConsulta) {
       case 'auditado':
-        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO},estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO}`;
+        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
         endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
         break;
       case 'jefe_OCI':
@@ -178,7 +189,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.auditoriasPorVigencia
     );
 
-    //si no hay paginador, se crea
     if (!this.paginator) {
       this.auditoriasDataSource.paginator = this.paginator;
       this.auditoriasDataSource.sort = this.sort;
@@ -188,19 +198,16 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   manejarCambioPaginado(evento: PageEvent) {
-    // Actualizar el índice de página y tamaño de página
     this.pageSize = evento.pageSize;
     this.pageIndex = evento.pageIndex;
 
     const offset = this.pageIndex * this.pageSize;
     this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, offset);
-    // Actualizar el paginador después de realizar la consulta
     this.paginator.length = this.totalRegistros;
     this.paginator.pageSize = this.pageSize;
     this.paginator.pageIndex = this.pageIndex;
   }
 
-  // Usar un conjunto para evitar duplicados en las acciones
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
@@ -209,12 +216,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     );
   }
 
-  // Obtener el icono dependiendo de la acción
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
   }
 
-  // Acciones
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
       "Ver Documento": () => this.verDocumento(auditoria),
@@ -377,11 +382,118 @@ export class TablaAuditoriasInternasComponent implements OnInit {
             "Auditoría enviada a revisión del programa por Jefe",
             "Auditoría enviada"
           );
+          this.notificarEnvioAJefe(auditoriaId);
           this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
         },
         error: (error) => {
           this.alertService.showErrorAlert("Error al enviar el programa.");
         }
+    });
+  }
+
+  /**
+   * Notifica al Jefe OCI cuando un auditor envía el programa de auditoría a revisión.
+   * Resuelve el nombre del remitente autenticado y los datos de la auditoría en paralelo,
+   * luego envía el correo y registra la notificación si el envío fue exitoso.
+   */
+  /**
+   * Notifica al Jefe OCI cuando un auditor envía el programa de auditoría a revisión.
+   * Sigue el patrón de consulta-plan-auditoria: resuelve Terceros primero y sola,
+   * luego encadena la consulta de la auditoría y el envío de notificación.
+   */
+  private notificarEnvioAJefe(auditoriaId: string): void {
+    const rolRemitente = [
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      exhaustMap((tercero) =>
+        forkJoin({
+          auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
+          vigencias: this.parametrosUtilsService.getVigencias(),
+          nombreRemitente: of(tercero.NombreCompleto),
+        })
+      ),
+
+      exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
+        const datosAuditoria = auditoria?.Data;
+
+        // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
+        const vigenciaId = datosAuditoria?.vigencia_id;
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
+          [],
+          environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS
+        );
+
+        const variablesSolicitud: VariablesSolicitud = {
+          titulo_solicitud: "Revisión de Programa de Auditoría",
+          tipo_solicitud: "revisión y aprobación",
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          vigencia: vigenciaNombre,
+          rol_remitente: rolRemitente,
+          nombre_remitente: nombreRemitente || rolRemitente,
+          fecha_envio: new Date().toLocaleDateString(),
+        };
+
+        return this.notificacionesService.enviarNotificacionSolicitud(
+          destinatarios,
+          variablesSolicitud
+        ).pipe(
+          tap((response: any) => {
+            if (response?.Status == 200) {
+              this.registrarNotificacion(
+                auditoriaId,
+                destinatarios,
+                variablesSolicitud,
+                "envio_revision_jefe_programa_trabajo"
+              );
+            }
+          })
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("Error al enviar notificación al Jefe OCI:", error);
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      error: (err) => console.warn("Error en notificación envío a Jefe:", err),
+    });
+  }
+
+  /**
+   * Registra un log de notificación enviada en el CRUD de notificaciones (MongoDB).
+   */
+  private registrarNotificacion(
+    auditoriaId: string,
+    destinatarios: DestinatariosEmail,
+    variables: VariablesSolicitud,
+    tipoNotificacion: string,
+    template: string = PLANTILLA_SOLICITUD_NOMBRE,
+  ): void {
+    const payload = {
+      template: template,
+      fecha_envio: new Date(),
+      metadatos: {
+        ...variables,
+        tipo_notificacion: tipoNotificacion,
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: auditoriaId,
+    };
+
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug("Registro de notificación guardado:", res),
+      error: (err) => console.warn("Error guardando registro de notificación:", err),
     });
   }
 

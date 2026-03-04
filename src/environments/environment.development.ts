@@ -55,6 +55,40 @@ export const environment = {
     BccAddresses: []
   },
 
+   NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa266jefe@yopmail.com",
+    ],
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    BccAddresses: []
+  },
+
+  NOTIFICACION_PROGRAMA_TRABAJO_RECHAZO_JEFE_DESTINATARIOS: {
+    ToAddresses: [],
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    BccAddresses: []
+  },
+
+  NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [],
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    BccAddresses: []
+  },
+
+  NOTIFICACION_PROGRAMA_TRABAJO_RECHAZO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [],
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    BccAddresses: []
+  },
+
   VIGENCIAS : {
     TIPO_PARAMETRO_ID: 121,
   },
