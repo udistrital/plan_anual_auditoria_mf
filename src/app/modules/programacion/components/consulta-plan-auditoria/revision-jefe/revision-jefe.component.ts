@@ -269,6 +269,7 @@ export class RevisionJefeComponent implements OnInit {
         destinatarios_bcc: destinatarios.BccAddresses ?? [],
       },
       referencia_id: this.planAuditoriaId,
+      referencia_tipo: 'PAA',
     };
 
     this.notificacionRegistroCrudService.post(payload).subscribe({

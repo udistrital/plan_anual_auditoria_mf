@@ -303,6 +303,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             )
             .subscribe({
               next: (documentos) => {
+                if (true)
                 if (documentos && documentos.Data.length > 0) {
                   const nuevoEstado = this.construirEstado(
                     element.id,
@@ -438,6 +439,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         destinatarios_bcc: destinatarios.BccAddresses ?? [],
       },
       referencia_id: element.id,
+      referencia_tipo: 'PAA',
     };
 
     this.notificacionRegistroCrudService.post(payload).subscribe({
