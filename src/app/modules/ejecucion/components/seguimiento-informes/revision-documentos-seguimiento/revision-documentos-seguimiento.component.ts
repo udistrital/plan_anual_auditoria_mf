@@ -76,7 +76,26 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   cargarDocumentos() {
-    console.log("Cargar documentos");
+    const tipoDocumentoIndiceMap: { [key: number]: number } = {
+      [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL]: 0,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: 1,
+    };
+
+    this.referenciaPdfService
+      .consultarDocumentos(this.auditoriaId)
+      .subscribe(async (res) => {
+        const promesas = res.map(async (documento) => {
+          const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+          this.documentos.push({ base64, tipo_id: documento.tipo_id });
+
+          const indice = tipoDocumentoIndiceMap[documento.tipo_id];
+          if (indice !== undefined) {
+            this.opcionesDocumentos[indice] = { ...this.opcionesDocumentos[indice], base64 };
+          }
+        });
+
+        await Promise.all(promesas);
+      });
   }
 
   preguntarAprobacion() {
@@ -144,8 +163,12 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   cargarEstadoInforme() {
-    // TODO: Cargar el estado del informe y cambiar:
-    this.estadoInformeId = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
+    this.planAuditoriaService
+      .get(`auditoria-estado?query=auditoria_id:${this.auditoriaId},actual:true`)
+      .subscribe((res) => {
+        this.estadoInformeId =
+          res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+      });
   }
 
   mostrarAcciones(): boolean {

@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
+import { environment } from 'src/environments/environment';
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 
@@ -36,8 +37,13 @@ export class EditarInformeComponent implements OnInit {
 
   informeId!: string;
   informeData: any = null;
+  estadoId: number = 0;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
+
+  get preinformeAprobado(): boolean {
+    return this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO;
+  }
 
   constructor(
     private alertaService: AlertService,
@@ -79,6 +85,7 @@ export class EditarInformeComponent implements OnInit {
     this.router.navigate([`/ejecucion/auditorias-internas`]);
   }
 
+  // TODO: Se consulta por informe o por auditoria?
   // Carga el informe desde la base de datos por informeId
   cargarInforme(): void {
     this.planAnualAuditoriaService.get(`informe/${this.informeId}`).subscribe({
@@ -87,11 +94,21 @@ export class EditarInformeComponent implements OnInit {
           this.informeData = response.Data;
           this.poblarFormularios();
           this.poblarFormularioInformacion();
+          this.cargarEstadoAuditoria();
         }
       },
       error: (error) => {
         console.error('Error al cargar el informe:', error);
       }
+    });
+  }
+
+  cargarEstadoAuditoria(): void {
+    this.planAnualAuditoriaService.get(`auditoria-estado?query=auditoria_id:${this.informeId},actual:true`).subscribe({
+      next: (res: any) => {
+        this.estadoId = res.Data?.[0]?.estado_id ?? 0;
+      },
+      error: () => {}
     });
   }
 

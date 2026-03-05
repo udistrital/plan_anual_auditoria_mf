@@ -16,6 +16,8 @@ import { RevisionDocumentosEjecucionComponent } from './components/auditorias-in
 import { ModalRechazoAuditoriaEjecucionComponent } from './components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component';
 import { RevisionDocumentosSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/revision-documentos-seguimiento.component';
 import { ModalRechazoSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component';
+import { ModalHistorialRechazosComponent } from './components/auditorias-internas/modal-historial-rechazos/modal-historial-rechazos.component';
+import { ModalHistorialRechazosSeguimientoComponent } from './components/seguimiento-informes/modal-historial-rechazos-seguimiento/modal-historial-rechazos-seguimiento.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +33,9 @@ import { ModalRechazoSeguimientoComponent } from './components/seguimiento-infor
     RevisionDocumentosEjecucionComponent,
     ModalRechazoAuditoriaEjecucionComponent,
     RevisionDocumentosSeguimientoComponent,
-    ModalRechazoSeguimientoComponent
+    ModalRechazoSeguimientoComponent,
+    ModalHistorialRechazosComponent,
+    ModalHistorialRechazosSeguimientoComponent,
   ],
   imports: [
     CommonModule,

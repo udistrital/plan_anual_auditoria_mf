@@ -6,12 +6,13 @@
 <ng-template #contenidoDePlantilla>
   <div class="row">
     <div class="col-12">
+      <div [class.steps-bloqueados]="!preinformeAprobado">
       <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
         <ng-template matStepperIcon="number">
           <mat-icon>lens</mat-icon>
         </ng-template>
         <!-- Paso 1: Información -->
-        <mat-step>
+        <mat-step [completed]="true">
           <ng-template matStepLabel>
             <p>Paso 1</p>
             <b style="color: var(--primary)">Información</b>
@@ -38,7 +39,7 @@
         </mat-step>
 
         <!-- Paso 2: Aspectos Generales -->
-        <mat-step>
+        <mat-step [completed]="true">
           <ng-template matStepLabel>
             <p>Paso 2</p>
             <b style="color: var(--primary)">Aspectos Generales</b>
@@ -69,7 +70,7 @@
         </mat-step>
 
         <!-- Paso 3: Aspectos Evaluados -->
-        <mat-step>
+        <mat-step [completed]="true">
           <ng-template matStepLabel>
             <p>Paso 3</p>
             <b style="color: var(--primary)">Aspectos Evaluados</b>
@@ -97,7 +98,7 @@
         </mat-step>
 
         <!-- Paso 4: Resumen de Hallazgos -->
-        <mat-step>
+        <mat-step [completed]="true">
           <ng-template matStepLabel>
             <p>Paso 4</p>
             <b style="color: var(--primary)">Resumen de Hallazgos</b>
@@ -117,15 +118,15 @@
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
               </button>
-              <button matStepperNext mat-flat-button color="primary" class="mx-2">
-                Guardar y cerrar
+              <button *ngIf="preinformeAprobado" matStepperNext mat-flat-button color="primary" class="mx-2">
+                Continuar
               </button>
             </div>
           </div>
         </mat-step>
 
         <!-- Paso 5: Respuesta Preliminar -->
-        <mat-step>
+        <mat-step [completed]="preinformeAprobado">
           <ng-template matStepLabel>
             <p>Paso 5</p>
             <b style="color: var(--primary)">Respuesta Preliminar</b>
@@ -194,6 +195,7 @@
           </div>
         </mat-step>
       </mat-stepper>
+      </div>
     </div>
   </div>
 </ng-template>
