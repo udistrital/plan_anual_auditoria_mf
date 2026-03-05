@@ -274,7 +274,7 @@ export class EditarAuditoriaComponent implements OnInit {
         tipoArchivo: "xlsx",
         id: this.auditoriaId,
         idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-        descripcion: "Archivo para cargue masivo de actividades",
+        descripcion: "Archivo para cargue masivo de actividades de auditoría interna",
         cargaLambda: true,
         tipo: "actividades",
         referencia: "Plan Auditoria",
