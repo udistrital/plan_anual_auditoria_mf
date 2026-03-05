@@ -8,9 +8,10 @@ import { Router } from "@angular/router";
 import { switchMap, catchError } from "rxjs/operators";
 import { throwError, of, forkJoin } from "rxjs";
 import { TercerosService } from "src/app/shared/services/terceros.service";
-import { NotificacionesService, VariablesRechazo } from "src/app/shared/services/notificaciones.service";
+import { DestinatariosEmail, NotificacionesService, VariablesRechazo } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { PLANTILLA_RECHAZO_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 
 @Component({
   selector: "app-modal-motivos-rechazo",
@@ -87,7 +88,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
   private notificarRechazo(): void {
     const motivoRechazo = this.formObservaciones.get("observaciones")?.value;
     // rolRemitente viene del componente padre — diferencia si rechazó Jefe o Secretario
-    const rolRemitente = this.infoModal.rolRemitente || "Jefe OCI";
+    const rolRemitente = this.infoModal.rolRemitente;
 
     this.planAuditoriaService.get(`plan-auditoria/${this.infoModal.planAuditoriaId}`).pipe(
       switchMap((planResponse: any) => {
@@ -151,7 +152,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
           destinatarios,
           variablesRechazo
         ).pipe(
-          switchMap((response: any) => of({ response, vigenciaNombre, correoAuditor }))
+          switchMap((response: any) => of({ response, vigenciaNombre, destinatarios }))
         );
       }),
 
@@ -163,11 +164,11 @@ export class ModalMotivosRechazoComponent implements OnInit {
       })
 
     ).subscribe({
-      next: ({ response, vigenciaNombre, correoAuditor }: any) => {
+      next: ({ response, vigenciaNombre, destinatarios }: any) => {
         console.log("RESPUESTA NOTIFICACION:", JSON.stringify(response, null, 2));
         // Solo se registra en MongoDB si el correo fue enviado exitosamente
         if (response?.Status == 200) {
-          this.registrarNotificacionRechazo(motivoRechazo, rolRemitente, vigenciaNombre, correoAuditor);
+          this.registrarNotificacionRechazo(motivoRechazo, rolRemitente, vigenciaNombre, destinatarios);
         }
       },
       error: (err) => console.warn("Error en notificación de rechazo:", err),
@@ -178,24 +179,19 @@ export class ModalMotivosRechazoComponent implements OnInit {
     motivoRechazo: string,
     rolRemitente: string,
     vigenciaNombre: string,
-    correoAuditor: string | null
+    destinatarios: DestinatariosEmail  
   ): void {
-    const destinatarioRegistro = correoAuditor
-      || environment["NOTIFICACION_PLAN_AUDITORIA_RECHAZO_DESTINATARIOS"]?.ToAddresses?.[0]
-      || "sin_correo";
-
     const payload = {
-      destinatario: destinatarioRegistro,
+      template: PLANTILLA_RECHAZO_NOMBRE,
       fecha_envio: new Date(),
       metadatos: {
-        titulo_rechazo: `Rechazo de Plan Anual de Auditoría - ${rolRemitente}`,
-        nombre_documento: "Plan Anual de Auditoría",
-        vigencia: vigenciaNombre,
+        tipo_notificacion: 'rechazo_paa',
         motivo_rechazo: motivoRechazo,
         rol_remitente: rolRemitente,
-        nombre_remitente: this.infoModal.nombreRemitente || rolRemitente,
-        fecha_envio: new Date().toLocaleDateString(),
-        tipo_notificacion: "rechazo_paa",
+        vigencia: vigenciaNombre,
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
       },
       referencia_id: this.infoModal.planAuditoriaId,
     };

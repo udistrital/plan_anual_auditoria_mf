@@ -27,7 +27,6 @@ export class RevisionSecretarioComponent {
   planAuditoriaId: string = "";
   estadoIdActual: number | null = null;
   mostrarBotones: boolean = true;
-  roles: string[] = [];
 
   constructor(
     public dialog: MatDialog,
@@ -48,9 +47,10 @@ export class RevisionSecretarioComponent {
   documentos: { base64: string; tipo_id: number }[] = [];
   documentosPorTab: { [key: number]: string } = {};
   tabs: TabDocumento[] = [];
+  roles: string[] = [];
   usuarioId: any;
   vigenciaNombre: string = "";
-
+  
   async ngOnInit() {
     console.debug("Inicializando RevisionSecretarioComponent...");
     this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
@@ -110,7 +110,6 @@ export class RevisionSecretarioComponent {
   abrirModalRechazo(): void {
     if (!this.mostrarBotones) return;
 
-    // Obtener nombre del secretario autenticado para pasarlo al modal
     this.tercerosService.getAuthenticatedUserTerceroIdentification().subscribe({
       next: (tercero) => {
         this.dialog.open(ModalMotivosRechazoComponent, {
@@ -118,7 +117,7 @@ export class RevisionSecretarioComponent {
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
-            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Secretario Auditor",
+            rolRemitente: "Secretario Auditor",
             nombreRemitente: tercero.NombreCompleto,
             vigencia: null,
           },
@@ -126,13 +125,12 @@ export class RevisionSecretarioComponent {
       },
       error: (err) => {
         console.warn("Error obteniendo datos del Secretario para el modal:", err);
-        // Abrir modal igualmente sin nombre del remitente
         this.dialog.open(ModalMotivosRechazoComponent, {
           width: "50%",
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
-            rolRemitente: rolRemitentePorRol[this.roles[0]] || "Secretario Auditor",
+            rolRemitente: "Secretario Auditor",
             nombreRemitente: "Secretario Auditor",
             vigencia: null,
           },
