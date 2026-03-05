@@ -72,10 +72,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
+    this.modoEditarExtraordinario = Boolean(localStorage.getItem('extra-edit'));
     const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
     this.vigenciaId = vigencia?.Id || 0;
     this.vigenciaNombre = vigencia?.Nombre || '';
     localStorage.removeItem('vigencia');
+    localStorage.removeItem('extra-edit');
     await this.obtenerEstadoActual();
     this.cargarAuditorias();
     try {
@@ -167,7 +169,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
         this.estadoIdActual = environment.PLAN_ESTADO.EN_BORRADOR_ID;
       }
 
-      console.log('Roles del usuario:', this.roles);
       const esAuditorExperto = this.roles.includes(environment.ROL.AUDITOR_EXPERTO);
       const esJefeControlInterno = this.roles.includes(environment.ROL.JEFE);
       const enRevisionJefe = this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
@@ -178,8 +179,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
         (enRevisionJefe && !esAuditorExperto);
 
                 
-      this.modoEditarExtraordinario = (esAuditorExperto || esJefeControlInterno) &&
-        (this.estadoIdActual === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID);
+      this.modoEditarExtraordinario = this.modoEditarExtraordinario && 
+        ((esAuditorExperto || esJefeControlInterno) &&
+        (this.estadoIdActual === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID));
 
       this.mostrarOrdenamiento =
         (esAuditorExperto || esJefeControlInterno) &&
@@ -369,7 +371,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   subirArchivoMatriz(): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "pdf",
@@ -382,14 +384,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
         referencia: "Plan Auditoria",
       },
     });
-
-    dialogRef.afterClosed().subscribe(() => {
-      this.cargarAuditorias();
-    });
   }
 
   subirActaModificacion() {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "pdf",
@@ -401,10 +399,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
           environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
         referencia: "Plan Auditoria",
       },
-    });
-
-    dialogRef.afterClosed().subscribe(() => {
-      this.cargarAuditorias();
     });
   }
 
