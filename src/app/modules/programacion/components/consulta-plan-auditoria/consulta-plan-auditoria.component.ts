@@ -61,6 +61,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Editar Auditorías", "edit"],
     ["Historial de Rechazo", "report"],
     ["Enviar Aprobación", "send"],
+    ["Edición Extraordinaria de Auditorías", "edit"],
   ]);
 
   constructor(
@@ -268,6 +269,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
+      "Edición Extraordinaria de Auditorías": () => this.editarActividades(plan),
     };
     acciones[accion]?.();
   }
