@@ -1,7 +1,7 @@
 <plantilla-modal 
     [icono]="'list_alt'"
     [titulo]="'Ver PAA'"
-    [descripcion]="'Plan Anual de Auditoria'"
+    [descripcion]="data.actualizado ? 'Plan Anual de Auditoria actualizado' : 'Plan Anual de Auditoria'"
     [contenido]="contenidoDeModal"
     [footer]="footerDeModal"
 ></plantilla-modal>

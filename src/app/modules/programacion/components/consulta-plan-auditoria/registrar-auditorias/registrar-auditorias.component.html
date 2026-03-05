@@ -51,14 +51,14 @@
       <!-- Agregar cdkDropList a la tabla -->
       <div class="table-container" 
            cdkDropList
-           [cdkDropListDisabled]="!modoEditar"
+           [cdkDropListDisabled]="!modoEditar && !modoEditarExtraordinario"
            (cdkDropListDropped)="drop($event)"
            cdkDropListAutoScrollDisabled="false">
         <table
           mat-table
           [dataSource]="dataSource"
           cdkDropList
-          [cdkDropListDisabled]="!modoEditar"
+          [cdkDropListDisabled]="!modoEditar && !modoEditarExtraordinario"
           (cdkDropListDropped)="drop($event)"
         >
           <!-- No Column (Generado automáticamente) -->
@@ -162,6 +162,7 @@
           <!-- Definir las filas (Agregar cdkDrag a las filas) -->
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr
+            class="{{modoEditar || modoEditarExtraordinario ? 'cdk-draggable' : '' }}"
             mat-row
             *matRowDef="let row; columns: displayedColumns"
             cdkDrag
@@ -172,7 +173,7 @@
       <div class="row mt-3">
         <div
           class="d-flex justify-content-end"
-          *ngIf="!modoEditar; else botonesAcciones"
+          *ngIf="!modoEditar && !modoEditarExtraordinario; else botonesAcciones"
         >
           <button
             class="mx-2"
@@ -196,6 +197,7 @@
         <ng-template #botonesAcciones>
           <div class="d-flex justify-content-end">
             <button
+              *ngIf="!modoEditarExtraordinario"
               class="mx-2"
               mat-raised-button
               color="primary"
@@ -205,12 +207,22 @@
               Añadir Auditoría
             </button>
             <button
+              *ngIf="!modoEditarExtraordinario"
               class="mx-2"
               mat-raised-button
               color="primary"
               (click)="subirArchivoCargueMasivo()"
             >
               <mat-icon>file_upload</mat-icon> Cargue Masivo
+            </button>
+            <button
+            *ngIf="modoEditarExtraordinario"
+              class="mx-2"
+              mat-raised-button
+              color="primary"
+              (click)="subirActaModificacion()"
+            >
+              <mat-icon>file_upload</mat-icon> Acta Actualización
             </button>
             <button
               class="mx-2"
@@ -223,7 +235,7 @@
             <button *ngIf="base64Matriz===null" class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
               <mat-icon>file_upload</mat-icon>Matriz
             </button>
-            <button *ngIf="base64Matriz!==null" class="mx-2" mat-raised-button color="primary" (click)="verMatriz()">
+            <button *ngIf="base64Matriz!==null && !modoEditarExtraordinario" class="mx-2" mat-raised-button color="primary" (click)="verMatriz()">
               <mat-icon>visibility</mat-icon>Ver Matriz
             </button>
             <button class="mx-2" mat-raised-button color="primary" (click)="guardarPaa()">

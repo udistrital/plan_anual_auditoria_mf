@@ -21,6 +21,7 @@ export class Auditoria {
     cronogramaId!: number[];
     vigencia_id!: number;
     estado_nombre!: string;
+    estado!: string;
     estado_id!: number;
     auditores!: number[];
 }

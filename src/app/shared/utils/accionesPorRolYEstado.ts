@@ -38,7 +38,7 @@ export const accionesProgramacion: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías"],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan", "Edición Extraordinaria de Auditorías"],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo",],
   },
 
@@ -73,6 +73,7 @@ export const accionesProgramacion: {
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
+      "Edición Extraordinaria de Auditorías",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",

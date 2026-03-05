@@ -41,7 +41,14 @@ export class AddAuditoriaModalComponent implements OnInit {
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: { usuario_id: number; usuario_rol: string; planAuditoriaId: string; vigenciaId: number; auditoria?: Auditoria }
+    public data: {
+      usuario_id: number;
+      usuario_rol: string;
+      planAuditoriaId: string;
+      vigenciaId: number;
+      isEditExtraordinario: boolean;
+      auditoria?: Auditoria
+    }
   ) {}
 
   ngOnInit(): void {
@@ -258,7 +265,9 @@ export class AddAuditoriaModalComponent implements OnInit {
         .showConfirmAlert(
           `¿Está seguro(a) de ${
             this.isEditMode ? "actualizar" : "guardar"
-          } la auditoría?`
+          } la auditoría? ${
+            this.data.isEditExtraordinario ? "\nEsta auditoría se encuentra en el estado " + this.data.auditoria?.estado : ""
+          }`
         )
         .then((result) => {
           if (result.isConfirmed) {

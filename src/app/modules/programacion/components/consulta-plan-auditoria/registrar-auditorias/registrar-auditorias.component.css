@@ -54,3 +54,11 @@
 .cdk-drop-list-dragging .mat-row:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+.cdk-draggable, .cdk-drag-animating:hover {
+  cursor: grab;
+}
+
+.cdk-draggable:active, .cdk-drop-list-dragging:active {
+  cursor: grabbing;
+}

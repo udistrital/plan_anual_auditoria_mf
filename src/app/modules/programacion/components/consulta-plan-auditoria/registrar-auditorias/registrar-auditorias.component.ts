@@ -42,6 +42,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   dataSource = new MatTableDataSource<Auditoria>([]);
   id: string = "";
   modoEditar: boolean = true;
+  modoEditarExtraordinario: boolean = false;
   vigenciaId: number = 0;
   idMatriz: any = null;
   base64Matriz: any = null;
@@ -88,8 +89,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.userService.getPersonaId().then((id) => {
       this.usuario_id = id;
     });
-    this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
-    this.title = `${this.modoEditar ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
+    this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar || this.modoEditarExtraordinario ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
+    this.title = `${this.modoEditar || this.modoEditarExtraordinario ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
   }
 
   cargarAuditorias(): void {
@@ -144,7 +145,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     ];
 
     // Agrega la columna de acciones solo si modoEditar es true
-    if (this.modoEditar) {
+    if (this.modoEditar || this.modoEditarExtraordinario) {
       this.displayedColumns.push("acciones");
     }
   }
@@ -167,14 +168,18 @@ export class RegistrarAuditoriasComponent implements OnInit {
       }
 
       console.log('Roles del usuario:', this.roles);
-      const esAuditorExperto = this.roles.includes('AUDITOR_EXPERTO');
-      const esJefeControlInterno = this.roles.includes('JEFE_CONTROL_INTERNO');
+      const esAuditorExperto = this.roles.includes(environment.ROL.AUDITOR_EXPERTO);
+      const esJefeControlInterno = this.roles.includes(environment.ROL.JEFE);
       const enRevisionJefe = this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
 
       this.modoEditar =
         (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
         this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO) ||
         (enRevisionJefe && !esAuditorExperto);
+
+                
+      this.modoEditarExtraordinario = (esAuditorExperto || esJefeControlInterno) &&
+        (this.estadoIdActual === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID);
 
       this.mostrarOrdenamiento =
         (esAuditorExperto || esJefeControlInterno) &&
@@ -184,13 +189,14 @@ export class RegistrarAuditoriasComponent implements OnInit {
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
       this.modoEditar = false;
+      this.modoEditarExtraordinario = false;
       this.mostrarOrdenamiento = false;
     }
   }
 
   // Función para manejar el evento de drag-and-drop
   drop(event: CdkDragDrop<Auditoria[]>): void {
-    if (!this.modoEditar) {
+    if (!this.modoEditar && !this.modoEditarExtraordinario) {
       return;
     }
     const prevData = [...this.dataSource.data];
@@ -270,7 +276,10 @@ export class RegistrarAuditoriasComponent implements OnInit {
     }
     
     this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
+      .showConfirmAlert(
+        `¿Está seguro(a) de eliminar el registro? 
+        ${this.modoEditarExtraordinario ? "\nEsta auditoría se encuentra en el estado " + element.estado : ""}`
+      )
       .then(
         (result) => {
           if (result.isConfirmed) {
@@ -378,6 +387,26 @@ export class RegistrarAuditoriasComponent implements OnInit {
     });
   }
 
+  subirActaModificacion() {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+      width: "800px",
+      data: {
+        tipoArchivo: "pdf",
+        id: this.id,
+        idTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_MODIFICACION,
+        descripcion: "Acta de modificación de plan aprobado",
+        cargaLambda: false,
+        tipoIdReferencia:
+          environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
+        referencia: "Plan Auditoria",
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarAuditorias();
+    });
+  }
+
   // Guardar cambios
   saveChanges(): void {
     console.log("Nuevo orden de auditorías:", this.dataSource.data);
@@ -391,6 +420,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
         planAuditoriaId: this.id,
         vigenciaId: this.vigenciaId,
+        isEditExtraordinario: this.modoEditarExtraordinario,
         auditoria,
       },
     });
@@ -413,7 +443,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
       (res) => {
         if (res && res.Data) {
           this.dialog.open(ModalPdfVisualizadorComponent, {
-            data: { base64Document: res.Data, id: this.id, vigenciaNombre: this.vigenciaNombre },
+            data: {
+              base64Document: res.Data,
+              id: this.id,
+              vigenciaNombre: this.vigenciaNombre,
+              actualizado: this.modoEditarExtraordinario
+            },
             width: "80%",
             height: "80vh",
           });
