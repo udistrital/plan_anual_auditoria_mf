@@ -19,6 +19,7 @@ export interface BotonTabDocumento {
 export interface TabDocumento {
   nombre: string;
   tipoId: number;
+  obligatorio?: boolean;
   botones?: BotonTabDocumento[];
 }
 

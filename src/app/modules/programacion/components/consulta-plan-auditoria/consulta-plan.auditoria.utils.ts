@@ -206,6 +206,7 @@ export class DocumentoUtils {
   ): TabDocumento[] {
     const formatoPaaActualizadoTab: TabDocumento = {
       nombre: "Formato PAA Actualizado",
+      obligatorio: true,
       tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
       botones: refreshCallbacks?.[REFRESHABLES.FORMATO_PAA_ACTUALIZADO] ? [
         {
@@ -222,6 +223,7 @@ export class DocumentoUtils {
     };
     const formatoPaaOriginalTab: TabDocumento = {
       nombre: "Formato PAA Original",
+      obligatorio: true,
       tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
     };
     const matrizFuncionPublicaTab: TabDocumento = {
@@ -232,23 +234,24 @@ export class DocumentoUtils {
       nombre: "Acta de Comité",
       tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR,
     };
+    const actaActualizacionPlan: TabDocumento = {
+      nombre: "Acta de actualización de plan aprobado",
+      tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
+    };
 
     let tabs = [];
     if (planEstado === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID) {
       tabs = [formatoPaaActualizadoTab, formatoPaaOriginalTab, matrizFuncionPublicaTab];
 
-      if (!roles || roles.length === 0) {
+      const rolesActaComite = [
+        environment.ROL.AUDITOR_EXPERTO,
+        environment.ROL.JEFE,
+        environment.ROL.SECRETARIO
+      ];
+      if (roles?.some(role => rolesActaComite.includes(role))) {
         tabs.push(actaComiteTab);
-      } else {
-        const rolesActaComite = [
-          environment.ROL.AUDITOR_EXPERTO,
-          environment.ROL.JEFE,
-          environment.ROL.SECRETARIO
-        ];
-        if (roles.some(role => rolesActaComite.includes(role))) {
-          tabs.push(actaComiteTab);
-        }
       }
+      tabs.push(actaActualizacionPlan);
     } else {
       tabs = [formatoPaaOriginalTab, matrizFuncionPublicaTab];
     }

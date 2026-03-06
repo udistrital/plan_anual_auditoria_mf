@@ -23,10 +23,12 @@
     </div>
     <div class="row">
         <div class="col-sm-12 col-md-4 col-lg-3 d-flex flex-column">
-            <button *ngFor="let tab of tabs; let i = index" class="mb-2 tab-btn" mat-stroked-button
-                [ngClass]="selectedTab === i ? 'selected' : ''" (click)="selectTab(i)">
-                {{ tab.nombre }}
-            </button>
+            <ng-container *ngFor="let tab of tabs; let i = index">
+                <button *ngIf="documentosPorTab[i] || tab.obligatorio" class="mb-2 tab-btn" mat-stroked-button
+                    [ngClass]="selectedTab === i ? 'selected' : ''" (click)="selectTab(i)">
+                    {{ tab.nombre }}
+                </button>
+            </ng-container>
         </div>
         <div class="col-sm-12 col-md-8 col-lg-9">
             <div *ngIf="documentosPorTab[selectedTab]" style="border: 1px solid #ebdddd">
