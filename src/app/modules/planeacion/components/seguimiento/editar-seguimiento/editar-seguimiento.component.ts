@@ -20,6 +20,7 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { establecerSelectsSecuenciales } from "src/app/shared/utils/formularios";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
+import { forkJoin } from "rxjs";
 
 
 @Component({
@@ -44,6 +45,9 @@ export class EditarSeguimientoComponent implements OnInit {
   tipoSeleccionado: "macroproceso" | "proceso" | null = null;
   procesoElegido = 0;
   usuarioId: number = 0;
+  paso1Guardado: boolean = false;
+  tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
+  auditoriaEstados = environment.AUDITORIA_ESTADO;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -137,6 +141,7 @@ export class EditarSeguimientoComponent implements OnInit {
           );
           
         });
+        this.paso1Guardado = true;
         this.stepper.next();
       });
   }
@@ -153,7 +158,21 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   finalizarAuditoria(): void {
-    console.log("Auditoría finalizada");
+    if (!this.paso1Guardado) {
+      return this.alertaService.showAlert(
+        "Formulario incompleto",
+        "Debe guardar todos los pasos del formulario antes de enviar (Paso 1: Información)"
+      );
+    }
+
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de enviar el formulario?")
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+        this.validarDocumentosAnexados(this.auditoria._id);
+      });
   }
 
   manejarEnvioDocumentos(documentos: any) {
@@ -207,9 +226,15 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   crearActividad() {
-    this.dialog.open(CrearActividadSeguimientoComponent, {
+    const dialogRef =this.dialog.open(CrearActividadSeguimientoComponent, {
       width: "1100px",
       data: { auditoriaId: this.auditoriaId },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      if (this.registroPlan) {
+        this.registroPlan.listaractividades();
+      }
     });
   }
 
@@ -257,4 +282,58 @@ export class EditarSeguimientoComponent implements OnInit {
     );
   }
 
+  validarDocumentosAnexados(auditoriaId: any) {
+    const docs = [
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información"},
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
+    ];
+
+    const requests = docs.map(d =>
+      this.planAuditoriaService.get(
+        `documento?query=referencia_id:${auditoriaId},tipo_id:${d.tipo},activo:true`
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        for (let i = 0; i < responses.length; i++) {
+          if (!responses[i] || responses[i].Data.length === 0) {
+            this.alertaService.showErrorAlert(
+              `No se ha encontrado el documento de  ${docs[i].nombre}. Por favor, asegúrese de subir todos los documentos requeridos antes de enviar a aprobación por Jefe.`
+            );
+            return;
+          }
+        }
+        this.enviarAprobacionPorJefe(auditoriaId);
+      },
+      error: (error) => {
+        console.error(error);
+        this.alertaService.showErrorAlert("Error validando los documentos.");
+      }
+    });
+  }
+
+  enviarAprobacionPorJefe(auditoriaId: string) {
+    const auditoriaEstado = {
+      auditoria_id: auditoriaId,
+      usuario_id: this.usuarioId,
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+      observacion: "",
+      estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
+      fase_id: environment.AUDITORIA_FASE.PLANEACION,
+    };
+    this.planAuditoriaService
+      .post("auditoria-estado", auditoriaEstado)
+      .subscribe({
+        next: () => {
+          this.alertaService.showSuccessAlert(
+            "Auditoría enviada a aprobación por Jefe",
+            "Auditoría enviada"
+          );
+        },
+        error: () => {
+          this.alertaService.showErrorAlert("Error al enviar el plan.");
+        }
+      });
+  }
 }

@@ -9,18 +9,21 @@
       <button
         mat-icon-button
         color="primary"
-        (click)="fileInput.value = ''; fileInput.click()"
-        *ngIf="!documento.plantilla"
+        (click)="subirCompromisoEtico()"
+        *ngIf="!documento.plantilla && documento.nombre == 'Compromiso Ético' && base64CompromisoEtico === null"
         class="width-100-md"
       >
         <mat-icon>upload</mat-icon>
       </button>
-      <input
-        type="file"
-        (change)="onArchivoSeleccionado($event, i)"
-        #fileInput
-        hidden
-      />
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="verCompromisoEtico()"
+        *ngIf="!documento.plantilla && documento.nombre == 'Compromiso Ético' && base64CompromisoEtico !== null"
+        class="width-100-md"
+      >
+        <mat-icon>visibility</mat-icon>
+      </button>
 
       <button
         mat-stroked-button
@@ -32,7 +35,7 @@
         [matTooltipPosition]="'above'"
       >
         <mat-icon style="color: var(--md-warning-600)">picture_as_pdf</mat-icon>
-        Generar documento
+        Ver documento
       </button>
     </div>
   </div>

@@ -4,10 +4,13 @@ import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
+import { ModalVisualizarRecargarCompromisoEticoComponent } from "../../../auditorias-internas/editar-auditoria/documentos-anexos-auditoria/modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
 
 @Component({
   selector: "app-documentos-anexos-seguimiento",
@@ -19,14 +22,19 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
 
   auditoriaId: string = "";
   formularioDocumentos: FormGroup;
+  idCompromisoEtico: any = null;
+  base64CompromisoEtico: any = null;
 
   documentos = [
     {
       nombre: "Oficio Anuncio Solicitud de Información",
-      // plantilla: "solicitud-informacion",
-      plantilla: null,
+      plantilla: "solicitud-informacion",
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
     },
+    {
+      nombre: "Compromiso Ético",
+      parametro: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
+    }
   ];
 
   constructor(
@@ -36,33 +44,72 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
     private readonly nuxeoService: NuxeoService,
     private readonly route: ActivatedRoute,
     private readonly referenciaPdfService: ReferenciaPdfService,
-    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService
   ) {
     this.formularioDocumentos = this.fb.group({
       campoDocumentos: ["", Validators.required],
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-  }
-
-  /**
-   * Handles the file selection event, reads the selected file, and opens it for viewing.
-   * @param event The file selection event containing the selected file.
-   * @param index The index of the document in the documentos array.
-   */
-  onArchivoSeleccionado(event: any, index: number): void {
-    const archivo = event.target.files[0];
-    if (archivo) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = (reader.result as string).split(",")[1];
-        this.verDocumento(base64String, this.documentos[index]);
-      };
-      reader.readAsDataURL(archivo);
+    try {
+      this.idCompromisoEtico = await this.buscarCompromisoEtico();
+      if (this.idCompromisoEtico !== null) {
+        this.buscarBase64(this.idCompromisoEtico);
+      }
+    } catch (error) {
+      console.error("Error al obtener el compromiso ético", error);
     }
   }
+
+  subirCompromisoEtico(): void {
+      const dialogRef = this.dialog.open(CargarArchivoComponent, {
+        width: "800px",
+        data: {
+          tipoArchivo: "pdf",
+          id: this.auditoriaId,
+          idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+          descripcion: "Compromiso ético de auditoría de seguimiento",
+          cargaLambda: false,
+          tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
+          referencia: "Auditoria",
+        }
+      });
+    }
+  
+    buscarCompromisoEtico(): Promise<string | null> {
+      return new Promise((resolve, reject) => {
+        this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
+          .subscribe(
+            (res) => {
+              if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+                resolve(res.Data[0].nuxeo_enlace);
+              } else {
+                resolve(null);
+              }
+            },
+            (error) => {
+              console.log("Error al buscar el compromiso Ético");
+              this.alertService.showErrorAlert("Error al buscar Compromiso Ético");
+              reject(error);
+            }
+          );
+      });
+    }
+  
+    async buscarBase64(nuxeoId: string) {
+      this.base64CompromisoEtico = await this.nuxeoService.obtenerPorUUID(nuxeoId);
+    }
+  
+    verCompromisoEtico() {
+        this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
+          data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+          width: "80%",
+          height: "80vh",
+        });
+      }
 
   onGuardar() {
     if (this.formularioDocumentos.valid) {

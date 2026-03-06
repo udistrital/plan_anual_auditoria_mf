@@ -23,6 +23,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { forkJoin } from "rxjs";
 
 @Component({
   selector: "app-tabla-seguimiento",
@@ -49,11 +50,13 @@ export class TablaSeguimientoComponent implements OnInit {
   mostrarAcciones: boolean = false;
   iconosAccion = new Map<string, string>([
     ["Ver Documento", "description"],
+    ["Ver Documentos", "description"],
     ["Ver Auditoría", "visibility"],
     ["Editar Auditoría", "edit"],
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
   ]);
+  tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
 
   constructor(
     private readonly alertService: AlertService,
@@ -267,7 +270,7 @@ export class TablaSeguimientoComponent implements OnInit {
   // Acciones
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      "Ver Documento": () => this.verDocumento(auditoria),
+      "Ver Documentos": () => this.verDocumentos(auditoria),
       "Ver Auditoría": () => this.verAuditoria(auditoria),
       "Editar Auditoría": () => this.editarAuditoria(auditoria),
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
@@ -336,7 +339,7 @@ export class TablaSeguimientoComponent implements OnInit {
         if (!confirmado.value) {
           return;
         }
-        this.enviarAprobacionPorJefe(auditoria._id);
+        this.validarDocumentosAnexados(auditoria._id);
       });
   }
 
@@ -432,10 +435,44 @@ export class TablaSeguimientoComponent implements OnInit {
           {
             nombre: "Oficio Anuncio Solicitud de Información",
             tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION
+          },
+          {
+            nombre: "Compromiso Ético",
+            tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO
           }
         ]
       },
     });
   }
 
+  validarDocumentosAnexados(auditoriaId: any) {
+    const docs = [
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información"},
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
+    ];
+
+    const requests = docs.map(d =>
+      this.planAuditoriaService.get(
+        `documento?query=referencia_id:${auditoriaId},tipo_id:${d.tipo},activo:true`
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (responses) => {
+        for (let i = 0; i < responses.length; i++) {
+          if (!responses[i] || responses[i].Data.length === 0) {
+            this.alertService.showErrorAlert(
+              `No se ha encontrado el documento de  ${docs[i].nombre}. Por favor, asegúrese de subir todos los documentos requeridos antes de enviar a aprobación por Jefe.`
+            );
+            return;
+          }
+        }
+        this.enviarAprobacionPorJefe(auditoriaId);
+      },
+      error: (error) => {
+        console.error(error);
+        this.alertService.showErrorAlert("Error validando los documentos.");
+      }
+    });
+  }
 }

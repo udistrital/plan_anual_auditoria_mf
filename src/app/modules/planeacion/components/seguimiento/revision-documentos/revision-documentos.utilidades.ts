@@ -37,4 +37,5 @@ export const rolesAprobacion: { [key: string]: any } = {
 
 export const documentos = [
   "Oficio Anuncio Solicitud de Información",
+  "Compromiso Ético"
 ];

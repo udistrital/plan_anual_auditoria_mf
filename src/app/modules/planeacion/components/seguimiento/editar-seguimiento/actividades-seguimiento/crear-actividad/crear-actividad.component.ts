@@ -9,7 +9,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 })
 export class CrearActividadSeguimientoComponent {
   auditoriaId: string;
-  datos: any;
+  datos: any | [] = [];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<CrearActividadSeguimientoComponent>,
@@ -35,8 +35,6 @@ export class CrearActividadSeguimientoComponent {
       // papeltrabajo_medio:actividadData.papelTrabajoMedio,
       // papeltrabajo_carpeta:actividadData.papelTrabajoCarpeta,
     };
-
-    console.debug('Crear actividad json:', actividadJson);
     
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de crear la actividad?")
@@ -47,9 +45,9 @@ export class CrearActividadSeguimientoComponent {
             .subscribe(
               (response) => {
                 if (response) {
-                  this.alertaService.showSuccessAlert("Mock Registro Creado");
+                  this.alertaService.showSuccessAlert("Registro Creado");
                   this.datos.push(response);
-                  this.dialogRef.close(true);
+                  this.dialogRef.close();
                 } else {
                   this.alertaService.showErrorAlert(
                     "Error al crear el registro"
