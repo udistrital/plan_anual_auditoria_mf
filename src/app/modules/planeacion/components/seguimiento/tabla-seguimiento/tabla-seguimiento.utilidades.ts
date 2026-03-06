@@ -39,12 +39,6 @@ export const colocacionesContructorTabla = [
     sortable: true,
   },
   {
-    columnDef: "documentos",
-    header: "Documentos",
-    cell: (auditoria: any) => "",
-    sortable: true,
-  },
-  {
     columnDef: "acciones",
     header: "Acciones",
     cell: (auditoria: any) => "",

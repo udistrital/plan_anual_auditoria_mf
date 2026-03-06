@@ -235,6 +235,10 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documentos"
     ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE]: [
+      "Ver Auditoría",
+      "Revisar Auditoría"
+    ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Ver Documentos"
     ]
@@ -248,6 +252,10 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos"
+    ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE]: [
+      "Ver Auditoría",
+      "Revisar Auditoría"
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Ver Documentos"
