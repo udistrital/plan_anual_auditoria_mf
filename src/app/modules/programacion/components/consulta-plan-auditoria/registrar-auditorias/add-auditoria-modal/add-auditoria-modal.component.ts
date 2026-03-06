@@ -1,7 +1,8 @@
 import { Component, OnInit, Inject } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { Observable, of } from "rxjs";
+import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
+import { Observable, of, Subject } from "rxjs";
 import {
   catchError,
   debounceTime,
@@ -30,8 +31,12 @@ export class AddAuditoriaModalComponent implements OnInit {
   macroprocesos: Parametro[] = [];
   procesos: Parametro[] = [];
   filteredDependencias!: Observable<Parametro[]>;
+  dependenciaBusquedaTexto = "";
   isEditMode = false;
   TODOS = "Todos";
+  isSearchingDependencia = false;
+  previousDependencia: Parametro | null = null;
+  private searchTrigger$ = new Subject<string>();
 
   constructor(
     private alertaService: AlertService,
@@ -165,19 +170,15 @@ export class AddAuditoriaModalComponent implements OnInit {
   }
 
   /**
-   * Initialize the search for dependencias by setting up a valueChanges subscription
-   * on the dependencia form control. This will trigger a search for dependencias
-   * based on the user's input, with debouncing and distinct value checks to optimize
-   * API calls.
+   * Initialize the search for dependencias by setting up a trigger stream. This will trigger
+   * a search for dependencias only when user focuses (with empty string) or types input,
+   * with debouncing and distinct value checks to optimize API calls.
    */
   inicializarBusquedaDependencias(): void {
-    const dependenciaControl = this.auditoriaForm.get("dependencia");
-    this.filteredDependencias = dependenciaControl.valueChanges.pipe(
-      startWith(dependenciaControl.value || ""),
-      map((value: string | Parametro) =>
-        typeof value === "string" ? value : value?.Nombre || ""
-      ),
-      debounceTime(500),
+    this.filteredDependencias = this.searchTrigger$.pipe(
+      startWith(""),
+      map((value: string) => value || ""),
+      debounceTime(200),
       distinctUntilChanged(),
       switchMap((value: string) => this.buscarDependencias(value))
     );
@@ -199,7 +200,10 @@ export class AddAuditoriaModalComponent implements OnInit {
       .pipe(catchError(() => of([])))
       .subscribe((res: Parametro[]) => {
         if (res && res.length) {
-          this.auditoriaForm.patchValue({ dependencia: res[0] });
+          const dependencia = res[0];
+          this.auditoriaForm.patchValue({ dependencia: dependencia });
+          this.previousDependencia = dependencia;
+          this.dependenciaBusquedaTexto = dependencia.Nombre || "";
         }
       });
   }
@@ -213,11 +217,13 @@ export class AddAuditoriaModalComponent implements OnInit {
    */
   buscarDependencias(value: string): Observable<Parametro[]> {
     const nombre = (value || "").trim();
+    const query = nombre
+      ? `Activo:true,Nombre:${encodeURIComponent(nombre)}`
+      : "Activo:true";
+
     return this.oikosSevice
       .get(
-        `dependencia?query=Activo:true,Nombre:${encodeURIComponent(
-          nombre
-        )}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
+        `dependencia?query=${query}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
       )
       .pipe(
         // Filter out dependencies with empty names
@@ -232,12 +238,62 @@ export class AddAuditoriaModalComponent implements OnInit {
   }
 
   /**
-   * Display function for the dependencia autocomplete to show the selected dependencia's name.
-   * @param dependencia The selected dependencia object from the autocomplete
-   * @returns The name of the selected dependencia or an empty string if no valid selection is made
+   * Handle focus on the dependencia input field. Store the current value and enable search mode.
    */
-  displayFnDependencia(dependencia: Parametro): string {
-    return dependencia && dependencia.Nombre ? dependencia.Nombre : '';
+  onDependenciaFocus(): void {
+    if (this.isSearchingDependencia) {
+      return;
+    }
+
+    const dependenciaSeleccionadaControl = this.auditoriaForm.get("dependencia");
+    this.previousDependencia = dependenciaSeleccionadaControl.value || null;
+    this.isSearchingDependencia = true;
+    this.dependenciaBusquedaTexto = "";
+    this.searchTrigger$.next("");
+  }
+
+  /**
+   * Handle input changes in dependencia search box.
+   * @param value Typed search text
+   */
+  onDependenciaInput(value: string): void {
+    this.dependenciaBusquedaTexto = value || "";
+    this.searchTrigger$.next(this.dependenciaBusquedaTexto);
+  }
+
+  /**
+   * Handle blur on the dependencia input field. If no selection was made, restore the previous value.
+   */
+  onDependenciaBlur(): void {
+    setTimeout(() => {
+      const dependenciaSeleccionadaControl = this.auditoriaForm.get("dependencia");
+
+      if (this.previousDependencia) {
+        dependenciaSeleccionadaControl.setValue(this.previousDependencia);
+        this.dependenciaBusquedaTexto = this.previousDependencia.Nombre || "";
+      } else {
+        dependenciaSeleccionadaControl.setValue(null);
+        this.dependenciaBusquedaTexto = "";
+      }
+
+      dependenciaSeleccionadaControl.markAsTouched();
+      this.isSearchingDependencia = false;
+    }, 200);
+  }
+
+  /**
+   * Handle selection of a dependencia from the autocomplete.
+   * @param event Selection event from autocomplete
+   */
+  onDependenciaSelect(event: MatAutocompleteSelectedEvent): void {
+    const dependencia = event.option.value as Parametro;
+    const dependenciaSeleccionadaControl = this.auditoriaForm.get("dependencia");
+
+    dependenciaSeleccionadaControl.setValue(dependencia);
+    this.dependenciaBusquedaTexto = dependencia?.Nombre || "";
+    this.previousDependencia = dependencia;
+    dependenciaSeleccionadaControl.markAsTouched();
+    this.isSearchingDependencia = false;
   }
 
   asignarTodos(): void {
