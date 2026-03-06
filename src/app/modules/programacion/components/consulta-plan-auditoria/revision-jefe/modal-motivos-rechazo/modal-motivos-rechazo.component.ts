@@ -194,6 +194,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
         destinatarios_bcc: destinatarios.BccAddresses ?? [],
       },
       referencia_id: this.infoModal.planAuditoriaId,
+      referencia_tipo: 'PAA',
     };
 
     this.notificacionRegistroCrudService.post(payload).subscribe({

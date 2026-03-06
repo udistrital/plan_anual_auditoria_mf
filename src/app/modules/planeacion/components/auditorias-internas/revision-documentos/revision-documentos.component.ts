@@ -417,6 +417,7 @@ export class RevisionDocumentosComponent implements OnInit {
         destinatarios_bcc: destinatarios.BccAddresses ?? [],
       },
       referencia_id: auditoriaId,
+      referencia_tipo: 'AUDITORIA INTERNA',
     };
 
     this.notificacionRegistroCrudService.post(payload).subscribe({
