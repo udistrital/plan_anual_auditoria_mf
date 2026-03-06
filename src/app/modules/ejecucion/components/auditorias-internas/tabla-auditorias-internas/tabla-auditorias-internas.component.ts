@@ -12,7 +12,9 @@ import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilida
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Router } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { ModalHistorialRechazosComponent } from "../modal-historial-rechazos/modal-historial-rechazos.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -49,6 +51,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Editar informe", "edit"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
+    ["Historial de Rechazos", "history"],
   ]);
 
   constructor(
@@ -60,6 +63,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     private planAuditoriaService: PlanAnualAuditoriaService,
     private referenciaPdfService: ReferenciaPdfService,
     private router: Router,
+    private dialog: MatDialog
   ) {}
 
   async ngOnInit() {
@@ -100,12 +104,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     offset: number = 0
   ) {
     this.auditoriasPorVigencia = [];
-
-    const queryBase = `query=vigencia_id:${vigenciaId},activo:true&limit=${limit}&offset=${offset}`;
+    const queryBase = `query=vigencia_id:${vigenciaId},activo:true,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}&limit=${limit}&offset=${offset}`;
     let url: string;
     switch (this.tipoConsulta) {
       case 'auditado':
-        url = `auditoria/auditado/${this.personaId}/${this.cargoId}?${queryBase},estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}`;
+        url = `auditoria/auditado/${this.personaId}/${this.cargoId}?${queryBase}`;
         break;
       case 'auditor':
         url = `auditoria/auditor/${this.personaId}?${queryBase}`;
@@ -154,7 +157,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.auditoriasPorVigencia
     );
 
-    //si no hay paginador, se crea
     if (!this.paginator) {
       this.auditoriasDataSource.paginator = this.paginator;
       this.auditoriasDataSource.sort = this.sort;
@@ -194,8 +196,16 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Editar informe": () => this.editarInforme(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
+      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
     };
     acciones[accion]?.();
+  }
+
+  abrirHistorialRechazos(auditoria: Auditoria) {
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      data: { auditoriaId: auditoria._id },
+      width: "40%",
+    });
   }
 
   editarPreinforme(auditoria: Auditoria) {

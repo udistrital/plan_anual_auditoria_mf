@@ -385,12 +385,14 @@ export const accionesEjecucionPreliminar: {
       "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
@@ -579,6 +581,7 @@ export const accionesEjecucionFinal: {
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
@@ -602,6 +605,7 @@ export const accionesEjecucionFinal: {
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
@@ -625,6 +629,7 @@ export const accionesEjecucionFinal: {
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
@@ -648,6 +653,7 @@ export const accionesEjecucionFinal: {
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
@@ -671,6 +677,7 @@ export const accionesEjecucionFinal: {
       "Editar Informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 };

@@ -1,0 +1,83 @@
+<plantilla-modal [icono]="'history'" [titulo]="'Historial de Rechazos'" [descripcion]="'Rechazos del informe final'"
+  [contenido]="contenidoDeModal" [footer]="footerDeModal"></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="d-flex align-items-center mb-3">
+    <mat-icon color="primary">restore</mat-icon>
+    <h3 class="mx-2">Historial de rechazos</h3>
+  </div>
+
+  <!-- Skeleton mientras carga -->
+  <ng-container *ngIf="cargando">
+    <div *ngFor="let _ of [].constructor(2)" class="px-3 my-2">
+      <div class="row">
+        <div class="col-12 col-sm-12">
+          <div class="fondo-chip mb-3 skeleton-container">
+            <div class="my-2">
+              <p class="skeleton skeleton-title"></p>
+              <p class="skeleton skeleton-text"></p>
+              <div class="d-flex flex-wrap mt-4">
+                <div class="chip mb-sm skeleton skeleton-chip"></div>
+                <div class="chip mb-sm skeleton skeleton-chip"></div>
+                <div class="chip mb-sm skeleton skeleton-chip"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Lista de rechazos -->
+  <ng-container *ngIf="!cargando">
+    <ng-container *ngFor="let rechazo of rechazos">
+      <div class="px-3 my-2">
+        <div class="row">
+          <div class="col-12 col-sm-12">
+            <div class="fondo-chip mb-3">
+              <div class="my-2">
+                <p class="mb-2">
+                  <b style="color: var(--md-accent-800)">Observaciones:</b>
+                </p>
+                <p>{{ rechazo.observacion }}</p>
+                <div class="d-flex flex-wrap mt-4">
+                  <div class="chip mb-sm">
+                    <b>
+                      <mat-icon class="icon-chip">cancel</mat-icon>
+                      Rechazado por: {{ rechazo.usuario?.nombre }}
+                    </b>
+                  </div>
+                  <div class="chip mb-sm">
+                    <mat-icon class="icon-chip">person</mat-icon>
+                    <b>Rol: {{ rechazo.usuario_rol }}</b>
+                  </div>
+                  <div class="chip mb-sm">
+                    <mat-icon class="icon-chip">calendar_today</mat-icon>
+                    <b>Fecha: {{ rechazo.fecha_ejecucion_estado | date: "dd/MM/yyyy" }}</b>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Sin resultados -->
+    <ng-container *ngIf="rechazos.length === 0">
+      <div class="px-3 my-4 d-flex flex-column align-items-center text-center">
+        <mat-icon color="primary" style="font-size: 40px; width: 40px; height: 40px;">
+          inbox
+        </mat-icon>
+        <p class="mt-2 mb-0">No hay rechazos registrados.</p>
+      </div>
+    </ng-container>
+  </ng-container>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]
+    class="my-3">
+    <mat-icon>toll</mat-icon>Regresar
+  </button>
+</ng-template>
