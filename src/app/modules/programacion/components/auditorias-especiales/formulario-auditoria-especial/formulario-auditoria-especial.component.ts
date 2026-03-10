@@ -18,17 +18,9 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from 'src/environments/environment';
 import {
   of,
-  map,
   forkJoin,
-  startWith,
-  switchMap,
-  catchError,
-  Observable,
-  debounceTime,
-  distinctUntilChanged,
-  Subject,
+  tap,
 } from 'rxjs';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 @Component({
   selector: "app-formulario-auditoria-especial",
@@ -44,11 +36,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   meses: Parametro[] = [];
   macroprocesos: Parametro[] = [];
   procesos: Parametro[] = [];
-  filteredDependencias!: Observable<Parametro[]>;
-  dependenciaBusquedaTexto = "";
-  isSearchingDependencia = false;
-  previousDependencia: Parametro | null = null;
-  private searchTrigger$ = new Subject<string>();
+  dependencias: Parametro[] = [];
   TODOS = "Todos";
   isEditMode = false;  
   auditorEliminar: AuditorEliminar | null = null;
@@ -57,7 +45,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
-    private oikosSevice: OikosService,
+    private oikosService: OikosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     public dialogRef: MatDialogRef<FormularioAuditoriaEspecialComponent>,
@@ -82,27 +70,33 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     forkJoin<void[]>([
       of(this.CargarEvaluaciones()),
       of(this.cargarMacroprocesos()),
-      of(this.inicializarBusquedaDependencias()),
+      this.cargarDependencias(),
       of(this.cargarMeses()),
       of(this.cargarAuditores())
     ]).subscribe(() => {
-      this.form.patchValue({
-        tituloAuditoria: this.data.auditoria?.auditoria || "",
-        tipoEvaluacion: this.data.auditoria?.tipoEvaluacionId || [],
-        macroproceso: this.data.auditoria?.macroprocesoId || [],
-        proceso: this.data.auditoria?.procesoId || [],
-        dependencia: this.data.auditoria?.dependenciaId || [],
-        cronogramaActividades: this.data.auditoria?.cronogramaId || [],
-      });
-      this.cargarDependenciaInicial();
       this.cargarProcesos();
     })
+
+    this.form.patchValue({
+      tituloAuditoria: this.data.auditoria?.auditoria || "",
+      tipoEvaluacion: this.data.auditoria?.tipoEvaluacionId || [],
+      macroproceso: this.data.auditoria?.macroprocesoId || [],
+      proceso: this.data.auditoria?.procesoId || [],
+      dependencia: this.data.auditoria?.dependenciaId || [],
+      cronogramaActividades: this.data.auditoria?.cronogramaId || [],
+    });
 
     this.form.get("macroproceso").valueChanges.subscribe((valor: number) => {
       this.form.patchValue({ proceso: [] });
       this.procesos = [];
       this.cargarProcesos();
     });
+
+    this.form.get("dependencia").valueChanges.subscribe((valor: number) => {
+      console.log("Valor de dependencia cambiado:", valor);
+    });
+
+    console.log("Dependencia Id:", this.form.get("dependencia").value);
   }
 
   cargarMacroprocesos() {
@@ -131,101 +125,16 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       });
   }
 
-  cargarDependenciaInicial(): void {
-    const dependenciaId = this.data.auditoria?.dependenciaId;
-    if (!this.isEditMode || !dependenciaId) {
-      return;
-    }
-
-    this.oikosSevice
-      .get(`dependencia?query=Id:${dependenciaId}&limit=1&fields=Id,Nombre`)
-      .pipe(catchError(() => of([])))
-      .subscribe((res: Parametro[]) => {
-        if (res && res.length) {
-          const dependencia = res[0];
-          this.form.patchValue({ dependencia: dependencia });
-          this.previousDependencia = dependencia;
-          this.dependenciaBusquedaTexto = dependencia.Nombre || "";
-        }
-      });
-  }
-
-  inicializarBusquedaDependencias(): void {
-    this.filteredDependencias = this.searchTrigger$.pipe(
-      startWith(""),
-      map((value: string) => value || ""),
-      debounceTime(200),
-      distinctUntilChanged(),
-      switchMap((value: string) => this.buscarDependencias(value))
-    );
-  }
-
-  buscarDependencias(value: string): Observable<Parametro[]> {
-    const nombre = (value || "").trim();
-    const query = nombre
-      ? `Activo:true,Nombre:${encodeURIComponent(nombre)}`
-      : "Activo:true";
-
-    return this.oikosSevice.get(
-      `dependencia?query=${query}&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
-    )
+  cargarDependencias() {
+    return this.oikosService
+      .get("dependencia?query=activo:true&limit=0")
       .pipe(
-        // Filter out dependencies with empty names
-        map((res: any) => res.filter(
-          (dep: Parametro) => dep.Nombre.length > 0
-        )),
-        catchError((error) => {
-          console.error("Error al buscar dependencias", error);
-          return of([])
+        tap((res) => {
+          if (res) {
+            this.dependencias = res;
+          }
         })
       );
-  }
-
-  displayFnDependencia(dependencia: Parametro): string {
-    return dependencia && dependencia.Nombre ? dependencia.Nombre : '';
-  }
-
-  onDependenciaFocus(): void {
-    if (this.isSearchingDependencia) {
-      return;
-    }
-
-    const dependenciaSeleccionadaControl = this.form.get("dependencia");
-    this.previousDependencia = dependenciaSeleccionadaControl.value || null;
-    this.isSearchingDependencia = true;
-    this.dependenciaBusquedaTexto = "";
-    this.searchTrigger$.next("");
-  }
-
-  onDependenciaInput(value: string): void {
-    this.dependenciaBusquedaTexto = value || "";
-    this.searchTrigger$.next(this.dependenciaBusquedaTexto);
-  }
-
-  onDependenciaBlur(): void {
-    setTimeout(() => {
-      const dependenciaSeleccionadaControl = this.form.get("dependencia");
-      if (this.previousDependencia) {
-        dependenciaSeleccionadaControl.setValue(this.previousDependencia);
-        this.dependenciaBusquedaTexto = this.previousDependencia.Nombre || "";
-      } else {
-        dependenciaSeleccionadaControl.setValue(null);
-        this.dependenciaBusquedaTexto = "";
-      }
-
-      dependenciaSeleccionadaControl.markAsTouched();
-      this.isSearchingDependencia = false;
-    }, 200);
-  }
-
-  onDependenciaSelect(event: MatAutocompleteSelectedEvent): void {
-    const dependencia = event.option.value as Parametro;
-    const dependenciaSeleccionadaControl = this.form.get("dependencia");
-    dependenciaSeleccionadaControl.setValue(dependencia);
-    this.dependenciaBusquedaTexto = dependencia?.Nombre || "";
-    this.previousDependencia = dependencia;
-    dependenciaSeleccionadaControl.markAsTouched();
-    this.isSearchingDependencia = false;
   }
 
   inicializarAuditoresSeleccionados(): void {
