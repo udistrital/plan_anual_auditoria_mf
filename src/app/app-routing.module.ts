@@ -35,6 +35,12 @@ const routes: Routes = [
     loadChildren: () => import('./modules/plan-mejoramiento/plan-mejoramiento.module').then(
       (m) => m.PlanesModule)
   },
+  {
+    path: 'auditorias-externas',
+    // canActivate: [AuthGuard], 
+    loadChildren: () => import('./modules/auditorias-externas/auditorias-externas.module').then(
+      (m) => m.AuditoriasExternasModule)
+  },
 ];
 
 @NgModule({

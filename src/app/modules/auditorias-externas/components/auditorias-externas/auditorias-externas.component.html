@@ -1,0 +1,37 @@
+<plantilla-tarjeta-contenedora [title]="'Auditorías externas'"
+  [breadcrumb]="'<p>Gestión Auditoría / <b>Auditorías Externas</b></p>'" [contenido]="contenidoDePlantilla">
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <form [formGroup]="vigenciaForm">
+        <div class="row">
+          <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+            <mat-label>Seleccione una vigencia:</mat-label>
+            <mat-icon color="primary" matPrefix>today</mat-icon>
+            <mat-select formControlName="vigencia" (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
+              color="primary">
+              <mat-option disabled value="">--Seleccionar--</mat-option>
+              <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia">{{ vigencia.Nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
+            <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
+              <button mat-raised-button color="primary" class="mx-3">
+                Crear
+              </button>
+            </div>
+          </div>
+        </div>
+        <p>Seleccione el año de la vigencia a registrar la auditoría externa</p>
+      </form>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <app-tabla-auditorias-externas></app-tabla-auditorias-externas>
+    </div>
+  </div>
+</ng-template>

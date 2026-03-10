@@ -1,0 +1,128 @@
+<plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="'<p>Gestión Auditoría / <b>Auditorías Externas</b></p>'"
+  [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
+        <ng-template matStepperIcon="number">
+          <mat-icon>lens</mat-icon>
+        </ng-template>
+
+        <!-- Paso 1: Información -->
+        <mat-step [completed]="true">
+          <ng-template matStepLabel>
+            <p>Paso 1</p>
+            <b style="color: var(--primary)">Información</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div><mat-icon>assignment</mat-icon></div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Información general de la Auditoría
+            </div>
+          </div>
+          <div *ngIf="formInformacion != null" class="mt-4">
+            <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
+              (submitFormulario)="preguntarGuardadoInformacion($event)">
+            </app-formulario-dinamico>
+            <div class="d-flex justify-content-end mt-4">
+              <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+                Guardar y Continuar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 2: Hallazgos -->
+        <mat-step [completed]="true">
+          <ng-template matStepLabel>
+            <p>Paso 2</p>
+            <b style="color: var(--primary)">Hallazgos</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div><mat-icon>find_in_page</mat-icon></div>
+            <div class="mx-3">
+              <h2>Hallazgos</h2>
+              Registre los hallazgos de la auditoría
+            </div>
+          </div>
+          <div class="mt-4">
+            <app-hallazgos-auditoria
+              [auditoriaId]="auditoriaId"
+              (hallazgosActualizados)="onHallazgosActualizados($event)">
+            </app-hallazgos-auditoria>
+            <div class="d-flex justify-content-end mt-4 gap-2">
+              <button matStepperPrevious mat-stroked-button color="primary">
+                Volver
+              </button>
+              <button mat-flat-button color="primary" matStepperNext>
+                Continuar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 3: Resumen -->
+        <mat-step [completed]="true">
+          <ng-template matStepLabel>
+            <p>Paso 3</p>
+            <b style="color: var(--primary)">Resumen de Hallazgos</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div><mat-icon>summarize</mat-icon></div>
+            <div class="mx-3">
+              <h2>Resumen de Hallazgos</h2>
+              Resumen de los hallazgos registrados
+            </div>
+          </div>
+          <div class="mt-4">
+            <app-resumen-hallazgos [hallazgos]="hallazgos"></app-resumen-hallazgos>
+            <div class="d-flex justify-content-end mt-4 gap-2">
+              <button matStepperPrevious mat-stroked-button color="primary">
+                Volver
+              </button>
+              <button mat-flat-button color="primary" matStepperNext>
+                Continuar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 4: Documentos Anexos -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 4</p>
+            <b style="color: var(--primary)">Documentos Anexos</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div><mat-icon>attach_file</mat-icon></div>
+            <div class="mx-3">
+              <h2>Documentos Anexos</h2>
+              Suba los documentos relacionados con la auditoría
+            </div>
+          </div>
+          <div class="mt-4">
+            <div class="d-flex flex-column align-items-center justify-content-center py-5 border rounded">
+              <mat-icon style="font-size: 48px; width: 48px; height: 48px;" color="primary">cloud_upload</mat-icon>
+              <p class="mt-3 text-muted">Seleccione o arrastre los documentos aquí</p>
+              <button mat-raised-button color="primary" class="mt-3">
+                Subir Documento
+              </button>
+            </div>
+            <div class="d-flex justify-content-end mt-4 gap-2">
+              <button matStepperPrevious mat-stroked-button color="primary">
+                Volver
+              </button>
+              <button mat-raised-button color="primary" (click)="guardarYCerrar()">
+                Guardar y Cerrar
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+      </mat-stepper>
+    </div>
+  </div>
+</ng-template>

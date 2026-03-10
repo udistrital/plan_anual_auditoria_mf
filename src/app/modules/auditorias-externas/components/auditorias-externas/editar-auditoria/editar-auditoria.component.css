@@ -1,0 +1,16 @@
+.separador {
+  border: 0;
+  height: 2px;
+  background: var(--primary);
+  opacity: 0.5;
+}
+
+button.mat-flat-button {
+  color: var(--md-primary-contrast-500);
+}
+
+.steps-bloqueados ::ng-deep mat-step-header:nth-of-type(5),
+.steps-bloqueados ::ng-deep mat-step-header:nth-of-type(6) {
+  pointer-events: none;
+  opacity: 0.4;
+}

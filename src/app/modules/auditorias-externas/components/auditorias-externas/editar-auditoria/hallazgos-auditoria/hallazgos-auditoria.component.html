@@ -1,0 +1,56 @@
+<div [formGroup]="hallazgosForm">
+  <div *ngIf="cargando" class="text-center py-4">
+    <p>Cargando hallazgos...</p>
+  </div>
+
+  <div *ngIf="!cargando">
+    <div formArrayName="hallazgos">
+      <div *ngFor="let hallazgo of hallazgos.controls; let i = index" [formGroupName]="i" class="hallazgo-box">
+        <div class="d-flex hallazgo-header">
+          <div class="d-flex align-items-start pt-2">
+            <span class="indice">1.1.{{ i + 1 }}</span>
+          </div>
+          <div class="flex-grow-1">
+            <mat-form-field appearance="outline" class="hallazgo-input">
+              <mat-label>Criterio</mat-label>
+              <input matInput formControlName="criterio" placeholder="Criterio del hallazgo"
+                [errorStateMatcher]="errorMatcher">
+              <mat-error *ngIf="hallazgo.get('criterio')?.hasError('required')">
+                El criterio es requerido
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="hallazgo-input">
+              <mat-label>Hallazgo</mat-label>
+              <input matInput formControlName="hallazgo" placeholder="Título del hallazgo"
+                [errorStateMatcher]="errorMatcher">
+              <mat-error *ngIf="hallazgo.get('hallazgo')?.hasError('required')">
+                El hallazgo es requerido
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="hallazgo-input">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" placeholder="Descripción del hallazgo" rows="3"
+                [errorStateMatcher]="errorMatcher"></textarea>
+              <mat-error *ngIf="hallazgo.get('descripcion')?.hasError('required')">
+                La descripción es requerida
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <button mat-icon-button color="warn" (click)="eliminarHallazgo(i)" class="pt-2">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="hallazgos.length === 0" class="d-flex justify-content-center align-items-center py-4 border rounded">
+      <p class="mb-0 text-muted">No hay hallazgos agregados.</p>
+    </div>
+
+    <div class="d-flex justify-content-start mt-3">
+      <button mat-stroked-button color="primary" (click)="agregarHallazgo()">
+        <mat-icon>add</mat-icon> Agregar Hallazgo
+      </button>
+    </div>
+  </div>
+</div>

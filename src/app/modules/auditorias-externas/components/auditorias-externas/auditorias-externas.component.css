@@ -1,0 +1,59 @@
+.custom-card {
+  margin: 40px;
+  padding: 20px;
+  box-shadow: 0 0.7rem 1.5rem rgba(44, 51, 73, 0.3);
+  border-radius: 10px;
+}
+
+.content {
+  display: flex;
+  gap: 20px;
+}
+
+.table-container {
+  width: 20%;
+  max-height: 500px;
+  overflow-y: auto;
+  background: #ffffff;
+
+}
+
+.pdf-container {
+  width: 80%;
+  border: 1px solid black;
+  height: 557px;
+  padding: 5px;
+  background: #f9f9f9;
+}
+
+#descargarBtn {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button_down {
+  display: flex;
+  margin-top: 50px;
+  justify-content: center;
+
+  button {
+    color: var(--md-primary-contrast-300);
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+}
+
+.selected {
+  background-color: #E79B8F;
+  color: #6E1413;
+  font-weight: bold;
+}
+
+.unselected {
+  background-color: #ffffff;
+  color: #6E1413;
+}
+
+.mat-mdc-cell {
+  border-bottom-style: none;
+}
