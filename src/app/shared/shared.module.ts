@@ -18,6 +18,9 @@ import { IconosModule } from "./modules/iconos.module";
 import { PdfVisualizadorComponent } from "./elements/components/pdf-visualizador/pdf-visualizador.component";
 import { EditorEnriquecidoComponent } from "./elements/components/editor-enriquecido/editor-enriquecido.component";
 import { QuillModule } from "ngx-quill";
+import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
+import { MatOption } from "@angular/material/core";
+import { SingleSelectionComponent } from "./elements/components/single-selection/singe-selection.component";
 
 @NgModule({
   declarations: [
@@ -30,6 +33,7 @@ import { QuillModule } from "ngx-quill";
     PlantillaModalComponent,
     PdfVisualizadorComponent,
     EditorEnriquecidoComponent,
+    SingleSelectionComponent,
   ],
   imports: [
     CommonModule,
@@ -39,6 +43,8 @@ import { QuillModule } from "ngx-quill";
     ReactiveFormsModule,
     PdfViewerModule,
     QuillModule.forRoot(),
+    NgxMatSelectSearchModule,
+    MatOption,
   ],
   exports: [
     //Componentes
@@ -51,6 +57,7 @@ import { QuillModule } from "ngx-quill";
     PlantillaModalComponent,
     PdfVisualizadorComponent,
     EditorEnriquecidoComponent,
+    SingleSelectionComponent,
     //modulos
     FormsModule,
     IconosModule,
