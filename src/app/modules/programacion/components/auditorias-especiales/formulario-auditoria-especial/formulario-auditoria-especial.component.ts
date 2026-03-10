@@ -167,7 +167,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       : "Activo:true";
 
     return this.oikosSevice.get(
-      `dependencia?query=${query}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
+      `dependencia?query=${query}&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
     )
       .pipe(
         // Filter out dependencies with empty names
