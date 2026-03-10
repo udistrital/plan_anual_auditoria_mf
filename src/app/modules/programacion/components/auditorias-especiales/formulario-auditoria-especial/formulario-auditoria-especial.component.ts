@@ -26,7 +26,9 @@ import {
   Observable,
   debounceTime,
   distinctUntilChanged,
+  Subject,
 } from 'rxjs';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 @Component({
   selector: "app-formulario-auditoria-especial",
@@ -43,6 +45,10 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   macroprocesos: Parametro[] = [];
   procesos: Parametro[] = [];
   filteredDependencias!: Observable<Parametro[]>;
+  dependenciaBusquedaTexto = "";
+  isSearchingDependencia = false;
+  previousDependencia: Parametro | null = null;
+  private searchTrigger$ = new Subject<string>();
   TODOS = "Todos";
   isEditMode = false;  
   auditorEliminar: AuditorEliminar | null = null;
@@ -136,19 +142,19 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       .pipe(catchError(() => of([])))
       .subscribe((res: Parametro[]) => {
         if (res && res.length) {
-          this.form.patchValue({ dependencia: res[0] });
+          const dependencia = res[0];
+          this.form.patchValue({ dependencia: dependencia });
+          this.previousDependencia = dependencia;
+          this.dependenciaBusquedaTexto = dependencia.Nombre || "";
         }
       });
   }
 
   inicializarBusquedaDependencias(): void {
-    const dependenciaControl = this.form.get("dependencia");
-    this.filteredDependencias = dependenciaControl.valueChanges.pipe(
-      startWith(dependenciaControl.value || ""),
-      map((value: string | Parametro) =>
-        typeof value === "string" ? value : value?.Nombre || ""
-      ),
-      debounceTime(500),
+    this.filteredDependencias = this.searchTrigger$.pipe(
+      startWith(""),
+      map((value: string) => value || ""),
+      debounceTime(200),
       distinctUntilChanged(),
       switchMap((value: string) => this.buscarDependencias(value))
     );
@@ -156,12 +162,13 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
 
   buscarDependencias(value: string): Observable<Parametro[]> {
     const nombre = (value || "").trim();
-    return this.oikosSevice
-      .get(
-        `dependencia?query=Activo:true,Nombre:${encodeURIComponent(
-          nombre
-        )}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
-      )
+    const query = nombre
+      ? `Activo:true,Nombre:${encodeURIComponent(nombre)}`
+      : "Activo:true";
+
+    return this.oikosSevice.get(
+      `dependencia?query=${query}&limit=20&sortby=nombre&order=asc&fields=Id,Nombre`
+    )
       .pipe(
         // Filter out dependencies with empty names
         map((res: any) => res.filter(
@@ -176,6 +183,49 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
 
   displayFnDependencia(dependencia: Parametro): string {
     return dependencia && dependencia.Nombre ? dependencia.Nombre : '';
+  }
+
+  onDependenciaFocus(): void {
+    if (this.isSearchingDependencia) {
+      return;
+    }
+
+    const dependenciaSeleccionadaControl = this.form.get("dependencia");
+    this.previousDependencia = dependenciaSeleccionadaControl.value || null;
+    this.isSearchingDependencia = true;
+    this.dependenciaBusquedaTexto = "";
+    this.searchTrigger$.next("");
+  }
+
+  onDependenciaInput(value: string): void {
+    this.dependenciaBusquedaTexto = value || "";
+    this.searchTrigger$.next(this.dependenciaBusquedaTexto);
+  }
+
+  onDependenciaBlur(): void {
+    setTimeout(() => {
+      const dependenciaSeleccionadaControl = this.form.get("dependencia");
+      if (this.previousDependencia) {
+        dependenciaSeleccionadaControl.setValue(this.previousDependencia);
+        this.dependenciaBusquedaTexto = this.previousDependencia.Nombre || "";
+      } else {
+        dependenciaSeleccionadaControl.setValue(null);
+        this.dependenciaBusquedaTexto = "";
+      }
+
+      dependenciaSeleccionadaControl.markAsTouched();
+      this.isSearchingDependencia = false;
+    }, 200);
+  }
+
+  onDependenciaSelect(event: MatAutocompleteSelectedEvent): void {
+    const dependencia = event.option.value as Parametro;
+    const dependenciaSeleccionadaControl = this.form.get("dependencia");
+    dependenciaSeleccionadaControl.setValue(dependencia);
+    this.dependenciaBusquedaTexto = dependencia?.Nombre || "";
+    this.previousDependencia = dependencia;
+    dependenciaSeleccionadaControl.markAsTouched();
+    this.isSearchingDependencia = false;
   }
 
   inicializarAuditoresSeleccionados(): void {
