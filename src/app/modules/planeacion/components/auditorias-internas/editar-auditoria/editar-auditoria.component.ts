@@ -268,7 +268,7 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   subirArchivoCargueMasivo(): void {
-    this.dialog.open(CargarArchivoComponent, {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "xlsx",
@@ -279,6 +279,12 @@ export class EditarAuditoriaComponent implements OnInit {
         tipo: "actividades",
         referencia: "Plan Auditoria",
       },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      if (this.registroPlan) {
+        this.registroPlan.listaractividades();
+      }
     });
   }
 
@@ -432,11 +438,12 @@ export class EditarAuditoriaComponent implements OnInit {
     });
   }
 
-  /**
+    /**
    * Notifica al Jefe OCI cuando un auditor envía el programa de auditoría a revisión.
    * Patrón: getAuthenticatedUserTerceroIdentification() primero y sola,
    * luego forkJoin con auditoria.
    */
+  
   private notificarEnvioAJefe(auditoriaId: string): void {
     const rolRemitente = [
       environment.ROL.AUDITOR_EXPERTO,
@@ -457,7 +464,6 @@ export class EditarAuditoriaComponent implements OnInit {
       exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
         const datosAuditoria = auditoria?.Data;
 
-        // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");

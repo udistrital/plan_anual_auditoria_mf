@@ -13,7 +13,7 @@ import { environment } from "src/environments/environment";
   styleUrl: "./cargar-archivo.component.css",
 })
 export class CargarArchivoComponent {
-  archivo: File | null = null; // Único archivo seleccionado
+  archivo: File | null = null;
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
 
   constructor(
@@ -128,7 +128,7 @@ export class CargarArchivoComponent {
         case "actividades":
           payload = {
             base64data: base64,
-            complement: { auditoria_id: this.data.id },
+            complemento: { auditoria_id: this.data.id },
             type_upload: "actividades",
           };
           break;
@@ -149,11 +149,18 @@ export class CargarArchivoComponent {
         );
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
+      // LOG TEMPORAL - ver detalle del error del serverless
+      console.error('=== ERROR SERVERLESS ===');
+      console.error('status:', error?.status);
+      console.error('message:', error?.message);
+      console.error('error.error:', JSON.stringify(error?.error, null, 2));
+      console.error('error completo:', JSON.stringify(error, null, 2));
+      console.error('=======================');
+
       this.alertService.showErrorAlert(
         "Error al enviar el archivo a cargue masivo. Por favor, revise el log."
       );
-      console.error("Error al enviar el archivo al MID", error);
       return false;
     }
   }
@@ -214,21 +221,65 @@ export class CargarArchivoComponent {
   }
 
   resultados(data: any): void {
-    let mensaje = "";
+    const totalCorrectos = data.Correctos?.length ?? 0;
+    const totalErroneos = data["Erróneos"]?.length ?? 0;
 
-    if (data.Erróneos?.length > 0) {
-      mensaje += `<strong>Se encontraron los siguientes errores en algunos registros:</strong><ul><br>`;
-      data.Erróneos.forEach((error: any) => {
-        mensaje += `<li><strong>Fila ${error.Idx}:</strong> ${error.Error}</li>`;
+    if (totalCorrectos > 0 && totalErroneos === 0) {
+      this.modalService.mostrarModal(
+        `<div style="text-align:center">
+          <p style="font-size:2rem; margin:0">✅</p>
+          <p style="font-size:1.1rem; margin-top:8px">
+            Se cargaron correctamente <strong>${totalCorrectos}</strong> registro(s).
+          </p>
+        </div>`,
+        'success',
+        'Cargue exitoso'
+      );
+      return;
+    }
+
+    const icono = totalCorrectos > 0 ? 'warning' : 'error';
+    const titulo = totalCorrectos > 0 ? 'Cargue con observaciones' : 'Cargue fallido';
+
+    let mensaje = '';
+
+    if (totalCorrectos > 0) {
+      mensaje += `
+        <div style="background:#e8f5e9; border-radius:8px; padding:10px; margin-bottom:12px">
+          ✅ <strong>${totalCorrectos}</strong> registro(s) cargado(s) correctamente
+          <span style="color:#555; font-size:0.9rem">(filas: ${data.Correctos.join(', ')})</span>
+        </div>`;
+    }
+
+    if (totalErroneos > 0) {
+      mensaje += `
+        <div style="background:#ffebee; border-radius:8px; padding:10px; margin-bottom:8px">
+          ❌ <strong>${totalErroneos}</strong> registro(s) con error
+        </div>
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem; text-align:left">
+          <thead>
+            <tr style="background:#f5f5f5">
+              <th style="padding:6px 10px; border-bottom:2px solid #ddd; width:60px">Fila</th>
+              <th style="padding:6px 10px; border-bottom:2px solid #ddd">Error</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      data["Erróneos"].forEach((error: any) => {
+        mensaje += `
+            <tr>
+              <td style="padding:6px 10px; border-bottom:1px solid #eee; text-align:center">
+                <strong>${error.Idx}</strong>
+              </td>
+              <td style="padding:6px 10px; border-bottom:1px solid #eee; color:#c62828">
+                ${error.Error}
+              </td>
+            </tr>`;
       });
-      mensaje += `</ul>`;
+
+      mensaje += `</tbody></table>`;
     }
 
-    if (data.Correctos?.length > 0) {
-      mensaje += `<br><strong>Registros correctos:</strong><ul>`;
-      mensaje += data.Correctos.join(", ") + "<br><br>";
-    }
-
-    this.modalService.mostrarModal(mensaje, "warning", "");
+    this.modalService.mostrarModal(mensaje, icono, titulo);
   }
 }
