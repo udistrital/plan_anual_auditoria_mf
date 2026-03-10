@@ -146,13 +146,14 @@
               <input
                 type="text"
                 matInput
-                formControlName="dependencia"
+                [value]="dependenciaBusquedaTexto"
                 [matAutocomplete]="autoDependencia"
+                (focus)="onDependenciaFocus()"
+                (input)="onDependenciaInput($any($event.target).value)"
+                (blur)="onDependenciaBlur()"
+                autocomplete="off"
               />
-              <mat-autocomplete
-                #autoDependencia="matAutocomplete"
-                [displayWith]="displayFnDependencia"
-              >
+              <mat-autocomplete #autoDependencia="matAutocomplete" (optionSelected)="onDependenciaSelect($event)">
                 <mat-option
                   *ngFor="let dependencia of filteredDependencias | async"
                   [value]="dependencia"
