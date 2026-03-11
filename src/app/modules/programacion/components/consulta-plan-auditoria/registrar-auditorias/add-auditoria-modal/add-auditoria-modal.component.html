@@ -150,7 +150,7 @@
 
 
           <!-- Cronograma de Actividades -->
-          <div class="col-12 col-md-12 col-xl-12">
+          <div class="col-12 col-md-6 col-xl-8">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Cronograma de actividades</b>
             </div>
@@ -181,6 +181,21 @@
               </mat-error>
             </mat-form-field>
           </div>
+
+          <!-- Cantidad de Auditorías -->
+          <div class="col-12 col-md-4 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Cantidad de Auditorías</b>
+            </div>
+            <app-single-selection
+              label="Cantidad de Auditorías"
+              icon="assignment"
+              placeholder="Seleccione la cantidad"
+              [parametros]="cantidadesAuditorias"
+              [parametroControl]="auditoriaForm.get('cantidadAuditorias')"
+            ></app-single-selection>
+          </div>
+
 
 
         </div>

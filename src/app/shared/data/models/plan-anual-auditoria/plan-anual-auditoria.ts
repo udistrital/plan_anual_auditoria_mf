@@ -19,6 +19,7 @@ export class Auditoria {
     dependenciaId!: number;
     cronograma!: string;
     cronogramaId!: number[];
+    cantidadAuditorias!: number;
     vigencia_id!: number;
     estado_nombre!: string;
     estado!: string;

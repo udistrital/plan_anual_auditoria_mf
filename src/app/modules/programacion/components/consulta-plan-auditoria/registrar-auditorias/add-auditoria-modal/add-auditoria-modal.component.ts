@@ -21,6 +21,7 @@ export class AddAuditoriaModalComponent implements OnInit {
   macroprocesos: Parametro[] = [];
   procesos: Parametro[] = [];
   dependencias: Parametro[] = [];
+  cantidadesAuditorias: Parametro[] = [];
   isEditMode = false;
   TODOS = "Todos";
 
@@ -69,6 +70,10 @@ export class AddAuditoriaModalComponent implements OnInit {
         this.data.auditoria?.cronogramaId || [],
         Validators.required,
       ],
+      cantidadAuditorias: [
+        this.data.auditoria?.cantidadAuditorias || [],
+        Validators.required,
+      ]
     });
 
     console.debug("Datos recibidos para edición:", this.data.auditoria);
@@ -79,6 +84,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.cargarProcesos();
     this.cargarDependencias();
     this.cargarMeses();
+    this.inicializarCantidadAuditorias();
 
     // When the macroproceso changes, clear the proceso selection and reload procesos.
     this.auditoriaForm.get("macroproceso").valueChanges.subscribe((valor: number) => {
@@ -86,6 +92,18 @@ export class AddAuditoriaModalComponent implements OnInit {
       this.procesos = [];
       this.cargarProcesos();
     });
+  }
+
+  inicializarCantidadAuditorias(): void {
+    const minCantidad = 1;
+    const maxCantidad = 12;
+    this.cantidadesAuditorias = Array.from(
+      { length: maxCantidad - minCantidad + 1 },
+      (_, i) => ({
+        Id: i + minCantidad,
+        Nombre: (i + minCantidad).toString()
+      })
+    );
   }
 
   cargarMeses(callback?: () => void) {
@@ -208,6 +226,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               macroproceso_id: this.auditoriaForm.value.macroproceso,
               proceso_id: this.auditoriaForm.value.proceso,
               dependencia_id: this.auditoriaForm.value.dependencia?.Id || this.auditoriaForm.value.dependencia,
+              cantidad_auditorias: this.auditoriaForm.value.cantidadAuditorias,
               cronograma_id: cronogramaIds,
               vigencia_id: this.data.vigenciaId
             };
