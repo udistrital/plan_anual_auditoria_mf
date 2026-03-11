@@ -60,87 +60,89 @@
             </div>
 
             <!-- Macroproceso -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Macroproceso</b>
-            </div>
-            <mat-form-field class="col-12" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <mat-select
-                formControlName="macroproceso"
-              >
-                <mat-option
-                  *ngFor="let macro of macroprocesos"
-                  [value]="macro.Id"
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Macroproceso</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">account_tree</mat-icon>
+                <mat-select
+                  formControlName="macroproceso"
                 >
-                  {{ macro.Nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
-                  form.get('macroproceso').hasError('required') &&
-                  form.get('macroproceso').touched
-                "
-              >
-                Seleccione el macroproceso
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-
-          <!-- Proceso -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Proceso</b>
+                  <mat-option
+                    *ngFor="let macro of macroprocesos"
+                    [value]="macro.Id"
+                  >
+                    {{ macro.Nombre }}
+                  </mat-option>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    form.get('macroproceso').hasError('required') &&
+                    form.get('macroproceso').touched
+                  "
+                >
+                  Seleccione el macroproceso
+                </mat-error>
+              </mat-form-field>
             </div>
-            <mat-form-field class="col-12" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <mat-select formControlName="proceso">
-                <mat-option
-                  *ngFor="let proceso of procesos"
-                  [value]="proceso.Id"
-                >{{
-                  proceso.Nombre
-                }}</mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
-                  form.get('proceso').hasError('required') &&
-                  form.get('proceso').touched &&
-                  procesos.length > 0
-                "
-              >
-                Seleccione el proceso
-              </mat-error>
-              <mat-error
-                *ngIf="
-                  form.get('proceso').hasError('required') &&
-                  form.get('proceso').touched &&
-                  procesos.length === 0
-                "
-              >
-                Seleccione un macroproceso con procesos.
-              </mat-error>
-            </mat-form-field>
-          </div>
 
 
-          <!-- Dependencia -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Dependencia</b>
+            <!-- Proceso -->
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Proceso</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">account_tree</mat-icon>
+                <mat-select formControlName="proceso">
+                  <mat-option
+                    *ngFor="let proceso of procesos"
+                    [value]="proceso.Id"
+                  >{{
+                    proceso.Nombre
+                  }}</mat-option>
+                </mat-select>
+                <mat-error
+                  *ngIf="
+                    form.get('proceso').hasError('required') &&
+                    form.get('proceso').touched &&
+                    procesos.length > 0
+                  "
+                >
+                  Seleccione el proceso
+                </mat-error>
+                <mat-error
+                  *ngIf="
+                    form.get('proceso').hasError('required') &&
+                    form.get('proceso').touched &&
+                    procesos.length === 0
+                  "
+                >
+                  Seleccione un macroproceso con procesos.
+                </mat-error>
+              </mat-form-field>
             </div>
-            <app-single-selection
-              label="Seleccionar"
-              icon="apartment"
-              placeholder="Dependencia auditada"
-              [parametros]="dependencias"
-              [formControl]="form.get('dependencia')"
-            ></app-single-selection>
-           </div>
 
+
+            <!-- Dependencia -->
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Dependencia</b>
+              </div>
+              <app-single-selection
+                label="Seleccionar"
+                icon="apartment"
+                placeholder="Dependencia auditada"
+                [parametros]="dependencias"
+                [parametroControl]="form.get('dependencia')"
+              ></app-single-selection>
+            </div>
+
+
+            <!-- Cronograma -->
             <div class="col-12 col-md-12 col-xl-12">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <strong>Cronograma de actividades</strong>
@@ -171,6 +173,8 @@
                 </mat-error>
               </mat-form-field>
             </div>
+
+
           </div>
 
           <div style="padding: 0 0 16px 5px">
