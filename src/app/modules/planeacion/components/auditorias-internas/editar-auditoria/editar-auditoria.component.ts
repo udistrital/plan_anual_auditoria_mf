@@ -518,9 +518,9 @@ export class EditarAuditoriaComponent implements OnInit {
     template: string = PLANTILLA_SOLICITUD_NOMBRE,
   ): void {
     const payload = {
-      template: template,
+      plantilla: template,
       fecha_envio: new Date(),
-      metadatos: {
+      metadato: {
         ...variables,
         tipo_notificacion: tipoNotificacion,
         destinatarios_to: destinatarios.ToAddresses ?? [],

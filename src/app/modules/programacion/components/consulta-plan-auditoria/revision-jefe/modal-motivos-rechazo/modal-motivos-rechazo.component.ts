@@ -182,9 +182,9 @@ export class ModalMotivosRechazoComponent implements OnInit {
     destinatarios: DestinatariosEmail  
   ): void {
     const payload = {
-      template: PLANTILLA_RECHAZO_NOMBRE,
+      plantilla: PLANTILLA_RECHAZO_NOMBRE,
       fecha_envio: new Date(),
-      metadatos: {
+      metadato: {
         tipo_notificacion: 'rechazo_paa',
         motivo_rechazo: motivoRechazo,
         rol_remitente: rolRemitente,

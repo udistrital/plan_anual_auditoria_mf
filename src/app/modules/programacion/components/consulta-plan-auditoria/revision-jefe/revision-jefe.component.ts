@@ -259,9 +259,9 @@ export class RevisionJefeComponent implements OnInit {
     template: string
   ): void {
     const payload = {
-      template: template,
+      plantilla: template,
       fecha_envio: new Date(),
-      metadatos: {
+      metadato: {
         ...variables,
         tipo_notificacion: tipoNotificacion,
         destinatarios_to: destinatarios.ToAddresses ?? [],

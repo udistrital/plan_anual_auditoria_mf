@@ -432,9 +432,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     variables: VariablesSolicitud
   ): void {
     const payload = {
-      template: PLANTILLA_SOLICITUD_NOMBRE,
+      plantilla: PLANTILLA_SOLICITUD_NOMBRE,
       fecha_envio: new Date(),
-      metadatos: {
+      metadato: {
         ...variables,
         tipo_notificacion: 'solicitud_aprobacion_paa',
         destinatarios_to: destinatarios.ToAddresses ?? [],
