@@ -210,6 +210,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   editarPreinforme(auditoria: Auditoria) {
     console.log("Editar Preinforme", auditoria);
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/ejecucion/auditorias-internas/editar-informe/${auditoriaId}`, // TODO: Se deberia pasar auditoriaId o informeId?
+    ]);
   }
 
   editarInforme(auditoria: Auditoria) {
