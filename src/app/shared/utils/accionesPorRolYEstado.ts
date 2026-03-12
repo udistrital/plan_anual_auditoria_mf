@@ -36,18 +36,18 @@ export const accionesProgramacion: {
 
   [environment.ROL.JEFE]: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
-    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías"],
-    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan", "Edición Extraordinaria de Auditorías"],
+    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías", "Historial de Rechazo"],
+    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo"],
+    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo", "Edición Extraordinaria de Auditorías"],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo",],
   },
 
   [environment.ROL.SECRETARIO]: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [],
-    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan"],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan"],
+    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo"],
+    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo"],
+    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo"],
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
@@ -268,6 +268,11 @@ export const accionesEjecucionPreliminar: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   [environment.ROL.ADMIN]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Preinforme",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
       "Editar informe",
