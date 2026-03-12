@@ -1,0 +1,22 @@
+<plantilla-modal
+  [icono]="'list_alt'"
+  [titulo]="'Ver Informe Auditoría'"
+  [descripcion]="'Informe de auditoría externa'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row">
+    <div class="col-12">
+      <app-pdf-visualizador [base64Document]="base64"></app-pdf-visualizador>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <button mat-raised-button color="primary" (click)="actualizarDocumento()">
+    <mat-icon>file_upload</mat-icon>
+    Actualizar
+  </button>
+</ng-template>

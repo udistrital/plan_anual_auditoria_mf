@@ -1,7 +1,6 @@
 import { Component, OnInit, OnChanges, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
-import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 
 export interface HallazgoResumen {
@@ -30,7 +29,6 @@ export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
 
   constructor(
     private fb: UntypedFormBuilder,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private alertaService: AlertService
   ) {}
 
@@ -47,41 +45,7 @@ export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
   }
 
   cargarHallazgos(): void {
-    this.cargando = true;
-    this.planAnualAuditoriaService.get(`tema?query=auditoria_id:${this.auditoriaId}`).subscribe({
-      next: (response: any) => {
-        const temas = response?.Data || [];
-        const hallazgosArray = this.fb.array([]);
-        let temaCount = 0;
-
-        for (const tema of temas) {
-          if (!tema.activo) continue;
-          temaCount++;
-          let subtemaCount = 0;
-
-          for (const subtema of tema.subtema || []) {
-            if (!subtema.activo) continue;
-            subtemaCount++;
-            let hallazgoCount = 0;
-
-            for (const hallazgo of subtema.hallazgo || []) {
-              if (!hallazgo.activo) continue;
-              hallazgoCount++;
-              hallazgosArray.push(this.fb.group({
-                criterio: [hallazgo.criterio || '', Validators.required],
-                hallazgo: [hallazgo.titulo || '', Validators.required],
-                descripcion: [hallazgo.descripcion || '', Validators.required],
-              }));
-            }
-          }
-        }
-
-        this.hallazgosForm = this.fb.group({ hallazgos: hallazgosArray });
-        this.emitirHallazgos();
-        this.cargando = false;
-      },
-      error: () => { this.cargando = false; }
-    });
+    console.log("Cargando hallazgos para auditoría ID:", this.auditoriaId);
   }
 
   agregarHallazgo(): void {

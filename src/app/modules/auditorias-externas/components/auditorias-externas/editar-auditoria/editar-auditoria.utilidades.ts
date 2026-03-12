@@ -1,9 +1,5 @@
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-
-// iconos
-// format_list_numbered
-// check_circle
-// visibility
+import { environment } from "src/environments/environment";
 
 export const formularioInformacionAuditoria: Formulario = {
   campos: [
@@ -24,71 +20,94 @@ export const formularioInformacionAuditoria: Formulario = {
       icono: "flag",
       tipo: "select",
       parametros: {
-        opciones: [
-          { Id: "1", Nombre: "Externa" },
-          { Id: "2", Nombre: "Contraloría de Bogotá" },
-          { Id: "3", Nombre: "Otros" },
-        ],
+        urlParametros:
+          "parametro?query=TipoParametroId:161&fields=Id,Nombre&limit=0",
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       claseGrid: "col-lg-5 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "tipo",
-      etiqueta: "Tipo",
-      icono: "list",
+      nombre: "macroproceso",
+      etiqueta: "Macroproceso",
+      icono: "account_tree",
       tipo: "select",
       parametros: {
-        urlParametros:
-          "parametro?query=TipoParametroId:140&fields=Id,Nombre&limit=0",
+        urlParametros: `parametro?query=TipoParametroId:${environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.MACROPROCESO.TIPO_PARAMETRO_ID}&fields=Id,Nombre&limit=0&sortby=Nombre&order=asc`,
+        opciones: [],
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
-      claseGrid: "col-lg-3 col-md-6 col-sm-12 col-xs-12",
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "proceso",
       etiqueta: "Proceso",
-      icono: "work",
+      icono: "account_tree",
       tipo: "select",
-      parametros: {
-        opciones: [
-          { Id: "1", Nombre: "Macroproceso" },
-          { Id: "2", Nombre: "Proceso" },
-          { Id: "3", Nombre: "Dependencia" },
-        ],
-      },
+      parametros: { opciones: [] },
       validaciones: [{ tipo: "requerido", valor: "" }],
-      deshabilitado: false,
-      claseGrid: "col-lg-3 col-md-6 col-sm-12 col-xs-12",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "auditor_responsable",
-      etiqueta: "Auditor Responsable",
-      icono: "person",
-      tipo: "text",
+      nombre: "dependencia",
+      etiqueta: "Dependencia",
+      icono: "apartment",
+      tipo: "select",
+      parametros: { opciones: [] },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "jefe_nombre",
+      etiqueta: "Jefe dependencia",
+      icono: "person",
+      tipo: "text",
+      deshabilitado: true,
       claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "lider",
-      etiqueta: "Líder",
-      icono: "person",
-      tipo: "text",
-      validaciones: [{ tipo: "requerido", valor: "" }],
-      deshabilitado: false,
-      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "responsable",
-      etiqueta: "Responsable",
+      nombre: "asistente_nombre",
+      etiqueta: "Asistente dependencia",
       icono: "supervisor_account",
       tipo: "text",
-      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_dependencia",
+      etiqueta: "Correo Dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "jefe_correo",
+      etiqueta: "Correo Jefe dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "asistente_correo",
+      etiqueta: "Correo Asistente dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_complementario",
+      etiqueta: "Correo Complementario",
+      icono: "email",
+      tipo: "email",
+      validaciones: [{ tipo: "email", valor: "" }],
       deshabilitado: false,
       claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
-    }
+    },
   ],
 };
