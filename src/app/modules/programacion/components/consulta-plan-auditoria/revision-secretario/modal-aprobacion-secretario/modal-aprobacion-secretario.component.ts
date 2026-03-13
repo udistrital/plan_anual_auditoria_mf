@@ -139,14 +139,11 @@ export class ModalAprobacionSecretarioComponent {
             .subscribe({
               next: (response: any) => {
                 if (response.Status === 200) {
-                  this.alertService.showSuccessAlert(
-                    "Plan aprobado exitosamente."
-                  ).then(() => {
-                    this.dialogRef.close();
-                    this.router.navigate([`/programacion/plan-auditoria/`]);
-                  });
+                  // Actualizar estado de auditorías padre a "Aprobada PAA"
+                  this.actualizarEstadoAuditoriasPadre();
                 } else {
                   console.error("Error al actualizar el estado de las auditorías.");
+                  this.mostrarMensajeExito();
                 }
               },
               error: (error) => {
@@ -160,6 +157,31 @@ export class ModalAprobacionSecretarioComponent {
         this.alertService.showErrorAlert("Error al aprobar el plan");
         console.error(error);
       }
+    });
+  }
+
+  actualizarEstadoAuditoriasPadre(): void {
+    this.planAuditoriaService.put(
+      `auditoria-padre/estado-masivo/${this.infoModal.planAuditoriaId}`,
+      { estado_id: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID }
+    ).subscribe({
+      next: (response: any) => {
+        console.log("Estados de auditorías padre actualizados a 'Aprobada PAA'");
+        this.mostrarMensajeExito();
+      },
+      error: (error) => {
+        console.error("Error al actualizar estados de auditorías padre", error);
+        this.mostrarMensajeExito();
+      }
+    });
+  }
+
+  mostrarMensajeExito(): void {
+    this.alertService.showSuccessAlert(
+      "Plan aprobado exitosamente."
+    ).then(() => {
+      this.dialogRef.close();
+      this.router.navigate([`/programacion/plan-auditoria/`]);
     });
   }
 

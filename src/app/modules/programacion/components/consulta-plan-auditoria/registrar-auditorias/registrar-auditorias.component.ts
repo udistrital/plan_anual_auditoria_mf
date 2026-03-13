@@ -96,7 +96,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   cargarAuditorias(): void {
-    let url = `auditoria/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`;
+    let url = `auditoria-padre/ordenadas?query=plan_auditoria_id:${this.id}&limit=0&populate=true`;
     
     if (this.ordenSeleccionado) {
       url += `&orderBy=${this.ordenSeleccionado}&orderDirection=ASC`;
@@ -286,7 +286,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         (result) => {
           if (result.isConfirmed) {
             this.PlanAnualAuditoriaMid
-              .delete(`auditoria/${element.id}`, { id: this.id })
+              .delete(`auditoria-padre/${element.id}`, { id: this.id })
               .subscribe(
                 (response) => {
                   if (response) {
