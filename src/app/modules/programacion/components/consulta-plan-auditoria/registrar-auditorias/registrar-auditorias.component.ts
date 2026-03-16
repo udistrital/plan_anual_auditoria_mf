@@ -434,7 +434,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   renderizar() {
-    this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}`).subscribe(
+    this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}?auditoria-padre=true`).subscribe(
       (res) => {
         if (res && res.Data) {
           this.dialog.open(ModalPdfVisualizadorComponent, {

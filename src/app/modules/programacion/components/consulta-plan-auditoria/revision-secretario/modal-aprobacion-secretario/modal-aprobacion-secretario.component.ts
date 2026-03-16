@@ -133,14 +133,14 @@ export class ModalAprobacionSecretarioComponent {
             usuario_id: this.infoModal.usuarioId,
             usuario_rol: this.infoModal.usuarioRol,
             fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
-            estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+            // estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+            estado_id: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
           }
           this.planAuditoriaService.put(`auditoria-gestion/${this.infoModal.planAuditoriaId}`, estadoAuditorias)
             .subscribe({
               next: (response: any) => {
                 if (response.Status === 200) {
-                  // Actualizar estado de auditorías padre a "Aprobada PAA"
-                  this.actualizarEstadoAuditoriasPadre();
+                  this.mostrarMensajeExito();
                 } else {
                   console.error("Error al actualizar el estado de las auditorías.");
                   this.mostrarMensajeExito();
@@ -156,22 +156,6 @@ export class ModalAprobacionSecretarioComponent {
       error: (error) => {
         this.alertService.showErrorAlert("Error al aprobar el plan");
         console.error(error);
-      }
-    });
-  }
-
-  actualizarEstadoAuditoriasPadre(): void {
-    this.planAuditoriaService.put(
-      `auditoria-padre/estado-masivo/${this.infoModal.planAuditoriaId}`,
-      { estado_id: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID }
-    ).subscribe({
-      next: (response: any) => {
-        console.log("Estados de auditorías padre actualizados a 'Aprobada PAA'");
-        this.mostrarMensajeExito();
-      },
-      error: (error) => {
-        console.error("Error al actualizar estados de auditorías padre", error);
-        this.mostrarMensajeExito();
       }
     });
   }
