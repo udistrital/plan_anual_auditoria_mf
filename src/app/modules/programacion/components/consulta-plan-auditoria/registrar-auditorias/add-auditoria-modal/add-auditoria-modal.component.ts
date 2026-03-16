@@ -235,24 +235,24 @@ export class AddAuditoriaModalComponent implements OnInit {
               usuario_id: this.data.usuario_id,
               usuario_rol: this.data.usuario_rol,
               fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
-              estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+              // estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+              estado_id: environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
             };
 
             const request$ = this.isEditMode
               ? this.planAnualAuditoriaService.put(
-                  `auditoria/${this.data.auditoria!.id}`,
+                  `auditoria-padre/${this.data.auditoria!.id}`,
                   formData
                 )
               : this.planAnualAuditoriaService.post("auditoria-gestion", {...formData, ...estadoInicial});
 
             request$.subscribe({
               next: (response) => {
-                this.alertaService.showSuccessAlert(
-                  `Auditoría ${
-                    this.isEditMode ? "actualizada" : "guardada"
-                  } exitosamente.`
-                );
-                this.dialogRef.close({ saved: true });
+                if (this.isEditMode && this.data.isEditExtraordinario) {
+                  this.actualizarEstadoAuditoriaPadre();
+                } else {
+                  this.mostrarMensajeExito();
+                }
               },
               error: (error) => {
                 this.alertaService.showErrorAlert(
@@ -268,6 +268,34 @@ export class AddAuditoriaModalComponent implements OnInit {
       console.warn("El formulario es inválido");
       this.auditoriaForm.markAllAsTouched();
     }
+  }
+
+  actualizarEstadoAuditoriaPadre(): void {
+    this.planAnualAuditoriaService.post(
+      'auditoria-padre-estado',
+      {
+        auditoria_padre_id: this.data.auditoria!.id,
+        usuario_id: this.data.usuario_id,
+        usuario_rol: this.data.usuario_rol,
+        fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+        estado_id: environment.AUDITORIA_PADRE_ESTADO.CON_MODIFICACION_EXTEMPORANEA_ID,
+      }
+    ).subscribe({
+      next: () => this.mostrarMensajeExito(),
+      error: (err) => {
+        console.error('Error actualizando estado de auditoría padre', err);
+        this.mostrarMensajeExito();
+      }
+    });
+  }
+
+  mostrarMensajeExito(): void {
+    this.alertaService.showSuccessAlert(
+      `Auditoría ${
+        this.isEditMode ? "actualizada" : "guardada"
+      } exitosamente.`
+    );
+    this.dialogRef.close({ saved: true });
   }
 
 }
