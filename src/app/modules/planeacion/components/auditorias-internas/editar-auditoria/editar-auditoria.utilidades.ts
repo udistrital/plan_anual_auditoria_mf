@@ -4,7 +4,7 @@ import { environment } from "src/environments/environment";
 export const formularioInformacionAuditoria: Formulario = {
   campos: [
     {
-      nombre: "no_auditoria",
+      nombre: "consecutivo_no_auditoria",
       descripcion: "No Auditoría y/o seguimiento",
       etiqueta: "No Auditoría y/o seguimiento",
       icono: "format_list_numbered",
@@ -196,7 +196,7 @@ export const formularioRecursosAuditoria: Formulario = {
 export const formularioTemasAuditoria: Formulario = {
   campos: [
     {
-      nombre: "temas",
+      nombre: "tema",
       etiqueta: "Temas",
       tipo: "textarea",
       validaciones: [{ tipo: "requerido", valor: "" }],
