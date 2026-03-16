@@ -1,0 +1,41 @@
+.documento-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.documento-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.icon-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.separador {
+  border: 0;
+  height: 2px;
+  background: var(--primary);
+  opacity: 0.5;
+}
+
+button.mat-flat-button {
+  color: var(--md-primary-contrast-500);
+}
+
+.steps-bloqueados ::ng-deep mat-step-header:nth-of-type(5),
+.steps-bloqueados ::ng-deep mat-step-header:nth-of-type(6) {
+  pointer-events: none;
+  opacity: 0.4;
+}

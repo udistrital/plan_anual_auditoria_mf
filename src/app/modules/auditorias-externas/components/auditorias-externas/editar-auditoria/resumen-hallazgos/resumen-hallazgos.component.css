@@ -1,0 +1,18 @@
+.table-container {
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.table-container table {
+  width: 100%;
+}
+
+.table-container th {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+}
