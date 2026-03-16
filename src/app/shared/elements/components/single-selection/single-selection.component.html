@@ -1,0 +1,35 @@
+<mat-form-field class="col-12" appearance="outline">
+  <mat-label *ngIf="label">{{label}}</mat-label>
+  <mat-icon matPrefix *ngIf="icon" color="primary">{{icon}}</mat-icon>
+  <mat-select #singleSelect class="col-12" [formControl]="formControl" [placeholder]="placeholder">
+    <mat-option>
+      <ngx-mat-select-search
+        [formControl]="formFilterControl"
+        placeholderLabel="Buscar..."
+        noEntriesFoundLabel="No hay opciones"
+      ></ngx-mat-select-search>
+    </mat-option>
+
+    <mat-option *ngFor="let parametro of (filteredParametros | async)" [value]="parametro.Id">
+      {{parametro.Nombre}}
+    </mat-option>
+  </mat-select>
+  <mat-error
+    *ngIf="
+      formControl.hasError('required') &&
+      formControl.touched &&
+      parametros.length > 0
+    "
+  >
+    {{noSelectionErrorMessage}}
+  </mat-error>
+  <mat-error
+    *ngIf="
+      formControl.hasError('required') &&
+      formControl.touched &&
+      parametros.length === 0
+    "
+  >
+    {{noOptionsErrorMessage}}
+  </mat-error>
+</mat-form-field>

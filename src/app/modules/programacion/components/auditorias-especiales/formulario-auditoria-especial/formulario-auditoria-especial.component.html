@@ -132,37 +132,13 @@
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Dependencia</b>
             </div>
-            <mat-form-field class="col-12 cursor-pointer-field" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">account_balance</mat-icon>
-              <mat-icon matSuffix>arrow_drop_down</mat-icon>
-              <input
-                type="text"
-                matInput
-                [value]="dependenciaBusquedaTexto"
-                [matAutocomplete]="autoDependencia"
-                (focus)="onDependenciaFocus()"
-                (input)="onDependenciaInput($any($event.target).value)"
-                (blur)="onDependenciaBlur()"
-                autocomplete="off"
-              />
-              <mat-autocomplete #autoDependencia="matAutocomplete" (optionSelected)="onDependenciaSelect($event)">
-                <mat-option
-                  *ngFor="let dependencia of filteredDependencias | async"
-                  [value]="dependencia"
-                >
-                  {{ dependencia.Nombre }}
-                </mat-option>
-              </mat-autocomplete>
-              <mat-error
-                *ngIf="
-                  form.get('dependencia').hasError('required') &&
-                  form.get('dependencia').touched
-                "
-              >
-                Seleccione la dependencia
-              </mat-error>
-            </mat-form-field>
+            <app-single-selection
+              label="Seleccionar"
+              icon="apartment"
+              placeholder="Dependencia auditada"
+              [parametros]="dependencias"
+              [formControl]="form.get('dependencia')"
+            ></app-single-selection>
            </div>
 
             <div class="col-12 col-md-12 col-xl-12">

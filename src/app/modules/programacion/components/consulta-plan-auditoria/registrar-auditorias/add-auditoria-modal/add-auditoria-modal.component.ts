@@ -1,18 +1,8 @@
 import { Component, OnInit, Inject } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
-import { Observable, of, Subject } from "rxjs";
-import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  map,
-  startWith,
-  switchMap,
-} from "rxjs/operators";
-import { ParametrosService } from "src/app/core/services/parametros.service";
 import { OikosService } from "src/app/core/services/oikos.service";
+import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
@@ -30,19 +20,15 @@ export class AddAuditoriaModalComponent implements OnInit {
   meses: Parametro[] = [];
   macroprocesos: Parametro[] = [];
   procesos: Parametro[] = [];
-  filteredDependencias!: Observable<Parametro[]>;
-  dependenciaBusquedaTexto = "";
+  dependencias: Parametro[] = [];
   isEditMode = false;
   TODOS = "Todos";
-  isSearchingDependencia = false;
-  previousDependencia: Parametro | null = null;
-  private searchTrigger$ = new Subject<string>();
 
   constructor(
     private alertaService: AlertService,
     private fb: FormBuilder,
     private parametrosService: ParametrosService,
-    private oikosSevice: OikosService,
+    private oikosService: OikosService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
@@ -91,8 +77,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.cargarTiposEvaluacion();
     this.cargarMacroprocesos();
     this.cargarProcesos();
-    this.inicializarBusquedaDependencias();
-    this.cargarDependenciaInicial();
+    this.cargarDependencias();
     this.cargarMeses();
 
     // When the macroproceso changes, clear the proceso selection and reload procesos.
@@ -169,131 +154,15 @@ export class AddAuditoriaModalComponent implements OnInit {
       });
   }
 
-  /**
-   * Initialize the search for dependencias by setting up a trigger stream. This will trigger
-   * a search for dependencias only when user focuses (with empty string) or types input,
-   * with debouncing and distinct value checks to optimize API calls.
-   */
-  inicializarBusquedaDependencias(): void {
-    this.filteredDependencias = this.searchTrigger$.pipe(
-      startWith(""),
-      map((value: string) => value || ""),
-      debounceTime(200),
-      distinctUntilChanged(),
-      switchMap((value: string) => this.buscarDependencias(value))
-    );
-  }
-
-  /**
-   * Load the initial dependencia for the auditoria being edited. If the form is in
-   * edit mode and a dependenciaId is present, it will fetch the dependencia details
-   * from the Oikos API and set the form control value accordingly.
-   */
-  cargarDependenciaInicial(): void {
-    const dependenciaId = this.data.auditoria?.dependenciaId;
-    if (!this.isEditMode || !dependenciaId) {
-      return;
-    }
-
-    this.oikosSevice
-      .get(`dependencia?query=Id:${dependenciaId}&limit=1&fields=Id,Nombre`)
-      .pipe(catchError(() => of([])))
-      .subscribe((res: Parametro[]) => {
-        if (res && res.length) {
-          const dependencia = res[0];
-          this.auditoriaForm.patchValue({ dependencia: dependencia });
-          this.previousDependencia = dependencia;
-          this.dependenciaBusquedaTexto = dependencia.Nombre || "";
+  cargarDependencias(callback?: () => void) {
+    this.oikosService
+      .get("dependencia?query=activo:true&limit=0")
+      .subscribe((res) => {
+        if (res) {
+          this.dependencias = res;
+          if (callback) callback();
         }
       });
-  }
-
-  /**
-   * Search for dependencias using the Oikos API based on the user's input. This function
-   * is used in the autocomplete for the dependencia form control to provide suggestions
-   * as the user types.
-   * @param value The search string entered by the user to find matching dependencias
-   * @returns An Observable that emits an array of Parametro objects representing the matching dependencias
-   */
-  buscarDependencias(value: string): Observable<Parametro[]> {
-    const nombre = (value || "").trim();
-    const query = nombre
-      ? `Activo:true,Nombre:${encodeURIComponent(nombre)}`
-      : "Activo:true";
-
-    return this.oikosSevice
-      .get(
-        `dependencia?query=${query}&limit=0&sortby=nombre&order=asc&fields=Id,Nombre`
-      )
-      .pipe(
-        // Filter out dependencies with empty names
-        map((res: any) => res.filter(
-          (dep: Parametro) => dep.Nombre.length > 0
-        )),
-        catchError((error) => {
-          console.error("Error al buscar dependencias", error);
-          return of([])
-        })
-      );
-  }
-
-  /**
-   * Handle focus on the dependencia input field. Store the current value and enable search mode.
-   */
-  onDependenciaFocus(): void {
-    if (this.isSearchingDependencia) {
-      return;
-    }
-
-    const dependenciaSeleccionadaControl = this.auditoriaForm.get("dependencia");
-    this.previousDependencia = dependenciaSeleccionadaControl.value || null;
-    this.isSearchingDependencia = true;
-    this.dependenciaBusquedaTexto = "";
-    this.searchTrigger$.next("");
-  }
-
-  /**
-   * Handle input changes in dependencia search box.
-   * @param value Typed search text
-   */
-  onDependenciaInput(value: string): void {
-    this.dependenciaBusquedaTexto = value || "";
-    this.searchTrigger$.next(this.dependenciaBusquedaTexto);
-  }
-
-  /**
-   * Handle blur on the dependencia input field. If no selection was made, restore the previous value.
-   */
-  onDependenciaBlur(): void {
-    setTimeout(() => {
-      const dependenciaSeleccionadaControl = this.auditoriaForm.get("dependencia");
-
-      if (this.previousDependencia) {
-        dependenciaSeleccionadaControl.setValue(this.previousDependencia);
-        this.dependenciaBusquedaTexto = this.previousDependencia.Nombre || "";
-      } else {
-        dependenciaSeleccionadaControl.setValue(null);
-        this.dependenciaBusquedaTexto = "";
-      }
-
-      dependenciaSeleccionadaControl.markAsTouched();
-      this.isSearchingDependencia = false;
-    }, 200);
-  }
-
-  /**
-   * Handle selection of a dependencia from the autocomplete.
-   * @param event Selection event from autocomplete
-   */
-  onDependenciaSelect(event: MatAutocompleteSelectedEvent): void {
-    const dependencia = event.option.value as Parametro;
-    const dependenciaSeleccionadaControl = this.auditoriaForm.get("dependencia");
-
-    dependenciaSeleccionadaControl.setValue(dependencia);
-    this.dependenciaBusquedaTexto = dependencia?.Nombre || "";
-    this.previousDependencia = dependencia;
-    dependenciaSeleccionadaControl.markAsTouched();
-    this.isSearchingDependencia = false;
   }
 
   asignarTodos(): void {
