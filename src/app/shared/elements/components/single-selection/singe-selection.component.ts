@@ -39,7 +39,7 @@ export class SingleSelectionComponent implements OnInit, AfterViewInit, OnChange
   @Input() public parametros: Parametro[] = [];
 
   /** control for the selected parametro */
-  @Input() public formControl: FormControl<number | null> = new FormControl<number | null>(null);
+  @Input() public parametroControl: FormControl<number | null> = new FormControl<number | null>(null);
 
   /** control for the MatSelect filter keyword */
   public formFilterControl: FormControl<string | null> = new FormControl<string | null>('');

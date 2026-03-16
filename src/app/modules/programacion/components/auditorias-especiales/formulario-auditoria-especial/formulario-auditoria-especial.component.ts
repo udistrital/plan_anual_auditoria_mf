@@ -20,6 +20,7 @@ import {
   of,
   forkJoin,
   tap,
+  Observable,
 } from 'rxjs';
 
 @Component({
@@ -37,6 +38,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
   macroprocesos: Parametro[] = [];
   procesos: Parametro[] = [];
   dependencias: Parametro[] = [];
+  cantidadesAuditorias: Parametro[] = [];
   TODOS = "Todos";
   isEditMode = false;  
   auditorEliminar: AuditorEliminar | null = null;
@@ -61,6 +63,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       dependencia: [[], Validators.required],
       cronogramaActividades: [[], Validators.required],
       auditoresSeleccionados: this.auditoresSeleccionados,
+      cantidadAuditorias: [[], Validators.required]
     });
   }
 
@@ -71,6 +74,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       of(this.CargarEvaluaciones()),
       of(this.cargarMacroprocesos()),
       this.cargarDependencias(),
+      this.inicializarCantidadesAuditorias(),
       of(this.cargarMeses()),
       of(this.cargarAuditores())
     ]).subscribe(() => {
@@ -84,6 +88,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       proceso: this.data.auditoria?.procesoId || [],
       dependencia: this.data.auditoria?.dependenciaId || [],
       cronogramaActividades: this.data.auditoria?.cronogramaId || [],
+      cantidadAuditorias: this.data.auditoria?.cantidadAuditorias || [],
     });
 
     this.form.get("macroproceso").valueChanges.subscribe((valor: number) => {
@@ -91,12 +96,19 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
       this.procesos = [];
       this.cargarProcesos();
     });
+  }
 
-    this.form.get("dependencia").valueChanges.subscribe((valor: number) => {
-      console.log("Valor de dependencia cambiado:", valor);
-    });
-
-    console.log("Dependencia Id:", this.form.get("dependencia").value);
+  inicializarCantidadesAuditorias(): Observable<Parametro[]> {
+    const minCantidad = 1;
+    const maxCantidad = 12;
+    this.cantidadesAuditorias = Array.from(
+      { length: maxCantidad - minCantidad + 1 },
+      (_, i) => ({
+        Id: i + minCantidad,
+        Nombre: (i + minCantidad).toString()
+      })
+    );
+    return of(this.cantidadesAuditorias);
   }
 
   cargarMacroprocesos() {
@@ -383,6 +395,7 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
               macroproceso_id: this.form.value.macroproceso,
               proceso_id: this.form.value.proceso,
               dependencia_id: this.form.value.dependencia.Id,
+              cantidad_auditorias: this.form.value.cantidadAuditorias,
               //auditores: auditoresSeleccionados
             };
 
