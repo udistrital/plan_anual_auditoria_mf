@@ -129,14 +129,16 @@ export class ModalAprobacionSecretarioComponent {
     this.planAuditoriaService.post("estado", planEstado).subscribe({
       next: (resp: any) => {
         if (resp.Success) {
-          const estadoAuditorias = {
+          const generarAuditoriasDto = {
             usuario_id: this.infoModal.usuarioId,
             usuario_rol: this.infoModal.usuarioRol,
+            observacion: "Generación automática de auditorías luego de aprobación del plan por parte del secretario técnico",
+            "estado_id_padre_actual": environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
+            "estado_id_padre_nuevo": environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
+            "estado_id_hija_nuevo": environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
             fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
-            // estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
-            estado_id: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
           }
-          this.planAuditoriaService.put(`auditoria-gestion/${this.infoModal.planAuditoriaId}`, estadoAuditorias)
+          this.planAuditoriaService.post(`plan-auditoria/${this.infoModal.planAuditoriaId}/generar-auditorias`, generarAuditoriasDto)
             .subscribe({
               next: (response: any) => {
                 if (response.Status === 200) {
