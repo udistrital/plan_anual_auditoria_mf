@@ -152,7 +152,7 @@ export class EditarSeguimientoComponent implements OnInit {
       consecutivo_OCI: informacion.consecutivo_OCI,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
-      no_auditoria: informacion.no_auditoria,
+      consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
       correo_complementario: informacion.correo_complementario,
     };
   }
@@ -208,7 +208,7 @@ export class EditarSeguimientoComponent implements OnInit {
 
   cargarFormulariosConAuditoria() {
     this.formularioInformacionComponent.form.patchValue({
-      no_auditoria: this.auditoria.no_auditoria,
+      consecutivo_no_auditoria: this.auditoria.consecutivo_no_auditoria,
       consecutivo_OCI: this.auditoria.consecutivo_OCI,
       consecutivo_IE: this.auditoria.consecutivo_IE,
       macroproceso: this.auditoria.macroproceso_nombre,
