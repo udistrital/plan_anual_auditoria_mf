@@ -40,6 +40,7 @@
     "single-spa-angular": "^9.1.2",
     "sweetalert2": "^11.12.4",
     "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {
@@ -51,6 +52,7 @@
     "@types/file-saver": "^2.0.7",
     "@types/jasmine": "~4.3.0",
     "@types/quill": "^2.0.14",
+    "@types/xlsx": "^0.0.35",
     "angular-eslint": "21.0.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",

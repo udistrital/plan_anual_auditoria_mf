@@ -6,6 +6,7 @@ import { ModalService } from "src/app/shared/services/modal.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { environment } from "src/environments/environment";
+import * as XLSX from "xlsx";
 
 @Component({
   selector: "app-cargar-archivo",
@@ -71,10 +72,24 @@ export class CargarArchivoComponent {
     this.fileInput.nativeElement.value = "";
   }
 
-  cargarArchivo(): void {
+  async cargarArchivo(): Promise<void> {
     if (!this.archivo) {
       this.alertService.showErrorAlert("No se ha seleccionado ningún archivo.");
       return;
+    }
+
+    // Validar fechas del Excel antes de enviar (solo para cargue masivo de actividades)
+    if (this.data.cargaLambda && this.data.tipo === "actividades") {
+      const erroresFechas = await this.validarFechasExcel(this.archivo);
+      if (erroresFechas.length > 0) {
+        const filas = erroresFechas
+          .map((e) => `• Fila ${e.fila}: ${e.mensaje}`)
+          .join("\n");
+        this.alertService.showErrorAlert(
+          `El archivo contiene errores en las fechas:\n\n${filas}`
+        );
+        return;
+      }
     }
 
     if (this.data.cargaLambda) {
@@ -102,6 +117,101 @@ export class CargarArchivoComponent {
         );
       });
     }
+  }
+
+  /**
+   * Lee el Excel y valida que 'Fecha Fin' >= 'Fecha Inicio' en cada fila de datos.
+   * Las fechas vienen como texto en formato YYYY-MM-DD según la plantilla.
+   * Se agrega T00:00:00 al parsear para evitar desfase de zona horaria (UTC vs local).
+   * Omite la fila de instrucciones que contiene texto explicativo.
+   */
+  private validarFechasExcel(
+    archivo: File
+  ): Promise<{ fila: number; mensaje: string }[]> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const hoja = workbook.Sheets[workbook.SheetNames[0]];
+
+          // true para leer el texto tal cual sin conversión automática de fechas
+          const filas: any[] = XLSX.utils.sheet_to_json(hoja, {
+            defval: null,
+            raw: true,
+          });
+
+          const errores: { fila: number; mensaje: string }[] = [];
+
+          filas.forEach((fila, index) => {
+            const numeroFila = index + 2; // +2 porque fila 1 es encabezado
+
+            const valorInicio: string | null = fila["Fecha Inicio"];
+            const valorFin: string | null = fila["Fecha Fin"];
+
+            if (
+              !valorInicio ||
+              !valorFin ||
+              String(valorInicio).toLowerCase().includes("texto") ||
+              String(valorInicio).toLowerCase().includes("yyyy")
+            ) {
+              return;
+            }
+
+            const valorInicioStr = String(valorInicio).trim();
+            const valorFinStr = String(valorFin).trim();
+
+            const fechaInicio = new Date(valorInicioStr + "T00:00:00");
+            const fechaFin = new Date(valorFinStr + "T00:00:00");
+
+            if (isNaN(fechaInicio.getTime())) {
+              errores.push({
+                fila: numeroFila,
+                mensaje: `Fecha de inicio inválida: "${valorInicioStr}". Use el formato YYYY-MM-DD.`,
+              });
+              return;
+            }
+
+            if (isNaN(fechaFin.getTime())) {
+              errores.push({
+                fila: numeroFila,
+                mensaje: `Fecha de fin inválida: "${valorFinStr}". Use el formato YYYY-MM-DD.`,
+              });
+              return;
+            }
+
+            // Comparar solo la parte de fecha (sin hora) para evitar falsos positivos
+            const inicio = new Date(
+              fechaInicio.getFullYear(),
+              fechaInicio.getMonth(),
+              fechaInicio.getDate()
+            );
+            const fin = new Date(
+              fechaFin.getFullYear(),
+              fechaFin.getMonth(),
+              fechaFin.getDate()
+            );
+
+            if (fin < inicio) {
+              errores.push({
+                fila: numeroFila,
+                mensaje: `La fecha de fin (${valorFinStr}) no puede ser anterior a la fecha de inicio (${valorInicioStr}).`,
+              });
+            }
+          });
+
+          resolve(errores);
+        } catch (error) {
+          console.error("Error al leer el archivo Excel para validación:", error);
+          resolve([]); // Si no se puede leer, dejar pasar y que el backend valide
+        }
+      };
+
+      reader.onerror = () => resolve([]);
+      reader.readAsArrayBuffer(archivo);
+    });
   }
 
   private async cargarConLambda(): Promise<boolean> {
@@ -150,13 +260,12 @@ export class CargarArchivoComponent {
         return false;
       }
     } catch (error: any) {
-      // LOG TEMPORAL - ver detalle del error del serverless
-      console.error('=== ERROR SERVERLESS ===');
-      console.error('status:', error?.status);
-      console.error('message:', error?.message);
-      console.error('error.error:', JSON.stringify(error?.error, null, 2));
-      console.error('error completo:', JSON.stringify(error, null, 2));
-      console.error('=======================');
+      console.error("=== ERROR SERVERLESS ===");
+      console.error("status:", error?.status);
+      console.error("message:", error?.message);
+      console.error("error.error:", JSON.stringify(error?.error, null, 2));
+      console.error("error completo:", JSON.stringify(error, null, 2));
+      console.error("=======================");
 
       this.alertService.showErrorAlert(
         "Error al enviar el archivo a cargue masivo. Por favor, revise el log."
@@ -208,9 +317,7 @@ export class CargarArchivoComponent {
           next: (response) => {
             console.log("Referencia guardada exitosamente", response);
             if (mostrarMensaje) {
-              this.alertService.showSuccessAlert(
-                "Archivo subido exitosamente."
-              );
+              this.alertService.showSuccessAlert("Archivo subido exitosamente.");
             }
           },
           error: (error) => {
@@ -232,22 +339,23 @@ export class CargarArchivoComponent {
             Se cargaron correctamente <strong>${totalCorrectos}</strong> registro(s).
           </p>
         </div>`,
-        'success',
-        'Cargue exitoso'
+        "success",
+        "Cargue exitoso"
       );
       return;
     }
 
-    const icono = totalCorrectos > 0 ? 'warning' : 'error';
-    const titulo = totalCorrectos > 0 ? 'Cargue con observaciones' : 'Cargue fallido';
+    const icono = totalCorrectos > 0 ? "warning" : "error";
+    const titulo =
+      totalCorrectos > 0 ? "Cargue con observaciones" : "Cargue fallido";
 
-    let mensaje = '';
+    let mensaje = "";
 
     if (totalCorrectos > 0) {
       mensaje += `
         <div style="background:#e8f5e9; border-radius:8px; padding:10px; margin-bottom:12px">
           ✅ <strong>${totalCorrectos}</strong> registro(s) cargado(s) correctamente
-          <span style="color:#555; font-size:0.9rem">(filas: ${data.Correctos.join(', ')})</span>
+          <span style="color:#555; font-size:0.9rem">(filas: ${data.Correctos.join(", ")})</span>
         </div>`;
     }
 
