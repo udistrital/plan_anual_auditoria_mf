@@ -213,7 +213,7 @@ export class DocumentoUtils {
           nombre: "Actualizar Documento",
           accion: () => this.handleActualizarDocumento(
             planId,
-            `plantilla/${planId}?conEspeciales=true`,
+            `plantilla/${planId}?auditoria-padre=true&conEspeciales=true`,
             environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO,
             refreshCallbacks?.[REFRESHABLES.FORMATO_PAA_ACTUALIZADO],
           ),
