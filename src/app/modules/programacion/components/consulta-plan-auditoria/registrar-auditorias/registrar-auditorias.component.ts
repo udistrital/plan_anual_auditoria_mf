@@ -119,6 +119,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
             cronograma: item.cronograma ?? "Sin Cronograma",
             cronogramaId: item.cronograma_id ?? [],
             estado: item.estado_nombre ?? "Sin estado",
+            cantidadAuditorias: item.cantidad_auditorias ?? 0,
           }));
           
           this.actualizarColumnas();
