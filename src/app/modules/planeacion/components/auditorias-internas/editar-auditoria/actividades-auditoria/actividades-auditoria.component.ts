@@ -86,6 +86,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
           actividad: item.titulo,
           fechaInicio: new Date(item.fecha_inicio).toLocaleDateString(),
           fechaFin: new Date(item.fecha_fin).toLocaleDateString(),
+          observaciones: item.observacion
           //ref: item.referencia,
           //descripcion: item.descripcion,
           //folios: item.folio?.toString() || "",
