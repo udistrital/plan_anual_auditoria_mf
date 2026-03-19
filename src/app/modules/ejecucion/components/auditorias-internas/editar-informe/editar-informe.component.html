@@ -54,8 +54,8 @@
             </div>
           </div>
           <div class="mt-4">
-            <form [formGroup]="formAspectosGenerales" (ngSubmit)="onSubmitAspectosGenerales()">
-              <app-editor-enriquecido formControlName="aspectos_generales"
+            <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
+              <app-editor-enriquecido formControlName="aspecto_general"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
@@ -84,13 +84,17 @@
               Aspectos evaluados
             </div>
           </div>
+
           <div class="mt-4">
             <app-aspectos-evaluados [informeId]="informeId" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
             <div class="d-flex justify-content-end mt-4">
-              <button mat-stroked-button color="primary" matStepperPrevious>
+              <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
                 Volver
               </button>
-              <button mat-flat-button color="primary" class="mx-2" (click)="onSubmitAspectosEvaluados()">
+              <button mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
+                Guardar
+              </button>
+              <button mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
                 Guardar y continuar
               </button>
             </div>
@@ -141,7 +145,7 @@
             </div>
           </div>
           <div class="mt-4">
-            <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="onSubmitRespuestaPreliminar()">
+            <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="guardarRespuestaPreliminar()">
               <app-editor-enriquecido formControlName="respuesta_preliminar"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
@@ -172,17 +176,17 @@
             </div>
           </div>
           <div class="mt-4">
-            <form [formGroup]="formInformeFinal" (ngSubmit)="onSubmitInformeFinal()">
+            <form [formGroup]="formInformeFinal" (ngSubmit)="guardarInformeFinal()">
               <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
               <app-editor-enriquecido formControlName="informe_final"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
-              <app-editor-enriquecido formControlName="observaciones_conclusiones"
+              <app-editor-enriquecido formControlName="observacion_conclusion"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <h3 style="color: var(--primary)" class="my-2">Notas</h3>
-              <app-editor-enriquecido formControlName="notas" placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <app-editor-enriquecido formControlName="nota" placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver

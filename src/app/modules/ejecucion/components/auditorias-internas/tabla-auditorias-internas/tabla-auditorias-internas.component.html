@@ -2,10 +2,9 @@
   <div class="row mt-4">
     <div class="col-12">
       <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
-      <p class="mb-2 mx-2">
-        Seleccione la auditoría interna para realizar la revisión y/o ejecución.
-      </p>
+      <p class="mb-2 mx-2"> Seleccione la auditoría interna para realizar la revisión y/o ejecución.</p>
     </div>
+
     <div class="col-12">
       <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
@@ -23,22 +22,12 @@
                 <!-- Acciones -->
                 <div *ngSwitchCase="'acciones'">
                   <ng-container *ngIf="row.acciones?.length > 0">
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      [matMenuTriggerFor]="menu"
-                    >
+                    <button mat-icon-button color="primary" [matMenuTriggerFor]="menu">
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
-                      <button
-                        mat-menu-item
-                        (click)="realizarAccion(row, accion)"
-                        *ngFor="let accion of row.acciones"
-                      >
-                        <mat-icon color="primary">{{
-                          getIconoAccion(accion)
-                        }}</mat-icon>
+                      <button mat-menu-item (click)="realizarAccion(row, accion)" *ngFor="let accion of row.acciones">
+                        <mat-icon color="primary">{{ getIconoAccion(accion) }}</mat-icon>
                         <span>{{ accion }}</span>
                       </button>
                     </mat-menu>

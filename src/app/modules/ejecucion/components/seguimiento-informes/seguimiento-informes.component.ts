@@ -40,7 +40,7 @@ export class SeguimientoInformesComponent implements OnInit {
 
   mostrarSeguimientosPorVigencia(vigencia: Vigencia) {
     this.vigenciaSeleccionada = vigencia.Id;
-    this.tablaSeguimientos.listarSeguimientosPorVigencia(this.vigenciaSeleccionada);
+    this.tablaSeguimientos.listarAuditoriasPorVigencia(this.vigenciaSeleccionada);
   }
 
   iniciarvigenciaForm() {
