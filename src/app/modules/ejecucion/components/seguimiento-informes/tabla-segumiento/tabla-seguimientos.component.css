@@ -1,3 +1,15 @@
+.mat-column-numero {
+  text-align: center;
+}
+
+.mat-column-acciones {
+  text-align: center;
+}
+
+.even-row {
+  background-color: #f4f4f4;
+}
+
 .link {
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -5,13 +17,4 @@
 
 .link:hover {
   opacity: 0.7;
-}
-
-.even-row {
-  background-color: #f9f9f9;
-}
-
-.table-container {
-  overflow-x: auto;
-  width: 100%;
 }

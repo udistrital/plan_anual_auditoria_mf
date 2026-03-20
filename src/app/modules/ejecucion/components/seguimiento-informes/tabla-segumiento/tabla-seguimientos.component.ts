@@ -31,10 +31,10 @@ export class TablaSeguimientosComponent implements OnInit {
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  seguimientosPorVigencia: any[] = [];
-  seguimientosDataSource: MatTableDataSource<any> = new MatTableDataSource();
-  seguimientosConstructorTabla: any;
-  banderaTablaSeguimientos: boolean = false;
+  auditoriasPorVigencia: any[] = [];
+  auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
+  constructorTablaAuditorias: any;
+  banderaTablaAuditorias: boolean = false;
   tablaColumnas: any;
   roles: string[] = [];
   totalRegistros: number = 0;
@@ -72,59 +72,56 @@ export class TablaSeguimientosComponent implements OnInit {
     }
   }
 
-  listarSeguimientosPorVigencia(
+  listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0
   ) {
-    this.seguimientosPorVigencia = [];
-    const url = `auditoria?query=vigencia_id:${vigenciaId},activo:true,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL}&limit=${limit}&offset=${offset}`;
+    this.auditoriasPorVigencia = [];
+    const url = `auditoria?query=vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.SEGUIMIENTO_ID},estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}&limit=${limit}&offset=${offset}`;
 
     this.planAuditoriaMid.get(url).subscribe((res) => {
-      const seguimientos: any[] = res.Data.map((seguimiento: any) => {
-        const estadoId = seguimiento.estado?.estado_id;
-
-        console.log("estado:", estadoId);
-        
+      const auditorias: any[] = res.Data.map((auditoria: any) => {
+        const estadoId = auditoria.estado?.estado_id || auditoria.estado_id;
         const acciones = this.getAccionesPorRolYEstado(estadoId);
-        return { ...seguimiento, acciones };
+        return { ...auditoria, acciones };
       });
 
-      if (!(seguimientos.length > 0)) {
-        this.banderaTablaSeguimientos = false;
-        this.seguimientosDataSource.data = [];
+      if (!(auditorias.length > 0)) {
+        this.banderaTablaAuditorias = false;
+        this.auditoriasDataSource.data = [];
         return this.alertaService.showAlert(
-          "No hay seguimientos registrados",
-          "Actualmente no hay seguimientos registrados para la vigencia seleccionada."
+          "No hay auditorías registradas",
+          "Actualmente no hay auditorías registradas para la vigencia seleccionada."
         );
       }
 
-      this.seguimientosPorVigencia = seguimientos;
+      this.auditoriasPorVigencia = auditorias;
       this.totalRegistros = res.MetaData.Count;
-      this.banderaTablaSeguimientos = true;
+      this.banderaTablaAuditorias = true;
       this.construirTabla();
     });
 
   }
 
   construirTabla() {
-    this.seguimientosConstructorTabla = seguimientosConstructorTabla.filter(
+    this.constructorTablaAuditorias = seguimientosConstructorTabla.filter(
       (column) => {
         return column.columnDef !== "acciones" || this.mostrarAcciones;
       }
     );
-    this.tablaColumnas = this.seguimientosConstructorTabla.map(
+    this.tablaColumnas = this.constructorTablaAuditorias.map(
       (column: any) => column.columnDef
     );
 
-    this.seguimientosDataSource = new MatTableDataSource(
-      this.seguimientosPorVigencia
+    this.auditoriasDataSource = new MatTableDataSource(
+      this.auditoriasPorVigencia
     );
 
     //si no hay paginador, se crea
     if (!this.paginator) {
-      this.seguimientosDataSource.paginator = this.paginator;
-      this.seguimientosDataSource.sort = this.sort;
+      this.auditoriasDataSource.paginator = this.paginator;
+      this.auditoriasDataSource.sort = this.sort;
     }
 
     this.changeDetector.detectChanges();
@@ -136,7 +133,7 @@ export class TablaSeguimientosComponent implements OnInit {
     this.pageIndex = evento.pageIndex;
 
     const offset = this.pageIndex * this.pageSize;
-    this.listarSeguimientosPorVigencia(this.vigenciaId, this.pageSize, offset);
+    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, offset);
     // Actualizar el paginador después de realizar la consulta
     this.paginator.length = this.totalRegistros;
     this.paginator.pageSize = this.pageSize;
@@ -155,39 +152,78 @@ export class TablaSeguimientosComponent implements OnInit {
     return this.iconosAccion.get(accion) ?? "help";
   }
 
-  realizarAccion(seguimiento: any, accion: string) {
+  realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      "Editar Informe": () => this.editarInformeSeguimiento(seguimiento),
-      "Ver Documentos del informe": () => this.verDocumentosInforme(seguimiento),
-      "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(seguimiento),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(seguimiento),
+      "Editar Informe": () => this.editarInforme(auditoria),
+      "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
+      "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
+      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
     };
     acciones[accion]?.();
   }
 
-  abrirHistorialRechazos(seguimiento: any) {
+  abrirHistorialRechazos(auditoria: any) {
     this.dialog.open(ModalHistorialRechazosSeguimientoComponent, {
-      data: { auditoriaId: seguimiento._id },
+      data: { auditoriaId: auditoria._id },
       width: "40%",
     });
   }
 
-  editarInformeSeguimiento(seguimiento: any) {
-    const seguimientoId = seguimiento._id;
+  editarInforme(auditoria: any) {
+    this.obtenerOCrearInforme(auditoria._id, (informeId) => {
+      this.router.navigate([`/ejecucion/seguimiento-informes/editar-informe/${informeId}`]);
+    });
+  }
+
+  private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
+      next: (res: any) => {
+        if (res.Data && res.Data.length > 0) {
+          onInformeId(res.Data[0]._id);
+        } else {
+          this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({
+            next: (informeCreado: any) => {
+              this.crearEstadoCreandoInformeFinal(auditoriaId, informeCreado.Data._id, onInformeId);
+            },
+            error: () => this.alertaService.showErrorAlert('Error al crear el informe.')
+          });
+        }
+      },
+      error: () => this.alertaService.showErrorAlert('Error al buscar el informe.')
+    });
+  }
+
+  private async crearEstadoCreandoInformeFinal(auditoriaId: string, informeId: string, onDone: (informeId: string) => void) {
+    const usuarioId = await this.userService.getPersonaId();
+    const role = this.rolService.getRolPrioritario([
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+    ]);
+    this.planAuditoriaService.post('auditoria-estado', {
+      auditoria_id: auditoriaId,
+      fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
+      estado_id: environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL,
+      usuario_id: usuarioId,
+      usuario_rol: role,
+      observacion: "",
+    }).subscribe({
+      next: () => onDone(informeId),
+      error: () => {
+        this.alertaService.showErrorAlert('Error al registrar el estado del informe.');
+        onDone(informeId);
+      }
+    });
+  }
+
+  verDocumentosInforme(auditoria: any) {
     this.router.navigate([
-      `/ejecucion/seguimiento-informes/editar-informe/${seguimientoId}`,
+      `/ejecucion/seguimiento-informes/revision/${auditoria._id}`,
     ]);
   }
 
-  verDocumentosInforme(seguimiento: any) {
-    const seguimientoId = seguimiento._id;
-    this.router.navigate([
-      `/ejecucion/seguimiento-informes/revision/${seguimientoId}`,
-    ]);
-  }
-
-  enviarAprobacionPorJefe(seguimiento: any) {
-    this.validarInformeFinal(seguimiento._id, async () => {
+  enviarAprobacionPorJefe(auditoria: any) {
+    this.validarInformeFinal(auditoria._id, async () => {
       const confirmado = await this.alertaService.showConfirmAlert(
         "¿Está seguro(a) de enviar el informe final para aprobación del Jefe?"
       );
@@ -202,7 +238,7 @@ export class TablaSeguimientosComponent implements OnInit {
 
       this.planAuditoriaService
         .post("auditoria-estado", {
-          auditoria_id: seguimiento._id,
+          auditoria_id: auditoria._id,
           fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
           estado_id: environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE,
           usuario_id: usuarioId,
@@ -215,7 +251,7 @@ export class TablaSeguimientosComponent implements OnInit {
               "El informe final fue enviado al Jefe para su aprobación.",
               "Informe enviado"
             );
-            this.listarSeguimientosPorVigencia(this.vigenciaId);
+            this.listarAuditoriasPorVigencia(this.vigenciaId);
           },
           error: () => {
             this.alertaService.showErrorAlert("Error al enviar el informe al Jefe.");
@@ -224,8 +260,8 @@ export class TablaSeguimientosComponent implements OnInit {
     });
   }
 
-  private validarInformeFinal(seguimientoId: string, onValido: () => void) {
-    this.referenciaPdfService.consultarDocumentos(seguimientoId).subscribe(docs => {
+  private validarInformeFinal(auditoriaId: string, onValido: () => void) {
+    this.referenciaPdfService.consultarDocumentos(auditoriaId).subscribe(docs => {
       if (!docs.some(doc => doc.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL)) {
         this.alertaService.showErrorAlert(
           "Debe generar el informe final antes de enviarlo al Jefe."

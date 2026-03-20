@@ -25,6 +25,7 @@ export class TablaAuditoriasEspecialesComponent {
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
   mostrarAcciones: boolean = false;
+  banderaTabla: boolean = false;
   displayedColumns: string[] = [
     "numero",
     "auditoria",
@@ -46,6 +47,8 @@ export class TablaAuditoriasEspecialesComponent {
     offset: number = 0
   ): void {
   this.vigenciaId = vigenciaId;
+  this.banderaTabla = false;
+  this.dataSource.data = [];
   this.planAuditoriaMid
     .get(
       `auditoria?query=vigencia_id:${vigenciaId},activo:true,plan_auditoria_id__isnull:true&limit=${limit}&offset=${offset}&auditores`
@@ -82,6 +85,9 @@ export class TablaAuditoriasEspecialesComponent {
               });
 
               this.dataSource.data = auditorias;
+              if (auditorias.length > 0) {
+                this.banderaTabla = true;
+              }
             },
             error: (error) => {
               this.alertaService.showErrorAlert("Error al cargar auditores");

@@ -1,74 +1,110 @@
 <div class="tabla-container" [formGroup]="aspectosForm">
-  <div class="control-buttons">
-    <button mat-raised-button color="primary" (click)="agregarTema()">Agregar Tema</button>
+
+  <div class="section-actions">
+    <button mat-raised-button color="primary" (click)="agregarTema()">
+      <mat-icon>add</mat-icon> Agregar Tema
+    </button>
   </div>
-  <div formArrayName="temas">
-    <mat-card *ngFor="let tema of temas.controls; let i = index" [formGroupName]="i" class="tema-box">
-      <div class="d-flex align-items-center tema-header">
+
+  <div class="tree" formArrayName="temas">
+
+    <!-- ── TEMA ── -->
+    <div class="tree-node"
+      *ngFor="let tema of temas.controls; let i = index"
+      [formGroupName]="i">
+
+      <div class="node-row tema-row">
+        <span class="node-dot tema-dot"></span>
+        <span class="nivel-label">Tema</span>
         <span class="indice">{{ i + 2 }}</span>
-        <mat-form-field appearance="outline" class="tema-input">
-          <mat-label>Tema</mat-label>
-          <input matInput formControlName="nombre" placeholder="Nombre del Tema">
+        <mat-form-field appearance="outline" class="node-input">
+          <mat-label>Nombre del Tema</mat-label>
+          <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
+          <mat-error *ngIf="tema.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
         </mat-form-field>
-        <button mat-icon-button color="warn" (click)="eliminarTema(i)">
+        <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
 
-      <div formArrayName="subtemas" class="ms-2">
-        <button mat-raised-button color="primary" (click)="agregarSubtema(i)">Agregar Subtema</button>
-        <div *ngFor="let subtema of getSubtemas(i).controls; let j = index" [formGroupName]="j" class="subtema-box">
-          <div class="d-flex align-items-center subtema-header">
+      <!-- Hijos: Subtemas -->
+      <div class="node-children" formArrayName="subtemas">
+
+        <!-- ── SUBTEMA ── -->
+        <div class="tree-node"
+          *ngFor="let subtema of getSubtemas(i).controls; let j = index"
+          [formGroupName]="j">
+
+          <div class="node-row subtema-row">
+            <span class="node-dot subtema-dot"></span>
+            <span class="nivel-label">Subtema</span>
             <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
-            <mat-form-field appearance="outline" class="subtema-input">
-              <mat-label>Subtema</mat-label>
-              <input matInput formControlName="nombre" placeholder="Nombre del Subtema">
+            <mat-form-field appearance="outline" class="node-input">
+              <mat-label>Nombre del Subtema</mat-label>
+              <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
+              <mat-error *ngIf="subtema.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
             </mat-form-field>
-            <button mat-icon-button color="warn" (click)="eliminarSubtema(i, j)">
+            <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
 
-          <div formArrayName="hallazgos">
-            <button mat-raised-button color="primary" (click)="agregarHallazgo(i, j)">Agregar Hallazgo</button>
-            <div *ngFor="let hallazgo of getHallazgos(i, j).controls; let k = index" [formGroupName]="k"
-              class="hallazgo-box">
-              <div class="d-flex hallazgo-header">
-                <div class="d-flex align-items-start">
-                  <span class="indice">{{ i + 2 }}.{{ j + 1 }}.{{ k + 1 }}</span>
-                </div>
-                <div class="flex-grow-1">
-                  <mat-form-field appearance="outline" class="hallazgo-input">
-                    <mat-label>Criterio</mat-label>
-                    <input matInput formControlName="criterio" placeholder="Criterio" [errorStateMatcher]="errorMatcher">
-                    <mat-error *ngIf="hallazgo.get('criterio')?.hasError('required')">
-                      El criterio es requerido
-                    </mat-error>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="hallazgo-input">
-                    <mat-label>Hallazgo</mat-label>
-                    <input matInput formControlName="hallazgo" placeholder="Hallazgo" [errorStateMatcher]="errorMatcher">
-                    <mat-error *ngIf="hallazgo.get('hallazgo')?.hasError('required')">
-                      El hallazgo es requerido
-                    </mat-error>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="hallazgo-input">
-                    <mat-label>Descripción</mat-label>
-                    <textarea matInput formControlName="descripcion" placeholder="Descripción" [errorStateMatcher]="errorMatcher"></textarea>
-                    <mat-error *ngIf="hallazgo.get('descripcion')?.hasError('required')">
-                      La descripción es requerida
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-                <button mat-icon-button color="warn" (click)="eliminarHallazgo(i, j, k)">
+          <!-- Hijos: Hallazgos -->
+          <div class="node-children" formArrayName="hallazgos">
+
+            <!-- ── HALLAZGO ── -->
+            <div class="tree-node"
+              *ngFor="let hallazgo of getHallazgos(i, j).controls; let k = index"
+              [formGroupName]="k">
+
+              <div class="node-row hallazgo-row">
+                <span class="node-dot hallazgo-dot"></span>
+                <span class="nivel-label">Hallazgo</span>
+                <span class="indice">{{ i + 2 }}.{{ j + 1 }}.{{ k + 1 }}</span>
+                <button mat-icon-button class="delete-btn" (click)="eliminarHallazgo(i, j, k)" matTooltip="Eliminar hallazgo">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
+
+              <div class="node-body">
+                <mat-form-field appearance="outline" class="hallazgo-input">
+                  <mat-label>Criterio</mat-label>
+                  <input matInput formControlName="criterio" [errorStateMatcher]="errorMatcher">
+                  <mat-error *ngIf="hallazgo.get('criterio')?.hasError('required')">El criterio es requerido</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="hallazgo-input">
+                  <mat-label>Hallazgo</mat-label>
+                  <input matInput formControlName="hallazgo" [errorStateMatcher]="errorMatcher">
+                  <mat-error *ngIf="hallazgo.get('hallazgo')?.hasError('required')">El hallazgo es requerido</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="hallazgo-input">
+                  <mat-label>Descripción</mat-label>
+                  <textarea matInput formControlName="descripcion" rows="3" [errorStateMatcher]="errorMatcher"></textarea>
+                  <mat-error *ngIf="hallazgo.get('descripcion')?.hasError('required')">La descripción es requerida</mat-error>
+                </mat-form-field>
+              </div>
+
             </div>
+
+            <div class="add-leaf-action">
+              <button mat-stroked-button color="primary" (click)="agregarHallazgo(i, j)">
+                <mat-icon>add</mat-icon> Agregar Hallazgo
+              </button>
+            </div>
+
           </div>
         </div>
+
+        <div class="add-leaf-action">
+          <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
+            <mat-icon>add</mat-icon> Agregar Subtema
+          </button>
+        </div>
+
       </div>
-    </mat-card>
+    </div>
+
   </div>
-  <button mat-raised-button color="primary" (click)="guardarAspectos()">Guardar</button>
+
+
 </div>

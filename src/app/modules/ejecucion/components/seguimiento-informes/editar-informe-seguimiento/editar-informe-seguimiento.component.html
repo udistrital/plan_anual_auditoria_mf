@@ -53,8 +53,8 @@
             </div>
           </div>
           <div class="mt-4">
-            <form [formGroup]="formAspectosGenerales" (ngSubmit)="onSubmitAspectosGenerales()">
-              <app-editor-enriquecido formControlName="contenido"
+            <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
+              <app-editor-enriquecido formControlName="aspecto_general"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
@@ -84,12 +84,12 @@
             </div>
           </div>
           <div class="mt-4">
-            <app-aspectos-evaluados-seguimiento></app-aspectos-evaluados-seguimiento>
+            <app-aspectos-evaluados-seguimiento [informeId]="informeId"></app-aspectos-evaluados-seguimiento>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" matStepperPrevious class="me-2">
                 Volver
               </button>
-              <button mat-raised-button color="primary" matStepperNext>
+              <button mat-raised-button color="primary" (click)="guardarAspectosEvaluados()">
                 Guardar y Continuar
               </button>
             </div>
@@ -112,12 +112,12 @@
             </div>
           </div>
           <div class="mt-4">
-            <form [formGroup]="formObservaciones" (ngSubmit)="onSubmitObservaciones()">
-              <app-editor-enriquecido formControlName="observaciones"
+            <form [formGroup]="formObservacionesConclusiones" (ngSubmit)="guardarObservacionesConclusiones()">
+              <app-editor-enriquecido formControlName="observacion_conclusion"
                 placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <h3 class="titulo-seccion mt-4">Notas</h3>
-              <app-editor-enriquecido formControlName="notas" placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <app-editor-enriquecido formControlName="nota" placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
@@ -127,7 +127,7 @@
                   <mat-icon>visibility</mat-icon>
                   Ver
                 </button>
-                <button mat-raised-button color="primary" type="submit" (click)="guardarYCerrar()">
+                <button mat-raised-button color="primary" type="submit">
                   Guardar y Cerrar
                 </button>
               </div>
