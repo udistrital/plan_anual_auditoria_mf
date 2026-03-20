@@ -126,7 +126,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
         subtemasArray.push(this.fb.group({
           _id: [subtema._id || null],
-          nombre: [subtema.titulo || ''],
+          nombre: [subtema.titulo || '', Validators.required],
           hallazgos: hallazgosArray,
           isNew: [false],
           isModified: [false]
@@ -135,7 +135,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
       temasArray.push(this.fb.group({
         _id: [tema._id || null],
-        nombre: [tema.titulo || ''],
+        nombre: [tema.titulo || '', Validators.required],
         subtemas: subtemasArray,
         isNew: [false],
         isModified: [false]
@@ -154,7 +154,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   agregarTema(): void {
     const nuevoTema = this.fb.group({
       _id: [null],
-      nombre: [''],
+      nombre: ['', Validators.required],
       subtemas: this.fb.array([]),
       isNew: [true],
       isModified: [false]
@@ -169,7 +169,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   agregarSubtema(temaIndex: number): void {
     const nuevoSubtema = this.fb.group({
       _id: [null],
-      nombre: [''],
+      nombre: ['', Validators.required],
       hallazgos: this.fb.array([]),
       isNew: [true],
       isModified: [false]
@@ -275,12 +275,12 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   }
 
   // Guarda todos los aspectos evaluados (temas, subtemas, hallazgos)
-  async guardarAspectos(): Promise<void> {
+  async guardarAspectos(): Promise<boolean> {
     // Validar formulario
     if (this.aspectosForm.invalid) {
       this.aspectosForm.markAllAsTouched();
       this.alertaService.showAlert('Formulario inválido', 'Por favor complete todos los campos requeridos');
-      return;
+      return false;
     }
 
     const temasFormValue = this.temas.value;
@@ -326,8 +326,9 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
               tema_id: temaId,
               titulo: subtemaForm.nombre
             }));
-            // El servidor devuelve el subtema creado
-            subtemaId = subtemaId = response?.Data?.subtema?.[0]?._id;
+            // El servidor devuelve el tema con los subtemas embebidos; el nuevo es el último
+            const subtemasEnResponse = response?.Data?.subtema || [];
+            subtemaId = subtemasEnResponse[subtemasEnResponse.length - 1]?._id;
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {
             console.error('Error al crear subtema:', error);
@@ -360,8 +361,11 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
                 criterio: hallazgoForm.criterio,
                 descripcion: hallazgoForm.descripcion
               }));
-              // El servidor devuelve el hallazgo creado
-              hallazgoId = response?.Data?._id || response?.hallazgo?._id;
+              // El servidor devuelve el tema con subtemas embebidos; buscar el hallazgo en el subtema correcto
+              const subtemaEnResponse = (response?.Data?.subtema || []).find((s: any) => s._id === subtemaId);
+              const hallazgosEnResponse = subtemaEnResponse?.hallazgo || [];
+              hallazgoId = hallazgosEnResponse[hallazgosEnResponse.length - 1]?._id;
+              console.log('[POST hallazgo] response:', response, '→ hallazgoId resuelto:', hallazgoId);
               this.getHallazgos(i, j).at(k).patchValue({ _id: hallazgoId, isNew: false });
             } catch (error) {
               console.error('Error al crear hallazgo:', error);
@@ -385,5 +389,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
     this.alertaService.showAlert('Guardado exitoso', 'Los aspectos evaluados se han guardado correctamente');
     this.datosActualizados.emit();
+    return true;
   }
 }

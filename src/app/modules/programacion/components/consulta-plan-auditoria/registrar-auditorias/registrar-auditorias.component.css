@@ -1,3 +1,15 @@
+.mat-column-no {
+  text-align: center;
+}
+
+.mat-column-acciones {
+  text-align: center;
+}
+
+.even-row {
+  background-color: #f4f4f4;
+}
+
 .filter-section {
   display: flex;
   align-items: center;

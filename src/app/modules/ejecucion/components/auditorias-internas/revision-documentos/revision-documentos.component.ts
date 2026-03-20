@@ -52,7 +52,7 @@ const configJefe = {
 })
 export class RevisionDocumentosEjecucionComponent implements OnInit {
   auditoriaId: string = "";
-  estadoInformeId!: number;
+  estadoAuditoriaId!: number;
   selectedTab: number = 0;
   role: string | null = null;
   usuarioId: any;
@@ -201,8 +201,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     this.planAuditoriaService
       .get(`auditoria-estado?query=auditoria_id:${this.auditoriaId},actual:true`)
       .subscribe((res) => {
-        this.estadoInformeId =
-          res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
+        this.estadoAuditoriaId = res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
       });
   }
 
@@ -212,8 +211,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
       [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
     };
-
-    return condicionesVisibilidad[this.role!]?.includes(this.estadoInformeId) || false;
+    return condicionesVisibilidad[this.role!]?.includes(this.estadoAuditoriaId) || false;
   }
 
   async descargarTodo() {
