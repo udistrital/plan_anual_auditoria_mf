@@ -18,6 +18,7 @@ export class ActividadFormularioComponent {
       actividad: ['', Validators.required],
       fechaInicio: ['', Validators.required],
       fechaFin: ['', Validators.required],
+      observaciones: ['', null],
       id:[''],
     });
   }

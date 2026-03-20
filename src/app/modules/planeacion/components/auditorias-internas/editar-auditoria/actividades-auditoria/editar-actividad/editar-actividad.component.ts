@@ -42,6 +42,7 @@ export class EditarActividadComponent {
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
+      observacion:actividadData.observaciones
     };
     console.log('Crear actividad json:', actividadJson);
     this.alertaService
