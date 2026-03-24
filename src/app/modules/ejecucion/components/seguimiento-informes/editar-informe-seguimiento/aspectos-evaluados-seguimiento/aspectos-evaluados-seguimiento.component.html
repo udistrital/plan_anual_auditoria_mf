@@ -1,40 +1,65 @@
 <div class="tabla-container" [formGroup]="aspectosForm">
-  <div class="control-buttons">
-    <button mat-raised-button color="primary" (click)="agregarTema()">Agregar Tema</button>
+
+  <div class="section-actions">
+    <button mat-raised-button color="primary" (click)="agregarTema()">
+      <mat-icon>add</mat-icon> Agregar Tema
+    </button>
   </div>
-  <div formArrayName="temas">
-    <mat-card *ngFor="let tema of temas.controls; let i = index" [formGroupName]="i" class="tema-box">
-      <div class="d-flex align-items-center tema-header">
-        <span class="indice">{{ i + 1 }}</span>
-        <mat-form-field appearance="outline" class="tema-input">
-          <mat-label>Tema</mat-label>
-          <input matInput formControlName="nombre" placeholder="Nombre del Tema">
+
+  <div class="tree" formArrayName="temas">
+
+    <!-- ── TEMA ── -->
+    <div class="tree-node"
+      *ngFor="let tema of temas.controls; let i = index"
+      [formGroupName]="i">
+
+      <div class="node-row tema-row">
+        <span class="node-dot tema-dot"></span>
+        <span class="nivel-label">Tema</span>
+        <span class="indice">{{ i + 2 }}</span>
+        <mat-form-field appearance="outline" class="node-input">
+          <mat-label>Nombre del Tema</mat-label>
+          <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
+          <mat-error *ngIf="tema.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
         </mat-form-field>
-        <button mat-icon-button color="warn" (click)="eliminarTema(i)">
+        <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
 
-      <div formArrayName="subtemas" class="ms-4">
-        <div *ngFor="let subtema of getSubtemas(i).controls; let j = index" [formGroupName]="j" class="subtema-box">
-          <div class="d-flex align-items-center subtema-header">
-            <span class="indice">{{ i + 1 }}.{{ j + 1 }}</span>
-            <mat-form-field appearance="outline" class="subtema-input">
-              <mat-label>Subtema</mat-label>
-              <input matInput formControlName="nombre" placeholder="Nombre del Subtema">
+      <!-- Hijos: Subtemas -->
+      <div class="node-children" formArrayName="subtemas">
+
+        <!-- ── SUBTEMA ── -->
+        <div class="tree-node"
+          *ngFor="let subtema of getSubtemas(i).controls; let j = index"
+          [formGroupName]="j">
+
+          <div class="node-row subtema-row">
+            <span class="node-dot subtema-dot"></span>
+            <span class="nivel-label">Subtema</span>
+            <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
+            <mat-form-field appearance="outline" class="node-input">
+              <mat-label>Nombre del Subtema</mat-label>
+              <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
+              <mat-error *ngIf="subtema.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
             </mat-form-field>
-            <button mat-icon-button color="warn" (click)="eliminarSubtema(i, j)">
+            <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
+
         </div>
-        <div class="d-flex justify-content-end mt-2">
+
+        <div class="add-leaf-action">
           <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
-            <mat-icon>add</mat-icon>
-            Agregar Subtema
+            <mat-icon>add</mat-icon> Agregar Subtema
           </button>
         </div>
+
       </div>
-    </mat-card>
+    </div>
+
   </div>
+
 </div>

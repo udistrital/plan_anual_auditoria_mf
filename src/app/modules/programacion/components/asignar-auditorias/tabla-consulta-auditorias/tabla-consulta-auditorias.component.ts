@@ -32,6 +32,7 @@ export class TablaConsultaAuditoriasComponent {
   permiso: boolean = false;
   usuarioRol: string = "";
   planAuditoriaId: string = "";
+  banderaTabla: boolean = false;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -79,6 +80,7 @@ export class TablaConsultaAuditoriasComponent {
   ): void {
     this.auditoriasPorVigencia = [];
     this.auditoriasDataSource.data = [];
+    this.banderaTabla = false;
 
     // Primero verificar si hay PAAs aprobados
     this.verificarPAAAprobado(vigenciaId)
@@ -124,6 +126,7 @@ export class TablaConsultaAuditoriasComponent {
             this.auditoriasPorVigencia = auditorias;
             this.totalRegistros = res.MetaData.Count;
             this.auditoriasDataSource.data = this.auditoriasPorVigencia;
+            this.banderaTabla = true;
           },
           error: (error) => {
             console.error("Error al cargar auditorías:", error);

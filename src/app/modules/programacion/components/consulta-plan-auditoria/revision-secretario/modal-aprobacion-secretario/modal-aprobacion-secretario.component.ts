@@ -85,7 +85,6 @@ export class ModalAprobacionSecretarioComponent {
           this.infoModal.planAuditoriaId,
           6820
         );
-        this.aceptarPlanAuditoria();
       },
       error: (error) => {
         console.error("Error al cargar el archivo en Nuxeo", error);
@@ -111,7 +110,10 @@ export class ModalAprobacionSecretarioComponent {
         .subscribe({
           next: (response) => {
             console.log("Referencia guardada exitosamente", response);
-            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+            this.alertService.showSuccessAlert("Archivo subido exitosamente.")
+              .then(() =>
+                this.aceptarPlanAuditoria()
+              )
           },
           error: (error) => {
             console.error("Error al guardar la referencia", error);
@@ -121,43 +123,50 @@ export class ModalAprobacionSecretarioComponent {
   }
 
   aceptarPlanAuditoria(): void {
-    const planEstado = this.construirObjetoPlanEstado(
-      this.infoModal.planAuditoriaId,
-      environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
-    );
+    // 1. Generar auditorías a partir del plan aprobado
+    const generarAuditoriasDto = {
+      usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.usuarioRol,
+      observacion: "Generación automática de auditorías luego de aprobación del plan por parte del secretario técnico",
+      "estado_id_padre_actual": environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
+      "estado_id_padre_nuevo": environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
+      "estado_id_hija_nuevo": environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+      fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+    }
+    this.planAuditoriaService.post(`plan-auditoria/${this.infoModal.planAuditoriaId}/generar-auditorias`, generarAuditoriasDto)
+      .subscribe({
+        next: (response: any) => {
+          if (response && response.Status === 201) {
 
-    this.planAuditoriaService.post("estado", planEstado).subscribe({
-      next: (resp: any) => {
-        if (resp.Success) {
-          const estadoAuditorias = {
-            usuario_id: this.infoModal.usuarioId,
-            usuario_rol: this.infoModal.usuarioRol,
-            fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
-            // estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
-            estado_id: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
-          }
-          this.planAuditoriaService.put(`auditoria-gestion/${this.infoModal.planAuditoriaId}`, estadoAuditorias)
-            .subscribe({
-              next: (response: any) => {
-                if (response.Status === 200) {
+            // 2. Actualizar el estado del plan de auditoría a "Aprobado por Secretario Técnico"
+            const planEstado = this.construirObjetoPlanEstado(
+              this.infoModal.planAuditoriaId,
+              environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
+            );
+            this.planAuditoriaService.post("estado", planEstado).subscribe({
+              next: (resp: any) => {
+                if (resp.Success) {
                   this.mostrarMensajeExito();
                 } else {
-                  console.error("Error al actualizar el estado de las auditorías.");
-                  this.mostrarMensajeExito();
+                  console.error("Error al actualizar el estado del plan.");
                 }
               },
               error: (error) => {
-                this.alertService.showErrorAlert("Error al actualizar el estado de las auditorías.");
+                this.alertService.showErrorAlert("Error al actualizar el estado del plan.");
                 console.error(error);
               }
             });
+          }
+          else {
+            this.alertService.showErrorAlert("Error al generar las auditorías del plan.");
+            console.error('Generar auditorías: respuesta inesperada', response);
+          }
+        },
+        error: (error) => {
+          this.alertService.showErrorAlert("Error al generar las auditorías del plan.");
+          console.error(error);
         }
-      },
-      error: (error) => {
-        this.alertService.showErrorAlert("Error al aprobar el plan");
-        console.error(error);
-      }
-    });
+      });
   }
 
   mostrarMensajeExito(): void {

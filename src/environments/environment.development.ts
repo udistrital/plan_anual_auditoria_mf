@@ -21,6 +21,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -100,6 +101,13 @@ export const environment = {
     EN_REVISION_SECRETARIO_ID: 6793,
     APROBADO_SECRETARIO_ID: 6794,
     RECHAZADO: 6806,
+  },
+
+  AUDITORIA_PADRE_ESTADO: {
+    TIPO_PARAMETRO_ID: 160,
+    BORRADOR_ID: 7096,
+    APROBADA_PAA_ID: 7097,
+    CON_MODIFICACION_EXTEMPORANEA_ID: 7098,
   },
 
   AUDITORIA_ESTADO: {

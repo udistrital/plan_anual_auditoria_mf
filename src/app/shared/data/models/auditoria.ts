@@ -5,7 +5,7 @@ export interface Auditoria {
   tipo_evaluacion_id: number;
   cronograma_id: number[];
   estado_id: number;
-  no_auditoria: number;
+  consecutivo_no_auditoria: number;
   vigencia_id: number;
   consecutivo_OCI: string;
   consecutivo_IE: string;
@@ -22,7 +22,7 @@ export interface Auditoria {
   rec_tecnologico: string;
   rec_humano: string;
   rec_fisico: string;
-  temas: string
+  tema: string
   activo: boolean;
   fecha_creacion: string;
   fecha_modificacion: string;

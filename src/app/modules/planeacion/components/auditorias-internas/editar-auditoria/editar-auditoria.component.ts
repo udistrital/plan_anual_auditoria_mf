@@ -181,7 +181,7 @@ export class EditarAuditoriaComponent implements OnInit {
       criterio: informacion.criterios,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
-      no_auditoria: informacion.no_auditoria,
+      consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
       objetivo: informacion.objetivo_auditoria,
       correo_complementario: informacion.correo_complementario,
     };
@@ -290,7 +290,7 @@ export class EditarAuditoriaComponent implements OnInit {
 
   cargarFormulariosConAuditoria() {
     this.formularioInformacionComponent.form.patchValue({
-      no_auditoria: this.auditoria.no_auditoria,
+      consecutivo_no_auditoria: this.auditoria.consecutivo_no_auditoria,
       consecutivo_OCI: this.auditoria.consecutivo_OCI,
       consecutivo_IE: this.auditoria.consecutivo_IE,
       macroproceso: this.auditoria.macroproceso_nombre,
@@ -316,7 +316,7 @@ export class EditarAuditoriaComponent implements OnInit {
     });
 
     this.formularioTemasComponent.form.patchValue({
-      temas: this.auditoria.temas,
+      tema: this.auditoria.tema,
     });
   }
 

@@ -1,3 +1,10 @@
+<!-- ← Botón de descarga de plantilla de cargue masivo -->
+<div class="mb-3">
+  <button mat-raised-button color="primary" (click)="descargarPlantilla()">
+    <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
+  </button>
+</div>
+
 <h3 class="mt-5 mb-3">Lista de actividades</h3>
 <div class="tabla-container">
   <table mat-table [dataSource]="datos">

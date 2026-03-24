@@ -230,7 +230,7 @@ export class CargarArchivoComponent {
               usuario_id: this.data.usuario_id,
               usuario_rol: this.data.usuario_rol,
               fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
-              estado_id: environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+              estado_id: environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
             },
             type_upload: "auditorias",
           };
