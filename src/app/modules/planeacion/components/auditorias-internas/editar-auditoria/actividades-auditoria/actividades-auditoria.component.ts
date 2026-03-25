@@ -55,6 +55,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
   private parsearFechaLocal(fechaISO: string): string {
     if (!fechaISO) return '';
     return new Date(fechaISO.substring(0, 10) + "T00:00:00").toLocaleDateString();
+  }
   // Descarga la plantilla de cargue masivo de actividades desde el gestor documental.
   async descargarPlantilla(): Promise<void> {
     try {
