@@ -1,3 +1,5 @@
+import { tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
+
 export const seguimientosConstructorTabla = [
   {
     columnDef: "numero",
@@ -14,7 +16,7 @@ export const seguimientosConstructorTabla = [
   {
     columnDef: "auditoria",
     header: "Auditoría",
-    cell: (seguimiento: any) => seguimiento.titulo || seguimiento.auditoria_nombre,
+    cell: (seguimiento: any) => tituloYSubtituloAuditoria(seguimiento),
     sortable: true,
   },
   {
