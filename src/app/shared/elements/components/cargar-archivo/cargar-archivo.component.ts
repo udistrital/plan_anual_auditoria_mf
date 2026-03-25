@@ -177,7 +177,6 @@ export class CargarArchivoComponent {
       this.nuxeoService.guardarArchivos([archivoConDatos]).subscribe({
         next: (response) => {
           console.log("Archivo subido a Nuxeo", response);
-          this.dialogRef.close();
           resolve(response[0]);
         },
         error: (error) => {
@@ -212,9 +211,11 @@ export class CargarArchivoComponent {
                 "Archivo subido exitosamente."
               );
             }
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error("Error al guardar la referencia", error);
+            this.dialogRef.close(false);
           },
         });
     }

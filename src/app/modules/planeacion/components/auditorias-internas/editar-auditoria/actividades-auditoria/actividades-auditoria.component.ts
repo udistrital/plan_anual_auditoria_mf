@@ -18,34 +18,13 @@ import { environment } from "src/environments/environment";
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: String;
   datos: any;
-  
-  /*datos = [
-    {
-      actividad: "Título de la actividad 1",
-      fechaInicio: "2024-01-01",
-      fechaFin: "2024-01-10",
-      ref: "Ref 1",
-      descripcion: "Descripción 1",
-      folios: "10",
-      medio: "Digital",
-      carpeta: "Carpeta A",
-    },
-    {
-      actividad: "Título de la actividad 2",
-      fechaInicio: "2024-02-01",
-      fechaFin: "2024-02-05",
-      ref: "Ref 2",
-      descripcion: "Descripción 2",
-      folios: "15",
-      medio: "Físico",
-      carpeta: "Carpeta B",
-    },
-  ];*/
+
   columnsToDisplay: string[] = [
     "no",
     "actividad",
     "fechaInicio",
     "fechaFin",
+    "observaciones",
     "acciones",
   ];
 
@@ -102,6 +81,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
             "Actualmente no hay actividades registradas para la vigencia seleccionada."
           );
         }
+
         //console.log("ACTB", actividades)
         this.datos = actividades.map((item) => ({
           id: item._id,
@@ -109,22 +89,28 @@ export class ActividadesAuditoriaComponent implements OnInit {
           fechaInicio: new Date(item.fecha_inicio).toLocaleDateString(),
           fechaFin: new Date(item.fecha_fin).toLocaleDateString(),
           observaciones: item.observacion,
+          //ref: item.referencia,
+          //descripcion: item.descripcion,
+          //folios: item.folio?.toString() || "",
+          //medio: item.medio_id || "",  
+          //carpeta: item.carpeta || ""
         }));
       });
   }
+
   eliminarActividad(actividad: any) {
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
-            .delete(`actividad`, actividad) 
+            .delete(`actividad`, actividad)
             .subscribe(
               (response) => {
                 if (response) {
                   this.alertaService.showSuccessAlert("Registro eliminado");
                   this.datos = this.datos.filter(
-                    (e:any) => e.id !== actividad.id
+                    (e: any) => e.id !== actividad.id
                   );
                 } else {
                   this.alertaService.showErrorAlert(
@@ -144,14 +130,19 @@ export class ActividadesAuditoriaComponent implements OnInit {
         this.alertaService.showErrorAlert("Error al eliminar el registro");
       });
   }
-  editarActividad(actividad: Actividad){
-    
+
+  editarActividad(actividad: Actividad) {
     const dialogRef = this.dialog.open(EditarActividadComponent, {
-      width: '1100px', 
-      data: { 
-        actividad: actividad, 
-        idAuditoria: this.idAuditoria, 
-      } 
+      width: '1100px',
+      data: {
+        actividad: actividad,
+        idAuditoria: this.idAuditoria,
+      }
+    });
+
+    // Refresca la lista tras editar una actividad.
+    dialogRef.afterClosed().subscribe(() => {
+      this.listaractividades();
     });
   }
 }
