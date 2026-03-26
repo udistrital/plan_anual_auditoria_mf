@@ -36,6 +36,19 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "none", 
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -48,7 +61,7 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "none"
+              "deployUrl": "https://plananualauditoria.portaloas.udistrital.edu.co/"
             },
             "development": {
               "buildOptimizer": true,
