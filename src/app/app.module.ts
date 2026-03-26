@@ -2,7 +2,7 @@ import { NgModule } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import { provideHttpClient, withInterceptors, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
+import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from "@angular/common/http";
 import { SpinnerInterceptor } from "./core/intercerptors/spinner.interceptor";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
