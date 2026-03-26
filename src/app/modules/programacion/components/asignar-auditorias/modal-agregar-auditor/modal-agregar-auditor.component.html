@@ -11,22 +11,33 @@
       <div class="row">
         <form [formGroup]="form">
           <div class="row mt-2">
-            <div class="col-12 col-md-6 col-xl-4">
+            <div class="col-12 col-md-12 col-xl-8">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Auditoría</b>
               </div>
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Nombre de Auditoría</mat-label>
-                <mat-icon matPrefix color="primary">developer_board</mat-icon>
-                <input
-                  matInput
-                  placeholder="Título de la Auditoría"
-                  formControlName="tituloAuditoria"
-                  readonly
-                />
-              </mat-form-field>
+              <div class="row">
+                <mat-form-field class="col-6" appearance="outline">
+                  <mat-label>Nombre de Auditoría</mat-label>
+                  <mat-icon matPrefix color="primary">developer_board</mat-icon>
+                  <input
+                    matInput
+                    placeholder="Título de la Auditoría"
+                    formControlName="tituloAuditoria"
+                    readonly
+                  />
+                </mat-form-field>
+                <mat-form-field class="col-6" appearance="outline">
+                  <mat-label>Nombre complementario</mat-label>
+                  <mat-icon matPrefix color="primary">developer_board</mat-icon>
+                  <input
+                    matInput
+                    placeholder="Subtítulo de la Auditoría"
+                    formControlName="subtituloAuditoria"
+                  />
+                </mat-form-field>
+              </div>
             </div>
-            <div class="col-12 col-md-6 col-xl-4">
+            <div class="col-12 col-md-12 col-xl-4">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Tipo de evaluación</b>
               </div>
@@ -41,7 +52,7 @@
                 />
               </mat-form-field>
             </div>
-            <div class="col-12 col-md-6 col-xl-4">
+            <div class="col-12 col-md-12 col-xl-12">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Cronograma de actividades</b>
               </div>

@@ -1,3 +1,5 @@
+import { tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
+
 export const colocacionesContructorTabla = [
   {
     columnDef: "numero",
@@ -8,7 +10,7 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "auditoria",
     header: "Auditoria",
-    cell: (auditoria: any) => auditoria.titulo,
+    cell: (auditoria: any) => tituloYSubtituloAuditoria(auditoria),
     sortable: true,
   },
   {
