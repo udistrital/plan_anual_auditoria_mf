@@ -58,7 +58,7 @@ steps:
 #     - unitest
 
 - name: nodejs_develop
-  image: node:current-alpine
+  image: node:20.14-alpine
   commands:
   - node --version
   - npm i
@@ -70,7 +70,7 @@ steps:
     - push     
 
 - name: nodejs_release
-  image: node:current-alpine
+  image: node:20.14-alpine
   commands:
   - node --version
   - npm i
@@ -82,7 +82,7 @@ steps:
     - push
    
 - name: nodejs_master
-  image: node:current-alpine
+  image: node:20.14-alpine
   commands:
   - node --version
   - npm i
