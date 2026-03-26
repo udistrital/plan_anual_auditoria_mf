@@ -49,6 +49,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   ordenSeleccionado: string = '';
   mostrarOrdenamiento: boolean = false;
   estadoIdActual: number | null = null;
+
   title: string = "";
   breadcrumb: string = "";
   usuario_id: number | null = null;
@@ -494,6 +495,27 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "80%",
       height: "80vh",
     });
+  }
+
+  eliminarAuditorias(): void {
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de eliminar todas las auditorías del PAA? Esta acción no se puede deshacer.")
+      .then((result) => {
+        if (result.isConfirmed) {
+          // TODO: Reemplazar con endpoint real
+          this.planAnualAuditoriaService
+            .delete(`auditoria-gestion/${this.id}`, { id: 'auditoria-padre-borrador' })
+            .subscribe(
+              () => {
+                this.alertaService.showSuccessAlert("Auditorías eliminadas exitosamente");
+                this.dataSource.data = [];
+              },
+              (error) => {
+                this.alertaService.showErrorAlert("Error al eliminar las auditorías");
+              }
+            );
+        }
+      });
   }
 
 }

@@ -44,6 +44,16 @@
             >
               <mat-icon>file_download</mat-icon> Exportar tabla
             </button>
+            <button
+              class="mx-2 mt-2"
+              *ngIf="modoEditar"
+              mat-stroked-button
+              color="primary"
+              style="border: 1px solid var(--md-primary-500) !important"
+              (click)="eliminarAuditorias()"
+            >
+              <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
+            </button>
           </div>
         </div>
       </div>
@@ -192,6 +202,16 @@
             (click)="exportarTabla()"
           >
             <mat-icon>file_download</mat-icon> Exportar tabla
+          </button>
+          <button
+            *ngIf="modoEditar"
+            class="mx-2"
+            mat-stroked-button
+            color="primary"
+            style="border: 1px solid var(--md-primary-500)"
+            (click)="eliminarAuditorias()"
+          >
+            <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
           </button>
         </div>
         <ng-template #botonesAcciones>

@@ -26,7 +26,6 @@ export class PlanAnualAuditoriaService {
 
   delete(endpoint: string, element: any) {
     this.requestManager.setPath("PLAN_ANUAL_AUDITORIA_SERVICE");
-    console.log("id ",element.id )
     return this.requestManager.delete(endpoint, element.id);
   }
 
