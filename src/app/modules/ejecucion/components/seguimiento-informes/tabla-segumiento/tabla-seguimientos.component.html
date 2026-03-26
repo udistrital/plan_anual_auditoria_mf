@@ -1,15 +1,15 @@
-<ng-container *ngIf="banderaTablaSeguimientos">
+<ng-container *ngIf="banderaTablaAuditorias">
   <div class="row mt-4">
     <div class="col-12">
-      <h3 class="my-3">Lista de seguimientos</h3>
+      <h3 class="my-3">Lista de auditorías</h3>
       <p class="mb-2 mx-2">
-        Seleccione la auditoría de seguimiento o informe a realizar revisión y/o evaluación.
+        Seleccione la auditoría para realizar revisión y/o evaluación del informe.
       </p>
     </div>
     <div class="col-12">
       <div class="table-container rounded-table table-scroll">
-        <table mat-table [dataSource]="seguimientosDataSource" matSort>
-          <ng-container *ngFor="let columna of seguimientosConstructorTabla" [matColumnDef]="columna.columnDef">
+        <table mat-table [dataSource]="auditoriasDataSource" matSort>
+          <ng-container *ngFor="let columna of constructorTablaAuditorias" [matColumnDef]="columna.columnDef">
             <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!columna.sortable">
               <b>{{ columna.header }}</b>
             </th>

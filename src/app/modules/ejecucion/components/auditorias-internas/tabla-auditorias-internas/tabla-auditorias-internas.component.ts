@@ -1,10 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  Input,
-  OnInit,
-  ViewChild,
-} from "@angular/core";
+import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
@@ -64,7 +58,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     private referenciaPdfService: ReferenciaPdfService,
     private router: Router,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   async ngOnInit() {
     this.roles = this.rolService.getRoles();
@@ -98,13 +92,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     // ADMIN, AUDITOR_EXPERTO, JEFE → tipoConsulta = 'general' (default)
   }
 
-  listarAuditoriasPorVigencia(
-    vigenciaId: number,
-    limit: number = this.itemsPerPage[0],
-    offset: number = 0
-  ) {
+  listarAuditoriasPorVigencia(vigenciaId: number, limit: number = this.itemsPerPage[0], offset: number = 0) {
     this.auditoriasPorVigencia = [];
-    const queryBase = `query=vigencia_id:${vigenciaId},activo:true,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}&limit=${limit}&offset=${offset}`;
+    const queryBase = `query=vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID},estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}&limit=${limit}&offset=${offset}`;
     let url: string;
     switch (this.tipoConsulta) {
       case 'auditado':
@@ -122,7 +112,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .get(url)
       .subscribe((res) => {
         const auditorias: any[] = res.Data.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_id;
+          const estadoId = auditoria.estado?.estado_id || auditoria.estado_id;
           const acciones = this.getAccionesPorRolYEstado(estadoId);
           return { ...auditoria, acciones };
         });
@@ -180,9 +170,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
-      new Set(
-        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || [])
-      )
+      new Set(this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || []))
     );
   }
 
@@ -193,7 +181,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
       "Editar Preinforme": () => this.editarPreinforme(auditoria),
-      "Editar informe": () => this.editarInforme(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
       "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
@@ -209,25 +196,55 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   editarPreinforme(auditoria: Auditoria) {
-    console.log("Editar Preinforme", auditoria);
-    const auditoriaId = auditoria._id;
-    this.router.navigate([
-      `/ejecucion/auditorias-internas/editar-informe/${auditoriaId}`, // TODO: Se deberia pasar auditoriaId o informeId?
-    ]);
+    this.obtenerOCrearInforme(auditoria._id, (informeId) => {
+      this.router.navigate([`/ejecucion/auditorias-internas/editar-informe/${informeId}`]);
+    });
   }
 
-  editarInforme(auditoria: Auditoria) {
-    const auditoriaId = auditoria._id;
-    this.router.navigate([
-      `/ejecucion/auditorias-internas/editar-informe/${auditoriaId}`, // TODO: Se deberia pasar auditoriaId o informeId?
+  private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
+      next: (res: any) => {
+        if (res.Data && res.Data.length > 0) {
+          onInformeId(res.Data[0]._id);
+        } else {
+          this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({
+            next: (informeCreado: any) => {
+              this.crearEstadoCreandoPreinforme(auditoriaId, informeCreado.Data._id, onInformeId);
+            },
+            error: () => this.alertaService.showErrorAlert('Error al crear el informe.')
+          });
+        }
+      },
+      error: () => this.alertaService.showErrorAlert('Error al buscar el informe.')
+    });
+  }
+
+  private async crearEstadoCreandoPreinforme(auditoriaId: string, informeId: string, onDone: (informeId: string) => void) {
+    const usuarioId = await this.userService.getPersonaId();
+    const role = this.rolService.getRolPrioritario([
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
     ]);
+    this.planAuditoriaService.post('auditoria-estado', {
+      auditoria_id: auditoriaId,
+      fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+      estado_id: environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME,
+      usuario_id: usuarioId,
+      usuario_rol: role,
+      observacion: "",
+    }).subscribe({
+      next: () => onDone(informeId),
+      error: () => {
+        this.alertaService.showErrorAlert('Error al registrar el estado del informe.');
+        onDone(informeId);
+      }
+    });
   }
 
   verDocumentosInforme(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
-    this.router.navigate([
-      `/ejecucion/auditorias-internas/revision/${auditoriaId}`,
-    ]);
+    this.router.navigate([`/ejecucion/auditorias-internas/revision/${auditoriaId}`]);
   }
 
   enviarAprobacionPorJefe(auditoria: Auditoria) {

@@ -28,6 +28,7 @@ export class CrearActividadComponent {
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
+      observacion: actividadData.observaciones
     };
 
     this.alertaService

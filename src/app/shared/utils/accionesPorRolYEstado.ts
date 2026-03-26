@@ -111,6 +111,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Revisar Auditoría",
+      "Iniciar Ejecución",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -130,6 +131,7 @@ export const accionesPlaneacion: {
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Revisar Auditoría",
+      "Iniciar Ejecución",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Revisar Auditoría",
@@ -275,43 +277,36 @@ export const accionesEjecucionPreliminar: {
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
@@ -320,43 +315,36 @@ export const accionesEjecucionPreliminar: {
   [environment.ROL.JEFE]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
@@ -365,44 +353,37 @@ export const accionesEjecucionPreliminar: {
   [environment.ROL.AUDITOR_EXPERTO]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
@@ -412,43 +393,36 @@ export const accionesEjecucionPreliminar: {
   [environment.ROL.AUDITOR]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
@@ -457,43 +431,36 @@ export const accionesEjecucionPreliminar: {
   [environment.ROL.AUDITOR_ASISTENTE]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
-      "Editar informe",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
@@ -575,6 +542,11 @@ export const accionesEjecucionFinal: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   [environment.ROL.ADMIN]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Informe",
+      "Ver Documentos del informe",
+      "Enviar a Aprobación por Jefe",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
       "Editar Informe",
       "Ver Documentos del informe",

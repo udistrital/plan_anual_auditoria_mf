@@ -19,10 +19,12 @@ import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatListModule } from "@angular/material/list";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
+import { MatExpansionModule } from "@angular/material/expansion";
 
 @NgModule({
   exports: [
     MatAutocompleteModule,
+    MatExpansionModule,
     MatButtonModule,
     MatCardModule,
     MatCheckboxModule,

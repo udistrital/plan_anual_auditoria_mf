@@ -21,6 +21,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -128,8 +129,9 @@ export const environment = {
       APROBADO_PROGRAMA_AUDITADO: 7068,
     },
     EJECUCION: {
+      POR_EJECUTAR: 7069,
+      
       // INFORME PRELIMINAR
-      POR_EJECUTAR: 7068, //7069
       CREANDO_PREINFORME: 7070,
       REVISION_PREINFORME_JEFE: 7071,
       APROBADO_PREINFORME_JEFE: 7072,

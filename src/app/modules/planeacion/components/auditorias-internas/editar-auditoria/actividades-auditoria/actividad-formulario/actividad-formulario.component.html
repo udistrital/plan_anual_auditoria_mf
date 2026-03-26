@@ -21,7 +21,7 @@
                 </mat-error>
               </mat-form-field>
             </div>
-  
+
             <!-- Campo: Fecha Inicio -->
             <div class="col-12 col-md-6 col-xl-4">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
@@ -46,7 +46,7 @@
                 </mat-error>
               </mat-form-field>
             </div>
-  
+
             <!-- Campo: Fecha Fin -->
             <div class="col-12 col-md-6 col-xl-4">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
@@ -60,19 +60,43 @@
                   [matDatepicker]="pickerFin"
                   placeholder="Seleccione una fecha"
                   formControlName="fechaFin"
+                  [min]="fechaMinFin"
                 />
                 <mat-datepicker-toggle
                   matSuffix
                   [for]="pickerFin"
+                  [disabled]="form.get('fechaFin')?.disabled"
                 ></mat-datepicker-toggle>
                 <mat-datepicker #pickerFin></mat-datepicker>
+                <mat-hint *ngIf="form.get('fechaFin')?.disabled">
+                  Primero seleccione una fecha de inicio
+                </mat-hint>
                 <mat-error *ngIf="form.get('fechaFin')?.hasError('required')">
                   La fecha de fin es requerida
                 </mat-error>
+                <mat-error *ngIf="form.get('fechaFin')?.hasError('matDatepickerMin')">
+                  La fecha de fin no puede ser anterior a la fecha de inicio
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Campo: Observaciones -->
+            <div class="col-12 col-md-6 col-xl-12">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Observaciones</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Observaciones</mat-label>
+                <mat-icon matPrefix color="primary">description</mat-icon>
+                <textarea
+                  matInput
+                  cols="5"
+                  placeholder="Observaciones de la actividad"
+                  formControlName="observaciones"></textarea>
               </mat-form-field>
             </div>
           </div>
-  
+
           <!-- Botones de acción -->
           <div class="d-flex justify-content-center align-items-center my-4">
             <mat-icon color="primary">info</mat-icon>
