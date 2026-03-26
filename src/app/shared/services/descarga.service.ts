@@ -1,6 +1,6 @@
 // src/app/services/descarga.service.ts
 import { Injectable } from '@angular/core';
-import * as JSZip from 'jszip'; 
+import JSZip from 'jszip';
 import { saveAs } from 'file-saver'; 
 import { environment } from "src/environments/environment";
 import base64ToArrayBuffer from '../utils/base64ToArrayBuffer';
