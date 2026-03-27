@@ -48,7 +48,8 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "none"
+              "outputHashing": "none",
+              "deployUrl": "https://plananualauditoria.portaloas.udistrital.edu.co/"
             },
             "development": {
               "buildOptimizer": true,
