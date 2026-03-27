@@ -38,6 +38,7 @@
     "single-spa": ">=4.0.0",
     "single-spa-angular": "^9.1.2",
     "sweetalert2": "^11.12.4",
+    "tar": "^7.5.13",
     "tslib": "^2.8.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz",
     "zone.js": "~0.14.10"
