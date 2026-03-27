@@ -3,7 +3,6 @@
     [titulo]="'Ver PAA'"
     [descripcion]="data.actualizado ? 'Plan Anual de Auditoria actualizado' : 'Plan Anual de Auditoria'"
     [contenido]="contenidoDeModal"
-    [footer]="footerDeModal"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
@@ -21,9 +20,4 @@
           </div>
       </div>
   </div>
-</ng-template>
-<ng-template #footerDeModal>
-  <button mat-raised-button color="primary" (click)="guardarPdf()">
-    Guardar
-  </button>
 </ng-template>

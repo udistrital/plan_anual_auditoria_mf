@@ -10,10 +10,8 @@ import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 
 //servicios
-import { NuxeoService } from "src/app/core/services/nuxeo.service";
-import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
-import { AlertService } from "src/app/shared/services/alert.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
   selector: "app-modal-pdf-visualizador",
@@ -30,9 +28,7 @@ export class ModalPdfVisualizadorComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string, vigenciaNombre: string, actualizado: boolean },
-    private nuxeoService: NuxeoService,
     private alertService: AlertService,
-    private referenciaPdfService: ReferenciaPdfService,
     private descargaService: DescargaService,
   ) { }
 
@@ -64,67 +60,6 @@ export class ModalPdfVisualizadorComponent implements OnInit {
       bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes.buffer;
-  }
-
-  guardarPdf() {
-    this.alertService.showConfirmAlert(
-      `¿Está seguro(a) de guardar el documento del Plan Anual de Auditorías ${this.data.actualizado ? "actualizado" : ""}?`,
-      "Guardar documento"
-    ).then((confirm) => {
-      if (confirm.isConfirmed) {
-        if (this.base64 !== "") {
-          const payload = {
-            IdTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-            nombre: this.data.id,
-            descripcion: "Documento pdf, auditorias de plan de auditoria",
-            metadatos: {},
-            file: this.base64,
-          };
-    
-          this.nuxeoService.guardarArchivos([payload]).subscribe({
-            next: (response: any) => {
-              const documento = response[0];
-              this.guardarReferencia(
-                documento,
-                "Plan Auditoria",
-                this.data.id,
-                this.data.actualizado ? 
-                environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO :
-                environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
-              );
-            },
-            error: (error) => {
-              console.error("Error al subir el documento", error);
-            },
-          });
-        }
-      }
-    });
-  }
-
-  guardarReferencia(
-    nuxeoResponse: any,
-    referencia_tipo: string,
-    referencia_id: string,
-    tipo_id: number
-  ): void {
-    if (nuxeoResponse.res.Enlace) {
-      this.referenciaPdfService
-        .guardarReferencia(
-          nuxeoResponse.res,
-          referencia_tipo,
-          referencia_id,
-          tipo_id
-        )
-        .subscribe({
-          next: (response) => {
-            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
-          },
-          error: (error) => {
-            console.error("Error al guardar la referencia", error);
-          },
-        });
-    }
   }
 
   async descargarPDF(): Promise<void> {
