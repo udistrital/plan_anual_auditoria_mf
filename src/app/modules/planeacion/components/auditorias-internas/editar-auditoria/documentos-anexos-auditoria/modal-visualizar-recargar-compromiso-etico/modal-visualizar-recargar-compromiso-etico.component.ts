@@ -30,7 +30,7 @@ export class ModalVisualizarRecargarCompromisoEticoComponent {
     }
   }
 
-  actualizarDocuemnto() {
+  actualizarDocumento() {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
