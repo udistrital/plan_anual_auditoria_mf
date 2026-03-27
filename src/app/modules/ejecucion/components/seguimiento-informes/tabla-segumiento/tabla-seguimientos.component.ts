@@ -165,7 +165,7 @@ export class TablaSeguimientosComponent implements OnInit {
   abrirHistorialRechazos(auditoria: any) {
     this.dialog.open(ModalHistorialRechazosSeguimientoComponent, {
       data: { auditoriaId: auditoria._id },
-      width: "40%",
+      width: "1000px",
     });
   }
 
