@@ -41,9 +41,10 @@ export class ActividadesAuditoriaComponent implements OnInit {
   onStepLeave() {
     this.resetComponent();
   }
+
   ngOnInit(): void {
     this.listaractividades();
-   }
+  }
 
   subirArchivo(tipoArchivo: string): void {
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
@@ -52,6 +53,10 @@ export class ActividadesAuditoriaComponent implements OnInit {
     });
   }
 
+  private parsearFechaLocal(fechaISO: string): string {
+    if (!fechaISO) return '';
+    return new Date(fechaISO.substring(0, 10) + "T00:00:00").toLocaleDateString();
+  }
   // Descarga la plantilla de cargue masivo de actividades desde el gestor documental.
   async descargarPlantilla(): Promise<void> {
     try {
@@ -82,13 +87,12 @@ export class ActividadesAuditoriaComponent implements OnInit {
           );
         }
 
-        //console.log("ACTB", actividades)
         this.datos = actividades.map((item) => ({
           id: item._id,
           actividad: item.titulo,
-          fechaInicio: new Date(item.fecha_inicio).toLocaleDateString(),
-          fechaFin: new Date(item.fecha_fin).toLocaleDateString(),
-          observaciones: item.observacion,
+          fechaInicio: this.parsearFechaLocal(item.fecha_inicio),
+          fechaFin: this.parsearFechaLocal(item.fecha_fin),
+          observaciones: item.observacion
           //ref: item.referencia,
           //descripcion: item.descripcion,
           //folios: item.folio?.toString() || "",
