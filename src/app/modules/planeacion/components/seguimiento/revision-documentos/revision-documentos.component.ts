@@ -36,6 +36,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   docSolicitudInformacion: string = "";
   docCartaPresentacion: string = "";
   docCompromisoEstico: string = "";
+  mostrarBotones: boolean = false;
 
   constructor(
     public dialog: MatDialog,
@@ -82,6 +83,10 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
         this.estadoAuditoriaId =
           res.Data[0]?.estado_id ??
           environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID;
+
+        if (this.role) {
+          this.mostrarAcciones(this.role, this.estadoAuditoriaId);
+        }
       });
   }
 
@@ -194,14 +199,14 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     ]);
   }
 
-  mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
+  mostrarAcciones(role: string, estadoAuditoriaId: number): void {
     const condicionesVisibilidad: { [key: string]: number[] } = {
       [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
-      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE],
-      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE]
+      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]
     };
     // retorna true, si el rol coincide con el estado de revision del rol
-    return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
+    this.mostrarBotones = condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
   }
 
   cargarDocumentos() {

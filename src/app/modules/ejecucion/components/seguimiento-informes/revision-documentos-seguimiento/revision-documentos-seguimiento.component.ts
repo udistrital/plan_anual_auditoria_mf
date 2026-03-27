@@ -33,9 +33,9 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     [environment.ROL.JEFE]: {
       estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE],
       estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE,
-      preguntaAprobacion: "¿Está seguro(a) de enviar el informe final a auditado?",
-      mensajeAprobacion: "El informe fue enviado a auditado",
-      botonAprobacion: "Aprobar y Enviar a Auditado",
+      preguntaAprobacion: "¿Está seguro(a) de aprobar y enviar el informe final?",
+      mensajeAprobacion: "El informe fue aprobado y enviado",
+      botonAprobacion: "Aprobar y Enviar informe",
       botonRechazo: "Rechazar Informe",
     }
   };
