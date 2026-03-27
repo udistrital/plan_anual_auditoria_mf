@@ -29,7 +29,7 @@ export class ModalVisualizarRecargarDocumentoComponent {
       console.error("No se proporcionó un documento PDF");
     }
   }
-  actualizarDocuemnto(){
+  actualizarDocumento(){
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
