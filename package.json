@@ -55,23 +55,37 @@
     "@types/quill": "^2.0.14",
     "@types/wrap-ansi": "^8.0.2",
     "@types/xlsx": "^0.0.35",
+    "ajv": "^8.18.0",
     "angular-eslint": "21.0.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
+    "esbuild": "^0.25.0",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "picomatch": "^4.0.4",
     "prettier": "^3.8.1",
     "rollup": "^4.60.0",
+    "serialize-javascript": "^7.0.5",
     "style-loader": "^3.3.1",
+    "tar": "^7.5.11",
+    "tmp": "^0.2.4",
     "typescript": "~5.4.5",
-    "typescript-eslint": "8.46.4"
+    "typescript-eslint": "8.46.4",
+    "webpack": "^5.104.1"
   },
   "overrides": {
-    "rollup": "$rollup"
+    "ajv": "^8.18.0",
+    "esbuild": "^0.25.0",
+    "picomatch": "^4.0.4",
+    "rollup": "$rollup",
+    "serialize-javascript": "^7.0.5",
+    "tar": "^7.5.11",
+    "tmp": "^0.2.4",
+    "webpack": "^5.104.1"
   }
 }
