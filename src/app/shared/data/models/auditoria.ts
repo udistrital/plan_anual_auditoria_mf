@@ -2,6 +2,7 @@ export interface Auditoria {
   _id: string;
   plan_auditoria_id: string;
   titulo: string;
+  subtitulo: string;
   tipo_evaluacion_id: number;
   cronograma_id: number[];
   estado_id: number;
@@ -40,3 +41,7 @@ export interface Auditoria {
   correo_dependencia?: string;
   correo_complementario?: string;
 }
+
+export function tituloYSubtituloAuditoria(auditoria: Auditoria): string {
+  return auditoria.subtitulo ? `${auditoria.titulo} - ${auditoria.subtitulo}` : auditoria.titulo;
+};
