@@ -64,10 +64,20 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   async ngOnInit() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
+    await this.cargarCompromisoEtico();
+  }
+
+  /**
+   * Busca el nuxeo_enlace del compromiso ético activo y, si existe,
+   * obtiene el base64 para mostrarlo. Centraliza la carga inicial y el refresco.
+   */
+  private async cargarCompromisoEtico(): Promise<void> {
     try {
       this.idCompromisoEtico = await this.buscarCompromisoEtico();
       if (this.idCompromisoEtico !== null) {
-        this.buscarBase64(this.idCompromisoEtico);
+        await this.buscarBase64(this.idCompromisoEtico);
+      } else {
+        this.base64CompromisoEtico = null;
       }
     } catch (error) {
       console.error("Error al obtener el compromiso ético", error);
@@ -85,6 +95,13 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         cargaLambda: false,
         tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
         referencia: "Auditoria",
+      }
+    });
+
+    // Se refresca solo si el documento quedó guardado exitosamente en el backend.
+    dialogRef.afterClosed().subscribe((guardadoExitoso: boolean) => {
+      if (guardadoExitoso) {
+        this.cargarCompromisoEtico();
       }
     });
   }
@@ -114,12 +131,22 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   }
 
   verCompromisoEtico() {
-      this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
-        data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
-        width: "80%",
-        height: "80vh",
-      });
-    }
+    const dialogRef = this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
+      data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+      width: "80%",
+      height: "80vh",
+    });
+
+    dialogRef.afterClosed().subscribe((resultado: boolean | 'deleted') => {
+      if (resultado === 'deleted') {
+        this.base64CompromisoEtico = null;
+        this.idCompromisoEtico = null;
+      } else if (resultado === true) {
+        this.cargarCompromisoEtico();
+      }
+    });
+  }
+
 
   onGuardar() {
     if (this.formularioDocumentos.valid) {
