@@ -21,6 +21,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { SpinnerService } from "src/app/shared/services/spinner.service";
 import { UserService } from "src/app/core/services/user.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
 @Component({
   selector: "app-registrar-auditorias",
@@ -69,6 +70,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private rolService: RolService,
     private userService: UserService,
     private documentoUtils: DocumentoUtils,
+    private referenciaPdfService: ReferenciaPdfService,
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -336,11 +338,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
   async guardarPaa() {
     // Validar cantidades (alerta no bloqueante)
     await this.validarCantidadesAuditorias();
-
+    const mensajeConfirm = this.modoEditarExtraordinario
+      ? "¿Está seguro(a) de guardar el Plan Anual de Auditoría actualizado por edición extraordinaria?"
+      : "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?";
     this.alertaService
-      .showConfirmAlert(
-        "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?"
-      )
+      .showConfirmAlert(mensajeConfirm)
       .then((result) => {
         if (result.isConfirmed) {
           const auditoriaIds = this.dataSource.data.map(
@@ -351,23 +353,117 @@ export class RegistrarAuditoriasComponent implements OnInit {
             auditorias: auditoriaIds,
           };
 
+          // Guardar el orden de las auditorías en el plan
           this.planAnualAuditoriaService
             .put(`plan-auditoria/${this.id}`, payload)
-            .subscribe(
-              () => {
-                this.alertaService.showSuccessAlert(
-                  "El Plan Anual de Auditoría fue guardado exitosamente"
-                );
+            .subscribe({
+              next: () => {
+                // Tras guardar el orden exitosamente, se renderiza y persiste el PDF del PAA en Nuxeo
+                this.guardarPdfPaa();
               },
-              (error) => {
+              error: (error) => {
                 console.error("Error al guardar el PAA:", error);
                 this.alertaService.showErrorAlert(
                   "Hubo un error al guardar el Plan Anual de Auditoría"
                 );
-              }
-            );
+              },
+            });
         }
       });
+  }
+
+  // Renderiza el PDF del PAA desde el backend y lo sube a Nuxeo.
+  // Es invocado automáticamente por guardarPaa() tras persistir el orden.
+  private guardarPdfPaa(): void {
+    this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}?auditoria-padre=true`)
+      .subscribe({
+        next: (res) => {
+          if (res && res.Data) {
+            const base64 = res.Data;
+
+            const payload = {
+              IdTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+              nombre: this.id,
+              descripcion: "Documento pdf, auditorias de plan de auditoria",
+              metadatos: {},
+              file: base64,
+            };
+
+            // Subir el PDF renderizado a Nuxeo
+            this.nuxeoService.guardarArchivos([payload]).subscribe({
+              next: (response: any) => {
+                const documento = response[0];
+                // Determinar el tipo de documento según el modo de edición:
+                // - Edición extraordinaria → PLAN_ANUAL_AUDITORIA_ACTUALIZADO
+                // - Flujo normal           → PLAN_ANUAL_AUDITORIA_ORIGINAL
+                this.guardarReferenciaPdf(
+                  documento,
+                  "Plan Auditoria",
+                  this.id,
+                  this.modoEditarExtraordinario
+                    ? environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ACTUALIZADO
+                    : environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
+                );
+              },
+              error: (error) => {
+                console.error("Error al subir el PDF a Nuxeo:", error);
+                this.alertaService.showErrorAlert(
+                  "El orden fue guardado, pero ocurrió un error al generar el documento PDF."
+                );
+              },
+            });
+          } else {
+            this.alertaService.showErrorAlert(
+              "El orden fue guardado, pero no se pudo renderizar el documento PDF."
+            );
+          }
+        },
+        error: (error) => {
+          console.error("Error al renderizar el PDF:", error);
+          this.alertaService.showErrorAlert(
+            "El orden fue guardado, pero ocurrió un error al renderizar el documento PDF."
+          );
+        },
+      });
+  }
+
+  // Registra en el sistema la referencia del documento subido a Nuxeo.
+  // Es invocado por guardarPdfPaa() tras una subida exitosa a Nuxeo.
+  private guardarReferenciaPdf(
+    nuxeoResponse: any,
+    referenciaTipo: string,
+    referenciaId: string,
+    tipoId: number
+  ): void {
+    if (nuxeoResponse?.res?.Enlace) {
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referenciaTipo,
+          referenciaId,
+          tipoId
+        )
+        .subscribe({
+          next: () => {
+            this.alertaService.showSuccessAlert(
+              "El Plan Anual de Auditoría fue guardado exitosamente."
+            );
+          },
+          error: (error) => {
+            console.error("Error al guardar la referencia del PDF:", error);
+            this.alertaService.showErrorAlert(
+              "El orden fue guardado, pero ocurrió un error al registrar el documento PDF."
+            );
+          },
+        });
+    } else {
+      // Si Nuxeo no devuelve enlace se notifica el éxito del guardado principal
+      // y se advierte en consola para trazabilidad
+      console.warn("Nuxeo no devolvió un enlace para el documento.");
+      this.alertaService.showSuccessAlert(
+        "El Plan Anual de Auditoría fue guardado exitosamente."
+      );
+    }
   }
 
   subirArchivoCargueMasivo(): void {
@@ -506,9 +602,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
         );
     });
   }
+
   async buscarBase64(nuxeoId: string) {
     this.base64Matriz = await this.nuxeoService.obtenerPorUUID(nuxeoId);
   }
+
   verMatriz() {
     this.dialog.open(ModalVisualizarRecargarDocumentoComponent, {
       data: { base64Document: this.base64Matriz, id: this.id },
