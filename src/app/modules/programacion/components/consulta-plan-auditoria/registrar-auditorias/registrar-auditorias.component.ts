@@ -36,6 +36,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     "proceso",
     "dependencia",
     "cronograma",
+    "cantidadAuditorias",
     "estado",
     "acciones",
   ];
@@ -119,6 +120,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
             cronograma: item.cronograma ?? "Sin Cronograma",
             cronogramaId: item.cronograma_id ?? [],
             estado: item.estado_nombre ?? "Sin estado",
+            // Se mapea cantidad_auditorias con fallback a 0 según el requerimiento
             cantidadAuditorias: item.cantidad_auditorias ?? 0,
           }));
           
@@ -144,6 +146,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "proceso",
       "dependencia",
       "cronograma",
+      "cantidadAuditorias",
       "estado",
     ];
 
@@ -315,7 +318,25 @@ export class RegistrarAuditoriasComponent implements OnInit {
       );
   }
 
-  guardarPaa() {
+  private async validarCantidadesAuditorias(): Promise<boolean> {
+    const sinCantidad = this.dataSource.data.some(
+      (auditoria) => !auditoria.cantidadAuditorias || Number(auditoria.cantidadAuditorias) === 0
+    );
+
+    if (sinCantidad) {
+      await this.alertaService.showNotification(
+        "Aviso",
+        "Se encuentran algunas auditorías sin cantidad asignada"
+      );
+    }
+
+    return true;
+  }
+
+  async guardarPaa() {
+    // Validar cantidades (alerta no bloqueante)
+    await this.validarCantidadesAuditorias();
+
     this.alertaService
       .showConfirmAlert(
         "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?"
