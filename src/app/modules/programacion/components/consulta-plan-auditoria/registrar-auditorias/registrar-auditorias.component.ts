@@ -318,10 +318,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   guardarPaa() {
+    const mensajeConfirm = this.modoEditarExtraordinario
+      ? "¿Está seguro(a) de guardar el Plan Anual de Auditoría actualizado por edición extraordinaria?"
+      : "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?";
     this.alertaService
-      .showConfirmAlert(
-        "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?"
-      )
+      .showConfirmAlert(mensajeConfirm)
       .then((result) => {
         if (result.isConfirmed) {
           const auditoriaIds = this.dataSource.data.map(
