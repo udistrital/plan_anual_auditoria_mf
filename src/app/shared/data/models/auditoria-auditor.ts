@@ -2,6 +2,7 @@ export class Auditoria {
     _id!: string;
     activo!: boolean;
     titulo!: string;
+    subtitulo!: string;
     tipo_evaluacion_nombre!: string[];
     tipo_evaluacion_id!: number[];
     cronograma_nombre!: string[];
