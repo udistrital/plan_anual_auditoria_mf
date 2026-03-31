@@ -11,10 +11,14 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
+        // PLAN_ANUAL_AUDITORIA_SERVICE: 
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
   PLAN_ANUAL_AUDITORIA_SERVICE: 
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+    "http://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_MID:
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   PLAN_ANUAL_AUDITORIA_MID:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
+    "http://localhost:8081/",
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
     OIKOS_SERVICE:
@@ -108,10 +112,10 @@ export const environment = {
   },
 
   AUDITORIA_PADRE_ESTADO: {
-    TIPO_PARAMETRO_ID: 160,
     BORRADOR_ID: 7096,
     APROBADA_PAA_ID: 7097,
     CON_MODIFICACION_EXTEMPORANEA_ID: 7098,
+    ELIMINADA_ID: 7099,
   },
 
   AUDITORIA_ESTADO: {

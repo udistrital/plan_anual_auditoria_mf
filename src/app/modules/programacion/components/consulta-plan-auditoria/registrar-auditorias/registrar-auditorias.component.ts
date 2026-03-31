@@ -272,7 +272,6 @@ export class RegistrarAuditoriasComponent implements OnInit {
     }
   }
 
-  // Eliminar auditoría
   borrarAuditoria(element: Auditoria) {
     if (!element.id) {
       this.alertaService.showErrorAlert("Error: ID de auditoría no válido");
@@ -284,36 +283,33 @@ export class RegistrarAuditoriasComponent implements OnInit {
         `¿Está seguro(a) de eliminar el registro? 
         ${this.modoEditarExtraordinario ? "\nEsta auditoría se encuentra en el estado " + element.estado : ""}`
       )
-      .then(
-        (result) => {
-          if (result.isConfirmed) {
-            this.PlanAnualAuditoriaMid
-              .delete(`auditoria-padre/${element.id}`, { id: this.id })
-              .subscribe(
-                (response) => {
-                  if (response) {
-                    this.alertaService.showSuccessAlert("Registro eliminado");
-                    this.dataSource.data = this.dataSource.data.filter(
-                      (e) => e.id !== element.id
-                    );
-                  } else {
-                    this.alertaService.showErrorAlert(
-                      "Error al eliminar el registro"
-                    );
-                  }
-                },
-                (error) => {
-                  this.alertaService.showErrorAlert(
-                    "Error al eliminar el registro"
-                  );
-                }
-              );
-          }
-        },
-        (error) => {
-          this.alertaService.showErrorAlert("Error al eliminar el registro");
+      .then((result) => {
+        if (result.isConfirmed) {
+          const payload = {
+            usuario_id: this.usuario_id,
+            usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+            observacion: 'Auditoría eliminada',
+            estado_id: environment.AUDITORIA_PADRE_ESTADO.ELIMINADA_ID,
+            fase_id: null,
+          };
+
+          this.planAnualAuditoriaService
+            .deleteWithBody(`auditoria-gestion/${this.id}/auditoria/${element.id}`, payload)
+            .subscribe(
+              (response) => {
+                console.log('Respuesta del servidor:', response);
+                this.alertaService.showSuccessAlert("Registro eliminado");
+                this.dataSource.data = this.dataSource.data.filter(
+                  (e) => e.id !== element.id
+                );
+              },
+              (error) => {
+                console.error('Error al eliminar auditoría:', error);
+                this.alertaService.showErrorAlert("Error al eliminar el registro");
+              }
+            );
         }
-      );
+      });
   }
 
   guardarPaa() {
@@ -502,15 +498,24 @@ export class RegistrarAuditoriasComponent implements OnInit {
       .showConfirmAlert("¿Está seguro(a) de eliminar todas las auditorías del PAA? Esta acción no se puede deshacer.")
       .then((result) => {
         if (result.isConfirmed) {
-          // TODO: Reemplazar con endpoint real
+          const payload = {
+            usuario_id: this.usuario_id,
+            usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+            observacion: 'Eliminación masiva de auditorías',
+            estado_id: environment.AUDITORIA_PADRE_ESTADO.ELIMINADA_ID,
+            fase_id: null,
+          };
+
           this.planAnualAuditoriaService
-            .delete(`auditoria-gestion/${this.id}`, { id: 'auditoria-padre-borrador' })
+            .deleteWithBody(`auditoria-gestion/${this.id}/auditoria-padre-borrador`, payload)
             .subscribe(
-              () => {
+              (response) => {
+                console.log('Respuesta del servidor:', response);
                 this.alertaService.showSuccessAlert("Auditorías eliminadas exitosamente");
                 this.dataSource.data = [];
               },
               (error) => {
+                console.error('Error al eliminar auditorías:', error);
                 this.alertaService.showErrorAlert("Error al eliminar las auditorías");
               }
             );
