@@ -24,6 +24,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
     "actividad",
     "fechaInicio",
     "fechaFin",
+    "observaciones",
     "acciones",
   ];
 
@@ -143,6 +144,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       }
     });
 
+    // Refresca la lista tras editar una actividad.
     dialogRef.afterClosed().subscribe(() => {
       this.listaractividades();
     });

@@ -13,7 +13,7 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { MatDialog } from "@angular/material/dialog";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
-import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { Auditoria, tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -275,7 +275,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           { nombre: "Carta de representación", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION },
           { nombre: "Compromiso ético", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO },
         ],
-        titulo: `${auditoria.titulo}`,
+        titulo: `${tituloYSubtituloAuditoria(auditoria)}`,
         descripcion: `Documentos asociados a la auditoría`
       },
       autoFocus: false,
