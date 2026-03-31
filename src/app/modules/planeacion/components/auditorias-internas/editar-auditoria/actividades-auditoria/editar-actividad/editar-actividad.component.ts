@@ -1,4 +1,4 @@
-import { Component, Input, Inject } from '@angular/core';
+import { Component, Input, Inject, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ActividadFormularioComponent } from '../actividad-formulario/actividad-formulario.component'
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -10,14 +10,13 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
   templateUrl: './editar-actividad.component.html',
   styleUrl: './editar-actividad.component.css'
 })
-export class EditarActividadComponent {
+export class EditarActividadComponent implements OnInit {
   //@Input() actividadData: any = {}; 
   /*actividad = {
     nombreActividad: 'Actividad Ejemplo',
     fechaInicio: new Date('2025-01-01'),
     fechaFin: new Date('2025-01-15'),
   };*/
-  datos: any;
   actividadData: any;
   idAuditoria: string;
 
@@ -26,23 +25,23 @@ export class EditarActividadComponent {
     private dialogRef: MatDialogRef<EditarActividadComponent>,
     private alertaService: AlertService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
-
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;
-    //console.log('Actividad Data:', this.actividadData);
-    //console.log('ID Auditoria:', this.idAuditoria);
-   }
-  ngOnInit(): void {
+    console.log('Actividad Data:', this.actividadData);
+    console.log('ID Auditoria:', this.idAuditoria);
   }
+
+  ngOnInit(): void {}
+
   editarActividad(actividadData: any) {
-    //console.log('Editar actividad:', actividadData);
-    let actividadJson={
-      auditoria_id:this.idAuditoria,
-      titulo:actividadData.actividad,
-      fecha_inicio:actividadData.fechaInicio.toISOString(),
-      fecha_fin:actividadData.fechaFin.toISOString(),
-      observacion:actividadData.observaciones
+    console.log('Editar actividad:', actividadData);
+    let actividadJson = {
+      auditoria_id: this.idAuditoria,
+      titulo: actividadData.actividad,
+      fecha_inicio: actividadData.fechaInicio.toISOString(),
+      fecha_fin: actividadData.fechaFin.toISOString(),
+      observacion: actividadData.observaciones
     };
     console.log('Crear actividad json:', actividadJson);
     this.alertaService
@@ -50,12 +49,12 @@ export class EditarActividadComponent {
       .then((result) => {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
-            .put(`actividad`, actividadJson)
+            .put(`actividad/${actividadData.id}`, actividadJson)
             .subscribe(
               (response) => {
                 if (response) {
                   this.alertaService.showSuccessAlert("Registro Editado");
-                  this.datos.push(response);
+                  this.dialogRef.close(true);
                 } else {
                   this.alertaService.showErrorAlert(
                     "Error al editar el registro"
