@@ -6,6 +6,7 @@ export interface AuditoriaEspecialTablaRow extends Partial<Auditoria> {
   auditores_nombre?: string[];
   esAuditoriaConcreta: boolean;
   cantidadConcretasCargadas?: number;
+  expandido?: boolean;
   filaOculta: boolean;
 }
 

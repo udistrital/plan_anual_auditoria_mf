@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
+import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { Auditoria as AuditoriaAsignacion } from 'src/app/shared/data/models/auditoria-auditor';
 import { Auditoria as AuditoriaPadreRequest } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
@@ -39,6 +40,7 @@ export class TablaAuditoriasEspecialesComponent {
 
   constructor(
     private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private planAuditoriaService: PlanAnualAuditoriaService,
     private alertaService: AlertService,
     private dialog: MatDialog,
   ) {
@@ -99,6 +101,7 @@ export class TablaAuditoriasEspecialesComponent {
                 cantidad_auditorias: item.cantidad_auditorias || 0,
                 esAuditoriaConcreta: false,
                 filaOculta: false,
+                expandido: false,
               };
             }
           );
@@ -249,6 +252,7 @@ export class TablaAuditoriasEspecialesComponent {
     auditoriasConcretas.forEach((row) => {
       row.filaOculta = !mostrarFilas;
     });
+    auditoriaPadre.expandido = !auditoriaPadre.expandido;
   }
 
   esFilaPadre(auditoria: AuditoriaEspecialTablaRow): boolean {
@@ -256,20 +260,34 @@ export class TablaAuditoriasEspecialesComponent {
   }
 
   auditoriasConcretasVisibles(auditoriaPadre: AuditoriaEspecialTablaRow): boolean {
-    if (!auditoriaPadre._id) {
-      return false;
-    }
-
-    return this.dataSource.data.some(
-      (row) =>
-        row.esAuditoriaConcreta
-        && row.auditoria_padre_id === auditoriaPadre._id
-        && !row.filaOculta,
-    );
+    return auditoriaPadre.expandido || false;
   }
 
   numeroVisual(auditoria: AuditoriaEspecialTablaRow): string | number {
     return auditoria.numero || "";
+  }
+
+  generarUnaAuditoria(auditoriaPadre: AuditoriaEspecialTablaRow): void {
+    if (!auditoriaPadre._id) {
+      return;
+    }
+
+    this.planAuditoriaService.post(`auditoria-padre/${auditoriaPadre._id}/generar-auditoria`, {}).subscribe({
+      next: () => {
+        this.alertaService.showSuccessAlert("Auditoría generada exitosamente").then(() => {
+          const offset = this.pageIndex * this.pageSize;
+          this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
+        });
+      },
+      error: (error) => {
+        let mensajeError = "Error al generar la auditoría";
+        if (error?.error?.Data?.includes("número máximo")) {
+          mensajeError = "No se pueden generar más auditorías concretas para esta auditoría padre.";
+        }
+        console.error("Error al generar la auditoría:", error);
+        this.alertaService.showErrorAlert(mensajeError);
+      }
+    });
   }
 
   async traerAuditoriasConcretas(
