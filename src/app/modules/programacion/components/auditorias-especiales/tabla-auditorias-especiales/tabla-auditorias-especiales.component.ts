@@ -80,7 +80,7 @@ export class TablaAuditoriasEspecialesComponent {
             (item: Auditoria, index: number): AuditoriaEspecialTablaRow => {
               const auditoriaId = item._id || "";
               return {
-                numero: index + 1,
+                numero: (offset + index + 1).toString(),
                 _id: auditoriaId,
                 titulo: item.titulo || "Sin Titulo",
                 subtitulo: "",
@@ -88,7 +88,6 @@ export class TablaAuditoriasEspecialesComponent {
                 tipo_evaluacion_nombre: item.tipo_evaluacion_nombre || "Sin Asignar",
                 cronograma_id: item.cronograma_id || [],
                 cronograma_nombre: item.cronograma_nombre || [],
-                cronograma_concat: item.cronograma_nombre?.join(", ") || "Sin Cronograma",
                 macroproceso_id: item.macroproceso_id || 0,
                 proceso_id: item.proceso_id || 0,
                 dependencia_id: item.dependencia_id || 0,
@@ -132,7 +131,7 @@ export class TablaAuditoriasEspecialesComponent {
           procesoId: auditoria.proceso_id || 0,
           dependencia: auditoria.dependencia_nombre || "",
           dependenciaId: auditoria.dependencia_id || 0,
-          cronograma: auditoria.cronograma_concat || "Sin Cronograma",
+          cronograma: auditoria.cronograma_nombre?.join(", ") || "Sin Cronograma",
           cronogramaId: auditoria.cronograma_id || [],
           cantidadAuditorias: auditoria.cantidad_auditorias || 0,
           vigencia_id: auditoria.vigencia_id || this.vigenciaId || 0,
@@ -168,6 +167,102 @@ export class TablaAuditoriasEspecialesComponent {
     console.log("Enviar a auditor:", auditoria);
     this.alertaService.showErrorAlert("Funcionalidad en desarrollo");
   }
+
+  alternarAuditoriasConcretas(auditoriaPadre: AuditoriaEspecialTablaRow): void {
+    // Validar que la auditoría padre tenga un ID válido, que no sea una auditoría concreta y que
+    // está en la tabla actual para evitar errores al manipular las filas hijas (auditorías concretas).
+    if (!auditoriaPadre._id || auditoriaPadre.esAuditoriaConcreta) {
+      return;
+    }
+
+    const auditoriasActuales = [...this.dataSource.data];
+    const indicePadre = auditoriasActuales.findIndex(
+      (row) => row._id === auditoriaPadre._id && !row.esAuditoriaConcreta,
+    );
+    if (indicePadre < 0) {
+      return;
+    }
+
+    // Si no se ha definido el número de auditorías concretas cargadas,
+    // se asume que no se han cargado y se hace fetch.
+    // De lo contrario, se usa la cantidad para seleccionar las filas hijas correspondientes.
+    let auditoriasConcretas: AuditoriaEspecialTablaRow[] = [];
+    if (auditoriaPadre.cantidadConcretasCargadas == null) {
+      auditoriasConcretas = this.traerAuditoriasConcretas(auditoriaPadre);
+      auditoriasActuales.splice(indicePadre + 1, 0, ...auditoriasConcretas);
+      auditoriaPadre.cantidadConcretasCargadas = auditoriasConcretas.length;
+      this.dataSource.data = auditoriasActuales;
+    }
+    else {
+      auditoriasConcretas = auditoriasActuales.splice(
+        indicePadre + 1,
+        auditoriaPadre.cantidadConcretasCargadas,
+      );
+    }
+
+    // Alternar visibilidad de las hijas.
+    const mostrarFilas = auditoriasConcretas.every((row) => row.filaOculta);
+    auditoriasConcretas.forEach((row) => {
+      row.filaOculta = !mostrarFilas;
+    });
+  }
+
+  esFilaPadre(auditoria: AuditoriaEspecialTablaRow): boolean {
+    return !auditoria.esAuditoriaConcreta;
+  }
+
+  auditoriasConcretasVisibles(auditoriaPadre: AuditoriaEspecialTablaRow): boolean {
+    if (!auditoriaPadre._id) {
+      return false;
+    }
+
+    return this.dataSource.data.some(
+      (row) =>
+        row.esAuditoriaConcreta
+        && row.auditoria_padre_id === auditoriaPadre._id
+        && !row.filaOculta,
+    );
+  }
+
+  numeroVisual(auditoria: AuditoriaEspecialTablaRow): string | number {
+    return auditoria.numero || "";
+  }
+
+  traerAuditoriasConcretas = (
+    auditoriaPadre: AuditoriaEspecialTablaRow,
+  ): AuditoriaEspecialTablaRow[] => {
+    const padreId = auditoriaPadre._id || "padre-sin-id";
+    const numeroPadre = auditoriaPadre.numero || "0";
+
+    // TODO: Mock. Remplazar por fetch real.
+    return Array.from({ length: 5 }, (_value, index): AuditoriaEspecialTablaRow => {
+      const numeroConcreto = `${numeroPadre}.${index + 1}`;
+      return {
+        numero: numeroConcreto,
+        _id: `${padreId}-concreta-${index + 1}`,
+        auditoria_padre_id: padreId,
+        titulo: auditoriaPadre.titulo || "Sin Titulo",
+        subtitulo: `Auditoria concreta ${index + 1}`,
+        tipo_evaluacion_id: auditoriaPadre.tipo_evaluacion_id || 0,
+        tipo_evaluacion_nombre: auditoriaPadre.tipo_evaluacion_nombre || "Sin Asignar",
+        cronograma_id: auditoriaPadre.cronograma_id || [],
+        cronograma_nombre: auditoriaPadre.cronograma_nombre || [],
+        macroproceso_id: auditoriaPadre.macroproceso_id || 0,
+        macroproceso_nombre: auditoriaPadre.macroproceso_nombre || "",
+        proceso_id: auditoriaPadre.proceso_id || 0,
+        proceso_nombre: auditoriaPadre.proceso_nombre || "",
+        dependencia_id: auditoriaPadre.dependencia_id || 0,
+        dependencia_nombre: auditoriaPadre.dependencia_nombre || "",
+        estado_id: auditoriaPadre.estado_id || 0,
+        estado_nombre: auditoriaPadre.estado_nombre || "Sin estado",
+        vigencia_id: auditoriaPadre.vigencia_id || 0,
+        cantidad_auditorias: 0,
+        auditores_nombre: ["Auditor Mock 1", "Auditor Mock 2"],
+        esAuditoriaConcreta: true,
+        filaOculta: true,
+      };
+    });
+  };
 
   manejarCambioPaginado(evento: PageEvent) {
     // Actualizar el índice de página y tamaño de página

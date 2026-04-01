@@ -1,6 +1,7 @@
 export interface Auditoria {
   _id: string;
   plan_auditoria_id: string;
+  auditoria_padre_id?: string;
   titulo: string;
   subtitulo: string;
   tipo_evaluacion_id: number;

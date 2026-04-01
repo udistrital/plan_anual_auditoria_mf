@@ -22,26 +22,42 @@
               [ngClass]="{ 'even-row': i % 2 === 0 }"
             >
               <ng-container *ngIf="columna.columnDef as colDef" [ngSwitch]="colDef">
+                <div *ngSwitchCase="'expandir'">
+                  <button
+                    *ngIf="esFilaPadre(row)"
+                    mat-icon-button
+                    color="primary"
+                    class="btn-expandir"
+                    (click)="alternarAuditoriasConcretas(row)"
+                    [attr.aria-label]="auditoriasConcretasVisibles(row) ? 'Colapsar auditorías concretas' : 'Expandir auditorías concretas'"
+                  >
+                    <mat-icon>
+                      {{ auditoriasConcretasVisibles(row) ? 'expand_more' : 'chevron_right' }}
+                    </mat-icon>
+                  </button>
+                </div>
                 <div *ngSwitchCase="'numero'">
-                  <span>{{ pageIndex * pageSize + i + 1 }}</span>
+                  <span class="numero-fila">{{ numeroVisual(row) }}</span>
                 </div>
 
                 <div *ngSwitchCase="'acciones'">
-                  <button mat-icon-button [matMenuTriggerFor]="menu" color="primary">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
-                    <!-- TODO: this feature is disabled for now
-                    <button mat-menu-item (click)="enviaraAuditor(row)">
-                      <mat-icon color="primary">send</mat-icon>
-                      <span>Enviar a Auditor(a)</span>
+                  <ng-container *ngIf="esFilaPadre(row)">
+                    <button mat-icon-button [matMenuTriggerFor]="menu" color="primary">
+                      <mat-icon>more_vert</mat-icon>
                     </button>
-                    -->
-                    <button mat-menu-item (click)="editarAuditoria(row)">
-                      <mat-icon color="primary">edit</mat-icon>
-                      <span>Editar Auditoría Especial</span>
-                    </button>
-                  </mat-menu>
+                    <mat-menu #menu="matMenu">
+                      <!-- TODO: this feature is disabled for now
+                      <button mat-menu-item (click)="enviaraAuditor(row)">
+                        <mat-icon color="primary">send</mat-icon>
+                        <span>Enviar a Auditor(a)</span>
+                      </button>
+                      -->
+                      <button mat-menu-item (click)="editarAuditoria(row)">
+                        <mat-icon color="primary">edit</mat-icon>
+                        <span>Editar Auditoría Especial</span>
+                      </button>
+                    </mat-menu>
+                  </ng-container>
                 </div>
 
                 <div *ngSwitchDefault>
@@ -55,6 +71,10 @@
           <tr
             mat-row
             *matRowDef="let row; columns: tablaColumnas"
+            [ngClass]="{
+              'fila-auditoria-padre': esFilaPadre(row),
+              'fila-auditoria-concreta': row.esAuditoriaConcreta
+            }"
             [style.display]="row.filaOculta ? 'none' : ''"
           ></tr>
         </table>

@@ -1,12 +1,12 @@
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 export interface AuditoriaEspecialTablaRow extends Partial<Auditoria> {
-  numero?: number;
-  cronograma_concat?: string;
+  numero: string;
   auditores_id?: number[];
   auditores_nombre?: string[];
-  esAuditoriaConcreta?: boolean;
-  filaOculta?: boolean;
+  esAuditoriaConcreta: boolean;
+  cantidadConcretasCargadas?: number;
+  filaOculta: boolean;
 }
 
 export interface ColumnaTablaAuditoriaEspecial {
@@ -33,10 +33,16 @@ export const cronogramaAuditoriaEspecial = (
     return auditoria.cronograma_nombre.join(", ");
   }
 
-  return auditoria.cronograma_concat || "Sin Cronograma";
+  return "Sin Cronograma";
 };
 
 export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecial[] = [
+  {
+    columnDef: "expandir",
+    header: "",
+    cell: (_auditoria: AuditoriaEspecialTablaRow) => "",
+    sortable: false,
+  },
   {
     columnDef: "numero",
     header: "No.",
@@ -54,7 +60,8 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     columnDef: "tipoEvaluacion",
     header: "Tipo de evaluacion",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
-      auditoria.tipo_evaluacion_nombre || "Sin Asignar",
+      auditoria.esAuditoriaConcreta ? ""
+        : auditoria.tipo_evaluacion_nombre || "Sin Asignar",
     sortable: true,
   },
   {
