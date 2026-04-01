@@ -41,7 +41,7 @@
                 </div>
 
                 <div *ngSwitchCase="'acciones'">
-                  <ng-container *ngIf="esFilaPadre(row)">
+                  <ng-container *ngIf="esFilaPadre(row) || row.esAuditoriaConcreta">
                     <button mat-icon-button [matMenuTriggerFor]="menu" color="primary">
                       <mat-icon>more_vert</mat-icon>
                     </button>
@@ -52,9 +52,13 @@
                         <span>Enviar a Auditor(a)</span>
                       </button>
                       -->
-                      <button mat-menu-item (click)="editarAuditoria(row)">
+                      <button *ngIf="esFilaPadre(row)" mat-menu-item (click)="editarAuditoria(row)">
                         <mat-icon color="primary">edit</mat-icon>
                         <span>Editar Auditoría Especial</span>
+                      </button>
+                      <button *ngIf="row.esAuditoriaConcreta" mat-menu-item (click)="editarAuditoriaConcreta(row)">
+                        <mat-icon color="primary">edit</mat-icon>
+                        <span>Editar Auditoría Concreta</span>
                       </button>
                     </mat-menu>
                   </ng-container>

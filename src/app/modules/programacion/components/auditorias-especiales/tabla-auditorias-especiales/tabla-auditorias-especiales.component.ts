@@ -5,12 +5,15 @@ import { MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
+import { Auditoria as AuditoriaAsignacion } from 'src/app/shared/data/models/auditoria-auditor';
 import { Auditoria as AuditoriaPadreRequest } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 import { AddAuditoriaModalComponent } from "../../consulta-plan-auditoria/registrar-auditorias/add-auditoria-modal/add-auditoria-modal.component";
+import { ModalAgregarAuditorComponent } from '../../asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component';
 import {
   AuditoriaEspecialTablaRow,
   colocacionesContructorTablaEspeciales,
 } from "./tabla-auditorias-especiales.utilidades";
+import { catchError, firstValueFrom, map, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-tabla-auditorias-especiales',
@@ -168,7 +171,48 @@ export class TablaAuditoriasEspecialesComponent {
     this.alertaService.showErrorAlert("Funcionalidad en desarrollo");
   }
 
-  alternarAuditoriasConcretas(auditoriaPadre: AuditoriaEspecialTablaRow): void {
+  editarAuditoriaConcreta(auditoria?: AuditoriaEspecialTablaRow): void {
+    if (!auditoria?._id) {
+      return;
+    }
+
+    const auditoriaParaAsignacion: AuditoriaAsignacion = {
+      _id: auditoria._id,
+      activo: true,
+      titulo: auditoria.titulo || "Sin Titulo",
+      subtitulo: auditoria.subtitulo || "",
+      tipo_evaluacion_nombre: auditoria.tipo_evaluacion_nombre ? [auditoria.tipo_evaluacion_nombre] : [],
+      tipo_evaluacion_id: auditoria.tipo_evaluacion_id ? [auditoria.tipo_evaluacion_id] : [],
+      cronograma_nombre: Array.isArray(auditoria.cronograma_nombre)
+        ? auditoria.cronograma_nombre
+        : (auditoria.cronograma_nombre ? [auditoria.cronograma_nombre] : []),
+      cronograma_id: Array.isArray(auditoria.cronograma_id)
+        ? auditoria.cronograma_id
+        : (auditoria.cronograma_id ? [auditoria.cronograma_id] : []),
+      vigencia_id: auditoria.vigencia_id || this.vigenciaId || 0,
+      vigencia_nombre: "",
+      estado_nombre: auditoria.estado_nombre || "Sin estado",
+      estado_id: auditoria.estado_id || 0,
+      auditores: auditoria.auditores_id || [],
+    };
+
+    const dialogRef = this.dialog.open(ModalAgregarAuditorComponent, {
+      width: "1100px",
+      data: {
+        auditoria: auditoriaParaAsignacion,
+        usuarioRol: this.usuarioRol,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.saved || result) {
+        const offset = this.pageIndex * this.pageSize;
+        this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
+      }
+    });
+  }
+
+  async alternarAuditoriasConcretas(auditoriaPadre: AuditoriaEspecialTablaRow): Promise<void> {
     // Validar que la auditoría padre tenga un ID válido, que no sea una auditoría concreta y que
     // está en la tabla actual para evitar errores al manipular las filas hijas (auditorías concretas).
     if (!auditoriaPadre._id || auditoriaPadre.esAuditoriaConcreta) {
@@ -188,7 +232,7 @@ export class TablaAuditoriasEspecialesComponent {
     // De lo contrario, se usa la cantidad para seleccionar las filas hijas correspondientes.
     let auditoriasConcretas: AuditoriaEspecialTablaRow[] = [];
     if (auditoriaPadre.cantidadConcretasCargadas == null) {
-      auditoriasConcretas = this.traerAuditoriasConcretas(auditoriaPadre);
+      auditoriasConcretas = await this.traerAuditoriasConcretas(auditoriaPadre);
       auditoriasActuales.splice(indicePadre + 1, 0, ...auditoriasConcretas);
       auditoriaPadre.cantidadConcretasCargadas = auditoriasConcretas.length;
       this.dataSource.data = auditoriasActuales;
@@ -228,40 +272,54 @@ export class TablaAuditoriasEspecialesComponent {
     return auditoria.numero || "";
   }
 
-  traerAuditoriasConcretas = (
-    auditoriaPadre: AuditoriaEspecialTablaRow,
-  ): AuditoriaEspecialTablaRow[] => {
+  async traerAuditoriasConcretas(
+    auditoriaPadre: AuditoriaEspecialTablaRow
+  ): Promise<AuditoriaEspecialTablaRow[]> {
     const padreId = auditoriaPadre._id || "padre-sin-id";
     const numeroPadre = auditoriaPadre.numero || "0";
 
-    // TODO: Mock. Remplazar por fetch real.
-    return Array.from({ length: 5 }, (_value, index): AuditoriaEspecialTablaRow => {
-      const numeroConcreto = `${numeroPadre}.${index + 1}`;
-      return {
-        numero: numeroConcreto,
-        _id: `${padreId}-concreta-${index + 1}`,
-        auditoria_padre_id: padreId,
-        titulo: auditoriaPadre.titulo || "Sin Titulo",
-        subtitulo: `Auditoria concreta ${index + 1}`,
-        tipo_evaluacion_id: auditoriaPadre.tipo_evaluacion_id || 0,
-        tipo_evaluacion_nombre: auditoriaPadre.tipo_evaluacion_nombre || "Sin Asignar",
-        cronograma_id: auditoriaPadre.cronograma_id || [],
-        cronograma_nombre: auditoriaPadre.cronograma_nombre || [],
-        macroproceso_id: auditoriaPadre.macroproceso_id || 0,
-        macroproceso_nombre: auditoriaPadre.macroproceso_nombre || "",
-        proceso_id: auditoriaPadre.proceso_id || 0,
-        proceso_nombre: auditoriaPadre.proceso_nombre || "",
-        dependencia_id: auditoriaPadre.dependencia_id || 0,
-        dependencia_nombre: auditoriaPadre.dependencia_nombre || "",
-        estado_id: auditoriaPadre.estado_id || 0,
-        estado_nombre: auditoriaPadre.estado_nombre || "Sin estado",
-        vigencia_id: auditoriaPadre.vigencia_id || 0,
-        cantidad_auditorias: 0,
-        auditores_nombre: ["Auditor Mock 1", "Auditor Mock 2"],
-        esAuditoriaConcreta: true,
-        filaOculta: true,
-      };
-    });
+    const auditoriasConcretas = await firstValueFrom(
+      this.planAuditoriaMid.get(`auditoria?query=activo:true,auditoria_padre_id:${auditoriaPadre._id}`).pipe(
+        map((res): AuditoriaEspecialTablaRow[] => {
+          return res.Data.map(
+            (item: Auditoria, index: number): AuditoriaEspecialTablaRow => {
+              const numeroConcreto = `${numeroPadre}.${index + 1}`;
+              return {
+                numero: numeroConcreto,
+                _id: item._id || `${padreId}-concreta-${index + 1}`,
+                auditoria_padre_id: padreId,
+                titulo: item.titulo || "Sin Titulo",
+                subtitulo: item.subtitulo || "",
+                tipo_evaluacion_id: item.tipo_evaluacion_id || 0,
+                tipo_evaluacion_nombre: item.tipo_evaluacion_nombre || "Sin Asignar",
+                cronograma_id: item.cronograma_id || [],
+                cronograma_nombre: item.cronograma_nombre || [],
+                macroproceso_id: item.macroproceso_id || 0,
+                macroproceso_nombre: item.macroproceso_nombre || "",
+                proceso_id: item.proceso_id || 0,
+                proceso_nombre: item.proceso_nombre || "",
+                dependencia_id: item.dependencia_id || 0,
+                dependencia_nombre: item.dependencia_nombre || "",
+                estado_id: item.estado_id || 0,
+                estado_nombre: item.estado_nombre || "Sin estado",
+                vigencia_id: item.vigencia_id || 0,
+                esAuditoriaConcreta: true,
+                filaOculta: true,
+              };
+            }
+          )
+        }),
+        catchError((error): Observable<AuditoriaEspecialTablaRow[]> => {
+          console.error("Error al cargar las auditorías concretas:", error);
+          this.alertaService.showErrorAlert("Error al cargar las auditorías concretas");
+          return of([]);
+        })
+      )
+    );
+
+    // TODO: Traer auditores y asignarlos a auditoría concreta
+
+    return auditoriasConcretas;
   };
 
   manejarCambioPaginado(evento: PageEvent) {
