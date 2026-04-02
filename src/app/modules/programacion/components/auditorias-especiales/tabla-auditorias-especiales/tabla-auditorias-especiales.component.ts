@@ -345,6 +345,29 @@ export class TablaAuditoriasEspecialesComponent {
     return auditoriasConcretas;
   };
 
+  eliminarAuditoria(auditoria: AuditoriaEspecialTablaRow): void {
+    if (!auditoria._id) {
+      return;
+    }
+
+    this.alertaService.showConfirmAlert("¿Está seguro de eliminar esta auditoría?").then((result) => {
+      if (result.isConfirmed) {
+        this.planAuditoriaService.delete('auditoria', { id: auditoria._id } ).subscribe({
+          next: () => {
+            this.alertaService.showSuccessAlert("Auditoría eliminada exitosamente").then(() => {
+              const offset = this.pageIndex * this.pageSize;
+              this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
+            });
+          },
+          error: (error) => {
+            console.error("Error al eliminar la auditoría:", error);
+            this.alertaService.showErrorAlert("Error al eliminar la auditoría");
+          }
+        });
+      }
+    });
+  }
+
   manejarCambioPaginado(evento: PageEvent) {
     // Actualizar el índice de página y tamaño de página
     this.pageSize = evento.pageSize;

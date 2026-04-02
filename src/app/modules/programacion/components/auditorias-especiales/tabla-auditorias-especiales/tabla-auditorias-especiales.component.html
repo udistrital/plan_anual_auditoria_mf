@@ -46,24 +46,32 @@
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
-                      <!-- TODO: this feature is disabled for now
-                      <button mat-menu-item (click)="enviaraAuditor(row)">
-                        <mat-icon color="primary">send</mat-icon>
-                        <span>Enviar a Auditor(a)</span>
-                      </button>
-                      -->
-                      <button *ngIf="esFilaPadre(row)" mat-menu-item (click)="editarAuditoria(row)">
-                        <mat-icon color="primary">edit</mat-icon>
-                        <span>Editar Auditoría Especial</span>
-                      </button>
-                      <button *ngIf="esFilaPadre(row)" mat-menu-item (click)="generarUnaAuditoria(row)">
-                        <mat-icon color="primary">add</mat-icon>
-                        <span>Generar una Auditoría</span>
-                      </button>
-                      <button *ngIf="row.esAuditoriaConcreta" mat-menu-item (click)="editarAuditoriaConcreta(row)">
-                        <mat-icon color="primary">edit</mat-icon>
-                        <span>Editar Auditoría Concreta</span>
-                      </button>
+                      <ng-container *ngIf="esFilaPadre(row)">
+                        <button mat-menu-item (click)="editarAuditoria(row)">
+                          <mat-icon color="primary">edit</mat-icon>
+                          <span>Editar Auditoría Especial</span>
+                        </button>
+                        <button mat-menu-item (click)="generarUnaAuditoria(row)">
+                          <mat-icon color="primary">add</mat-icon>
+                          <span>Generar una Auditoría</span>
+                        </button>
+                      </ng-container>
+                      <ng-container *ngIf="row.esAuditoriaConcreta">
+                        <button mat-menu-item (click)="editarAuditoriaConcreta(row)">
+                          <mat-icon color="primary">edit</mat-icon>
+                          <span>Editar Auditoría Concreta</span>
+                        </button>
+                        <!-- TODO: this feature is disabled for now
+                        <button mat-menu-item (click)="enviaraAuditor(row)">
+                          <mat-icon color="primary">send</mat-icon>
+                          <span>Enviar a Auditor(a)</span>
+                        </button>
+                        -->
+                        <button mat-menu-item (click)="eliminarAuditoria(row)">
+                          <mat-icon color="primary">delete</mat-icon>
+                          <span>Eliminar Auditoría Concreta</span>
+                        </button>
+                      </ng-container>
                     </mat-menu>
                   </ng-container>
                 </div>
