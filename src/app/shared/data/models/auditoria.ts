@@ -1,3 +1,12 @@
+export interface RegistroAuditor {
+  _id: string;
+  auditor_id: number;
+  asignado_por_id: number;
+  auditor_lider: boolean;
+  auditor_nombre: string;
+  asignado_por_nombre: string;
+}
+
 export interface Auditoria {
   _id: string;
   plan_auditoria_id: string;
@@ -42,6 +51,7 @@ export interface Auditoria {
   asistente_correo?: string;
   correo_dependencia?: string;
   correo_complementario?: string;
+  auditores?: RegistroAuditor[];
 }
 
 export function tituloYSubtituloAuditoria(auditoria: Auditoria): string {

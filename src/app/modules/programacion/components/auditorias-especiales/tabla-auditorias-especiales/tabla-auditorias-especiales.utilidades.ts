@@ -10,6 +10,19 @@ export interface AuditoriaEspecialTablaRow extends Partial<Auditoria> {
   filaOculta: boolean;
 }
 
+function prepararCadenaAuditores(auditoria: AuditoriaEspecialTablaRow): string {
+  if (!auditoria?.auditores_nombre || auditoria.auditores_nombre.length === 0)
+    return "Sin Auditores";
+
+  const auditores: string[] = auditoria.auditores_nombre!.map(nombre =>
+      nombre.trim().toLowerCase().split(" ")
+        .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+        .join(" ")
+    );
+  
+  return auditores.join(", ");
+}
+
 export interface ColumnaTablaAuditoriaEspecial {
   columnDef: string;
   header: string;
@@ -69,8 +82,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     columnDef: "auditor",
     header: "Auditor(es)",
     cell: (_auditoria: AuditoriaEspecialTablaRow) =>
-      !_auditoria.esAuditoriaConcreta ? ""
-        : (_auditoria.auditores_nombre ? _auditoria.auditores_nombre.join(", ") : "Sin Auditores"),
+      !_auditoria.esAuditoriaConcreta ? "" : prepararCadenaAuditores(_auditoria),
     sortable: true,
   },
   {

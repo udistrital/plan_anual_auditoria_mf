@@ -297,8 +297,13 @@ export class TablaAuditoriasEspecialesComponent {
     const numeroPadre = auditoriaPadre.numero || "0";
 
     const auditoriasConcretas = await firstValueFrom(
-      this.planAuditoriaMid.get(`auditoria?query=activo:true,auditoria_padre_id:${auditoriaPadre._id}`).pipe(
+      this.planAuditoriaMid.get(`auditoria?query=activo:true,auditoria_padre_id:${auditoriaPadre._id}&auditores`).pipe(
         map((res): AuditoriaEspecialTablaRow[] => {
+          // Mover el auditor líder al inicio de la lista de auditores para cada auditoría concreta, si existe.
+          res.Data.forEach((auditoria: Auditoria): void => {
+            auditoria.auditores?.sort((a, b) => (b.auditor_lider ? 1 : 0) - (a.auditor_lider ? 1 : 0));
+          });
+          
           return res.Data.map(
             (item: Auditoria, index: number): AuditoriaEspecialTablaRow => {
               const numeroConcreto = `${numeroPadre}.${index + 1}`;
@@ -321,6 +326,8 @@ export class TablaAuditoriasEspecialesComponent {
                 estado_id: item.estado_id || 0,
                 estado_nombre: item.estado_nombre || "Sin estado",
                 vigencia_id: item.vigencia_id || 0,
+                auditores_id: item.auditores?.map((auditor) => auditor.auditor_id) || [],
+                auditores_nombre: item.auditores?.map((auditor) => auditor.auditor_nombre) || [],
                 esAuditoriaConcreta: true,
                 filaOculta: true,
               };
@@ -334,8 +341,6 @@ export class TablaAuditoriasEspecialesComponent {
         })
       )
     );
-
-    // TODO: Traer auditores y asignarlos a auditoría concreta
 
     return auditoriasConcretas;
   };
