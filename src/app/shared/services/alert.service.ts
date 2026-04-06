@@ -64,4 +64,17 @@ export class AlertService {
       },
     });
   }
+
+  showNotification(title: string, text: string): Promise<any> {
+    return Swal.fire({
+      icon: "info",
+      title: title,
+      text: text,
+      confirmButtonText: "Aceptar",
+      customClass: {
+        confirmButton: "alertaConfirmarBoton",
+        icon: "alertaIconoWarn",
+      },
+    });
+  }
 }
