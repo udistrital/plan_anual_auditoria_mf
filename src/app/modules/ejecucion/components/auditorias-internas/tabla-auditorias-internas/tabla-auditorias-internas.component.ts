@@ -191,7 +191,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   abrirHistorialRechazos(auditoria: Auditoria) {
     this.dialog.open(ModalHistorialRechazosComponent, {
       data: { auditoriaId: auditoria._id },
-      width: "40%",
+      width: "1000px",
     });
   }
 
