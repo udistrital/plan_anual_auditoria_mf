@@ -74,3 +74,8 @@
 .cdk-draggable:active, .cdk-drop-list-dragging:active {
   cursor: grabbing;
 }
+
+.mat-column-cantidadAuditorias {
+  text-align: center;
+  justify-content: center; /* Esto es vital para Flexbox */
+}

@@ -9,6 +9,7 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 import { ModalPdfVisualizadorComponent } from "./pdf-visualizador-modal/pdf-visualizador.component";
 import { ModalVisualizarRecargarDocumentoComponent } from "./modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
+import { ModalAuditoriasHijasComponent, AuditoriaHija } from "./modal-auditorias-hijas/modal-auditorias-hijas.component";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 import { RolService } from "src/app/core/services/rol.service";
@@ -37,6 +38,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     "proceso",
     "dependencia",
     "cronograma",
+    "cantidadAuditorias",
     "estado",
     "acciones",
   ];
@@ -122,6 +124,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
             cronograma: item.cronograma ?? "Sin Cronograma",
             cronogramaId: item.cronograma_id ?? [],
             estado: item.estado_nombre ?? "Sin estado",
+            // Se mapea cantidad_auditorias con fallback a 0 según el requerimiento
             cantidadAuditorias: item.cantidad_auditorias ?? 0,
           }));
           
@@ -147,6 +150,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       "proceso",
       "dependencia",
       "cronograma",
+      "cantidadAuditorias",
       "estado",
     ];
 
@@ -274,47 +278,96 @@ export class RegistrarAuditoriasComponent implements OnInit {
     }
   }
 
-  borrarAuditoria(element: Auditoria) {
+  private async obtenerAuditoriasHijas(auditoriaId: string, tituloPadre: string): Promise<AuditoriaHija[]> {
+    try {
+      const res = await this.PlanAnualAuditoriaMid
+        .get(`auditoria?query=activo:true,_id:${auditoriaId}&limit=0`)
+        .toPromise();
+      if (!res?.Data?.length) return [];
+      return res.Data.map((h: any) => ({
+        nombre: h.subtitulo ? `${tituloPadre} - ${h.subtitulo}` : tituloPadre,
+        estado: h.estado?.nombre ?? h.estado_nombre ?? 'Sin estado',
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  private async mostrarModalHijas(auditoriaId: string, tituloPadre: string, accion: 'editar' | 'eliminar'): Promise<boolean> {
+    const hijas = await this.obtenerAuditoriasHijas(auditoriaId, tituloPadre);
+    const ref = this.dialog.open(ModalAuditoriasHijasComponent, {
+      width: '700px',
+      data: { hijas, accion },
+    });
+    return firstValueFrom(ref.afterClosed()).then(r => !!r);
+  }
+
+  // Eliminar auditoría
+  async borrarAuditoria(element: Auditoria) {
     if (!element.id) {
       this.alertaService.showErrorAlert("Error: ID de auditoría no válido");
       return;
     }
-    
-    this.alertaService
-      .showConfirmAlert(
-        `¿Está seguro(a) de eliminar el registro? 
-        ${this.modoEditarExtraordinario ? "\nEsta auditoría se encuentra en el estado " + element.estado : ""}`
-      )
-      .then((result) => {
-        if (result.isConfirmed) {
-          const payload = {
-            usuario_id: this.usuario_id,
-            usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
-            observacion: 'Auditoría eliminada',
-            estado_id: environment.AUDITORIA_PADRE_ESTADO.ELIMINADA_ID,
-            fase_id: null,
-          };
 
-          this.planAnualAuditoriaService
-            .deleteWithBody(`auditoria-gestion/${this.id}/auditoria/${element.id}`, payload)
-            .subscribe(
-              (response) => {
-                console.log('Respuesta del servidor:', response);
-                this.alertaService.showSuccessAlert("Registro eliminado");
-                this.dataSource.data = this.dataSource.data.filter(
-                  (e) => e.id !== element.id
-                );
-              },
-              (error) => {
-                console.error('Error al eliminar auditoría:', error);
-                this.alertaService.showErrorAlert("Error al eliminar el registro");
-              }
-            );
-        }
-      });
+    if (this.modoEditarExtraordinario) {
+      const continuar = await this.mostrarModalHijas(element.id, element.auditoria, 'eliminar');
+      if (!continuar) return;
+      this.ejecutarEliminacion(element);
+      return;
+    }
+
+    this.alertaService
+      .showConfirmAlert(`¿Está seguro(a) de eliminar el registro?`)
+      .then(
+        (result) => {
+          if (result.isConfirmed) this.ejecutarEliminacion(element);
+        },
+        () => this.alertaService.showErrorAlert("Error al eliminar el registro")
+      );
   }
 
-  guardarPaa() {
+  private ejecutarEliminacion(element: Auditoria): void {
+    const payload = {
+      usuario_id: this.usuario_id,
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+      observacion: 'Auditoría eliminada',
+      estado_id: environment.AUDITORIA_PADRE_ESTADO.ELIMINADA_ID,
+      fase_id: null,
+    };
+
+    this.planAnualAuditoriaService
+      .deleteWithBody(`auditoria-gestion/${this.id}/auditoria/${element.id}`, payload)
+      .subscribe(
+        (response) => {
+          if (response) {
+            this.alertaService.showSuccessAlert("Registro eliminado");
+            this.dataSource.data = this.dataSource.data.filter((e) => e.id !== element.id);
+          } else {
+            this.alertaService.showErrorAlert("Error al eliminar el registro");
+          }
+        },
+        () => this.alertaService.showErrorAlert("Error al eliminar el registro")
+      );
+  }
+
+  private async validarCantidadesAuditorias(): Promise<boolean> {
+    const sinCantidad = this.dataSource.data.some(
+      (auditoria) => !auditoria.cantidadAuditorias || Number(auditoria.cantidadAuditorias) === 0
+    );
+
+    if (sinCantidad) {
+      await this.alertaService.showNotification(
+        "Aviso",
+        "Se encuentran algunas auditorías sin cantidad asignada"
+      );
+    }
+
+    return true;
+  }
+
+  async guardarPaa() {
+    // Validar cantidades (alerta no bloqueante)
+    await this.validarCantidadesAuditorias();
     const mensajeConfirm = this.modoEditarExtraordinario
       ? "¿Está seguro(a) de guardar el Plan Anual de Auditoría actualizado por edición extraordinaria?"
       : "¿Está seguro(a) de guardar el Plan Anual de Auditoría (PAA)?";
@@ -524,7 +577,11 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   // Editar auditoría
-  editarAuditoria(auditoria: Auditoria) {
+  async editarAuditoria(auditoria: Auditoria) {
+    if (this.modoEditarExtraordinario && auditoria.id) {
+      const continuar = await this.mostrarModalHijas(auditoria.id, auditoria.auditoria, 'editar');
+      if (!continuar) return;
+    }
     this.agregarAuditoria(auditoria);
   }
 

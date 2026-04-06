@@ -88,12 +88,16 @@
       </div>
 
       <!-- Campo tipo fecha -->
-      <mat-form-field *ngSwitchCase="'date'" appearance="outline" class="example-full-width">
+      <mat-form-field *ngSwitchCase="'date'" appearance="outline" class="col-12">
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <input matInput [matDatepicker]="picker" [formControlName]="campo.nombre" />
-        <mat-datepicker-toggle matPrefix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker [startView]="campo.parametros?.vista || 'month'"
-          [startAt]="campo.parametros?.fecha_inicio || ''"></mat-datepicker>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          [formControlName]="campo.nombre"
+          [placeholder]="campo.placeholder || 'Seleccione una fecha'"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
