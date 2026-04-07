@@ -216,7 +216,7 @@ export class EditarAuditoriaComponent implements OnInit {
       rec_tecnologico: recursos.tecnologicos,
       rec_humano: recursos.humanos,
       rec_fisico: recursos.fisicos,
-      temas: this.formularioTemasComponent.form.value.temas,
+      tema: this.formularioTemasComponent.form.value.tema,
     };
 
     this.planAuditoriaService
