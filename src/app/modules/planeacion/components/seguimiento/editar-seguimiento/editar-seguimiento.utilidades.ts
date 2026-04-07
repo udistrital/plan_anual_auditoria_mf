@@ -22,7 +22,7 @@ export const formularioInformacionAuditoria: Formulario = {
       deshabilitado: false,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
-    {
+    /*{
       nombre: "consecutivo_IE",
       etiqueta: "Consecutivo IE",
       icono: "bookmark_border",
@@ -33,7 +33,7 @@ export const formularioInformacionAuditoria: Formulario = {
       ],
       deshabilitado: false,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
+    },*/
     {
       nombre: "macroproceso",
       etiqueta: "Macroproceso",

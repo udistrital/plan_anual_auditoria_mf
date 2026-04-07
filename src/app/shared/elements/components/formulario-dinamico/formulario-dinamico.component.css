@@ -1,3 +1,10 @@
 .example-full-width {
   width: 100%;
 }
+
+::ng-deep .ql-editor-auto-expand .ql-editor {
+  min-height: 150px;
+  max-height: 500px;
+  height: auto !important;
+  overflow-y: auto;
+}
