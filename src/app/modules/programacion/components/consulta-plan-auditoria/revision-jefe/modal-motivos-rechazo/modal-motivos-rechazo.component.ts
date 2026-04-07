@@ -62,6 +62,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
     const planEstado = {
       plan_auditoria_id: this.infoModal.planAuditoriaId,
       usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.rolRemitente,
       observacion: this.formObservaciones.get("observaciones")?.value,
       estado_id: environment.PLAN_ESTADO.RECHAZADO,
     };
