@@ -52,6 +52,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   ordenSeleccionado: string = '';
   mostrarOrdenamiento: boolean = false;
   estadoIdActual: number | null = null;
+
   title: string = "";
   breadcrumb: string = "";
   usuario_id: number | null = null;
@@ -326,8 +327,16 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   private ejecutarEliminacion(element: Auditoria): void {
-    this.PlanAnualAuditoriaMid
-      .delete(`auditoria-padre/${element.id}`, { id: this.id })
+    const payload = {
+      usuario_id: this.usuario_id,
+      usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+      observacion: 'Auditoría eliminada',
+      estado_id: environment.AUDITORIA_PADRE_ESTADO.ELIMINADA_ID,
+      fase_id: null,
+    };
+
+    this.planAnualAuditoriaService
+      .deleteWithBody(`auditoria-gestion/${this.id}/auditoria/${element.id}`, payload)
       .subscribe(
         (response) => {
           if (response) {
@@ -638,6 +647,36 @@ export class RegistrarAuditoriasComponent implements OnInit {
       width: "80%",
       height: "80vh",
     });
+  }
+
+  eliminarAuditorias(): void {
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de eliminar todas las auditorías del PAA? Esta acción no se puede deshacer.")
+      .then((result) => {
+        if (result.isConfirmed) {
+          const payload = {
+            usuario_id: this.usuario_id,
+            usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
+            observacion: 'Eliminación masiva de auditorías',
+            estado_id: environment.AUDITORIA_PADRE_ESTADO.ELIMINADA_ID,
+            fase_id: null,
+          };
+
+          this.planAnualAuditoriaService
+            .deleteWithBody(`auditoria-gestion/${this.id}/auditoria-padre-borrador`, payload)
+            .subscribe(
+              (response) => {
+                console.log('Respuesta del servidor:', response);
+                this.alertaService.showSuccessAlert("Auditorías eliminadas exitosamente");
+                this.dataSource.data = [];
+              },
+              (error) => {
+                console.error('Error al eliminar auditorías:', error);
+                this.alertaService.showErrorAlert("Error al eliminar las auditorías");
+              }
+            );
+        }
+      });
   }
 
 }
