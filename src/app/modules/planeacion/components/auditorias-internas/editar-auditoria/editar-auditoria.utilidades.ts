@@ -23,7 +23,7 @@ export const formularioInformacionAuditoria: Formulario = {
       deshabilitado: false,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
-    {
+    /*{
       nombre: "consecutivo_IE",
       etiqueta: "Consecutivo IE",
       icono: "bookmark_border",
@@ -34,7 +34,7 @@ export const formularioInformacionAuditoria: Formulario = {
       ],
       deshabilitado: false,
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
+    },*/
     {
       nombre: "macroproceso",
       etiqueta: "Macroproceso",
@@ -197,11 +197,18 @@ export const formularioTemasAuditoria: Formulario = {
   campos: [
     {
       nombre: "tema",
-      etiqueta: "Temas",
-      tipo: "textarea",
+      etiqueta: "Información solicitada",
+      tipo: "quill",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      placeholder: "Escriba aquí los temas a tratar en la auditoría",
+      quillConfig: {
+        toolbar: [
+          ["bold", "italic"],
+          [{ list: "ordered" }, { list: "bullet" }]
+        ],
+      },
     }
   ]
 }

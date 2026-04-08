@@ -134,6 +134,20 @@
         </mat-error>
       </mat-form-field>
 
+        <!-- Campo tipo editor de texto enriquecido -->
+        <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand">
+          <quill-editor 
+            [formControlName]="campo.nombre"
+            [modules]="campo.quillConfig!"
+            [placeholder]="campo.placeholder || ''"
+            [ngStyle]="{ 'width': '100%'}"
+            >
+          </quill-editor>
+          <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
+            {{ campo.etiqueta }} es requerido
+          </mat-error>
+        </div>
+
       <!-- <mat-divider *ngSwitchCase="'divider'"></mat-divider>
 
         <mat-icon *ngSwitchCase="'icono'" aria-hidden="false" [aria-label]="campo.parametros?.icono" [fontIcon]="campo.parametros?.icono">
