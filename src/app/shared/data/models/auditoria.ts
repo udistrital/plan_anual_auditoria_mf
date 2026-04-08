@@ -20,8 +20,8 @@ export interface Auditoria {
   vigencia_id: number;
   consecutivo_OCI: string;
   consecutivo_IE: string;
-  macroproceso_id: number;
-  proceso_id: number;
+  macroproceso_id: number[];
+  proceso_id: number[];
   dependencia_id: number;
   jefe_nombre: number;
   asistente_nombre: number;
@@ -51,6 +51,9 @@ export interface Auditoria {
   asistente_correo?: string;
   correo_dependencia?: string;
   correo_complementario?: string;
+  cronograma?: string;
+  macroprocesos?: string;
+  procesos?: string;
   auditores?: RegistroAuditor[];
 }
 

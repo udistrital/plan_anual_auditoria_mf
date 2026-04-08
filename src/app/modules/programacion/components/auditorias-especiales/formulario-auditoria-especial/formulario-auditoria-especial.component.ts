@@ -84,8 +84,8 @@ export class FormularioAuditoriaEspecialComponent implements OnInit {
     this.form.patchValue({
       tituloAuditoria: this.data.auditoria?.auditoria || "",
       tipoEvaluacion: this.data.auditoria?.tipoEvaluacionId || [],
-      macroproceso: this.data.auditoria?.macroprocesoId || [],
-      proceso: this.data.auditoria?.procesoId || [],
+      macroproceso: this.data.auditoria?.macroprocesosId || [],
+      proceso: this.data.auditoria?.procesosId || [],
       dependencia: this.data.auditoria?.dependenciaId || [],
       cronogramaActividades: this.data.auditoria?.cronogramaId || [],
       cantidadAuditorias: this.data.auditoria?.cantidadAuditorias || [],
