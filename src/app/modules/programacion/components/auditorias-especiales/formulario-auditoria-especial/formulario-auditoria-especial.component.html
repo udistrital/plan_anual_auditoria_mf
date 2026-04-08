@@ -132,13 +132,13 @@
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Dependencia</b>
               </div>
-              <app-single-selection
+              <app-search-selection
                 label="Seleccionar"
                 icon="apartment"
                 placeholder="Dependencia auditada"
                 [parametros]="dependencias"
                 [parametroControl]="form.get('dependencia')"
-              ></app-single-selection>
+              ></app-search-selection>
             </div>
 
 
@@ -180,13 +180,13 @@
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Cantidad de Auditorías</b>
               </div>
-              <app-single-selection
+              <app-search-selection
                 label="Seleccionar"
                 icon="assignment"
                 placeholder="Seleccione la cantidad"
                 [parametros]="cantidadesAuditorias"
                 [parametroControl]="form.get('cantidadAuditorias')"
-              ></app-single-selection>
+              ></app-search-selection>
             </div>
 
 

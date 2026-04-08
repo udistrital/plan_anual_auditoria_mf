@@ -143,13 +143,13 @@
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Dependencia</b>
             </div>
-            <app-single-selection
+            <app-search-selection
               label="Dependencia"
               icon="apartment"
               placeholder="Seleccionar dependencia"
               [parametros]="dependencias"
               [parametroControl]="auditoriaForm.get('dependencia')"
-            ></app-single-selection>
+            ></app-search-selection>
           </div>
 
 
@@ -191,13 +191,13 @@
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Cantidad de Auditorías</b>
             </div>
-            <app-single-selection
+            <app-search-selection
               label="Cantidad de Auditorías"
               icon="assignment"
               placeholder="Seleccione la cantidad"
               [parametros]="cantidadesAuditorias"
               [parametroControl]="auditoriaForm.get('cantidadAuditorias')"
-            ></app-single-selection>
+            ></app-search-selection>
           </div>
 
 
