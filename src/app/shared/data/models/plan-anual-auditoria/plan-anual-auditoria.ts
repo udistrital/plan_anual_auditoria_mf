@@ -15,8 +15,8 @@ export class Auditoria {
     macroprocesosId!: number[];
     procesos!: string;
     procesosId!: number[];
-    dependencia!: string;
-    dependenciaId!: number;
+    dependencias!: string;
+    dependenciasId!: number[];
     cronograma!: string;
     cronogramaId!: number[];
     cantidadAuditorias!: number;

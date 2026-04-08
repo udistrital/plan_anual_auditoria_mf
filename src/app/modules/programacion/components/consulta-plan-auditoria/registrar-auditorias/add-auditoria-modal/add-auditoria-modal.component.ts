@@ -63,8 +63,8 @@ export class AddAuditoriaModalComponent implements OnInit {
         this.data.auditoria?.procesosId || [],
         Validators.required,
       ],
-      dependencia: [
-        this.data.auditoria?.dependenciaId || [],
+      dependencias: [
+        this.data.auditoria?.dependenciasId || [],
         Validators.required,
       ],
       cronogramaActividades: [
@@ -236,7 +236,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
               macroproceso_id: this.auditoriaForm.value.macroprocesos,
               proceso_id: this.auditoriaForm.value.procesos,
-              dependencia_id: this.auditoriaForm.value.dependencia?.Id || this.auditoriaForm.value.dependencia,
+              dependencia_id: this.auditoriaForm.value.dependencias,
               cantidad_auditorias: this.auditoriaForm.value.cantidadAuditorias,
               cronograma_id: cronogramaIds,
               vigencia_id: this.data.vigenciaId

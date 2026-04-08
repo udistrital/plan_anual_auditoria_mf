@@ -22,7 +22,7 @@ export interface Auditoria {
   consecutivo_IE: string;
   macroproceso_id: number[];
   proceso_id: number[];
-  dependencia_id: number;
+  dependencia_id: number[];
   jefe_nombre: number;
   asistente_nombre: number;
   fecha_inicio: string;
@@ -42,9 +42,9 @@ export interface Auditoria {
   estado_nombre: string;
   tipo_nombre: string;
   vigencia_nombre: string;
-  macroproceso_nombre: string;
-  proceso_nombre: string;
-  dependencia_nombre: string;
+  macroproceso_nombre: string[];
+  proceso_nombre: string[];
+  dependencia_nombre: string[];
   cantidad_auditorias?: number;
   estado_interno_id?: number;
   jefe_correo?: string;
@@ -54,6 +54,7 @@ export interface Auditoria {
   cronograma?: string;
   macroprocesos?: string;
   procesos?: string;
+  dependencias?: string;
   auditores?: RegistroAuditor[];
 }
 

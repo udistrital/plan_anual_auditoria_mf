@@ -138,17 +138,18 @@
           </div>
 
 
-          <!-- Dependencia -->
+          <!-- Dependencias -->
           <div class="col-12 col-md-4 col-xl-4">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Dependencia</b>
+              <b>Dependencias</b>
             </div>
             <app-search-selection
-              label="Dependencia"
+              multiple
+              label="Dependencias"
               icon="apartment"
-              placeholder="Seleccionar dependencia"
+              placeholder="Seleccionar dependencias"
               [parametros]="dependencias"
-              [parametroControl]="auditoriaForm.get('dependencia')"
+              [parametroControl]="auditoriaForm.get('dependencias')"
             ></app-search-selection>
           </div>
 
