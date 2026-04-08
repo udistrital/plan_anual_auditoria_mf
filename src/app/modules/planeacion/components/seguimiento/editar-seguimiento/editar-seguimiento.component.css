@@ -9,3 +9,17 @@
   color: #3c1513;
   border-radius: 10px;
 }
+
+:host ::ng-deep .modo-lectura .mdc-text-field--disabled {
+  background-color: #fff !important;
+}
+
+:host ::ng-deep .modo-lectura .mat-mdc-input-element:disabled,
+:host ::ng-deep .modo-lectura .mat-mdc-select-disabled .mat-mdc-select-value-text,
+:host ::ng-deep .modo-lectura .mat-mdc-form-field-disabled .mdc-floating-label,
+:host ::ng-deep .modo-lectura .mat-mdc-form-field-disabled .mat-mdc-form-field-icon-suffix,
+:host ::ng-deep .modo-lectura .mat-mdc-form-field-disabled .mat-mdc-form-field-icon-prefix {
+  color: rgba(0, 0, 0, 0.87) !important;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.87) !important;
+  opacity: 1 !important;
+}

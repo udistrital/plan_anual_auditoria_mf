@@ -46,6 +46,7 @@ export class EditarSeguimientoComponent implements OnInit {
   procesoElegido = 0;
   usuarioId: number = 0;
   paso1Guardado: boolean = false;
+  soloLectura: boolean = false;
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
   auditoriaEstados = environment.AUDITORIA_ESTADO;
 
@@ -65,6 +66,7 @@ export class EditarSeguimientoComponent implements OnInit {
   ngOnInit() {
     this.cargarFormularios();
     this.manejarResponsiveStepper();
+    this.soloLectura = this.route.snapshot.queryParamMap.get("modo") === "ver";
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.obtenerAuditoria(this.auditoriaId);
     this.userService.getPersonaId().then((usuarioId) => {
@@ -96,10 +98,19 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   enviarFormInformacion() {
+    if (this.soloLectura) {
+      this.stepper.next();
+      return;
+    }
+
     this.formularioInformacionComponent.onSubmit();
   }
 
   preguntarGuardadoInformacion(dataForm: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!dataForm) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -129,6 +140,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   guardarInformacion(informacion: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
 
@@ -158,6 +173,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   finalizarAuditoria(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!this.paso1Guardado) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -166,7 +185,7 @@ export class EditarSeguimientoComponent implements OnInit {
     }
 
     this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de enviar el formulario?")
+      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
       .then((confirmado) => {
         if (!confirmado.value) {
           return;
@@ -192,6 +211,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   subirArchivoCargueMasivo(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
@@ -223,10 +246,18 @@ export class EditarSeguimientoComponent implements OnInit {
       correo_dependencia: this.auditoria.correo_dependencia,
       correo_complementario: this.auditoria.correo_complementario,
     });
+
+    if (this.soloLectura) {
+      this.formularioInformacionComponent.form.disable();
+    }
     
   }
 
   crearActividad() {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef =this.dialog.open(CrearActividadSeguimientoComponent, {
       width: "1100px",
       data: { auditoriaId: this.auditoriaId },
@@ -244,6 +275,10 @@ export class EditarSeguimientoComponent implements OnInit {
   };
 
   manejarCambioSelect(event: any): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.selectActions[event.campo.nombre]?.(event.valor);
   }
 
@@ -284,6 +319,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   validarDocumentosAnexados(auditoriaId: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const docs = [
       { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información"},
       { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
@@ -315,6 +354,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   enviarAprobacionPorJefe(auditoriaId: string) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
