@@ -24,3 +24,17 @@
   opacity: 1 !important;
 }
 
+:host ::ng-deep .modo-lectura quill-editor .ql-container.ql-snow {
+  background-color: #fff;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+:host ::ng-deep .modo-lectura quill-editor .ql-toolbar.ql-snow {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+:host ::ng-deep .modo-lectura quill-editor .ql-editor {
+  color: rgba(0, 0, 0, 0.87) !important;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.87) !important;
+  opacity: 1 !important;
+}
