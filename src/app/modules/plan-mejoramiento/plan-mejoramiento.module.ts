@@ -13,21 +13,27 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { PlanesRoutingModule } from './plan-mejoramiento-routing.module';
+import { SharedModule } from '../../shared/shared.module';
+
 import { PlanDeMejoramientoComponent } from './components/plan-de-mejoramiento/plan-mejoramiento.component';
 import { TablaPlanMejoramientoComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/tabla-plan-mejoramiento.component';
-import { SharedModule } from '../../shared/shared.module';
+import { ModalAsignacionAuditoresComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-asignacion-auditores/modal-asignacion-auditores.component';
 
 @NgModule({
   declarations: [
     PlanDeMejoramientoComponent,
     TablaPlanMejoramientoComponent,
+    ModalAsignacionAuditoresComponent,
   ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    SharedModule,
     FormsModule,
+    SharedModule,
     PlanesRoutingModule,
     MatFormFieldModule,
     MatInputModule,
@@ -41,6 +47,8 @@ import { SharedModule } from '../../shared/shared.module';
     MatTooltipModule,
     MatCardModule,
     MatDividerModule,
-  ]
+    MatDialogModule,
+    MatProgressSpinnerModule,
+  ],
 })
-export class PlanesModule { }
+export class PlanesModule {}

@@ -31,7 +31,7 @@ const routes: Routes = [
   },
   {
     path: 'plan-mejoramiento',
-    canActivate: [AuthGuard], 
+    //canActivate: [AuthGuard], 
     loadChildren: () => import('./modules/plan-mejoramiento/plan-mejoramiento.module').then(
       (m) => m.PlanesModule)
   },

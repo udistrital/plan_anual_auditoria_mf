@@ -5,12 +5,12 @@ import { PlanDeMejoramientoComponent } from './components/plan-de-mejoramiento/p
 const routes: Routes = [
   {
     path: 'plan-mejoramiento',
-    component: PlanDeMejoramientoComponent
-  }
+    component: PlanDeMejoramientoComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class PlanesRoutingModule { }
+export class PlanesRoutingModule {}
