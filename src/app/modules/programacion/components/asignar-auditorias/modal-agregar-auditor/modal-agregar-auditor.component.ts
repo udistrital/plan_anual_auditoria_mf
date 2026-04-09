@@ -309,4 +309,55 @@ export class ModalAgregarAuditorComponent implements OnInit {
       this.form.markAllAsTouched();
     }
   }
+
+  desasignarAuditor(index: number) {
+    const auditorSeleccionado = this.auditoresSeleccionados.at(index)?.value;
+    if (this.auditoresAsignados.length > 1) {
+      this.alertaService
+      .showConfirmAlert(`¿Está seguro de desasignar este auditor?`)
+      .then((result) => {
+        if (result.isConfirmed) {
+          const auditorEncontrado = this.auditoresAsignados.find((a) => a.auditor_id === auditorSeleccionado.auditor.id);
+
+          if (auditorEncontrado) {
+            this.auditorEliminar = {
+              id: auditorEncontrado._id,
+              auditoria_id: auditorEncontrado._id,
+              id_tercero: auditorEncontrado.auditor_id!,
+              activo: false,
+            };
+
+            this.planAnualAuditoriaService
+              .delete("auditor", this.auditorEliminar)
+              .subscribe({
+                next: (deleteResponse: any) => {
+                  this.auditoresSeleccionados.removeAt(index);
+                  this.auditoresAsignados = this.auditoresAsignados.filter(a => a.auditor_id !== auditorSeleccionado.auditor.id);
+                  this.dialogRef.close({ saved: true });
+                  this.alertaService.showSuccessAlert(
+                    "Auditor desasignado correctamente."
+                  );
+                },
+                error: (err) => {
+                  this.alertaService.showErrorAlert(
+                    "Error al desasignar el auditor. Inténtelo de nuevo."
+                  );
+                },
+              });
+          } else {
+            this.auditoresSeleccionados.removeAt(index);
+            this.auditoresAsignados = this.auditoresAsignados.filter(a => a.auditor_id !== auditorSeleccionado.audor.id);
+            this.dialogRef.close({ saved: true });
+            this.alertaService.showSuccessAlert(
+              "Auditor desasignado correctamente."
+            );
+          }
+        }
+      });
+    } else {
+      this.alertaService.showErrorAlert(
+        "No se puede desasignar el auditor. Debe haber al menos un auditor asignado a la auditoría."
+      )
+    }
+  }
 }
