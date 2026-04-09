@@ -52,9 +52,9 @@ export interface Auditoria {
   correo_dependencia?: string;
   correo_complementario?: string;
   cronograma?: string;
-  macroprocesos?: string;
-  procesos?: string;
-  dependencias?: string;
+  macroproceso?: string;
+  proceso?: string;
+  dependencia?: string;
   auditores?: RegistroAuditor[];
 }
 
