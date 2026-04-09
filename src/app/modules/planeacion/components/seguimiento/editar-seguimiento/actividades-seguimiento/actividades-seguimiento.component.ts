@@ -14,6 +14,7 @@ import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-
 })
 export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
+  @Input() soloLectura: boolean = false;
   datos: any;
   
   columnsToDisplay: string[] = [
@@ -37,6 +38,9 @@ export class ActividadesSeguimientoComponent implements OnInit {
     this.resetComponent();
   }
   ngOnInit(): void {
+    if (this.soloLectura) {
+      this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
+    }
     this.listaractividades();
    }
 
@@ -74,6 +78,10 @@ export class ActividadesSeguimientoComponent implements OnInit {
       
   }
   eliminarActividad(actividad: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
@@ -106,6 +114,10 @@ export class ActividadesSeguimientoComponent implements OnInit {
       });
   }
   editarActividad(actividad: Actividad){
+    if (this.soloLectura) {
+      return;
+    }
+
     
     const dialogRef = this.dialog.open(EditarActividadSeguimientoComponent, {
       width: '1100px', 

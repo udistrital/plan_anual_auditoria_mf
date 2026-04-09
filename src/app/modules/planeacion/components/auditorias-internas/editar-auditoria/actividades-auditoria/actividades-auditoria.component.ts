@@ -17,6 +17,7 @@ import { environment } from "src/environments/environment";
 })
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: String;
+  @Input() soloLectura: boolean = false;
   datos: any;
 
   columnsToDisplay: string[] = [
@@ -43,6 +44,9 @@ export class ActividadesAuditoriaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.soloLectura) {
+      this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
+    }
     this.listaractividades();
   }
 
@@ -103,6 +107,10 @@ export class ActividadesAuditoriaComponent implements OnInit {
   }
 
   eliminarActividad(actividad: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
@@ -136,6 +144,10 @@ export class ActividadesAuditoriaComponent implements OnInit {
   }
 
   editarActividad(actividad: Actividad) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(EditarActividadComponent, {
       width: '1100px',
       data: {
