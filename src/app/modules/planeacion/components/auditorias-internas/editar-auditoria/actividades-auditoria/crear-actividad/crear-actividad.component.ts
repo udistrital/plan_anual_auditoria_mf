@@ -28,7 +28,13 @@ export class CrearActividadComponent {
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
-      observacion: actividadData.observaciones
+      observacion: actividadData.observaciones,
+      // TODO: Ajustar a verdadero modelo de papel de trabajo o consulta
+      papel_referencia: actividadData.papelTrabajoReferencia,
+      papel_descripcion: actividadData.papelTrabajoDescripcion,
+      papel_folios: actividadData.papelTrabajoFolios,
+      papel_medio: actividadData.papelTrabajoMedio,
+      papel_carpeta: actividadData.papelTrabajoCarpeta,
     };
 
     this.alertaService
