@@ -5,7 +5,7 @@ import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
-import { AuditorEliminar, Auditoria, Auditor } from "src/app/shared/data/models/auditoria-auditor";
+import { AuditorEliminar, Auditoria, Auditor, AuditorDesasignar } from "src/app/shared/data/models/auditoria-auditor";
 import { Parametro } from "src/app/shared/data/models/parametros/parametros";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
@@ -27,6 +27,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
   isEditMode = false;
   usuarioId: any;
   auditorEliminar: AuditorEliminar | null = null;
+  auditorDesasignar: AuditorDesasignar | null = null;
 
   constructor(
     private alertaService: AlertService,
@@ -60,7 +61,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
 
   inicializarAuditoresSeleccionados(): void {
     this.PlanAnualAuditoriaMid.get(
-      `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true`
+      `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true,asignado:true`
     ).subscribe({
       next: (res) => {
         this.auditoresSeleccionados.clear();
@@ -320,17 +321,14 @@ export class ModalAgregarAuditorComponent implements OnInit {
           const auditorEncontrado = this.auditoresAsignados.find((a) => a.auditor_id === auditorSeleccionado.auditor.id);
 
           if (auditorEncontrado) {
-            this.auditorEliminar = {
-              id: auditorEncontrado._id,
-              auditoria_id: auditorEncontrado._id,
-              id_tercero: auditorEncontrado.auditor_id!,
-              activo: false,
+            this.auditorDesasignar = {
+              asignado: false,
             };
 
             this.planAnualAuditoriaService
-              .delete("auditor", this.auditorEliminar)
+              .put("auditor/" + auditorEncontrado._id, this.auditorDesasignar)
               .subscribe({
-                next: (deleteResponse: any) => {
+                next: (putResponse: any) => {
                   this.auditoresSeleccionados.removeAt(index);
                   this.auditoresAsignados = this.auditoresAsignados.filter(a => a.auditor_id !== auditorSeleccionado.auditor.id);
                   this.dialogRef.close({ saved: true });
