@@ -35,7 +35,11 @@
         [matTooltipPosition]="'above'"
       >
         <mat-icon style="color: var(--md-warning-600)">picture_as_pdf</mat-icon>
-        {{ existeDocumento(documento) ? "Ver documento" : "Generar documento" }}
+        {{
+          existeDocumento(documento)
+            ? (esCartaRepresentacion(documento) ? "Ver documentos" : "Ver documento")
+            : (esCartaRepresentacion(documento) ? "Generar documentos" : "Generar documento")
+        }}
       </button>
     </div>
   </div>

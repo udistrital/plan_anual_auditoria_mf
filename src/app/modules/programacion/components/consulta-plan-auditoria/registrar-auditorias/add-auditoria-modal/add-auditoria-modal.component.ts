@@ -225,7 +225,7 @@ export class AddAuditoriaModalComponent implements OnInit {
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
               macroproceso_id: this.auditoriaForm.value.macroproceso,
               proceso_id: this.auditoriaForm.value.proceso,
-              dependencia_id: this.auditoriaForm.value.dependencia?.Id || this.auditoriaForm.value.dependencia,
+              dependencia_id: this.auditoriaForm.value.dependencia,
               cantidad_auditorias: this.auditoriaForm.value.cantidadAuditorias,
               cronograma_id: cronogramaIds,
               vigencia_id: this.data.vigenciaId
