@@ -12,7 +12,7 @@ export const formularioInformacionAuditoria: Formulario = {
       placeholder: "Escriba aquí el número de la auditoría",
       deshabilitado: false,
       validaciones: [{ tipo: "requerido", valor: "" }],
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "consecutivo_OCI",
@@ -21,7 +21,7 @@ export const formularioInformacionAuditoria: Formulario = {
       tipo: "text",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     /*{
       nombre: "consecutivo_IE",
@@ -52,63 +52,6 @@ export const formularioInformacionAuditoria: Formulario = {
       claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     {
-      nombre: "dependencia",
-      etiqueta: "Dependencia",
-      icono: "apartment",
-      tipo: "text",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "jefe_nombre",
-      etiqueta: "Jefe dependencia",
-      icono: "person",
-      tipo: "text",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "asistente_nombre",
-      etiqueta: "Asistente dependencia",
-      icono: "supervisor_account",
-      tipo: "text",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "correo_dependencia",
-      etiqueta: "Correo Dependencia",
-      icono: "email",
-      tipo: "email",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "jefe_correo",
-      etiqueta: "Correo Jefe dependencia",
-      icono: "email",
-      tipo: "email",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "asistente_correo",
-      etiqueta: "Correo Asistente dependencia",
-      icono: "email",
-      tipo: "email",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "correo_complementario",
-      etiqueta: "Correo Complementario",
-      icono: "email",
-      tipo: "email",
-      validaciones: [{ tipo: "email", valor: "" }],
-      deshabilitado: false,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
-    },
-    {
       nombre: "fecha_ejecucion_inicial",
       etiqueta: "Fecha de Ejecución Inicial",
       icono: "event",
@@ -119,7 +62,7 @@ export const formularioInformacionAuditoria: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       tipo: "date",
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "fecha_ejecucion_final",
@@ -132,7 +75,7 @@ export const formularioInformacionAuditoria: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       tipo: "date",
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
     {
       nombre: "objetivo_auditoria",
@@ -210,5 +153,66 @@ export const formularioTemasAuditoria: Formulario = {
         ],
       },
     }
+  ]
+}
+
+export const formularioDependencias: Formulario = {
+  campos: [
+    {
+      nombre: "dependencia_id",
+      etiqueta: "Dependencia",
+      tipo: "hidden",
+      deshabilitado: true,
+      claseGrid: "d-none",
+    },
+    {
+      nombre: "jefe_nombre",
+      etiqueta: "Jefe dependencia",
+      icono: "person",
+      tipo: "text",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "asistente_nombre",
+      etiqueta: "Asistente dependencia",
+      icono: "supervisor_account",
+      tipo: "text",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "jefe_correo",
+      etiqueta: "Correo Jefe dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "asistente_correo",
+      etiqueta: "Correo Asistente dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_dependencia",
+      etiqueta: "Correo Dependencia",
+      icono: "email",
+      tipo: "email",
+      deshabilitado: true,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      nombre: "correo_complementario",
+      etiqueta: "Correo Complementario",
+      icono: "email",
+      tipo: "email",
+      validaciones: [{ tipo: "email", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
   ]
 }
