@@ -17,7 +17,8 @@ export class ReferenciaPdfService {
     nuxeoResponse: any, // Respuesta de Nuxeo
     referencia_tipo: string,
     referencia_id: string,
-    tipo_id: number
+    tipo_id: number,
+    metadatos?: Record<string, any>
   ): Observable<any> {
     const payload = {
       referencia_tipo: referencia_tipo,
@@ -25,13 +26,21 @@ export class ReferenciaPdfService {
       nuxeo_id: nuxeoResponse.Id,
       nuxeo_enlace: nuxeoResponse.Enlace,
       tipo_id: tipo_id,
+      metadatos: metadatos || {},
       activo: true,
       fecha_creacion: new Date().toISOString(),
     };
 
-    // Verificar si ya existe un registro para la referencia
+    const queryBase = `referencia_id:${referencia_id},tipo_id:${tipo_id}`;
+    const dependenciaId = metadatos?.["dependencia_id"];
+    const queryMetadatos =
+      typeof dependenciaId === "number"
+        ? `,metadatos.dependencia_id:${dependenciaId}<n>`
+        : "";
+
+    // Verificar si ya existe un registro para la referencia y metadatos (si aplica)
     return this.planAnualAuditoriaService
-      .get(`documento?query=referencia_id:${referencia_id},tipo_id:${tipo_id}`)
+      .get(`documento?query=${queryBase}${queryMetadatos}`)
       .pipe(
         switchMap((response) => {
           if (response && response.Data.length > 0) {

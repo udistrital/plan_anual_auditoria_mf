@@ -283,7 +283,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   verAuditoria(auditoria: Auditoria) {
-    console.log(auditoria);
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/auditorias-internas/editar/${auditoriaId}`,
+    ], {
+      queryParams: { modo: "ver" },
+    });
   }
 
   editarAuditoria(auditoria: Auditoria) {

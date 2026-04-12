@@ -10,7 +10,7 @@
         mat-icon-button
         color="primary"
         (click)="subirCompromisoEtico()"
-        *ngIf="!documento.plantilla && documento.nombre == 'Compromiso Ético' && base64CompromisoEtico === null"
+        *ngIf="!soloLectura && !documento.plantilla && documento.nombre == 'Compromiso Ético' && base64CompromisoEtico === null"
         class="width-100-md"
       >
         <mat-icon>upload</mat-icon>
@@ -27,15 +27,19 @@
 
       <button
         mat-stroked-button
-        *ngIf="documento.plantilla"
+        *ngIf="documento.plantilla && (!soloLectura || existeDocumento(documento))"
         class="width-100-md"
-        (click)="generarDocumento(documento)"
+        (click)="manejarDocumento(documento)"
         matTooltip="En esta opción, puede revisar los cambios realizados. Si todo
         está correcto, puede proceder a guardar el documento."
         [matTooltipPosition]="'above'"
       >
         <mat-icon style="color: var(--md-warning-600)">picture_as_pdf</mat-icon>
-        Ver documento
+        {{
+          existeDocumento(documento)
+            ? (esCartaRepresentacion(documento) ? "Ver documentos" : "Ver documento")
+            : (esCartaRepresentacion(documento) ? "Generar documentos" : "Generar documento")
+        }}
       </button>
     </div>
   </div>

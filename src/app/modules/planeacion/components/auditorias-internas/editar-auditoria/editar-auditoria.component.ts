@@ -65,6 +65,7 @@ export class EditarAuditoriaComponent implements OnInit {
   usuarioId: number = 0;
   paso1Guardado: boolean = false;
   paso3Guardado: boolean = false;
+  soloLectura: boolean = false;
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
   auditoriaEstados = environment.AUDITORIA_ESTADO;
 
@@ -88,6 +89,7 @@ export class EditarAuditoriaComponent implements OnInit {
   ngOnInit() {
     this.cargarFormularios();
     this.manejarResponsiveStepper();
+    this.soloLectura = this.route.snapshot.queryParamMap.get("modo") === "ver";
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.obtenerAuditoria(this.auditoriaId);
     this.userService.getPersonaId().then((usuarioId) => {
@@ -121,6 +123,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   enviarFormInformacion() {
+    if (this.soloLectura) {
+      this.stepper.next();
+      return;
+    }
     this.formularioInformacionComponent.onSubmit();
   }
 
@@ -136,6 +142,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   preguntarGuardadoInformacion(dataForm: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!dataForm) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -154,6 +164,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   guardarInformacion(informacion: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
 
@@ -188,11 +202,20 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   enviarFormRecursos() {
+    if (this.soloLectura) {
+      this.stepper.next();
+      return;
+    }
+
     this.formularioRecursosComponent.onSubmit();
     this.formularioTemasComponent.onSubmit();
   }
 
   preguntarGuardadoRecursos(dataForm: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!dataForm || !this.formularioTemasComponent.form.valid) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -211,6 +234,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   guardarRecursos(recursos: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaId = this.auditoria._id;
     const recursosEditar = {
       rec_tecnologico: recursos.tecnologicos,
@@ -234,6 +261,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   finalizarAuditoria(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!this.paso1Guardado || !this.paso3Guardado) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -242,7 +273,7 @@ export class EditarAuditoriaComponent implements OnInit {
     }
 
     this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de enviar el formulario?")
+      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
       .then((confirmado) => {
         if (!confirmado.value) {
           return;
@@ -268,6 +299,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   subirArchivoCargueMasivo(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
@@ -318,9 +353,19 @@ export class EditarAuditoriaComponent implements OnInit {
     this.formularioTemasComponent.form.patchValue({
       tema: this.auditoria.tema,
     });
+
+    if (this.soloLectura) {
+      this.formularioInformacionComponent.form.disable();
+      this.formularioRecursosComponent.form.disable();
+      this.formularioTemasComponent.form.disable();
+    }
   }
 
   crearActividad() {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(CrearActividadComponent, {
       width: "1100px",
       data: { auditoriaId: this.auditoriaId },
@@ -338,6 +383,10 @@ export class EditarAuditoriaComponent implements OnInit {
   };
 
   manejarCambioSelect(event: any): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.selectActions[event.campo.nombre]?.(event.valor);
   }
 

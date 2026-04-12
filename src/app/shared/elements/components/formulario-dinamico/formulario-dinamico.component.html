@@ -139,7 +139,7 @@
           <quill-editor 
             [formControlName]="campo.nombre"
             [modules]="campo.quillConfig!"
-            [placeholder]="campo.placeholder || ''"
+            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder || '')"
             [ngStyle]="{ 'width': '100%'}"
             >
           </quill-editor>
