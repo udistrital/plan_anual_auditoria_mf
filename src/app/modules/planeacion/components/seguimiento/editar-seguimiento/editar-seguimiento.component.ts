@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { MatStepper } from "@angular/material/stepper";
 import { ActividadesSeguimientoComponent as ActividadesSeguimientoComponent } from "./actividades-seguimiento/actividades-seguimiento.component";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
+  formularioDependencias,
   formularioInformacionAuditoria,
 } from "./editar-seguimiento.utilidades";
 import { BreakpointObserver } from "@angular/cdk/layout";
@@ -28,7 +29,7 @@ import { forkJoin } from "rxjs";
   templateUrl: "./editar-seguimiento.component.html",
   styleUrls: ["./editar-seguimiento.component.css"],
 })
-export class EditarSeguimientoComponent implements OnInit {
+export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild(ActividadesSeguimientoComponent)
@@ -37,6 +38,10 @@ export class EditarSeguimientoComponent implements OnInit {
   @ViewChild("formularioInformacionComp")
   formularioInformacionComponent!: FormularioDinamicoComponent;
   formularioInformacion: Formulario | undefined;
+
+  @ViewChildren("formularioDependenciasComp")
+  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
+  formularioDependencias: Formulario = formularioDependencias;
 
   auditoriaId!: string;
   auditoria!: Auditoria;
@@ -60,7 +65,8 @@ export class EditarSeguimientoComponent implements OnInit {
     private readonly parametrosService: ParametrosService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly rolService: RolService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -89,6 +95,7 @@ export class EditarSeguimientoComponent implements OnInit {
   obtenerAuditoria(auditoriaId: string) {
     this.planAuditoriaMid.get(`auditoria/${auditoriaId}`).subscribe((res) => {
       this.auditoria = res.Data;
+      this.changeDetector.detectChanges();
       this.cargarFormulariosConAuditoria();
     });
   }
@@ -236,19 +243,26 @@ export class EditarSeguimientoComponent implements OnInit {
       consecutivo_IE: this.auditoria.consecutivo_IE,
       macroproceso: this.auditoria.macroproceso_nombre,
       proceso: this.auditoria.proceso_nombre,
-      dependencia: this.auditoria.dependencia_nombre,
-      jefe_nombre: this.auditoria.jefe_nombre,
-      asistente_nombre: this.auditoria.asistente_nombre,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
-      jefe_correo: this.auditoria.jefe_correo,
-      asistente_correo: this.auditoria.asistente_correo,
-      correo_dependencia: this.auditoria.correo_dependencia,
-      correo_complementario: this.auditoria.correo_complementario,
+    });
+
+    this.formularioDependenciasComponent.forEach((comp, i) => {
+      const dep = this.auditoria.datos_dependencias[i];
+      comp.form.patchValue({
+        dependencia_id: dep.dependencia_id,
+        jefe_nombre: dep.jefe_nombre,
+        jefe_correo: dep.jefe_correo,
+        asistente_nombre: dep.asistente_nombre,
+        asistente_correo: dep.asistente_correo,
+        correo_dependencia: dep.correo_dependencia,
+        correo_complementario: dep.correo_complementario,
+      });
     });
 
     if (this.soloLectura) {
       this.formularioInformacionComponent.form.disable();
+      this.formularioDependenciasComponent.forEach(form => form.form.disable());
     }
     
   }
