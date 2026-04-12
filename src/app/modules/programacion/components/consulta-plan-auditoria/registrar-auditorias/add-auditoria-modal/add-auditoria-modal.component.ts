@@ -1,6 +1,7 @@
 import { Component, OnInit, Inject } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { catchError, map, of } from "rxjs";
 import { OikosService } from "src/app/core/services/oikos.service";
 import { ParametrosService } from "src/app/core/services/parametros.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -54,16 +55,16 @@ export class AddAuditoriaModalComponent implements OnInit {
         this.data.auditoria?.tipoEvaluacionId || [],
         Validators.required,
       ],
-      macroproceso: [
-        this.data.auditoria?.macroprocesoId || [],
+      macroprocesos: [
+        this.data.auditoria?.macroprocesosId || [],
         Validators.required,
       ],
-      proceso: [
-        this.data.auditoria?.procesoId || [],
+      procesos: [
+        this.data.auditoria?.procesosId || [],
         Validators.required,
       ],
-      dependencia: [
-        this.data.auditoria?.dependenciaId || [],
+      dependencias: [
+        this.data.auditoria?.dependenciasId || [],
         Validators.required,
       ],
       cronogramaActividades: [
@@ -87,11 +88,21 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.inicializarCantidadAuditorias();
 
     // When the macroproceso changes, clear the proceso selection and reload procesos.
-    this.auditoriaForm.get("macroproceso").valueChanges.subscribe((valor: number) => {
-      this.auditoriaForm.patchValue({ proceso: [] });
-      this.procesos = [];
-      this.cargarProcesos();
+    this.auditoriaForm.get("macroprocesos").valueChanges.subscribe(() => {
+      this.cargarProcesos(this.actualizarProcesosSeleccionados.bind(this));
     });
+  }
+
+  actualizarProcesosSeleccionados(): void {
+    const procesosActuales = this.auditoriaForm.get("procesos").value || [];
+    const procesosFiltrados = procesosActuales.filter((procesoId: number) =>
+      this.procesos.some((proceso) => proceso.Id === procesoId)
+    );
+
+    console.debug("Procesos antes de actualizar:", procesosActuales);
+    console.debug("Procesos después de actualizar:", procesosFiltrados);
+
+    this.auditoriaForm.patchValue({ procesos: procesosFiltrados });
   }
 
   inicializarCantidadAuditorias(): void {
@@ -157,18 +168,18 @@ export class AddAuditoriaModalComponent implements OnInit {
    * @param callback Optional callback function to execute after loading procesos
    */
   cargarProcesos(callback?: () => void) {
-    const macroprocesoId = this.auditoriaForm.get("macroproceso").value;
-    if ((macroprocesoId == false || macroprocesoId == null) && macroprocesoId !== 0)
-      return;
-
+    const macroprocesosId = this.auditoriaForm.get("macroprocesos").value;
+    const macroprocesosIdBarSeparated = Array.isArray(macroprocesosId) ? macroprocesosId.join("|") : macroprocesosId;
     const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
     this.parametrosService
-      .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId:${macroprocesoId}&limit=0`)
-      .subscribe((res) => {
-        if (res && res.Data) {
-          this.procesos = res.Data;
-          if (callback) callback();
-        }
+      .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId__in:${macroprocesosIdBarSeparated}&limit=0`)
+      .pipe(
+        map((res: any) => res && res.Data ? res.Data : []),
+        catchError(() => of([])),
+      )
+      .subscribe((data: Parametro[]) => {
+        this.procesos = data;
+        if (callback) callback();
       });
   }
 
@@ -223,9 +234,9 @@ export class AddAuditoriaModalComponent implements OnInit {
               plan_auditoria_id: this.data.planAuditoriaId,
               titulo: this.auditoriaForm.value.tituloActividad,
               tipo_evaluacion_id: this.auditoriaForm.value.tipoEvaluacion,
-              macroproceso_id: this.auditoriaForm.value.macroproceso,
-              proceso_id: this.auditoriaForm.value.proceso,
-              dependencia_id: this.auditoriaForm.value.dependencia,
+              macroproceso_id: this.auditoriaForm.value.macroprocesos,
+              proceso_id: this.auditoriaForm.value.procesos,
+              dependencia_id: this.auditoriaForm.value.dependencias,
               cantidad_auditorias: this.auditoriaForm.value.cantidadAuditorias,
               cronograma_id: cronogramaIds,
               vigencia_id: this.data.vigenciaId
