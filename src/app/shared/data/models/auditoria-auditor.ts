@@ -21,6 +21,10 @@ export class AuditorEliminar {
     auditoria_id!: string;
 }
 
+export class AuditorDesasignar {
+    asignado!: boolean;
+}
+
 export interface Auditor {
     _id: string;
     id: number;

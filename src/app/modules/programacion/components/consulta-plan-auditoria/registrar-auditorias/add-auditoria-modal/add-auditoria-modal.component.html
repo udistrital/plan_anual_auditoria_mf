@@ -66,16 +66,17 @@
           </div>
 
 
-          <!-- Macroproceso -->
+          <!-- Macroprocesos -->
           <div class="col-12 col-md-4 col-xl-4">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Macroproceso</b>
+              <b>Macroprocesos</b>
             </div>
             <mat-form-field class="col-12" appearance="outline">
               <mat-label>Seleccionar </mat-label>
               <mat-icon matPrefix color="primary">account_tree</mat-icon>
               <mat-select
-                formControlName="macroproceso"
+                multiple
+                formControlName="macroprocesos"
               >
                 <mat-option
                   *ngFor="let macro of macroprocesos"
@@ -86,25 +87,28 @@
               </mat-select>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('macroproceso').hasError('required') &&
-                  auditoriaForm.get('macroproceso').touched
+                  auditoriaForm.get('macroprocesos').hasError('required') &&
+                  auditoriaForm.get('macroprocesos').touched
                 "
               >
-                Seleccione el macroproceso
+                Seleccione los macroprocesos
               </mat-error>
             </mat-form-field>
           </div>
 
 
-          <!-- Proceso -->
+          <!-- Procesos -->
           <div class="col-12 col-md-4 col-xl-4">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Proceso</b>
+              <b>Procesos</b>
             </div>
             <mat-form-field class="col-12" appearance="outline">
               <mat-label>Seleccionar </mat-label>
               <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <mat-select formControlName="proceso">
+              <mat-select
+                multiple
+                formControlName="procesos"
+              >
                 <mat-option
                   *ngFor="let proceso of procesos"
                   [value]="proceso.Id"
@@ -114,17 +118,17 @@
               </mat-select>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('proceso').hasError('required') &&
-                  auditoriaForm.get('proceso').touched &&
+                  auditoriaForm.get('procesos').hasError('required') &&
+                  auditoriaForm.get('procesos').touched &&
                   procesos.length > 0
                 "
               >
-                Seleccione el proceso
+                Seleccione los procesos
               </mat-error>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('proceso').hasError('required') &&
-                  auditoriaForm.get('proceso').touched &&
+                  auditoriaForm.get('procesos').hasError('required') &&
+                  auditoriaForm.get('procesos').touched &&
                   procesos.length === 0
                 "
               >
@@ -134,18 +138,19 @@
           </div>
 
 
-          <!-- Dependencia -->
+          <!-- Dependencias -->
           <div class="col-12 col-md-4 col-xl-4">
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Dependencia</b>
+              <b>Dependencias</b>
             </div>
-            <app-single-selection
-              label="Dependencia"
+            <app-search-selection
+              multiple
+              label="Dependencias"
               icon="apartment"
-              placeholder="Seleccionar dependencia"
+              placeholder="Seleccionar dependencias"
               [parametros]="dependencias"
-              [parametroControl]="auditoriaForm.get('dependencia')"
-            ></app-single-selection>
+              [parametroControl]="auditoriaForm.get('dependencias')"
+            ></app-search-selection>
           </div>
 
 
@@ -187,13 +192,13 @@
             <div class="fondo-acento-50 d-flex justify-content-center my-3">
               <b>Cantidad de Auditorías</b>
             </div>
-            <app-single-selection
+            <app-search-selection
               label="Cantidad de Auditorías"
               icon="assignment"
               placeholder="Seleccione la cantidad"
               [parametros]="cantidadesAuditorias"
               [parametroControl]="auditoriaForm.get('cantidadAuditorias')"
-            ></app-single-selection>
+            ></app-search-selection>
           </div>
 
 
