@@ -34,13 +34,8 @@ export class ActividadFormularioComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.actividadData) {
-      const fechaInicioParseada = this.actividadData.fechaInicio
-        ? parse(this.actividadData.fechaInicio, 'dd/MM/yyyy', new Date())
-        : null;
-
-      const fechaFinParseada = this.actividadData.fechaFin
-        ? parse(this.actividadData.fechaFin, 'dd/MM/yyyy', new Date())
-        : null;
+      const fechaInicioParseada = this.actividadData.fechaInicio;
+      const fechaFinParseada = this.actividadData.fechaFin;
 
       const data = {
         ...this.actividadData,
