@@ -161,8 +161,8 @@ export const formularioDependencias: Formulario = {
     {
       nombre: "dependencia_id",
       etiqueta: "Dependencia",
-      tipo: "hidden",
-      deshabilitado: true,
+      tipo: "text",
+      deshabilitado: false,
       claseGrid: "d-none",
     },
     {

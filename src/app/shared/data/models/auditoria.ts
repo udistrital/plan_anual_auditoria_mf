@@ -15,7 +15,11 @@ export interface DatosDependencias {
   asistente_nombre?: string;
   asistente_correo?: string;
   correo_dependencia?: string;
-  correo_complementario?: string;
+}
+
+export interface CorreoComplementario {
+  dependencia_id: number;
+  correo: string;
 }
 
 export interface Auditoria {
@@ -61,7 +65,7 @@ export interface Auditoria {
   jefe_correo?: string;
   asistente_correo?: string;
   correo_dependencia?: string;
-  correo_complementario?: string;
+  correo_complementario?: CorreoComplementario[];
   auditores?: RegistroAuditor[];
   datos_dependencias: DatosDependencias[];
 }

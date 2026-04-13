@@ -169,13 +169,20 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
   }
 
   mapearInfoFormInformacion(informacion: any) {
+    const correos = this.formularioDependenciasComponent.map((form) => {
+      const correo = {
+        dependencia_id: form.form.value.dependencia_id,
+        correo: form.form.value.correo_complementario
+      };
+      return correo;
+    });
     return {
       consecutivo_IE: informacion.consecutivo_IE,
       consecutivo_OCI: informacion.consecutivo_OCI,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
       consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
-      correo_complementario: informacion.correo_complementario,
+      correo_complementario: correos,
     };
   }
 
@@ -249,6 +256,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = this.auditoria.datos_dependencias[i];
+      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo || "";
       comp.form.patchValue({
         dependencia_id: dep.dependencia_id,
         jefe_nombre: dep.jefe_nombre,
@@ -256,7 +264,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         asistente_nombre: dep.asistente_nombre,
         asistente_correo: dep.asistente_correo,
         correo_dependencia: dep.correo_dependencia,
-        correo_complementario: dep.correo_complementario,
+        correo_complementario: correo,
       });
     });
 
