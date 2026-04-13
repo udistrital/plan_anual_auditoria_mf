@@ -1,0 +1,12 @@
+.seccion-titulo {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.separador {
+  border: 0;
+  height: 2px;
+  background: var(--primary);
+  opacity: 0.2;
+  margin: 0.5rem 0 1rem;
+}

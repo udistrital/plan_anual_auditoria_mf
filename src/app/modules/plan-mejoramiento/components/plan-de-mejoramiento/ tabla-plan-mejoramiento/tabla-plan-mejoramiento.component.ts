@@ -10,18 +10,14 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
-
 import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
-
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
-
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
   selector: "app-tabla-plan-mejoramiento",
@@ -191,7 +187,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   }
 
   registrarPlan(plan: any): void {
-    //this.router.navigate([`/planes/plan-mejoramiento/registrar-plan/${plan._id}`]);
+      this.router.navigate([`/plan-mejoramiento/registrar-plan/${plan._id}`]);
   }
 
   enviarAprobacion(plan: any): void {

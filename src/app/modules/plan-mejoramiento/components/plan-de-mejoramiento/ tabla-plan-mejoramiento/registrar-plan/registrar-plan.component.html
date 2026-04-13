@@ -1,0 +1,79 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Editar Plan de Mejoramiento'"
+  [breadcrumb]="'<p>Planes de Mejoramiento / Registrar Plan / <b>Editar Plan de Mejoramiento</b></p>'"
+  [contenido]="contenidoDePlantilla"
+  [mostrarBotonRegresar]="true"
+  (regresar)="regresar()"
+>
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+
+  <!-- Información Plan de Mejoramiento (read-only) -->
+  <div class="row mt-3">
+    <div class="col-12 mb-3">
+      <h5 class="seccion-titulo">Información Plan de Mejoramiento</h5>
+    </div>
+    <mat-form-field appearance="outline" class="col-md-3 col-12">
+      <mat-label>No. Auditoría</mat-label>
+      <input matInput [value]="auditoria?.consecutivo_no_auditoria || ''" readonly />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="col-md-5 col-12">
+      <mat-label>Nombre de auditoría</mat-label>
+      <input matInput [value]="auditoria?.titulo || ''" readonly />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="col-md-4 col-12">
+      <mat-label>Proceso Responsable</mat-label>
+      <input matInput [value]="auditoria?.proceso_nombre || ''" readonly />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="col-md-4 col-12">
+      <mat-label>Líder del Proceso</mat-label>
+      <input matInput [value]="auditoria?.jefe_nombre || ''" readonly />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="col-md-4 col-12">
+      <mat-label>Gestores del Proceso</mat-label>
+      <input matInput [value]="auditoria?.dependencia_nombre || ''" readonly />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="col-md-2 col-12">
+      <mat-label>Fecha (DD/MM/AA)</mat-label>
+      <input matInput [value]="auditoria?.fecha_inicio | date:'dd/MM/yy'" readonly />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="col-md-2 col-12">
+      <mat-label>Seleccione una opción</mat-label>
+      <mat-select>
+        <!-- opciones dinámicas si aplica -->
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <hr class="separador" />
+
+  <!-- Tabla de hallazgos -->
+  <div class="row mt-3">
+    <div class="col-12 mb-2">
+      <h5 class="seccion-titulo mb-1">Formulación Plan de Trabajo</h5>
+      <p class="text-muted small mb-0">Seleccione el hallazgo para agregar y/o editar plan de acción</p>
+    </div>
+    <div class="col-12">
+      <app-tabla-hallazgos
+        *ngIf="auditoria"
+        [auditoriaId]="auditoriaId"
+        [auditoria]="auditoria"
+      ></app-tabla-hallazgos>
+    </div>
+  </div>
+
+<!-- Footer -->
+    <div class="d-flex justify-content-end mt-4" style="gap: 16px;">
+    <button mat-raised-button color="primary">
+        <mat-icon>visibility</mat-icon>
+        Vista Previa
+    </button>
+    <button mat-raised-button color="primary">Guardar</button>
+    <button mat-stroked-button color="primary">
+        <mat-icon>send</mat-icon>
+        Enviar a Auditor
+    </button>
+    </div>
+
+</ng-template>
