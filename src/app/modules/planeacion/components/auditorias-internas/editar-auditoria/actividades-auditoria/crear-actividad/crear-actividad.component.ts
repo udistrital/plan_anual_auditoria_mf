@@ -20,10 +20,10 @@ export class CrearActividadComponent {
   ) {
     this.auditoriaId = data.auditoriaId;
   }
-  ngOnInit(): void {
-    //console.log('Auditoría ID recibido:', this.auditoriaId);
 
+  ngOnInit(): void {
   }
+  
   crearActividad(actividadData: ActividadPlan) {
     let actividadJson: Actividad = {
       auditoria_id: this.auditoriaId,
@@ -57,7 +57,7 @@ export class CrearActividadComponent {
                 }
               },
               (error) => {
-                console.log("error ",error)
+                console.error("error al crear actividad:", error);
                 this.alertaService.showErrorAlert(
                   "Error al crear el registro"
                 );
@@ -65,8 +65,9 @@ export class CrearActividadComponent {
             );
         }
       })
-      .catch(() => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      .catch((error) => {
+        console.error("Error al crear actividad", error);
+        this.alertaService.showErrorAlert("Error al crear el registro");
       });
   }
 }

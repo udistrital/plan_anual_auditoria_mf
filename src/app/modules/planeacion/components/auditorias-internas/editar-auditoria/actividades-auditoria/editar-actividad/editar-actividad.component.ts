@@ -37,7 +37,7 @@ export class EditarActividadComponent implements OnInit {
   ngOnInit(): void {}
 
   editarActividad(actividadData: ActividadPlan) {
-    console.log('Editar actividad:', actividadData);
+    console.debug('Editar actividad:', actividadData);
     let actividadJson: Actividad = {
       auditoria_id: this.idAuditoria,
       titulo: actividadData.actividad,
@@ -50,7 +50,8 @@ export class EditarActividadComponent implements OnInit {
       medio: actividadData.papelTrabajoMedio,
       carpeta: actividadData.papelTrabajoCarpeta
     };
-    console.log('Crear actividad json:', actividadJson);
+
+    console.debug('Editar actividad json:', actividadJson);
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de editar el registro?")
       .then((result) => {
@@ -69,7 +70,7 @@ export class EditarActividadComponent implements OnInit {
                 }
               },
               (error) => {
-                console.log("error ",error)
+                console.error("error al editar actividad:", error);
                 this.alertaService.showErrorAlert(
                   "Error al editar el registro"
                 );
@@ -77,8 +78,9 @@ export class EditarActividadComponent implements OnInit {
             );
         }
       })
-      .catch(() => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      .catch((error) => {
+        console.error("Error al editar actividad", error);
+        this.alertaService.showErrorAlert("Error al editar el registro");
       });
   }
 }
