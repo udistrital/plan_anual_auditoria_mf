@@ -3,7 +3,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { Actividad } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
+import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
+import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-actividad.component'
 
@@ -58,17 +59,17 @@ export class ActividadesSeguimientoComponent implements OnInit {
             "Actualmente no hay actividades registradas para la vigencia seleccionada."
           );
         }
-        this.datos = actividades.map((item) => ({
+        this.datos = actividades.map((item: Actividad): ActividadPlan => ({
           id: item._id,
           actividad: item.titulo,
-          fechaInicio: new Date(item.fecha_inicio)?.toLocaleDateString(),
-          fechaFin: new Date(item.fecha_fin)?.toLocaleDateString(),
-          // TODO: update papelTrabajo fields when business logic is clear
-          //ref: item.papeltrabajo_referencia,
-          //descripcion: item.papeltrabajo_descripcion,
-          //folios: item.papeltrabajo_folios?.toString() || "",
-          //medio: item.papeltrabajo_medio || "",  
-          //carpeta: item.papeltrabajo_carpeta || ""
+          fechaInicio: new Date(item.fecha_inicio),
+          fechaFin: new Date(item.fecha_fin),
+          observaciones: item.observacion,
+          papelTrabajoReferencia: item.referencia,
+          papelTrabajoDescripcion: item.descripcion,
+          papelTrabajoFolios: item.folio,
+          papelTrabajoMedio: item.medio,
+          papelTrabajoCarpeta: item.carpeta
         }));
       });
       
@@ -105,14 +106,19 @@ export class ActividadesSeguimientoComponent implements OnInit {
         this.alertaService.showErrorAlert("Error al eliminar el registro");
       });
   }
-  editarActividad(actividad: Actividad){
-    
+
+  editarActividad(actividad: ActividadPlan){
     const dialogRef = this.dialog.open(EditarActividadSeguimientoComponent, {
       width: '1100px', 
       data: { 
         actividad: actividad, 
         idAuditoria: this.idAuditoria, 
       } 
+    });
+
+    // Refresca la lista tras editar una actividad.
+    dialogRef.afterClosed().subscribe(() => {
+      this.listaractividades()
     });
   }
 }

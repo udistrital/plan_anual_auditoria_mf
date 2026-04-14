@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { parse } from 'date-fns';
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
   selector: 'app-actividad-seguimiento-formulario',
@@ -8,8 +9,8 @@ import { parse } from 'date-fns';
   styleUrls: ['./actividad-formulario.component.css'],
 })
 export class ActividadSeguimientoFormularioComponent {
-  @Input() actividadData: any = {}; // Recibe los datos iniciales
-  @Output() formSubmit = new EventEmitter<any>(); // Envía los datos actualizados al componente padre
+  @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales
+  @Output() formSubmit = new EventEmitter<ActividadPlan>(); // Envía los datos actualizados al componente padre
 
   form: FormGroup;
 
@@ -18,12 +19,12 @@ export class ActividadSeguimientoFormularioComponent {
       actividad: [''],
       fechaInicio: [''],
       fechaFin: [''],
-      // TODO: update papelTrabajo fields when business logic is clear
-      // papelTrabajoReferencia: [''],
-      // papelTrabajoDescripcion: [''],
-      // papelTrabajoFolios: [''],
-      // papelTrabajoMedio: [''],
-      // papelTrabajoCarpeta: [''],
+      observaciones: [''],
+      papelTrabajoReferencia: [''],
+      papelTrabajoDescripcion: [''],
+      papelTrabajoFolios: [''],
+      papelTrabajoMedio: [''],
+      papelTrabajoCarpeta: [''],
       id:[''],
     });
   }
@@ -32,12 +33,8 @@ export class ActividadSeguimientoFormularioComponent {
     if (this.actividadData) {
       const data = {
         ...this.actividadData,
-        fechaInicio: this.actividadData.fechaInicio
-          ? parse(this.actividadData.fechaInicio, 'dd/MM/yyyy', new Date())
-          : null,
-        fechaFin: this.actividadData.fechaFin
-          ? parse(this.actividadData.fechaFin, 'dd/MM/yyyy', new Date())
-          : null,
+        fechaInicio: this.actividadData.fechaInicio,
+        fechaFin: this.actividadData.fechaFin,
       };
   
       this.form.patchValue(data);
