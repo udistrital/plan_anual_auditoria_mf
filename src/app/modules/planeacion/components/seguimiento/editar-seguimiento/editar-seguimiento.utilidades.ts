@@ -138,6 +138,6 @@ export const formularioDependencias: Formulario = {
       deshabilitado: false,
       claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
+    // TODO: La vista de ejecución de informes y seguimiento no tiene estos campos, revisar su pertinencia.
   ]
 }
-

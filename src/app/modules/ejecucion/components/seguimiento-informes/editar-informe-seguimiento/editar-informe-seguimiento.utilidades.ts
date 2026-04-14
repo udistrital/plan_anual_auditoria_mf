@@ -99,6 +99,7 @@ export const formularioInformacionSeguimiento: Formulario = {
       tipo: "date",
       claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
+    // TODO: La vista de planeación de informes y seguimiento no tiene estos campos, revisar su pertinencia.
     {
       nombre: "objetivo_auditoria",
       etiqueta: "Objetivo de la Auditoría",
@@ -107,6 +108,7 @@ export const formularioInformacionSeguimiento: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: true,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 150 },
     },
     {
       nombre: "alcance_auditoria",
@@ -116,6 +118,7 @@ export const formularioInformacionSeguimiento: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: true,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 150 },
     },
     {
       nombre: "criterios",
@@ -125,6 +128,7 @@ export const formularioInformacionSeguimiento: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: true,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 150 },
     },
     {
       nombre: "muestra",
