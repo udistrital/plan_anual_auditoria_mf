@@ -19,6 +19,9 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Campo oculto -->
+      <input *ngSwitchCase="'hidden'" type="hidden" [formControlName]="campo.nombre" />
+
       <!-- Campo tipo email -->
       <mat-form-field *ngSwitchCase="'email'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>

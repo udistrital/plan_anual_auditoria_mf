@@ -19,6 +19,7 @@ export class Campo {
     | "date-range"
     | "icono"
     | "quill"
+    | "hidden"
     | "textarea" = "text";
   placeholder?: string;
   validaciones?: any;
