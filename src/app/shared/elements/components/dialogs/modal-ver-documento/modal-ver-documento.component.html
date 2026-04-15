@@ -32,6 +32,10 @@
       >
         <span class="multiple-item-title">{{ documento.titulo }}</span>
         <mat-icon
+          class="multiple-item-check"
+          *ngIf="mostrarCheckGuardado && documento.guardado && documento.firmado !== false"
+        >check_circle</mat-icon>
+        <mat-icon
           class="multiple-item-unsigned"
           *ngIf="documento.firmado === false"
         >warning_amber</mat-icon>

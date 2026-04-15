@@ -619,6 +619,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
               width: "1200px",
               data: {
                 modoMultiple: true,
+                mostrarCheckGuardado: false,
                 documentos,
               },
               autoFocus: false,
