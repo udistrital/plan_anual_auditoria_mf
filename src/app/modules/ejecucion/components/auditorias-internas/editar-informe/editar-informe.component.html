@@ -122,6 +122,9 @@
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
               </button>
+              <button mat-flat-button color="primary" class="mx-2" (click)="verPreinforme()">
+                Ver preinforme
+              </button>
               <button *ngIf="preinformeAprobado" matStepperNext mat-flat-button color="primary" class="mx-2">
                 Continuar
               </button>

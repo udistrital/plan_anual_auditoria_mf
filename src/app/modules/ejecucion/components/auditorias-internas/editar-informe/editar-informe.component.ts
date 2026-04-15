@@ -2,16 +2,20 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import { formularioInformacionAuditoria } from "./editar-informe.utilidades";
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
+import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import { environment } from 'src/environments/environment';
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
+import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
 
 @Component({
   selector: 'app-editar-informe',
@@ -51,7 +55,10 @@ export class EditarInformeComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private route: ActivatedRoute,
+    private dialog: MatDialog,
     private fb: FormBuilder,
+    private nuxeoService: NuxeoService,
+    private referenciaPdfService: ReferenciaPdfService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private planAuditoriaMid: PlanAnualAuditoriaMid
   ) {
@@ -248,6 +255,115 @@ export class EditarInformeComponent implements OnInit {
 
   guardarRespuestaPreliminar() {
     this.guardarPaso(this.formRespuestaPreliminar.value, "La respuesta preliminar se ha guardado correctamente", "No se pudo guardar la respuesta preliminar");
+  }
+
+  verPreinforme(): void {
+    const auditoriaId = this.informeData?.auditoria_id;
+
+    if (!auditoriaId) {
+      this.alertaService.showErrorAlert("No fue posible identificar la auditoría asociada.");
+      return;
+    }
+
+    this.planAuditoriaMid.get(`plantilla/informe-auditoria/${auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+
+        if (!documentoBase64) {
+          this.alertaService.showErrorAlert("No fue posible generar el preinforme.");
+          return;
+        }
+
+        this.verDocumento(documentoBase64, {
+          nombre: "Informe Preliminar",
+          plantilla: "informe-auditoria",
+          parametro: environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR,
+        });
+      },
+      error: (error: any) => {
+        console.error("Error al generar el preinforme:", error);
+        this.alertaService.showErrorAlert("No fue posible generar el preinforme.");
+      },
+    });
+  }
+
+  verDocumento(documentoBase64: any, infoDocumento: any): void {
+    const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
+      width: "1000px",
+      data: documentoBase64,
+      autoFocus: false,
+    });
+
+    const modalInstance = dialogRef.componentInstance;
+    modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (!res) return;
+
+      if (res.accion === "guardarDocumento") {
+        this.guardarDocumento(documentoBase64, infoDocumento);
+      }
+    });
+  }
+
+  guardarDocumento(documentoBase64: any, infoDocumento: any) {
+    if (documentoBase64 !== "") {
+      const payload = {
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        nombre: infoDocumento.nombre,
+        descripcion:
+          "Documento pdf (" +
+          infoDocumento.plantilla +
+          ") de auditoría de plan de auditoría",
+        metadatos: {},
+        file: documentoBase64,
+      };
+
+      this.nuxeoService.guardarArchivos([payload]).subscribe({
+        next: (response: any) => {
+          const documentoRefNuxeo = response[0];
+
+          this.guardarReferencia(
+            documentoRefNuxeo,
+            "Auditoria",
+            this.informeData?.auditoria_id,
+            infoDocumento.parametro
+          );
+        },
+        error: (error: any) => {
+          console.error("Error al subir el documento", error);
+        },
+      });
+    }
+  }
+
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number,
+    metadatos?: Record<string, any>,
+    onSuccess?: () => void
+  ): void {
+    if (nuxeoResponse.res.Enlace) {
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id,
+          metadatos
+        )
+        .subscribe({
+          next: () => {
+            this.alertaService.showSuccessAlert("Archivo subido exitosamente.");
+            onSuccess?.();
+          },
+          error: (error: any) => {
+            console.error("Error al guardar la referencia", error);
+          },
+        });
+    }
   }
 
   guardarInformeFinal() {
