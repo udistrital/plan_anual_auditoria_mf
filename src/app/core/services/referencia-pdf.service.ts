@@ -103,13 +103,12 @@ export class ReferenciaPdfService {
     referenciaId: string,
     opciones: ConsultaDocumentosReferenciaOptions = {}
   ): Observable<DocumentoReferenciaPdf[]> {
-    const referenciaTipo = opciones.referenciaTipo ?? "Auditoria";
     const fields = opciones.fields ?? "nuxeo_enlace,tipo_id,metadatos";
     const limit = opciones.limit ?? 0;
 
     return this.planAnualAuditoriaService
       .get(
-        `documento?query=referencia_id:${referenciaId},referencia_tipo:${referenciaTipo},activo:true&fields=${fields}&limit=${limit}`
+        `documento?query=referencia_id:${referenciaId},activo:true&fields=${fields}&limit=${limit}`
       )
       .pipe(
         map((response: any) => {

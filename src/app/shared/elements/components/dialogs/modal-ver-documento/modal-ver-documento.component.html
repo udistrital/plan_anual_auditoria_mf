@@ -26,9 +26,15 @@
         *ngFor="let documento of documentosMultiples; let i = index"
         (click)="seleccionarDocumento(i)"
         [class.listado-activo]="indiceSeleccionado === i"
+        matTooltip="Documento no firmado"
+        [matTooltipPosition]="'above'"
+        [matTooltipDisabled]="documento.firmado !== false"
       >
         <span class="multiple-item-title">{{ documento.titulo }}</span>
-        <mat-icon class="multiple-item-check" *ngIf="documento.guardado">check_circle</mat-icon>
+        <mat-icon
+          class="multiple-item-unsigned"
+          *ngIf="documento.firmado === false"
+        >warning_amber</mat-icon>
       </button>
     </div>
 

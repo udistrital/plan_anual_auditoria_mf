@@ -62,8 +62,8 @@
   line-height: 1.25;
 }
 
-.multiple-item-check {
-  color: var(--md-primary-500);
+.multiple-item-unsigned {
+  color: var(--md-warning-700);
   margin-top: 2px;
   flex-shrink: 0;
 }

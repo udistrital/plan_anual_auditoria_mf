@@ -5,11 +5,12 @@ interface DocumentoMultiple {
   titulo: string;
   base64: string;
   guardado: boolean;
+  firmado?: boolean;
 }
 
 interface ModalDocumentoMultipleData {
   modoMultiple: boolean;
-  documentos: Array<{ titulo: string; base64: string; guardado?: boolean }>;
+  documentos: Array<{ titulo: string; base64: string; guardado?: boolean; firmado?: boolean }>;
 }
 
 @Component({
@@ -44,6 +45,7 @@ export class ModalVerDocumentoComponent implements OnInit {
         titulo: documento.titulo,
         base64: documento.base64,
         guardado: !!documento.guardado,
+        firmado: documento.firmado,
       }));
       this.seleccionarDocumento(0);
       return;
