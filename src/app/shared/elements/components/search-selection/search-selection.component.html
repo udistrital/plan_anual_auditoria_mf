@@ -1,7 +1,13 @@
 <mat-form-field class="col-12" appearance="outline">
   <mat-label *ngIf="label">{{label}}</mat-label>
   <mat-icon matPrefix *ngIf="icon" color="primary">{{icon}}</mat-icon>
-  <mat-select #singleSelect class="col-12" [formControl]="parametroControl" [placeholder]="placeholder">
+  <mat-select
+    [multiple]="multiple"
+    #matSelect
+    class="col-12"
+    [formControl]="parametroControl"
+    [placeholder]="placeholder"
+  >
     <mat-option>
       <ngx-mat-select-search
         [formControl]="formFilterControl"

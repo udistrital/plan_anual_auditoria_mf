@@ -15,6 +15,7 @@ import { environment } from "src/environments/environment";
 import { RolService } from "src/app/core/services/rol.service";
 import { DocumentoUtils } from "../consulta-plan.auditoria.utils";
 import { firstValueFrom, map, catchError } from "rxjs";
+import { Auditoria as AuditoriaModel } from "src/app/shared/data/models/auditoria";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -110,24 +111,25 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get(url).subscribe(
       (res) => {
         if (res.Data && res.Data.length > 0) {
-          this.dataSource.data = res.Data.map((item: any) => ({
-            id: item._id ?? "",
-            auditoria: item.titulo ?? "Sin Título",
-            tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
-            tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
-            macroproceso: item.macroproceso_nombre ?? "Sin Macroproceso",
-            macroprocesoId: item.macroproceso_id ?? 0,
-            proceso: item.proceso_nombre ?? "Sin Proceso",
-            procesoId: item.proceso_id ?? 0,
-            dependencia: item.dependencia_nombre ?? "Sin Dependencia",
-            dependenciaId: item.dependencia_id ?? 0,
-            cronograma: item.cronograma ?? "Sin Cronograma",
-            cronogramaId: item.cronograma_id ?? [],
-            estado: item.estado_nombre ?? "Sin estado",
-            // Se mapea cantidad_auditorias con fallback a 0 según el requerimiento
-            cantidadAuditorias: item.cantidad_auditorias ?? 0,
-          }));
-          
+          this.dataSource.data = res.Data.map((item: AuditoriaModel): Partial<Auditoria> => {
+            return {
+              id: item._id ?? "",
+              auditoria: item.titulo ?? "Sin Título",
+              tipoEvaluacion: item.tipo_evaluacion_nombre ?? "Sin Tipo",
+              tipoEvaluacionId: item.tipo_evaluacion_id ?? 0,
+              macroprocesos: item.macroproceso ?? "Sin macroprocesos",
+              macroprocesosId: item.macroproceso_id ?? [],
+              procesos: item.proceso ?? "Sin procesos",
+              procesosId: item.proceso_id ?? [],
+              dependencias: item.dependencia ?? "Sin dependencias",
+              dependenciasId: item.dependencia_id ?? [],
+              cronograma: item.cronograma ?? "Sin Cronograma",
+              cronogramaId: item.cronograma_id ?? [],
+              estado: item.estado_nombre ?? "Sin estado",
+              // Se mapea cantidad_auditorias con fallback a 0 según el requerimiento
+              cantidadAuditorias: item.cantidad_auditorias ?? 0,
+            };
+          });
           this.actualizarColumnas();
         }
       },

@@ -1,6 +1,6 @@
 <!-- ← Botón de descarga de plantilla de cargue masivo -->
 <div class="mb-3">
-  <button mat-raised-button color="primary" (click)="descargarPlantilla()">
+  <button *ngIf="!soloLectura" mat-raised-button color="primary" (click)="descargarPlantilla()">
     <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
   </button>
 </div>
@@ -53,7 +53,7 @@
     </ng-container>
 
     <!-- Acciones -->
-    <ng-container matColumnDef="acciones">
+    <ng-container *ngIf="!soloLectura" matColumnDef="acciones">
       <th mat-header-cell *matHeaderCellDef class="header">
         <b>Acciones</b>
       </th>

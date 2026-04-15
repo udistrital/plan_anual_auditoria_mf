@@ -1,7 +1,9 @@
 <plantilla-tarjeta-contenedora
-  [title]="'Editar Auditoría'"
+  [title]="soloLectura ? 'Ver Auditoría' : 'Editar Auditoría'"
   [breadcrumb]="
-    '<p>Gestión Auditoría / Planeación / Auditorías Internas / <b>Editar Auditoría</b></p>'
+    soloLectura
+      ? '<p>Gestión Auditoría / Planeación / Auditorías Internas / <b>Ver Auditoría</b></p>'
+      : '<p>Gestión Auditoría / Planeación / Auditorías Internas / <b>Editar Auditoría</b></p>'
   "
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
@@ -9,7 +11,7 @@
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row">
+  <div class="row" [class.modo-lectura]="soloLectura">
     <div class="col-12">
       <mat-stepper
         [linear]="esLineal"
@@ -44,14 +46,39 @@
               (campoSeleccionado)="manejarCambioSelect($event)"
             >
             </app-formulario-dinamico>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Dependencias</h2>
+                Informacion de las dependencias
+              </div>
+            </div>
+            <mat-accordion *ngIf="auditoria" multi="true">
+              <mat-expansion-panel *ngFor="let dep of auditoria.datos_dependencias">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    {{ dep.dependencia_nombre }}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="p-3">
+                  <app-formulario-dinamico
+                    #formularioDependenciasComp
+                    [formulario]="formularioDependencias"
+                  >
+                  </app-formulario-dinamico>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
             <div class="d-flex justify-content-end mt-4">
               <button
                 mat-raised-button
                 color="primary"
                 (click)="enviarFormInformacion()"
               >
-                <mat-icon>save</mat-icon>
-                Guardar y continuar
+                <mat-icon>{{ soloLectura ? 'arrow_forward_ios' : 'save' }}</mat-icon>
+                {{ soloLectura ? 'Continuar' : 'Guardar y continuar' }}
               </button>
             </div>
           </div>
@@ -74,6 +101,7 @@
           </div>
           <app-actividades-auditoria
             [idAuditoria]="auditoriaId"
+            [soloLectura]="soloLectura"
           ></app-actividades-auditoria>
           <div class="d-flex justify-content-end mt-4">
             <button matStepperPrevious mat-stroked-button color="primary">
@@ -81,6 +109,7 @@
               Volver
             </button>
             <button
+              *ngIf="!soloLectura"
               mat-flat-button
               color="primary"
               class="mx-2"
@@ -90,10 +119,11 @@
               Crear Actividad
             </button>
             <button matStepperNext mat-flat-button color="primary" class="mx-2">
-              <mat-icon>save</mat-icon>
-              Guardar y continuar
+              <mat-icon>{{ soloLectura ? 'arrow_forward_ios' : 'save' }}</mat-icon>
+              {{ soloLectura ? 'Continuar' : 'Guardar y continuar' }}
             </button>
             <button
+              *ngIf="!soloLectura"
               class="mx-2"
               mat-raised-button
               color="primary"
@@ -155,8 +185,8 @@
                 (click)="enviarFormRecursos()"
                 class="mx-2"
               >
-                <mat-icon>save</mat-icon>
-                Guardar y continuar
+                <mat-icon>{{ soloLectura ? 'arrow_forward_ios' : 'save' }}</mat-icon>
+                {{ soloLectura ? 'Continuar' : 'Guardar y continuar' }}
               </button>
             </div>
           </div>
@@ -178,6 +208,7 @@
             </div>
           </div>
           <app-documentos-anexos-auditoria
+            [soloLectura]="soloLectura"
             (guardarDocumentos)="manejarEnvioDocumentos($event)"
           ></app-documentos-anexos-auditoria>
           <div class="d-flex justify-content-end mt-4">
@@ -185,9 +216,9 @@
               <mat-icon>arrow_back_ios</mat-icon>
               Volver
             </button>
-            <button mat-flat-button color="primary" class="mx-2" (click)="finalizarAuditoria()">
+            <button *ngIf="!soloLectura" mat-flat-button color="primary" class="mx-2" (click)="finalizarAuditoria()">
               <mat-icon>send</mat-icon>
-              Enviar
+              Enviar a Aprobación
             </button>
           </div>
         </mat-step>

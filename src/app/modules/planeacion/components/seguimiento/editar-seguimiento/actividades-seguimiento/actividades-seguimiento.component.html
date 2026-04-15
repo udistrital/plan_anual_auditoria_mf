@@ -37,7 +37,7 @@
 
     <!-- Acciones -->
 
-    <ng-container matColumnDef="acciones">
+    <ng-container *ngIf="!soloLectura" matColumnDef="acciones">
       <th mat-header-cell *matHeaderCellDef class="header">
         <b>Acciones</b>
       </th>
