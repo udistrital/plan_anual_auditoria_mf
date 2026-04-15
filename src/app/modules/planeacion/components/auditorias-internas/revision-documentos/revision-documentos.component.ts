@@ -259,21 +259,22 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   /**
-   * Notifica a los actores de la dependencia (jefe, asistente, correo dependencia
-   * y correo complementario si existe) cuando el Jefe OCI aprueba y envía el
-   * programa de auditoría a revisión del auditado.
-   * Los auditores asignados reciben copia (Cc).
-   *
-   * Patrón: getAuthenticatedUserTerceroIdentification() primero y sola,
-   * luego forkJoin con auditoria, auditores y vigencias.
-   */
+ * Notifica a los actores de cada dependencia asociada a la auditoría (correo_dependencia,
+ * jefe_correo, asistente_correo y correo_complementario si existe) cuando el Jefe OCI
+ * aprueba y envía el programa de auditoría a revisión del auditado.
+ * Los auditores asignados reciben copia (Cc).
+ *
+ * Los correos se resuelven desde `dependencias_info`, que soporta múltiples dependencias
+ * por auditoría. Los campos opcionales (jefe, asistente, complementario) solo se incluyen
+ * si el MID los retorna.
+ *
+ */
   private notificarEnvioAuditado(auditoriaId: string): void {
     const rolRemitente = "Jefe OCI";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
       exhaustMap((tercero) => {
-        console.log("Tercero autenticado:", tercero.NombreCompleto);
         return forkJoin({
           auditoria: this.planAuditoriaMid.get(`auditoria/${auditoriaId}`),
           auditores: this.planAuditoriaService.get(
@@ -287,23 +288,11 @@ export class RevisionDocumentosComponent implements OnInit {
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
         const datosAuditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
+        const dependenciasInfo: any[] = datosAuditoria?.dependencias_info ?? [];
 
-        // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
-
-        console.log("auditoria_id:", auditoriaId);
-        console.log("titulo auditoria:", datosAuditoria?.titulo);
-        console.log("vigencia_id:", vigenciaId);
-        console.log("vigencia_nombre resuelta:", vigenciaNombre);
-        console.log("dependencia_nombre:", datosAuditoria?.dependencia_nombre);
-        console.log("correo_dependencia:", datosAuditoria?.correo_dependencia);
-        console.log("jefe_correo:", datosAuditoria?.jefe_correo);
-        console.log("asistente_correo:", datosAuditoria?.asistente_correo);
-        console.log("correo_complementario:", datosAuditoria?.correo_complementario);
-        console.log("auditores encontrados:", listaAuditores.length);
-        console.log("auditores:", listaAuditores.map((a: any) => a.auditor_id));
 
         const correosAuditores$ = listaAuditores.length > 0
           ? forkJoin(
@@ -321,23 +310,27 @@ export class RevisionDocumentosComponent implements OnInit {
               .filter((t) => t?.UsuarioWSO2)
               .map((t) => t.UsuarioWSO2);
 
-            console.log("correos auditores resueltos (Cc):", correosAuditores);
+            const toAddressesDinamicos: string[] = dependenciasInfo.flatMap((dep) => {
+              const correos: string[] = [];
+              if (dep.correo_dependencia)    correos.push(dep.correo_dependencia);
+              if (dep.jefe_correo)           correos.push(dep.jefe_correo);
+              if (dep.asistente_correo)      correos.push(dep.asistente_correo);
+              if (dep.correo_complementario) correos.push(dep.correo_complementario);
+              return correos;
+            });
 
-            // ToAddresses: actores de la dependencia (dinámico) + fijos del environment
-            const toAddressesDinamicos: string[] = [
-              datosAuditoria?.correo_dependencia,
-              datosAuditoria?.jefe_correo,
-              datosAuditoria?.asistente_correo,
-            ].filter((correo): correo is string =>
-              !!correo && correo !== "Correo no encontrado"
+            console.log(
+              "[notificarEnvioAuditado] dependencias_info recibidas:",
+              JSON.stringify(dependenciasInfo, null, 2)
             );
-
-            // correo_complementario solo si no es nulo ni vacío
-            if (datosAuditoria?.correo_complementario) {
-              toAddressesDinamicos.push(datosAuditoria.correo_complementario);
-            }
-
-            console.log("ToAddresses dinámicos (dependencia):", toAddressesDinamicos);
+            console.log(
+              "[notificarEnvioAuditado] ToAddresses resueltos:",
+              toAddressesDinamicos
+            );
+            console.log(
+              "[notificarEnvioAuditado] Cc auditores resueltos:",
+              correosAuditores
+            );
 
             const fijosEnvioAuditado = environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS;
             const destinatarios: DestinatariosEmail = {
@@ -352,6 +345,11 @@ export class RevisionDocumentosComponent implements OnInit {
               BccAddresses: fijosEnvioAuditado.BccAddresses ?? [],
             };
 
+            console.log(
+            "[notificarEnvioAuditado] Payload final destinatarios:",
+            JSON.stringify(destinatarios, null, 2)
+            );
+
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Revisión de Programa de Auditoría",
               tipo_solicitud: "revisión y firma",
@@ -362,14 +360,11 @@ export class RevisionDocumentosComponent implements OnInit {
               fecha_envio: new Date().toLocaleDateString(),
             };
 
-            console.log("PAYLOAD ENVÍO AUDITADO:", JSON.stringify({ destinatarios, variablesSolicitud }, null, 2));
-
             return this.notificacionesService.enviarNotificacionSolicitud(
               destinatarios,
               variablesSolicitud
             ).pipe(
               tap((response: any) => {
-                console.log("RESPUESTA NOTIFICACION:", JSON.stringify(response, null, 2));
                 if (response?.Status == 200) {
                   this.registrarNotificacion(
                     auditoriaId,
@@ -386,8 +381,6 @@ export class RevisionDocumentosComponent implements OnInit {
 
       catchError((error) => {
         console.warn("Error al notificar envío a auditado:", error);
-        console.warn("Status:", error.status);
-        console.warn("Body:", JSON.stringify(error.error));
         return throwError(() => error);
       })
 
