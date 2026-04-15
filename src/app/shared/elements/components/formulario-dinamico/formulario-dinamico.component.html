@@ -124,7 +124,6 @@
         <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
         <textarea
           matInput
-          style="resize: none"
           [style.height.px]="campo.parametros?.altura || 72"
           [formControlName]="campo.nombre"
           [placeholder]="campo.placeholder || ''"
