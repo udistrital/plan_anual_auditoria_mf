@@ -92,15 +92,16 @@ export class ReferenciaPdfService {
   ): Observable<{ nuxeo_enlace: string; tipo_id: number }[]> {
     return this.planAnualAuditoriaService
       .get(
-        `documento?query=referencia_id:${referenciaId},activo:true&fields=nuxeo_enlace,tipo_id`
+        `documento?query=referencia_id:${referenciaId},activo:true&fields=nuxeo_enlace,tipo_id,metadatos`
       )
       .pipe(
         map((response: any) => {
           if (response && response.Data && Array.isArray(response.Data)) {
             return response.Data.map(
-              (item: { nuxeo_enlace: string; tipo_id: number }) => ({
+              (item: { nuxeo_enlace: string; tipo_id: number; metadatos: any }) => ({
                 nuxeo_enlace: item.nuxeo_enlace,
                 tipo_id: item.tipo_id,
+                metadatos: item.metadatos,
               })
             ).filter(
               (item: { nuxeo_enlace: any; tipo_id: any }) =>
