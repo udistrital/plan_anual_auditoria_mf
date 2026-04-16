@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -14,13 +15,18 @@ import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-
 })
 export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
-  datos: any;
+  datos = new MatTableDataSource<any>([]);
   
   columnsToDisplay: string[] = [
     "no",
     "actividad",
     "fechaInicio",
     "fechaFin",
+    "referencia",
+    "descripcion",
+    "folio",
+    "carpeta",
+    "observaciones",
     "acciones",
   ];
 
@@ -58,17 +64,16 @@ export class ActividadesSeguimientoComponent implements OnInit {
             "Actualmente no hay actividades registradas para la vigencia seleccionada."
           );
         }
-        this.datos = actividades.map((item) => ({
+        this.datos.data = actividades.map((item) => ({
           id: item._id,
           actividad: item.titulo,
           fechaInicio: new Date(item.fecha_inicio)?.toLocaleDateString(),
           fechaFin: new Date(item.fecha_fin)?.toLocaleDateString(),
-          // TODO: update papelTrabajo fields when business logic is clear
-          //ref: item.papeltrabajo_referencia,
-          //descripcion: item.papeltrabajo_descripcion,
-          //folios: item.papeltrabajo_folios?.toString() || "",
-          //medio: item.papeltrabajo_medio || "",  
-          //carpeta: item.papeltrabajo_carpeta || ""
+          observaciones: item.observacion || '',
+          referencia: item.referencia || '',
+          descripcion: item.descripcion || '',
+          folio: item.folio?.toString() || '',
+          carpeta: item.carpeta || ''
         }));
       });
       
@@ -84,7 +89,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
               (response) => {
                 if (response) {
                   this.alertaService.showSuccessAlert("Registro eliminado");
-                  this.datos = this.datos.filter(
+                  this.datos.data = this.datos.data.filter(
                     (e:any) => e.id !== actividad.id
                   );
                 } else {

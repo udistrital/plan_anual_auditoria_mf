@@ -28,7 +28,11 @@ export class CrearActividadComponent {
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
-      observacion: actividadData.observaciones
+      observacion: actividadData.observaciones,
+      referencia: actividadData.referencia,
+      descripcion: actividadData.descripcion,
+      folio: actividadData.folio ? Number(actividadData.folio) : null,
+      carpeta: actividadData.carpeta,
     };
 
     this.alertaService

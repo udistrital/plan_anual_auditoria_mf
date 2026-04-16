@@ -34,12 +34,11 @@ export class EditarActividadSeguimientoComponent {
       titulo:actividadData.actividad,
       fecha_inicio:actividadData.fechaInicio.toISOString(),
       fecha_fin:actividadData.fechaFin.toISOString(),
-      // TODO: update papelTrabajo fields when business logic is clear
-      // papeltrabajo_referencia:actividadData.papelTrabajoReferencia,
-      // papeltrabajo_descripcion:actividadData.papelTrabajoDescripcion,
-      // papeltrabajo_folios:actividadData.papelTrabajoFolios,
-      // papeltrabajo_medio:actividadData.papelTrabajoMedio,
-      // papeltrabajo_carpeta:actividadData.papelTrabajoCarpeta,
+      observacion:actividadData.observaciones,
+      referencia:actividadData.referencia,
+      descripcion:actividadData.descripcion,
+      folio:actividadData.folio ? Number(actividadData.folio) : null,
+      carpeta:actividadData.carpeta,
     };
 
     console.debug('Editar actividad json:', actividadJson);

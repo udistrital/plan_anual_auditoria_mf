@@ -23,6 +23,10 @@ export class ActividadFormularioComponent implements OnInit, OnDestroy {
       fechaInicio: ['', Validators.required],
       fechaFin: [{ value: '', disabled: true }, Validators.required],
       observaciones: ['', null],
+      referencia: [''],
+      descripcion: [''],
+      folio: [null],
+      carpeta: [''],
       id: [''],
     });
   }

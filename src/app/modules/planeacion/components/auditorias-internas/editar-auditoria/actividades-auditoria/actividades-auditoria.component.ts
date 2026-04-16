@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -17,13 +18,17 @@ import { environment } from "src/environments/environment";
 })
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: String;
-  datos: any;
+  datos = new MatTableDataSource<any>([]);
 
   columnsToDisplay: string[] = [
     "no",
     "actividad",
     "fechaInicio",
     "fechaFin",
+    "referencia",
+    "descripcion",
+    "folio",
+    "carpeta",
     "observaciones",
     "acciones",
   ];
@@ -87,17 +92,16 @@ export class ActividadesAuditoriaComponent implements OnInit {
           );
         }
 
-        this.datos = actividades.map((item) => ({
+        this.datos.data = actividades.map((item) => ({
           id: item._id,
           actividad: item.titulo,
           fechaInicio: this.parsearFechaLocal(item.fecha_inicio),
           fechaFin: this.parsearFechaLocal(item.fecha_fin),
-          observaciones: item.observacion
-          //ref: item.referencia,
-          //descripcion: item.descripcion,
-          //folios: item.folio?.toString() || "",
-          //medio: item.medio_id || "",  
-          //carpeta: item.carpeta || ""
+          observaciones: item.observacion,
+          referencia: item.referencia || '',
+          descripcion: item.descripcion || '',
+          folio: item.folio?.toString() || '',
+          carpeta: item.carpeta || ''
         }));
       });
   }
@@ -113,7 +117,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
               (response) => {
                 if (response) {
                   this.alertaService.showSuccessAlert("Registro eliminado");
-                  this.datos = this.datos.filter(
+                  this.datos.data = this.datos.data.filter(
                     (e: any) => e.id !== actividad.id
                   );
                 } else {
