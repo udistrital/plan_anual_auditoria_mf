@@ -3,7 +3,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { Actividad } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
+import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
+import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import  { EditarActividadComponent } from './editar-actividad/editar-actividad.component'
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -91,17 +92,17 @@ export class ActividadesAuditoriaComponent implements OnInit {
           );
         }
 
-        this.datos = actividades.map((item) => ({
+        this.datos = actividades.map((item: Actividad): ActividadPlan => ({
           id: item._id,
           actividad: item.titulo,
-          fechaInicio: this.parsearFechaLocal(item.fecha_inicio),
-          fechaFin: this.parsearFechaLocal(item.fecha_fin),
-          observaciones: item.observacion
-          //ref: item.referencia,
-          //descripcion: item.descripcion,
-          //folios: item.folio?.toString() || "",
-          //medio: item.medio_id || "",  
-          //carpeta: item.carpeta || ""
+          fechaInicio: new Date(item.fecha_inicio),
+          fechaFin: new Date(item.fecha_fin),
+          observaciones: item.observacion,
+          papelTrabajoReferencia: item.referencia,
+          papelTrabajoDescripcion: item.descripcion,
+          papelTrabajoFolios: item.folio,
+          papelTrabajoMedio: item.medio,  
+          papelTrabajoCarpeta: item.carpeta
         }));
       });
   }
@@ -143,11 +144,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       });
   }
 
-  editarActividad(actividad: Actividad) {
-    if (this.soloLectura) {
-      return;
-    }
-
+  editarActividad(actividad: ActividadPlan) {
     const dialogRef = this.dialog.open(EditarActividadComponent, {
       width: '1100px',
       data: {
