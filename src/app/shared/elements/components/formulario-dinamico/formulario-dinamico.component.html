@@ -19,6 +19,9 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Campo oculto -->
+      <input *ngSwitchCase="'hidden'" type="hidden" [formControlName]="campo.nombre" />
+
       <!-- Campo tipo email -->
       <mat-form-field *ngSwitchCase="'email'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>
@@ -139,7 +142,7 @@
           <quill-editor 
             [formControlName]="campo.nombre"
             [modules]="campo.quillConfig!"
-            [placeholder]="campo.placeholder || ''"
+            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder || '')"
             [ngStyle]="{ 'width': '100%'}"
             >
           </quill-editor>

@@ -2,6 +2,8 @@ import { Component, Input, Inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
+import { Actividad } from 'src/app/shared/data/models/actividad';
 
 
 @Component({
@@ -10,8 +12,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
   styleUrl: './editar-actividad.component.css'
 })
 export class EditarActividadSeguimientoComponent {
-  datos: any;
-  actividadData: any;
+  actividadData: ActividadPlan;
   idAuditoria: string;
 
   constructor(
@@ -28,32 +29,32 @@ export class EditarActividadSeguimientoComponent {
   ngOnInit(): void {
   }
 
-  editarActividad(actividadData: any) {
-    let actividadJson={
-      auditoria_id:this.idAuditoria,
-      titulo:actividadData.actividad,
-      fecha_inicio:actividadData.fechaInicio.toISOString(),
-      fecha_fin:actividadData.fechaFin.toISOString(),
-      observacion:actividadData.observaciones,
-      referencia:actividadData.referencia,
-      descripcion:actividadData.descripcion,
-      folio:actividadData.folio ? Number(actividadData.folio) : null,
-      carpeta:actividadData.carpeta,
+  editarActividad(actividadData: ActividadPlan) {
+    console.debug('Editar actividad:', actividadData);
+    let actividadJson: Actividad = {
+      auditoria_id: this.idAuditoria,
+      titulo: actividadData.actividad,
+      fecha_inicio: actividadData.fechaInicio.toISOString(),
+      fecha_fin: actividadData.fechaFin.toISOString(),
+      observacion: actividadData.observaciones,
+      referencia: actividadData.papelTrabajoReferencia,
+      descripcion: actividadData.papelTrabajoDescripcion,
+      folio: actividadData.papelTrabajoFolios,
+      medio: actividadData.papelTrabajoMedio,
+      carpeta: actividadData.papelTrabajoCarpeta
     };
 
     console.debug('Editar actividad json:', actividadJson);
-
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de editar el registro?")
       .then((result) => {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
-            .put(`actividad`, actividadJson)
+            .put(`actividad/${actividadData.id}`, actividadJson)
             .subscribe(
               (response) => {
                 if (response) {
-                  this.alertaService.showSuccessAlert("Mock Registro Editado");
-                  this.datos.push(response);
+                  this.alertaService.showSuccessAlert("Registro Editado");
                   this.dialogRef.close(true);
                 } else {
                   this.alertaService.showErrorAlert(

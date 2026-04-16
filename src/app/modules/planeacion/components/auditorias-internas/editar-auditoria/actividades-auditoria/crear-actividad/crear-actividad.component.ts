@@ -2,6 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
+import { Actividad } from 'src/app/shared/data/models/actividad';
 @Component({
   selector: 'app-crear-actividad',
   templateUrl: './crear-actividad.component.html',
@@ -18,21 +20,22 @@ export class CrearActividadComponent {
   ) {
     this.auditoriaId = data.auditoriaId;
   }
-  ngOnInit(): void {
-    //console.log('Auditoría ID recibido:', this.auditoriaId);
 
+  ngOnInit(): void {
   }
-  crearActividad(actividadData: any) {
-    let actividadJson={
-      auditoria_id:this.auditoriaId,
-      titulo:actividadData.actividad,
-      fecha_inicio:actividadData.fechaInicio.toISOString(),
-      fecha_fin:actividadData.fechaFin.toISOString(),
+  
+  crearActividad(actividadData: ActividadPlan) {
+    let actividadJson: Actividad = {
+      auditoria_id: this.auditoriaId,
+      titulo: actividadData.actividad,
+      fecha_inicio: actividadData.fechaInicio.toISOString(),
+      fecha_fin: actividadData.fechaFin.toISOString(),
       observacion: actividadData.observaciones,
-      referencia: actividadData.referencia,
-      descripcion: actividadData.descripcion,
-      folio: actividadData.folio ? Number(actividadData.folio) : null,
-      carpeta: actividadData.carpeta,
+      referencia: actividadData.papelTrabajoReferencia,
+      descripcion: actividadData.papelTrabajoDescripcion,
+      folio: actividadData.papelTrabajoFolios,
+      medio: actividadData.papelTrabajoMedio,
+      carpeta: actividadData.papelTrabajoCarpeta,
     };
 
     this.alertaService
@@ -54,7 +57,7 @@ export class CrearActividadComponent {
                 }
               },
               (error) => {
-                console.log("error ",error)
+                console.error("error al crear actividad:", error);
                 this.alertaService.showErrorAlert(
                   "Error al crear el registro"
                 );
@@ -62,8 +65,9 @@ export class CrearActividadComponent {
             );
         }
       })
-      .catch(() => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      .catch((error) => {
+        console.error("Error al crear actividad", error);
+        this.alertaService.showErrorAlert("Error al crear el registro");
       });
   }
 }

@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { parse } from 'date-fns';
 import { Subscription } from 'rxjs';
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
   selector: 'app-actividad-formulario',
@@ -9,8 +10,8 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./actividad-formulario.component.css'],
 })
 export class ActividadFormularioComponent implements OnInit, OnDestroy {
-  @Input() actividadData: any = {};
-  @Output() formSubmit = new EventEmitter<any>();
+  @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales
+  @Output() formSubmit = new EventEmitter<ActividadPlan>();
 
   form: FormGroup;
   fechaMinFin: Date | null = null;
@@ -23,23 +24,19 @@ export class ActividadFormularioComponent implements OnInit, OnDestroy {
       fechaInicio: ['', Validators.required],
       fechaFin: [{ value: '', disabled: true }, Validators.required],
       observaciones: ['', null],
-      referencia: [''],
-      descripcion: [''],
-      folio: [null],
-      carpeta: [''],
+      papelTrabajoReferencia: ['', null],
+      papelTrabajoDescripcion: ['', null],
+      papelTrabajoFolios: ['', null],
+      papelTrabajoMedio: ['', null],
+      papelTrabajoCarpeta: ['', null],
       id: [''],
     });
   }
 
   ngOnInit(): void {
     if (this.actividadData) {
-      const fechaInicioParseada = this.actividadData.fechaInicio
-        ? parse(this.actividadData.fechaInicio, 'dd/MM/yyyy', new Date())
-        : null;
-
-      const fechaFinParseada = this.actividadData.fechaFin
-        ? parse(this.actividadData.fechaFin, 'dd/MM/yyyy', new Date())
-        : null;
+      const fechaInicioParseada = this.actividadData.fechaInicio;
+      const fechaFinParseada = this.actividadData.fechaFin;
 
       const data = {
         ...this.actividadData,

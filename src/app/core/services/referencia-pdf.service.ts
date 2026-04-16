@@ -1,8 +1,20 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
+
+export interface DocumentoReferenciaPdf {
+  nuxeo_enlace: string;
+  tipo_id: number;
+  metadatos?: Record<string, any>;
+}
+
+export interface ConsultaDocumentosReferenciaOptions {
+  referenciaTipo?: string;
+  fields?: string;
+  limit?: number;
+}
 
 @Injectable({
   providedIn: "root",
@@ -17,7 +29,8 @@ export class ReferenciaPdfService {
     nuxeoResponse: any, // Respuesta de Nuxeo
     referencia_tipo: string,
     referencia_id: string,
-    tipo_id: number
+    tipo_id: number,
+    metadatos?: Record<string, any>
   ): Observable<any> {
     const payload = {
       referencia_tipo: referencia_tipo,
@@ -25,13 +38,21 @@ export class ReferenciaPdfService {
       nuxeo_id: nuxeoResponse.Id,
       nuxeo_enlace: nuxeoResponse.Enlace,
       tipo_id: tipo_id,
+      metadatos: metadatos || {},
       activo: true,
       fecha_creacion: new Date().toISOString(),
     };
 
-    // Verificar si ya existe un registro para la referencia
+    const queryBase = `referencia_id:${referencia_id},tipo_id:${tipo_id}`;
+    const dependenciaId = metadatos?.["dependencia_id"];
+    const queryMetadatos =
+      typeof dependenciaId === "number"
+        ? `,metadatos.dependencia_id:${dependenciaId}<n>`
+        : "";
+
+    // Verificar si ya existe un registro para la referencia y metadatos (si aplica)
     return this.planAnualAuditoriaService
-      .get(`documento?query=referencia_id:${referencia_id},tipo_id:${tipo_id}`)
+      .get(`documento?query=${queryBase}${queryMetadatos}`)
       .pipe(
         switchMap((response) => {
           if (response && response.Data.length > 0) {
@@ -79,30 +100,28 @@ export class ReferenciaPdfService {
   }
 
   consultarDocumentos(
-    referenciaId: string
-  ): Observable<{ nuxeo_enlace: string; tipo_id: number }[]> {
+    referenciaId: string,
+    opciones: ConsultaDocumentosReferenciaOptions = {}
+  ): Observable<DocumentoReferenciaPdf[]> {
+    const fields = opciones.fields ?? "nuxeo_enlace,tipo_id,metadatos";
+    const limit = opciones.limit ?? 0;
+
     return this.planAnualAuditoriaService
       .get(
-        `documento?query=referencia_id:${referenciaId},activo:true&fields=nuxeo_enlace,tipo_id`
+        `documento?query=referencia_id:${referenciaId},activo:true&fields=${fields}&limit=${limit}`
       )
       .pipe(
         map((response: any) => {
           if (response && response.Data && Array.isArray(response.Data)) {
-            return response.Data.map(
-              (item: { nuxeo_enlace: string; tipo_id: number }) => ({
-                nuxeo_enlace: item.nuxeo_enlace,
-                tipo_id: item.tipo_id,
-              })
-            ).filter(
-              (item: { nuxeo_enlace: any; tipo_id: any }) =>
-                item.nuxeo_enlace && item.tipo_id
+            return response.Data.filter(
+              (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
             );
           }
           throw new Error("No se encontraron enlaces válidos en la respuesta.");
         }),
         catchError((error) => {
           console.error("Error al consultar los documentos:", error);
-          return []; // Retorna un arreglo vacío en caso de error
+          return of([]); // Retorna un arreglo vacío en caso de error (of = observable)
         })
       );
   }

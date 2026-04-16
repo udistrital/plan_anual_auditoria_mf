@@ -4,7 +4,8 @@ import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
-import { Actividad } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
+import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
+import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import  { EditarActividadComponent } from './editar-actividad/editar-actividad.component'
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -18,6 +19,7 @@ import { environment } from "src/environments/environment";
 })
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: String;
+  @Input() soloLectura: boolean = false;
   datos = new MatTableDataSource<any>([]);
 
   columnsToDisplay: string[] = [
@@ -29,6 +31,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
     "descripcion",
     "folio",
     "carpeta",
+    "medio",
     "observaciones",
     "acciones",
   ];
@@ -48,6 +51,9 @@ export class ActividadesAuditoriaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.soloLectura) {
+      this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
+    }
     this.listaractividades();
   }
 
@@ -92,21 +98,28 @@ export class ActividadesAuditoriaComponent implements OnInit {
           );
         }
 
-        this.datos.data = actividades.map((item) => ({
-          id: item._id,
-          actividad: item.titulo,
-          fechaInicio: this.parsearFechaLocal(item.fecha_inicio),
-          fechaFin: this.parsearFechaLocal(item.fecha_fin),
-          observaciones: item.observacion,
-          referencia: item.referencia || '',
-          descripcion: item.descripcion || '',
-          folio: item.folio?.toString() || '',
-          carpeta: item.carpeta || ''
-        }));
+        this.datos = new MatTableDataSource( 
+          actividades.map((item: Actividad): ActividadPlan => ({
+            id: item._id,
+            actividad: item.titulo,
+            fechaInicio: new Date(item.fecha_inicio),
+            fechaFin: new Date(item.fecha_fin),
+            observaciones: item.observacion,
+            papelTrabajoReferencia: item.referencia,
+            papelTrabajoDescripcion: item.descripcion,
+            papelTrabajoFolios: item.folio,
+            papelTrabajoMedio: item.medio,
+            papelTrabajoCarpeta: item.carpeta
+          })
+        ));
       });
   }
 
   eliminarActividad(actividad: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de eliminar el registro?")
       .then((result) => {
@@ -139,7 +152,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       });
   }
 
-  editarActividad(actividad: Actividad) {
+  editarActividad(actividad: ActividadPlan) {
     const dialogRef = this.dialog.open(EditarActividadComponent, {
       width: '1100px',
       data: {

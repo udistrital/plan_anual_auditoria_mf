@@ -1,11 +1,10 @@
 // Adapted from https://stackblitz.com/github/bithost-gmbh/ngx-mat-select-search-example?file=src%2Fapp%2Fapp.component.html
 
 import { AfterViewInit, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { ReplaySubject, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { MatSelect } from '@angular/material/select';
-import { setThrowInvalidWriteToSignalError } from '@angular/core/primitives/signals';
 
 export interface Parametro {
   Id: number;
@@ -13,12 +12,12 @@ export interface Parametro {
 }
 
 @Component({
-    selector: 'app-single-selection',
-    templateUrl: './single-selection.component.html',
-    styleUrls: ['./single-selection.component.css'],
+    selector: 'app-search-selection',
+    templateUrl: './search-selection.component.html',
+    styleUrls: ['./search-selection.component.css'],
     standalone: false
 })
-export class SingleSelectionComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class SearchSelectionComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
 
   /** Label for the single selection filter */
   @Input() public label: string = 'Parámetro';
@@ -39,7 +38,17 @@ export class SingleSelectionComponent implements OnInit, AfterViewInit, OnChange
   @Input() public parametros: Parametro[] = [];
 
   /** control for the selected parametro */
-  @Input() public parametroControl: FormControl<number | null> = new FormControl<number | null>(null);
+  @Input() public parametroControl: FormControl<any> = new FormControl<any>(null);
+
+  /** Multiple selection flag — acepta atributo sin binding (p. ej. "multiple") */
+  private _multiple: boolean = false;
+  @Input()
+  public set multiple(value: boolean | string | undefined) {
+    this._multiple = value === '' || value === true || value === 'true';
+  }
+  public get multiple(): boolean {
+    return this._multiple;
+  }
 
   /** control for the MatSelect filter keyword */
   public formFilterControl: FormControl<string | null> = new FormControl<string | null>('');
@@ -47,7 +56,7 @@ export class SingleSelectionComponent implements OnInit, AfterViewInit, OnChange
   /** list of parametros filtered by search keyword */
   public filteredParametros: ReplaySubject<Parametro[]> = new ReplaySubject<Parametro[]>(1);
 
-  @ViewChild('singleSelect', { static: true }) singleSelect!: MatSelect;
+  @ViewChild('matSelect', { static: true }) matSelect!: MatSelect;
 
   /** Subject that emits when the component has been destroyed. */
   protected _onDestroy = new Subject<void>();
@@ -93,7 +102,7 @@ export class SingleSelectionComponent implements OnInit, AfterViewInit, OnChange
         // the form control (i.e. _initializeSelection())
         // this needs to be done after the filteredParametros are loaded initially
         // and after the mat-option elements are available
-        this.singleSelect.compareWith = (a: number | null, b: number | null) => !!a && !!b && a === b;
+        this.matSelect.compareWith = (a: number | null, b: number | null) => !!a && !!b && a === b;
       });
   }
 
