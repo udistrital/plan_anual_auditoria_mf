@@ -25,6 +25,7 @@ import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
 
 @Component({
   selector: "app-revision-documentos",
@@ -102,19 +103,38 @@ export class RevisionDocumentosComponent implements OnInit {
     const { estadoAprobacion, mensajeAprobacion, preguntaAprobacion } =
       rolAprobacion;
 
-    this.alertService
-      .showConfirmAlert(preguntaAprobacion)
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-
-        if (Array.isArray(estadoAprobacion)) {
-          this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
-        } else {
-          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+    if (this.role == environment.ROL.JEFE_DEPENDENCIA || this.role == environment.ROL.ASISTENTE_DEPENDENCIA) {
+      const dialogRef = this.dialog.open(ModalAprobacionAuditadoComponent, {
+        width: "600px",
+        data: {
+          auditoria_id: this.auditoriaId
         }
       });
+
+      dialogRef.afterClosed().subscribe((aprobado: boolean) => {
+        if (aprobado) {
+          if (Array.isArray(estadoAprobacion)) {
+            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+          } else {
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          }
+        }
+      });
+    } else {
+      this.alertService
+        .showConfirmAlert(preguntaAprobacion)
+        .then((confirmado) => {
+          if (!confirmado.value) {
+            return;
+          }
+
+          if (Array.isArray(estadoAprobacion)) {
+            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+          } else {
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          }
+        });
+    }
   }
 
   async aprobarAuditoriaSecuencial(
