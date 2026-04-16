@@ -15,6 +15,7 @@ import { CrearActividadComponent as CrearActividadAuditoriaComponent } from "./c
 import { EditarActividadComponent as EditarActividadAuditoriaComponent } from "./components/auditorias-internas/editar-auditoria/actividades-auditoria/editar-actividad/editar-actividad.component";
 import { RevisionDocumentosComponent } from "./components/auditorias-internas/revision-documentos/revision-documentos.component";
 import { ModalRechazoAuditoriaComponent } from "./components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component";
+import { ModalInicioEjecucionComponent } from "./components/auditorias-internas/tabla-auditorias-internas/modal-inicio-ejecucion/modal-inicio-ejecucion.component";
 
 // Seguimiento e Informes
 import { SeguimientoComponent } from "./components/seguimiento/seguimiento.component";
@@ -44,6 +45,7 @@ import { QuillModule } from "ngx-quill";
     RevisionDocumentosComponent,
     ModalRechazoAuditoriaComponent,
     ModalVisualizarRecargarCompromisoEticoComponent,
+    ModalInicioEjecucionComponent,
 
     // Seguimiento e Informes
     SeguimientoComponent,

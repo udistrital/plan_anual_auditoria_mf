@@ -34,6 +34,7 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { ModalInicioEjecucionComponent } from "./modal-inicio-ejecucion/modal-inicio-ejecucion.component";
 
 @Component({
   selector: "app-tabla-auditorias-internas",
@@ -301,30 +302,26 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   iniciarEjecucion(auditoria: Auditoria) {
-    this.alertService
-      .showConfirmAlert("¿Está seguro(a) de iniciar la ejecución de esta auditoría?")
-      .then((confirmado) => {
-        if (!confirmado.value) return;
+    const dialogRef = this.dialog.open(ModalInicioEjecucionComponent, {
+      width: "600px",
+      data: {
+        auditoriaId: auditoria._id,
+        usuarioId: this.usuarioId,
+        usuarioRol: [environment.ROL.JEFE, environment.ROL.ADMIN]
+          .find(rol => this.rolService.tieneRol(rol)),
+        tipoEvaluacionId: auditoria.tipo_evaluacion_id,
+      },
+    });
 
-        const esSeguimiento = auditoria.tipo_evaluacion_id === environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
-
-        const payload = {
-          auditoria_id: auditoria._id,
-          usuario_id: this.usuarioId,
-          usuario_rol: [environment.ROL.JEFE, environment.ROL.ADMIN].find(rol => this.rolService.tieneRol(rol)),
-          observacion: "",
-          estado_id: environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR,
-          fase_id: esSeguimiento ? environment.AUDITORIA_FASE.EJECUCION_FINAL : environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
-        };
-
-        this.planAuditoriaService.post("auditoria-estado", payload).subscribe({
-          next: () => {
-            this.alertService.showSuccessAlert("Ejecución iniciada correctamente", "Ejecución iniciada");
-            this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
-          },
-          error: () => this.alertService.showErrorAlert("Error al iniciar la ejecución."),
-        });
-      });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result?.iniciado) {
+        this.listarAuditoriasPorVigencia(
+          this.vigenciaId,
+          this.pageSize,
+          this.pageIndex * this.pageSize
+        );
+      }
+    });
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
