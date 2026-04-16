@@ -6,12 +6,21 @@
 }
 
 .custom-button {
-  padding: 20px 10px;
+  width: 100%;
+  padding: 10px 12px;
+  height: auto !important;
+}
+
+.custom-button .mdc-button__label,
+.custom-button .mat-button-wrapper {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
 }
 
 @media (max-width: 768px) {
   .custom-button {
-    padding: 5px 5px;
+    padding: 8px 10px;
   }
 }
 
@@ -19,4 +28,39 @@
   border: 1px solid #d8d8d8;
   border-radius: 6px;
   padding: 20px;
+}
+
+.documentos-panel {
+  height: auto;
+  max-height: 520px;
+}
+
+.documentos-scroll {
+  overflow-y: auto;
+  max-height: calc(520px - 56px);
+  padding-right: 10px;
+  scrollbar-width: thin;
+}
+
+.documentos-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.documentos-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.documentos-scroll::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .documentos-panel {
+    height: auto;
+    max-height: none;
+  }
+
+  .documentos-scroll {
+    max-height: 280px;
+  }
 }

@@ -68,6 +68,12 @@
   flex-shrink: 0;
 }
 
+.multiple-item-unsigned {
+  color: var(--md-warning-700);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
 .listado-activo {
   border-color: var(--md-primary-500) !important;
 }

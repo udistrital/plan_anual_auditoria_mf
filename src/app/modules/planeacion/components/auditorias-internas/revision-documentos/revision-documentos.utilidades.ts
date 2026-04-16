@@ -22,10 +22,3 @@ export const rolesAprobacion: { [key: string]: any } = {
   [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
   [environment.ROL.ASISTENTE_DEPENDENCIA]: configAuditado,
 };
-
-export const documentos = [
-  "Programa de Auditoría",
-  "Oficio Anuncio Solicitud de Información",
-  "Carta de presentación",
-  "Compromiso Ético del Auditor Interno",
-];
