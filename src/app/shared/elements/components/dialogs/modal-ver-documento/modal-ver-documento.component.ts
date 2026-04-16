@@ -5,11 +5,13 @@ interface DocumentoMultiple {
   titulo: string;
   base64: string;
   guardado: boolean;
+  firmado?: boolean;
 }
 
 interface ModalDocumentoMultipleData {
   modoMultiple: boolean;
-  documentos: Array<{ titulo: string; base64: string; guardado?: boolean }>;
+  documentos: Array<{ titulo: string; base64: string; guardado?: boolean; firmado?: boolean }>;
+  mostrarCheckGuardado?: boolean;
 }
 
 @Component({
@@ -25,6 +27,7 @@ export class ModalVerDocumentoComponent implements OnInit {
   documentoSrc: any;
   documentoSeleccionadoSrc: Uint8Array | null = null;
   modoMultiple: boolean = false;
+  mostrarCheckGuardado: boolean = true;
   documentosMultiples: DocumentoMultiple[] = [];
   indiceSeleccionado: number = 0;
 
@@ -40,10 +43,12 @@ export class ModalVerDocumentoComponent implements OnInit {
   private configurarDocumento(): void {
     if (this.esModoMultiple(this.documentoBase64)) {
       this.modoMultiple = true;
+      this.mostrarCheckGuardado = this.documentoBase64.mostrarCheckGuardado !== false;
       this.documentosMultiples = this.documentoBase64.documentos.map((documento) => ({
         titulo: documento.titulo,
         base64: documento.base64,
         guardado: !!documento.guardado,
+        firmado: documento.firmado,
       }));
       this.seleccionarDocumento(0);
       return;
