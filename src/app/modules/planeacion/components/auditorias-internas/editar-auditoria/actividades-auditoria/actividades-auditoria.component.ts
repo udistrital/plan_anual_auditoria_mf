@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
@@ -19,6 +19,10 @@ import { environment } from "src/environments/environment";
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: String;
   @Input() soloLectura: boolean = false;
+  @Input() minFechaStr!: String;
+  @Input() maxFechaStr!: String;
+  minFecha: Date | null = null;
+  maxFecha: Date | null = null;
   datos: any;
 
   columnsToDisplay: string[] = [
@@ -49,6 +53,15 @@ export class ActividadesAuditoriaComponent implements OnInit {
       this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
     }
     this.listaractividades();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['minFechaStr'] && this.minFechaStr) {
+      this.minFecha = new Date(this.minFechaStr.toString().substring(0, 10) + "T00:00:00");
+    }
+    if (changes['maxFechaStr'] && this.maxFechaStr) {
+      this.maxFecha = new Date(this.maxFechaStr.toString().substring(0, 10) + "T00:00:00");
+    }
   }
 
   subirArchivo(tipoArchivo: string): void {
@@ -150,6 +163,8 @@ export class ActividadesAuditoriaComponent implements OnInit {
       data: {
         actividad: actividad,
         idAuditoria: this.idAuditoria,
+        minFechaStr: this.minFechaStr,
+        maxFechaStr: this.maxFechaStr,
       }
     });
 
