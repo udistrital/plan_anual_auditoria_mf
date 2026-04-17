@@ -1,0 +1,23 @@
+<plantilla-modal
+  [icono]="'report'"
+  [titulo]="'Edición extraordinaria'"
+  [descripcion]="'Lista de modificaciones extraordinarias del Plan Anual de Auditoría'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+
+</ng-template>
+
+<ng-template #footerDeModal>
+  <button
+    mat-stroked-button
+    color="primary"
+    style="border: 1px solid var(--md-primary-500)"
+    [mat-dialog-close]
+    class="my-3"
+  >
+    <mat-icon>toll</mat-icon>Regresar
+  </button>
+</ng-template>

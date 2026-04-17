@@ -292,7 +292,7 @@ export class AddAuditoriaModalComponent implements OnInit {
         estado_id: environment.AUDITORIA_PADRE_ESTADO.CON_MODIFICACION_EXTEMPORANEA_ID,
       }
     ).subscribe({
-      next: () => this.mostrarMensajeExito(),
+      next: (nuevoEstado: any) => this.mostrarMensajeExito(nuevoEstado?.Data?._id),
       error: (err) => {
         console.error('Error actualizando estado de auditoría padre', err);
         this.mostrarMensajeExito();
@@ -300,13 +300,13 @@ export class AddAuditoriaModalComponent implements OnInit {
     });
   }
 
-  mostrarMensajeExito(): void {
+  mostrarMensajeExito(nuevoEstado?: string): void {
     this.alertaService.showSuccessAlert(
       `Auditoría ${
         this.isEditMode ? "actualizada" : "guardada"
       } exitosamente.`
     );
-    this.dialogRef.close({ saved: true });
+    this.dialogRef.close({ saved: true, nuevoEstado });
   }
 
 }

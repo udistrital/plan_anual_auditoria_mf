@@ -25,6 +25,7 @@ import {
 } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
+import { ModalListaModificacionesComponent } from "./modal-lista-modificaciones/modal-lista-modificaciones.component";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -60,6 +61,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Registrar Auditorías", "add_circle"],
     ["Editar Auditorías", "edit"],
     ["Historial de Rechazo", "report"],
+    ["Historial de Ediciones Extraordinarias", "report"],
     ["Enviar Aprobación", "send"],
     ["Edición Extraordinaria de Auditorías", "edit"],
   ]);
@@ -149,6 +151,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
               (accion) => accion !== "Historial de Rechazo"
+            );
+          }
+          if (!item.tiene_modificaciones) {
+            acciones = acciones.filter(
+              (accion) => accion !== "Historial de Ediciones Extraordinarias"
             );
           }
           return {
@@ -268,6 +275,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Ver Documentos": () => this.verDocumentos(plan), 
       "Editar Marco General": () => this.editarReporte(plan),
       "Historial de Rechazo": () => this.verMotivosRechazo(plan),
+      "Historial de Ediciones Extraordinarias": () => this.verHistorialModificaciones(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
       "Edición Extraordinaria de Auditorías": () => this.editarActividades(plan, true),
     };
@@ -491,6 +499,14 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   verDocumentos(plan: any) {
     this.documentoUtils.verDocumentos(plan.id, plan.estadoId, plan.vigencia, this.roles);
+  }
+
+  verHistorialModificaciones(plan: any) {
+    const dialogRef = this.dialog.open(ModalListaModificacionesComponent, {
+      width: "1000px",
+      data: plan,
+      autoFocus: false,
+    });
   }
 
 }

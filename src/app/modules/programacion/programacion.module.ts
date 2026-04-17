@@ -25,6 +25,7 @@ import { ModalListaRechazosComponent } from "./components/consulta-plan-auditori
 import { MatTooltip } from "@angular/material/tooltip";
 import { UnirConComaPipe } from "src/app/shared/pipes/unir-con-coma.pipe";
 import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-especiales/tabla-auditorias-especiales/tabla-auditorias-especiales.component";
+import { ModalListaModificacionesComponent } from "./components/consulta-plan-auditoria/modal-lista-modificaciones/modal-lista-modificaciones.component";
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     ModalAprobacionSecretarioComponent,
     ModalListaRechazosComponent,
     ModalMotivosRechazoComponent,
+    ModalListaModificacionesComponent,
     ModalPdfVisualizadorComponent,
     RevisionJefeComponent,
     RevisionSecretarioComponent,

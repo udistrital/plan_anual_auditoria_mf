@@ -53,6 +53,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   ordenSeleccionado: string = '';
   mostrarOrdenamiento: boolean = false;
   estadoIdActual: number | null = null;
+  edicionExtraordinaria: string[] = [];
 
   title: string = "";
   breadcrumb: string = "";
@@ -537,19 +538,31 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   subirActaModificacion() {
-    this.dialog.open(CargarArchivoComponent, {
-      width: "800px",
-      data: {
-        tipoArchivo: "pdf",
-        id: this.id,
-        idTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_MODIFICACION,
-        descripcion: "Acta de modificación de plan aprobado",
-        cargaLambda: false,
-        tipoIdReferencia:
-          environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
-        referencia: "Plan Auditoria",
-      },
-    });
+    if (this.edicionExtraordinaria.length === 0) {
+      this.alertaService.showNotification(
+        "Edición extraordinaria",
+        "No hay cambios en las auditorías para registrar en el acta de modificación.");
+    } else {
+      const dialogRef = this.dialog.open(CargarArchivoComponent, {
+        width: "800px",
+        data: {
+          tipoArchivo: "pdf",
+          id: this.id,
+          idTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_MODIFICACION,
+          descripcion: "Acta de modificación de plan aprobado",
+          cargaLambda: false,
+          tipoIdReferencia:
+            environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
+          referencia: "Plan Auditoria",
+          metadatos: {
+            auditoria_padre_estado_id: this.edicionExtraordinaria.map(id => id)
+          } ,
+        },
+      });
+      dialogRef.afterClosed().subscribe((result: boolean) => {
+        if (result) this.edicionExtraordinaria = [];
+      });
+    }
   }
 
   // Guardar cambios
@@ -574,6 +587,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
       if (result?.saved) {
         console.log("Auditoría guardada o actualizada");
         this.cargarAuditorias();
+      }
+      if (result?.nuevoEstado) {
+        this.edicionExtraordinaria.push(result.nuevoEstado)
       }
     });
   }
@@ -612,7 +628,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
   }
 
   regresarRuta() {
-    this.router.navigate([`/programacion/plan-auditoria`]);
+    if (this.edicionExtraordinaria.length > 0) {
+      this.alertaService.showErrorAlert(
+        "No ha subido un Acta de Modificación Extraordinaria."
+      );
+    } else {
+      this.router.navigate([`/programacion/plan-auditoria`]);
+    }
   }
 
   verDocumentos() {
