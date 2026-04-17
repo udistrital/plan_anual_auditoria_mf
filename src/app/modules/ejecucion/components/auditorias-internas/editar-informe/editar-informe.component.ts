@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
@@ -16,6 +16,7 @@ import { environment } from 'src/environments/environment';
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
+import { join } from 'node:path';
 
 @Component({
   selector: 'app-editar-informe',
@@ -23,7 +24,7 @@ import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/d
   styleUrls: ['./editar-informe.component.css']
 })
 
-export class EditarInformeComponent implements OnInit {
+export class EditarInformeComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild("formularioInformacionComp")
@@ -46,8 +47,9 @@ export class EditarInformeComponent implements OnInit {
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
 
-  get preinformeAprobado(): boolean {
-    return this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO;
+  // Cuando el informe ya fue aprobado por el auditado -> Pasa a informe final
+  get pasosInicialesSoloLectura(): boolean {
+    return this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
   }
 
   constructor(
@@ -80,6 +82,10 @@ export class EditarInformeComponent implements OnInit {
     this.manejarResponsiveStepper();
     this.informeId = this.route.snapshot.paramMap.get("id")!;
     this.cargarInforme();
+  }
+
+  ngAfterViewInit(): void {
+    this.aplicarModoSoloLecturaPasosIniciales();
   }
 
   cargarFormularios(): void {
@@ -136,9 +142,20 @@ export class EditarInformeComponent implements OnInit {
     this.planAnualAuditoriaService.get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`).subscribe({
       next: (res: any) => {
         this.estadoId = res.Data?.[0]?.estado_id ?? 0;
+        this.aplicarModoSoloLecturaPasosIniciales();
       },
       error: () => { }
     });
+  }
+
+  private aplicarModoSoloLecturaPasosIniciales(): void {
+    if (!this.pasosInicialesSoloLectura) return;
+
+    this.formAspectosGenerales.disable({ emitEvent: false });
+
+    if (this.formularioInformacionComponent?.form) {
+      this.formularioInformacionComponent.form.disable({ emitEvent: false });
+    }
   }
 
   // Pobla los formularios con los datos del informe cargado
@@ -168,7 +185,7 @@ export class EditarInformeComponent implements OnInit {
     if (!this.formularioInformacionComponent) return;
 
     const valoresIniciales: any = {
-      no_auditoria: auditoria?.no_auditoria,
+      consecutivo_no_auditoria: auditoria?.consecutivo_no_auditoria,
       macroproceso: auditoria?.macroproceso_nombre,
       proceso: auditoria?.proceso_nombre,
       dependencia: auditoria?.dependencia_nombre,
@@ -177,7 +194,7 @@ export class EditarInformeComponent implements OnInit {
       correo_dependencia: auditoria?.correo_dependencia,
       jefe_correo: auditoria?.jefe_correo,
       asistente_correo: auditoria?.asistente_correo,
-      correo_complementario: this.informeData?.correo_complementario ?? auditoria?.correo_complementario,
+      correo_complementario: auditoria.correo_complementario.map((c: any) => c.correo).join(", "),
       objetivo_auditoria: auditoria?.objetivo,
       alcance_auditoria: auditoria?.alcance,
       criterios: auditoria?.criterio,
@@ -283,6 +300,36 @@ export class EditarInformeComponent implements OnInit {
       error: (error: any) => {
         console.error("Error al generar el preinforme:", error);
         this.alertaService.showErrorAlert("No fue posible generar el preinforme.");
+      },
+    });
+  }
+
+  verInforme(): void {
+    const auditoriaId = this.informeData?.auditoria_id;
+
+    if (!auditoriaId) {
+      this.alertaService.showErrorAlert("No fue posible identificar la auditoría asociada.");
+      return;
+    }
+
+    this.planAuditoriaMid.get(`plantilla/informe-auditoria/${auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+
+        if (!documentoBase64) {
+          this.alertaService.showErrorAlert("No fue posible generar el informe.");
+          return;
+        }
+
+        this.verDocumento(documentoBase64, {
+          nombre: "Informe Final",
+          plantilla: "informe-auditoria",
+          parametro: environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL,
+        });
+      },
+      error: (error: any) => {
+        console.error("Error al generar el informe:", error);
+        this.alertaService.showErrorAlert("No fue posible generar el informe.");
       },
     });
   }

@@ -1,10 +1,9 @@
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { environment } from "src/environments/environment";
 
 export const formularioInformacionAuditoria: Formulario = {
   campos: [
     {
-      nombre: "no_auditoria",
+      nombre: "consecutivo_no_auditoria",
       descripcion: "No Auditoría y/o seguimiento",
       etiqueta: "No Auditoría y/o seguimiento",
       icono: "format_list_numbered",
