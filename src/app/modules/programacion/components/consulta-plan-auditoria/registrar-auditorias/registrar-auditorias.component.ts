@@ -556,7 +556,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
           referencia: "Plan Auditoria",
           metadatos: {
             auditoria_padre_estado_id: this.edicionExtraordinaria.map(id => id)
-          } ,
+          },
+          nuevo: true
         },
       });
       dialogRef.afterClosed().subscribe((result: boolean) => {

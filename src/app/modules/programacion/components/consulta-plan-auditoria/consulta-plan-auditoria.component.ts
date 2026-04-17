@@ -25,7 +25,7 @@ import {
 } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
-import { ModalListaModificacionesComponent } from "./modal-lista-modificaciones/modal-lista-modificaciones.component";
+import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -502,9 +502,15 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verHistorialModificaciones(plan: any) {
-    const dialogRef = this.dialog.open(ModalListaModificacionesComponent, {
-      width: "1000px",
-      data: plan,
+    this.dialog.open(ModalVerDocumentosComponent, {
+      width: "1200px",
+      data: {
+        entityId: plan.id,
+        tipo: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
+        inferTabs: true,
+        titulo: "Actas de Modificación extraordinaria",
+        descripcion: `Historial de Actas de Modificación - Plan Anual de Auditoría ${plan.vigencia}`,
+      },
       autoFocus: false,
     });
   }

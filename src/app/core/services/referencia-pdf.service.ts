@@ -5,6 +5,7 @@ import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
 
 export interface DocumentoReferenciaPdf {
+  nuxeo_id: number;
   nuxeo_enlace: string;
   tipo_id: number;
   metadatos?: Record<string, any>;
@@ -12,6 +13,7 @@ export interface DocumentoReferenciaPdf {
 
 export interface ConsultaDocumentosReferenciaOptions {
   referenciaTipo?: string;
+  tipo_id?: number;
   fields?: string;
   limit?: number;
 }
@@ -30,7 +32,8 @@ export class ReferenciaPdfService {
     referencia_tipo: string,
     referencia_id: string,
     tipo_id: number,
-    metadatos?: Record<string, any>
+    metadatos?: Record<string, any>,
+    nuevo: boolean = false
   ): Observable<any> {
     const payload = {
       referencia_tipo: referencia_tipo,
@@ -51,7 +54,8 @@ export class ReferenciaPdfService {
         : "";
 
     // Verificar si ya existe un registro para la referencia y metadatos (si aplica)
-    return this.planAnualAuditoriaService
+    return nuevo ? this.planAnualAuditoriaService.post(`documento`, payload) 
+      : this.planAnualAuditoriaService
       .get(`documento?query=${queryBase}${queryMetadatos}`)
       .pipe(
         switchMap((response) => {
@@ -103,19 +107,20 @@ export class ReferenciaPdfService {
     referenciaId: string,
     opciones: ConsultaDocumentosReferenciaOptions = {}
   ): Observable<DocumentoReferenciaPdf[]> {
-    const fields = opciones.fields ?? "nuxeo_enlace,tipo_id,metadatos";
+    const fields = opciones.fields ?? "nuxeo_id,nuxeo_enlace,tipo_id,metadatos";
     const limit = opciones.limit ?? 0;
+    const tipo = opciones.tipo_id !== undefined ? `tipo_id:${opciones.tipo_id},` : "";
 
     return this.planAnualAuditoriaService
       .get(
-        `documento?query=referencia_id:${referenciaId},activo:true&fields=${fields}&limit=${limit}`
+        `documento?query=referencia_id:${referenciaId},${tipo}activo:true&fields=${fields}&limit=${limit}`
       )
       .pipe(
         map((response: any) => {
           if (response && response.Data && Array.isArray(response.Data)) {
-            return response.Data.filter(
-              (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
-            );
+            return tipo ? response.Data.filter(
+                (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
+              ) : this.filtrarValidos(response.Data);
           }
           throw new Error("No se encontraron enlaces válidos en la respuesta.");
         }),
@@ -124,5 +129,24 @@ export class ReferenciaPdfService {
           return of([]); // Retorna un arreglo vacío en caso de error (of = observable)
         })
       );
+  }
+
+  // Filtra los documentos para quedarse solo con el más reciente de cada tipo_id.
+  filtrarValidos(documentos: DocumentoReferenciaPdf[]): DocumentoReferenciaPdf[] {
+    const mapaMaximos = new Map<number, DocumentoReferenciaPdf>();
+
+    documentos = documentos.filter(
+      (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
+    );
+
+    for (const doc of documentos) {
+      const existente = mapaMaximos.get(doc.tipo_id);
+
+      if (!existente || doc.nuxeo_id > existente.nuxeo_id) {
+        mapaMaximos.set(doc.tipo_id, doc);
+      }
+    }
+
+    return Array.from(mapaMaximos.values());
   }
 }

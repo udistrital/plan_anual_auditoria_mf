@@ -39,6 +39,7 @@ export class CargarArchivoComponent {
       tipoIdReferencia: number;
       referencia: string;
       metadatos?: Record<string, any>;
+      nuevo?: boolean;
     }
   ) {}
 
@@ -116,7 +117,8 @@ export class CargarArchivoComponent {
           this.data.id,
           this.data.tipoIdReferencia,
           true,
-          this.data.metadatos
+          this.data.metadatos,
+          this.data.nuevo
         );
       });
     }
@@ -306,7 +308,8 @@ export class CargarArchivoComponent {
     referencia_id: string,
     tipo_id: number,
     mostrarMensaje: boolean,
-    metadatos?: Record<string, any>
+    metadatos?: Record<string, any>,
+    nuevo: boolean = false
   ): void {
     if (nuxeoResponse.res.Enlace) {
       this.referenciaPdfService
@@ -315,7 +318,8 @@ export class CargarArchivoComponent {
           referencia_tipo,
           referencia_id,
           tipo_id,
-          metadatos
+          metadatos,
+          nuevo
         )
         .subscribe({
           next: (response) => {
