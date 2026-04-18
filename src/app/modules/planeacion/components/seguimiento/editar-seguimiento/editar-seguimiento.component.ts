@@ -232,7 +232,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.dialog.open(CargarArchivoComponent, {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "xlsx",
@@ -243,6 +243,12 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         tipo: "actividades",
         referencia: "Plan Auditoria",
       },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      if (this.registroPlan) {
+        this.registroPlan.listaractividades();
+      }
     });
   }
 
