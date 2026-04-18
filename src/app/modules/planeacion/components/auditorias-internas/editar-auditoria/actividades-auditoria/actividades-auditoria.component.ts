@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -23,13 +24,18 @@ export class ActividadesAuditoriaComponent implements OnInit {
   @Input() maxFechaStr!: String;
   minFecha: Date | null = null;
   maxFecha: Date | null = null;
-  datos: any;
+  datos = new MatTableDataSource<any>([]);
 
   columnsToDisplay: string[] = [
     "no",
     "actividad",
     "fechaInicio",
     "fechaFin",
+    "referencia",
+    "descripcion",
+    "folio",
+    "carpeta",
+    "medio",
     "observaciones",
     "acciones",
   ];
@@ -105,18 +111,20 @@ export class ActividadesAuditoriaComponent implements OnInit {
           );
         }
 
-        this.datos = actividades.map((item: Actividad): ActividadPlan => ({
-          id: item._id,
-          actividad: item.titulo,
-          fechaInicio: new Date(item.fecha_inicio),
-          fechaFin: new Date(item.fecha_fin),
-          observaciones: item.observacion,
-          papelTrabajoReferencia: item.referencia,
-          papelTrabajoDescripcion: item.descripcion,
-          papelTrabajoFolios: item.folio,
-          papelTrabajoMedio: item.medio,  
-          papelTrabajoCarpeta: item.carpeta
-        }));
+        this.datos = new MatTableDataSource( 
+          actividades.map((item: Actividad): ActividadPlan => ({
+            id: item._id,
+            actividad: item.titulo,
+            fechaInicio: new Date(item.fecha_inicio),
+            fechaFin: new Date(item.fecha_fin),
+            observaciones: item.observacion,
+            papelTrabajoReferencia: item.referencia,
+            papelTrabajoDescripcion: item.descripcion,
+            papelTrabajoFolios: item.folio,
+            papelTrabajoMedio: item.medio,
+            papelTrabajoCarpeta: item.carpeta
+          })
+        ));
       });
   }
 
@@ -135,7 +143,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
               (response) => {
                 if (response) {
                   this.alertaService.showSuccessAlert("Registro eliminado");
-                  this.datos = this.datos.filter(
+                  this.datos.data = this.datos.data.filter(
                     (e: any) => e.id !== actividad.id
                   );
                 } else {

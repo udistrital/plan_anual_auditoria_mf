@@ -177,11 +177,14 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       return correo;
     });
     return {
+      alcance: informacion.alcance_auditoria,
       consecutivo_IE: informacion.consecutivo_IE,
       consecutivo_OCI: informacion.consecutivo_OCI,
+      criterio: informacion.criterios,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
       consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
+      objetivo: informacion.objetivo_auditoria,
       correo_complementario: correos,
     };
   }
@@ -229,7 +232,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.dialog.open(CargarArchivoComponent, {
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "xlsx",
@@ -240,6 +243,12 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         tipo: "actividades",
         referencia: "Plan Auditoria",
       },
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      if (this.registroPlan) {
+        this.registroPlan.listaractividades();
+      }
     });
   }
 
