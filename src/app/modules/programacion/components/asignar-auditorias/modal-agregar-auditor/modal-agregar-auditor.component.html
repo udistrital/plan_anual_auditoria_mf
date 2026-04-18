@@ -69,8 +69,8 @@
             </div>
           </div>
 
-          <div style="padding: 0 0 16px 5px">
-            <span><b>Auditor</b></span>
+          <div class="fondo-acento-50 d-flex justify-content-center my-3">
+            <b>Auditores</b>
           </div>
 
           <div class="row d-flex align-items-center">
@@ -78,15 +78,16 @@
               *ngFor="let auditorControl of auditoresSeleccionados.controls; let i = index" [formGroup]="auditorControl"
               class="col-12 d-flex align-items-center mt-3" track auditorControl
             >
-              <mat-form-field appearance="outline" class="col-8">
-                <mat-label>Seleccione un auditor</mat-label>
-                <mat-icon color="primary" matPrefix>person</mat-icon>
-                <mat-select [formControlName]="'auditor'">
-                  <mat-option *ngFor="let auditor of auditoresDisponibles(i)" [value]="auditor">
-                    {{ auditor.nombre }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="col-8 p-0">
+                <app-search-selection
+                  label="Auditor"
+                  icon="person"
+                  placeholder="Seleccione un auditor"
+                  [items]="auditores"
+                  [labelKey]="'nombre'"
+                  [selectionControl]="getAuditorControl(i)"
+                ></app-search-selection>
+              </div>
               <mat-checkbox
               class="col-3 mx-2"
               formControlName="lider"

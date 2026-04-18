@@ -148,8 +148,10 @@
               label="Dependencias"
               icon="apartment"
               placeholder="Seleccionar dependencias"
-              [parametros]="dependencias"
-              [parametroControl]="auditoriaForm.get('dependencias')"
+              [items]="dependencias"
+              [labelKey]="'Nombre'"
+              [valueKey]="'Id'"
+              [selectionControl]="auditoriaForm.get('dependencias')"
             ></app-search-selection>
           </div>
 
@@ -196,8 +198,10 @@
               label="Cantidad de Auditorías"
               icon="assignment"
               placeholder="Seleccione la cantidad"
-              [parametros]="cantidadesAuditorias"
-              [parametroControl]="auditoriaForm.get('cantidadAuditorias')"
+              [items]="cantidadesAuditorias"
+              [labelKey]="'Nombre'"
+              [valueKey]="'Id'"
+              [selectionControl]="auditoriaForm.get('cantidadAuditorias')"
             ></app-search-selection>
           </div>
 
