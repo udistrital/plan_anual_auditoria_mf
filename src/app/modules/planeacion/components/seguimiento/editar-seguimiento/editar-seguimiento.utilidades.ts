@@ -76,6 +76,36 @@ export const formularioInformacionAuditoria: Formulario = {
       tipo: "date",
       claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },
+    {
+      nombre: "objetivo_auditoria",
+      etiqueta: "Objetivo de la Auditoría",
+      icono: "flag",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 120 },
+    },
+    {
+      nombre: "alcance_auditoria",
+      etiqueta: "Alcance de la Auditoría",
+      icono: "visibility",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 120 },
+    },
+    {
+      nombre: "criterios",
+      etiqueta: "Criterios",
+      icono: "check_circle",
+      tipo: "textarea",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 120 },
+    },
   ],
 };
 
@@ -140,4 +170,3 @@ export const formularioDependencias: Formulario = {
     },
   ]
 }
-

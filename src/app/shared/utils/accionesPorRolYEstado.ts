@@ -26,6 +26,7 @@ export const accionesProgramacion: {
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
@@ -49,6 +50,7 @@ export const accionesProgramacion: {
       "Ver Plan",
       "Historial de Rechazo",
       "Edición Extraordinaria de Auditorías",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo"],
   },
@@ -91,6 +93,7 @@ export const accionesProgramacion: {
       "Ver Documentos",
       "Historial de Rechazo",
       "Edición Extraordinaria de Auditorías",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",

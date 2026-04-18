@@ -85,6 +85,7 @@ export const formularioInformacionAuditoria: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 120 },
     },
     {
       nombre: "alcance_auditoria",
@@ -94,6 +95,7 @@ export const formularioInformacionAuditoria: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 120 },
     },
     {
       nombre: "criterios",
@@ -103,6 +105,7 @@ export const formularioInformacionAuditoria: Formulario = {
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      parametros: { altura: 120 },
     },
   ],
 };

@@ -35,6 +35,7 @@ export class Campo {
     fecha_inicio?: string;
     etiqueta_inicio?: string;
     etiqueta_fin?: string;
+    altura?: number;
   };
   deshabilitado?: boolean;
   valor?: any;
