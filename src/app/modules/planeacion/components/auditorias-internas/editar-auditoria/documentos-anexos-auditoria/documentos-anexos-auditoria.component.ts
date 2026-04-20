@@ -133,8 +133,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   verCompromisoEtico() {
     const dialogRef = this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
       data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
-      width: "80%",
-      height: "80vh",
+      width: "1000px",
+      autoFocus: false,
     });
 
     dialogRef.afterClosed().subscribe((resultado: boolean | 'deleted') => {
