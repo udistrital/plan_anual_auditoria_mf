@@ -15,13 +15,14 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 
 const configAuditado = {
   estadoAprobacion: [
-    environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO
+    environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO,
+    environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL
   ],
   estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
-  preguntaAprobacion: "¿Está seguro(a) de enviar la respuesta preliminar al auditor?",
-  mensajeAprobacion: "El informe fue enviado al auditor(a)",
+  preguntaAprobacion: "¿Está seguro(a) de aprobar la respuesta preliminar?",
+  mensajeAprobacion: "El informe pasó a etapa de informe final",
   botonAprobacion: "Aceptar informe",
-  botonRechazo: "Respuesta Preliminar",
+  botonRechazo: "Enviar Respuesta Preliminar",
   modalRechazo: {
     titulo: "Respuesta Preliminar",
     descripcion: "Descripción respuesta del auditado",
@@ -30,6 +31,24 @@ const configAuditado = {
     mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
     mensajeExito: "Informe preliminar enviado",
     descripcionExito: "El informe fue enviado al auditor(a)",
+  },
+};
+
+const configJefeFinal = {
+  estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE],
+  estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE,
+  preguntaAprobacion: "¿Está seguro(a) de aprobar el informe final?",
+  mensajeAprobacion: "El informe final fue aprobado",
+  botonAprobacion: "Aprobar Informe Final",
+  botonRechazo: "Rechazar Informe Final",
+  modalRechazo: {
+    titulo: "Rechazo de Informe Final",
+    descripcion: "Descripción del rechazo del informe final",
+    labelTextarea: "Descripción del rechazo del informe final",
+    botonConfirmar: "Guardar",
+    mensajeConfirmacion: "¿Está seguro(a) de rechazar el informe final?",
+    mensajeExito: "Informe final rechazado",
+    descripcionExito: "El informe final fue rechazado",
   },
 };
 
@@ -57,13 +76,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   role: string | null = null;
   usuarioId: any;
   documentos: { base64: string; tipo_id: number }[] = [];
-  opcionesDocumentos: { nombre: string; base64: string }[] = [
-    { nombre: "Informe Preliminar", base64: "" },
-    { nombre: "Programa de Trabajo", base64: "" },
-    { nombre: "Oficio Anuncio Solicitud Información", base64: "" },
-    { nombre: "Carta de Representación", base64: "" },
-    { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
-  ];
+  opcionesDocumentos: { nombre: string; base64: string }[] = [];
   rolesAprobacion: { [key: string]: any } = {
     [environment.ROL.JEFE]: configJefe,
     [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
@@ -92,7 +105,6 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.obtenerRolPrioritario();
     this.userService.getPersonaId().then((usuarioId) => { this.usuarioId = usuarioId; });
-    this.cargarDocumentos();
   }
 
   obtenerRolPrioritario() {
@@ -108,13 +120,33 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   cargarDocumentos() {
+    this.documentos = [];
+
     const tipoDocumentoIndiceMap: { [key: number]: number } = {
       [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR]: 0,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO]: 1,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: 2,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION]: 3,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO]: 4,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL]: 1,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 2 : 1,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 3 : 2,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 4 : 3,
+      [environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 5 : 4,
     };
+
+    this.opcionesDocumentos = this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL
+      ? [
+        { nombre: "Informe Preliminar", base64: "" },
+        { nombre: "Informe Final", base64: "" },
+        { nombre: "Programa de Trabajo", base64: "" },
+        { nombre: "Oficio Anuncio Solicitud Información", base64: "" },
+        { nombre: "Carta de Representación", base64: "" },
+        { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
+      ]
+      : [
+        { nombre: "Informe Preliminar", base64: "" },
+        { nombre: "Programa de Trabajo", base64: "" },
+        { nombre: "Oficio Anuncio Solicitud Información", base64: "" },
+        { nombre: "Carta de Representación", base64: "" },
+        { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
+      ];
 
     this.referenciaPdfService
       .consultarDocumentos(this.auditoriaId)
@@ -156,7 +188,10 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         await this.planAuditoriaService.post("auditoria-estado", auditoriaEstado).toPromise();
       }
 
-      this.alertService.showSuccessAlert(mensajeAprobacion, "Informe preliminar enviado");
+      const mensaje = this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
+        ? "Informe final enviado"
+        : "Informe preliminar enviado";
+      this.alertService.showSuccessAlert(mensajeAprobacion, mensaje);
       this.router.navigate([`/ejecucion/auditorias-internas/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
@@ -164,9 +199,14 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
+    const faseId =
+      estadoAprobacion === environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL
+        ? environment.AUDITORIA_FASE.EJECUCION_FINAL
+        : environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR;
+
     return {
       auditoria_id: this.auditoriaId,
-      fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+      fase_id: faseId,
       estado_id: estadoAprobacion,
       usuario_id: this.usuarioId,
       usuario_rol: this.role,
@@ -202,15 +242,36 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       .get(`auditoria-estado?query=auditoria_id:${this.auditoriaId},actual:true`)
       .subscribe((res) => {
         this.estadoAuditoriaId = res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
+        this.configurarRevisionSegunEstado();
+        this.cargarDocumentos();
       });
   }
 
-  mostrarAcciones(): boolean {
-    const condicionesVisibilidad: { [key: string]: number[] } = {
-      [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
-      [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
-      [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+  private configurarRevisionSegunEstado(): void {
+    if (this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL) {
+      this.rolesAprobacion = {
+        [environment.ROL.JEFE]: configJefeFinal,
+      };
+      return;
+    }
+
+    this.rolesAprobacion = {
+      [environment.ROL.JEFE]: configJefe,
+      [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: configAuditado,
     };
+  }
+
+  mostrarAcciones(): boolean {
+    const condicionesVisibilidad: { [key: string]: number[] } = this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL
+      ? {
+        [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE],
+      }
+      : {
+        [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE],
+        [environment.ROL.JEFE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+        [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO],
+      };
     return condicionesVisibilidad[this.role!]?.includes(this.estadoAuditoriaId) || false;
   }
 

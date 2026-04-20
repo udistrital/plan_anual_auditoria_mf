@@ -1,7 +1,7 @@
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
 import { Component, Inject, OnInit } from "@angular/core";
-import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
+import { FormArray, FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -148,7 +148,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
   cargarAuditores() {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       if (res && res.Data) {
-        const auditorMap =new Map();
+        const auditorMap = new Map();
 
         res.Data.filter(
           (auditor: any) =>
@@ -156,13 +156,16 @@ export class ModalAgregarAuditorComponent implements OnInit {
             ["AUDITOR", "AUDITOR EXPERTO", "AUDITOR ASISTENTE"].includes(auditor.rol_usuario)
         ).forEach((auditor: any) => {
           auditorMap.set(auditor.id_tercero, {
-          nombre: auditor.nombre,
-          documento: auditor.documento,
-          id: auditor.id_tercero,
+            nombre: auditor.nombre,
+            documento: auditor.documento,
+            id: auditor.id_tercero,
+          });
         });
-      });
 
-        this.auditores = Array.from(auditorMap.values());
+        this.auditores = Array.from(auditorMap.values())
+            .sort((a: Auditor, b: Auditor): number =>
+              a.nombre.localeCompare(b.nombre)
+            );
       }
       this.inicializarAuditoresSeleccionados();
     });
@@ -184,6 +187,10 @@ export class ModalAgregarAuditorComponent implements OnInit {
         control.get("lider")?.setValue(false);
       }
     });
+  }
+
+  getAuditorControl(index: number): FormControl<Auditor | null> {
+    return this.auditoresSeleccionados.at(index).get("auditor") as FormControl<Auditor | null>;
   }
 
   asignarAuditor(auditorSeleccionado: any): void {

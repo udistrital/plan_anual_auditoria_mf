@@ -3,6 +3,8 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { ActividadFormularioComponent } from '../actividad-formulario/actividad-formulario.component'
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
+import { Actividad } from 'src/app/shared/data/models/actividad';
 
 
 @Component({
@@ -17,7 +19,7 @@ export class EditarActividadComponent implements OnInit {
     fechaInicio: new Date('2025-01-01'),
     fechaFin: new Date('2025-01-15'),
   };*/
-  actividadData: any;
+  actividadData: ActividadPlan;
   idAuditoria: string;
 
   constructor(
@@ -34,16 +36,22 @@ export class EditarActividadComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  editarActividad(actividadData: any) {
-    console.log('Editar actividad:', actividadData);
-    let actividadJson = {
+  editarActividad(actividadData: ActividadPlan) {
+    console.debug('Editar actividad:', actividadData);
+    let actividadJson: Actividad = {
       auditoria_id: this.idAuditoria,
       titulo: actividadData.actividad,
       fecha_inicio: actividadData.fechaInicio.toISOString(),
       fecha_fin: actividadData.fechaFin.toISOString(),
-      observacion: actividadData.observaciones
+      observacion: actividadData.observaciones,
+      referencia: actividadData.papelTrabajoReferencia,
+      descripcion: actividadData.papelTrabajoDescripcion,
+      folio: actividadData.papelTrabajoFolios,
+      medio: actividadData.papelTrabajoMedio,
+      carpeta: actividadData.papelTrabajoCarpeta
     };
-    console.log('Crear actividad json:', actividadJson);
+
+    console.debug('Editar actividad json:', actividadJson);
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de editar el registro?")
       .then((result) => {
@@ -62,7 +70,7 @@ export class EditarActividadComponent implements OnInit {
                 }
               },
               (error) => {
-                console.log("error ",error)
+                console.error("error al editar actividad:", error);
                 this.alertaService.showErrorAlert(
                   "Error al editar el registro"
                 );
@@ -70,8 +78,9 @@ export class EditarActividadComponent implements OnInit {
             );
         }
       })
-      .catch(() => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      .catch((error) => {
+        console.error("Error al editar actividad", error);
+        this.alertaService.showErrorAlert("Error al editar el registro");
       });
   }
 }

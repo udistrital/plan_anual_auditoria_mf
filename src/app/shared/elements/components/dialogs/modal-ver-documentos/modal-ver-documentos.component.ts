@@ -30,6 +30,7 @@ export interface ModalVerDocumentosData {
   vigenciaNombre?: string;
   tabs?: TabDocumento[];
   inferTabs?: boolean;
+  tipo?: number;
   textoBotonCerrar?: string;
 }
 
@@ -47,6 +48,7 @@ export class ModalVerDocumentosComponent implements OnInit {
   descripcion: string = "Documentos";
   vigenciaSuffix: string = "";
   textoBotonCerrar: string = "Regresar";
+  consultarPorTipo: boolean = false;
   tabs: TabDocumento[] = [];
 
   constructor(
@@ -61,6 +63,7 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.descripcion) this.descripcion = data.descripcion;
     if (data.tabs) this.tabs = data.tabs;
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
+    if (data.tipo) this.consultarPorTipo = true;
     if (data.vigenciaNombre) {
       this.vigenciaSuffix = data.vigenciaNombre
           ? `-${data.vigenciaNombre.replace(/\s+/g, '-')}`
@@ -85,11 +88,11 @@ export class ModalVerDocumentosComponent implements OnInit {
    */
   async cargarDocumentos() {
     try {
+      const opciones = this.consultarPorTipo ? { tipo_id: this.data.tipo } : {};
       const enlacesConTipo = await lastValueFrom(
-        this.referenciaPdfService.consultarDocumentos(this.data.entityId)
+        this.referenciaPdfService.consultarDocumentos(this.data.entityId, opciones)
       );
 
-      console.debug("Enlaces con tipo obtenidos:", enlacesConTipo);
       const enlaces = enlacesConTipo.map((doc) => doc.nuxeo_enlace);
       const base64Files = await this.nuxeoService.obtenerPorUUIDs(enlaces);
 
