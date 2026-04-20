@@ -11,9 +11,9 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 })
 export class CrearActividadComponent {
   auditoriaId: string;
-  minFecha: Date | null = null;
-  maxFecha: Date | null = null;
   datos: any | [] = [];
+  minFechaStr: string | null = null;
+  maxFechaStr: string | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -26,22 +26,13 @@ export class CrearActividadComponent {
     private dialogRef: MatDialogRef<CrearActividadComponent>
   ) {
     this.auditoriaId = data.auditoriaId;
-    this.minFecha = data.minFechaStr ? new Date(data.minFechaStr.toString().substring(0, 10) + "T00:00:00") : null;
-    this.maxFecha = data.maxFechaStr ? new Date(data.maxFechaStr.toString().substring(0, 10) + "T00:00:00") : null;
+    this.minFechaStr = data.minFechaStr || null;
+    this.maxFechaStr = data.maxFechaStr || null;
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   crearActividad(actividadData: ActividadPlan) {
-    const fechaInicioValida = this.minFecha ? actividadData.fechaInicio >= this.minFecha : true;
-    const fechaFinValida = this.maxFecha ? actividadData.fechaFin <= this.maxFecha : true;
-    if (!fechaInicioValida || !fechaFinValida) {
-      const mensajeError = `Las fechas deben estar entre ${this.minFecha?.toLocaleDateString()} y ${this.maxFecha?.toLocaleDateString()}`;
-      this.alertaService.showErrorAlert(mensajeError);
-      return;
-    }
-
     let actividadJson: Actividad = {
       auditoria_id: this.auditoriaId,
       titulo: actividadData.actividad,

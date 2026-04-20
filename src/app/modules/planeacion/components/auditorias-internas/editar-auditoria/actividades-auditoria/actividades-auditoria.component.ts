@@ -47,7 +47,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private nuxeoService: NuxeoService,
     private descargaService: DescargaService,
-  ) { }
+  ) {}
 
   resetComponent() { }
   onStepLeave() {
@@ -59,15 +59,6 @@ export class ActividadesAuditoriaComponent implements OnInit {
       this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
     }
     this.listaractividades();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['minFechaStr'] && this.minFechaStr) {
-      this.minFecha = new Date(this.minFechaStr.toString().substring(0, 10) + "T00:00:00");
-    }
-    if (changes['maxFechaStr'] && this.maxFechaStr) {
-      this.maxFecha = new Date(this.maxFechaStr.toString().substring(0, 10) + "T00:00:00");
-    }
   }
 
   subirArchivo(tipoArchivo: string): void {

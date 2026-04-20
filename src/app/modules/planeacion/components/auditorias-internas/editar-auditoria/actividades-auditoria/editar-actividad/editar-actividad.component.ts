@@ -21,8 +21,8 @@ export class EditarActividadComponent implements OnInit {
   };*/
   actividadData: ActividadPlan;
   idAuditoria: string;
-  minFecha: Date | null = null;
-  maxFecha: Date | null = null;
+  minFechaStr: string | null = null;
+  maxFechaStr: string | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -37,8 +37,8 @@ export class EditarActividadComponent implements OnInit {
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;
-    this.minFecha = data.minFechaStr ? new Date(data.minFechaStr.toString().substring(0, 10) + "T00:00:00") : null;
-    this.maxFecha = data.maxFechaStr ? new Date(data.maxFechaStr.toString().substring(0, 10) + "T00:00:00") : null;
+    this.minFechaStr = data.minFechaStr || null;
+    this.maxFechaStr = data.maxFechaStr || null;
     console.debug('Actividad Data:', this.actividadData);
     console.debug('ID Auditoria:', this.idAuditoria);
   }
@@ -47,14 +47,6 @@ export class EditarActividadComponent implements OnInit {
 
   editarActividad(actividadData: ActividadPlan) {
     console.debug('Editar actividad:', actividadData);
-    const fechaInicioValida = this.minFecha ? actividadData.fechaInicio >= this.minFecha : true;
-    const fechaFinValida = this.maxFecha ? actividadData.fechaFin <= this.maxFecha : true;
-    if (!fechaInicioValida || !fechaFinValida) {
-      const mensajeError = `Las fechas deben estar entre ${this.minFecha?.toLocaleDateString()} y ${this.maxFecha?.toLocaleDateString()}`;
-      this.alertaService.showErrorAlert(mensajeError);
-      return;
-    }
-
     let actividadJson: Actividad = {
       auditoria_id: this.idAuditoria,
       titulo: actividadData.actividad,
