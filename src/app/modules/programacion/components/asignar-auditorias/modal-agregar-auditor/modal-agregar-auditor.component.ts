@@ -53,7 +53,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
       tituloAuditoria: [this.data.auditoria?.titulo || ""],
       subtituloAuditoria: [this.data.auditoria?.subtitulo || ""],
       tipoEvaluacion: [this.data.auditoria?.tipo_evaluacion_nombre || []],
-      cronogramaActividades: [this.data.auditoria?.cronograma_nombre || []],
       auditoresSeleccionados: this.auditoresSeleccionados,
       auditor: [""],
     });
@@ -269,7 +268,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
               titulo: this.form.value.tituloAuditoria,
               subtitulo: this.form.value.subtituloAuditoria,
               tipo_evaluacion_id: this.data.auditoria?.tipo_evaluacion_id,
-              cronograma_id: this.data.auditoria?.cronograma_id,
               //auditores: auditoresSeleccionados
             };
 
