@@ -1,6 +1,7 @@
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
+import { Subscription } from 'rxjs';
 import { FormArray, FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -22,6 +23,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
   auditores: Auditor[] = [];
   auditoresSeleccionados: FormArray<FormGroup>;
   auditoresAsignados: Auditor[] = [];
+  auditoresDisponiblesCache: Auditor[][] = [];
+  private selectionChangesSub: Subscription | null = null;
   meses: Parametro[] = [];
   TODOS = "Todos";
   isEditMode = false;
@@ -92,6 +95,9 @@ export class ModalAgregarAuditorComponent implements OnInit {
         console.error("Error al cargar auditores asignados:", error);
       }
     });
+    // Inicializar caché y suscripciones tras poblar los controles
+    this.recomputeAuditoresDisponibles();
+    this.subscribeToSelectionChanges();
   }
 
   agregarAuditor() {
@@ -101,6 +107,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
         lider: this.fb.control<boolean>(false),
       })
     );
+    this.recomputeAuditoresDisponibles();
   }
 
   eliminarAuditor(index: number) {
@@ -128,6 +135,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
                   this.alertaService.showSuccessAlert(
                     "Auditor eliminado correctamente."
                   );
+                  this.recomputeAuditoresDisponibles();
                 },
                 error: (err) => {
                   this.alertaService.showErrorAlert(
@@ -140,6 +148,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
             this.alertaService.showSuccessAlert(
               "Auditor eliminado correctamente."
             );
+            this.recomputeAuditoresDisponibles();
           }
         }
       });
@@ -172,13 +181,70 @@ export class ModalAgregarAuditorComponent implements OnInit {
   }
 
   auditoresDisponibles(index: number): Auditor[] {
-    const seleccionados = this.auditoresSeleccionados.value
-      .filter((_, i) => i !== index)
-      .map((control: { auditor: Auditor }) => control.auditor?.documento);
+    return this.auditoresDisponiblesCache[index] ?? this.auditores;
+  }
 
-    return this.auditores.filter(
-      (auditor) => !seleccionados.includes(auditor.documento)
-    );
+  private subscribeToSelectionChanges(): void {
+    if (this.selectionChangesSub) {
+      this.selectionChangesSub.unsubscribe();
+    }
+    if (this.auditoresSeleccionados) {
+      this.selectionChangesSub = this.auditoresSeleccionados.valueChanges.subscribe(() => {
+        this.recomputeAuditoresDisponibles();
+      });
+    }
+  }
+
+  private recomputeAuditoresDisponibles(): void {
+    if (!this.auditores || !this.auditoresSeleccionados) {
+      return;
+    }
+
+    const controls = this.auditoresSeleccionados.controls || [];
+    const newCache: Auditor[][] = [];
+
+    for (let i = 0; i < controls.length; i++) {
+      const seleccionados = controls
+        .filter((_, idx) => idx !== i)
+        .map((control) => control.get('auditor')?.value?.documento)
+        .filter((d: any) => d != null);
+
+      newCache[i] = this.auditores.filter(
+        (auditor) => !seleccionados.includes(auditor.documento)
+      );
+    }
+
+    // Update cache only where changed to keep stable references
+    const maxLen = Math.max(this.auditoresDisponiblesCache.length, newCache.length);
+    for (let i = 0; i < maxLen; i++) {
+      const oldArr = this.auditoresDisponiblesCache[i] || [];
+      const newArr = newCache[i] || [];
+      if (!this.areAuditorArraysEqual(oldArr, newArr)) {
+        this.auditoresDisponiblesCache[i] = newArr;
+      }
+    }
+
+    // truncate if needed
+    if (newCache.length < this.auditoresDisponiblesCache.length) {
+      this.auditoresDisponiblesCache.length = newCache.length;
+    }
+  }
+
+  private areAuditorArraysEqual(a: Auditor[], b: Auditor[]): boolean {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i].id !== b[i].id) return false;
+    }
+    return true;
+  }
+
+  ngOnDestroy(): void {
+    if (this.selectionChangesSub) {
+      this.selectionChangesSub.unsubscribe();
+      this.selectionChangesSub = null;
+    }
   }
 
   onLiderChange(selectedIndex: number): void {

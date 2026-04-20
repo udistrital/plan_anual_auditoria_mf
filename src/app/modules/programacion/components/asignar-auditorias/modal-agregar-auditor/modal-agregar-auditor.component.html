@@ -83,7 +83,7 @@
                   label="Auditor"
                   icon="person"
                   placeholder="Seleccione un auditor"
-                  [items]="auditores"
+                  [items]="auditoresDisponibles(i)"
                   [labelKey]="'nombre'"
                   [selectionControl]="getAuditorControl(i)"
                 ></app-search-selection>
