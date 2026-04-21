@@ -69,3 +69,13 @@
     background-position: -200% 0;
   }
 }
+
+/* Borde rojo para rechazos */
+.fondo-chip--rechazo {
+  border-left-color: #c62828;
+}
+
+/* Borde naranja/ámbar para revisiones del jefe con observación */
+.fondo-chip--revision {
+  border-left-color: #e65100;
+}
