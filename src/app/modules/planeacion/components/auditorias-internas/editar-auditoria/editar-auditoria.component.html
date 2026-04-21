@@ -1,5 +1,7 @@
 <plantilla-tarjeta-contenedora
   [title]="soloLectura ? 'Ver Auditoría' : 'Editar Auditoría'"
+  [subtitle]="auditoria.vigencia_nombre || ''"
+  [subtitleChild]="auditoria.titulo || ''"
   [breadcrumb]="
     soloLectura
       ? '<p>Gestión Auditoría / Planeación / Auditorías Internas / <b>Ver Auditoría</b></p>'
