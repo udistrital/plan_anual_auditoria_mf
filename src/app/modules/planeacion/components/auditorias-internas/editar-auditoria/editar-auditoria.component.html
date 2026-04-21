@@ -102,6 +102,8 @@
           <app-actividades-auditoria
             [idAuditoria]="auditoriaId"
             [soloLectura]="soloLectura"
+            [minFechaStr]="auditoria.fecha_inicio"
+            [maxFechaStr]="auditoria.fecha_fin"
           ></app-actividades-auditoria>
           <div class="d-flex justify-content-end mt-4">
             <button matStepperPrevious mat-stroked-button color="primary">

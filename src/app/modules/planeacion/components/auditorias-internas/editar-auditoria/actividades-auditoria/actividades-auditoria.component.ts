@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
@@ -20,6 +20,10 @@ import { environment } from "src/environments/environment";
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: String;
   @Input() soloLectura: boolean = false;
+  @Input() minFechaStr!: String;
+  @Input() maxFechaStr!: String;
+  minFecha: Date | null = null;
+  maxFecha: Date | null = null;
   datos = new MatTableDataSource<any>([]);
 
   columnsToDisplay: string[] = [
@@ -43,7 +47,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private nuxeoService: NuxeoService,
     private descargaService: DescargaService,
-  ) { }
+  ) {}
 
   resetComponent() { }
   onStepLeave() {
@@ -158,6 +162,8 @@ export class ActividadesAuditoriaComponent implements OnInit {
       data: {
         actividad: actividad,
         idAuditoria: this.idAuditoria,
+        minFechaStr: this.minFechaStr,
+        maxFechaStr: this.maxFechaStr,
       }
     });
 
