@@ -5,6 +5,7 @@ import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
   formularioDependencias,
   formularioInformacionAuditoria,
+  formularioTemasAuditoria,
 } from "./editar-seguimiento.utilidades";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -38,6 +39,10 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
   @ViewChild("formularioInformacionComp")
   formularioInformacionComponent!: FormularioDinamicoComponent;
   formularioInformacion: Formulario | undefined;
+
+  @ViewChild("formularioTemasComp")
+  formularioTemasComponent!: FormularioDinamicoComponent;
+  formularioTemas: Formulario | undefined;
 
   @ViewChildren("formularioDependenciasComp")
   formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
@@ -102,6 +107,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
 
   cargarFormularios(): void {
     this.formularioInformacion = formularioInformacionAuditoria;
+    this.formularioTemas = formularioTemasAuditoria;
   }
 
   enviarFormInformacion() {
@@ -111,6 +117,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
     }
 
     this.formularioInformacionComponent.onSubmit();
+    this.formularioTemasComponent.onSubmit();
   }
 
   preguntarGuardadoInformacion(dataForm: any) {
@@ -118,7 +125,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    if (!dataForm) {
+    if (!dataForm || !this.formularioTemasComponent.form.valid) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
         "Debe llenar todos los campos obligatorios"
@@ -176,6 +183,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       };
       return correo;
     });
+    const tema = this.formularioTemasComponent.form.value.tema;
     return {
       alcance: informacion.alcance_auditoria,
       consecutivo_IE: informacion.consecutivo_IE,
@@ -185,6 +193,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       fecha_inicio: informacion.fecha_ejecucion_inicial,
       consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
       objetivo: informacion.objetivo_auditoria,
+      tema: tema,
       correo_complementario: correos,
     };
   }
@@ -259,8 +268,15 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       consecutivo_IE: this.auditoria.consecutivo_IE,
       macroproceso: this.auditoria.macroproceso_nombre,
       proceso: this.auditoria.proceso_nombre,
+      objetivo_auditoria: this.auditoria.objetivo,
+      alcance_auditoria: this.auditoria.alcance,
+      criterios: this.auditoria.criterio,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
+    });
+
+    this.formularioTemasComponent.form.patchValue({
+      tema: this.auditoria.tema,
     });
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
