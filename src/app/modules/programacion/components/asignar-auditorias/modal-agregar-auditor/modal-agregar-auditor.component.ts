@@ -1,7 +1,8 @@
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
-import { Component, Inject, OnInit } from "@angular/core";
-import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
+import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
+import { Subscription } from 'rxjs';
+import { FormArray, FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -22,6 +23,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
   auditores: Auditor[] = [];
   auditoresSeleccionados: FormArray<FormGroup>;
   auditoresAsignados: Auditor[] = [];
+  auditoresDisponiblesCache: Auditor[][] = [];
+  private selectionChangesSub: Subscription | null = null;
   meses: Parametro[] = [];
   TODOS = "Todos";
   isEditMode = false;
@@ -53,7 +56,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
       tituloAuditoria: [this.data.auditoria?.titulo || ""],
       subtituloAuditoria: [this.data.auditoria?.subtitulo || ""],
       tipoEvaluacion: [this.data.auditoria?.tipo_evaluacion_nombre || []],
-      cronogramaActividades: [this.data.auditoria?.cronograma_nombre || []],
       auditoresSeleccionados: this.auditoresSeleccionados,
       auditor: [""],
     });
@@ -92,6 +94,9 @@ export class ModalAgregarAuditorComponent implements OnInit {
         console.error("Error al cargar auditores asignados:", error);
       }
     });
+    // Inicializar caché y suscripciones tras poblar los controles
+    this.recomputeAuditoresDisponibles();
+    this.subscribeToSelectionChanges();
   }
 
   agregarAuditor() {
@@ -101,6 +106,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
         lider: this.fb.control<boolean>(false),
       })
     );
+    this.recomputeAuditoresDisponibles();
   }
 
   eliminarAuditor(index: number) {
@@ -128,6 +134,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
                   this.alertaService.showSuccessAlert(
                     "Auditor eliminado correctamente."
                   );
+                  this.recomputeAuditoresDisponibles();
                 },
                 error: (err) => {
                   this.alertaService.showErrorAlert(
@@ -140,6 +147,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
             this.alertaService.showSuccessAlert(
               "Auditor eliminado correctamente."
             );
+            this.recomputeAuditoresDisponibles();
           }
         }
       });
@@ -148,7 +156,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
   cargarAuditores() {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
       if (res && res.Data) {
-        const auditorMap =new Map();
+        const auditorMap = new Map();
 
         res.Data.filter(
           (auditor: any) =>
@@ -156,26 +164,86 @@ export class ModalAgregarAuditorComponent implements OnInit {
             ["AUDITOR", "AUDITOR EXPERTO", "AUDITOR ASISTENTE"].includes(auditor.rol_usuario)
         ).forEach((auditor: any) => {
           auditorMap.set(auditor.id_tercero, {
-          nombre: auditor.nombre,
-          documento: auditor.documento,
-          id: auditor.id_tercero,
+            nombre: auditor.nombre,
+            documento: auditor.documento,
+            id: auditor.id_tercero,
+          });
         });
-      });
 
-        this.auditores = Array.from(auditorMap.values());
+        this.auditores = Array.from(auditorMap.values())
+            .sort((a: Auditor, b: Auditor): number =>
+              a.nombre.localeCompare(b.nombre)
+            );
       }
       this.inicializarAuditoresSeleccionados();
     });
   }
 
   auditoresDisponibles(index: number): Auditor[] {
-    const seleccionados = this.auditoresSeleccionados.value
-      .filter((_, i) => i !== index)
-      .map((control: { auditor: Auditor }) => control.auditor?.documento);
+    return this.auditoresDisponiblesCache[index] ?? this.auditores;
+  }
 
-    return this.auditores.filter(
-      (auditor) => !seleccionados.includes(auditor.documento)
-    );
+  private subscribeToSelectionChanges(): void {
+    if (this.selectionChangesSub) {
+      this.selectionChangesSub.unsubscribe();
+    }
+    if (this.auditoresSeleccionados) {
+      this.selectionChangesSub = this.auditoresSeleccionados.valueChanges.subscribe(() => {
+        this.recomputeAuditoresDisponibles();
+      });
+    }
+  }
+
+  private recomputeAuditoresDisponibles(): void {
+    if (!this.auditores || !this.auditoresSeleccionados) {
+      return;
+    }
+
+    const controls = this.auditoresSeleccionados.controls || [];
+    const newCache: Auditor[][] = [];
+
+    for (let i = 0; i < controls.length; i++) {
+      const seleccionados = controls
+        .filter((_, idx) => idx !== i)
+        .map((control) => control.get('auditor')?.value?.documento)
+        .filter((d: any) => d != null);
+
+      newCache[i] = this.auditores.filter(
+        (auditor) => !seleccionados.includes(auditor.documento)
+      );
+    }
+
+    // Update cache only where changed to keep stable references
+    const maxLen = Math.max(this.auditoresDisponiblesCache.length, newCache.length);
+    for (let i = 0; i < maxLen; i++) {
+      const oldArr = this.auditoresDisponiblesCache[i] || [];
+      const newArr = newCache[i] || [];
+      if (!this.areAuditorArraysEqual(oldArr, newArr)) {
+        this.auditoresDisponiblesCache[i] = newArr;
+      }
+    }
+
+    // truncate if needed
+    if (newCache.length < this.auditoresDisponiblesCache.length) {
+      this.auditoresDisponiblesCache.length = newCache.length;
+    }
+  }
+
+  private areAuditorArraysEqual(a: Auditor[], b: Auditor[]): boolean {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i].id !== b[i].id) return false;
+    }
+    return true;
+  }
+
+  ngOnDestroy(): void {
+    if (this.selectionChangesSub) {
+      this.selectionChangesSub.unsubscribe();
+      this.selectionChangesSub = null;
+    }
   }
 
   onLiderChange(selectedIndex: number): void {
@@ -184,6 +252,10 @@ export class ModalAgregarAuditorComponent implements OnInit {
         control.get("lider")?.setValue(false);
       }
     });
+  }
+
+  getAuditorControl(index: number): FormControl<Auditor | null> {
+    return this.auditoresSeleccionados.at(index).get("auditor") as FormControl<Auditor | null>;
   }
 
   asignarAuditor(auditorSeleccionado: any): void {
@@ -262,7 +334,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
               titulo: this.form.value.tituloAuditoria,
               subtitulo: this.form.value.subtituloAuditoria,
               tipo_evaluacion_id: this.data.auditoria?.tipo_evaluacion_id,
-              cronograma_id: this.data.auditoria?.cronograma_id,
               //auditores: auditoresSeleccionados
             };
 

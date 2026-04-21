@@ -35,6 +35,12 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 
+interface DocumentoAdjuntoCarta {
+  nuxeo_enlace?: string;
+  nombre?: string;
+  metadatos?: Record<string, any>;
+}
+
 @Component({
   selector: "app-tabla-auditorias-internas",
   templateUrl: "./tabla-auditorias-internas.component.html",
@@ -70,6 +76,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Iniciar Ejecución", "play_arrow"],
+    ["Ver Cartas de representación", "mail"],
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
 
@@ -230,6 +237,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
       "Enviar a Aprobación por Jefe": () => this.preguntarEnvioAprobacionPorJefe(auditoria),
       "Iniciar Ejecución": () => this.iniciarEjecucion(auditoria),
+      "Ver Cartas de representación": () => this.verCartasRepresentacion(auditoria),
     };
     acciones[accion]?.();
   }
@@ -562,5 +570,73 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         this.alertService.showErrorAlert("Error validando los documentos.");
       }
     });
+  }
+
+  verCartasRepresentacion(auditoria: Auditoria) {
+    this.planAuditoriaService
+      .get(
+        `documento?query=referencia_id:${auditoria._id},referencia_tipo:Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION},activo:true&fields=nuxeo_enlace,nombre,metadatos`
+      )
+      .subscribe({
+        next: async (res) => {
+          const cartas: DocumentoAdjuntoCarta[] = Array.isArray(res?.Data) ? res.Data : [];
+          const cartasConEnlace = cartas.filter((carta) => !!carta.nuxeo_enlace);
+
+          if (cartasConEnlace.length === 0) {
+            this.alertService.showAlert(
+              "Sin documentos",
+              "No hay cartas de representación disponibles para esta auditoría."
+            );
+            return;
+          }
+
+          try {
+            const documentos = await Promise.all(
+              cartasConEnlace.map(async (carta, index) => {
+                const base64 = await this.nuxeoService.obtenerPorUUID(carta.nuxeo_enlace!);
+                const dependenciaNombre =
+                  typeof carta.metadatos?.["dependencia_nombre"] === "string"
+                    ? carta.metadatos?.["dependencia_nombre"]
+                    : carta.nombre || `Dependencia ${index + 1}`;
+                const valorFirmado = carta.metadatos?.["firmado"];
+                const firmado =
+                  typeof valorFirmado === "boolean"
+                    ? valorFirmado
+                    : typeof valorFirmado === "string"
+                      ? valorFirmado.toLowerCase() === "true"
+                      : false;
+
+                return {
+                  titulo: `Carta de Representación ${dependenciaNombre}`,
+                  base64,
+                  guardado: true,
+                  firmado,
+                };
+              })
+            );
+
+            this.dialog.open(ModalVerDocumentoComponent, {
+              width: "1200px",
+              data: {
+                modoMultiple: true,
+                mostrarCheckGuardado: false,
+                documentos,
+              },
+              autoFocus: false,
+            });
+          } catch (error) {
+            console.error("Error al cargar cartas de representación", error);
+            this.alertService.showErrorAlert(
+              "No fue posible visualizar las cartas de representación."
+            );
+          }
+        },
+        error: (error) => {
+          console.error("Error al consultar cartas de representación", error);
+          this.alertService.showErrorAlert(
+            "No fue posible consultar las cartas de representación."
+          );
+        },
+      });
   }
 }

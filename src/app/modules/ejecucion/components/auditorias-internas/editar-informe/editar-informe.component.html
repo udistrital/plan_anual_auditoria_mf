@@ -4,9 +4,9 @@
   [mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row">
+  <div class="row" [class.modo-lectura]="pasosInicialesSoloLectura">
     <div class="col-12">
-      <div [class.steps-bloqueados]="!preinformeAprobado">
+      <div [class.steps-bloqueados]="!pasosInicialesSoloLectura">
       <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
         <ng-template matStepperIcon="number">
           <mat-icon>lens</mat-icon>
@@ -31,8 +31,11 @@
               (submitFormulario)="preguntarGuardadoInformacion($event)">
             </app-formulario-dinamico>
             <div class="d-flex justify-content-end mt-4">
-              <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+              <button *ngIf="!pasosInicialesSoloLectura" mat-raised-button color="primary" (click)="enviarFormInformacion()">
                 Guardar y continuar
+              </button>
+              <button *ngIf="pasosInicialesSoloLectura" mat-raised-button color="primary" matStepperNext>
+                Continuar
               </button>
             </div>
           </div>
@@ -61,8 +64,11 @@
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button mat-flat-button color="primary" type="submit" class="mx-2">
+                <button *ngIf="!pasosInicialesSoloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
+                </button>
+                <button *ngIf="pasosInicialesSoloLectura" matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
+                  Continuar
                 </button>
               </div>
             </form>
@@ -86,16 +92,19 @@
           </div>
 
           <div class="mt-4">
-            <app-aspectos-evaluados [informeId]="informeId" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
+            <app-aspectos-evaluados [informeId]="informeId" [soloLectura]="pasosInicialesSoloLectura" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
                 Volver
               </button>
-              <button mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
+              <button *ngIf="!pasosInicialesSoloLectura" mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
                 Guardar
               </button>
-              <button mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
+              <button *ngIf="!pasosInicialesSoloLectura" mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
                 Guardar y continuar
+              </button>
+              <button *ngIf="pasosInicialesSoloLectura" matStepperNext mat-flat-button color="primary" class="mx-2">
+                Continuar
               </button>
             </div>
           </div>
@@ -122,7 +131,10 @@
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
               </button>
-              <button *ngIf="preinformeAprobado" matStepperNext mat-flat-button color="primary" class="mx-2">
+              <button *ngIf="!pasosInicialesSoloLectura" mat-flat-button color="primary" class="mx-2" (click)="verPreinforme()" type="button">
+                Ver informe preliminar
+              </button>
+              <button *ngIf="pasosInicialesSoloLectura" matStepperNext mat-flat-button color="primary" class="mx-2">
                 Continuar
               </button>
             </div>
@@ -130,7 +142,7 @@
         </mat-step>
 
         <!-- Paso 5: Respuesta Preliminar -->
-        <mat-step [completed]="preinformeAprobado">
+        <mat-step [completed]="pasosInicialesSoloLectura">
           <ng-template matStepLabel>
             <p>Paso 5</p>
             <b style="color: var(--primary)">Respuesta Preliminar</b>
@@ -190,6 +202,9 @@
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
+                </button>
+                <button mat-flat-button color="primary" class="mx-2" (click)="verInforme()" type="button">
+                  Ver informe final
                 </button>
                 <button mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar

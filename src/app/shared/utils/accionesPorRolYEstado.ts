@@ -26,6 +26,7 @@ export const accionesProgramacion: {
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
@@ -49,6 +50,7 @@ export const accionesProgramacion: {
       "Ver Plan",
       "Historial de Rechazo",
       "Edición Extraordinaria de Auditorías",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo"],
   },
@@ -91,6 +93,7 @@ export const accionesProgramacion: {
       "Ver Documentos",
       "Historial de Rechazo",
       "Edición Extraordinaria de Auditorías",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
@@ -149,6 +152,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Revisar Auditoría",
       "Iniciar Ejecución",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Revisar Auditoría",
@@ -177,6 +181,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -207,6 +212,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -237,6 +243,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
