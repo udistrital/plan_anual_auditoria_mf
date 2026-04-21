@@ -21,17 +21,26 @@ export class EditarActividadComponent implements OnInit {
   };*/
   actividadData: ActividadPlan;
   idAuditoria: string;
+  minFechaStr: string | null = null;
+  maxFechaStr: string | null = null;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: any,
+    @Inject(MAT_DIALOG_DATA) public data: {
+      actividad: ActividadPlan;
+      idAuditoria: string;
+      minFechaStr?: string;
+      maxFechaStr?: string;
+    },
     private dialogRef: MatDialogRef<EditarActividadComponent>,
     private alertaService: AlertService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;
-    console.log('Actividad Data:', this.actividadData);
-    console.log('ID Auditoria:', this.idAuditoria);
+    this.minFechaStr = data.minFechaStr || null;
+    this.maxFechaStr = data.maxFechaStr || null;
+    console.debug('Actividad Data:', this.actividadData);
+    console.debug('ID Auditoria:', this.idAuditoria);
   }
 
   ngOnInit(): void {}

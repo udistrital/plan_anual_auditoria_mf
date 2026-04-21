@@ -28,12 +28,6 @@ export const colocacionesContructorTabla = [
     sortable: true,
   },
   {
-    columnDef: "cronograma",
-    header: "Cronograma de Actividades",
-    cell: (auditoria: any) => auditoria.cronograma,
-    sortable: true,
-  },
-  {
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: any) => auditoria.estado_nombre,
