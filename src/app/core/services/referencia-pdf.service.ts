@@ -5,9 +5,13 @@ import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
 
 export interface DocumentoReferenciaPdf {
+  _id?: string;
+  referencia_id?: string;
+  referencia_tipo?: string;
   nuxeo_id: number;
   nuxeo_enlace: string;
   tipo_id: number;
+  nombre?: string;
   metadatos?: Record<string, any>;
 }
 
@@ -33,7 +37,8 @@ export class ReferenciaPdfService {
     referencia_id: string,
     tipo_id: number,
     metadatos?: Record<string, any>,
-    nuevo: boolean = false
+    nuevo: boolean = false,
+    documentoIdActualizar?: string
   ): Observable<any> {
     const payload = {
       referencia_tipo: referencia_tipo,
@@ -45,6 +50,13 @@ export class ReferenciaPdfService {
       activo: true,
       fecha_creacion: new Date().toISOString(),
     };
+
+    if (documentoIdActualizar) {
+      return this.planAnualAuditoriaService.put(
+        `documento/${documentoIdActualizar}`,
+        payload
+      );
+    }
 
     const queryBase = `referencia_id:${referencia_id},tipo_id:${tipo_id}`;
     const dependenciaId = metadatos?.["dependencia_id"];
@@ -107,7 +119,7 @@ export class ReferenciaPdfService {
     referenciaId: string,
     opciones: ConsultaDocumentosReferenciaOptions = {}
   ): Observable<DocumentoReferenciaPdf[]> {
-    const fields = opciones.fields ?? "nuxeo_id,nuxeo_enlace,tipo_id,metadatos";
+    const fields = opciones.fields ?? "_id,referencia_id,referencia_tipo,nuxeo_id,nuxeo_enlace,tipo_id,nombre,metadatos";
     const limit = opciones.limit ?? 0;
     const tipo = opciones.tipo_id !== undefined ? `tipo_id:${opciones.tipo_id},` : "";
 
