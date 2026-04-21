@@ -43,7 +43,6 @@ export class TablaConsultaAuditoriasComponent {
 
   ngOnInit() {
     this.setPermisos();
-    this.construirTabla();
   }
 
   setPermisos() {
@@ -79,13 +78,12 @@ export class TablaConsultaAuditoriasComponent {
     offset: number = 0
   ): void {
     this.auditoriasPorVigencia = [];
-    this.auditoriasDataSource.data = [];
-    this.banderaTabla = false;
 
     // Primero verificar si hay PAAs aprobados
     this.verificarPAAAprobado(vigenciaId)
       .then((tienePAAAprobado) => {
         if (!tienePAAAprobado) {
+          this.banderaTabla = false;
           // No hay PAA aprobado, mostrar modal
           this.alertaService.showAlert(
             "Sin plan de auditorias aprobado",
@@ -108,6 +106,7 @@ export class TablaConsultaAuditoriasComponent {
               : [];
 
             if (auditorias.length === 0) {
+              this.banderaTabla = false;
               // Hay PAA aprobado pero no hay auditorías en estado válido
               this.alertaService.showAlert(
                 "Sin auditorias por asignar",
@@ -127,6 +126,7 @@ export class TablaConsultaAuditoriasComponent {
             this.totalRegistros = res.MetaData.Count;
             this.auditoriasDataSource.data = this.auditoriasPorVigencia;
             this.banderaTabla = true;
+            this.construirTabla();
           },
           error: (error) => {
             console.error("Error al cargar auditorías:", error);
@@ -167,7 +167,7 @@ export class TablaConsultaAuditoriasComponent {
     this.pageIndex = evento.pageIndex;
 
     const offset = this.pageIndex * this.pageSize;
-    this.listarAuditoriasPorVigencia(this.vigenciaId!, this.pageSize, offset);
+    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, offset);
     // Actualizar el paginador después de realizar la consulta
     this.paginator.length = this.totalRegistros;
     this.paginator.pageSize = this.pageSize;

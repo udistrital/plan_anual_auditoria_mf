@@ -13,39 +13,31 @@
       </div>
       <div class="row">
         <div class="col-sm-12 col-md-5 col-lg-4">
-          <div class="d-flex flex-column borde-redondo">
+          <div class="d-flex flex-column borde-redondo documentos-panel">
             <h3 class="mb-3">Documentos</h3>
-            <button class="mb-2 custom-button" mat-stroked-button [ngClass]="selectedTab === i ? 'selected' : ''"
-              *ngFor="let doc of opcionesDocumentos; let i = index" (click)="selectTab(i)">
-              {{ doc }}
-            </button>
+            <div class="documentos-scroll">
+              <button
+                class="mb-2 custom-button"
+                mat-stroked-button
+                [ngClass]="selectedTab === i ? 'selected' : ''"
+                *ngFor="let doc of documentosVisibles; let i = index"
+                (click)="selectTab(i)"
+              >
+                {{ doc.titulo }}
+              </button>
+            </div>
           </div>
         </div>
         <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
           <div class="borde-redondo">
-            <div *ngIf="selectedTab === 0">
-              <h3>Programa de trabajo</h3>
+            <ng-container *ngIf="documentosVisibles[selectedTab] as documentoSeleccionado">
+              <h3>{{ documentoSeleccionado.titulo }}</h3>
               <div class="row">
-                <app-pdf-visualizador class="mt-3" [base64Document]="docProgramaTrabajo"></app-pdf-visualizador>
+                <app-pdf-visualizador class="mt-3" [base64Document]="documentoSeleccionado.base64"></app-pdf-visualizador>
               </div>
-            </div>
-            <div *ngIf="selectedTab === 1">
-              <h3>Oficio Anuncio Solicitud de Información</h3>
-              <div class="row">
-                <app-pdf-visualizador class="mt-3" [base64Document]="docSolicitudInformacion"></app-pdf-visualizador>
-              </div>
-            </div>
-            <div *ngIf="selectedTab === 2">
-              <h3>Carta de representación</h3>
-              <div class="row">
-                <app-pdf-visualizador class="mt-3" [base64Document]="docCartaPresentacion"></app-pdf-visualizador>
-              </div>
-            </div>
-            <div *ngIf="selectedTab === 3">
-              <h3>Compromiso Ético del Auditor Interno</h3>
-              <div class="row">
-                <app-pdf-visualizador class="mt-3" [base64Document]="docCompromisoEtico"></app-pdf-visualizador>
-              </div>
+            </ng-container>
+            <div *ngIf="documentosVisibles.length === 0" class="alert alert-info mb-0">
+              No hay documentos disponibles para mostrar.
             </div>
           </div>
         </div>

@@ -7,6 +7,21 @@ export interface RegistroAuditor {
   asignado_por_nombre: string;
 }
 
+export interface DatosDependencias {
+  dependencia_id?: number;
+  dependencia_nombre?: string;
+  jefe_nombre?: string;
+  jefe_correo?: string;
+  asistente_nombre?: string;
+  asistente_correo?: string;
+  correo_dependencia?: string;
+}
+
+export interface CorreoComplementario {
+  dependencia_id: number;
+  correo: string;
+}
+
 export interface Auditoria {
   _id: string;
   plan_auditoria_id: string;
@@ -20,9 +35,9 @@ export interface Auditoria {
   vigencia_id: number;
   consecutivo_OCI: string;
   consecutivo_IE: string;
-  macroproceso_id: number;
-  proceso_id: number;
-  dependencia_id: number;
+  macroproceso_id: number[];
+  proceso_id: number[];
+  dependencia_id: number[];
   jefe_nombre: number;
   asistente_nombre: number;
   fecha_inicio: string;
@@ -42,16 +57,21 @@ export interface Auditoria {
   estado_nombre: string;
   tipo_nombre: string;
   vigencia_nombre: string;
-  macroproceso_nombre: string;
-  proceso_nombre: string;
-  dependencia_nombre: string;
+  macroproceso_nombre: string[];
+  proceso_nombre: string[];
+  dependencia_nombre: string[];
   cantidad_auditorias?: number;
   estado_interno_id?: number;
   jefe_correo?: string;
   asistente_correo?: string;
   correo_dependencia?: string;
-  correo_complementario?: string;
+  correo_complementario?: CorreoComplementario[];
+  cronograma?: string;
+  macroproceso?: string;
+  proceso?: string;
+  dependencia?: string;
   auditores?: RegistroAuditor[];
+  datos_dependencias: DatosDependencias[];
 }
 
 export function tituloYSubtituloAuditoria(auditoria: Auditoria): string {

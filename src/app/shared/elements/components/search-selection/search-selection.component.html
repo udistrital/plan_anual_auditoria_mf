@@ -1,7 +1,13 @@
 <mat-form-field class="col-12" appearance="outline">
   <mat-label *ngIf="label">{{label}}</mat-label>
   <mat-icon matPrefix *ngIf="icon" color="primary">{{icon}}</mat-icon>
-  <mat-select #singleSelect class="col-12" [formControl]="parametroControl" [placeholder]="placeholder">
+  <mat-select
+    [multiple]="multiple"
+    #matSelect
+    class="col-12"
+    [formControl]="selectionControl"
+    [placeholder]="placeholder"
+  >
     <mat-option>
       <ngx-mat-select-search
         [formControl]="formFilterControl"
@@ -10,24 +16,24 @@
       ></ngx-mat-select-search>
     </mat-option>
 
-    <mat-option *ngFor="let parametro of (filteredParametros | async)" [value]="parametro.Id">
-      {{parametro.Nombre}}
+    <mat-option *ngFor="let selectable of (filteredSelectables | async)" [value]="selectable.value">
+      {{selectable.label}}
     </mat-option>
   </mat-select>
   <mat-error
     *ngIf="
-      parametroControl.hasError('required') &&
-      parametroControl.touched &&
-      parametros.length > 0
+      selectionControl.hasError('required') &&
+      selectionControl.touched &&
+      selectables.length > 0
     "
   >
     {{noSelectionErrorMessage}}
   </mat-error>
   <mat-error
     *ngIf="
-      parametroControl.hasError('required') &&
-      parametroControl.touched &&
-      parametros.length === 0
+      selectionControl.hasError('required') &&
+      selectionControl.touched &&
+      selectables.length === 0
     "
   >
     {{noOptionsErrorMessage}}

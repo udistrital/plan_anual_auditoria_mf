@@ -1,9 +1,11 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { MatStepper } from "@angular/material/stepper";
 import { ActividadesSeguimientoComponent as ActividadesSeguimientoComponent } from "./actividades-seguimiento/actividades-seguimiento.component";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
+  formularioDependencias,
   formularioInformacionAuditoria,
+  formularioTemasAuditoria,
 } from "./editar-seguimiento.utilidades";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -28,7 +30,7 @@ import { forkJoin } from "rxjs";
   templateUrl: "./editar-seguimiento.component.html",
   styleUrls: ["./editar-seguimiento.component.css"],
 })
-export class EditarSeguimientoComponent implements OnInit {
+export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild(ActividadesSeguimientoComponent)
@@ -38,6 +40,14 @@ export class EditarSeguimientoComponent implements OnInit {
   formularioInformacionComponent!: FormularioDinamicoComponent;
   formularioInformacion: Formulario | undefined;
 
+  @ViewChild("formularioTemasComp")
+  formularioTemasComponent!: FormularioDinamicoComponent;
+  formularioTemas: Formulario | undefined;
+
+  @ViewChildren("formularioDependenciasComp")
+  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
+  formularioDependencias: Formulario = formularioDependencias;
+
   auditoriaId!: string;
   auditoria!: Auditoria;
   esLineal = false;
@@ -46,6 +56,7 @@ export class EditarSeguimientoComponent implements OnInit {
   procesoElegido = 0;
   usuarioId: number = 0;
   paso1Guardado: boolean = false;
+  soloLectura: boolean = false;
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
   auditoriaEstados = environment.AUDITORIA_ESTADO;
 
@@ -59,12 +70,14 @@ export class EditarSeguimientoComponent implements OnInit {
     private readonly parametrosService: ParametrosService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly rolService: RolService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.cargarFormularios();
     this.manejarResponsiveStepper();
+    this.soloLectura = this.route.snapshot.queryParamMap.get("modo") === "ver";
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.obtenerAuditoria(this.auditoriaId);
     this.userService.getPersonaId().then((usuarioId) => {
@@ -87,20 +100,32 @@ export class EditarSeguimientoComponent implements OnInit {
   obtenerAuditoria(auditoriaId: string) {
     this.planAuditoriaMid.get(`auditoria/${auditoriaId}`).subscribe((res) => {
       this.auditoria = res.Data;
+      this.changeDetector.detectChanges();
       this.cargarFormulariosConAuditoria();
     });
   }
 
   cargarFormularios(): void {
     this.formularioInformacion = formularioInformacionAuditoria;
+    this.formularioTemas = formularioTemasAuditoria;
   }
 
   enviarFormInformacion() {
+    if (this.soloLectura) {
+      this.stepper.next();
+      return;
+    }
+
     this.formularioInformacionComponent.onSubmit();
+    this.formularioTemasComponent.onSubmit();
   }
 
   preguntarGuardadoInformacion(dataForm: any) {
-    if (!dataForm) {
+    if (this.soloLectura) {
+      return;
+    }
+
+    if (!dataForm || !this.formularioTemasComponent.form.valid) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
         "Debe llenar todos los campos obligatorios"
@@ -129,6 +154,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   guardarInformacion(informacion: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
 
@@ -147,17 +176,33 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   mapearInfoFormInformacion(informacion: any) {
+    const correos = this.formularioDependenciasComponent.map((form) => {
+      const correo = {
+        dependencia_id: form.form.value.dependencia_id,
+        correo: form.form.value.correo_complementario
+      };
+      return correo;
+    });
+    const tema = this.formularioTemasComponent.form.value.tema;
     return {
+      alcance: informacion.alcance_auditoria,
       consecutivo_IE: informacion.consecutivo_IE,
       consecutivo_OCI: informacion.consecutivo_OCI,
+      criterio: informacion.criterios,
       fecha_fin: informacion.fecha_ejecucion_final,
       fecha_inicio: informacion.fecha_ejecucion_inicial,
       consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
-      correo_complementario: informacion.correo_complementario,
+      objetivo: informacion.objetivo_auditoria,
+      tema: tema,
+      correo_complementario: correos,
     };
   }
 
   finalizarAuditoria(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!this.paso1Guardado) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -166,7 +211,7 @@ export class EditarSeguimientoComponent implements OnInit {
     }
 
     this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de enviar el formulario?")
+      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
       .then((confirmado) => {
         if (!confirmado.value) {
           return;
@@ -192,7 +237,11 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   subirArchivoCargueMasivo(): void {
-    this.dialog.open(CargarArchivoComponent, {
+    if (this.soloLectura) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: "xlsx",
@@ -204,6 +253,12 @@ export class EditarSeguimientoComponent implements OnInit {
         referencia: "Plan Auditoria",
       },
     });
+
+    dialogRef.afterClosed().subscribe(() => {
+      if (this.registroPlan) {
+        this.registroPlan.listaractividades();
+      }
+    });
   }
 
   cargarFormulariosConAuditoria() {
@@ -213,20 +268,43 @@ export class EditarSeguimientoComponent implements OnInit {
       consecutivo_IE: this.auditoria.consecutivo_IE,
       macroproceso: this.auditoria.macroproceso_nombre,
       proceso: this.auditoria.proceso_nombre,
-      dependencia: this.auditoria.dependencia_nombre,
-      jefe_nombre: this.auditoria.jefe_nombre,
-      asistente_nombre: this.auditoria.asistente_nombre,
+      objetivo_auditoria: this.auditoria.objetivo,
+      alcance_auditoria: this.auditoria.alcance,
+      criterios: this.auditoria.criterio,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
-      jefe_correo: this.auditoria.jefe_correo,
-      asistente_correo: this.auditoria.asistente_correo,
-      correo_dependencia: this.auditoria.correo_dependencia,
-      correo_complementario: this.auditoria.correo_complementario,
     });
+
+    this.formularioTemasComponent.form.patchValue({
+      tema: this.auditoria.tema,
+    });
+
+    this.formularioDependenciasComponent.forEach((comp, i) => {
+      const dep = this.auditoria.datos_dependencias[i];
+      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo || "";
+      comp.form.patchValue({
+        dependencia_id: dep.dependencia_id,
+        jefe_nombre: dep.jefe_nombre,
+        jefe_correo: dep.jefe_correo,
+        asistente_nombre: dep.asistente_nombre,
+        asistente_correo: dep.asistente_correo,
+        correo_dependencia: dep.correo_dependencia,
+        correo_complementario: correo,
+      });
+    });
+
+    if (this.soloLectura) {
+      this.formularioInformacionComponent.form.disable();
+      this.formularioDependenciasComponent.forEach(form => form.form.disable());
+    }
     
   }
 
   crearActividad() {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef =this.dialog.open(CrearActividadSeguimientoComponent, {
       width: "1100px",
       data: { auditoriaId: this.auditoriaId },
@@ -244,6 +322,10 @@ export class EditarSeguimientoComponent implements OnInit {
   };
 
   manejarCambioSelect(event: any): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.selectActions[event.campo.nombre]?.(event.valor);
   }
 
@@ -284,6 +366,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   validarDocumentosAnexados(auditoriaId: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const docs = [
       { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información"},
       { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
@@ -315,6 +401,10 @@ export class EditarSeguimientoComponent implements OnInit {
   }
 
   enviarAprobacionPorJefe(auditoriaId: string) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,

@@ -310,12 +310,12 @@ export class TablaSeguimientoComponent implements OnInit {
   }
 
   verAuditoria(auditoria: Auditoria) {
-    // TODO: Implement the view functionality
-    console.log("Ver auditoría:", auditoria);
-    this.alertService.showSuccessAlert(
-      "Funcionalidad en desarrollo",
-      "La funcionalidad de ver auditoría está en desarrollo."
-    );
+    const auditoriaId = auditoria._id;
+    this.router.navigate([
+      `/planeacion/seguimiento/editar/${auditoriaId}`,
+    ], {
+      queryParams: { modo: "ver" },
+    });
   }
 
   editarAuditoria(auditoria: Auditoria) {
