@@ -140,7 +140,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
     switch (this.tipoConsulta) {
       case 'auditado':
-        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+        query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
         endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
         break;
       case 'jefe_OCI':
