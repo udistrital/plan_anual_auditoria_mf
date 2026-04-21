@@ -310,6 +310,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
         this.actualizarDocumentosVisibles();
       });
+    }
   }
 
   private async cargarDependenciasPorAuditoria(): Promise<void> {
