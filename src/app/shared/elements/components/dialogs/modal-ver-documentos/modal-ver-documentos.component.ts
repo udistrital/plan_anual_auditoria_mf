@@ -19,6 +19,7 @@ export interface BotonTabDocumento {
 export interface TabDocumento {
   nombre: string;
   tipoId: number;
+  fecha_subida?: string;
   obligatorio?: boolean;
   botones?: BotonTabDocumento[];
 }
@@ -41,7 +42,7 @@ export interface ModalVerDocumentosData {
 })
 export class ModalVerDocumentosComponent implements OnInit {
   selectedTab: number = 0;
-  documentos: { base64: string; tipo_id: number }[] = [];
+  documentos: { base64: string; tipo_id: number, fecha_subida: string }[] = [];
   documentosPorTab: { [key: number]: string } = {};
 
   titulo: string = "Ver documentos";
@@ -98,7 +99,7 @@ export class ModalVerDocumentosComponent implements OnInit {
 
       enlacesConTipo.forEach((doc, index) => {
         const base64 = base64Files[index];
-        this.documentos.push({ base64, tipo_id: doc.tipo_id });
+        this.documentos.push({ base64, tipo_id: doc.tipo_id, fecha_subida: doc.fecha_creacion });
       });
     } catch (error) {
       console.error("Error al cargar los documentos:", error);
@@ -124,7 +125,11 @@ export class ModalVerDocumentosComponent implements OnInit {
                                   .replaceAll("_", " ")
                                   // Capitalize first letter of each word
                                   .replace(/\b\w/g, char => char.toUpperCase());
-        tabsInferidas.push({ nombre: nombreParametro, tipoId: doc.tipo_id });
+        const tab: TabDocumento = { nombre: nombreParametro, tipoId: doc.tipo_id }
+        if (doc.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN) {
+          tab.fecha_subida = doc.fecha_subida;
+        }
+        tabsInferidas.push(tab);
       }
     });
 

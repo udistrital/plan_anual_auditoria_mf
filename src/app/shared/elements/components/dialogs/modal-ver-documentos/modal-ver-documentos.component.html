@@ -27,6 +27,7 @@
                 <button *ngIf="documentosPorTab[i] || tab.obligatorio" class="mb-2 tab-btn" mat-stroked-button
                     [ngClass]="selectedTab === i ? 'selected' : ''" (click)="selectTab(i)">
                     {{ tab.nombre }}
+                    <span *ngIf="tab.fecha_subida" >{{ tab.fecha_subida | date:'dd/MM/yyyy' }}</span>
                 </button>
             </ng-container>
         </div>

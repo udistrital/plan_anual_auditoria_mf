@@ -8,6 +8,7 @@ export interface DocumentoReferenciaPdf {
   nuxeo_id: number;
   nuxeo_enlace: string;
   tipo_id: number;
+  fecha_creacion: string;
   metadatos?: Record<string, any>;
 }
 
@@ -107,7 +108,7 @@ export class ReferenciaPdfService {
     referenciaId: string,
     opciones: ConsultaDocumentosReferenciaOptions = {}
   ): Observable<DocumentoReferenciaPdf[]> {
-    const fields = opciones.fields ?? "nuxeo_id,nuxeo_enlace,tipo_id,metadatos";
+    const fields = opciones.fields ?? "nuxeo_id,nuxeo_enlace,tipo_id,metadatos,fecha_creacion";
     const limit = opciones.limit ?? 0;
     const tipo = opciones.tipo_id !== undefined ? `tipo_id:${opciones.tipo_id},` : "";
 
