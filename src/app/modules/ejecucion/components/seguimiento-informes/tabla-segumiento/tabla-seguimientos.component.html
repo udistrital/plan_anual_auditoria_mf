@@ -8,9 +8,9 @@
     </div>
     <div class="col-12">
       <div class="table-container rounded-table table-scroll">
-        <table mat-table [dataSource]="auditoriasDataSource" matSort>
+        <table mat-table [dataSource]="auditoriasDataSource">
           <ng-container *ngFor="let columna of constructorTablaAuditorias" [matColumnDef]="columna.columnDef">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!columna.sortable">
+            <th mat-header-cell *matHeaderCellDef>
               <b>{{ columna.header }}</b>
             </th>
 

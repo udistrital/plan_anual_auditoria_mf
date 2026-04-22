@@ -8,9 +8,9 @@
     </div>
     <div class="col-12">
       <div class="table-container rounded-table table-scroll">
-        <table mat-table [dataSource]="planesDataSource" matSort>
+        <table mat-table [dataSource]="planesDataSource">
           <ng-container *ngFor="let columna of planesConstructorTabla" [matColumnDef]="columna.columnDef">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!columna.sortable">
+            <th mat-header-cell *matHeaderCellDef>
               <b>{{ columna.header }}</b>
             </th>
             <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">

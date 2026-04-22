@@ -8,7 +8,7 @@
     </div>
     <div class="col-12">
       <div class="table-container table-scroll">
-        <table mat-table [dataSource]="auditoriasDataSource" matSort>
+        <table mat-table [dataSource]="auditoriasDataSource">
           <ng-container
             *ngFor="let columna of auditoriasContructorTabla"
             [matColumnDef]="columna.columnDef"
@@ -16,8 +16,6 @@
             <th
               mat-header-cell
               *matHeaderCellDef
-              mat-sort-header
-              [disabled]="!columna.sortable"
             >
               <b>{{ columna.header }}</b>
             </th>

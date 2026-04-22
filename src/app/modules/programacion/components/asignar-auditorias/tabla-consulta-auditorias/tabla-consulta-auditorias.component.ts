@@ -6,7 +6,6 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { Auditoria } from "src/app/shared/data/models/auditoria-auditor";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { colocacionesContructorTabla } from "./tabla-consulta-auditorias.utilidades";
-import { MatSort } from "@angular/material/sort";
 import { ModalAgregarAuditorComponent } from "../modal-agregar-auditor/modal-agregar-auditor.component";
 import { RolService } from "src/app/core/services/rol.service";
 import { environment } from "src/environments/environment";
@@ -18,7 +17,6 @@ import { environment } from "src/environments/environment";
 })
 export class TablaConsultaAuditoriasComponent {
   @Input() vigenciaId: any;
-  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   auditoriasPorVigencia: Auditoria[] = [];
@@ -156,7 +154,6 @@ export class TablaConsultaAuditoriasComponent {
     //si no hay paginador, se crea
     if (!this.paginator) {
       this.auditoriasDataSource.paginator = this.paginator;
-      this.auditoriasDataSource.sort = this.sort;
     }
 
   }
