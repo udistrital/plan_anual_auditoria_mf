@@ -56,7 +56,7 @@
                 <mat-icon>upload_file</mat-icon>
                 Cargar Carta Firmada
               </button>
-              <button mat-stroked-button color="primary" class="mx-2 width-100-md"
+              <button *ngIf="mostrarRechazoAuditoria(role, estadoAuditoriaId)" mat-stroked-button color="primary" class="mx-2 width-100-md"
                 style="border: 1px solid var(--md-primary-500)" (click)="abrirModalRechazo()">
                 <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
               </button>

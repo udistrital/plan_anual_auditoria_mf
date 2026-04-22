@@ -43,6 +43,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   iconosAccion = new Map<string, string>([
     ["Editar Preinforme", "edit_note"],
     ["Editar Informe", "edit"],
+    ["Ver Preinforme", "visibility"],
+    ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Historial de Rechazos", "history"],
@@ -191,6 +193,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const acciones: Record<string, Function | null> = {
       "Editar Preinforme": () => this.editarInforme(auditoria),
       "Editar Informe": () => this.editarInforme(auditoria),
+      "Ver Preinforme": () => this.verInformeSoloLectura(auditoria),
+      "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
       "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
@@ -208,6 +212,22 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   editarInforme(auditoria: Auditoria) {
     this.obtenerOCrearInforme(auditoria._id, (informeId) => {
       this.router.navigate([`/ejecucion/auditorias-internas/editar-informe/${informeId}`]);
+    });
+  }
+
+  verInformeSoloLectura(auditoria: Auditoria) {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
+      next: (res: any) => {
+        if (res.Data && res.Data.length > 0) {
+          this.router.navigate(
+            [`/ejecucion/auditorias-internas/editar-informe/${res.Data[0]._id}`],
+            { queryParams: { soloLectura: true } }
+          );
+        } else {
+          this.alertaService.showErrorAlert('No se encontró un informe para esta auditoría.');
+        }
+      },
+      error: () => this.alertaService.showErrorAlert('Error al buscar el informe.')
     });
   }
 

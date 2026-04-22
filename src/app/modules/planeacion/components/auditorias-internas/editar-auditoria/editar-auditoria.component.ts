@@ -190,6 +190,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
             );
           });
         }
+        this.auditoria = (res as any).Data;
         this.paso1Guardado = true;
         this.stepper.next();
       });
@@ -391,7 +392,11 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
 
     const dialogRef = this.dialog.open(CrearActividadComponent, {
       width: "1100px",
-      data: { auditoriaId: this.auditoriaId },
+      data: {
+        auditoriaId: this.auditoriaId,
+        minFechaStr: this.auditoria.fecha_inicio,
+        maxFechaStr: this.auditoria.fecha_fin,
+      },
     });
 
     dialogRef.afterClosed().subscribe(() => {

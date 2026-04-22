@@ -6,5 +6,9 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <app-actividad-formulario (formSubmit)="crearActividad($event)"></app-actividad-formulario>
+  <app-actividad-formulario
+    [minFechaStr]="minFechaStr"
+    [maxFechaStr]="maxFechaStr"
+    (formSubmit)="crearActividad($event)"
+  ></app-actividad-formulario>
 </ng-template>

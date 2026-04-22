@@ -4,7 +4,7 @@
   [mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row" [class.modo-lectura]="pasosInicialesSoloLectura">
+  <div class="row" [class.modo-lectura]="pasosInicialesSoloLectura || soloLectura">
     <div class="col-12">
       <div [class.steps-bloqueados]="!pasosInicialesSoloLectura">
       <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
@@ -31,10 +31,10 @@
               (submitFormulario)="preguntarGuardadoInformacion($event)">
             </app-formulario-dinamico>
             <div class="d-flex justify-content-end mt-4">
-              <button *ngIf="!pasosInicialesSoloLectura" mat-raised-button color="primary" (click)="enviarFormInformacion()">
+              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura" mat-raised-button color="primary" (click)="enviarFormInformacion()">
                 Guardar y continuar
               </button>
-              <button *ngIf="pasosInicialesSoloLectura" mat-raised-button color="primary" matStepperNext>
+              <button *ngIf="pasosInicialesSoloLectura || soloLectura" mat-raised-button color="primary" matStepperNext>
                 Continuar
               </button>
             </div>
@@ -59,15 +59,15 @@
           <div class="mt-4">
             <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
               <app-editor-enriquecido formControlName="aspecto_general"
-                placeholder="Edita tu texto..."></app-editor-enriquecido>
+                [placeholder]="pasosInicialesSoloLectura || soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button *ngIf="!pasosInicialesSoloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
+                <button *ngIf="!pasosInicialesSoloLectura && !soloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
                 </button>
-                <button *ngIf="pasosInicialesSoloLectura" matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
+                <button *ngIf="pasosInicialesSoloLectura || soloLectura" matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
                   Continuar
                 </button>
               </div>
@@ -92,18 +92,18 @@
           </div>
 
           <div class="mt-4">
-            <app-aspectos-evaluados [informeId]="informeId" [soloLectura]="pasosInicialesSoloLectura" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
+            <app-aspectos-evaluados [informeId]="informeId" [soloLectura]="pasosInicialesSoloLectura || soloLectura" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
                 Volver
               </button>
-              <button *ngIf="!pasosInicialesSoloLectura" mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
+              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura" mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
                 Guardar
               </button>
-              <button *ngIf="!pasosInicialesSoloLectura" mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
+              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura" mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
                 Guardar y continuar
               </button>
-              <button *ngIf="pasosInicialesSoloLectura" matStepperNext mat-flat-button color="primary" class="mx-2">
+              <button *ngIf="pasosInicialesSoloLectura || soloLectura" matStepperNext mat-flat-button color="primary" class="mx-2">
                 Continuar
               </button>
             </div>
@@ -131,7 +131,7 @@
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
               </button>
-              <button *ngIf="!pasosInicialesSoloLectura" mat-flat-button color="primary" class="mx-2" (click)="verPreinforme()" type="button">
+              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura" mat-flat-button color="primary" class="mx-2" (click)="verPreinforme()" type="button">
                 Ver informe preliminar
               </button>
               <button *ngIf="pasosInicialesSoloLectura" matStepperNext mat-flat-button color="primary" class="mx-2">
@@ -159,13 +159,16 @@
           <div class="mt-4">
             <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="guardarRespuestaPreliminar()">
               <app-editor-enriquecido formControlName="respuesta_preliminar"
-                placeholder="Edita tu texto..."></app-editor-enriquecido>
+                [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button mat-flat-button color="primary" type="submit" class="mx-2">
+                <button *ngIf="!soloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
+                </button>
+                <button *ngIf="soloLectura" matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
+                  Continuar
                 </button>
               </div>
             </form>
@@ -191,14 +194,14 @@
             <form [formGroup]="formInformeFinal" (ngSubmit)="guardarInformeFinal()">
               <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
               <app-editor-enriquecido formControlName="informe_final"
-                placeholder="Edita tu texto..."></app-editor-enriquecido>
+                [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
 
               <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
               <app-editor-enriquecido formControlName="observacion_conclusion"
-                placeholder="Edita tu texto..."></app-editor-enriquecido>
+                [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
 
               <h3 style="color: var(--primary)" class="my-2">Notas</h3>
-              <app-editor-enriquecido formControlName="nota" placeholder="Edita tu texto..."></app-editor-enriquecido>
+              <app-editor-enriquecido formControlName="nota" [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
@@ -206,7 +209,7 @@
                 <button mat-flat-button color="primary" class="mx-2" (click)="verInforme()" type="button">
                   Ver informe final
                 </button>
-                <button mat-flat-button color="primary" type="submit" class="mx-2">
+                <button *ngIf="!soloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
                   Guardar y continuar
                 </button>
               </div>

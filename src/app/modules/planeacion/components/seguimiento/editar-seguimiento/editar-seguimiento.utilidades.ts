@@ -109,6 +109,25 @@ export const formularioInformacionAuditoria: Formulario = {
   ],
 };
 
+export const formularioTemasAuditoria: Formulario = {
+  campos: [
+    {
+      nombre: "tema",
+      etiqueta: "Solicitud de Información",
+      tipo: "quill",
+      validaciones: [{ tipo: "requerido", valor: "" }],
+      deshabilitado: false,
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
+      placeholder: "Escriba aquí los temas a tratar en la auditoría",
+      quillConfig: {
+        toolbar: [
+          ["bold", "italic"],
+          [{ list: "ordered" }, { list: "bullet" }]
+        ],
+      },
+    }
+  ]
+}
 
 export const formularioDependencias: Formulario = {
   campos: [
