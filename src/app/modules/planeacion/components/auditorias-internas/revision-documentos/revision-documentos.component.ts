@@ -21,6 +21,7 @@ import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
 
 interface DocumentoAdjuntoRevision {
   tipo_id: number;
@@ -117,19 +118,38 @@ export class RevisionDocumentosComponent implements OnInit {
     const { estadoAprobacion, mensajeAprobacion, preguntaAprobacion } =
       rolAprobacion;
 
-    this.alertService
-      .showConfirmAlert(preguntaAprobacion)
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-
-        if (Array.isArray(estadoAprobacion)) {
-          this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
-        } else {
-          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+    if (this.role == environment.ROL.JEFE_DEPENDENCIA || this.role == environment.ROL.ASISTENTE_DEPENDENCIA) {
+      const dialogRef = this.dialog.open(ModalAprobacionAuditadoComponent, {
+        width: "600px",
+        data: {
+          auditoria_id: this.auditoriaId
         }
       });
+
+      dialogRef.afterClosed().subscribe((aprobado: boolean) => {
+        if (aprobado) {
+          if (Array.isArray(estadoAprobacion)) {
+            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+          } else {
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          }
+        }
+      });
+    } else {
+      this.alertService
+        .showConfirmAlert(preguntaAprobacion)
+        .then((confirmado) => {
+          if (!confirmado.value) {
+            return;
+          }
+
+          if (Array.isArray(estadoAprobacion)) {
+            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+          } else {
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          }
+        });
+    }
   }
 
   async aprobarAuditoriaSecuencial(
@@ -246,16 +266,19 @@ export class RevisionDocumentosComponent implements OnInit {
         "docCompromisoEtico",
     };
 
-    this.referenciaPdfService
-      .consultarDocumentos(this.auditoriaId, {})
-      .subscribe(async (documentosAdjuntos: DocumentoReferenciaPdf[]) => {
-        await this.cargarDependenciasPorAuditoria();
+    if (this.role === environment.ROL.JEFE_DEPENDENCIA || this.role === environment.ROL.ASISTENTE_DEPENDENCIA) {
+      this.filtrarDocumentosPorDependenciaAuditado(tipoDocumentoMap);
+    } else {
+      this.referenciaPdfService
+        .consultarDocumentos(this.auditoriaId, {})
+        .subscribe(async (documentosAdjuntos: DocumentoReferenciaPdf[]) => {
+          await this.cargarDependenciasPorAuditoria();
 
-        let indiceCarta = 0;
-        const promesas = documentosAdjuntos.map(async (documento, index) => {
-          if (!documento?.nuxeo_enlace) {
-            return null;
-          }
+          let indiceCarta = 0;
+          const promesas = documentosAdjuntos.map(async (documento, index) => {
+            if (!documento?.nuxeo_enlace) {
+              return null;
+            }
 
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
 
@@ -287,6 +310,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
         this.actualizarDocumentosVisibles();
       });
+    }
   }
 
   private async cargarDependenciasPorAuditoria(): Promise<void> {
@@ -591,5 +615,41 @@ export class RevisionDocumentosComponent implements OnInit {
       next: (res) => console.debug("Registro de notificación guardado:", res),
       error: (err) => console.warn("Error guardando registro de notificación:", err),
     });
+  }
+
+  mostrarRechazoAuditoria(role: string, estadoAuditoriaId: number): boolean {
+    const condicionesVisibilidad: { [key: string]: number[] } = {
+      [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
+    };
+    return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
+  }
+
+  private async filtrarDocumentosPorDependenciaAuditado(tipoDocumentoMap: any) {
+    const personaId = await this.userService.getPersonaId();
+    let cargoId: number | undefined;
+    
+    switch (this.role) {
+      case environment.ROL.JEFE_DEPENDENCIA:
+        cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+        break;
+      case environment.ROL.ASISTENTE_DEPENDENCIA:
+        cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+        break;
+    }
+
+    this.planAuditoriaMid.get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
+      .subscribe(async (res) => {
+        const promesas = res.map(async (documento: any) => {
+          const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
+          const propiedad = tipoDocumentoMap[documento.tipo_id];
+          if (propiedad) {
+            (this as any)[propiedad] = base64;
+          }
+
+          this.documentos.push({ base64, tipo_id: documento.tipo_id });
+        });
+        await Promise.all(promesas);
+      });
   }
 }
