@@ -445,13 +445,15 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     }
 
     const modalInstance = dialogRef.componentInstance;
+    const metadatos = { firmado: false };
     modalInstance.botonGuardar = { icono: "save", texto: "Guardar carta actual" };
     modalInstance.botonGuardarTodos = { icono: "save", texto: "Guardar todas" };
     modalInstance.onGuardarIndividual = (indice: number) => {
       this.guardarDocumento(
         documentos[indice].base64,
         this.construirInfoCarta(infoDocumento, documentos[indice]),
-        () => modalInstance.marcarGuardado(indice)
+        () => modalInstance.marcarGuardado(indice),
+        metadatos
       );
     };
     modalInstance.onGuardarTodos = () => {
@@ -459,7 +461,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         this.guardarDocumento(
           documentoCarta.base64,
           this.construirInfoCarta(infoDocumento, documentoCarta),
-          () => modalInstance.marcarGuardado(indice)
+          () => modalInstance.marcarGuardado(indice),
+          metadatos
         );
       });
     };
@@ -500,7 +503,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   guardarDocumento(
     documentoBase64: any,
     infoDocumento: any,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    metadatos?: Record<string, any>,
   ) {
     if (this.soloLectura) {
       return;
@@ -514,7 +518,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           "Documento pdf (" +
           infoDocumento.plantilla +
           ") de auditoría de plan de auditoría",
-        metadatos: {},
+        metadatos: metadatos,
         file: documentoBase64,
       };
 

@@ -46,6 +46,16 @@
         <ng-container *ngIf="mostrarAcciones(role, estadoAuditoriaId)">
           <div class="row">
             <div class="col-12 my-4">
+              <button
+                *ngIf="puedeCargarCartaFirmada()"
+                mat-flat-button
+                color="accent"
+                class="mx-2 width-100-md mt-md"
+                (click)="abrirModalCargueCartasFirmadas()"
+              >
+                <mat-icon>upload_file</mat-icon>
+                Cargar Carta Firmada
+              </button>
               <button *ngIf="mostrarRechazoAuditoria(role, estadoAuditoriaId)" mat-stroked-button color="primary" class="mx-2 width-100-md"
                 style="border: 1px solid var(--md-primary-500)" (click)="abrirModalRechazo()">
                 <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
