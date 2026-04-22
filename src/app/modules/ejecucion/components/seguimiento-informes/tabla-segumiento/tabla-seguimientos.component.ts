@@ -6,6 +6,7 @@ import {
   ViewChild,
 } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { seguimientosConstructorTabla } from "./tabla-seguimientos.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
@@ -27,6 +28,7 @@ import { environment } from "src/environments/environment";
 })
 export class TablaSeguimientosComponent implements OnInit {
   @Input() vigenciaId: any;
+  @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   auditoriasPorVigencia: any[] = [];
@@ -119,6 +121,7 @@ export class TablaSeguimientosComponent implements OnInit {
     //si no hay paginador, se crea
     if (!this.paginator) {
       this.auditoriasDataSource.paginator = this.paginator;
+      this.auditoriasDataSource.sort = this.sort;
     }
 
     this.changeDetector.detectChanges();

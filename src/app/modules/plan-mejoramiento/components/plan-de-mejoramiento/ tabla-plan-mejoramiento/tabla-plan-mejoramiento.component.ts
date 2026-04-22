@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
+import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
@@ -18,6 +19,7 @@ export class TablaPlanMejoramientoComponent {
   @Input() vigenciaId: any;
   @Input() tipoEvaluacionId: any;
   @Input() role: any;
+  @ViewChild(MatSort) sort!: MatSort;
 
   planesPorVigencia: any[] = [];
   planesDataSource: MatTableDataSource<any> = new MatTableDataSource();
@@ -108,6 +110,9 @@ export class TablaPlanMejoramientoComponent {
       this.paginator.length = this.totalRegistros;
       this.paginator.pageSize = this.pageSize;
       this.paginator.pageIndex = this.pageIndex;
+    }
+    if (this.sort) {
+      this.planesDataSource.sort = this.sort;
     }
     this.changeDetector.detectChanges();
   }
