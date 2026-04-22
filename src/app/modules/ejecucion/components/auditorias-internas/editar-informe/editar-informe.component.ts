@@ -12,7 +12,9 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
+import { RolService } from 'src/app/core/services/rol.service';
 import { environment } from 'src/environments/environment';
+import { accionesEjecucionFinal, accionesEjecucionPreliminar } from 'src/app/shared/utils/accionesPorRolYEstado';
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
@@ -44,6 +46,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   informeId!: string;
   informeData: any = null;
   estadoId: number = 0;
+  soloLectura: boolean = false;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
 
@@ -62,7 +65,8 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     private nuxeoService: NuxeoService,
     private referenciaPdfService: ReferenciaPdfService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private rolService: RolService
   ) {
     this.formAspectosGenerales = this.fb.group({
       aspecto_general: [''],
@@ -78,6 +82,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
+    this.soloLectura = this.route.snapshot.queryParamMap.get('soloLectura') === 'true';
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.informeId = this.route.snapshot.paramMap.get("id")!;
@@ -142,19 +147,43 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     this.planAnualAuditoriaService.get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`).subscribe({
       next: (res: any) => {
         this.estadoId = res.Data?.[0]?.estado_id ?? 0;
+        this.forzarSoloLecturaSegunPermisos();
         this.aplicarModoSoloLecturaPasosIniciales();
       },
       error: () => { }
     });
   }
 
+  private forzarSoloLecturaSegunPermisos(): void {
+    const esFlujoFinal = this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+    const accionEdicion = esFlujoFinal ? 'Editar Informe' : 'Editar Preinforme';
+    const roles = this.rolService.getRoles();
+
+    const puedeEditar = roles.some((rol) => {
+      const acciones = esFlujoFinal
+        ? accionesEjecucionFinal[rol]?.[this.estadoId] ?? []
+        : accionesEjecucionPreliminar[rol]?.[this.estadoId] ?? [];
+      return acciones.includes(accionEdicion);
+    });
+
+    if (!puedeEditar) {
+      this.soloLectura = true;
+    }
+  }
+
   private aplicarModoSoloLecturaPasosIniciales(): void {
-    if (!this.pasosInicialesSoloLectura) return;
+    const deshabilitarPasosIniciales = this.pasosInicialesSoloLectura || this.soloLectura;
+    if (!deshabilitarPasosIniciales) return;
 
     this.formAspectosGenerales.disable({ emitEvent: false });
 
     if (this.formularioInformacionComponent?.form) {
       this.formularioInformacionComponent.form.disable({ emitEvent: false });
+    }
+
+    if (this.soloLectura) {
+      this.formRespuestaPreliminar.disable({ emitEvent: false });
+      this.formInformeFinal.disable({ emitEvent: false });
     }
   }
 
@@ -342,7 +371,9 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     });
 
     const modalInstance = dialogRef.componentInstance;
-    modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    if (!this.soloLectura) {
+      modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    }
 
     dialogRef.afterClosed().subscribe((res) => {
       if (!res) return;

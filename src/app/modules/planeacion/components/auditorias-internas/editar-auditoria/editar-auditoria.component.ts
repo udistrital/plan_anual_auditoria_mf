@@ -190,6 +190,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
             );
           });
         }
+        this.auditoria = (res as any).Data;
         this.paso1Guardado = true;
         this.stepper.next();
       });
