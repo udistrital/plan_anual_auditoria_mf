@@ -2,9 +2,9 @@ import { environment } from "src/environments/environment";
 
 const configAuditado = {
   estadoAprobacion: environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO,
-  preguntaAprobacion: "¿Está seguro(a) de firmar y enviar auditoría?",
+  preguntaAprobacion: "¿Está seguro(a) de enviar auditoría?",
   mensajeAprobacion: "La auditoria fue enviada al auditor",
-  botonAprobacion: "Firmar y enviar a Auditor",
+  botonAprobacion: "Enviar a Auditor",
 };
 
 const configJefe = {
