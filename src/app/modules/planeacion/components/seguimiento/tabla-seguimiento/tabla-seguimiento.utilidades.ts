@@ -20,6 +20,12 @@ export const colocacionesContructorTabla = [
     sortable: false,
   },
   {
+    columnDef: "tipo_evaluacion",
+    header: "Tipo Evaluación",
+    cell: (auditoria: any) => auditoria.tipo_evaluacion_nombre,
+    sortable: false,
+  },
+  {
     columnDef: "auditores",
     header: "Auditor(es)",
     cell: (auditoria: any) =>
