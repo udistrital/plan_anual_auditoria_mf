@@ -14,15 +14,20 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
+import { BotonTabDocumentoContext, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { forkJoin, of, throwError } from "rxjs";
+import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
 
 interface DocumentoAdjuntoRevision {
+  _id?: string;
+  referencia_id?: string;
+  referencia_tipo?: string;
   tipo_id: number;
   nuxeo_enlace: string;
   nombre?: string;
@@ -117,19 +122,38 @@ export class RevisionDocumentosComponent implements OnInit {
     const { estadoAprobacion, mensajeAprobacion, preguntaAprobacion } =
       rolAprobacion;
 
-    this.alertService
-      .showConfirmAlert(preguntaAprobacion)
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-
-        if (Array.isArray(estadoAprobacion)) {
-          this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
-        } else {
-          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+    if (this.role == environment.ROL.JEFE_DEPENDENCIA || this.role == environment.ROL.ASISTENTE_DEPENDENCIA) {
+      const dialogRef = this.dialog.open(ModalAprobacionAuditadoComponent, {
+        width: "600px",
+        data: {
+          auditoria_id: this.auditoriaId
         }
       });
+
+      dialogRef.afterClosed().subscribe((aprobado: boolean) => {
+        if (aprobado) {
+          if (Array.isArray(estadoAprobacion)) {
+            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+          } else {
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          }
+        }
+      });
+    } else {
+      this.alertService
+        .showConfirmAlert(preguntaAprobacion)
+        .then((confirmado) => {
+          if (!confirmado.value) {
+            return;
+          }
+
+          if (Array.isArray(estadoAprobacion)) {
+            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+          } else {
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          }
+        });
+    }
   }
 
   async aprobarAuditoriaSecuencial(
@@ -232,6 +256,90 @@ export class RevisionDocumentosComponent implements OnInit {
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
   }
 
+  puedeCargarCartaFirmada(): boolean {
+    const esAuditado =
+      this.role === environment.ROL.JEFE_DEPENDENCIA ||
+      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
+
+    return (
+      esAuditado &&
+      this.estadoAuditoriaId ===
+        environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO
+    );
+  }
+
+  async abrirModalCargueCartasFirmadas(): Promise<void> {
+    try {
+      const cartas = (await lastValueFrom(
+        this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {})
+      )) as DocumentoAdjuntoRevision[];
+
+      const cartasAuditado = cartas.filter(
+        (documento) =>
+          documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+      );
+
+      console.debug("Cartas de representación visibles para modal:", cartasAuditado);
+
+      if (!Array.isArray(cartasAuditado) || cartasAuditado.length === 0) {
+        this.alertService.showAlert(
+          "Sin cartas disponibles",
+          "No se encontraron cartas de representación para cargar firma."
+        );
+        return;
+      }
+
+      const tabs: TabDocumento[] = cartasAuditado.map((documento, index): TabDocumento => {
+        const dependenciaNombre = this.resolverNombreDependencia(documento, index);
+
+        return {
+          nombre: `Carta de representación ${dependenciaNombre}`,
+          tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+          documentoId: documento._id,
+          botones: [{
+            nombre: "Descargar Carta",
+            accion: async () => {
+              const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+              this.descargaService.descargarArchivo(
+                base64, "application/pdf", `Carta_Representacion_${dependenciaNombre}`
+              );
+            }
+          }],
+          cargueAdjuntoConfig: {
+            nombreBoton: "Cargar Carta Firmada",
+            iconoBoton: "upload_file",
+            colorBoton: "accent",
+            idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+            descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
+            referenciaTipoFallback: "Auditoria",
+            metadatosAdicionales: { firmado: true },
+            onSuccess: async () => {
+              this.cargarDocumentos();
+            },
+          },
+        };
+      });
+
+      this.dialog.open(ModalVerDocumentosComponent, {
+        width: "1200px",
+        data: {
+          entityId: this.auditoriaId,
+          titulo: "Cartas de representación",
+          descripcion:
+            "Revise y cargue la carta de representación firmada para cada dependencia.",
+          tabs,
+          tipo: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+          textoBotonCerrar: "Cerrar",
+        },
+      });
+    } catch (error) {
+      console.error("Error al abrir modal de cargue de cartas firmadas", error);
+      this.alertService.showErrorAlert(
+        "No fue posible abrir el modal de cargue de cartas firmadas."
+      );
+    }
+  }
+
   cargarDocumentos() {
     this.documentos = [];
     this.cartasRepresentacion = [];
@@ -246,16 +354,19 @@ export class RevisionDocumentosComponent implements OnInit {
         "docCompromisoEtico",
     };
 
-    this.referenciaPdfService
-      .consultarDocumentos(this.auditoriaId, {})
-      .subscribe(async (documentosAdjuntos: DocumentoReferenciaPdf[]) => {
-        await this.cargarDependenciasPorAuditoria();
+    if (this.role === environment.ROL.JEFE_DEPENDENCIA || this.role === environment.ROL.ASISTENTE_DEPENDENCIA) {
+      this.filtrarDocumentosPorDependenciaAuditado(tipoDocumentoMap);
+    } else {
+      this.referenciaPdfService
+        .consultarDocumentos(this.auditoriaId, {})
+        .subscribe(async (documentosAdjuntos: DocumentoReferenciaPdf[]) => {
+          await this.cargarDependenciasPorAuditoria();
 
-        let indiceCarta = 0;
-        const promesas = documentosAdjuntos.map(async (documento, index) => {
-          if (!documento?.nuxeo_enlace) {
-            return null;
-          }
+          let indiceCarta = 0;
+          const promesas = documentosAdjuntos.map(async (documento, index) => {
+            if (!documento?.nuxeo_enlace) {
+              return null;
+            }
 
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
 
@@ -287,6 +398,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
         this.actualizarDocumentosVisibles();
       });
+    }
   }
 
   private async cargarDependenciasPorAuditoria(): Promise<void> {
@@ -591,5 +703,41 @@ export class RevisionDocumentosComponent implements OnInit {
       next: (res) => console.debug("Registro de notificación guardado:", res),
       error: (err) => console.warn("Error guardando registro de notificación:", err),
     });
+  }
+
+  mostrarRechazoAuditoria(role: string, estadoAuditoriaId: number): boolean {
+    const condicionesVisibilidad: { [key: string]: number[] } = {
+      [environment.ROL.JEFE]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE],
+    };
+    return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
+  }
+
+  private async filtrarDocumentosPorDependenciaAuditado(tipoDocumentoMap: any) {
+    const personaId = await this.userService.getPersonaId();
+    let cargoId: number | undefined;
+    
+    switch (this.role) {
+      case environment.ROL.JEFE_DEPENDENCIA:
+        cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+        break;
+      case environment.ROL.ASISTENTE_DEPENDENCIA:
+        cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+        break;
+    }
+
+    this.planAuditoriaMid.get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
+      .subscribe(async (res) => {
+        const promesas = res.map(async (documento: any) => {
+          const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
+          const propiedad = tipoDocumentoMap[documento.tipo_id];
+          if (propiedad) {
+            (this as any)[propiedad] = base64;
+          }
+
+          this.documentos.push({ base64, tipo_id: documento.tipo_id });
+        });
+        await Promise.all(promesas);
+      });
   }
 }

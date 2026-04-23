@@ -15,11 +15,21 @@
                 class="modal-btn"
                 *ngFor="let boton of tabs[selectedTab].botones"
                 mat-flat-button [color]="boton.color || 'accent'"
-                (click)="boton.accion()"
+                (click)="ejecutarBotonTab(boton)"
             >
                 {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
             </button>
         </ng-container>
+        <button
+            class="modal-btn"
+            *ngIf="tabs && tabs[selectedTab] && tabs[selectedTab].cargueAdjuntoConfig"
+            mat-flat-button
+            [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
+            (click)="abrirCargueAdjuntoTabActual()"
+        >
+            {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
+            <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
+        </button>
     </div>
     <div class="row">
         <div class="col-sm-12 col-md-4 col-lg-3 d-flex flex-column">

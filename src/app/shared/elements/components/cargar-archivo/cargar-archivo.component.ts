@@ -40,6 +40,7 @@ export class CargarArchivoComponent {
       referencia: string;
       metadatos?: Record<string, any>;
       nuevo?: boolean;
+      documentoIdActualizar?: string;
     }
   ) {}
 
@@ -319,7 +320,8 @@ export class CargarArchivoComponent {
           referencia_id,
           tipo_id,
           metadatos,
-          nuevo
+          nuevo,
+          this.data.documentoIdActualizar
         )
         .subscribe({
           next: (response) => {

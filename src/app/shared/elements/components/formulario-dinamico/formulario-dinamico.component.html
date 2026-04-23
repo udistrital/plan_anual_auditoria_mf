@@ -143,6 +143,12 @@
 
         <!-- Campo tipo editor de texto enriquecido -->
         <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand">
+          <label class="titulo-quill">
+            <b>
+              <mat-icon>edit_note</mat-icon>
+              {{ campo.etiqueta }}
+            </b>
+          </label>
           <quill-editor 
             [formControlName]="campo.nombre"
             [modules]="campo.quillConfig!"
