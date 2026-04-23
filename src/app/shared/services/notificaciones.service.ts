@@ -4,7 +4,8 @@ import {
   NotificacionesMidService,
   TEMPLATED_EMAIL_ENDPOINT,
   PLANTILLA_SOLICITUD_NOMBRE,
-  PLANTILLA_RECHAZO_NOMBRE
+  PLANTILLA_RECHAZO_NOMBRE,
+  PLANTILLA_CARTA_REPRESENTACION_NOMBRE,
 } from '../../core/services/notificaciones-mid.service';
 import { environment } from '../../../environments/environment';
 
@@ -34,7 +35,7 @@ interface CuerpoTemplatedEmail {
       /** Data structure for email recipient addresses */
       Destination: DestinatariosEmail;
       /** Data for replacing placeholders in the email template */
-      ReplacementTemplateData: VariablesSolicitud | VariablesRechazo;
+      ReplacementTemplateData: VariablesSolicitud | VariablesRechazo | VariablesCartaRepresentacion;
       // TODO: Attatchments member for the email
     }
   ]
@@ -86,6 +87,19 @@ export interface VariablesRechazo {
   /** Name of the sender */
   nombre_remitente: string;
   /** Date the rejection was sent */
+  fecha_envio: string;
+}
+
+export interface VariablesCartaRepresentacion {
+  /**Dependencia auditada que firmó */
+  dependencia: string;
+  /**Tipo de auditoría interna */
+  tipo_auditoria: string;
+  /** Año de vigencia */
+  vigencia: string;
+  /** Auditado que envia */
+  nombre_quien_envia: string;
+  /** fecha de envio */
   fecha_envio: string;
 }
 
@@ -141,6 +155,30 @@ export class NotificacionesService {
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_RECHAZO_NOMBRE,
+      Destinations: [
+        {
+          Destination: destinatarios,
+          ReplacementTemplateData: variables
+        }
+      ]
+    };
+
+    return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
+  }
+
+  /**
+   * Send a notification email for carta de representacion using the NOTIFICACIONES_MID_SERVICE.
+   * @param {DestinatariosEmail} destinatarios List of email recipients (To, CC, BCC).
+   * @param {VariablesCartaRepresentacion} variables Variables to replace in the carta representacion email template.
+   * @returns {Observable<any>} An Observable containing the response from the email service.
+   */
+  public enviarNotificacionCartaRepresentacion(
+    destinatarios: DestinatariosEmail,
+    variables: VariablesCartaRepresentacion
+  ): Observable<any> {
+    const cuerpo: CuerpoTemplatedEmail = {
+      Source: this.remitenteEmail,
+      Template: PLANTILLA_CARTA_REPRESENTACION_NOMBRE,
       Destinations: [
         {
           Destination: destinatarios,

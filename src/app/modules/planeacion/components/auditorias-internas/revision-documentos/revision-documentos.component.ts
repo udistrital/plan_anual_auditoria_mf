@@ -16,7 +16,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
 import { BotonTabDocumentoContext, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
-import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
+import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, VariablesCartaRepresentacion } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
@@ -554,7 +554,7 @@ export class RevisionDocumentosComponent implements OnInit {
  * aprueba y envía el programa de auditoría a revisión del auditado.
  * Los auditores asignados reciben copia (Cc).
  *
- * Los correos se resuelven desde `dependencias_info`, que soporta múltiples dependencias
+ * Los correos se resuelven desde `datos_dependencias`, que soporta múltiples dependencias
  * por auditoría. Los campos opcionales (jefe, asistente, complementario) solo se incluyen
  * si el MID los retorna.
  *
@@ -768,27 +768,24 @@ export class RevisionDocumentosComponent implements OnInit {
               JSON.stringify(destinatarios, null, 2)
             );
 
-            const variablesSolicitud: VariablesSolicitud = {
-              titulo_solicitud: "Aceptación de Auditoría",
-              tipo_solicitud: "notificación de aceptación",
-              // reemplazar PLANTILLA_SOLICITUD_NOMBRE por la plantilla definitiva cuando este el mockup
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
-              vigencia: vigenciaNombre,
-              rol_remitente: rolRemitente,
-              nombre_remitente: nombreRemitente || rolRemitente,
-              fecha_envio: new Date().toLocaleDateString(),
+            const variablesCartaRepresentacion: VariablesCartaRepresentacion = {
+              dependencia:        dependenciasInfo[0]?.dependencia_nombre ?? "",
+              tipo_auditoria:     datosAuditoria?.titulo ?? "",
+              vigencia:           vigenciaNombre,
+              nombre_quien_envia: nombreRemitente || rolRemitente,
+              fecha_envio:        new Date().toLocaleDateString(),
             };
 
-            return this.notificacionesService.enviarNotificacionSolicitud(
+            return this.notificacionesService.enviarNotificacionCartaRepresentacion(
               destinatarios,
-              variablesSolicitud
+              variablesCartaRepresentacion
             ).pipe(
               tap((response: any) => {
                 if (response?.Status == 200) {
                   this.registrarNotificacion(
                     auditoriaId,
                     destinatarios,
-                    variablesSolicitud,
+                    variablesCartaRepresentacion as any,
                     "aceptacion_auditado_cargue_documento"
                   );
                 }
