@@ -61,14 +61,14 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     columnDef: "numero",
     header: "No.",
     cell: (_auditoria: AuditoriaEspecialTablaRow) => "",
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "auditoria",
     header: "Auditoria",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       tituloAuditoriaEspecial(auditoria),
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "tipoEvaluacion",
@@ -76,28 +76,28 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       auditoria.esAuditoriaConcreta ? ""
         : auditoria.tipo_evaluacion_nombre || "Sin Asignar",
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "auditor",
     header: "Auditor(es)",
     cell: (_auditoria: AuditoriaEspecialTablaRow) =>
       !_auditoria.esAuditoriaConcreta ? "" : prepararCadenaAuditores(_auditoria),
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "cronograma",
     header: "Cronograma de Actividades",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       cronogramaAuditoriaEspecial(auditoria),
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       auditoria.estado_nombre || "Sin estado",
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "acciones",

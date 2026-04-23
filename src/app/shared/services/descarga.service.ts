@@ -79,18 +79,32 @@ export class DescargaService {
     suffix?: string
   ): Promise<void> {
     const zip = new JSZip();
+    const nombreBaseContador = new Map<string, number>();
+    const suffixNormalizado = suffix ? `-${suffix}` : '';
   
     try {
       documentos.forEach((doc, index) => {
+        const nombreBasePersonalizado = typeof doc.fileName === 'string'
+          ? this.normalizarNombreArchivo(doc.fileName)
+          : '';
+
         // Buscar la clave correspondiente al tipo_id en TIPO_DOCUMENTO_PARAMETROS
         const tipoDocumento = Object.entries(environment.TIPO_DOCUMENTO_PARAMETROS)
-          .find(([_, id]) => id === doc.tipo_id)?.[0]; // Obtener la clave (nombre del documento)
-  
-        console.log(tipoDocumento)
+          .find(([_, id]) => id === doc.tipo_id)?.[0];
+
         // Asignar un nombre adecuado al archivo
-        const fileName = tipoDocumento 
-          ? `${tipoDocumento.toLowerCase().replaceAll('_', '-')}${suffix}.pdf` 
-          : `documento_${index + 1}${suffix}.pdf`;
+        const nombreBase = nombreBasePersonalizado
+          ? `${nombreBasePersonalizado}${suffixNormalizado}`
+          : tipoDocumento
+            ? `${tipoDocumento.toLowerCase().replaceAll('_', '-')}${suffixNormalizado}`
+            : `documento_${index + 1}${suffixNormalizado}`;
+
+        const ocurrencias = (nombreBaseContador.get(nombreBase) ?? 0) + 1;
+        nombreBaseContador.set(nombreBase, ocurrencias);
+
+        const fileName = ocurrencias > 1
+          ? `${nombreBase}-${ocurrencias}.pdf`
+          : `${nombreBase}.pdf`;
   
         zip.file(fileName, doc.base64, { base64: true });
       });
@@ -116,5 +130,15 @@ export class DescargaService {
       'application/json': 'json',
     };
     return mimeMap[mimeType] || 'file';
+  }
+
+  private normalizarNombreArchivo(nombre: string): string {
+    return nombre
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 }

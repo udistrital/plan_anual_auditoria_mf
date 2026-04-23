@@ -11,12 +11,12 @@ export class Auditoria {
     auditoria!: string;
     tipoEvaluacion!: string;
     tipoEvaluacionId!: number;
-    macroproceso!: string;
-    macroprocesoId!: number
-    proceso!: string;
-    procesoId!: number;
-    dependencia!: string;
-    dependenciaId!: number;
+    macroprocesos!: string;
+    macroprocesosId!: number[];
+    procesos!: string;
+    procesosId!: number[];
+    dependencias!: string;
+    dependenciasId!: number[];
     cronograma!: string;
     cronogramaId!: number[];
     cantidadAuditorias!: number;
@@ -27,9 +27,15 @@ export class Auditoria {
     auditores!: number[];
 }
 export class Actividad{
-    id!:string;
-    auditoriaId!:string;
-    titulo!:string;
-    fechaInicio!:Date;
-    fechaFin!:Date;
+    id!: string | undefined;
+    actividad!: string;
+    auditoriaId?: string;
+    fechaInicio!: Date;
+    fechaFin!: Date;
+    observaciones?: string;
+    papelTrabajoReferencia?: string;
+    papelTrabajoDescripcion?: string;
+    papelTrabajoFolios?: number;
+    papelTrabajoMedio?: string;
+    papelTrabajoCarpeta?: string;
 }

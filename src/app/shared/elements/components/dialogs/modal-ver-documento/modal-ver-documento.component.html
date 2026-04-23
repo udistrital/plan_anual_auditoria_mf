@@ -7,7 +7,7 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <div style="z-index: 0">
+  <div style="z-index: 0" *ngIf="!modoMultiple">
     <pdf-viewer
       [src]="documentoSrc"
       [render-text]="true"
@@ -16,6 +16,42 @@
       [zoom]="0.98"
       class="visualizador"
     ></pdf-viewer>
+  </div>
+
+  <div class="multiple-container" *ngIf="modoMultiple">
+    <div class="multiple-listado">
+      <button
+        mat-stroked-button
+        class="multiple-item"
+        *ngFor="let documento of documentosMultiples; let i = index"
+        (click)="seleccionarDocumento(i)"
+        [class.listado-activo]="indiceSeleccionado === i"
+        matTooltip="Documento no firmado"
+        [matTooltipPosition]="'above'"
+        [matTooltipDisabled]="documento.firmado !== false"
+      >
+        <span class="multiple-item-title">{{ documento.titulo }}</span>
+        <mat-icon
+          class="multiple-item-check"
+          *ngIf="mostrarCheckGuardado && documento.guardado && documento.firmado !== false"
+        >check_circle</mat-icon>
+        <mat-icon
+          class="multiple-item-unsigned"
+          *ngIf="documento.firmado === false"
+        >warning_amber</mat-icon>
+      </button>
+    </div>
+
+    <div class="multiple-visor" *ngIf="documentoSeleccionadoSrc">
+      <pdf-viewer
+        [src]="documentoSeleccionadoSrc"
+        [render-text]="true"
+        [original-size]="false"
+        [show-all]="true"
+        [zoom]="0.98"
+        class="visualizador"
+      ></pdf-viewer>
+    </div>
   </div>
 </ng-template>
 <ng-template #footerDeModal>
@@ -31,12 +67,22 @@
   <button
     mat-raised-button
     color="primary"
-    [mat-dialog-close]
     class="my-3"
     *ngIf="botonGuardar.texto"
-    (click)="guardar()"
+    (click)="modoMultiple ? guardarIndividual() : guardar()"
   >
     <mat-icon>{{ botonGuardar.icono }}</mat-icon
     >{{ botonGuardar.texto }}
+  </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    class="my-3"
+    *ngIf="modoMultiple && botonGuardarTodos.texto"
+    (click)="guardarTodas()"
+  >
+    <mat-icon>{{ botonGuardarTodos.icono }}</mat-icon
+    >{{ botonGuardarTodos.texto }}
   </button>
 </ng-template>

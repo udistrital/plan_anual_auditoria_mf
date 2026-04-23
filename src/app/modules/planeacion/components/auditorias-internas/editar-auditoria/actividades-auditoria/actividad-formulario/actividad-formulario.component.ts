@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { parse } from 'date-fns';
 import { Subscription } from 'rxjs';
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
   selector: 'app-actividad-formulario',
@@ -9,11 +9,15 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./actividad-formulario.component.css'],
 })
 export class ActividadFormularioComponent implements OnInit, OnDestroy {
-  @Input() actividadData: any = {};
-  @Output() formSubmit = new EventEmitter<any>();
+  @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales
+  @Input() minFechaStr: string | null = null;
+  @Input() maxFechaStr: string | null = null;
+  @Output() formSubmit = new EventEmitter<ActividadPlan>();
 
   form: FormGroup;
   fechaMinFin: Date | null = null;
+  minFecha: Date | null = null;
+  maxFecha: Date | null = null;
 
   private subs = new Subscription();
 
@@ -23,19 +27,22 @@ export class ActividadFormularioComponent implements OnInit, OnDestroy {
       fechaInicio: ['', Validators.required],
       fechaFin: [{ value: '', disabled: true }, Validators.required],
       observaciones: ['', null],
+      papelTrabajoReferencia: ['', null],
+      papelTrabajoDescripcion: ['', null],
+      papelTrabajoFolios: ['', null],
+      papelTrabajoMedio: ['', null],
+      papelTrabajoCarpeta: ['', null],
       id: [''],
     });
   }
 
   ngOnInit(): void {
-    if (this.actividadData) {
-      const fechaInicioParseada = this.actividadData.fechaInicio
-        ? parse(this.actividadData.fechaInicio, 'dd/MM/yyyy', new Date())
-        : null;
+    this.minFecha = this.minFechaStr ? new Date(this.minFechaStr.toString().substring(0, 10) + "T00:00:00") : null;
+    this.maxFecha = this.maxFechaStr ? new Date(this.maxFechaStr.toString().substring(0, 10) + "T00:00:00") : null;
 
-      const fechaFinParseada = this.actividadData.fechaFin
-        ? parse(this.actividadData.fechaFin, 'dd/MM/yyyy', new Date())
-        : null;
+    if (this.actividadData) {
+      const fechaInicioParseada = this.actividadData.fechaInicio;
+      const fechaFinParseada = this.actividadData.fechaFin;
 
       const data = {
         ...this.actividadData,

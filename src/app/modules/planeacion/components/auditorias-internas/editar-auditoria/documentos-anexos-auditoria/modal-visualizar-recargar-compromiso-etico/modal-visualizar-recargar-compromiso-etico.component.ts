@@ -11,10 +11,11 @@ import { environment } from 'src/environments/environment';
 export class ModalVisualizarRecargarCompromisoEticoComponent {
   protected base64: string = "";
   protected idAuditoria: string = "";
+  protected soloLectura: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { base64Document: string; id: string },
+    public data: { base64Document: string; id: string; soloLectura?: boolean },
     private dialog: MatDialog,
     private dialogRef: MatDialogRef<ModalVisualizarRecargarCompromisoEticoComponent>,
   ) { }
@@ -25,12 +26,17 @@ export class ModalVisualizarRecargarCompromisoEticoComponent {
     if (documentSource) {
       this.base64 = documentSource;
       this.idAuditoria = this.data.id;
+      this.soloLectura = this.data.soloLectura ?? false;
     } else {
       console.error("No se proporcionó un documento PDF");
     }
   }
 
   actualizarDocumento() {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {

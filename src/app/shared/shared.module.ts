@@ -20,7 +20,7 @@ import { EditorEnriquecidoComponent } from "./elements/components/editor-enrique
 import { QuillModule } from "ngx-quill";
 import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { MatOption } from "@angular/material/core";
-import { SingleSelectionComponent } from "./elements/components/single-selection/singe-selection.component";
+import { SearchSelectionComponent } from "./elements/components/search-selection/search-selection.component";
 
 @NgModule({
   declarations: [
@@ -33,7 +33,7 @@ import { SingleSelectionComponent } from "./elements/components/single-selection
     PlantillaModalComponent,
     PdfVisualizadorComponent,
     EditorEnriquecidoComponent,
-    SingleSelectionComponent,
+    SearchSelectionComponent,
   ],
   imports: [
     CommonModule,
@@ -57,7 +57,7 @@ import { SingleSelectionComponent } from "./elements/components/single-selection
     PlantillaModalComponent,
     PdfVisualizadorComponent,
     EditorEnriquecidoComponent,
-    SingleSelectionComponent,
+    SearchSelectionComponent,
     //modulos
     FormsModule,
     IconosModule,

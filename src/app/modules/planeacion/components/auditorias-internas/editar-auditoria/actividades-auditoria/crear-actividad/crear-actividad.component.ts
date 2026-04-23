@@ -2,6 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
+import { Actividad } from 'src/app/shared/data/models/actividad';
 @Component({
   selector: 'app-crear-actividad',
   templateUrl: './crear-actividad.component.html',
@@ -10,25 +12,38 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 export class CrearActividadComponent {
   auditoriaId: string;
   datos: any | [] = [];
+  minFechaStr: string | null = null;
+  maxFechaStr: string | null = null;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: {
+      auditoriaId: string;
+      minFechaStr?: string;
+      maxFechaStr?: string;
+    },
     private alertaService: AlertService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private dialogRef: MatDialogRef<CrearActividadComponent>
   ) {
     this.auditoriaId = data.auditoriaId;
+    this.minFechaStr = data.minFechaStr || null;
+    this.maxFechaStr = data.maxFechaStr || null;
   }
-  ngOnInit(): void {
-    //console.log('Auditoría ID recibido:', this.auditoriaId);
 
-  }
-  crearActividad(actividadData: any) {
-    let actividadJson={
-      auditoria_id:this.auditoriaId,
-      titulo:actividadData.actividad,
-      fecha_inicio:actividadData.fechaInicio.toISOString(),
-      fecha_fin:actividadData.fechaFin.toISOString(),
-      observacion: actividadData.observaciones
+  ngOnInit(): void {}
+
+  crearActividad(actividadData: ActividadPlan) {
+    let actividadJson: Actividad = {
+      auditoria_id: this.auditoriaId,
+      titulo: actividadData.actividad,
+      fecha_inicio: actividadData.fechaInicio.toISOString(),
+      fecha_fin: actividadData.fechaFin.toISOString(),
+      observacion: actividadData.observaciones,
+      referencia: actividadData.papelTrabajoReferencia,
+      descripcion: actividadData.papelTrabajoDescripcion,
+      folio: actividadData.papelTrabajoFolios,
+      medio: actividadData.papelTrabajoMedio,
+      carpeta: actividadData.papelTrabajoCarpeta,
     };
 
     this.alertaService
@@ -50,7 +65,7 @@ export class CrearActividadComponent {
                 }
               },
               (error) => {
-                console.log("error ",error)
+                console.error("error al crear actividad:", error);
                 this.alertaService.showErrorAlert(
                   "Error al crear el registro"
                 );
@@ -58,8 +73,9 @@ export class CrearActividadComponent {
             );
         }
       })
-      .catch(() => {
-        this.alertaService.showErrorAlert("Error al eliminar el registro");
+      .catch((error) => {
+        console.error("Error al crear actividad", error);
+        this.alertaService.showErrorAlert("Error al crear el registro");
       });
   }
 }

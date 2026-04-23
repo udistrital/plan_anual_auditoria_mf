@@ -10,7 +10,7 @@
   <app-pdf-visualizador [base64Document]="base64"></app-pdf-visualizador>
 </ng-template>
 <ng-template #footerDeModal>
-  <button mat-raised-button color="primary" (click)="actualizarDocumento()">
+  <button *ngIf="!soloLectura" mat-raised-button color="primary" (click)="actualizarDocumento()">
     <mat-icon>file_upload</mat-icon>
     Actualizar
   </button>

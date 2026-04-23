@@ -26,6 +26,7 @@ export const accionesProgramacion: {
       "Ver Auditorias",
       "Ver Documentos",
       "Historial de Rechazo",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
@@ -36,17 +37,35 @@ export const accionesProgramacion: {
 
   [environment.ROL.JEFE]: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
-    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: ["Ver Plan", "Editar Auditorías", "Historial de Rechazo"],
-    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo"],
-    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo", "Edición Extraordinaria de Auditorías"],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo",],
+    [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [
+      "Ver Plan",
+      "Editar Auditorías",
+      "Historial de Rechazo",
+    ],
+    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
+      "Ver Plan",
+      "Historial de Rechazo",
+    ],
+    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
+      "Ver Plan",
+      "Historial de Rechazo",
+      "Edición Extraordinaria de Auditorías",
+      "Historial de Ediciones Extraordinarias",
+    ],
+    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo"],
   },
 
   [environment.ROL.SECRETARIO]: {
     [environment.PLAN_ESTADO.EN_BORRADOR_ID]: [],
     [environment.PLAN_ESTADO.EN_REVISION_JEFE_ID]: [],
-    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo"],
-    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: ["Ver Plan", "Historial de Rechazo"],
+    [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
+      "Ver Plan",
+      "Historial de Rechazo",
+    ],
+    [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
+      "Ver Plan",
+      "Historial de Rechazo",
+    ],
     [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Rechazo"],
   },
 
@@ -74,6 +93,7 @@ export const accionesProgramacion: {
       "Ver Documentos",
       "Historial de Rechazo",
       "Edición Extraordinaria de Auditorías",
+      "Historial de Ediciones Extraordinarias",
     ],
     [environment.PLAN_ESTADO.RECHAZADO]: [
       "Editar Marco General",
@@ -132,6 +152,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Revisar Auditoría",
       "Iniciar Ejecución",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Revisar Auditoría",
@@ -160,6 +181,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -190,6 +212,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -220,6 +243,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Ver Documentos",
+      "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -231,150 +255,131 @@ export const accionesPlaneacion: {
   [environment.ROL.JEFE_DEPENDENCIA]: {
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Revisar Auditoría"
+      "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documentos"
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE]: [
       "Ver Auditoría",
-      "Revisar Auditoría"
+      "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
-      "Ver Documentos"
-    ]
+      "Ver Documentos",
+    ],
   },
 
   [environment.ROL.ASISTENTE_DEPENDENCIA]: {
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Revisar Auditoría"
+      "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
-      "Ver Documentos"
+      "Ver Documentos",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE]: [
       "Ver Auditoría",
-      "Revisar Auditoría"
+      "Revisar Auditoría",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
-      "Ver Documentos"
-    ]
-  }
+      "Ver Documentos",
+    ],
+  },
 };
 
-// TODO: Ajustar correctamente las acciones de acuerdo al rol y el estado
 export const accionesEjecucionPreliminar: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   [environment.ROL.ADMIN]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
       "Editar Preinforme",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
   [environment.ROL.JEFE]: {
-    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
-      "Editar Preinforme",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
-      "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
-      "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
@@ -397,34 +402,36 @@ export const accionesEjecucionPreliminar: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
   },
 
@@ -435,162 +442,110 @@ export const accionesEjecucionPreliminar: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
-      "Editar Preinforme",
+      "Ver Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
+      "Historial de Rechazos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
+      "Historial de Rechazos",
       "Enviar a Aprobación por Jefe",
     ],
   },
 
   [environment.ROL.JEFE_DEPENDENCIA]: {
-    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
   },
 
   [environment.ROL.ASISTENTE_DEPENDENCIA]: {
-    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
   },
 };
 
-// TODO: Ajustar correctamente las acciones de acuerdo al rol y el estado
 export const accionesEjecucionFinal: {
   [rol: string]: { [estado: number]: string[] };
 } = {
   [environment.ROL.ADMIN]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
       "Editar Informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
       "Editar Informe",
       "Ver Documentos del informe",
+      "Historial de Rechazos",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
+      "Ver Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
+      "Ver Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
+      "Enviar a Aprobación por Jefe",
     ],
   },
 
   [environment.ROL.JEFE]: {
-    [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
-      "Editar Informe",
-      "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
-    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
+      "Enviar a Aprobación por Jefe",
     ],
   },
 
@@ -601,20 +556,21 @@ export const accionesEjecucionFinal: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
+      "Ver Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
+
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
+      "Ver Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
+      "Enviar a Aprobación por Jefe",
     ],
   },
 
@@ -625,20 +581,21 @@ export const accionesEjecucionFinal: {
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
+      "Ver Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
+
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
-      "Editar Informe",
+      "Ver Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
+      "Enviar a Aprobación por Jefe",
     ],
   },
 
@@ -651,18 +608,18 @@ export const accionesEjecucionFinal: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
+      "Historial de Rechazos",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Enviar a Aprobación por Jefe",
       "Historial de Rechazos",
+      "Enviar a Aprobación por Jefe",
     ],
   },
 };

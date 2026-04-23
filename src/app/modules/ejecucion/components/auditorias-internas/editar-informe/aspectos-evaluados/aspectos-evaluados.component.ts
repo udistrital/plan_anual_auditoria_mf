@@ -43,6 +43,7 @@ interface Tema {
 })
 export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() soloLectura: boolean = false;
   @Output() datosActualizados = new EventEmitter<void>();
 
   aspectosForm: UntypedFormGroup = this.fb.group({});
@@ -68,12 +69,29 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     if (this.informeId) {
       this.cargarTemas();
     }
+
+    this.actualizarModoSoloLectura();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['informeId'] && this.informeId) {
       this.cargarTemas();
     }
+
+    if (changes['soloLectura']) {
+      this.actualizarModoSoloLectura();
+    }
+  }
+
+  private actualizarModoSoloLectura(): void {
+    if (!this.aspectosForm) return;
+
+    if (this.soloLectura) {
+      this.aspectosForm.disable({ emitEvent: false });
+      return;
+    }
+
+    this.aspectosForm.enable({ emitEvent: false });
   }
 
   // Carga los temas, subtemas y hallazgos desde la base de datos
@@ -85,6 +103,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       next: (response: any) => {
         this.temasData = response?.Data || [];
         this.construirFormulario();
+        this.actualizarModoSoloLectura();
         this.cargando = false;
       },
       error: (error) => {
@@ -145,6 +164,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     this.aspectosForm = this.fb.group({
       temas: temasArray,
     });
+
+    this.actualizarModoSoloLectura();
   }
 
   get temas(): UntypedFormArray {
@@ -152,6 +173,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   }
 
   agregarTema(): void {
+    if (this.soloLectura) return;
+
     const nuevoTema = this.fb.group({
       _id: [null],
       nombre: ['', Validators.required],
@@ -167,6 +190,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   }
 
   agregarSubtema(temaIndex: number): void {
+    if (this.soloLectura) return;
+
     const nuevoSubtema = this.fb.group({
       _id: [null],
       nombre: ['', Validators.required],
@@ -182,6 +207,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   }
 
   agregarHallazgo(temaIndex: number, subtemaIndex: number): void {
+    if (this.soloLectura) return;
+
     const nuevoHallazgo = this.fb.group({
       _id: [null],
       criterio: ['', Validators.required],
@@ -195,6 +222,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Elimina un tema y sus subtemas/hallazgos en cascada
   eliminarTema(index: number): void {
+    if (this.soloLectura) return;
+
     const tema = this.temas.at(index);
     const temaId = tema.get('_id')?.value;
 
@@ -222,6 +251,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Elimina un subtema y sus hallazgos en cascada
   eliminarSubtema(temaIndex: number, subtemaIndex: number): void {
+    if (this.soloLectura) return;
+
     const subtema = this.getSubtemas(temaIndex).at(subtemaIndex);
     const subtemaId = subtema.get('_id')?.value;
 
@@ -249,6 +280,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Elimina un hallazgo
   eliminarHallazgo(temaIndex: number, subtemaIndex: number, hallazgoIndex: number): void {
+    if (this.soloLectura) return;
+
     const hallazgo = this.getHallazgos(temaIndex, subtemaIndex).at(hallazgoIndex);
     const hallazgoId = hallazgo.get('_id')?.value;
 
@@ -276,6 +309,10 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Guarda todos los aspectos evaluados (temas, subtemas, hallazgos)
   async guardarAspectos(): Promise<boolean> {
+    if (this.soloLectura) {
+      return true;
+    }
+
     // Validar formulario
     if (this.aspectosForm.invalid) {
       this.aspectosForm.markAllAsTouched();
