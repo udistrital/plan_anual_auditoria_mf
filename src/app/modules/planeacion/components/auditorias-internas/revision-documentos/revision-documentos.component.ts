@@ -14,16 +14,20 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
+import { BotonTabDocumentoContext, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { forkJoin, of, throwError } from "rxjs";
+import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
 
 interface DocumentoAdjuntoRevision {
+  _id?: string;
+  referencia_id?: string;
+  referencia_tipo?: string;
   tipo_id: number;
   nuxeo_enlace: string;
   nombre?: string;
@@ -250,6 +254,90 @@ export class RevisionDocumentosComponent implements OnInit {
       [environment.ROL.ASISTENTE_DEPENDENCIA]: [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO],
     };
     return condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
+  }
+
+  puedeCargarCartaFirmada(): boolean {
+    const esAuditado =
+      this.role === environment.ROL.JEFE_DEPENDENCIA ||
+      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
+
+    return (
+      esAuditado &&
+      this.estadoAuditoriaId ===
+        environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO
+    );
+  }
+
+  async abrirModalCargueCartasFirmadas(): Promise<void> {
+    try {
+      const cartas = (await lastValueFrom(
+        this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {})
+      )) as DocumentoAdjuntoRevision[];
+
+      const cartasAuditado = cartas.filter(
+        (documento) =>
+          documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+      );
+
+      console.debug("Cartas de representación visibles para modal:", cartasAuditado);
+
+      if (!Array.isArray(cartasAuditado) || cartasAuditado.length === 0) {
+        this.alertService.showAlert(
+          "Sin cartas disponibles",
+          "No se encontraron cartas de representación para cargar firma."
+        );
+        return;
+      }
+
+      const tabs: TabDocumento[] = cartasAuditado.map((documento, index): TabDocumento => {
+        const dependenciaNombre = this.resolverNombreDependencia(documento, index);
+
+        return {
+          nombre: `Carta de representación ${dependenciaNombre}`,
+          tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+          documentoId: documento._id,
+          botones: [{
+            nombre: "Descargar Carta",
+            accion: async () => {
+              const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+              this.descargaService.descargarArchivo(
+                base64, "application/pdf", `Carta_Representacion_${dependenciaNombre}`
+              );
+            }
+          }],
+          cargueAdjuntoConfig: {
+            nombreBoton: "Cargar Carta Firmada",
+            iconoBoton: "upload_file",
+            colorBoton: "accent",
+            idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+            descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
+            referenciaTipoFallback: "Auditoria",
+            metadatosAdicionales: { firmado: true },
+            onSuccess: async () => {
+              this.cargarDocumentos();
+            },
+          },
+        };
+      });
+
+      this.dialog.open(ModalVerDocumentosComponent, {
+        width: "1200px",
+        data: {
+          entityId: this.auditoriaId,
+          titulo: "Cartas de representación",
+          descripcion:
+            "Revise y cargue la carta de representación firmada para cada dependencia.",
+          tabs,
+          tipo: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+          textoBotonCerrar: "Cerrar",
+        },
+      });
+    } catch (error) {
+      console.error("Error al abrir modal de cargue de cartas firmadas", error);
+      this.alertService.showErrorAlert(
+        "No fue posible abrir el modal de cargue de cartas firmadas."
+      );
+    }
   }
 
   cargarDocumentos() {
