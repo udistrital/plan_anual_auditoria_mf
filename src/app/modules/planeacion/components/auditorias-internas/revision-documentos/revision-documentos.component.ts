@@ -135,7 +135,11 @@ export class RevisionDocumentosComponent implements OnInit {
           if (Array.isArray(estadoAprobacion)) {
             this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
           } else {
-            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion).then(() => {
+              // El auditado firma y envía al auditor
+              // Se notifica al auditor con copia a la dependencia auditada
+              this.notificarAceptacionAuditado(this.auditoriaId);
+            });
           }
         }
       });
@@ -574,7 +578,7 @@ export class RevisionDocumentosComponent implements OnInit {
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
         const datosAuditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
-        const dependenciasInfo: any[] = datosAuditoria?.dependencias_info ?? [];
+        const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
 
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
@@ -672,6 +676,135 @@ export class RevisionDocumentosComponent implements OnInit {
 
     ).subscribe({
       error: (err) => console.warn("Error en notificación envío a auditado:", err),
+    });
+  }
+
+  /**
+   * Notifica a los auditores asignados al programa cuando el auditado
+   * (Jefe o Asistente de dependencia) firma y envía la aceptación de la auditoría
+   * con el cargue del documento.
+   * Los auditores reciben el correo en To, la dependencia auditada en Cc.
+   */
+  private notificarAceptacionAuditado(auditoriaId: string): void {
+    const rolRemitente = "Dependencia Auditada";
+
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      exhaustMap((tercero) => {
+        return forkJoin({
+          auditoria: this.planAuditoriaMid.get(`auditoria/${auditoriaId}`),
+          auditores: this.planAuditoriaService.get(
+            `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
+          ),
+          vigencias: this.parametrosUtilsService.getVigencias(),
+          nombreRemitente: of(tercero.NombreCompleto),
+        });
+      }),
+
+      exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
+        const datosAuditoria = auditoria?.Data;
+        const listaAuditores: any[] = auditores?.Data ?? [];
+        const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
+
+        const vigenciaId = datosAuditoria?.vigencia_id;
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        const correosAuditores$ = listaAuditores.length > 0
+          ? forkJoin(
+              listaAuditores.map((a: any) =>
+                this.tercerosService.getTerceroById(a.auditor_id).pipe(
+                  catchError(() => of(null))
+                )
+              )
+            )
+          : of([]);
+
+        return correosAuditores$.pipe(
+          switchMap((terceros: any[]) => {
+            // Auditores van al To
+            const correosAuditores = terceros
+              .filter((t) => t?.UsuarioWSO2)
+              .map((t) => t.UsuarioWSO2);
+
+            // Dependencia auditada va al Cc
+            const correosDependencia: string[] = dependenciasInfo.flatMap((dep) => {
+              const correos: string[] = [];
+              if (dep.correo_dependencia)    correos.push(dep.correo_dependencia);
+              if (dep.jefe_correo)           correos.push(dep.jefe_correo);
+              if (dep.asistente_correo)      correos.push(dep.asistente_correo);
+              if (dep.correo_complementario) correos.push(dep.correo_complementario);
+              return correos;
+            });
+
+            console.log(
+              "[notificarAceptacionAuditado] dependencias_info recibidas:",
+              JSON.stringify(dependenciasInfo, null, 2)
+            );
+            console.log(
+              "[notificarAceptacionAuditado] To auditores resueltos:",
+              correosAuditores
+            );
+            console.log(
+              "[notificarAceptacionAuditado] Cc dependencia resueltos:",
+              correosDependencia
+            );
+
+            const fijos = environment.NOTIFICACION_ACEPTACION_AUDITADO_DESTINATARIOS;
+            const destinatarios: DestinatariosEmail = {
+              ToAddresses: [
+                ...correosAuditores,
+                ...(fijos?.ToAddresses ?? []),
+              ],
+              CcAddresses: [
+                ...correosDependencia,
+                ...(fijos?.CcAddresses ?? []),
+              ],
+              BccAddresses: fijos?.BccAddresses ?? [],
+            };
+
+            console.log(
+              "[notificarAceptacionAuditado] Payload final destinatarios:",
+              JSON.stringify(destinatarios, null, 2)
+            );
+
+            const variablesSolicitud: VariablesSolicitud = {
+              titulo_solicitud: "Aceptación de Auditoría",
+              tipo_solicitud: "notificación de aceptación",
+              // reemplazar PLANTILLA_SOLICITUD_NOMBRE por la plantilla definitiva cuando este el mockup
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              vigencia: vigenciaNombre,
+              rol_remitente: rolRemitente,
+              nombre_remitente: nombreRemitente || rolRemitente,
+              fecha_envio: new Date().toLocaleDateString(),
+            };
+
+            return this.notificacionesService.enviarNotificacionSolicitud(
+              destinatarios,
+              variablesSolicitud
+            ).pipe(
+              tap((response: any) => {
+                if (response?.Status == 200) {
+                  this.registrarNotificacion(
+                    auditoriaId,
+                    destinatarios,
+                    variablesSolicitud,
+                    "aceptacion_auditado_cargue_documento"
+                  );
+                }
+              })
+            );
+          })
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("Error al notificar aceptación del auditado:", error);
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      error: (err) => console.warn("Error en notificación aceptación auditado:", err),
     });
   }
 
