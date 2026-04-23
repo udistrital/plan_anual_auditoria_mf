@@ -43,6 +43,7 @@ export interface CargueAdjuntoTabConfig {
 export interface TabDocumento {
   nombre: string;
   tipoId: number;
+  fecha_subida?: string;
   obligatorio?: boolean;
   botones?: BotonTabDocumento[];
   documentoId?: string;
@@ -159,7 +160,11 @@ export class ModalVerDocumentosComponent implements OnInit {
                                   .replaceAll("_", " ")
                                   // Capitalize first letter of each word
                                   .replace(/\b\w/g, char => char.toUpperCase());
-        tabsInferidas.push({ nombre: nombreParametro, tipoId: doc.tipo_id });
+        const tab: TabDocumento = { nombre: nombreParametro, tipoId: doc.tipo_id }
+        if (doc.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN) {
+          tab.fecha_subida = doc.fecha_creacion;
+        }
+        tabsInferidas.push(tab);
       }
     });
 
