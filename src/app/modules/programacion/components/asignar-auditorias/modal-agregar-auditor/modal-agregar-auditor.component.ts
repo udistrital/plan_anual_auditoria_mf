@@ -115,7 +115,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
     const error = this.validarEliminacion(auditorSeleccionado, estadoActual);
   
     if (error) {
-      this.alertaService.showErrorAlert(error);
+      this.alertaService.showAlert("",error);
       return;
     }
   
@@ -126,28 +126,15 @@ export class ModalAgregarAuditorComponent implements OnInit {
   
     const estados = environment.AUDITORIA_ESTADO.PROGRAMACION;
   
-    // 🚫 No eliminar líder en estado AUDITOR_ASIGNADO
-    if (estado === estados.AUDITOR_ASIGNADO && auditor.lider) {
-      return "No se puede eliminar el auditor líder. Debe asignar otro líder primero.";
-    }
-  
-    // ✅ Caso libre: POR_ASIGNAR sin auditores
-    if (
-      estado === estados.POR_ASIGNAR &&
-      (!this.auditoresAsignados || this.auditoresAsignados.length === 0)
-    ) {
-      return null;
-    }
-  
-    // ⚠️ Validaciones cuando hay auditores asignados
-    if (estado === estados.AUDITOR_ASIGNADO && this.auditoresAsignados?.length) {
+    // Validaciones cuando hay auditores asignados
+    if (estado >= estados.AUDITOR_ASIGNADO && this.auditoresAsignados?.length) {
   
       const esUnicoAsignado =
         this.auditoresAsignados.length === 1 &&
         this.auditoresAsignados[0].auditor_id === auditor.auditor.id;
   
       if (esUnicoAsignado) {
-        return "No se puede eliminar el último auditor asignado.";
+        return "No se puede eliminar el último auditor asignado. Debe guardar mas auditores antes de eliminar este";
       }
   
       if (this.auditoresSeleccionados.length <= 1) {
@@ -362,19 +349,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
 
   guardarAuditoria() {
     if (this.form.valid) {
-      // Validar que exista un auditor líder
-      const tieneAuditorLider = this.auditoresSeleccionados.value.some(
-        (item: { auditor: Auditor | null; lider: boolean }) => item.lider === true
-      );
-
-      if (!tieneAuditorLider) {
-        this.alertaService.showErrorAlert(
-          "Debe seleccionar un auditor líder antes de guardar la auditoría."
-        );
-        return;
-      }  
-
-
       this.alertaService
         .showConfirmAlert(`¿Está seguro(a) de actualizar la auditoría?`)
         .then((result) => {
