@@ -111,35 +111,51 @@ export class ModalAgregarAuditorComponent implements OnInit {
 
   eliminarAuditor(index: number) {
     const auditorSeleccionado = this.auditoresSeleccionados.at(index)?.value;
-
-    // Validar el estado de la auditoría
-    const estadoActual = this.data.auditoria?.estado_id;
-
-    // Caso 1: Si el estado es POR_ASIGNAR y no hay auditores asignados, permitir eliminación sin restricciones
-    if (
-      estadoActual === environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR &&
-      (!this.auditoresAsignados || this.auditoresAsignados.length === 0)
-    ) {
-      this.confirmarEliminacion(index, auditorSeleccionado);
+    const estadoActual = this.data.auditoria?.estado_id ?? 0; // Provide a default value
+    const error = this.validarEliminacion(auditorSeleccionado, estadoActual);
+  
+    if (error) {
+      this.alertaService.showErrorAlert(error);
       return;
     }
+  
+    this.confirmarEliminacion(index, auditorSeleccionado);
+  }
 
-    // Caso 2: Si el estado es POR_ASIGNAR y hay auditores asignados, validar que quede al menos uno en auditoresSeleccionados
+  private validarEliminacion(auditor: any, estado: number): string | null {
+  
+    const estados = environment.AUDITORIA_ESTADO.PROGRAMACION;
+  
+    // 🚫 No eliminar líder en estado AUDITOR_ASIGNADO
+    if (estado === estados.AUDITOR_ASIGNADO && auditor.lider) {
+      return "No se puede eliminar el auditor líder. Debe asignar otro líder primero.";
+    }
+  
+    // ✅ Caso libre: POR_ASIGNAR sin auditores
     if (
-      estadoActual === environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO &&
-      this.auditoresAsignados &&
-      this.auditoresAsignados.length > 0
+      estado === estados.POR_ASIGNAR &&
+      (!this.auditoresAsignados || this.auditoresAsignados.length === 0)
     ) {
+      return null;
+    }
+  
+    // ⚠️ Validaciones cuando hay auditores asignados
+    if (estado === estados.AUDITOR_ASIGNADO && this.auditoresAsignados?.length) {
+  
+      const esUnicoAsignado =
+        this.auditoresAsignados.length === 1 &&
+        this.auditoresAsignados[0].auditor_id === auditor.auditor.id;
+  
+      if (esUnicoAsignado) {
+        return "No se puede eliminar el último auditor asignado.";
+      }
+  
       if (this.auditoresSeleccionados.length <= 1) {
-        this.alertaService.showErrorAlert(
-          "No se puede eliminar el auditor. Debe haber al menos un auditor seleccionado."
-        );
-        return;
+        return "Debe haber al menos un auditor seleccionado.";
       }
     }
-
-    // Confirmar eliminación
-    this.confirmarEliminacion(index, auditorSeleccionado);
+  
+    return null;
   }
 
   confirmarEliminacion(index: number, auditorSeleccionado: any) {
@@ -346,6 +362,19 @@ export class ModalAgregarAuditorComponent implements OnInit {
 
   guardarAuditoria() {
     if (this.form.valid) {
+      // Validar que exista un auditor líder
+      const tieneAuditorLider = this.auditoresSeleccionados.value.some(
+        (item: { auditor: Auditor | null; lider: boolean }) => item.lider === true
+      );
+
+      if (!tieneAuditorLider) {
+        this.alertaService.showErrorAlert(
+          "Debe seleccionar un auditor líder antes de guardar la auditoría."
+        );
+        return;
+      }  
+
+
       this.alertaService
         .showConfirmAlert(`¿Está seguro(a) de actualizar la auditoría?`)
         .then((result) => {
