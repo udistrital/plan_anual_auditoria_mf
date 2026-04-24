@@ -9,11 +9,11 @@ import { AsignarAuditoriasComponent } from "./components/asignar-auditorias/asig
 import { RegistroAuditoriasEspecialesComponent } from "./components/auditorias-especiales/registro-auditorias-especiales.component";
 import { ConsultaPlanAuditoriaComponent } from "./components/consulta-plan-auditoria/consulta-plan-auditoria.component";
 import { RegistrarPlanComponent } from "./components/consulta-plan-auditoria/registrar-plan/registrar-plan.component";
-import { FormularioAuditoriaEspecialComponent } from "./components/auditorias-especiales/formulario-auditoria-especial/formulario-auditoria-especial.component";
 import { SharedModule } from "src/app/shared/shared.module";
 import { ModalAprobacionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/modal-aprobacion-secretario/modal-aprobacion-secretario.component";
 import { ModalMotivosRechazoComponent } from "./components/consulta-plan-auditoria/revision-jefe/modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { ModalVisualizarRecargarDocumentoComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/modal-visualizar-recargar-documento/modal-visualizar-recargar-documento.component";
+import { ModalAuditoriasHijasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/modal-auditorias-hijas/modal-auditorias-hijas.component";
 import { RevisionJefeComponent } from "./components/consulta-plan-auditoria/revision-jefe/revision-jefe.component";
 import { RevisionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/revision-secretario.component";
 import { AddAuditoriaModalComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/add-auditoria-modal/add-auditoria-modal.component";
@@ -31,7 +31,6 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     AddAuditoriaModalComponent,
     AsignarAuditoriasComponent,
     ConsultaPlanAuditoriaComponent,
-    FormularioAuditoriaEspecialComponent,
     TablaAuditoriasEspecialesComponent,
     ModalAgregarAuditorComponent,
     ModalAprobacionSecretarioComponent,
@@ -44,6 +43,7 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     RegistrarPlanComponent,
     RegistroAuditoriasEspecialesComponent,
     TablaConsultaAuditoriasComponent,
+    ModalAuditoriasHijasComponent,
     ModalVisualizarRecargarDocumentoComponent,
   ],
   imports: [

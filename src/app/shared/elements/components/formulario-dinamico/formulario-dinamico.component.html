@@ -19,6 +19,9 @@
         </mat-error>
       </mat-form-field>
 
+      <!-- Campo oculto -->
+      <input *ngSwitchCase="'hidden'" type="hidden" [formControlName]="campo.nombre" />
+
       <!-- Campo tipo email -->
       <mat-form-field *ngSwitchCase="'email'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>
@@ -88,12 +91,16 @@
       </div>
 
       <!-- Campo tipo fecha -->
-      <mat-form-field *ngSwitchCase="'date'" appearance="outline" class="example-full-width">
+      <mat-form-field *ngSwitchCase="'date'" appearance="outline" class="col-12">
         <mat-label>{{ campo.etiqueta }}</mat-label>
-        <input matInput [matDatepicker]="picker" [formControlName]="campo.nombre" />
-        <mat-datepicker-toggle matPrefix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker [startView]="campo.parametros?.vista || 'month'"
-          [startAt]="campo.parametros?.fecha_inicio || ''"></mat-datepicker>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          [formControlName]="campo.nombre"
+          [placeholder]="campo.placeholder || 'Seleccione una fecha'"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
@@ -115,8 +122,12 @@
       <mat-form-field *ngSwitchCase="'textarea'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>
         <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <textarea style="height: 72px; resize: none" matInput [formControlName]="campo.nombre"
-          [placeholder]="campo.placeholder || ''"></textarea>
+        <textarea
+          matInput
+          [style.height.px]="campo.parametros?.altura || 72"
+          [formControlName]="campo.nombre"
+          [placeholder]="campo.placeholder || ''"
+        ></textarea>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
@@ -129,6 +140,26 @@
           {{ getValidacionValor(campo, "maxLength") }} caracteres
         </mat-error>
       </mat-form-field>
+
+        <!-- Campo tipo editor de texto enriquecido -->
+        <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand">
+          <label class="titulo-quill">
+            <b>
+              <mat-icon>edit_note</mat-icon>
+              {{ campo.etiqueta }}
+            </b>
+          </label>
+          <quill-editor 
+            [formControlName]="campo.nombre"
+            [modules]="campo.quillConfig!"
+            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder || '')"
+            [ngStyle]="{ 'width': '100%'}"
+            >
+          </quill-editor>
+          <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
+            {{ campo.etiqueta }} es requerido
+          </mat-error>
+        </div>
 
       <!-- <mat-divider *ngSwitchCase="'divider'"></mat-divider>
 

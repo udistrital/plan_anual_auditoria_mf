@@ -13,7 +13,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
-import { accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
+import { accionesEjecucionFinal, accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
 import { environment } from "src/environments/environment";
 
 @Component({
@@ -42,7 +42,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   cargoId: number = 0;
   iconosAccion = new Map<string, string>([
     ["Editar Preinforme", "edit_note"],
-    ["Editar informe", "edit"],
+    ["Editar Informe", "edit"],
+    ["Ver Preinforme", "visibility"],
+    ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Historial de Rechazos", "history"],
@@ -67,7 +69,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   setPermisos() {
-    if (this.rolService.mostrarAcciones(accionesEjecucionPreliminar)) {
+    if (this.rolService.mostrarAcciones(accionesEjecucionPreliminar) || this.rolService.mostrarAcciones(accionesEjecucionFinal)) {
       this.mostrarAcciones = true;
     }
   }
@@ -169,9 +171,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   getAccionesPorRolYEstado(estado: number) {
-    return Array.from(
-      new Set(this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || []))
-    );
+    const mostrarComoInforme = estado >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+
+    const acciones = this.roles.flatMap((rol) => {
+      // Usar solo las acciones correspondientes según la etapa
+      if (mostrarComoInforme) {
+        return accionesEjecucionFinal[rol]?.[estado] || [];
+      } else {
+        return accionesEjecucionPreliminar[rol]?.[estado] || [];
+      }
+    });
+
+    return Array.from(new Set(acciones));
   }
 
   getIconoAccion(accion: string): string {
@@ -180,7 +191,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
-      "Editar Preinforme": () => this.editarPreinforme(auditoria),
+      "Editar Preinforme": () => this.editarInforme(auditoria),
+      "Editar Informe": () => this.editarInforme(auditoria),
+      "Ver Preinforme": () => this.verInformeSoloLectura(auditoria),
+      "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
       "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
@@ -191,13 +205,29 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   abrirHistorialRechazos(auditoria: Auditoria) {
     this.dialog.open(ModalHistorialRechazosComponent, {
       data: { auditoriaId: auditoria._id },
-      width: "40%",
+      width: "1000px",
     });
   }
 
-  editarPreinforme(auditoria: Auditoria) {
+  editarInforme(auditoria: Auditoria) {
     this.obtenerOCrearInforme(auditoria._id, (informeId) => {
       this.router.navigate([`/ejecucion/auditorias-internas/editar-informe/${informeId}`]);
+    });
+  }
+
+  verInformeSoloLectura(auditoria: Auditoria) {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
+      next: (res: any) => {
+        if (res.Data && res.Data.length > 0) {
+          this.router.navigate(
+            [`/ejecucion/auditorias-internas/editar-informe/${res.Data[0]._id}`],
+            { queryParams: { soloLectura: true } }
+          );
+        } else {
+          this.alertaService.showErrorAlert('No se encontró un informe para esta auditoría.');
+        }
+      },
+      error: () => this.alertaService.showErrorAlert('Error al buscar el informe.')
     });
   }
 
@@ -248,9 +278,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   enviarAprobacionPorJefe(auditoria: Auditoria) {
-    this.validarInformePreliminar(auditoria._id, async () => {
+    const estadoId = (auditoria as any).estado?.estado_id || (auditoria as any).estado_id;
+    const esFlujoFinal = estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+
+    const validacion = esFlujoFinal
+      ? this.validarInformeFinal.bind(this)
+      : this.validarInformePreliminar.bind(this);
+
+    validacion(auditoria._id, async () => {
       const confirmado = await this.alertaService.showConfirmAlert(
-        "¿Está seguro(a) de enviar el informe preliminar para aprobación del Jefe?"
+        esFlujoFinal
+          ? "¿Está seguro(a) de enviar el informe final para aprobación del Jefe?"
+          : "¿Está seguro(a) de enviar el informe preliminar para aprobación del Jefe?"
       );
       if (!confirmado.value) return;
 
@@ -266,8 +305,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.planAuditoriaService
         .post("auditoria-estado", {
           auditoria_id: auditoria._id,
-          fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
-          estado_id: environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE,
+          fase_id: esFlujoFinal
+            ? environment.AUDITORIA_FASE.EJECUCION_FINAL
+            : environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+          estado_id: esFlujoFinal
+            ? environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
+            : environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE,
           usuario_id: usuarioId,
           usuario_rol: role,
           observacion: "",
@@ -275,7 +318,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         .subscribe({
           next: () => {
             this.alertaService.showSuccessAlert(
-              "El informe fue enviado al Jefe para su aprobación.",
+              esFlujoFinal
+                ? "El informe final fue enviado al Jefe para su aprobación."
+                : "El informe fue enviado al Jefe para su aprobación.",
               "Informe enviado"
             );
             this.listarAuditoriasPorVigencia(this.vigenciaId);
@@ -293,6 +338,19 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       if (!docs.some(doc => doc.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR)) {
         this.alertaService.showErrorAlert(
           "Debe generar el informe preliminar antes de enviarlo al Jefe."
+        );
+        return;
+      }
+      onValido();
+    });
+  }
+
+  // Valida que el informe final exista antes de permitir enviar a aprobación por jefe
+  private validarInformeFinal(auditoriaId: string, onValido: () => void) {
+    this.referenciaPdfService.consultarDocumentos(auditoriaId).subscribe(docs => {
+      if (!docs.some(doc => doc.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL)) {
+        this.alertaService.showErrorAlert(
+          "Debe generar el informe final antes de enviarlo al Jefe."
         );
         return;
       }

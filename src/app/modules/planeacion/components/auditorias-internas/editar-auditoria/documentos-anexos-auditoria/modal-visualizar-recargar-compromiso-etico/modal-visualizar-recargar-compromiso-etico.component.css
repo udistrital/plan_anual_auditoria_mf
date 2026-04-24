@@ -1,0 +1,4 @@
+:host ::ng-deep app-pdf-visualizador pdf-viewer {
+  height: 65vh !important;
+  display: block;
+}

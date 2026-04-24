@@ -7,13 +7,28 @@ import { SpinnerInterceptor } from "./core/intercerptors/spinner.interceptor";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
+import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 
-@NgModule({ declarations: [AppComponent, SpinnerComponent],
-    bootstrap: [AppComponent], imports: [AppRoutingModule,
+@NgModule({
+    declarations: [AppComponent, SpinnerComponent],
+    bootstrap: [AppComponent],
+    imports: [
+        AppRoutingModule,
         BrowserModule,
-        BrowserAnimationsModule], providers: [
+        BrowserAnimationsModule
+    ], 
+    providers: [
         PlanAnualAuditoriaService,
         provideHttpClient(withInterceptors([SpinnerInterceptor])),
         provideHttpClient(withInterceptorsFromDi()),
-    ] })
+        provideNativeDateAdapter(),
+        { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },
+        { provide: MAT_DATE_FORMATS,
+            useValue: {
+                parse: { dateInput: 'dd/MM/yyyy' }, 
+                display: { dateInput: 'dd/MM/yyyy' } 
+            }
+        }
+    ]
+})
 export class AppModule {}

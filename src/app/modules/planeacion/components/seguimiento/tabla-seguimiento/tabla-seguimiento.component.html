@@ -1,9 +1,9 @@
 <ng-container *ngIf="banderaTablaSeguimiento">
   <div class="row mt-4">
     <div class="col-12">
-      <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
+      <h3 class="my-3">Listado de Seguimientos e Informes de Ley Aprobados en el Plan Anual de Auditorías (PAA)</h3>
       <p class="mb-2 mx-2">
-        Seleccione la auditoría de seguimiento o informe para su edición y/o planeación.
+        Seleccione el seguimiento y/o informe de ley para realizar la revisión y/o planeación.
       </p>
     </div>
     <div class="col-12">
@@ -33,6 +33,11 @@
               >
                 <div *ngSwitchCase="'numero'">
                   <span>{{ pageIndex * pageSize + i + 1 }}</span>
+                </div>
+
+                <!-- Tipo Evaluación -->
+                <div *ngSwitchCase="'tipo_evaluacion'">
+                  <span>{{ row.tipo_evaluacion_nombre }}</span>
                 </div>
 
                 <!-- Documentos -->

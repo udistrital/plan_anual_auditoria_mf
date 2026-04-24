@@ -6,6 +6,37 @@
   text-align: center;
 }
 
+.btn-expandir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+
+.btn-expandir .mat-icon {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-size: 20px;
+}
+
+.numero-fila {
+  vertical-align: middle;
+}
+
+.fila-auditoria-padre {
+  font-weight: 500;
+}
+
+.fila-auditoria-concreta {
+  font-weight: 400;
+}
+
 /* Aplicar sombreado filas */
 /* .even-row {
   background-color: #f4f4f4;

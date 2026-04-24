@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit, QueryList, ViewChild, ViewChildren, AfterViewInit, ChangeDetectorRef } from "@angular/core";
 import { MatStepper } from "@angular/material/stepper";
 import { ActividadesAuditoriaComponent } from "./actividades-auditoria/actividades-auditoria.component";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
+  formularioDependencias,
   formularioInformacionAuditoria,
   formularioRecursosAuditoria,
   formularioTemasAuditoria,
@@ -38,7 +39,7 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
   templateUrl: "./editar-auditoria.component.html",
   styleUrls: ["./editar-auditoria.component.css"],
 })
-export class EditarAuditoriaComponent implements OnInit {
+export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild(ActividadesAuditoriaComponent)
@@ -56,6 +57,10 @@ export class EditarAuditoriaComponent implements OnInit {
   formularioTemasComponent!: FormularioDinamicoComponent;
   formularioTemas: Formulario | undefined;
 
+  @ViewChildren("formularioDependenciasComp")
+  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
+  formularioDependencias: Formulario = formularioDependencias;
+
   auditoriaId!: string;
   auditoria!: Auditoria;
   esLineal = false;
@@ -65,6 +70,7 @@ export class EditarAuditoriaComponent implements OnInit {
   usuarioId: number = 0;
   paso1Guardado: boolean = false;
   paso3Guardado: boolean = false;
+  soloLectura: boolean = false;
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
   auditoriaEstados = environment.AUDITORIA_ESTADO;
 
@@ -83,11 +89,13 @@ export class EditarAuditoriaComponent implements OnInit {
     private readonly notificacionesService: NotificacionesService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.cargarFormularios();
     this.manejarResponsiveStepper();
+    this.soloLectura = this.route.snapshot.queryParamMap.get("modo") === "ver";
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
     this.obtenerAuditoria(this.auditoriaId);
     this.userService.getPersonaId().then((usuarioId) => {
@@ -110,6 +118,7 @@ export class EditarAuditoriaComponent implements OnInit {
   obtenerAuditoria(auditoriaId: string) {
     this.planAuditoriaMid.get(`auditoria/${auditoriaId}`).subscribe((res) => {
       this.auditoria = res.Data;
+      this.changeDetector.detectChanges();
       this.cargarFormulariosConAuditoria();
     });
   }
@@ -118,9 +127,14 @@ export class EditarAuditoriaComponent implements OnInit {
     this.formularioInformacion = formularioInformacionAuditoria;
     this.formularioRecursos = formularioRecursosAuditoria;
     this.formularioTemas = formularioTemasAuditoria;
+    this.formularioDependencias = formularioDependencias;
   }
 
   enviarFormInformacion() {
+    if (this.soloLectura) {
+      this.stepper.next();
+      return;
+    }
     this.formularioInformacionComponent.onSubmit();
   }
 
@@ -136,6 +150,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   preguntarGuardadoInformacion(dataForm: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!dataForm) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -154,6 +172,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   guardarInformacion(informacion: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaId = this.auditoria._id;
     const informacionEditar = this.mapearInfoFormInformacion(informacion);
 
@@ -168,12 +190,20 @@ export class EditarAuditoriaComponent implements OnInit {
             );
           });
         }
+        this.auditoria = (res as any).Data;
         this.paso1Guardado = true;
         this.stepper.next();
       });
   }
 
   mapearInfoFormInformacion(informacion: any) {
+    const correos = this.formularioDependenciasComponent.map((form) => {
+      const correo = {
+        dependencia_id: form.form.value.dependencia_id,
+        correo: form.form.value.correo_complementario
+      };
+      return correo;
+    });
     return {
       alcance: informacion.alcance_auditoria,
       consecutivo_IE: informacion.consecutivo_IE,
@@ -183,16 +213,25 @@ export class EditarAuditoriaComponent implements OnInit {
       fecha_inicio: informacion.fecha_ejecucion_inicial,
       consecutivo_no_auditoria: informacion.consecutivo_no_auditoria,
       objetivo: informacion.objetivo_auditoria,
-      correo_complementario: informacion.correo_complementario,
+      correo_complementario: correos,
     };
   }
 
   enviarFormRecursos() {
+    if (this.soloLectura) {
+      this.stepper.next();
+      return;
+    }
+
     this.formularioRecursosComponent.onSubmit();
     this.formularioTemasComponent.onSubmit();
   }
 
   preguntarGuardadoRecursos(dataForm: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!dataForm || !this.formularioTemasComponent.form.valid) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -211,12 +250,16 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   guardarRecursos(recursos: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     const auditoriaId = this.auditoria._id;
     const recursosEditar = {
       rec_tecnologico: recursos.tecnologicos,
       rec_humano: recursos.humanos,
       rec_fisico: recursos.fisicos,
-      temas: this.formularioTemasComponent.form.value.temas,
+      tema: this.formularioTemasComponent.form.value.tema,
     };
 
     this.planAuditoriaService
@@ -234,6 +277,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   finalizarAuditoria(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (!this.paso1Guardado || !this.paso3Guardado) {
       return this.alertaService.showAlert(
         "Formulario incompleto",
@@ -242,7 +289,7 @@ export class EditarAuditoriaComponent implements OnInit {
     }
 
     this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de enviar el formulario?")
+      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
       .then((confirmado) => {
         if (!confirmado.value) {
           return;
@@ -268,6 +315,10 @@ export class EditarAuditoriaComponent implements OnInit {
   }
 
   subirArchivoCargueMasivo(): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
@@ -295,18 +346,25 @@ export class EditarAuditoriaComponent implements OnInit {
       consecutivo_IE: this.auditoria.consecutivo_IE,
       macroproceso: this.auditoria.macroproceso_nombre,
       proceso: this.auditoria.proceso_nombre,
-      dependencia: this.auditoria.dependencia_nombre,
-      jefe_nombre: this.auditoria.jefe_nombre,
-      asistente_nombre: this.auditoria.asistente_nombre,
       fecha_ejecucion_inicial: this.auditoria.fecha_inicio,
       fecha_ejecucion_final: this.auditoria.fecha_fin,
       objetivo_auditoria: this.auditoria.objetivo,
       alcance_auditoria: this.auditoria.alcance,
       criterios: this.auditoria.criterio,
-      jefe_correo: this.auditoria.jefe_correo,
-      asistente_correo: this.auditoria.asistente_correo,
-      correo_dependencia: this.auditoria.correo_dependencia,
-      correo_complementario: this.auditoria.correo_complementario,
+    });
+
+    this.formularioDependenciasComponent.forEach((comp, i) => {
+      const dep = this.auditoria.datos_dependencias[i];
+      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo || "";
+      comp.form.patchValue({
+        dependencia_id: dep.dependencia_id,
+        jefe_nombre: dep.jefe_nombre,
+        jefe_correo: dep.jefe_correo,
+        asistente_nombre: dep.asistente_nombre,
+        asistente_correo: dep.asistente_correo,
+        correo_dependencia: dep.correo_dependencia,
+        correo_complementario: correo,
+      });
     });
 
     this.formularioRecursosComponent.form.patchValue({
@@ -318,12 +376,27 @@ export class EditarAuditoriaComponent implements OnInit {
     this.formularioTemasComponent.form.patchValue({
       tema: this.auditoria.tema,
     });
+
+    if (this.soloLectura) {
+      this.formularioInformacionComponent.form.disable();
+      this.formularioRecursosComponent.form.disable();
+      this.formularioTemasComponent.form.disable();
+      this.formularioDependenciasComponent.forEach(form => form.form.disable());
+    }
   }
 
   crearActividad() {
+    if (this.soloLectura) {
+      return;
+    }
+
     const dialogRef = this.dialog.open(CrearActividadComponent, {
       width: "1100px",
-      data: { auditoriaId: this.auditoriaId },
+      data: {
+        auditoriaId: this.auditoriaId,
+        minFechaStr: this.auditoria.fecha_inicio,
+        maxFechaStr: this.auditoria.fecha_fin,
+      },
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -338,6 +411,10 @@ export class EditarAuditoriaComponent implements OnInit {
   };
 
   manejarCambioSelect(event: any): void {
+    if (this.soloLectura) {
+      return;
+    }
+
     this.selectActions[event.campo.nombre]?.(event.valor);
   }
 

@@ -1,17 +1,24 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
+import { MatDialog } from "@angular/material/dialog";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import { formularioInformacionAuditoria } from "./editar-informe.utilidades";
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
+import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
+import { RolService } from 'src/app/core/services/rol.service';
 import { environment } from 'src/environments/environment';
+import { accionesEjecucionFinal, accionesEjecucionPreliminar } from 'src/app/shared/utils/accionesPorRolYEstado';
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
+import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
+import { join } from 'node:path';
 
 @Component({
   selector: 'app-editar-informe',
@@ -19,7 +26,7 @@ import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos
   styleUrls: ['./editar-informe.component.css']
 })
 
-export class EditarInformeComponent implements OnInit {
+export class EditarInformeComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild("formularioInformacionComp")
@@ -39,11 +46,13 @@ export class EditarInformeComponent implements OnInit {
   informeId!: string;
   informeData: any = null;
   estadoId: number = 0;
+  soloLectura: boolean = false;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
 
-  get preinformeAprobado(): boolean {
-    return this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO;
+  // Cuando el informe ya fue aprobado por el auditado -> Pasa a informe final
+  get pasosInicialesSoloLectura(): boolean {
+    return this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
   }
 
   constructor(
@@ -51,9 +60,13 @@ export class EditarInformeComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private route: ActivatedRoute,
+    private dialog: MatDialog,
     private fb: FormBuilder,
+    private nuxeoService: NuxeoService,
+    private referenciaPdfService: ReferenciaPdfService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private rolService: RolService
   ) {
     this.formAspectosGenerales = this.fb.group({
       aspecto_general: [''],
@@ -69,10 +82,15 @@ export class EditarInformeComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.soloLectura = this.route.snapshot.queryParamMap.get('soloLectura') === 'true';
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.informeId = this.route.snapshot.paramMap.get("id")!;
     this.cargarInforme();
+  }
+
+  ngAfterViewInit(): void {
+    this.aplicarModoSoloLecturaPasosIniciales();
   }
 
   cargarFormularios(): void {
@@ -129,9 +147,44 @@ export class EditarInformeComponent implements OnInit {
     this.planAnualAuditoriaService.get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`).subscribe({
       next: (res: any) => {
         this.estadoId = res.Data?.[0]?.estado_id ?? 0;
+        this.forzarSoloLecturaSegunPermisos();
+        this.aplicarModoSoloLecturaPasosIniciales();
       },
       error: () => { }
     });
+  }
+
+  private forzarSoloLecturaSegunPermisos(): void {
+    const esFlujoFinal = this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+    const accionEdicion = esFlujoFinal ? 'Editar Informe' : 'Editar Preinforme';
+    const roles = this.rolService.getRoles();
+
+    const puedeEditar = roles.some((rol) => {
+      const acciones = esFlujoFinal
+        ? accionesEjecucionFinal[rol]?.[this.estadoId] ?? []
+        : accionesEjecucionPreliminar[rol]?.[this.estadoId] ?? [];
+      return acciones.includes(accionEdicion);
+    });
+
+    if (!puedeEditar) {
+      this.soloLectura = true;
+    }
+  }
+
+  private aplicarModoSoloLecturaPasosIniciales(): void {
+    const deshabilitarPasosIniciales = this.pasosInicialesSoloLectura || this.soloLectura;
+    if (!deshabilitarPasosIniciales) return;
+
+    this.formAspectosGenerales.disable({ emitEvent: false });
+
+    if (this.formularioInformacionComponent?.form) {
+      this.formularioInformacionComponent.form.disable({ emitEvent: false });
+    }
+
+    if (this.soloLectura) {
+      this.formRespuestaPreliminar.disable({ emitEvent: false });
+      this.formInformeFinal.disable({ emitEvent: false });
+    }
   }
 
   // Pobla los formularios con los datos del informe cargado
@@ -161,7 +214,7 @@ export class EditarInformeComponent implements OnInit {
     if (!this.formularioInformacionComponent) return;
 
     const valoresIniciales: any = {
-      no_auditoria: auditoria?.no_auditoria,
+      consecutivo_no_auditoria: auditoria?.consecutivo_no_auditoria,
       macroproceso: auditoria?.macroproceso_nombre,
       proceso: auditoria?.proceso_nombre,
       dependencia: auditoria?.dependencia_nombre,
@@ -170,7 +223,7 @@ export class EditarInformeComponent implements OnInit {
       correo_dependencia: auditoria?.correo_dependencia,
       jefe_correo: auditoria?.jefe_correo,
       asistente_correo: auditoria?.asistente_correo,
-      correo_complementario: this.informeData?.correo_complementario ?? auditoria?.correo_complementario,
+      correo_complementario: auditoria.correo_complementario.map((c: any) => c.correo).join(", "),
       objetivo_auditoria: auditoria?.objetivo,
       alcance_auditoria: auditoria?.alcance,
       criterios: auditoria?.criterio,
@@ -248,6 +301,147 @@ export class EditarInformeComponent implements OnInit {
 
   guardarRespuestaPreliminar() {
     this.guardarPaso(this.formRespuestaPreliminar.value, "La respuesta preliminar se ha guardado correctamente", "No se pudo guardar la respuesta preliminar");
+  }
+
+  verPreinforme(): void {
+    const auditoriaId = this.informeData?.auditoria_id;
+
+    if (!auditoriaId) {
+      this.alertaService.showErrorAlert("No fue posible identificar la auditoría asociada.");
+      return;
+    }
+
+    this.planAuditoriaMid.get(`plantilla/informe-auditoria/${auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+
+        if (!documentoBase64) {
+          this.alertaService.showErrorAlert("No fue posible generar el preinforme.");
+          return;
+        }
+
+        this.verDocumento(documentoBase64, {
+          nombre: "Informe Preliminar",
+          plantilla: "informe-auditoria",
+          parametro: environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR,
+        });
+      },
+      error: (error: any) => {
+        console.error("Error al generar el preinforme:", error);
+        this.alertaService.showErrorAlert("No fue posible generar el preinforme.");
+      },
+    });
+  }
+
+  verInforme(): void {
+    const auditoriaId = this.informeData?.auditoria_id;
+
+    if (!auditoriaId) {
+      this.alertaService.showErrorAlert("No fue posible identificar la auditoría asociada.");
+      return;
+    }
+
+    this.planAuditoriaMid.get(`plantilla/informe-auditoria/${auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+
+        if (!documentoBase64) {
+          this.alertaService.showErrorAlert("No fue posible generar el informe.");
+          return;
+        }
+
+        this.verDocumento(documentoBase64, {
+          nombre: "Informe Final",
+          plantilla: "informe-auditoria",
+          parametro: environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL,
+        });
+      },
+      error: (error: any) => {
+        console.error("Error al generar el informe:", error);
+        this.alertaService.showErrorAlert("No fue posible generar el informe.");
+      },
+    });
+  }
+
+  verDocumento(documentoBase64: any, infoDocumento: any): void {
+    const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
+      width: "1000px",
+      data: documentoBase64,
+      autoFocus: false,
+    });
+
+    const modalInstance = dialogRef.componentInstance;
+    if (!this.soloLectura) {
+      modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    }
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (!res) return;
+
+      if (res.accion === "guardarDocumento") {
+        this.guardarDocumento(documentoBase64, infoDocumento);
+      }
+    });
+  }
+
+  guardarDocumento(documentoBase64: any, infoDocumento: any) {
+    if (documentoBase64 !== "") {
+      const payload = {
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        nombre: infoDocumento.nombre,
+        descripcion:
+          "Documento pdf (" +
+          infoDocumento.plantilla +
+          ") de auditoría de plan de auditoría",
+        metadatos: {},
+        file: documentoBase64,
+      };
+
+      this.nuxeoService.guardarArchivos([payload]).subscribe({
+        next: (response: any) => {
+          const documentoRefNuxeo = response[0];
+
+          this.guardarReferencia(
+            documentoRefNuxeo,
+            "Auditoria",
+            this.informeData?.auditoria_id,
+            infoDocumento.parametro
+          );
+        },
+        error: (error: any) => {
+          console.error("Error al subir el documento", error);
+        },
+      });
+    }
+  }
+
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number,
+    metadatos?: Record<string, any>,
+    onSuccess?: () => void
+  ): void {
+    if (nuxeoResponse.res.Enlace) {
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id,
+          metadatos
+        )
+        .subscribe({
+          next: () => {
+            this.alertaService.showSuccessAlert("Archivo subido exitosamente.");
+            onSuccess?.();
+          },
+          error: (error: any) => {
+            console.error("Error al guardar la referencia", error);
+          },
+        });
+    }
   }
 
   guardarInformeFinal() {

@@ -42,7 +42,17 @@
               style="border: 1px solid var(--md-primary-500) !important"
               (click)="exportarTabla()"
             >
-              <mat-icon>file_download</mat-icon> Exportar tabla
+              <mat-icon>file_download</mat-icon> Exportar Tabla
+            </button>
+            <button
+              class="mx-2 mt-2"
+              *ngIf="modoEditar"
+              mat-stroked-button
+              color="primary"
+              style="border: 1px solid var(--md-primary-500) !important"
+              (click)="eliminarAuditorias()"
+            >
+              <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
             </button>
           </div>
         </div>
@@ -92,30 +102,30 @@
           <!-- Macroproceso Column -->
           <ng-container matColumnDef="macroproceso">
             <th mat-header-cell *matHeaderCellDef class="header">
-              <b>Macroproceso</b>
+              <b>Macroprocesos</b>
             </th>
             <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-              {{ element.macroproceso }}
+              {{ element.macroprocesos }}
             </td>
           </ng-container>
 
           <!-- Proceso Column -->
           <ng-container matColumnDef="proceso">
             <th mat-header-cell *matHeaderCellDef class="header">
-              <b>Proceso</b>
+              <b>Procesos</b>
             </th>
             <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-              {{ element.proceso }}
+              {{ element.procesos }}
             </td>
           </ng-container>
 
           <!-- Dependencia Column -->
           <ng-container matColumnDef="dependencia">
             <th mat-header-cell *matHeaderCellDef class="header">
-              <b>Dependencia</b>
+              <b>Dependencias</b>
             </th>
             <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-              {{ element.dependencia }}
+              {{ element.dependencias }}
             </td>
           </ng-container>
 
@@ -126,6 +136,14 @@
             </th>
             <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
               {{ element.cronograma }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="cantidadAuditorias">
+            <th mat-header-cell *matHeaderCellDef class="header">
+              <b>Cantidad</b>
+            </th>
+            <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
+              {{ element.cantidadAuditorias ?? 0 }}
             </td>
           </ng-container>
 
@@ -193,6 +211,16 @@
           >
             <mat-icon>file_download</mat-icon> Exportar tabla
           </button>
+          <button
+            *ngIf="modoEditar"
+            class="mx-2"
+            mat-stroked-button
+            color="primary"
+            style="border: 1px solid var(--md-primary-500)"
+            (click)="eliminarAuditorias()"
+          >
+            <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
+          </button>
         </div>
         <ng-template #botonesAcciones>
           <div class="d-flex justify-content-end">
@@ -222,7 +250,7 @@
               color="primary"
               (click)="subirActaModificacion()"
             >
-              <mat-icon>file_upload</mat-icon> Acta Actualización
+              <mat-icon>file_upload</mat-icon> Acta de Modificación
             </button>
             <button
               class="mx-2"

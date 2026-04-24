@@ -28,6 +28,8 @@ import { DocumentosAnexosSeguimientoComponent } from "./components/seguimiento/e
 import { RevisionDocumentosSeguimientoComponent } from "./components/seguimiento/revision-documentos/revision-documentos.component";
 import { ModalRechazoSeguimientoComponent } from "./components/seguimiento/revision-documentos/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component";
 import { ModalVisualizarRecargarCompromisoEticoComponent } from "./components/auditorias-internas/editar-auditoria/documentos-anexos-auditoria/modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
+import { QuillModule } from "ngx-quill";
+import { ModalAprobacionAuditadoComponent } from "./components/auditorias-internas/revision-documentos/modal-aprobacion-auditado/modal-aprobacion-auditado.component";
 
 @NgModule({
   declarations: [
@@ -43,6 +45,7 @@ import { ModalVisualizarRecargarCompromisoEticoComponent } from "./components/au
     RevisionDocumentosComponent,
     ModalRechazoAuditoriaComponent,
     ModalVisualizarRecargarCompromisoEticoComponent,
+    ModalAprobacionAuditadoComponent,
 
     // Seguimiento e Informes
     SeguimientoComponent,
@@ -61,7 +64,8 @@ import { ModalVisualizarRecargarCompromisoEticoComponent } from "./components/au
     PlaneacionRoutingModule,
     MaterialModule,
     ReactiveFormsModule,
-    SharedModule
+    SharedModule,
+    QuillModule
   ],
 })
 export class PlaneacionModule {}

@@ -18,6 +18,8 @@ export class Campo {
     | "date"
     | "date-range"
     | "icono"
+    | "quill"
+    | "hidden"
     | "textarea" = "text";
   placeholder?: string;
   validaciones?: any;
@@ -33,8 +35,12 @@ export class Campo {
     fecha_inicio?: string;
     etiqueta_inicio?: string;
     etiqueta_fin?: string;
+    altura?: number;
   };
   deshabilitado?: boolean;
   valor?: any;
   claseGrid?: string;
+  quillConfig?: {
+    toolbar: any[];
+  };
 }
