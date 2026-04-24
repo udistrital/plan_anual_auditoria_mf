@@ -7,13 +7,7 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <div class="row">
-      <div class="col-12">
-        <app-pdf-visualizador
-        [base64Document]="base64"
-      ></app-pdf-visualizador>
-      </div>
-  </div>
+  <app-pdf-visualizador [base64Document]="base64"></app-pdf-visualizador>
 </ng-template>
 <ng-template #footerDeModal>
   <button *ngIf="!soloLectura" mat-raised-button color="primary" (click)="actualizarDocumento()">
