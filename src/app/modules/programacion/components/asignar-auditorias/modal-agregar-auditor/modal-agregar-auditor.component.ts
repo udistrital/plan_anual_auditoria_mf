@@ -111,12 +111,48 @@ export class ModalAgregarAuditorComponent implements OnInit {
 
   eliminarAuditor(index: number) {
     const auditorSeleccionado = this.auditoresSeleccionados.at(index)?.value;
-    
+    const estadoActual = this.data.auditoria?.estado_id ?? 0; // Provide a default value
+    const error = this.validarEliminacion(auditorSeleccionado, estadoActual);
+  
+    if (error) {
+      this.alertaService.showAlert("",error);
+      return;
+    }
+  
+    this.confirmarEliminacion(index, auditorSeleccionado);
+  }
+
+  private validarEliminacion(auditor: any, estado: number): string | null {
+  
+    const estados = environment.AUDITORIA_ESTADO.PROGRAMACION;
+  
+    // Validaciones cuando hay auditores asignados
+    if (estado >= estados.AUDITOR_ASIGNADO && this.auditoresAsignados?.length) {
+  
+      const esUnicoAsignado =
+        this.auditoresAsignados.length === 1 &&
+        this.auditoresAsignados[0].auditor_id === auditor.auditor.id;
+  
+      if (esUnicoAsignado) {
+        return "No se puede eliminar el último auditor asignado. Debe guardar mas auditores antes de eliminar este";
+      }
+  
+      if (this.auditoresSeleccionados.length <= 1) {
+        return "Debe haber al menos un auditor seleccionado.";
+      }
+    }
+  
+    return null;
+  }
+
+  confirmarEliminacion(index: number, auditorSeleccionado: any) {
     this.alertaService
       .showConfirmAlert(`¿Está seguro de eliminar este auditor?`)
       .then((result) => {
         if (result.isConfirmed) {
-          const auditorEncontrado = this.auditoresAsignados.find((a) => a.auditor_id === auditorSeleccionado.auditor.id);
+          const auditorEncontrado = this.auditoresAsignados?.find(
+            (a) => a.auditor_id === auditorSeleccionado.auditor.id
+          );
 
           if (auditorEncontrado) {
             this.auditorEliminar = {
@@ -128,15 +164,17 @@ export class ModalAgregarAuditorComponent implements OnInit {
             this.planAnualAuditoriaService
               .delete("auditor", this.auditorEliminar)
               .subscribe({
-                next: (deleteResponse: any) => {
+                next: () => {
                   this.auditoresSeleccionados.removeAt(index);
-                  this.auditoresAsignados = this.auditoresAsignados.filter(a => a.auditor_id !== auditorSeleccionado.auditor.id);
+                  this.auditoresAsignados = this.auditoresAsignados.filter(
+                    (a) => a.auditor_id !== auditorSeleccionado.auditor.id
+                  );
                   this.alertaService.showSuccessAlert(
                     "Auditor eliminado correctamente."
                   );
                   this.recomputeAuditoresDisponibles();
                 },
-                error: (err) => {
+                error: () => {
                   this.alertaService.showErrorAlert(
                     "Error al eliminar el auditor. Inténtelo de nuevo."
                   );
@@ -342,10 +380,13 @@ export class ModalAgregarAuditorComponent implements OnInit {
               .subscribe({
                 next: (response: any) => {
                   if (response.Status === 200) {
+                    const estadoActual = this.data.auditoria?.estado_id;
                     const nuevoEstado = auditoresSeleccionados.length > 0 || this.auditoresAsignados.length > 0 ?
                       environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO :
                       environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR;
-                    if (nuevoEstado !== this.data.auditoria?.estado_id) { 
+
+                    // Validar si el estado actual permite el cambio
+                    if (estadoActual === environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR && nuevoEstado === environment.AUDITORIA_ESTADO.PROGRAMACION.AUDITOR_ASIGNADO) {
                       this.cambiarEstado(nuevoEstado)
                         .subscribe({
                           next: (resp: any) => {
