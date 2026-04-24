@@ -5,19 +5,19 @@ export const colocacionesContructorTabla = [
     columnDef: "numero",
     header: "No.",
     cell: (auditoria: any) => "",
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "auditoria",
     header: "Auditoria",
     cell: (auditoria: any) => tituloYSubtituloAuditoria(auditoria),
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "tipoEvaluacion",
     header: "Tipo de Evaluación",
     cell: (auditoria: any) => auditoria.tipo_evaluacion_nombre,
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "auditores",
@@ -25,19 +25,13 @@ export const colocacionesContructorTabla = [
     cell: (auditoria: any) =>
       auditoria.auditores?.map((a: any) => a.auditor_nombre).join(", ") ||
       "Sin Auditor(es)",
-    sortable: true,
-  },
-  {
-    columnDef: "cronograma",
-    header: "Cronograma de Actividades",
-    cell: (auditoria: any) => auditoria.cronograma,
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: any) => auditoria.estado_nombre,
-    sortable: true,
+    sortable: false,
   },
   {
     columnDef: "acciones",

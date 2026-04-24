@@ -19,11 +19,13 @@ import { ModalVisualizarRecargarCompromisoEticoComponent } from "../../../audito
 })
 export class DocumentosAnexosSeguimientoComponent implements OnInit {
   @Output() guardarDocumentos = new EventEmitter<any>();
+  @Input() soloLectura: boolean = false;
 
   auditoriaId: string = "";
   formularioDocumentos: FormGroup;
   idCompromisoEtico: any = null;
   base64CompromisoEtico: any = null;
+  documentosExistentes: { [tipoId: number]: string | null } = {};
 
   documentos = [
     {
@@ -54,6 +56,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
 
   async ngOnInit() {
     this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
+    await this.cargarEstadoDocumentos();
     try {
       this.idCompromisoEtico = await this.buscarCompromisoEtico();
       if (this.idCompromisoEtico !== null) {
@@ -64,7 +67,72 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
     }
   }
 
+  private async cargarEstadoDocumentos(): Promise<void> {
+    const documentosConPlantilla = this.documentos.filter((documento) => !!documento.plantilla);
+
+    await Promise.all(
+      documentosConPlantilla.map(async (documento) => {
+        this.documentosExistentes[documento.parametro] = await this.buscarDocumentoPorTipo(documento.parametro);
+      })
+    );
+  }
+
+  private buscarDocumentoPorTipo(tipoDocumento: number): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+      this.planAnualAuditoriaService
+        .get(
+          `documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Auditoria,tipo_id:${tipoDocumento},activo:true&fields=nuxeo_enlace`
+        )
+        .subscribe(
+          (res) => {
+            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+              resolve(res.Data[0].nuxeo_enlace);
+            } else {
+              resolve(null);
+            }
+          },
+          (error) => {
+            console.error("Error al buscar documento adjunto", error);
+            reject(error);
+          }
+        );
+    });
+  }
+
+  existeDocumento(documento: any): boolean {
+    return !!this.documentosExistentes[documento.parametro];
+  }
+
+  manejarDocumento(documento: any): void {
+    if (this.existeDocumento(documento)) {
+      this.verDocumentoGuardado(documento);
+      return;
+    }
+
+    this.generarDocumento(documento);
+  }
+
+  private async verDocumentoGuardado(documento: any): Promise<void> {
+    const nuxeoId = this.documentosExistentes[documento.parametro];
+    if (!nuxeoId) {
+      this.generarDocumento(documento);
+      return;
+    }
+
+    try {
+      const documentoBase64 = await this.nuxeoService.obtenerPorUUID(nuxeoId);
+      this.verDocumento(documentoBase64, documento);
+    } catch (error) {
+      console.error("Error al cargar documento guardado", error);
+      this.alertService.showErrorAlert("No fue posible visualizar el documento guardado.");
+    }
+  }
+
   subirCompromisoEtico(): void {
+      if (this.soloLectura) {
+        return;
+      }
+
       const dialogRef = this.dialog.open(CargarArchivoComponent, {
         width: "800px",
         data: {
@@ -105,13 +173,17 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
   
     verCompromisoEtico() {
         this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
-          data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+          data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId, soloLectura: this.soloLectura },
           width: "80%",
           height: "80vh",
         });
       }
 
   onGuardar() {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (this.formularioDocumentos.valid) {
       this.guardarDocumentos.emit(this.documentos);
     }
@@ -134,19 +206,25 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
       autoFocus: false,
     });
 
-    const modalInstance = dialogRef.componentInstance;
-    modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    if (!this.soloLectura) {
+      const modalInstance = dialogRef.componentInstance;
+      modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    }
 
     dialogRef.afterClosed().subscribe((res) => {
       if (!res) return;
 
-      if (res.accion === "guardarDocumento") {
+      if (!this.soloLectura && res.accion === "guardarDocumento") {
         this.guardarDocumento(documentoBase64, infoDocumento);
       }
     });
   }
 
   guardarDocumento(documentoBase64: any, infoDocumento: any) {
+    if (this.soloLectura) {
+      return;
+    }
+
     if (documentoBase64 !== "") {
       const payload = {
         IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
@@ -168,6 +246,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
             this.auditoriaId,
             infoDocumento.parametro
           );
+          this.documentosExistentes[infoDocumento.parametro] = documentoRefNuxeo?.res?.Enlace || null;
         },
         error: (error) => {
           console.error("Error al subir el documento", error);

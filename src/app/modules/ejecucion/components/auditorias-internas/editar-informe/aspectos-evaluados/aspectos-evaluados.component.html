@@ -1,6 +1,6 @@
 <div class="tabla-container" [formGroup]="aspectosForm">
 
-  <div class="section-actions">
+  <div class="section-actions" *ngIf="!soloLectura">
     <button mat-raised-button color="primary" (click)="agregarTema()">
       <mat-icon>add</mat-icon> Agregar Tema
     </button>
@@ -22,7 +22,7 @@
           <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
           <mat-error *ngIf="tema.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
         </mat-form-field>
-        <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
+        <button *ngIf="!soloLectura" mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
           <mat-icon>delete</mat-icon>
         </button>
       </div>
@@ -44,7 +44,7 @@
               <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
               <mat-error *ngIf="subtema.get('nombre')?.hasError('required')">El nombre es requerido</mat-error>
             </mat-form-field>
-            <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
+            <button *ngIf="!soloLectura" mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -61,7 +61,7 @@
                 <span class="node-dot hallazgo-dot"></span>
                 <span class="nivel-label">Hallazgo</span>
                 <span class="indice">{{ i + 2 }}.{{ j + 1 }}.{{ k + 1 }}</span>
-                <button mat-icon-button class="delete-btn" (click)="eliminarHallazgo(i, j, k)" matTooltip="Eliminar hallazgo">
+                <button *ngIf="!soloLectura" mat-icon-button class="delete-btn" (click)="eliminarHallazgo(i, j, k)" matTooltip="Eliminar hallazgo">
                   <mat-icon>delete</mat-icon>
                 </button>
               </div>
@@ -86,7 +86,7 @@
 
             </div>
 
-            <div class="add-leaf-action">
+            <div class="add-leaf-action" *ngIf="!soloLectura">
               <button mat-stroked-button color="primary" (click)="agregarHallazgo(i, j)">
                 <mat-icon>add</mat-icon> Agregar Hallazgo
               </button>
@@ -95,7 +95,7 @@
           </div>
         </div>
 
-        <div class="add-leaf-action">
+        <div class="add-leaf-action" *ngIf="!soloLectura">
           <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
             <mat-icon>add</mat-icon> Agregar Subtema
           </button>

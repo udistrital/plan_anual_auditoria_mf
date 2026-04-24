@@ -1,0 +1,28 @@
+.auditores-lista {
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 0; 
+  }
+  
+  .auditor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px; 
+    margin: 0; 
+  }
+  
+  .even-row {
+    background-color: #f4f4f4;
+  }
+  
+  .auditor-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .auditor-nombre {
+    font-size: 14px;
+    color: #555;
+  }

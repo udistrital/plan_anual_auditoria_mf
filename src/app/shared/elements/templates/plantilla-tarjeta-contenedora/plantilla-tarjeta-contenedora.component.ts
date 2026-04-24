@@ -38,6 +38,8 @@ export class PlantillaTarjetaContenedoraComponent {
    */
    @Input() subtitle: string = "";
 
+   @Input() subtitleChild: string = "";
+
 
   /**
    * Contenido dinámico que será renderizado dentro de la tarjeta.

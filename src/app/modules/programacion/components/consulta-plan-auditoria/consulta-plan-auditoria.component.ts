@@ -25,6 +25,7 @@ import {
 } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
+import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -59,7 +60,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     ["Editar Marco General", "edit"],
     ["Registrar Auditorías", "add_circle"],
     ["Editar Auditorías", "edit"],
-    ["Historial de Rechazo", "report"],
+    ["Historial de Observaciones", "report"],
+    ["Historial de Ediciones Extraordinarias", "report"],
     ["Enviar Aprobación", "send"],
     ["Edición Extraordinaria de Auditorías", "edit"],
   ]);
@@ -148,7 +150,12 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           let acciones = this.getAccionesPorRolYEstado(estadoId);
           if (!item.tiene_rechazos) {
             acciones = acciones.filter(
-              (accion) => accion !== "Historial de Rechazo"
+              (accion) => accion !== "Historial de Observaciones"
+            );
+          }
+          if (!item.tiene_modificaciones) {
+            acciones = acciones.filter(
+              (accion) => accion !== "Historial de Ediciones Extraordinarias"
             );
           }
           return {
@@ -267,7 +274,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       "Editar Auditorías": () => this.editarActividades(plan),
       "Ver Documentos": () => this.verDocumentos(plan), 
       "Editar Marco General": () => this.editarReporte(plan),
-      "Historial de Rechazo": () => this.verMotivosRechazo(plan),
+      "Historial de Observaciones": () => this.verMotivosRechazo(plan),
+      "Historial de Ediciones Extraordinarias": () => this.verHistorialModificaciones(plan),
       "Enviar Aprobación": () => this.enviarPlan(plan),
       "Edición Extraordinaria de Auditorías": () => this.editarActividades(plan, true),
     };
@@ -491,6 +499,20 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   verDocumentos(plan: any) {
     this.documentoUtils.verDocumentos(plan.id, plan.estadoId, plan.vigencia, this.roles);
+  }
+
+  verHistorialModificaciones(plan: any) {
+    this.dialog.open(ModalVerDocumentosComponent, {
+      width: "1200px",
+      data: {
+        entityId: plan.id,
+        tipo: environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_MODIFICACION_PLAN,
+        inferTabs: true,
+        titulo: "Actas de Modificación extraordinaria",
+        descripcion: `Historial de Actas de Modificación - Plan Anual de Auditoría ${plan.vigencia}`,
+      },
+      autoFocus: false,
+    });
   }
 
 }
