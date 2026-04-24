@@ -161,7 +161,7 @@ export const formularioTemasAuditoria: Formulario = {
   campos: [
     {
       nombre: "tema",
-      etiqueta: "Información solicitada",
+      etiqueta: "Solicitud de información",
       tipo: "quill",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
