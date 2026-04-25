@@ -1,0 +1,149 @@
+<plantilla-modal
+  [icono]="'edit'"
+  [titulo]="'Asignar Auditor(es)'"
+  [descripcion]="subtituloModal"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-3">
+
+    <!-- Fila 1: Auditoría y Tipo de Evaluación — se muestran de inmediato -->
+    <div class="col-12 mb-3">
+      <div class="row mx-0">
+        <div class="col-6 pe-2">
+          <div class="seccion-header text-center mb-2">
+            <b>Auditoría</b>
+          </div>
+          <mat-form-field appearance="outline" class="col-12">
+            <mat-label>Nombre de la auditoría</mat-label>
+            <input matInput [value]="data.auditoria?.titulo || ''" readonly />
+          </mat-form-field>
+        </div>
+        <div class="col-6 ps-2">
+          <div class="seccion-header text-center mb-2">
+            <b>Tipo de Evaluación</b>
+          </div>
+          <mat-form-field appearance="outline" class="col-12">
+            <mat-label>Tipo de evaluación</mat-label>
+            <input matInput [value]="data.auditoria?.tipo_evaluacion_nombre || ''" readonly />
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fila 2: Cronograma de actividades — se muestra de inmediato -->
+    <div class="col-12 mb-3">
+      <div class="seccion-header text-center mb-2">
+        <b>Cronograma de actividades</b>
+      </div>
+      <mat-form-field appearance="outline" class="col-12">
+        <mat-label>Cronograma de actividades</mat-label>
+        <input matInput [value]="cronogramaTexto" readonly />
+      </mat-form-field>
+    </div>
+
+    <!-- Fila 3: Auditores Responsables Auditoría — se muestran de inmediato (solo lectura) -->
+    <div class="col-12 mb-3">
+      <p class="mb-2"><b>Auditor(es) Responsables Auditoría</b></p>
+      <table class="tabla-auditores-readonly w-100">
+        <tbody>
+          <tr *ngFor="let auditor of auditoresAuditoria">
+            <td>
+              <mat-icon class="icon-chip">person</mat-icon>
+              {{ auditor.nombre }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Fila 4: Auditores Responsables Plan (editable) -->
+    <div class="col-12 mb-2">
+      <p class="mb-2">
+        <b>Auditor(es) Responsables Plan<span class="text-danger">*</span></b>
+      </p>
+
+      <!-- Lista de auditores del plan ya agregados -->
+      <div
+        *ngFor="let auditor of auditoresPlan; let i = index"
+        class="fondo-chip d-flex align-items-center justify-content-between mb-2"
+      >
+        <div class="d-flex align-items-center">
+          <mat-icon class="icon-chip">person</mat-icon>
+          <span>{{ auditor.nombre }}</span>
+          <span class="auditor-tag">
+            <mat-icon>badge</mat-icon>
+            Auditor {{ i + 1 }}
+          </span>
+        </div>
+        <button
+          mat-icon-button
+          color="warn"
+          (click)="eliminarAuditorPlan(i)"
+          matTooltip="Eliminar auditor del plan"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+
+      <!-- Selector: spinner solo aquí mientras carga, el resto del modal ya es visible -->
+      <div class="d-flex align-items-center mt-2 gap-2">
+        <mat-form-field appearance="outline" class="flex-grow-1">
+          <mat-label>Seleccione un auditor</mat-label>
+          <mat-icon color="primary" matPrefix>person_search</mat-icon>
+          <mat-select [(ngModel)]="auditorSeleccionado" [disabled]="cargando">
+            <mat-option *ngIf="cargando" disabled>
+              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+              Cargando auditores...
+            </mat-option>
+            <mat-option
+              *ngFor="let auditor of auditoresDisponibles"
+              [value]="auditor"
+            >
+              {{ auditor.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-raised-button
+          color="primary"
+          class="btn-agregar mb-4"
+          (click)="agregarAuditorPlan()"
+          [disabled]="!auditorSeleccionado || cargando"
+        >
+          <mat-icon>add</mat-icon> Agregar Auditor
+        </button>
+      </div>
+
+      <!-- Mensaje informativo -->
+      <div class="info-guardar d-flex align-items-center my-2">
+        <mat-icon>info</mat-icon>
+        <p class="mb-0 ms-2">¿Guardar cambios?</p>
+      </div>
+    </div>
+
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="d-flex justify-content-end gap-2 mb-3">
+    <button
+      mat-stroked-button
+      color="warn"
+      class="btn-cerrar"
+      [mat-dialog-close]
+    >
+      <mat-icon>close</mat-icon> No, cerrar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="guardarYCerrar()"
+      [disabled]="cargando"
+    >
+      <mat-icon>save</mat-icon> Sí, guardar y cerrar
+    </button>
+  </div>
+</ng-template>
