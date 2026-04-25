@@ -124,7 +124,10 @@ export class ModalVerDocumentosComponent implements OnInit {
    */
   async cargarDocumentos() {
     try {
-      const opciones = this.consultarPorTipo ? { tipo_id: this.data.tipo } : {};
+      const tieneTabsConDocumentoId = this.tabs.some((tab) => !!tab.documentoId);
+      const opciones = this.consultarPorTipo
+        ? { tipo_id: this.data.tipo }
+        : { deduplicarPorTipo: !tieneTabsConDocumentoId };
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.data.entityId, opciones)
       );
@@ -193,6 +196,9 @@ export class ModalVerDocumentosComponent implements OnInit {
         const documento = documentosDisponibles[documentoIdx];
         this.documentosPorTab[index] = documento.base64;
         this.documentoInfoPorTab[index] = documento;
+        if (!this.tabs[index].documentoId) {
+          this.tabs[index].documentoId = documento._id;
+        }
         documentosDisponibles.splice(documentoIdx, 1);
       });
     } catch (error) {
