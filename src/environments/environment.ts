@@ -94,6 +94,17 @@ export const environment = {
     BccAddresses: []
   },
 
+  NOTIFICACION_ACEPTACION_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [
+      // correos fijos adicionales para pruebas
+      "pruebaspaa26auditor@yopmail.com",
+    ],
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    BccAddresses: []
+  },
+
   VIGENCIAS : {
     TIPO_PARAMETRO_ID: 121,
   },
