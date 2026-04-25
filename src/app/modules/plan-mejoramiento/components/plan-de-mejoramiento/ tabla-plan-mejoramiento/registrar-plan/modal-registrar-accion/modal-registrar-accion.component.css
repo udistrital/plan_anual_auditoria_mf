@@ -1,0 +1,121 @@
+.seccion-header {
+  background-color: var(--md-accent-50);
+  color: var(--md-accent-900);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.seccion-header b {
+  font-weight: 500;
+}
+
+.hallazgo-vinculado {
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-left: 6px solid var(--md-primary-500);
+  font-size: 14px;
+  color: var(--md-accent-900);
+  line-height: 1.5;
+}
+
+.auditor-readonly {
+  padding: 15px;
+  color: var(--md-accent-900);
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-left: 6px solid var(--md-primary-500);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.auditor-readonly .icon-chip {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin-right: 8px;
+  margin-top: 1px;
+  color: var(--md-primary-500);
+}
+
+.label-lider {
+  display: block;
+  font-size: 11px;
+  color: var(--md-accent-600, #757575);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.auditor-tag {
+  border: 1px solid var(--md-accent-600);
+  padding: 5px;
+  padding-right: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.auditor-tag mat-icon {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+  margin-right: 3px;
+  margin-bottom: -4px;
+  color: var(--md-accent-600);
+}
+
+.info-guardar {
+  padding: 15px;
+  color: var(--md-accent-900);
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-left: 6px solid var(--md-primary-500);
+}
+
+.info-guardar mat-icon {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+  margin-right: 8px;
+  color: var(--md-primary-500);
+}
+
+.info-guardar p {
+  font-size: 13px;
+  color: var(--md-accent-900);
+  margin: 0;
+}
+
+.btn-cerrar {
+  border: 1px solid var(--md-primary-500) !important;
+}
+
+.btn-agregar {
+  white-space: nowrap;
+  height: 40px;
+}
+
+.tip-suffix {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  cursor: help;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.tip-suffix:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .auditor-tag {
+    font-size: 9.5px;
+  }
+}
