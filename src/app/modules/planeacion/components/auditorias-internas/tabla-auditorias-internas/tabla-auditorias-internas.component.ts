@@ -35,7 +35,6 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { OikosService } from "src/app/core/services/oikos.service";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -97,7 +96,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     private readonly notificacionesService: NotificacionesService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly parametrosUtilsService: ParametrosUtilsService,
-    private readonly oikosService: OikosService,
   ) {}
 
   ngOnInit() {
@@ -316,23 +314,16 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     );
   }
 
-  private async obtenerMapaDependencias(): Promise<Map<number, string>> {
-    return await lastValueFrom(
-      this.oikosService
-        .get(
-          `dependencia?fields=Id,Nombre&limit=0`)
-        .pipe(
-          map((response: any) => {
-            const mapa = new Map<number, string>();
-            response.map( (dep: any) => mapa.set(dep.Id, dep.Nombre) );
-            return mapa;
-          }),
-          catchError((error) => {
-            console.error("Error consultando dependencias para cartas de presentación:", error);
-            return of(new Map<number, string>());
-          })
-        )
-      );
+  private async obtenerMapaDependencias(auditoria: Auditoria): Promise<Map<number, string>> {
+    const mapa = new Map<number, string>();
+    auditoria.dependencia_id.forEach((id, idx) => {
+      const nombre = auditoria.dependencia_nombre[idx]?.toLowerCase()
+          .split(" ")
+          .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+          .join(" ");
+      mapa.set(id, nombre || "Dependencia desconocida");
+    });
+    return mapa;
   }
 
   async verDocumentos(auditoria: Auditoria) {
@@ -354,7 +345,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
     const [cartas, dependenciasCartas] = await Promise.all([
       this.obtenerCartasVisibles(auditoriaId),
-      this.obtenerMapaDependencias(),
+      this.obtenerMapaDependencias(auditoria),
     ]);
 
     const tabsCartasPresentacion: TabDocumento[] = cartas
