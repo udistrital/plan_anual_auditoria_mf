@@ -273,35 +273,51 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       });
   }
 
-  async verDocumentos(auditoria: Auditoria) {
-    const auditoriaId = auditoria._id;
-    const getAdjuntoConfigByRole = (rol: string): CargueAdjuntoTabConfig | undefined => {
-      if (rol === environment.ROL.JEFE_DEPENDENCIA || rol === environment.ROL.ASISTENTE_DEPENDENCIA)
-        return undefined;
+  puedeRemplazarDocumento(rol: string): boolean {
+    return [
+        environment.ROL.AUDITOR_EXPERTO,
+        environment.ROL.AUDITOR,
+        environment.ROL.AUDITOR_ASISTENTE
+      ].includes(rol);
+  }
 
-      return {
-        nombreBoton: "Remplazar documento",
-        iconoBoton: "upload_file",
-        colorBoton: "primary",
-        tipoArchivo: "pdf",
-        idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
-        descripcion: "Remplazar el documento asociado a esta auditoría",
-        onSuccess: () => this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize),
-      }
-    };
+  private esUsuarioAuditado(): boolean {
+    return this.tipoConsulta === "auditado";
+  }
 
-    const cartas: any[] = await lastValueFrom(
-      this.referenciaPdfService
-        .consultarDocumentos(auditoriaId, { tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION })
+  private async obtenerCartasVisibles(auditoriaId: string): Promise<any[]> {
+    if (!this.esUsuarioAuditado()) {
+      return await lastValueFrom(
+        this.referenciaPdfService
+          .consultarDocumentos(auditoriaId, { tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION })
+          .pipe(
+            catchError((error) => {
+              console.error("Error consultando cantidad de cartas de presentación:", error);
+              return of([]);
+            })
+          )
+      );
+    }
+
+    const personaIdAuditado = this.personaId || await this.userService.getPersonaId();
+    const documentosVisiblesAuditado: any[] = await lastValueFrom(
+      this.planAuditoriaMid
+        .get(`auditado/${personaIdAuditado}/documento?auditoria_id=${auditoriaId}&cargo_id=${this.cargoId}`)
         .pipe(
           catchError((error) => {
-            console.error("Error consultando cantidad de cartas de presentación:", error);
+            console.error("Error consultando documentos visibles para auditado:", error);
             return of([]);
           })
         )
     );
 
-    const dependenciasCartas = await lastValueFrom(
+    return documentosVisiblesAuditado.filter(
+      (documento: any) => documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+    );
+  }
+
+  private async obtenerMapaDependencias(): Promise<Map<number, string>> {
+    return await lastValueFrom(
       this.oikosService
         .get(
           `dependencia?fields=Id,Nombre&limit=0`)
@@ -317,21 +333,45 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           })
         )
       );
+  }
 
-    const tabsCartasPresentacion: TabDocumento[] = cartas.map((carta) => {
-      const cargueAdjuntoConfig = getAdjuntoConfigByRole(this.role);
+  async verDocumentos(auditoria: Auditoria) {
+    const auditoriaId = auditoria._id;
+    const getAdjuntoConfigByRole = (rol: string): CargueAdjuntoTabConfig | undefined => {
+      if (!this.puedeRemplazarDocumento(rol))
+        return undefined;
+
       return {
-        nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) || "Dependencia desconocida"),
-        documentoId: carta._id,
-        tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
-        cargueAdjuntoConfig: cargueAdjuntoConfig
-          ? {
-              ...cargueAdjuntoConfig,
-              metadatosAdicionales: { firmada: true},
-            }
-          : undefined,
+        nombreBoton: "Remplazar documento",
+        iconoBoton: "upload_file",
+        colorBoton: "primary",
+        tipoArchivo: "pdf",
+        idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        descripcion: "Remplazar el documento asociado a esta auditoría",
+        onSuccess: () => this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize),
       }
-    });
+    };
+
+    const [cartas, dependenciasCartas] = await Promise.all([
+      this.obtenerCartasVisibles(auditoriaId),
+      this.obtenerMapaDependencias(),
+    ]);
+
+    const tabsCartasPresentacion: TabDocumento[] = cartas
+      .map((carta) => {
+        const cargueAdjuntoConfig = getAdjuntoConfigByRole(this.role);
+        return {
+          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) || "Dependencia desconocida"),
+          documentoId: carta._id,
+          tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+          cargueAdjuntoConfig: cargueAdjuntoConfig
+            ? {
+                ...cargueAdjuntoConfig,
+                metadatosAdicionales: { firmada: true},
+              }
+            : undefined,
+        }
+      });
 
     this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
