@@ -857,8 +857,23 @@ export class RevisionDocumentosComponent implements OnInit {
 
     this.planAuditoriaMid.get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
       .subscribe(async (res) => {
+        let indiceCarta = 0;
+
         const promesas = res.map(async (documento: any) => {
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
+          if (documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION) {
+            this.documentos.push({ base64, tipo_id: documento.tipo_id });
+
+            const indiceCartaActual = indiceCarta;
+            indiceCarta += 1;
+
+            this.cartasRepresentacion.push({
+              base64,
+              dependenciaNombre: this.resolverNombreDependencia(documento, indiceCartaActual),
+            });
+            return null;
+          }
 
           const propiedad = tipoDocumentoMap[documento.tipo_id];
           if (propiedad) {
@@ -866,8 +881,11 @@ export class RevisionDocumentosComponent implements OnInit {
           }
 
           this.documentos.push({ base64, tipo_id: documento.tipo_id });
+          return null;
         });
+
         await Promise.all(promesas);
+        this.actualizarDocumentosVisibles();
       });
   }
 }
