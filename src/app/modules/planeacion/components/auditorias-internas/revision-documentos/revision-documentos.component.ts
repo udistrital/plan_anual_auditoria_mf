@@ -270,17 +270,20 @@ export class RevisionDocumentosComponent implements OnInit {
     );
   }
 
-  async abrirModalCargueCartasFirmadas(): Promise<void> {
-    try {
+  async cargarCartasAuditado() {
       const cartas = (await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {})
       )) as DocumentoAdjuntoRevision[];
 
-      const cartasAuditado = cartas.filter(
+      return cartas.filter(
         (documento) =>
           documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
       );
+  }
 
+  async abrirModalCargueCartasFirmadas(): Promise<void> {
+    try {
+      let cartasAuditado = await this.cargarCartasAuditado();
       console.debug("Cartas de representación visibles para modal:", cartasAuditado);
 
       if (!Array.isArray(cartasAuditado) || cartasAuditado.length === 0) {
@@ -314,8 +317,9 @@ export class RevisionDocumentosComponent implements OnInit {
             idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
             descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
             referenciaTipoFallback: "Auditoria",
-            metadatosAdicionales: { firmado: true },
+            metadatosAdicionales: { firmada: true },
             onSuccess: async () => {
+              cartasAuditado = await this.cargarCartasAuditado();
               this.cargarDocumentos();
             },
           },
