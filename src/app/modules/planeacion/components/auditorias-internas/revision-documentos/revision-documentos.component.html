@@ -60,8 +60,12 @@
                 style="border: 1px solid var(--md-primary-500)" (click)="abrirModalRechazo()">
                 <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
               </button>
-              <button class="mx-2 width-100-md mt-md" mat-raised-button color="primary"
-                (click)="preguntarAprobacionAuditoria()">
+              <button
+                *ngIf="!puedeCargarCartaFirmada()"
+                class="mx-2 width-100-md mt-md"
+                mat-raised-button color="primary"
+                (click)="preguntarAprobacionAuditoria()"
+              >
                 <mat-icon>fact_check</mat-icon>
                 {{ rolesAprobacion[role]?.botonAprobacion || "" }}
               </button>
