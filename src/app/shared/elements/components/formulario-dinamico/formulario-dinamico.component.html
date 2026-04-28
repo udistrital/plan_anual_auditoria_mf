@@ -100,6 +100,17 @@
           [placeholder]="campo.placeholder || 'Seleccione una fecha'"
         />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-icon
+          *ngIf="campo.tooltip"
+          matSuffix
+          class="tooltip-icon ms-1"
+          [matTooltip]="campo.tooltip"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-multilinea"
+          aria-label="Información adicional"
+        >
+          info
+        </mat-icon>
         <mat-datepicker #picker></mat-datepicker>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
@@ -115,6 +126,18 @@
         </mat-date-range-input>
         <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle matIconSuffix [for]="pickerRange"></mat-datepicker-toggle>
+        <mat-icon
+          *ngIf="campo.tooltip"
+          matSuffix
+          class="tooltip-icon ms-1"
+          color="primary"
+          [matTooltip]="campo.tooltip"
+          matTooltipPosition="right"
+          matTooltipClass="tooltip-multilinea"
+          aria-label="Información adicional"
+        >
+          info
+        </mat-icon>
         <mat-date-range-picker #pickerRange></mat-date-range-picker>
       </mat-form-field>
 
@@ -147,6 +170,16 @@
             <b>
               <mat-icon>edit_note</mat-icon>
               {{ campo.etiqueta }}
+              <mat-icon
+                *ngIf="campo.tooltip"
+                class="tooltip-icon ms-1"
+                [matTooltip]="campo.tooltip"
+                matTooltipPosition="right"
+                matTooltipClass="tooltip-multilinea"
+                aria-label="Información adicional"
+              >
+                info
+              </mat-icon>
             </b>
           </label>
           <quill-editor 
