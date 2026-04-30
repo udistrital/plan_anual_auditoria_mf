@@ -3,13 +3,21 @@ quill-editor {
   width: 100%;
 }
 
+:host ::ng-deep .ql-editor {
+  font-size: 1rem;
+}
+
+:host ::ng-deep .ql-editor p,
+:host ::ng-deep .ql-editor li {
+  font-size: 1rem;
+}
+
 .toolbar {
   background-color: var(--md-accent-100);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   padding: 5px;
 }
-
 
 .toolbar .ql-formats button {
   color: var(--md-accent-contrast-500);

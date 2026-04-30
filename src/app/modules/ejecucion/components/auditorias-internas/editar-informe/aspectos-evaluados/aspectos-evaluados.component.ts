@@ -7,23 +7,19 @@ import { firstValueFrom } from 'rxjs';
 
 interface Hallazgo {
   _id?: string;
+  auditoria_id?: string;
   subtema_id?: string;
   titulo: string;
   criterio: string;
-  activo?: boolean;
   descripcion: string;
-  isNew?: boolean;
-  isModified?: boolean;
+  activo?: boolean;
 }
 
 interface Subtema {
   _id?: string;
-  tema_id?: string;
   activo?: boolean;
   titulo: string;
   hallazgos: Hallazgo[];
-  isNew?: boolean;
-  isModified?: boolean;
 }
 
 interface Tema {
@@ -32,8 +28,6 @@ interface Tema {
   activo?: boolean;
   titulo: string;
   subtema: Subtema[];
-  isNew?: boolean;
-  isModified?: boolean;
 }
 
 @Component({
@@ -43,6 +37,7 @@ interface Tema {
 })
 export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() auditoriaId!: string;
   @Input() soloLectura: boolean = false;
   @Output() datosActualizados = new EventEmitter<void>();
 
@@ -50,7 +45,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   temasData: Tema[] = [];
   cargando = false;
   errorMatcher: ErrorStateMatcher = {
-    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control && control.invalid && (control.dirty || control.touched));
     }
   };
@@ -94,14 +89,19 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     this.aspectosForm.enable({ emitEvent: false });
   }
 
-  // Carga los temas, subtemas y hallazgos desde la base de datos
+  // Carga temas y luego hallazgos (colección separada)
   cargarTemas(): void {
     if (!this.informeId) return;
 
     this.cargando = true;
     this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
-      next: (response: any) => {
-        this.temasData = response?.Data || [];
+      next: async (response: any) => {
+        const temas = response?.Data || [];
+
+        // Cargar hallazgos de cada tema en paralelo y asignarlos a sus subtemas
+        await this.asignarHallazgosASubtemas(temas);
+
+        this.temasData = temas;
         this.construirFormulario();
         this.actualizarModoSoloLectura();
         this.cargando = false;
@@ -113,24 +113,43 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     });
   }
 
+  // Carga todos los hallazgos del informe en 1 query y los distribuye en los subtemas
+  private async asignarHallazgosASubtemas(temas: any[]): Promise<void> {
+    let hallazgosTotales: any[] = [];
+    try {
+      const resp: any = await firstValueFrom(
+        this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}`)
+      );
+      hallazgosTotales = resp?.Data || [];
+    } catch {
+      hallazgosTotales = [];
+    }
+
+    for (const tema of temas) {
+      for (const subtema of (tema.subtema || [])) {
+        const subtemaIdStr = subtema._id?.toString();
+        subtema.hallazgo = hallazgosTotales.filter(
+          (h: any) => h.subtema_id?.toString() === subtemaIdStr && h.activo !== false
+        );
+      }
+    }
+  }
+
   // Construye el formulario reactivo con los datos cargados
   construirFormulario(): void {
     const temasArray = this.fb.array([]);
 
     this.temasData.forEach((tema) => {
-      //Solo temas activos
       if (!tema.activo) return;
 
       const subtemasArray = this.fb.array([]);
 
       (tema.subtema || []).forEach((subtema: any) => {
-        //Solo subtemas activos
         if (!subtema.activo) return;
 
         const hallazgosArray = this.fb.array([]);
 
         (subtema.hallazgo || []).forEach((hallazgo: any) => {
-          //Solo hallazgos activos
           if (!hallazgo.activo) return;
 
           hallazgosArray.push(this.fb.group({
@@ -138,8 +157,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
             criterio: [hallazgo.criterio || '', Validators.required],
             hallazgo: [hallazgo.titulo || '', Validators.required],
             descripcion: [hallazgo.descripcion || '', Validators.required],
-            isNew: [false],
-            isModified: [false]
           }));
         });
 
@@ -147,8 +164,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
           _id: [subtema._id || null],
           nombre: [subtema.titulo || '', Validators.required],
           hallazgos: hallazgosArray,
-          isNew: [false],
-          isModified: [false]
         }));
       });
 
@@ -156,8 +171,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         _id: [tema._id || null],
         nombre: [tema.titulo || '', Validators.required],
         subtemas: subtemasArray,
-        isNew: [false],
-        isModified: [false]
       }));
     });
 
@@ -179,8 +192,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       _id: [null],
       nombre: ['', Validators.required],
       subtemas: this.fb.array([]),
-      isNew: [true],
-      isModified: [false]
     });
     this.temas.push(nuevoTema);
   }
@@ -196,8 +207,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       _id: [null],
       nombre: ['', Validators.required],
       hallazgos: this.fb.array([]),
-      isNew: [true],
-      isModified: [false]
     });
     this.getSubtemas(temaIndex).push(nuevoSubtema);
   }
@@ -214,8 +223,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       criterio: ['', Validators.required],
       hallazgo: ['', Validators.required],
       descripcion: ['', Validators.required],
-      isNew: [true],
-      isModified: [false]
     });
     this.getHallazgos(temaIndex, subtemaIndex).push(nuevoHallazgo);
   }
@@ -232,7 +239,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         .then((confirmado) => {
           if (!confirmado.value) return;
 
-          this.planAnualAuditoriaService.delete("tema", {id: temaId}).subscribe({
+          this.planAnualAuditoriaService.delete('tema', { id: temaId }).subscribe({
             next: () => {
               this.temas.removeAt(index);
               this.alertaService.showAlert('Eliminado', 'El tema ha sido eliminado correctamente');
@@ -261,7 +268,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         .then((confirmado) => {
           if (!confirmado.value) return;
 
-          this.planAnualAuditoriaService.delete(`subtema`, {id: subtemaId}).subscribe({
+          this.planAnualAuditoriaService.delete('subtema', { id: subtemaId }).subscribe({
             next: () => {
               this.getSubtemas(temaIndex).removeAt(subtemaIndex);
               this.alertaService.showAlert('Eliminado', 'El subtema ha sido eliminado correctamente');
@@ -290,7 +297,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         .then((confirmado) => {
           if (!confirmado.value) return;
 
-          this.planAnualAuditoriaService.delete(`hallazgo`, {id: hallazgoId}).subscribe({
+          this.planAnualAuditoriaService.delete('hallazgo', { id: hallazgoId }).subscribe({
             next: () => {
               this.getHallazgos(temaIndex, subtemaIndex).removeAt(hallazgoIndex);
               this.alertaService.showAlert('Eliminado', 'El hallazgo ha sido eliminado correctamente');
@@ -313,7 +320,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       return true;
     }
 
-    // Validar formulario
     if (this.aspectosForm.invalid) {
       this.aspectosForm.markAllAsTouched();
       this.alertaService.showAlert('Formulario inválido', 'Por favor complete todos los campos requeridos');
@@ -329,11 +335,11 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       // Crear o actualizar tema
       if (!temaId) {
         try {
-          const response: any = await firstValueFrom(this.planAnualAuditoriaService.post("tema", {
+          const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
             informe_id: this.informeId,
             titulo: temaForm.nombre
           }));
-          temaId = response?.Data?._id || response?._id || response?.Id;
+          temaId = response?.Data?._id || response?._id;
           this.temas.at(i).patchValue({ _id: temaId, isNew: false });
         } catch (error) {
           console.error('Error al crear tema:', error);
@@ -359,7 +365,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         // Crear o actualizar subtema
         if (!subtemaId) {
           try {
-            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post(`subtema`, {
+            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('subtema', {
               tema_id: temaId,
               titulo: subtemaForm.nombre
             }));
@@ -374,7 +380,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
           }
         } else {
           try {
-            // Log para verificar que el ID llega correctamente
             await firstValueFrom(this.planAnualAuditoriaService.put(`subtema/${subtemaId}`, {
               titulo: subtemaForm.nombre
             }));
@@ -389,20 +394,18 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
           const hallazgoForm = subtemaForm.hallazgos[k];
           let hallazgoId = hallazgoForm._id;
 
-          // Crear o actualizar hallazgo
           if (!hallazgoId) {
             try {
-              const response: any = await firstValueFrom(this.planAnualAuditoriaService.post(`hallazgo`, {
+              const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('hallazgo', {
+                auditoria_id: this.auditoriaId,
+                informe_id: this.informeId,
                 subtema_id: subtemaId,
                 titulo: hallazgoForm.hallazgo,
                 criterio: hallazgoForm.criterio,
                 descripcion: hallazgoForm.descripcion
               }));
-              // El servidor devuelve el tema con subtemas embebidos; buscar el hallazgo en el subtema correcto
-              const subtemaEnResponse = (response?.Data?.subtema || []).find((s: any) => s._id === subtemaId);
-              const hallazgosEnResponse = subtemaEnResponse?.hallazgo || [];
-              hallazgoId = hallazgosEnResponse[hallazgosEnResponse.length - 1]?._id;
-              console.log('[POST hallazgo] response:', response, '→ hallazgoId resuelto:', hallazgoId);
+              // El servidor devuelve el hallazgo creado directamente
+              hallazgoId = response?.Data?._id;
               this.getHallazgos(i, j).at(k).patchValue({ _id: hallazgoId, isNew: false });
             } catch (error) {
               console.error('Error al crear hallazgo:', error);

@@ -25,14 +25,12 @@ export class ModalHistorialRechazosComponent implements OnInit {
     const { auditoriaId } = this.data;
     const estadoRechazadoJefe =
       environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE;
-    const estadoObservacionesAuditado =
-      environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO;
     const estadoRechazadoJefeFinal =
       environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE;
 
     this.planAuditoriaMid
       .get(
-        `auditoria-estado?query=auditoria_id:${auditoriaId},estado_id__in:${estadoRechazadoJefe}|${estadoObservacionesAuditado}|${estadoRechazadoJefeFinal},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
+        `auditoria-estado?query=auditoria_id:${auditoriaId},estado_id__in:${estadoRechazadoJefe}|${estadoRechazadoJefeFinal},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
       )
       .subscribe((res) => {
         this.rechazos = (res.Data || []).map((r: any) => ({

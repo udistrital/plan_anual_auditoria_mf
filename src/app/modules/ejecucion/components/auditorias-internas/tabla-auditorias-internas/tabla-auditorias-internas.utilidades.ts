@@ -22,25 +22,25 @@ export const colocacionesContructorTabla = [
   {
     columnDef: "dependencia",
     header: "Dependencia",
-    cell: (auditoria: any) => "Pepito Perez",
+    cell: (auditoria: any) => auditoria.dependencia_nombre,
     sortable: false,
   },
   {
     columnDef: "auditores",
     header: "Auditor(es)",
-    cell: (auditoria: any) => "Proceso o Dependencia",
+    cell: (auditoria: any) => "",
     sortable: false,
   },
   {
     columnDef: "lider",
     header: "Líder",
-    cell: (auditoria: any) => "Nombre Líder",
+    cell: (auditoria: any) => "",
     sortable: false,
   },
   {
     columnDef: "responsable",
     header: "Responsable",
-    cell: (auditoria: any) => "Nombre responsable",
+    cell: (auditoria: any) => "",
     sortable: false,
   },
   {

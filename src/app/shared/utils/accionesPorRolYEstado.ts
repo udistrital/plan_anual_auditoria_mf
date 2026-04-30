@@ -467,7 +467,7 @@ export const accionesEjecucionPreliminar: {
       "Historial de Rechazos",
       "Enviar a Aprobación por Jefe",
     ],
-    [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
+    [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [ 
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
@@ -477,6 +477,7 @@ export const accionesEjecucionPreliminar: {
 
   [environment.ROL.JEFE_DEPENDENCIA]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
+      "Editar Preinforme",
       "Ver Documentos del informe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
@@ -489,6 +490,7 @@ export const accionesEjecucionPreliminar: {
 
   [environment.ROL.ASISTENTE_DEPENDENCIA]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
+      "Editar Preinforme",
       "Ver Documentos del informe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
