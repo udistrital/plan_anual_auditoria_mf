@@ -284,7 +284,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           { nombre: "Compromiso ético", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO },
         ],
         titulo: `${tituloYSubtituloAuditoria(auditoria)}`,
-        descripcion: `Documentos asociados a la auditoría`
+        descripcion: `Documentos asociados a la auditoría`,
+        sufijo: `oci-${auditoria.consecutivo_OCI}`,
       },
       autoFocus: false,
     });

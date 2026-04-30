@@ -459,6 +459,7 @@ export class TablaSeguimientoComponent implements OnInit {
       data: {
         entityId: auditoriaId,
         descripcion: "Documentos de la Auditoría de Seguimiento",
+        sufijo: `oci-${auditoria.consecutivo_OCI}`,
         tabs: [
           {
             nombre: "Oficio Anuncio Solicitud de Información",
