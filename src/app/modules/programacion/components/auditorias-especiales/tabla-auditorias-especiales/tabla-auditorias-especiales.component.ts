@@ -306,13 +306,13 @@ export class TablaAuditoriasEspecialesComponent {
           
           return res.Data.map(
             (item: Auditoria, index: number): AuditoriaEspecialTablaRow => {
-              const numeroConcreto = `${numeroPadre}.${index + 1}`;
+              const numeroConcreto = `${index + 1}`;
               return {
-                numero: numeroConcreto,
+                numero: "",
                 _id: item._id || `${padreId}-concreta-${index + 1}`,
                 auditoria_padre_id: padreId,
                 titulo: item.titulo || "Sin Titulo",
-                subtitulo: item.subtitulo || "",
+                subtitulo: item.subtitulo || `Sin Subtítulo (#${numeroConcreto})`,
                 tipo_evaluacion_id: item.tipo_evaluacion_id || 0,
                 tipo_evaluacion_nombre: item.tipo_evaluacion_nombre || "Sin Asignar",
                 cronograma_id: item.cronograma_id || [],
