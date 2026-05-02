@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
+import { firstValueFrom } from 'rxjs';
 
 interface HallazgoResumen {
   numero: string;
@@ -39,50 +40,49 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
     if (!this.informeId) return;
 
     this.cargando = true;
-    this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
-      next: (response: any) => {
-        const temas = response?.Data || [];
-        const hallazgosList: HallazgoResumen[] = [];
 
-        let temaCount = 0;
+    // Queries en paralelo: estructura (temas+subtemas) y datos (hallazgos)
+    Promise.all([
+      firstValueFrom(this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`)),
+      firstValueFrom(this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}`)),
+    ]).then(([temasResp, hallazgosResp]: [any, any]) => {
+      const temas: any[] = temasResp?.Data || [];
+      const todosLosHallazgos: any[] = hallazgosResp?.Data || [];
+      const hallazgosList: HallazgoResumen[] = [];
 
-        temas.forEach((tema: any) => {
-          //Solo temas activos
-          if (!tema.activo) return;
+      let temaCount = 0;
 
-          temaCount++;
-          let subtemaCount = 0;
+      for (const tema of temas) {
+        if (!tema.activo) continue;
+        temaCount++;
+        let subtemaCount = 0;
 
-          const subtemas = tema.subtema || [];
-          subtemas.forEach((subtema: any) => {
-            //Solo subtemas activos
-            if (!subtema.activo) return;
+        for (const subtema of (tema.subtema || [])) {
+          if (!subtema.activo) continue;
+          subtemaCount++;
+          let hallazgoCount = 0;
 
-            subtemaCount++;
-            let hallazgoCount = 0;
+          const subtemaIdStr = subtema._id?.toString();
+          const hallazgosDeSubtema = todosLosHallazgos.filter(
+            (h: any) => h.subtema_id?.toString() === subtemaIdStr && h.activo !== false
+          );
 
-            const hallazgos = subtema.hallazgo || [];
-            hallazgos.forEach((hallazgo: any) => {
-              //Solo hallazgos activos
-              if (!hallazgo.activo) return;
-
-              hallazgoCount++;
-              hallazgosList.push({
-                numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
-                criterio: hallazgo.criterio || '',
-                descripcion: hallazgo.descripcion || ''
-              });
+          for (const hallazgo of hallazgosDeSubtema) {
+            hallazgoCount++;
+            hallazgosList.push({
+              numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
+              criterio: hallazgo.criterio || '',
+              descripcion: hallazgo.descripcion || ''
             });
-          });
-        });
-
-        this.hallazgos = hallazgosList;
-        this.cargando = false;
-      },
-      error: (error) => {
-        console.error('Error al cargar hallazgos:', error);
-        this.cargando = false;
+          }
+        }
       }
+
+      this.hallazgos = hallazgosList;
+      this.cargando = false;
+    }).catch((error) => {
+      console.error('Error al cargar hallazgos:', error);
+      this.cargando = false;
     });
   }
 }

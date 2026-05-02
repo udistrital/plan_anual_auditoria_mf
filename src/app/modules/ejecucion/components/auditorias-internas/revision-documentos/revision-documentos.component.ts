@@ -22,16 +22,8 @@ const configAuditado = {
   preguntaAprobacion: "¿Está seguro(a) de aprobar la respuesta preliminar?",
   mensajeAprobacion: "El informe pasó a etapa de informe final",
   botonAprobacion: "Aceptar informe",
-  botonRechazo: "Enviar Respuesta Preliminar",
-  modalRechazo: {
-    titulo: "Respuesta Preliminar",
-    descripcion: "Descripción respuesta del auditado",
-    labelTextarea: "Descripción respuesta del auditado",
-    botonConfirmar: "Guardar",
-    mensajeConfirmacion: "¿Está seguro(a) de enviar la respuesta preliminar a auditor?",
-    mensajeExito: "Informe preliminar enviado",
-    descripcionExito: "El informe fue enviado al auditor(a)",
-  },
+  botonRechazo: "Revisar hallazgos",
+  esRedireccionHallazgos: true,
 };
 
 const configJefeFinal = {
@@ -214,6 +206,15 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     };
   }
 
+  accionBotonRechazo(): void {
+    const rolConfig = this.rolesAprobacion[this.role!];
+    if (rolConfig?.esRedireccionHallazgos) {
+      this.revisarHallazgos();
+    } else {
+      this.abrirModalRechazo();
+    }
+  }
+
   abrirModalRechazo(): void {
     const rolConfig = this.rolesAprobacion[this.role!];
     const modalConfig = rolConfig?.modalRechazo;
@@ -226,6 +227,22 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         estadoRechazo: rolConfig?.estadoRechazo,
         ...modalConfig,
       },
+    });
+  }
+
+  revisarHallazgos(): void {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const informeId = res?.Data?.[0]?._id;
+        if (!informeId) {
+          this.alertService.showErrorAlert("No se encontró el informe asociado a esta auditoría.");
+          return;
+        }
+        this.router.navigate([`/ejecucion/auditorias-internas/editar-informe/${informeId}`], {
+          queryParams: { step: 4 },
+        });
+      },
+      error: () => this.alertService.showErrorAlert("Error al buscar el informe."),
     });
   }
 
