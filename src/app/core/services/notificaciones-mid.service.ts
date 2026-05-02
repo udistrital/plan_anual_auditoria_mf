@@ -8,6 +8,9 @@ export const TEMPLATED_EMAIL_ENDPOINT = 'email/enviar_templated_email';
 export const PLANTILLA_SOLICITUD_NOMBRE = 'SISIFO_PLANTILLA_SOLICITUD';
 /** Name of the template for rejection emails */
 export const PLANTILLA_RECHAZO_NOMBRE = 'SISIFO_PLANTILLA_RECHAZO';
+/** Plantilla para envio de aceptacion por auditado */
+export const PLANTILLA_CARTA_REPRESENTACION_NOMBRE = 'SISIFO_CARTA_REPRESENTACION';
+
 
 /**
  * This service is a wrapper for the NOTIFICACIONES_MID_SERVICE API,

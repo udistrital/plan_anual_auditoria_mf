@@ -1,25 +1,37 @@
-import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  ViewChild,
+} from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
-import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
+import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { RolService } from "src/app/core/services/rol.service";
+import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
-import Swal from "sweetalert2";
+import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 
 @Component({
   selector: "app-tabla-plan-mejoramiento",
   templateUrl: "./tabla-plan-mejoramiento.component.html",
   styleUrls: ["./tabla-plan-mejoramiento.component.css"],
 })
-export class TablaPlanMejoramientoComponent {
+export class TablaPlanMejoramientoComponent implements OnInit {
   @Input() vigenciaId: any;
   @Input() tipoEvaluacionId: any;
   @Input() role: any;
+  @Input() personaId: any;
+
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   planesPorVigencia: any[] = [];
   planesDataSource: MatTableDataSource<any> = new MatTableDataSource();
@@ -27,118 +39,188 @@ export class TablaPlanMejoramientoComponent {
   banderaTablePlanes: boolean = false;
   tablaColumnas: any;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
   totalRegistros: number = 0;
   pageSize: number = 5;
   pageIndex: number = 0;
   itemsPerPage: number[] = [5, 10, 20];
 
+  usuarioId: number = 0;
+  cargoId: number = 0;
+  roles: string[] = [];
+
+  private tipoConsulta: "general" | "auditor" | "auditado" = "general";
+
+  readonly iconosAccion = new Map<string, string>([
+    ["Asignar Auditor(es)",       "manage_accounts"],
+    ["Registrar Plan",            "edit"],
+    ["Enviar a Revisión",         "send"],
+    ["Ver Documentos Auditoría",  "description"],
+  ]);
+
   constructor(
-    private alertaService: AlertService,
-    private changeDetector: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private router: Router
+    private readonly alertaService: AlertService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly router: Router
   ) {}
+
+  async ngOnInit() {
+    this.roles = this.rolService.getRoles();
+    this.usuarioId = await this.userService.getPersonaId();
+    this.configurarTipoConsulta();
+  }
+
+  private configurarTipoConsulta(): void {
+    if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
+      this.tipoConsulta = "auditado";
+      this.cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+    } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      this.tipoConsulta = "auditado";
+      this.cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+    } else if (
+      this.rolService.tieneRol(environment.ROL.AUDITOR) ||
+      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE) ||
+      this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
+    ) {
+      this.tipoConsulta = "auditor";
+    } else {
+      this.tipoConsulta = "general";
+    }
+  }
 
   listarPlanesPorFiltros(
     vigenciaId: number,
     tipoEvaluacionId: number,
-    limit: number = this.itemsPerPage[0],
+    limit: number = this.pageSize,
     offset: number = 0
-  ) {
-    console.log("Consultando auditorías - Rol:", this.role, "| Vigencia:", vigenciaId, "| Tipo:", tipoEvaluacionId);
-    
-    const estadoAprobadoInformeFinal = environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE;
-    
+  ): void {
+    this.vigenciaId = vigenciaId;
+    this.tipoEvaluacionId = tipoEvaluacionId;
     this.planesPorVigencia = [];
 
-    this.planAuditoriaMid
-      .get(`auditoria?query=vigencia_id:${vigenciaId},tipo_evaluacion_id:${tipoEvaluacionId},estado_id:${estadoAprobadoInformeFinal},activo:true&limit=${limit}&offset=${offset}`)
-      .subscribe({
-        next: (res) => {
-          const auditorias: any[] = res.Data;
-          
-          // Verificar si hay datos
-          if (!auditorias || auditorias.length === 0) {
-            Swal.fire({
-              title: "No hay planes registrados",
-              text: `No se encontraron auditorías en estado "Aprobado informe final" para la vigencia y tipo de evaluación seleccionados.`,
-              icon: "info",
-            });
-            this.planesPorVigencia = [];
-            this.totalRegistros = 0;
-            this.banderaTablePlanes = false;
-            this.planesDataSource.data = [];
-            if (this.paginator) {
-              this.paginator.length = 0;
-            }
-            return;
-          }
-          
-          // Asignar datos y construir tabla
-          this.planesPorVigencia = auditorias;
-          this.totalRegistros = res.MetaData.Count;
-          this.banderaTablePlanes = true;
-          this.construirTabla();
-        },
-        error: (error) => {
-          console.error('Error al consultar auditorías:', error);
-          Swal.fire({
-            title: "Error",
-            text: "Ocurrió un error al consultar las auditorías. Por favor, intente nuevamente.",
-            icon: "error",
-          });
-          this.planesPorVigencia = [];
-          this.totalRegistros = 0;
-          this.banderaTablePlanes = false;
-          this.planesDataSource.data = [];
-          if (this.paginator) {
-            this.paginator.length = 0;
-          }
+    const baseQuery = `vigencia_id:${vigenciaId},tipo_evaluacion_id:${tipoEvaluacionId},activo:true`;
+    const endpoint = this.construirEndpoint(baseQuery, limit, offset);
+
+    this.planAuditoriaMid.get(endpoint).subscribe({
+      next: (res) => {
+        const auditorias: any[] = res?.Data ?? [];
+
+        if (!auditorias.length) {
+          this.alertaService.showAlert(
+            "Sin resultados",
+            "No se encontraron auditorías para la vigencia y tipo de evaluación seleccionados."
+          );
+          this.resetTabla();
+          return;
         }
-      });
+
+        this.planesPorVigencia = auditorias.map((auditoria: any) => {
+          const estadoId = auditoria.estado?.estado_id ?? auditoria.estado_id;
+          return {
+            ...auditoria,
+            acciones: this.getAccionesPorRolYEstado(estadoId),
+          };
+        });
+
+        this.totalRegistros = res?.MetaData?.Count ?? auditorias.length;
+        this.banderaTablePlanes = true;
+        this.construirTabla();
+      },
+      error: (error) => {
+        console.error("Error al consultar auditorías:", error);
+        this.alertaService.showErrorAlert(
+          "Ocurrió un error al consultar las auditorías. Por favor, intente nuevamente."
+        );
+        this.resetTabla();
+      },
+    });
   }
 
-  construirTabla() {
-    this.planesConstructorTabla = planMejoramientoConstructorTabla;
-    this.tablaColumnas = this.planesConstructorTabla.map((column: any) => column.columnDef);
-    this.planesDataSource = new MatTableDataSource(this.planesPorVigencia);
+  private construirEndpoint(baseQuery: string, limit: number, offset: number): string {
+    switch (this.tipoConsulta) {
+      case "auditado":
+        return `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${baseQuery}&limit=${limit}&offset=${offset}`;
+      case "auditor":
+        return `auditoria/auditor/${this.personaId}?query=${baseQuery}&limit=${limit}&offset=${offset}`;
+      default:
+        return `auditoria?query=${baseQuery}&limit=${limit}&offset=${offset}`;
+    }
+  }
 
+  getAccionesPorRolYEstado(estadoId: number): string[] {
+
+    // para traer las acciones posterior del ./utils/accionesPorRolYEstado
+
+    if (true) {
+    return ["Asignar Auditor(es)", "Registrar Plan", "Enviar a Revisión", "Ver Documentos Auditoría"];
+    }
+  }
+
+  getIconoAccion(accion: string): string {
+    return this.iconosAccion.get(accion) ?? "help_outline";
+  }
+
+  realizarAccion(plan: any, accion: string): void {
+    const acciones: Record<string, () => void> = {
+      "Asignar Auditor(es)":      () => this.asignarAuditores(plan),
+      "Registrar Plan":           () => this.registrarPlan(plan),
+      "Enviar a Revisión":        () => this.enviarAprobacion(plan),
+      "Ver Documentos Auditoría": () => this.verDocumentosAuditoria(plan),
+    };
+    acciones[accion]?.();
+  }
+
+  asignarAuditores(plan: any): void {
+    const dialogRef = this.dialog.open(ModalAsignacionAuditoresComponent, {
+      width: "800px",
+      data: { auditoria: plan, usuarioId: this.usuarioId, role: this.role },
+    });
+    dialogRef.afterClosed().subscribe((guardado: boolean) => {
+      if (guardado) {
+        this.listarPlanesPorFiltros(this.vigenciaId, this.tipoEvaluacionId, this.pageSize, this.pageIndex * this.pageSize);
+      }
+    });
+  }
+
+  registrarPlan(plan: any): void {
+      this.router.navigate([`/plan-mejoramiento/registrar-plan/${plan._id}`]);
+  }
+
+  enviarAprobacion(plan: any): void {
+  }
+
+  verDocumentosAuditoria(plan: any): void {
+  }
+
+  private resetTabla(): void {
+    this.planesPorVigencia = [];
+    this.totalRegistros = 0;
+    this.banderaTablePlanes = false;
+    this.planesDataSource.data = [];
+    if (this.paginator) this.paginator.length = 0;
+  }
+
+  private construirTabla(): void {
+    this.planesConstructorTabla = planMejoramientoConstructorTabla;
+    this.tablaColumnas = this.planesConstructorTabla.map((c: any) => c.columnDef);
+    this.planesDataSource = new MatTableDataSource(this.planesPorVigencia);
     if (this.paginator) {
       this.planesDataSource.paginator = this.paginator;
       this.paginator.length = this.totalRegistros;
       this.paginator.pageSize = this.pageSize;
       this.paginator.pageIndex = this.pageIndex;
     }
-    if (this.sort) {
-      this.planesDataSource.sort = this.sort;
-    }
+    if (this.sort) this.planesDataSource.sort = this.sort;
     this.changeDetector.detectChanges();
   }
 
-  manejarCambioPaginado(evento: PageEvent) {
+  manejarCambioPaginado(evento: PageEvent): void {
     this.pageSize = evento.pageSize;
     this.pageIndex = evento.pageIndex;
-    const offset = this.pageIndex * this.pageSize;
-    this.listarPlanesPorFiltros(this.vigenciaId, this.tipoEvaluacionId, this.pageSize, offset);
-  }
-
-  registrarPlan(plan: any) {
-    this.router.navigate([`/planes/plan-mejoramiento/registrar-plan/${plan._id}`]);
-  }
-
-  enviarAprobacion(plan: any) {
-    this.alertaService
-      .showConfirmAlert("¿Está seguro de enviar el plan de mejoramiento para aprobación?")
-      .then((confirmado) => {
-        if (!confirmado.value) return;
-        console.log("Enviar aprobación plan:", plan);
-        this.alertaService.showSuccessAlert("Plan enviado exitosamente", "ENVIADO PARA APROBACIÓN");
-      });
-  }
-
-  verDocumentosAuditoria(plan: any) {
-    console.log("Ver documentos de auditoría:", plan);
+    this.listarPlanesPorFiltros(this.vigenciaId, this.tipoEvaluacionId, this.pageSize, this.pageIndex * this.pageSize);
   }
 }
