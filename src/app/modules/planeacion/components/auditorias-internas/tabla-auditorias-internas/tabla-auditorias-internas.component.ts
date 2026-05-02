@@ -22,9 +22,9 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
-import { forkJoin, of, throwError } from "rxjs";
-import { catchError, exhaustMap, tap } from "rxjs/operators";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
+import { catchError, exhaustMap, map, tap } from "rxjs/operators";
+import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
   NotificacionesService,
@@ -34,6 +34,8 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { OikosService } from "src/app/core/services/oikos.service";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -95,6 +97,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     private readonly notificacionesService: NotificacionesService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly oikosService: OikosService,
   ) {}
 
   ngOnInit() {
@@ -270,18 +273,128 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       });
   }
 
-  verDocumentos(auditoria: Auditoria) {
+  puedeRemplazarDocumento(rol: string): boolean {
+    return [
+        environment.ROL.AUDITOR_EXPERTO,
+        environment.ROL.AUDITOR,
+        environment.ROL.AUDITOR_ASISTENTE
+      ].includes(rol);
+  }
+
+  private esUsuarioAuditado(): boolean {
+    return this.tipoConsulta === "auditado";
+  }
+
+  private async obtenerCartasVisibles(auditoriaId: string): Promise<any[]> {
+    if (!this.esUsuarioAuditado()) {
+      return await lastValueFrom(
+        this.referenciaPdfService
+          .consultarDocumentos(auditoriaId, { tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION })
+          .pipe(
+            catchError((error) => {
+              console.error("Error consultando cantidad de cartas de presentación:", error);
+              return of([]);
+            })
+          )
+      );
+    }
+
+    const personaIdAuditado = this.personaId || await this.userService.getPersonaId();
+    const documentosVisiblesAuditado: any[] = await lastValueFrom(
+      this.planAuditoriaMid
+        .get(`auditado/${personaIdAuditado}/documento?auditoria_id=${auditoriaId}&cargo_id=${this.cargoId}`)
+        .pipe(
+          catchError((error) => {
+            console.error("Error consultando documentos visibles para auditado:", error);
+            return of([]);
+          })
+        )
+    );
+
+    return documentosVisiblesAuditado.filter(
+      (documento: any) => documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+    );
+  }
+
+  private async obtenerMapaDependencias(): Promise<Map<number, string>> {
+    return await lastValueFrom(
+      this.oikosService
+        .get(
+          `dependencia?fields=Id,Nombre&limit=0`)
+        .pipe(
+          map((response: any) => {
+            const mapa = new Map<number, string>();
+            response.map( (dep: any) => mapa.set(dep.Id, dep.Nombre) );
+            return mapa;
+          }),
+          catchError((error) => {
+            console.error("Error consultando dependencias para cartas de presentación:", error);
+            return of(new Map<number, string>());
+          })
+        )
+      );
+  }
+
+  async verDocumentos(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
+    const getAdjuntoConfigByRole = (rol: string): CargueAdjuntoTabConfig | undefined => {
+      if (!this.puedeRemplazarDocumento(rol))
+        return undefined;
+
+      return {
+        nombreBoton: "Remplazar documento",
+        iconoBoton: "upload_file",
+        colorBoton: "primary",
+        tipoArchivo: "pdf",
+        idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        descripcion: "Remplazar el documento asociado a esta auditoría",
+        onSuccess: () => this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize),
+      }
+    };
+
+    const [cartas, dependenciasCartas] = await Promise.all([
+      this.obtenerCartasVisibles(auditoriaId),
+      this.obtenerMapaDependencias(),
+    ]);
+
+    const tabsCartasPresentacion: TabDocumento[] = cartas
+      .map((carta) => {
+        const cargueAdjuntoConfig = getAdjuntoConfigByRole(this.role);
+        return {
+          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) || "Dependencia desconocida"),
+          documentoId: carta._id,
+          tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+          cargueAdjuntoConfig: cargueAdjuntoConfig
+            ? {
+                ...cargueAdjuntoConfig,
+                metadatosAdicionales: { firmada: true},
+              }
+            : undefined,
+        }
+      });
+
     this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
         entityId: auditoriaId,
         inferTabs: false,
         tabs: [
-          { nombre: "Programa de auditoría", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO },
-          { nombre: "Solicitud de información", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION },
-          { nombre: "Carta de representación", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION },
-          { nombre: "Compromiso ético", tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO },
+          {
+            nombre: "Programa de auditoría",
+            tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
+            cargueAdjuntoConfig: getAdjuntoConfigByRole(this.role),
+          },
+          {
+            nombre: "Solicitud de información",
+            tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
+            cargueAdjuntoConfig: getAdjuntoConfigByRole(this.role),
+          },
+          ...tabsCartasPresentacion,
+          {
+            nombre: "Compromiso ético",
+            tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
+            cargueAdjuntoConfig: getAdjuntoConfigByRole(this.role),
+          },
         ],
         titulo: `${tituloYSubtituloAuditoria(auditoria)}`,
         descripcion: `Documentos asociados a la auditoría`

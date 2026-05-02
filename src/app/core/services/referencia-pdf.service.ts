@@ -21,6 +21,7 @@ export interface ConsultaDocumentosReferenciaOptions {
   tipo_id?: number;
   fields?: string;
   limit?: number;
+  deduplicarPorTipo?: boolean;
 }
 
 @Injectable({
@@ -122,6 +123,7 @@ export class ReferenciaPdfService {
   ): Observable<DocumentoReferenciaPdf[]> {
     const limit = opciones.limit ?? 0;
     const tipo = opciones.tipo_id !== undefined ? `tipo_id:${opciones.tipo_id},` : "";
+    const deduplicarPorTipo = opciones.deduplicarPorTipo ?? true;
 
     return this.planAnualAuditoriaService
       .get(
@@ -130,9 +132,15 @@ export class ReferenciaPdfService {
       .pipe(
         map((response: any) => {
           if (response && response.Data && Array.isArray(response.Data)) {
-            return tipo ? response.Data.filter(
-                (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
-              ) : this.filtrarValidos(response.Data);
+            const documentosValidos = response.Data.filter(
+              (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
+            );
+
+            if (tipo || !deduplicarPorTipo) {
+              return documentosValidos;
+            }
+
+            return this.filtrarValidos(documentosValidos);
           }
           throw new Error("No se encontraron enlaces válidos en la respuesta.");
         }),
