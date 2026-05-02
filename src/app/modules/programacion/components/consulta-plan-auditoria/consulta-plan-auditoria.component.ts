@@ -26,6 +26,7 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalEnviarAprobacionComponent } from "./modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -114,10 +115,11 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     this.offset = 0;
   }
 
-  construirEstado(planId: string, estadoId: number, observacion = "") {
+  construirEstado(planId: string, estadoId: number, observacion = "", usuarioRol?: string) {
     return {
       plan_auditoria_id: planId,
       usuario_id: this.usuarioId,
+      usuario_rol: usuarioRol ?? null,
       observacion,
       estado_id: estadoId,
     };
@@ -148,7 +150,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           const estadoId = item.estado?.estado_id;
           const vigenciaId = item.vigencia_id;
           let acciones = this.getAccionesPorRolYEstado(estadoId);
-          if (!item.tiene_rechazos) {
+          if (!item.tiene_rechazos && !item.tiene_observaciones) {
             acciones = acciones.filter(
               (accion) => accion !== "Historial de Observaciones"
             );
@@ -302,84 +304,72 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   enviarPlan(element: any) {
-    this.alertaService
-      .showConfirmAlert(
-        "¿Está seguro(a) de enviar el Plan Anual de Auditoría (PAA)?"
-      )
-      .then((result) => {
-        if (result.isConfirmed) {
-          this.planAnualAuditoriaService
-            .get(
-              `documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`
-            )
-            .subscribe({
-              next: (documentos) => {
-                if (true)
-                if (documentos && documentos.Data.length > 0) {
-                  const nuevoEstado = this.construirEstado(
-                    element.id,
-                    environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
-                  );
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
+      width: '500px',
+      autoFocus: false,
+    });
 
-                  this.planAnualAuditoriaService
-                    .post("estado", nuevoEstado)
-                    .subscribe({
-                      next: (nuevoEstadoResponse: any) => {
-                        if (nuevoEstadoResponse.Status === 201) {
-                          this.notificarEnvioPlan(element).pipe(
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      // null = canceló con botón, undefined = cerró con X o backdrop
+      if (observacion === null || observacion === undefined) return;
 
-                            exhaustMap((response: any) => {
-                              if (response.Status == 200) {
-                                this.alertaService.showSuccessAlert(
-                                  "Plan enviado exitosamente"
-                                );
-                                return of(response);
-                              }
+      this.planAnualAuditoriaService
+        .get(`documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`)
+        .subscribe({
+          next: (documentos) => {
+            if (documentos && documentos.Data.length > 0) {
+              const nuevoEstado = this.construirEstado(
+                element.id,
+                environment.PLAN_ESTADO.EN_REVISION_JEFE_ID,
+                observacion,
+                this.roles[0]
+              );
 
-                              console.error("Solicitud de notificación fallida:", response);
-                              return throwError(() => new Error("Solicitud de notificación fallida"));
-                            }),
-
-                            catchError((error) => {
-                              this.alertaService.showAlert(
-                                "Error en notificación",
-                                "El plan fue asociado exitosamente, pero hubo un problema al enviar la notificación."
-                              );
-
-                              return throwError(() => new Error("Error en notificación", error));
-                            }),
-
-                          ).subscribe();
-                          this.iniciarPaginacion();
-                          this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
-                        } else {
-                          this.alertaService.showErrorAlert(
-                            "Error al asociar el estado al plan"
-                          );
+              this.planAnualAuditoriaService.post('estado', nuevoEstado).subscribe({
+                next: (nuevoEstadoResponse: any) => {
+                  if (nuevoEstadoResponse.Status === 201) {
+                    this.notificarEnvioPlan(element).pipe(
+                      exhaustMap((response: any) => {
+                        if (response.Status == 200) {
+                          this.alertaService.showSuccessAlert('Plan enviado exitosamente');
+                          return of(response);
                         }
-                      },
-                      error: (nuevoEstadoError) => {
-                        this.alertaService.showErrorAlert(
-                          "Error al asociar el estado al plan"
+                        console.error('Solicitud de notificación fallida:', response);
+                        return throwError(() => new Error('Solicitud de notificación fallida'));
+                      }),
+                      catchError((error) => {
+                        this.alertaService.showAlert(
+                          'Error en notificación',
+                          'El plan fue asociado exitosamente, pero hubo un problema al enviar la notificación.'
                         );
-                        console.error(nuevoEstadoError);
-                      }
-                    });
-                } else {
-                  this.alertaService.showErrorAlert(
-                    "No cuenta con el PDF del Plan Anual de Auditoría creado"
-                  );
-                }
-              },
-              error: (error) => {
-                this.alertaService.showErrorAlert(
-                  "Error al verificar la existencia del documento asociado."
-                );
-                console.error(error);
-              }
-            });
-        }
-      });
+                        return throwError(() => new Error('Error en notificación', error));
+                      }),
+                    ).subscribe();
+                    this.iniciarPaginacion();
+                    this.cargarPlanesAuditoria(this.opcionesPagina[0], 0);
+                  } else {
+                    this.alertaService.showErrorAlert('Error al asociar el estado al plan');
+                  }
+                },
+                error: (nuevoEstadoError) => {
+                  this.alertaService.showErrorAlert('Error al asociar el estado al plan');
+                  console.error(nuevoEstadoError);
+                },
+              });
+            } else {
+              this.alertaService.showErrorAlert(
+                'No cuenta con el PDF del Plan Anual de Auditoría creado'
+              );
+            }
+          },
+          error: (error) => {
+            this.alertaService.showErrorAlert(
+              'Error al verificar la existencia del documento asociado.'
+            );
+            console.error(error);
+          },
+        });
+    });
   }
 
   /**
