@@ -590,6 +590,12 @@ export class RevisionDocumentosComponent implements OnInit {
         const datosAuditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
         const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
+        dependenciasInfo.forEach((dep) => 
+          datosAuditoria.correo_complementario.forEach((correo: any) => {
+            if (correo.dependencia_id === dep.dependencia_id)
+              dep.correo_complementario = correo.correo;
+          })
+        );
 
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);

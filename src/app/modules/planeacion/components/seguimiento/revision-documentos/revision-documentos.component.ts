@@ -2,6 +2,14 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ModalRechazoSeguimientoComponent } from "./modal-rechazo-seguimiento/modal-rechazo-seguimiento.component";
 import { MatDialog } from "@angular/material/dialog";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { forkJoin, of, throwError } from "rxjs";
+import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { environment } from "src/environments/environment";
 import { documentos, rolesAprobacion } from "./revision-documentos.utilidades";
 
@@ -48,7 +56,12 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     private readonly userService: UserService,
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly nuxeoService: NuxeoService,
-    private readonly descargaService: DescargaService
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 
   ngOnInit(): void {
@@ -131,9 +144,150 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
       for (const estado of estadoAprobacion) {
         await this.aprobarAuditoria(estado, mensajeAprobacion);
       }
+      const ultimoEstado = estadoAprobacion[estadoAprobacion.length - 1];
+      if (ultimoEstado === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO) {
+        this.notificarEnvioAuditado(this.auditoriaId);
+      }
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el plan.");
     }
+  }
+
+
+  private notificarEnvioAuditado(auditoriaId: string): void {
+    const rolRemitente = "Jefe OCI";
+
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      exhaustMap((tercero) => {
+        return forkJoin({
+          auditoria: this.planAuditoriaMid.get(`auditoria/${auditoriaId}`),
+          auditores: this.planAuditoriaService.get(
+            `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
+          ),
+          vigencias: this.parametrosUtilsService.getVigencias(),
+          nombreRemitente: of(tercero.NombreCompleto),
+        });
+      }),
+
+      exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
+        const datosAuditoria = auditoria?.Data;
+        const listaAuditores: any[] = auditores?.Data ?? [];
+        const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
+        dependenciasInfo.forEach((dep) => 
+          datosAuditoria.correo_complementario.forEach((correo: any) => {
+            if (correo.dependencia_id === dep.dependencia_id)
+              dep.correo_complementario = correo.correo;
+          })
+        );
+
+        const vigenciaId = datosAuditoria?.vigencia_id;
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        const correosAuditores$ = listaAuditores.length > 0
+          ? forkJoin(
+            listaAuditores.map((a: any) =>
+              this.tercerosService.getTerceroById(a.auditor_id).pipe(
+                catchError(() => of(null))
+              )
+            )
+          )
+          : of([]);
+
+        return correosAuditores$.pipe(
+          switchMap((terceros: any[]) => {
+            const correosAuditores = terceros
+              .filter((t) => t?.UsuarioWSO2)
+              .map((t) => t.UsuarioWSO2);
+
+            const toAddressesDinamicos: string[] = dependenciasInfo.flatMap((dep) => {
+              const correos: string[] = [];
+              if (dep.correo_dependencia)    correos.push(dep.correo_dependencia);
+              if (dep.jefe_correo)           correos.push(dep.jefe_correo);
+              if (dep.asistente_correo)      correos.push(dep.asistente_correo);
+              if (dep.correo_complementario) correos.push(dep.correo_complementario);
+              return correos;
+            });
+
+            const fijosEnvioAuditado = environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS;
+            const destinatarios: DestinatariosEmail = {
+              ToAddresses: [
+                ...toAddressesDinamicos,
+                ...(fijosEnvioAuditado.ToAddresses ?? []),
+              ],
+              CcAddresses: [
+                ...correosAuditores,
+                ...(fijosEnvioAuditado.CcAddresses ?? []),
+              ],
+              BccAddresses: fijosEnvioAuditado.BccAddresses ?? [],
+            };
+
+            const variablesSolicitud: VariablesSolicitud = {
+              titulo_solicitud: "Revisión de Programa de Auditoría",
+              tipo_solicitud: "revisión y firma",
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              vigencia: vigenciaNombre,
+              rol_remitente: rolRemitente,
+              nombre_remitente: nombreRemitente || rolRemitente,
+              fecha_envio: new Date().toLocaleDateString(),
+            };
+
+            return this.notificacionesService.enviarNotificacionSolicitud(
+              destinatarios,
+              variablesSolicitud
+            ).pipe(
+              tap((response: any) => {
+                if (response?.Status == 200) {
+                  this.registrarNotificacion(
+                    auditoriaId,
+                    destinatarios,
+                    variablesSolicitud,
+                    "envio_revision_auditado_programa_trabajo"
+                  );
+                }
+              })
+            );
+          })
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("Error al notificar envío a auditado (seguimiento):", error);
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      error: (err) => console.warn("Error en notificación envío a auditado (seguimiento):", err),
+    });
+  }
+
+
+  private registrarNotificacion(
+    auditoriaId: string,
+    destinatarios: DestinatariosEmail,
+    variables: VariablesSolicitud,
+    tipoNotificacion: string,
+    template: string = PLANTILLA_SOLICITUD_NOMBRE,
+  ): void {
+    const payload = {
+      plantilla: template,
+      fecha_envio: new Date(),
+      metadato: {
+        ...variables,
+        tipo_notificacion: tipoNotificacion,
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: auditoriaId,
+      referencia_tipo: 'AUDITORIA SEGUIMIENTO',
+    };
+
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug("Registro de notificación guardado (seguimiento):", res),
+      error: (err) => console.warn("Error guardando registro de notificación (seguimiento):", err),
+    });
   }
 
   async aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
