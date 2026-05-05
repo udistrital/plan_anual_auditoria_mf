@@ -147,7 +147,9 @@ export class RevisionDocumentosComponent implements OnInit {
         if (Array.isArray(estadoAprobacion)) {
           this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
         } else {
-          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion).then(() =>
+            this.notificarAceptacionAuditado(this.auditoriaId)
+          )
         }
       });
   }

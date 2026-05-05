@@ -130,7 +130,9 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
           // Si es un array como en el caso del rol jefe, para hacer dos post para el flujo de estados
           this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
         } else {
-          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
+          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion).then(() =>
+            this.notificarAceptacionAuditado(this.auditoriaId)
+          );
         }
       });
   }
@@ -154,6 +156,16 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
 
+  /**
+   * Notifica a los actores de cada dependencia asociada a la auditoría (correo_dependencia,
+   * jefe_correo, asistente_correo y correo_complementario si existe) cuando el Jefe OCI
+   * aprueba y envía el programa de auditoría a revisión del auditado en seguimiento.
+   * Los auditores asignados reciben copia (Cc).
+   *
+   * Los correos se resuelven desde `datos_dependencias`, que soporta múltiples dependencias
+   * por auditoría. Los campos opcionales (jefe, asistente, complementario) solo se incluyen
+   * si el MID los retorna.
+   */
   private notificarEnvioAuditado(auditoriaId: string): void {
     const rolRemitente = "Jefe OCI";
 
@@ -185,6 +197,15 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
 
+        console.log(
+          "[notificarEnvioAuditado - SEGUIMIENTO] auditoriaId:", auditoriaId,
+          "vigenciaId:", vigenciaId
+        );
+        console.log(
+          "[notificarEnvioAuditado - SEGUIMIENTO] dependencias_info recibidas:",
+          JSON.stringify(dependenciasInfo, null, 2)
+        );
+
         const correosAuditores$ = listaAuditores.length > 0
           ? forkJoin(
             listaAuditores.map((a: any) =>
@@ -210,6 +231,15 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
               return correos;
             });
 
+            console.log(
+              "[notificarEnvioAuditado - SEGUIMIENTO] ToAddresses dinámicos:",
+              toAddressesDinamicos
+            );
+            console.log(
+              "[notificarEnvioAuditado - SEGUIMIENTO] Cc auditores:",
+              correosAuditores
+            );
+
             const fijosEnvioAuditado = environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS;
             const destinatarios: DestinatariosEmail = {
               ToAddresses: [
@@ -222,6 +252,11 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
               ],
               BccAddresses: fijosEnvioAuditado.BccAddresses ?? [],
             };
+
+            console.log(
+              "[notificarEnvioAuditado - SEGUIMIENTO] Payload final destinatarios:",
+              JSON.stringify(destinatarios, null, 2)
+            );
 
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Revisión de Programa de Auditoría",
@@ -239,6 +274,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
             ).pipe(
               tap((response: any) => {
                 if (response?.Status == 200) {
+                  console.log("[notificarEnvioAuditado - SEGUIMIENTO] Notificación enviada exitosamente");
                   this.registrarNotificacion(
                     auditoriaId,
                     destinatarios,
@@ -253,20 +289,156 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
       }),
 
       catchError((error) => {
-        console.warn("Error al notificar envío a auditado (seguimiento):", error);
+        console.warn("[notificarEnvioAuditado - SEGUIMIENTO] Error al notificar envío a auditado:", error);
+        console.warn("Status:", error?.status);
+        console.warn("Body:", JSON.stringify(error?.error));
         return throwError(() => error);
       })
 
     ).subscribe({
-      error: (err) => console.warn("Error en notificación envío a auditado (seguimiento):", err),
+      error: (err) => console.warn("[notificarEnvioAuditado - SEGUIMIENTO] Error suscripción:", err),
     });
   }
 
 
+  /**
+   * Notifica a los auditores asignados cuando el auditado (Jefe o Asistente de Dependencia)
+   * firma y carga/acepta la auditoría de seguimiento con documentos.
+   * Los auditores reciben el correo en To, la dependencia auditada en Cc.
+   */
+  private notificarAceptacionAuditado(auditoriaId: string): void {
+    const rolRemitente = "Dependencia Auditada";
+
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      exhaustMap((tercero) => {
+        return forkJoin({
+          auditoria: this.planAuditoriaMid.get(`auditoria/${auditoriaId}`),
+          auditores: this.planAuditoriaService.get(
+            `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
+          ),
+          vigencias: this.parametrosUtilsService.getVigencias(),
+          nombreRemitente: of(tercero.NombreCompleto),
+        });
+      }),
+
+      exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
+        const datosAuditoria = auditoria?.Data;
+        const listaAuditores: any[] = auditores?.Data ?? [];
+        const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
+
+        const vigenciaId = datosAuditoria?.vigencia_id;
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        console.log(
+          "[notificarAceptacionAuditado - SEGUIMIENTO] auditoriaId:", auditoriaId,
+          "dependencias_info recibidas:",
+          JSON.stringify(dependenciasInfo, null, 2)
+        );
+
+        const correosAuditores$ = listaAuditores.length > 0
+          ? forkJoin(
+              listaAuditores.map((a: any) =>
+                this.tercerosService.getTerceroById(a.auditor_id).pipe(
+                  catchError(() => of(null))
+                )
+              )
+            )
+          : of([]);
+
+        return correosAuditores$.pipe(
+          switchMap((terceros: any[]) => {
+            // Auditores van al To
+            const correosAuditores = terceros
+              .filter((t) => t?.UsuarioWSO2)
+              .map((t) => t.UsuarioWSO2);
+
+            // Dependencia auditada va al Cc
+            const correosDependencia: string[] = dependenciasInfo.flatMap((dep) => {
+              const correos: string[] = [];
+              if (dep.correo_dependencia)    correos.push(dep.correo_dependencia);
+              if (dep.jefe_correo)           correos.push(dep.jefe_correo);
+              if (dep.asistente_correo)      correos.push(dep.asistente_correo);
+              if (dep.correo_complementario) correos.push(dep.correo_complementario);
+              return correos;
+            });
+
+            console.log(
+              "[notificarAceptacionAuditado - SEGUIMIENTO] To auditores:",
+              correosAuditores
+            );
+            console.log(
+              "[notificarAceptacionAuditado - SEGUIMIENTO] Cc dependencia:",
+              correosDependencia
+            );
+
+            const fijos = environment.NOTIFICACION_ACEPTACION_AUDITADO_DESTINATARIOS;
+            const destinatarios: DestinatariosEmail = {
+              ToAddresses: [
+                ...correosAuditores,
+                ...(fijos?.ToAddresses ?? []),
+              ],
+              CcAddresses: [
+                ...correosDependencia,
+                ...(fijos?.CcAddresses ?? []),
+              ],
+              BccAddresses: fijos?.BccAddresses ?? [],
+            };
+
+            console.log(
+              "[notificarAceptacionAuditado - SEGUIMIENTO] Payload final destinatarios:",
+              JSON.stringify(destinatarios, null, 2)
+            );
+
+            const variablesCartaRepresentacion: any = {
+              dependencia:        dependenciasInfo[0]?.dependencia_nombre ?? "",
+              tipo_auditoria:     datosAuditoria?.titulo ?? "",
+              vigencia:           vigenciaNombre,
+              nombre_quien_envia: nombreRemitente || rolRemitente,
+              fecha_envio:        new Date().toLocaleDateString(),
+            };
+
+            return this.notificacionesService.enviarNotificacionCartaRepresentacion(
+              destinatarios,
+              variablesCartaRepresentacion
+            ).pipe(
+              tap((response: any) => {
+                if (response?.Status == 200) {
+                  console.log("[notificarAceptacionAuditado - SEGUIMIENTO] Notificación enviada exitosamente");
+                  this.registrarNotificacion(
+                    auditoriaId,
+                    destinatarios,
+                    variablesCartaRepresentacion as any,
+                    "aceptacion_auditado_cargue_documento"
+                  );
+                }
+              })
+            );
+          })
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("[notificarAceptacionAuditado - SEGUIMIENTO] Error al notificar aceptación:", error);
+        console.warn("Status:", error?.status);
+        console.warn("Body:", JSON.stringify(error?.error));
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      error: (err) => console.warn("[notificarAceptacionAuditado - SEGUIMIENTO] Error suscripción:", err),
+    });
+  }
+
+
+  /**
+   * Registra un log de notificación enviada en el CRUD de notificaciones (MongoDB).
+   */
   private registrarNotificacion(
     auditoriaId: string,
     destinatarios: DestinatariosEmail,
-    variables: VariablesSolicitud,
+    variables: any,
     tipoNotificacion: string,
     template: string = PLANTILLA_SOLICITUD_NOMBRE,
   ): void {
@@ -285,8 +457,8 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     };
 
     this.notificacionRegistroCrudService.post(payload).subscribe({
-      next: (res) => console.debug("Registro de notificación guardado (seguimiento):", res),
-      error: (err) => console.warn("Error guardando registro de notificación (seguimiento):", err),
+      next: (res) => console.debug("[registrarNotificacion - SEGUIMIENTO] Registro guardado:", res),
+      error: (err) => console.warn("[registrarNotificacion - SEGUIMIENTO] Error guardando:", err),
     });
   }
 
