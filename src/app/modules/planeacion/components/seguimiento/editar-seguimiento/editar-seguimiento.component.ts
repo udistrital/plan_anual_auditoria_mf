@@ -296,6 +296,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
 
     if (this.soloLectura) {
       this.formularioInformacionComponent.form.disable();
+      this.formularioTemasComponent.form.disable();
       this.formularioDependenciasComponent.forEach(form => form.form.disable());
     }
     
