@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { formularioInformacionAuditoria } from "./editar-informe.utilidades";
+import { formularioDependencias, formularioInformacionAuditoria } from "./editar-informe.utilidades";
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -18,7 +18,7 @@ import { accionesEjecucionFinal, accionesEjecucionPreliminar } from 'src/app/sha
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
-import { join } from 'node:path';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
   selector: 'app-editar-informe',
@@ -38,6 +38,10 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   @ViewChild("resumenHallazgosComp")
   resumenHallazgosComponent!: ResumenHallazgosComponent;
 
+  @ViewChildren("formularioDependenciasComp")
+  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
+  formularioDependencias: Formulario = formularioDependencias;
+
   formInformacion: Formulario | undefined;
   formAspectosGenerales: FormGroup;
   formInformeFinal: FormGroup;
@@ -45,6 +49,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   informeId!: string;
   informeData: any = null;
+  auditoria: Auditoria | null = null;
   estadoId: number = 0;
   soloLectura: boolean = false;
   esLineal = false;
@@ -66,7 +71,8 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     private referenciaPdfService: ReferenciaPdfService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private rolService: RolService
+    private rolService: RolService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.formAspectosGenerales = this.fb.group({
       aspecto_general: [''],
@@ -95,6 +101,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   cargarFormularios(): void {
     this.formInformacion = formularioInformacionAuditoria;
+    this.formularioDependencias = formularioDependencias;
   }
 
   manejarResponsiveStepper() {
@@ -210,20 +217,15 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   }
 
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
-  poblarFormularioInformacion(auditoria?: any): void {
+  poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
+    this.auditoria = auditoria || null;
+    this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
       consecutivo_no_auditoria: auditoria?.consecutivo_no_auditoria,
       macroproceso: auditoria?.macroproceso_nombre,
       proceso: auditoria?.proceso_nombre,
-      dependencia: auditoria?.dependencia_nombre,
-      jefe_nombre: auditoria?.jefe_nombre,
-      asistente_nombre: auditoria?.asistente_nombre,
-      correo_dependencia: auditoria?.correo_dependencia,
-      jefe_correo: auditoria?.jefe_correo,
-      asistente_correo: auditoria?.asistente_correo,
-      correo_complementario: auditoria.correo_complementario.map((c: any) => c.correo).join(", "),
       objetivo_auditoria: auditoria?.objetivo,
       alcance_auditoria: auditoria?.alcance,
       criterios: auditoria?.criterio,
@@ -237,6 +239,21 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     }
 
     this.formularioInformacionComponent.form.patchValue(valoresIniciales);
+
+    this.formularioDependenciasComponent.forEach((comp, i) => {
+      const dep = auditoria?.datos_dependencias[i];
+      console.log('Poblando dependencia:', dep);
+      const correo = auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      comp.form.patchValue({
+        dependencia_id: dep?.dependencia_id,
+        jefe_nombre: dep?.jefe_nombre,
+        jefe_correo: dep?.jefe_correo,
+        asistente_nombre: dep?.asistente_nombre,
+        asistente_correo: dep?.asistente_correo,
+        correo_dependencia: dep?.correo_dependencia,
+        correo_complementario: correo,
+      });
+    });
   }
 
   enviarFormInformacion() {
