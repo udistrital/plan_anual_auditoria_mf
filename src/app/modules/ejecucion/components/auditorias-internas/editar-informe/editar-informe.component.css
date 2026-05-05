@@ -15,6 +15,12 @@ button.mat-flat-button {
   opacity: 0.4;
 }
 
+.steps-bloqueados-con-revision ::ng-deep mat-step-header:nth-of-type(6),
+.steps-bloqueados-con-revision ::ng-deep mat-step-header:nth-of-type(7) {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
 :host ::ng-deep .modo-lectura .mdc-text-field--disabled {
   background-color: #fff !important;
 }

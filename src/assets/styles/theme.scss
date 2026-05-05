@@ -102,3 +102,16 @@ $light-theme: mat.m2-define-light-theme(
 );
 
 @include mat.all-component-themes($light-theme);
+
+.mat-mdc-tooltip.tooltip-multilinea-amplio {
+  min-width: 240px;
+  max-width: min(420px, calc(100vw - 32px));
+}
+
+.mat-mdc-tooltip.tooltip-multilinea-top {
+  translate: 0 calc(50% - 15px);
+}
+
+.mat-mdc-tooltip.tooltip-multilinea-amplio .mat-mdc-tooltip-surface {
+  max-width: none;
+}

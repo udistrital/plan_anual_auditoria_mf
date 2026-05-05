@@ -60,6 +60,14 @@ export interface ModalVerDocumentosData {
   inferTabs?: boolean;
   tipo?: number;
   textoBotonCerrar?: string;
+  accionesFooter?: AccionFooterModal[];
+}
+
+export interface AccionFooterModal {
+  nombre: string;
+  icono?: string;
+  color?: string;
+  accion: () => boolean | Promise<boolean>;
 }
 
 @Component({
@@ -79,6 +87,7 @@ export class ModalVerDocumentosComponent implements OnInit {
   textoBotonCerrar: string = "Regresar";
   consultarPorTipo: boolean = false;
   tabs: TabDocumento[] = [];
+  accionesFooter: AccionFooterModal[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ModalVerDocumentosData,
@@ -93,6 +102,7 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.descripcion) this.descripcion = data.descripcion;
     if (data.tabs) this.tabs = data.tabs;
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
+    if (data.accionesFooter) this.accionesFooter = data.accionesFooter;
     if (data.tipo) this.consultarPorTipo = true;
     if (data.vigenciaNombre) {
       this.vigenciaSuffix = data.vigenciaNombre
@@ -124,7 +134,10 @@ export class ModalVerDocumentosComponent implements OnInit {
    */
   async cargarDocumentos() {
     try {
-      const opciones = this.consultarPorTipo ? { tipo_id: this.data.tipo } : {};
+      const tieneTabsConDocumentoId = this.tabs.some((tab) => !!tab.documentoId);
+      const opciones = this.consultarPorTipo
+        ? { tipo_id: this.data.tipo }
+        : { deduplicarPorTipo: !tieneTabsConDocumentoId };
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.data.entityId, opciones)
       );
@@ -193,6 +206,9 @@ export class ModalVerDocumentosComponent implements OnInit {
         const documento = documentosDisponibles[documentoIdx];
         this.documentosPorTab[index] = documento.base64;
         this.documentoInfoPorTab[index] = documento;
+        if (!this.tabs[index].documentoId) {
+          this.tabs[index].documentoId = documento._id;
+        }
         documentosDisponibles.splice(documentoIdx, 1);
       });
     } catch (error) {
@@ -220,6 +236,13 @@ export class ModalVerDocumentosComponent implements OnInit {
 
   async ejecutarBotonTab(boton: BotonTabDocumento): Promise<void> {
     await boton.accion(this.getBotonContext());
+  }
+
+  async ejecutarAccionFooter(accionFooter: AccionFooterModal): Promise<void> {
+    const debeCerrar = await accionFooter.accion();
+    if (debeCerrar) {
+      this.dialogRef.close(true);
+    }
   }
 
   getBotonContext(): BotonTabDocumentoContext {
