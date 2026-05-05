@@ -170,6 +170,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
           );
           
         });
+        this.auditoria = (res as any).Data;
         this.paso1Guardado = true;
         this.stepper.next();
       });
@@ -305,9 +306,13 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    const dialogRef =this.dialog.open(CrearActividadSeguimientoComponent, {
+    const dialogRef = this.dialog.open(CrearActividadSeguimientoComponent, {
       width: "1100px",
-      data: { auditoriaId: this.auditoriaId },
+      data: {
+        auditoriaId: this.auditoriaId,
+        minFechaStr: this.auditoria.fecha_inicio,
+        maxFechaStr: this.auditoria.fecha_fin,
+      },
     });
 
     dialogRef.afterClosed().subscribe(() => {

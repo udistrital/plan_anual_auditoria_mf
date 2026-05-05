@@ -8,6 +8,8 @@
 <ng-template #contenidoDeModal>
   <app-actividad-seguimiento-formulario
   [actividadData]="actividadData"
+  [minFechaStr]="minFechaStr"
+  [maxFechaStr]="maxFechaStr"
   (formSubmit)="editarActividad($event)"
 ></app-actividad-seguimiento-formulario>
 </ng-template>
