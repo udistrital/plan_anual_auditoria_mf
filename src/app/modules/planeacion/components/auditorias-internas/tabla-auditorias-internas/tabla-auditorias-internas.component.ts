@@ -388,7 +388,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           },
         ],
         titulo: `${tituloYSubtituloAuditoria(auditoria)}`,
-        descripcion: `Documentos asociados a la auditoría`
+        descripcion: `Documentos asociados a la auditoría`,
+        sufijo: `oci-${auditoria.consecutivo_OCI}`,
       },
       autoFocus: false,
     });

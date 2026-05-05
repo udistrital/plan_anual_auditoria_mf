@@ -289,7 +289,7 @@ export class DocumentoUtils {
         entityId: planId,
         descripcion: `Documentos asociados al Plan Anual de Auditoría - Vigencia ${planVigenciaNombre}`,
         tabs: tabs,
-        vigenciaNombre: planVigenciaNombre,
+        sufijo: planVigenciaNombre,
       },
     });
   }

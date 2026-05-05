@@ -55,7 +55,7 @@ export interface ModalVerDocumentosData {
   entityId: string;
   titulo?: string;
   descripcion?: string;
-  vigenciaNombre?: string;
+  sufijo?: string;
   tabs?: TabDocumento[];
   inferTabs?: boolean;
   tipo?: number;
@@ -83,7 +83,7 @@ export class ModalVerDocumentosComponent implements OnInit {
 
   titulo: string = "Ver documentos";
   descripcion: string = "Documentos";
-  vigenciaSuffix: string = "";
+  suffix: string = "";
   textoBotonCerrar: string = "Regresar";
   consultarPorTipo: boolean = false;
   tabs: TabDocumento[] = [];
@@ -104,10 +104,8 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
     if (data.accionesFooter) this.accionesFooter = data.accionesFooter;
     if (data.tipo) this.consultarPorTipo = true;
-    if (data.vigenciaNombre) {
-      this.vigenciaSuffix = data.vigenciaNombre
-          ? `-${data.vigenciaNombre.replace(/\s+/g, '-')}`
-          : '';
+    if (data.sufijo) {
+      this.suffix = data.sufijo ? data.sufijo : '';
     }
   }
 
@@ -309,11 +307,12 @@ export class ModalVerDocumentosComponent implements OnInit {
   }
 
   async descargarTodo() {
+    const suffixNormalizado = this.suffix ? `-${this.suffix.replace(/\s+/g, '-')}` : '';
     try {
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        `documentos${this.vigenciaSuffix}.zip`,
-        this.vigenciaSuffix,
+        `documentos${suffixNormalizado}.zip`,
+        this.suffix,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
