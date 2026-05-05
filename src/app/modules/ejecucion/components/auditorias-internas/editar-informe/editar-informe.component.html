@@ -31,6 +31,31 @@
             <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
               (submitFormulario)="preguntarGuardadoInformacion($event)">
             </app-formulario-dinamico>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Dependencias</h2>
+                Informacion de las dependencias
+              </div>
+            </div>
+            <mat-accordion *ngIf="auditoria" multi="true">
+              <mat-expansion-panel *ngFor="let dep of auditoria.datos_dependencias">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    {{ dep.dependencia_nombre }}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="p-3">
+                  <app-formulario-dinamico
+                    #formularioDependenciasComp
+                    [formulario]="formularioDependencias"
+                  >
+                  </app-formulario-dinamico>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
             <div class="d-flex justify-content-end mt-4">
               <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-raised-button color="primary" (click)="enviarFormInformacion()">
                 Guardar y continuar

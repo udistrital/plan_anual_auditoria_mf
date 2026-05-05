@@ -1,9 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { formularioInformacionSeguimiento } from "./editar-informe-seguimiento.utilidades";
+import { formularioDependencias, formularioInformacionSeguimiento } from "./editar-informe-seguimiento.utilidades";
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AspectosEvaluadosSeguimientoComponent } from './aspectos-evaluados-seguimiento/aspectos-evaluados-seguimiento.component';
@@ -12,6 +12,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
   selector: 'app-editar-informe-seguimiento',
@@ -28,11 +29,16 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   aspectosEvaluadosComp!: AspectosEvaluadosSeguimientoComponent;
   formularioInformacion: Formulario | undefined;
 
+  @ViewChildren("formularioDependenciasComp")
+  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
+  formularioDependencias: Formulario = formularioDependencias;
+
   formAspectosGenerales: FormGroup;
   formObservacionesConclusiones: FormGroup;
 
   informeId!: string;
   informeData: any = null;
+  auditoria: Auditoria | null = null;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
 
@@ -44,7 +50,8 @@ export class EditarInformeSeguimientoComponent implements OnInit {
     private fb: FormBuilder,
     private dialog: MatDialog,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.formAspectosGenerales = this.fb.group({
       aspecto_general: [''],
@@ -64,6 +71,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
 
   cargarFormularios(): void {
     this.formularioInformacion = formularioInformacionSeguimiento;
+    this.formularioDependencias = formularioDependencias;
   }
 
   manejarResponsiveStepper() {
@@ -126,20 +134,15 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   }
 
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
-  poblarFormularioInformacion(auditoria?: any): void {
+  poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
+    this.auditoria = auditoria || null;
+    this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
-      no_auditoria: auditoria?.no_auditoria,
+      no_auditoria: auditoria?.consecutivo_no_auditoria,
       macroproceso: auditoria?.macroproceso_nombre,
       proceso: auditoria?.proceso_nombre,
-      dependencia: auditoria?.dependencia_nombre,
-      jefe_nombre: auditoria?.jefe_nombre,
-      asistente_nombre: auditoria?.asistente_nombre,
-      correo_dependencia: auditoria?.correo_dependencia,
-      jefe_correo: auditoria?.jefe_correo,
-      asistente_correo: auditoria?.asistente_correo,
-      correo_complementario: auditoria?.correo_complementario,
       objetivo_auditoria: auditoria?.objetivo,
       alcance_auditoria: auditoria?.alcance,
       criterios: auditoria?.criterio,
@@ -153,6 +156,20 @@ export class EditarInformeSeguimientoComponent implements OnInit {
     }
 
     this.formularioInformacionComponent.form.patchValue(valoresIniciales);
+
+    this.formularioDependenciasComponent.forEach((comp, i) => {
+      const dep = this.auditoria?.datos_dependencias[i];
+      const correo = this.auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      comp.form.patchValue({
+        dependencia_id: dep?.dependencia_id,
+        jefe_nombre: dep?.jefe_nombre,
+        jefe_correo: dep?.jefe_correo,
+        asistente_nombre: dep?.asistente_nombre,
+        asistente_correo: dep?.asistente_correo,
+        correo_dependencia: dep?.correo_dependencia,
+        correo_complementario: correo,
+      });
+    });
   }
 
   enviarFormInformacion() {
