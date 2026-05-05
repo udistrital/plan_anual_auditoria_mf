@@ -306,7 +306,11 @@ export class AddAuditoriaModalComponent implements OnInit {
         this.isEditMode ? "actualizada" : "guardada"
       } exitosamente.`
     );
-    this.dialogRef.close({ saved: true, nuevoEstado });
+    this.dialogRef.close({
+      saved: true,
+      cantidad: this.auditoriaForm.value.cantidadAuditorias,
+      nuevoEstado,
+    });
   }
 
 }

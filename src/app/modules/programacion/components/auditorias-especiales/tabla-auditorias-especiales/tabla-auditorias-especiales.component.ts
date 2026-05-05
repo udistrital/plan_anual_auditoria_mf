@@ -14,7 +14,8 @@ import {
   AuditoriaEspecialTablaRow,
   colocacionesContructorTablaEspeciales,
 } from "./tabla-auditorias-especiales.utilidades";
-import { catchError, firstValueFrom, map, Observable, of } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable, of, throwError } from 'rxjs';
+import { error } from 'node:console';
 
 @Component({
   selector: 'app-tabla-auditorias-especiales',
@@ -161,12 +162,49 @@ export class TablaAuditoriasEspecialesComponent {
       },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result?.saved) {
-        const offset = this.pageIndex * this.pageSize;
-        this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (!result?.saved)
+        return;
+
+      // Si la cantidad de auditorías concretas es 1, se inicia el proceso de generación y asignación automática, de lo contrario se recarga la tabla normalmente.
+      const offset = this.pageIndex * this.pageSize;
+      if (result.cantidad == 1) {
+        try {
+          await this.generarYAsignarUnicaAuditoriaConcreta(auditoria!);
+        } catch (error) {
+          console.error("Error al generar y asignar auditoría concreta:", error);
+          this.alertaService.showErrorAlert("Error al generar y asignar auditoría concreta");
+        }
       }
+
+      this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
     });
+  }
+
+  async generarYAsignarUnicaAuditoriaConcreta(auditoriaPadre: AuditoriaEspecialTablaRow): Promise<void> {
+    // Primero se comprueba que no existen auditorías concretas
+    let auditoriasConcretas = await this.traerAuditoriasConcretas(auditoriaPadre);
+    if (auditoriasConcretas.length > 0)
+      return;
+
+    // Luego se genera la nueva auditoría concreta
+    await firstValueFrom(
+      this.planAuditoriaService.post(
+        `auditoria-padre/${auditoriaPadre._id}/generar-auditoria`, {}
+      ).pipe(
+        catchError((error) => throwError(() =>
+          new Error("Error al generar la auditoría concreta.", error)
+        ))
+      )
+    );
+
+    // Ahora se cargan las auditorías concretas para obtener los campos enriquecidos
+    auditoriasConcretas = await this.traerAuditoriasConcretas(auditoriaPadre);
+    if (auditoriasConcretas.length !== 1)
+      throw new Error("Error inesperado: se esperaba exactamente una auditoría concreta después de la generación.");
+
+    // Finalmente se abre el modal de asignación con la auditoría concreta recién generada.
+    this.editarAuditoriaConcreta(auditoriasConcretas[0]);
   }
 
   enviaraAuditor(auditoria: Auditoria) {
@@ -306,13 +344,13 @@ export class TablaAuditoriasEspecialesComponent {
           
           return res.Data.map(
             (item: Auditoria, index: number): AuditoriaEspecialTablaRow => {
-              const numeroConcreto = `${numeroPadre}.${index + 1}`;
+              const numeroConcreto = `${index + 1}`;
               return {
-                numero: numeroConcreto,
+                numero: "",
                 _id: item._id || `${padreId}-concreta-${index + 1}`,
                 auditoria_padre_id: padreId,
                 titulo: item.titulo || "Sin Titulo",
-                subtitulo: item.subtitulo || "",
+                subtitulo: item.subtitulo || `Sin Subtítulo (#${numeroConcreto})`,
                 tipo_evaluacion_id: item.tipo_evaluacion_id || 0,
                 tipo_evaluacion_nombre: item.tipo_evaluacion_nombre || "Sin Asignar",
                 cronograma_id: item.cronograma_id || [],
