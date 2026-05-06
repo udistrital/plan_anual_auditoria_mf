@@ -445,24 +445,31 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     }
 
     const modalInstance = dialogRef.componentInstance;
-    const metadatos = { firmado: false };
     modalInstance.botonGuardar = { icono: "save", texto: "Guardar carta actual" };
     modalInstance.botonGuardarTodos = { icono: "save", texto: "Guardar todas" };
     modalInstance.onGuardarIndividual = (indice: number) => {
       this.guardarDocumento(
         documentos[indice].base64,
         this.construirInfoCarta(infoDocumento, documentos[indice]),
-        () => modalInstance.marcarGuardado(indice),
-        metadatos
+        () => {
+          modalInstance.marcarGuardado(indice);
+          this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+        },
       );
     };
     modalInstance.onGuardarTodos = () => {
+      let pendientes = documentos.length;
       documentos.forEach((documentoCarta, indice) => {
         this.guardarDocumento(
           documentoCarta.base64,
           this.construirInfoCarta(infoDocumento, documentoCarta),
-          () => modalInstance.marcarGuardado(indice),
-          metadatos
+          () => {
+            modalInstance.marcarGuardado(indice);
+            pendientes--;
+            if (pendientes === 0) {
+              this.alertService.showSuccessAlert("Todos los archivos fueron subidos exitosamente.");
+            }
+          },
         );
       });
     };
@@ -495,7 +502,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       if (!res) return;
 
       if (!this.soloLectura && res.accion === "guardarDocumento") {
-        this.guardarDocumento(documentoBase64, infoDocumento);
+        this.guardarDocumento(
+          documentoBase64,
+          infoDocumento,
+          () => this.alertService.showSuccessAlert("Archivo subido exitosamente."),
+        );
       }
     });
   }
@@ -504,7 +515,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     documentoBase64: any,
     infoDocumento: any,
     onSuccess?: () => void,
-    metadatos?: Record<string, any>,
   ) {
     if (this.soloLectura) {
       return;
@@ -518,7 +528,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           "Documento pdf (" +
           infoDocumento.plantilla +
           ") de auditoría de plan de auditoría",
-        metadatos: metadatos,
         file: documentoBase64,
       };
 
@@ -602,7 +611,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         )
         .subscribe({
           next: (response) => {
-            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
             onSuccess?.();
           },
           error: (error) => {
