@@ -274,7 +274,9 @@ export class RevisionDocumentosComponent implements OnInit {
 
   async cargarCartasAuditado() {
       const cartas = (await lastValueFrom(
-        this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {})
+        this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {
+          deduplicarPorTipo: false,
+        })
       )) as DocumentoAdjuntoRevision[];
 
       return cartas.filter(
@@ -374,7 +376,9 @@ export class RevisionDocumentosComponent implements OnInit {
       this.filtrarDocumentosPorDependenciaAuditado(tipoDocumentoMap);
     } else {
       this.referenciaPdfService
-        .consultarDocumentos(this.auditoriaId, {})
+        .consultarDocumentos(this.auditoriaId, {
+          deduplicarPorTipo: false,
+        })
         .subscribe(async (documentosAdjuntos: DocumentoReferenciaPdf[]) => {
           await this.cargarDependenciasPorAuditoria();
 
