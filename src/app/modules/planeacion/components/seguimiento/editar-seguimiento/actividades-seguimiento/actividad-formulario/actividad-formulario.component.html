@@ -25,7 +25,14 @@
               </div>
               <mat-form-field class="col-12" appearance="outline">
                 <mat-label>Fecha de Inicio</mat-label>
-                <input matInput [matDatepicker]="pickerInicio" placeholder="Seleccione una fecha" formControlName="fechaInicio" />
+                <input
+                  matInput
+                  [matDatepicker]="pickerInicio"
+                  placeholder="Seleccione una fecha"
+                  formControlName="fechaInicio"
+                  [min]="minFecha"
+                  [max]="maxFecha"
+                />
                 <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
                 <mat-datepicker #pickerInicio></mat-datepicker>
                 <mat-error *ngIf="form.get('fechaInicio')?.hasError('required')">
@@ -41,9 +48,23 @@
               </div>
               <mat-form-field class="col-12" appearance="outline">
                 <mat-label>Fecha de Fin</mat-label>
-                <input matInput [matDatepicker]="pickerFin" placeholder="Seleccione una fecha" formControlName="fechaFin" />
-                <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                <input
+                  matInput
+                  [matDatepicker]="pickerFin"
+                  placeholder="Seleccione una fecha"
+                  formControlName="fechaFin"
+                  [min]="fechaMinFin || minFecha"
+                  [max]="maxFecha"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="pickerFin"
+                  [disabled]="form.get('fechaFin')?.disabled"
+                ></mat-datepicker-toggle>
                 <mat-datepicker #pickerFin></mat-datepicker>
+                <mat-hint *ngIf="form.get('fechaFin')?.disabled">
+                  Primero seleccione una fecha de inicio
+                </mat-hint>
                 <mat-error *ngIf="form.get('fechaFin')?.hasError('required')">
                   La fecha de fin es requerida
                 </mat-error>
