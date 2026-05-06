@@ -115,7 +115,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
   verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
     for (const carta of cartas) {
-      if (!carta.metadatos!["firmada"]) {
+      if (!carta.metadatos!["firmado"]) {
         this.alertService.showAlert(
           "Carta sin firmar",
           `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
@@ -319,7 +319,7 @@ export class RevisionDocumentosComponent implements OnInit {
             idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
             descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
             referenciaTipoFallback: "Auditoria",
-            metadatosAdicionales: { firmada: true },
+            metadatosAdicionales: { firmado: true },
             onSuccess: async () => {
               cartasAuditado = await this.cargarCartasAuditado();
               this.cargarDocumentos();
