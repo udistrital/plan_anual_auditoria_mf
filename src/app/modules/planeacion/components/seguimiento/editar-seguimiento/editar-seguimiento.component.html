@@ -1,5 +1,7 @@
 <plantilla-tarjeta-contenedora
   [title]="soloLectura ? 'Ver Auditoría' : 'Editar Auditoría'"
+  [subtitle]="auditoria.vigencia_nombre || ''"
+  [subtitleChild]="auditoria.titulo + (auditoria.subtitulo ? ' - ' + auditoria.subtitulo : '') || ''"
   [breadcrumb]="
     soloLectura
       ? '<p>Gestión Auditoría / Planeación / Seguimiento e Informes / <b>Ver Auditoría</b></p>'
@@ -117,6 +119,8 @@
           <app-actividades-seguimiento
             [idAuditoria]="auditoriaId"
             [soloLectura]="soloLectura"
+            [minFechaStr]="auditoria.fecha_inicio"
+            [maxFechaStr]="auditoria.fecha_fin"
           ></app-actividades-seguimiento>
           <div class="d-flex justify-content-end mt-4">
             <button matStepperPrevious mat-stroked-button color="primary">

@@ -17,6 +17,8 @@ import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-
 export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
   @Input() soloLectura: boolean = false;
+  @Input() minFechaStr?: String;
+  @Input() maxFechaStr?: String;
   datos = new MatTableDataSource<any>([]);
   
   columnsToDisplay: string[] = [
@@ -129,7 +131,9 @@ export class ActividadesSeguimientoComponent implements OnInit {
       width: '1100px', 
       data: { 
         actividad: actividad, 
-        idAuditoria: this.idAuditoria, 
+        idAuditoria: this.idAuditoria,
+        minFechaStr: this.minFechaStr,
+        maxFechaStr: this.maxFechaStr,
       } 
     });
 

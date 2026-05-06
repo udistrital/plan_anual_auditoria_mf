@@ -12,6 +12,8 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 export class CrearActividadSeguimientoComponent {
   auditoriaId: string;
   datos: any | [] = [];
+  minFechaStr: string | null = null;
+  maxFechaStr: string | null = null;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     private alertaService: AlertService,
@@ -19,6 +21,8 @@ export class CrearActividadSeguimientoComponent {
     private dialogRef: MatDialogRef<CrearActividadSeguimientoComponent>,
   ) {
     this.auditoriaId = data.auditoriaId;
+    this.minFechaStr = data.minFechaStr || null;
+    this.maxFechaStr = data.maxFechaStr || null;
   }
 
   ngOnInit(): void {
