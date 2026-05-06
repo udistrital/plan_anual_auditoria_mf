@@ -143,19 +143,23 @@ export class ReferenciaPdfService {
       );
   }
 
-  // Filtra los documentos para quedarse solo con el más reciente de cada tipo_id.
+  // Filtra los documentos para quedarse solo con el más reciente por tipo_id,
+  // usando también dependencia_id cuando está presente para no colapsar documentos
+  // del mismo tipo que pertenecen a dependencias distintas (ej. cartas de representación).
   filtrarValidos(documentos: DocumentoReferenciaPdf[]): DocumentoReferenciaPdf[] {
-    const mapaMaximos = new Map<number, DocumentoReferenciaPdf>();
+    const mapaMaximos = new Map<string, DocumentoReferenciaPdf>();
 
     documentos = documentos.filter(
       (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
     );
 
     for (const doc of documentos) {
-      const existente = mapaMaximos.get(doc.tipo_id);
+      const dependenciaId = doc.metadatos?.['dependencia_id'];
+      const clave = dependenciaId !== undefined ? `${doc.tipo_id}_${dependenciaId}` : String(doc.tipo_id);
+      const existente = mapaMaximos.get(clave);
 
       if (!existente || doc.nuxeo_id > existente.nuxeo_id) {
-        mapaMaximos.set(doc.tipo_id, doc);
+        mapaMaximos.set(clave, doc);
       }
     }
 
