@@ -93,6 +93,16 @@
             <div class="col-12">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Papeles de trabajo</b>
+                <mat-icon
+                  matSuffix
+                  class="tooltip-icon ms-1"
+                  matTooltip="Los papeles de trabajo son los documentos elaborados por el auditor interno u obtenidos por él durante el transcurso de cada una de las fases del proceso."
+                  matTooltipPosition="right"
+                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                  aria-label="Información adicional"
+                >
+                  info
+                </mat-icon>
               </div>
             </div>
             <!-- Referencia -->
@@ -105,6 +115,17 @@
                   placeholder="Referencia"
                   formControlName="papelTrabajoReferencia"
                 />
+                <mat-icon
+                  matSuffix
+                  class="tooltip-icon ms-1"
+                  color="primary"
+                  matTooltip="Marca que le hace al auditor a cada papel de trabajo de acuerdo a la actividad ejecutada y en cumplimiento de las Normas de Auditoria Generalmente Aceptadas."
+                  matTooltipPosition="right"
+                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                  aria-label="Información adicional"
+                >
+                  info
+                </mat-icon>
               </mat-form-field>
             </div>
 
@@ -118,6 +139,17 @@
                   placeholder="Descripción"
                   formControlName="papelTrabajoDescripcion"
                 />
+                <mat-icon
+                  matSuffix
+                  class="tooltip-icon ms-1"
+                  color="primary"
+                  matTooltip="Tipo de documento (acta, procedimiento, lista de chequeo)."
+                  matTooltipPosition="right"
+                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                  aria-label="Información adicional"
+                >
+                  info
+                </mat-icon>
               </mat-form-field>
             </div>
 
@@ -132,6 +164,17 @@
                   placeholder="Folios"
                   formControlName="papelTrabajoFolios"
                 />
+                <mat-icon
+                  matSuffix
+                  class="tooltip-icon ms-1"
+                  color="primary"
+                  matTooltip="Se deben foliar los documentos de cada referencia y poner el numero de folios."
+                  matTooltipPosition="right"
+                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                  aria-label="Información adicional"
+                >
+                  info
+                </mat-icon>
               </mat-form-field>
             </div>
 
@@ -145,6 +188,17 @@
                   placeholder="Medio"
                   formControlName="papelTrabajoMedio"
                 />
+                <mat-icon
+                  matSuffix
+                  class="tooltip-icon ms-1"
+                  color="primary"
+                  matTooltip="Relacionar si es medio físico, magnético."
+                  matTooltipPosition="right"
+                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                  aria-label="Información adicional"
+                >
+                  info
+                </mat-icon>
               </mat-form-field>
             </div>
 
@@ -158,13 +212,23 @@
                   placeholder="Carpeta"
                   formControlName="papelTrabajoCarpeta"
                 />
+                <mat-icon
+                  matSuffix
+                  class="tooltip-icon ms-1"
+                  color="primary"
+                  matTooltip="Relacionar la carpeta del archivo de gestión donde se archivará."
+                  matTooltipPosition="right"
+                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                  aria-label="Información adicional"
+                >
+                  info
+                </mat-icon>
               </mat-form-field>
             </div>
           </div>
   
           <!-- Botones de acción -->
           <div class="d-flex justify-content-center align-items-center my-4">
-            <mat-icon color="primary">info</mat-icon>
             <p class="mx-2">¿Guardar cambios?</p>
           </div>
           <mat-dialog-actions align="center">
