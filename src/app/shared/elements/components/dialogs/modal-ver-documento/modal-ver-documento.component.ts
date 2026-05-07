@@ -22,8 +22,10 @@ interface ModalDocumentoMultipleData {
 export class ModalVerDocumentoComponent implements OnInit {
   @Input() botonGuardar = { icono: "", texto: "" };
   @Input() botonGuardarTodos = { icono: "", texto: "" };
+  @Input() botonDescargarDOCX = { icono: "", texto: "" };
   @Input() onGuardarIndividual?: (indice: number) => void;
   @Input() onGuardarTodos?: () => void;
+  @Input() onDescargarDocumentoDOCX?: (indice: number) => void;
   documentoSrc: any;
   documentoSeleccionadoSrc: Uint8Array | null = null;
   modoMultiple: boolean = false;
@@ -111,6 +113,22 @@ export class ModalVerDocumentoComponent implements OnInit {
     this.dialogRef.close({
       accion: "guardarTodos",
     });
+  }
+
+  descargarDocumentoDOCX(indice: number = this.indiceSeleccionado): void {
+    if (this.onDescargarDocumentoDOCX) {
+      this.onDescargarDocumentoDOCX(indice);
+      return;
+    }
+  }
+
+  validarDescargaDOCX(indice: number = this.indiceSeleccionado): boolean {
+    if (indice >= 0 && indice < this.documentosMultiples.length) {
+      if(!this.documentosMultiples[indice].guardado) {
+        return true;
+      }
+    }
+    return false;
   }
 
   marcarGuardado(indice: number): void {
