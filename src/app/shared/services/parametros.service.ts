@@ -29,7 +29,7 @@ export class ParametrosUtilsService {
    public getVigencias(): Observable<any[]> {
     environment.VIGENCIAS.TIPO_PARAMETRO_ID
 
-    const endpoint = `parametro?query=TipoParametroId:${environment.VIGENCIAS.TIPO_PARAMETRO_ID}&fields=Id,Nombre&limit=0&sortby=nombre&order=desc`;
+    const endpoint = `parametro?query=TipoParametroId:${environment.VIGENCIAS.TIPO_PARAMETRO_ID},Activo:true&fields=Id,Nombre&limit=0&sortby=nombre&order=desc`;
     
     return this.parametrosService.get(endpoint).pipe(
       map((res: any) => {

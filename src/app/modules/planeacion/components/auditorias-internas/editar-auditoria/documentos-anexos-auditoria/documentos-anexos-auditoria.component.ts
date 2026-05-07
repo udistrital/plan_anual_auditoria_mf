@@ -451,16 +451,108 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       this.guardarDocumento(
         documentos[indice].base64,
         this.construirInfoCarta(infoDocumento, documentos[indice]),
-        () => modalInstance.marcarGuardado(indice),
+        () => {
+          modalInstance.marcarGuardado(indice);
+          this.alertService.showSuccessAlert("Archivo subido exitosamente.");
+        },
       );
     };
     modalInstance.onGuardarTodos = () => {
-      documentos.forEach((documentoCarta, indice) => {
-        this.guardarDocumento(
-          documentoCarta.base64,
-          this.construirInfoCarta(infoDocumento, documentoCarta),
-          () => modalInstance.marcarGuardado(indice),
-        );
+      const items = documentos
+        .map((doc, indice) => ({
+          indice,
+          doc,
+          infoDocumento: this.construirInfoCarta(infoDocumento, doc),
+        }))
+        .filter((item) => item.doc.base64 !== "");
+
+      if (items.length === 0) return;
+
+      const payloads = items.map(({ doc, infoDocumento: info }) => ({
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        nombre: info.nombre,
+        descripcion: `Documento pdf (${info.plantilla}) de auditoría de plan de auditoría`,
+        file: doc.base64,
+      }));
+
+      this.nuxeoService.guardarArchivos(payloads).subscribe({
+        next: (responses: any[]) => {
+          const fallidas: string[] = [];
+          let completadas = 0;
+          const total = items.length;
+
+          const verificarCompletado = () => {
+            completadas++;
+            if (completadas === total) {
+              if (fallidas.length > 0) {
+                this.alertService.showErrorAlert(
+                  `No se pudo guardar la referencia de: ${fallidas.join(", ")}`
+                );
+              } else {
+                this.alertService.showSuccessAlert("Todos los archivos fueron subidos exitosamente.");
+              }
+            }
+          };
+
+          items.forEach(({ indice, infoDocumento: info }, i) => {
+            const documentoRefNuxeo = responses[i];
+            const enlaceDocumento = documentoRefNuxeo?.res?.Enlace || null;
+
+            this.guardarReferencia(
+              documentoRefNuxeo,
+              "Auditoria",
+              this.auditoriaId,
+              info.parametro,
+              this.esCartaRepresentacion(info) ? { dependencia_id: info.dependenciaId } : undefined,
+              () => {
+                if (this.esCartaRepresentacion(info)) {
+                  const nombreDependencia = this.normalizarNombreDependencia(
+                    info.dependenciaNombre,
+                    this.resolverNombreDependencia(
+                      info.dependenciaId ?? null,
+                      info.nombre,
+                      this.cartasRepresentacionExistentes.length
+                    )
+                  );
+                  const cartaActualizada = {
+                    nuxeoId: enlaceDocumento,
+                    dependenciaNombre: nombreDependencia,
+                    dependenciaId: info.dependenciaId ?? null,
+                  } as CartaRepresentacionPersistida;
+
+                  const indiceCartaExistente = this.cartasRepresentacionExistentes.findIndex((carta) =>
+                    this.esMismaDependencia(
+                      carta.dependenciaId,
+                      carta.dependenciaNombre,
+                      cartaActualizada.dependenciaId,
+                      cartaActualizada.dependenciaNombre
+                    )
+                  );
+
+                  if (indiceCartaExistente >= 0) {
+                    this.cartasRepresentacionExistentes[indiceCartaExistente] = cartaActualizada;
+                  } else {
+                    this.cartasRepresentacionExistentes.push(cartaActualizada);
+                  }
+
+                  this.documentosExistentes[info.parametro] =
+                    this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+                } else {
+                  this.documentosExistentes[info.parametro] = enlaceDocumento;
+                }
+                modalInstance.marcarGuardado(indice);
+                verificarCompletado();
+              },
+              () => {
+                fallidas.push(info.dependenciaNombre ?? info.nombre);
+                verificarCompletado();
+              }
+            );
+          });
+        },
+        error: (error) => {
+          console.error("Error al subir los documentos", error);
+        },
       });
     };
   }
@@ -492,7 +584,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       if (!res) return;
 
       if (!this.soloLectura && res.accion === "guardarDocumento") {
-        this.guardarDocumento(documentoBase64, infoDocumento);
+        this.guardarDocumento(
+          documentoBase64,
+          infoDocumento,
+          () => this.alertService.showSuccessAlert("Archivo subido exitosamente."),
+        );
       }
     });
   }
@@ -584,7 +680,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     referencia_id: string,
     tipo_id: number,
     metadatos?: Record<string, any>,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    onError?: () => void
   ): void {
     if (nuxeoResponse.res.Enlace) {
       this.referenciaPdfService
@@ -597,11 +694,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         )
         .subscribe({
           next: (response) => {
-            this.alertService.showSuccessAlert("Archivo subido exitosamente.");
             onSuccess?.();
           },
           error: (error) => {
             console.error("Error al guardar la referencia", error);
+            onError?.();
           },
         });
     }
