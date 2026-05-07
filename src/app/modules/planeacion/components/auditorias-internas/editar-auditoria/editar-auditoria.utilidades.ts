@@ -144,14 +144,6 @@ export const formularioRecursosAuditoria: Formulario = {
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
     },
     {
-      nombre: "humanos",
-      etiqueta: "Humanos",
-      tipo: "textarea",
-      validaciones: [{ tipo: "requerido", valor: "" }],
-      deshabilitado: false,
-      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-    },
-    {
       nombre: "fisicos",
       etiqueta: "Fisicos",
       tipo: "textarea",
