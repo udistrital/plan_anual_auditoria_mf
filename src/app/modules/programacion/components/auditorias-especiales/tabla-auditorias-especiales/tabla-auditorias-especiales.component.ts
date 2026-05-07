@@ -343,18 +343,14 @@ export class TablaAuditoriasEspecialesComponent {
           }
         },
         error: (error) => {
-          let mensajeError = "Error al generar la auditoría";
-  
-          if (
-            error?.error?.message?.includes("número máximo") ||
-            error?.error?.Data?.includes("número máximo")
-          ) {
-            mensajeError =
-              "No se pueden generar más auditorías para esta auditoría padre.";
-          }
-  
-          console.error("Error al generar la auditoría:", error);
-          this.alertaService.showErrorAlert(mensajeError);
+          const backendMessage =
+            error?.error?.message || "Error al generar la auditoría";
+        
+          const mensajeTexto = Array.isArray(backendMessage)
+            ? backendMessage.join(" ")
+            : backendMessage;
+        
+          this.alertaService.showAlert("",mensajeTexto);
         },
       });
   }
