@@ -162,7 +162,8 @@ export class ModalRechazoSeguimientoComponent {
           switchMap((terceros: any[]) => {
             const correosAuditores = terceros
               .filter((t) => t?.UsuarioWSO2)
-              .map((t) => t.UsuarioWSO2);
+              .map((t) => t.UsuarioWSO2)
+              .filter((v: string) => v.includes('@'));
 
             console.log("[notificarRechazo - SEGUIMIENTO] correos auditores resueltos:", correosAuditores);
 
