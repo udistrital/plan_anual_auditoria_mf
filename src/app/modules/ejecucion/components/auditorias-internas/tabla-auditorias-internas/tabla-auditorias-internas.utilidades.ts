@@ -20,29 +20,32 @@ export const colocacionesContructorTabla = [
     sortable: false,
   },
   {
+    columnDef: "auditores",
+    header: "Auditor(es)",
+    cell: (auditoria: any) =>
+      auditoria.auditores
+        ?.map((auditor: any) => auditor.auditor_nombre)
+        ?.join(", ") ?? "",
+    sortable: false,
+  },
+  {
     columnDef: "dependencia",
     header: "Dependencia",
     cell: (auditoria: any) => auditoria.dependencia_nombre,
     sortable: false,
   },
-  {
-    columnDef: "auditores",
-    header: "Auditor(es)",
-    cell: (auditoria: any) => "",
-    sortable: false,
-  },
-  {
-    columnDef: "lider",
-    header: "Líder",
-    cell: (auditoria: any) => "",
-    sortable: false,
-  },
-  {
-    columnDef: "responsable",
-    header: "Responsable",
-    cell: (auditoria: any) => "",
-    sortable: false,
-  },
+  // {
+  //   columnDef: "lider",
+  //   header: "Líder",
+  //   cell: (auditoria: any) => "",
+  //   sortable: false,
+  // },
+  // {
+  //   columnDef: "responsable",
+  //   header: "Responsable",
+  //   cell: (auditoria: any) => "",
+  //   sortable: false,
+  // },
   {
     columnDef: "estado",
     header: "Estado",

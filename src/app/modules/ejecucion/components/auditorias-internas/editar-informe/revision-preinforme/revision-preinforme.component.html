@@ -43,7 +43,7 @@
               <div class="node-row hallazgo-row">
                 <span class="node-dot hallazgo-dot"></span>
                 <span class="nivel-label">Hallazgo</span>
-                <span class="indice">{{ i + 2 }}.{{ j + 1 }}.{{ k + 1 }}</span>
+                <span class="indice" *ngIf="!item.hallazgo.rechazado">{{ i + 2 }}.{{ j + 1 }}.{{ hallazgoNumeral(subtemaItem.hallazgos, k) }}</span>
                 <ng-container *ngIf="item.hallazgo?.rechazado">
                   <div class="status">
                     <mat-icon color="primary">block</mat-icon>
@@ -72,6 +72,10 @@
                     <mat-icon class="obs-icono">forum</mat-icon>
                     <span class="obs-titulo">Observaciones</span>
                   </div>
+                  <div *ngIf="fechaFinRevision" class="fecha-revision">
+                    <mat-icon>schedule</mat-icon>
+                    <span>Fecha límite de revisión del auditado: <strong>{{ fechaFinFormateada }}</strong></span>
+                  </div>
                   <ng-container *ngFor="let obs of item.observacionesAuditado">
                     <!-- Mi observación: editable -->
                     <ng-container
@@ -87,7 +91,7 @@
                       <div class="d-flex justify-content-end">
                         <button mat-flat-button color="primary" (click)="guardarObservacion(item, obs)"
                           [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
-                          {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar' }}
+                          {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
                         </button>
                       </div>
                     </ng-container>
@@ -115,7 +119,7 @@
                     <div class="d-flex justify-content-end">
                       <button mat-flat-button color="primary" (click)="guardarObservacion(item, null)"
                         [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
-                        {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar' }}
+                        {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
                       </button>
                     </div>
                   </ng-container>
@@ -147,7 +151,7 @@
                       <button mat-flat-button color="primary"
                         (click)="guardarObservacion(item, item.observacionAuditor)"
                         [disabled]="estaGuardando(item.hallazgo._id)">
-                        {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar' }}
+                        {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
                       </button>
                     </div>
                   </ng-container>

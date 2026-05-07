@@ -177,3 +177,24 @@
   gap: 4px;
   color: var(--md-primary-500);
 }
+
+.fecha-revision {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #5d4037;
+  font-size: 0.82rem;
+}
+
+.fecha-revision mat-icon {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  color: #f9a825;
+  flex-shrink: 0;
+}

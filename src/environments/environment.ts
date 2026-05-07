@@ -105,6 +105,14 @@ export const environment = {
     BccAddresses: []
   },
 
+  NOTIFICACION_PREINFORME_ENVIO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa26auditado@yopmail.com",
+    ],
+    CcAddresses: [],
+    BccAddresses: []
+  },
+
   VIGENCIAS : {
     TIPO_PARAMETRO_ID: 121,
   },
@@ -249,6 +257,8 @@ export const environment = {
     JEFE_DEPENDENCIA_ID: 312,
     ASISTENTE_DEPENDENCIA_ID: 320,
   },
+
+  DIAS_REVISION_PREINFORME: 3,
 
   // idsCamposFormulario: {
   //   Objetivo: 6770,
