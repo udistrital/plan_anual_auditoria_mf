@@ -678,7 +678,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
             this.auditoriaId,
             infoDocumento.parametro,
             this.esCartaRepresentacion(infoDocumento)
-              ? { dependencia_id: infoDocumento.dependenciaId }
+              ? { dependencia_id: infoDocumento.dependenciaId, firmado: false }
               : undefined,
             () => {
               if (this.esCartaRepresentacion(infoDocumento)) {

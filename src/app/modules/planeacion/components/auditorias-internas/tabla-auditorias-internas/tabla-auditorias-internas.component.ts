@@ -358,7 +358,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           cargueAdjuntoConfig: cargueAdjuntoConfig
             ? {
                 ...cargueAdjuntoConfig,
-                metadatosAdicionales: { firmada: true},
+                metadatosAdicionales: { firmado: true},
               }
             : undefined,
         }
