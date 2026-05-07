@@ -1,4 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
@@ -64,6 +65,9 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   usuarioId: number = 0;
   usuarioRol: string = '';
   dependenciaIds: number[] = [];
+
+  temasRaw: any[] | null = null;
+  hallazgosRaw: any[] | null = null;
 
   // Cuando el informe ya fue aprobado por el auditado -> Pasa a informe final
   get pasosInicialesSoloLectura(): boolean {
@@ -171,6 +175,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     this.informeId = this.route.snapshot.paramMap.get("id")!;
     this.cargarInforme();
     this.cargarUsuario();
+    this.cargarTemasYHallazgos();
   }
 
   private async cargarUsuario(): Promise<void> {
@@ -231,6 +236,19 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   regresarRuta() {
     this.router.navigate([`/ejecucion/auditorias-internas`]);
+  }
+
+  cargarTemasYHallazgos(): void {
+    Promise.all([
+      firstValueFrom(this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`)),
+      firstValueFrom(this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}&limit=0`)),
+    ]).then(([temasResp, hallazgosResp]: [any, any]) => {
+      this.temasRaw = temasResp?.Data || [];
+      this.hallazgosRaw = hallazgosResp?.Data || [];
+    }).catch(() => {
+      this.temasRaw = [];
+      this.hallazgosRaw = [];
+    });
   }
 
   // Carga el informe y la auditoría enriquecida (MID) para poblar todos los campos
@@ -431,11 +449,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     if (this.aspectosEvaluadosComponent) {
       const ok = await this.aspectosEvaluadosComponent.guardarAspectos();
       if (ok) this.stepper.next();
-
-      // Recargar resumen de hallazgos después de guardar
-      if (this.resumenHallazgosComponent) {
-        this.resumenHallazgosComponent.cargarHallazgos();
-      }
+      this.cargarTemasYHallazgos();
     }
   }
 
@@ -635,8 +649,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   // Se ejecuta cuando se eliminan temas, subtemas o hallazgos
   onDatosActualizados(): void {
-    if (this.resumenHallazgosComponent) {
-      this.resumenHallazgosComponent.cargarHallazgos();
-    }
+    this.cargarTemasYHallazgos();
   }
 }

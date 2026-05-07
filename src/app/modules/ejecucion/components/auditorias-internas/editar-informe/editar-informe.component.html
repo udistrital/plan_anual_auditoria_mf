@@ -118,7 +118,7 @@
           </div>
 
           <div class="mt-4">
-            <app-aspectos-evaluados [informeId]="informeId" [auditoriaId]="auditoriaId" [soloLectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
+            <app-aspectos-evaluados [informeId]="informeId" [auditoriaId]="auditoriaId" [soloLectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
                 Volver
@@ -152,7 +152,7 @@
             </div>
           </div>
           <div class="mt-4">
-            <app-resumen-hallazgos [informeId]="informeId" #resumenHallazgosComp></app-resumen-hallazgos>
+            <app-resumen-hallazgos [informeId]="informeId" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #resumenHallazgosComp></app-resumen-hallazgos>
             <div class="d-flex justify-content-end mt-4">
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
@@ -191,11 +191,15 @@
           <div class="mt-4">
             <app-revision-preinforme
               [informeId]="informeId"
+              [temasRaw]="temasRaw"
+              [hallazgosRaw]="hallazgosRaw"
               [puedeEscribirObservacionAuditado]="puedeEscribirObservacionAuditado"
               [puedeEscribirObservacionAuditor]="puedeEscribirObservacionAuditor"
               [usuarioId]="usuarioId"
               [usuarioRol]="usuarioRol"
-              [dependenciaIds]="dependenciaIds">
+              [dependenciaIds]="dependenciaIds"
+              [fechaFinRevision]="informeData?.fecha_fin_revision"
+              (datosModificados)="cargarTemasYHallazgos()">
             </app-revision-preinforme>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious type="button">
