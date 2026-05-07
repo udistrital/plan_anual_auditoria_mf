@@ -23,7 +23,13 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { forkJoin } from "rxjs";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { forkJoin, of, throwError } from "rxjs";
+import { catchError, exhaustMap, tap } from "rxjs/operators";
 
 @Component({
   selector: "app-tabla-seguimiento",
@@ -70,6 +76,10 @@ export class TablaSeguimientoComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly router: Router,
     private readonly userService: UserService,
+    private readonly tercerosService: TercerosService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
   ) {}
 
   ngOnInit() {
@@ -433,19 +443,121 @@ export class TablaSeguimientoComponent implements OnInit {
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
+
     this.planAuditoriaService
       .post("auditoria-estado", auditoriaEstado)
       .subscribe({
         next: () => {
           this.alertService.showSuccessAlert(
-            "Auditoría enviada a aprobación por Jefe",
+            "Auditoría enviada a revisión del programa por Jefe",
             "Auditoría enviada"
           );
+          this.notificarEnvioAJefe(auditoriaId);
+          this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, this.pageIndex * this.pageSize);
         },
-        error: () => {
-          this.alertService.showErrorAlert("Error al enviar el plan.");
+        error: (error) => {
+          this.alertService.showErrorAlert("Error al enviar el programa.");
         }
-      });
+    });
+  }
+
+    /**
+   * Notifica al Jefe OCI cuando un auditor envía el programa de auditoría a revisión.
+   * Patrón: getAuthenticatedUserTerceroIdentification() primero y sola,
+   * luego forkJoin con auditoria.
+   */
+  
+  private notificarEnvioAJefe(auditoriaId: string): void {
+    const rolRemitente = [
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+
+    this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+
+      exhaustMap((tercero) =>
+        forkJoin({
+          auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
+          vigencias: this.parametrosUtilsService.getVigencias(),
+          nombreRemitente: of(tercero.NombreCompleto),
+        })
+      ),
+
+      exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
+        const datosAuditoria = auditoria?.Data;
+
+        const vigenciaId = datosAuditoria?.vigencia_id;
+        const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
+        const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+
+        const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
+          [],
+          environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS
+        );
+
+        const variablesSolicitud: VariablesSolicitud = {
+          titulo_solicitud: "Revisión de Programa de Auditoría",
+          tipo_solicitud: "revisión y aprobación",
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          vigencia: vigenciaNombre,
+          rol_remitente: rolRemitente,
+          nombre_remitente: nombreRemitente || rolRemitente,
+          fecha_envio: new Date().toLocaleDateString(),
+        };
+
+        return this.notificacionesService.enviarNotificacionSolicitud(
+          destinatarios,
+          variablesSolicitud
+        ).pipe(
+          tap((response: any) => {
+            if (response?.Status == 200) {
+              this.registrarNotificacion(
+                auditoriaId,
+                destinatarios,
+                variablesSolicitud,
+                "envio_revision_jefe_programa_trabajo"
+              );
+            }
+          })
+        );
+      }),
+
+      catchError((error) => {
+        console.warn("Error al enviar notificación al Jefe OCI:", error);
+        return throwError(() => error);
+      })
+
+    ).subscribe({
+      error: (err) => console.warn("Error en notificación envío a Jefe:", err),
+    });
+  }
+
+  private registrarNotificacion(
+    auditoriaId: string,
+    destinatarios: DestinatariosEmail,
+    variables: VariablesSolicitud,
+    tipoNotificacion: string,
+    template: string = PLANTILLA_SOLICITUD_NOMBRE,
+  ): void {
+    const payload = {
+      plantilla: template,
+      fecha_envio: new Date(),
+      metadato: {
+        ...variables,
+        tipo_notificacion: tipoNotificacion,
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: auditoriaId,
+      referencia_tipo: 'AUDITORIA INTERNA',
+    };
+
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug("Registro de notificación guardado:", res),
+      error: (err) => console.warn("Error guardando registro de notificación:", err),
+    });
   }
 
   /**
