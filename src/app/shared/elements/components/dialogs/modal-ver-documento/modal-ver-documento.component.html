@@ -85,4 +85,15 @@
     <mat-icon>{{ botonGuardarTodos.icono }}</mat-icon
     >{{ botonGuardarTodos.texto }}
   </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    class="my-3"
+    *ngIf="botonDescargarDOCX.texto && validarDescargaDOCX()"
+    (click)="descargarDocumentoDOCX()"
+  >
+    <mat-icon>{{ botonDescargarDOCX.icono }}</mat-icon
+    >{{ botonDescargarDOCX.texto }}
+  </button>
 </ng-template>
