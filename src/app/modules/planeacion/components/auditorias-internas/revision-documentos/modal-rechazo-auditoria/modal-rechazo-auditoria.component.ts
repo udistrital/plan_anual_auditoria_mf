@@ -10,10 +10,10 @@ import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
   NotificacionesService,
   DestinatariosEmail,
-  VariablesSolicitud,
+  VariablesRechazo,
 } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
-import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
+import { PLANTILLA_RECHAZO_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
@@ -164,7 +164,8 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
           switchMap((terceros: any[]) => {
             const correosAuditores = terceros
               .filter((t) => t?.UsuarioWSO2)
-              .map((t) => t.UsuarioWSO2);
+              .map((t) => t.UsuarioWSO2)
+              .filter((v: string) => v.includes('@'));
 
             console.log("correos auditores resueltos:", correosAuditores);
 
@@ -190,9 +191,9 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
               BccAddresses: fijosRechazo.BccAddresses ?? [],
             };
 
-            const variablesSolicitud: VariablesSolicitud = {
-              titulo_solicitud: "Rechazo de Programa de Auditoría",
-              tipo_solicitud: "revisión y corrección",
+            const variablesRechazo: VariablesRechazo = {
+              titulo_rechazo: "Rechazo de Programa de Auditoría",
+              motivo_rechazo: this.formObservaciones.get("observaciones")?.value || "",
               nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
@@ -200,31 +201,23 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
               fecha_envio: new Date().toLocaleDateString(),
             };
 
-            console.log("PAYLOAD RECHAZO:", JSON.stringify({ destinatarios, variablesSolicitud }, null, 2));
+            console.log("PAYLOAD RECHAZO:", JSON.stringify({ destinatarios, variablesRechazo }, null, 2));
             console.log("Correos a los que se va a enviar:");
             console.log("  To:", destinatarios.ToAddresses);
             console.log("  Cc:", destinatarios.CcAddresses);
             console.log("  Bcc:", destinatarios.BccAddresses);
 
-            return this.notificacionesService.enviarNotificacionSolicitud(
+            return this.notificacionesService.enviarNotificacionRechazo(
               destinatarios,
-              variablesSolicitud
+              variablesRechazo
             ).pipe(
               tap((response: any) => {
                 console.log("RESPUESTA NOTIFICACION:", JSON.stringify(response, null, 2));
                 if (response?.Status == 200) {
-                  console.log("Registrando en BD:", JSON.stringify({
-                    template: "SISIFO_PLANTILLA_SOLICITUD",
-                    tipo_notificacion: "rechazo_programa_trabajo",
-                    referencia_id: auditoriaId,
-                    destinatarios_to: destinatarios.ToAddresses,
-                    destinatarios_cc: destinatarios.CcAddresses,
-                    destinatarios_bcc: destinatarios.BccAddresses,
-                  }, null, 2));
                   this.registrarNotificacion(
                     auditoriaId,
                     destinatarios,
-                    variablesSolicitud,
+                    variablesRechazo,
                     "rechazo_programa_trabajo"
                   );
                 }
@@ -249,9 +242,9 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
   private registrarNotificacion(
     auditoriaId: string,
     destinatarios: DestinatariosEmail,
-    variables: VariablesSolicitud,
+    variables: VariablesRechazo,
     tipoNotificacion: string,
-    template: string = PLANTILLA_SOLICITUD_NOMBRE,
+    template: string = PLANTILLA_RECHAZO_NOMBRE,
   ): void {
     const payload = {
       plantilla: template,
