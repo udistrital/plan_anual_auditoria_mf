@@ -19,6 +19,12 @@ interface CartaRepresentacionDocumento {
   guardado: boolean;
 }
 
+interface CartaRepresentacionDocumentoDOCX {
+  base64: string;
+  dependenciaNombre: string;
+  dependenciaId: number | null;
+}
+
 interface CartaRepresentacionPersistida {
   nuxeoId: string | null;
   dependenciaNombre: string;
@@ -293,7 +299,17 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         })
       );
 
-      this.verDocumentoMultiple(cartas, documento);
+      const plantilla = documento.plantilla;
+      const idAuditoria = this.auditoriaId;
+      let documentosDOCX: any = [];
+
+      this.PlanAnualAuditoriaMid.get(`plantilla/docx/${plantilla}/${idAuditoria}`).subscribe((res) => {
+      documentosDOCX = this.mapearCartasDesdeRespuestaPlantilla(res?.Data).map((documentoDOCX) => ({
+        ...documentoDOCX
+      }));
+      this.verDocumentoMultiple(cartas, documento, documentosDOCX);
+    });
+
     } catch (error) {
       console.error("Error al cargar cartas de representación guardadas", error);
       this.alertService.showErrorAlert("No fue posible visualizar las cartas guardadas.");
@@ -418,15 +434,22 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           ...carta,
           guardado: this.estaCartaGuardada(carta.dependenciaId, carta.dependenciaNombre),
         }));
-        this.verDocumentoMultiple(cartas, documento);
-        return;
+
+        this.PlanAnualAuditoriaMid.get(`plantilla/docx/${plantilla}/${idAuditoria}`).subscribe((res) => {
+          const documentosDOCX = this.mapearCartasDesdeRespuestaPlantilla(res?.Data).map((documentoDOCX) => ({
+            ...documentoDOCX
+          }));
+
+          this.verDocumentoMultiple(cartas, documento, documentosDOCX);
+          return;
+        });
       }
 
       this.verDocumento(res.Data, documento);
     });
   }
 
-  private verDocumentoMultiple(documentos: CartaRepresentacionDocumento[], infoDocumento: any): void {
+  private verDocumentoMultiple(documentos: CartaRepresentacionDocumento[], infoDocumento: any, documentosDOCX: CartaRepresentacionDocumentoDOCX[]): void {
     const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
       width: "1200px",
       data: {
@@ -436,6 +459,10 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           base64: documento.base64,
           guardado: documento.guardado,
         })),
+        documentosDOCX: documentosDOCX ? documentosDOCX.map((documentoDOCX) => ({
+          titulo: `Carta de Representación ${documentoDOCX.dependenciaNombre}`,
+          base64: documentoDOCX.base64
+        })) : []
       },
       autoFocus: false,
     });
@@ -447,6 +474,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     const modalInstance = dialogRef.componentInstance;
     modalInstance.botonGuardar = { icono: "save", texto: "Guardar carta actual" };
     modalInstance.botonGuardarTodos = { icono: "save", texto: "Guardar todas" };
+    modalInstance.botonDescargarDOCX = { icono: "download", texto: "Descargar DOCX"};
     modalInstance.onGuardarIndividual = (indice: number) => {
       this.guardarDocumento(
         documentos[indice].base64,
@@ -555,6 +583,32 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         },
       });
     };
+    modalInstance.onDescargarDocumentoDOCX = (indice: number) => {
+      const base64 = documentosDOCX?.[indice].base64;
+      const nombreArchivo = `CARTA DE REPRESENTACION - ${documentosDOCX?.[indice].dependenciaNombre}`;
+      this.descargarDocumentoDOCX(base64, nombreArchivo);
+    }
+  }
+
+  private descargarDocumentoDOCX(base64String: any, nombreDocumento: string) {
+
+    const byteCharacters = atob(base64String);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+
+    const url = window.URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombreDocumento;
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    window.URL.revokeObjectURL(url);
   }
 
   private construirInfoCarta(infoDocumento: any, carta: CartaRepresentacionDocumento): any {
@@ -624,7 +678,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
             this.auditoriaId,
             infoDocumento.parametro,
             this.esCartaRepresentacion(infoDocumento)
-              ? { dependencia_id: infoDocumento.dependenciaId }
+              ? { dependencia_id: infoDocumento.dependenciaId, firmado: false }
               : undefined,
             () => {
               if (this.esCartaRepresentacion(infoDocumento)) {

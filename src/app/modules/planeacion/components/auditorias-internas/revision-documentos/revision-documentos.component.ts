@@ -115,7 +115,7 @@ export class RevisionDocumentosComponent implements OnInit {
 
   verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
     for (const carta of cartas) {
-      if (!carta.metadatos!["firmada"]) {
+      if (!carta.metadatos!["firmado"]) {
         this.alertService.showAlert(
           "Carta sin firmar",
           `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
@@ -274,7 +274,9 @@ export class RevisionDocumentosComponent implements OnInit {
 
   async cargarCartasAuditado() {
       const cartas = (await lastValueFrom(
-        this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {})
+        this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {
+          deduplicarPorTipo: false,
+        })
       )) as DocumentoAdjuntoRevision[];
 
       return cartas.filter(
@@ -319,7 +321,7 @@ export class RevisionDocumentosComponent implements OnInit {
             idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
             descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
             referenciaTipoFallback: "Auditoria",
-            metadatosAdicionales: { firmada: true },
+            metadatosAdicionales: { firmado: true },
             onSuccess: async () => {
               cartasAuditado = await this.cargarCartasAuditado();
               this.cargarDocumentos();
@@ -374,7 +376,9 @@ export class RevisionDocumentosComponent implements OnInit {
       this.filtrarDocumentosPorDependenciaAuditado(tipoDocumentoMap);
     } else {
       this.referenciaPdfService
-        .consultarDocumentos(this.auditoriaId, {})
+        .consultarDocumentos(this.auditoriaId, {
+          deduplicarPorTipo: false,
+        })
         .subscribe(async (documentosAdjuntos: DocumentoReferenciaPdf[]) => {
           await this.cargarDependenciasPorAuditoria();
 
@@ -617,7 +621,8 @@ export class RevisionDocumentosComponent implements OnInit {
           switchMap((terceros: any[]) => {
             const correosAuditores = terceros
               .filter((t) => t?.UsuarioWSO2)
-              .map((t) => t.UsuarioWSO2);
+              .map((t) => t.UsuarioWSO2)
+              .filter((v: string) => v.includes('@'));
 
             const toAddressesDinamicos: string[] = dependenciasInfo.flatMap((dep) => {
               const correos: string[] = [];
@@ -744,7 +749,8 @@ export class RevisionDocumentosComponent implements OnInit {
             // Auditores van al To
             const correosAuditores = terceros
               .filter((t) => t?.UsuarioWSO2)
-              .map((t) => t.UsuarioWSO2);
+              .map((t) => t.UsuarioWSO2)
+              .filter((v: string) => v.includes('@'));
 
             // Dependencia auditada va al Cc
             const correosDependencia: string[] = dependenciasInfo.flatMap((dep) => {

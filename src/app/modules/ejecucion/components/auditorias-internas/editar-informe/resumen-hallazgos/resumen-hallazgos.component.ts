@@ -1,6 +1,4 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
-import { firstValueFrom } from 'rxjs';
 
 interface HallazgoResumen {
   numero: string;
@@ -15,74 +13,47 @@ interface HallazgoResumen {
 })
 export class ResumenHallazgosComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() temasRaw: any[] | null = null;
+  @Input() hallazgosRaw: any[] | null = null;
 
   displayedColumns: string[] = ['numero', 'criterio', 'descripcion'];
   hallazgos: HallazgoResumen[] = [];
   cargando = false;
 
-  constructor(
-    private planAnualAuditoriaService: PlanAnualAuditoriaService
-  ) { }
-
-  ngOnInit(): void {
-    if (this.informeId) {
-      this.cargarHallazgos();
-    }
-  }
+  ngOnInit(): void { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['informeId'] && this.informeId) {
-      this.cargarHallazgos();
+    if ((changes['temasRaw'] || changes['hallazgosRaw']) && this.temasRaw !== null && this.hallazgosRaw !== null) {
+      this.computarHallazgos(this.temasRaw, this.hallazgosRaw);
     }
   }
 
-  cargarHallazgos(): void {
-    if (!this.informeId) return;
+  private computarHallazgos(temas: any[], hallazgos: any[]): void {
+    const lista: HallazgoResumen[] = [];
+    let temaCount = 0;
 
-    this.cargando = true;
+    for (const tema of temas) {
+      if (!tema.activo) continue;
+      temaCount++;
+      let subtemaCount = 0;
 
-    // Queries en paralelo: estructura (temas+subtemas) y datos (hallazgos)
-    Promise.all([
-      firstValueFrom(this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`)),
-      firstValueFrom(this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}`)),
-    ]).then(([temasResp, hallazgosResp]: [any, any]) => {
-      const temas: any[] = temasResp?.Data || [];
-      const todosLosHallazgos: any[] = hallazgosResp?.Data || [];
-      const hallazgosList: HallazgoResumen[] = [];
+      for (const subtema of (tema.subtema || [])) {
+        if (!subtema.activo) continue;
+        subtemaCount++;
+        let hallazgoCount = 0;
 
-      let temaCount = 0;
-
-      for (const tema of temas) {
-        if (!tema.activo) continue;
-        temaCount++;
-        let subtemaCount = 0;
-
-        for (const subtema of (tema.subtema || [])) {
-          if (!subtema.activo) continue;
-          subtemaCount++;
-          let hallazgoCount = 0;
-
-          const subtemaIdStr = subtema._id?.toString();
-          const hallazgosDeSubtema = todosLosHallazgos.filter(
-            (h: any) => h.subtema_id?.toString() === subtemaIdStr && h.activo !== false
-          );
-
-          for (const hallazgo of hallazgosDeSubtema) {
-            hallazgoCount++;
-            hallazgosList.push({
-              numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
-              criterio: hallazgo.criterio || '',
-              descripcion: hallazgo.descripcion || ''
-            });
-          }
+        const subtemaIdStr = subtema._id?.toString();
+        for (const h of hallazgos.filter(h => h.subtema_id?.toString() === subtemaIdStr && h.activo !== false)) {
+          hallazgoCount++;
+          lista.push({
+            numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
+            criterio: h.criterio || '',
+            descripcion: h.descripcion || ''
+          });
         }
       }
+    }
 
-      this.hallazgos = hallazgosList;
-      this.cargando = false;
-    }).catch((error) => {
-      console.error('Error al cargar hallazgos:', error);
-      this.cargando = false;
-    });
+    this.hallazgos = lista;
   }
 }
