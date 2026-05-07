@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ModalRechazoAuditoriaComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
-import { MatDialog } from "@angular/material/dialog";
+import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 import { rolesAprobacion } from "./revision-documentos.utilidades";
 
@@ -66,6 +66,7 @@ export class RevisionDocumentosComponent implements OnInit {
   docSolicitudInformacion: string = "";
   cartasRepresentacion: CartaRepresentacionRevision[] = [];
   docCompromisoEtico: string = "";
+  cargueCartasDialogRef?: MatDialogRef<any>;
 
   constructor(
     public dialog: MatDialog,
@@ -112,6 +113,20 @@ export class RevisionDocumentosComponent implements OnInit {
       });
   }
 
+  verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
+    for (const carta of cartas) {
+      if (!carta.metadatos!["firmada"]) {
+        this.alertService.showAlert(
+          "Carta sin firmar",
+          `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
+        );
+        return;
+      }
+    }
+
+    this.preguntarAprobacionAuditoria();
+  }
+
   preguntarAprobacionAuditoria() {
     const rolAprobacion = this.rolesAprobacion[this.role!];
 
@@ -122,42 +137,21 @@ export class RevisionDocumentosComponent implements OnInit {
     const { estadoAprobacion, mensajeAprobacion, preguntaAprobacion } =
       rolAprobacion;
 
-    if (this.role == environment.ROL.JEFE_DEPENDENCIA || this.role == environment.ROL.ASISTENTE_DEPENDENCIA) {
-      const dialogRef = this.dialog.open(ModalAprobacionAuditadoComponent, {
-        width: "600px",
-        data: {
-          auditoria_id: this.auditoriaId
+    this.alertService
+      .showConfirmAlert(preguntaAprobacion)
+      .then((confirmado) => {
+        if (!confirmado.value) {
+          return;
+        }
+
+        if (Array.isArray(estadoAprobacion)) {
+          this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
+        } else {
+          this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion).then(() =>
+            this.notificarAceptacionAuditado(this.auditoriaId)
+          )
         }
       });
-
-      dialogRef.afterClosed().subscribe((aprobado: boolean) => {
-        if (aprobado) {
-          if (Array.isArray(estadoAprobacion)) {
-            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
-          } else {
-            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion).then(() => {
-              // El auditado firma y envía al auditor
-              // Se notifica al auditor con copia a la dependencia auditada
-              this.notificarAceptacionAuditado(this.auditoriaId);
-            });
-          }
-        }
-      });
-    } else {
-      this.alertService
-        .showConfirmAlert(preguntaAprobacion)
-        .then((confirmado) => {
-          if (!confirmado.value) {
-            return;
-          }
-
-          if (Array.isArray(estadoAprobacion)) {
-            this.aprobarAuditoriaSecuencial(estadoAprobacion, mensajeAprobacion);
-          } else {
-            this.aprobarAuditoria(estadoAprobacion, mensajeAprobacion);
-          }
-        });
-    }
   }
 
   async aprobarAuditoriaSecuencial(
@@ -193,6 +187,12 @@ export class RevisionDocumentosComponent implements OnInit {
                 mensajeAprobacion,
                 "Auditoría enviada"
               ).then(() => {
+                try {
+                  this.cargueCartasDialogRef?.close();
+                } catch (e) {
+                  console.error("Error al cerrar el modal de cargue de cartas firmadas", e);
+                }
+
                 this.router.navigate([`/planeacion/auditorias-internas/`]);
                 resolve();
               });
@@ -272,17 +272,20 @@ export class RevisionDocumentosComponent implements OnInit {
     );
   }
 
-  async abrirModalCargueCartasFirmadas(): Promise<void> {
-    try {
+  async cargarCartasAuditado() {
       const cartas = (await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {})
       )) as DocumentoAdjuntoRevision[];
 
-      const cartasAuditado = cartas.filter(
+      return cartas.filter(
         (documento) =>
           documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
       );
+  }
 
+  async abrirModalCargueCartasFirmadas(): Promise<void> {
+    try {
+      let cartasAuditado = await this.cargarCartasAuditado();
       console.debug("Cartas de representación visibles para modal:", cartasAuditado);
 
       if (!Array.isArray(cartasAuditado) || cartasAuditado.length === 0) {
@@ -316,15 +319,16 @@ export class RevisionDocumentosComponent implements OnInit {
             idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
             descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
             referenciaTipoFallback: "Auditoria",
-            metadatosAdicionales: { firmado: true },
+            metadatosAdicionales: { firmada: true },
             onSuccess: async () => {
+              cartasAuditado = await this.cargarCartasAuditado();
               this.cargarDocumentos();
             },
           },
         };
       });
 
-      this.dialog.open(ModalVerDocumentosComponent, {
+      this.cargueCartasDialogRef = this.dialog.open(ModalVerDocumentosComponent, {
         width: "1200px",
         data: {
           entityId: this.auditoriaId,
@@ -334,6 +338,14 @@ export class RevisionDocumentosComponent implements OnInit {
           tabs,
           tipo: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           textoBotonCerrar: "Cerrar",
+          accionesFooter: [
+            {
+              nombre: this.rolesAprobacion[this.role!].botonAprobacion,
+              icono: "fact_check",
+              color: "primary",
+              accion: async () => this.verificarFirmaCartaYPreguntarAprobacion(cartasAuditado),
+            },
+          ],
         },
       });
     } catch (error) {
@@ -400,6 +412,7 @@ export class RevisionDocumentosComponent implements OnInit {
           (carta): carta is CartaRepresentacionRevision => !!carta
         );
 
+        await this.cargarDependenciasPorAuditoria();
         this.actualizarDocumentosVisibles();
       });
     }
@@ -579,6 +592,12 @@ export class RevisionDocumentosComponent implements OnInit {
         const datosAuditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
         const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
+        dependenciasInfo.forEach((dep) => 
+          datosAuditoria.correo_complementario.forEach((correo: any) => {
+            if (correo.dependencia_id === dep.dependencia_id)
+              dep.correo_complementario = correo.correo;
+          })
+        );
 
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
@@ -857,8 +876,28 @@ export class RevisionDocumentosComponent implements OnInit {
 
     this.planAuditoriaMid.get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
       .subscribe(async (res) => {
+        await this.cargarDependenciasPorAuditoria();
+        let indiceCarta = 0;
+
         const promesas = res.map(async (documento: any) => {
+          if (!documento?.nuxeo_enlace) {
+            return null;
+          }
+
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
+          if (documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION) {
+            this.documentos.push({ base64, tipo_id: documento.tipo_id });
+
+            const indiceCartaActual = indiceCarta;
+            indiceCarta += 1;
+
+            this.cartasRepresentacion.push({
+              base64,
+              dependenciaNombre: this.resolverNombreDependencia(documento, indiceCartaActual),
+            });
+            return null;
+          }
 
           const propiedad = tipoDocumentoMap[documento.tipo_id];
           if (propiedad) {
@@ -866,8 +905,11 @@ export class RevisionDocumentosComponent implements OnInit {
           }
 
           this.documentos.push({ base64, tipo_id: documento.tipo_id });
+          return null;
         });
+
         await Promise.all(promesas);
+        this.actualizarDocumentosVisibles();
       });
   }
 }

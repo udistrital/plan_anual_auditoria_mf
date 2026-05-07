@@ -42,28 +42,28 @@ export class NuxeoService {
       return from([[] as any[]]);
     }
 
-    const requests = files.map((file: any) =>
-      from(this.obtenerArchivoEnBase64(file)).pipe(
-        mergeMap((fileData: string) => {
-          const sendFileData = [
-            {
-              IdTipoDocumento: file.IdTipoDocumento,
-              nombre: (file.nombre || "").replace(/[\.]/g),
-              metadatos: file.metadatos ? file.metadatos : {},
-              descripcion: file.descripcion ? file.descripcion : "",
-              file: fileData,
-            },
-          ];
+    return forkJoin(files.map((file) => from(this.obtenerArchivoEnBase64(file)))).pipe(
+      mergeMap((fileDatas: string[]) => {
+        const sendFileData = files.map((file, i) => ({
+          IdTipoDocumento: file.IdTipoDocumento,
+          nombre: (file.nombre || "").replace(/[\.]/g),
+          metadatos: file.metadatos ? file.metadatos : {},
+          descripcion: file.descripcion ? file.descripcion : "",
+          file: fileDatas[i],
+        }));
 
-          return this.gestorDocumentalService.postAny(
-            "document/uploadAnyFormat",
-            sendFileData
+        return this.gestorDocumentalService
+          .postAny("document/uploadAnyFormat", sendFileData)
+          .pipe(
+            map((response: any) => {
+              if (Array.isArray(response?.res)) {
+                return response.res.map((item: any) => ({ ...response, res: item }));
+              }
+              return [response];
+            })
           );
-        })
-      )
+      })
     );
-
-    return forkJoin(requests);
   }
 
   private async obtenerArchivoEnBase64(file: any): Promise<string> {

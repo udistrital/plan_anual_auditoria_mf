@@ -1,0 +1,50 @@
+<plantilla-modal
+  [icono]="'send'"
+  [titulo]="'Enviar a Aprobación'"
+  [descripcion]="'Enviar el Plan Anual de Auditoría al Jefe para su aprobación'"
+  [contenido]="contenidoDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-2">
+    <div class="col-12">
+      <form [formGroup]="form">
+        <mat-form-field appearance="outline" class="col-12">
+          <mat-label>Observación (opcional)</mat-label>
+          <mat-icon color="primary" matPrefix>comment</mat-icon>
+          <textarea
+            style="height: 100px; resize: none"
+            matInput
+            formControlName="observacion"
+            placeholder="Ingrese una observación opcional para el Jefe..."
+          ></textarea>
+        </mat-form-field>
+      </form>
+
+      <div class="d-flex justify-content-center align-items-center fondo-acento-50 my-2">
+        <mat-icon>info</mat-icon>
+        <p class="mx-2">¿Está seguro(a) de enviar el Plan Anual de Auditoría (PAA)?</p>
+      </div>
+
+      <mat-dialog-actions align="center">
+        <button
+          mat-stroked-button
+          color="primary"
+          style="border: 1px solid var(--md-primary-500)"
+          [mat-dialog-close]="null"
+          class="mb-sm"
+        >
+          <mat-icon>close</mat-icon>Cancelar
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="confirmar()"
+          class="mb-sm"
+        >
+          <mat-icon>send</mat-icon>Sí, enviar
+        </button>
+      </mat-dialog-actions>
+    </div>
+  </div>
+</ng-template>

@@ -49,6 +49,15 @@
     </div>
 </ng-template>
 <ng-template #footerDeModal>
+    <button
+        *ngFor="let accionFooter of accionesFooter"
+        mat-flat-button
+        [color]="accionFooter.color || 'primary'"
+        class="my-3 mx-2"
+        (click)="ejecutarAccionFooter(accionFooter)"
+    >
+        <mat-icon *ngIf="accionFooter.icono">{{ accionFooter.icono }}</mat-icon>{{ accionFooter.nombre }}
+    </button>
     <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]
         class="my-3">
         <mat-icon>toll</mat-icon>{{ textoBotonCerrar }}

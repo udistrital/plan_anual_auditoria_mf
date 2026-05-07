@@ -182,15 +182,20 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
       .subscribe((res) => {
+        const datosActualizados = (res as any)?.Data;
+        if (datosActualizados) {
+          this.auditoria = { ...this.auditoria, ...datosActualizados };
+        }
+
         if (this.auditoria.estado_id !== environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA) {
           this.cambiarEstado().subscribe(() => {
             this.auditoria.estado_id = environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA;
-            this.alertaService.showSuccessAlert(
-              "Información editada correctamente"
-            );
+            this.alertaService.showSuccessAlert("Información editada correctamente");
           });
+        } else {
+          this.alertaService.showSuccessAlert("Información editada correctamente");
         }
-        this.auditoria = (res as any).Data;
+
         this.paso1Guardado = true;
         this.stepper.next();
       });

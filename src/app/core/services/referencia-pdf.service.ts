@@ -21,6 +21,7 @@ export interface ConsultaDocumentosReferenciaOptions {
   tipo_id?: number;
   fields?: string;
   limit?: number;
+  deduplicarPorTipo?: boolean;
 }
 
 @Injectable({
@@ -30,7 +31,7 @@ export class ReferenciaPdfService {
   constructor(
     private readonly http: HttpClient,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService
-  ) {}
+  ) { }
 
   guardarReferencia(
     nuxeoResponse: any, // Respuesta de Nuxeo
@@ -67,23 +68,23 @@ export class ReferenciaPdfService {
         : "";
 
     // Verificar si ya existe un registro para la referencia y metadatos (si aplica)
-    return nuevo ? this.planAnualAuditoriaService.post(`documento`, payload) 
+    return nuevo ? this.planAnualAuditoriaService.post(`documento`, payload)
       : this.planAnualAuditoriaService
-      .get(`documento?query=${queryBase}${queryMetadatos}`)
-      .pipe(
-        switchMap((response) => {
-          if (response && response.Data.length > 0) {
-            const documentoId = response.Data[0]._id; // ID del documento existente
-            console.log("actualizacion payload", payload);
-            return this.planAnualAuditoriaService.put(
-              `documento/${documentoId}`,
-              payload
-            );
-          } else {
-            return this.planAnualAuditoriaService.post(`documento`, payload);
-          }
-        })
-      );
+        .get(`documento?query=${queryBase}${queryMetadatos}`)
+        .pipe(
+          switchMap((response) => {
+            if (response && response.Data.length > 0) {
+              const documentoId = response.Data[0]._id; // ID del documento existente
+              console.log("actualizacion payload", payload);
+              return this.planAnualAuditoriaService.put(
+                `documento/${documentoId}`,
+                payload
+              );
+            } else {
+              return this.planAnualAuditoriaService.post(`documento`, payload);
+            }
+          })
+        );
   }
 
   consultarDocumento(
@@ -122,6 +123,7 @@ export class ReferenciaPdfService {
   ): Observable<DocumentoReferenciaPdf[]> {
     const limit = opciones.limit ?? 0;
     const tipo = opciones.tipo_id !== undefined ? `tipo_id:${opciones.tipo_id},` : "";
+    const deduplicarPorTipo = opciones.deduplicarPorTipo ?? true;
 
     return this.planAnualAuditoriaService
       .get(
@@ -130,9 +132,15 @@ export class ReferenciaPdfService {
       .pipe(
         map((response: any) => {
           if (response && response.Data && Array.isArray(response.Data)) {
-            return tipo ? response.Data.filter(
-                (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
-              ) : this.filtrarValidos(response.Data);
+            const documentosValidos = response.Data.filter(
+              (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
+            );
+
+            if (tipo || !deduplicarPorTipo) {
+              return documentosValidos;
+            }
+
+            return this.filtrarValidos(documentosValidos);
           }
           throw new Error("No se encontraron enlaces válidos en la respuesta.");
         }),
@@ -143,19 +151,23 @@ export class ReferenciaPdfService {
       );
   }
 
-  // Filtra los documentos para quedarse solo con el más reciente de cada tipo_id.
+  // Filtra los documentos para quedarse solo con el más reciente por tipo_id,
+  // usando también dependencia_id cuando está presente para no colapsar documentos
+  // del mismo tipo que pertenecen a dependencias distintas (ej. cartas de representación).
   filtrarValidos(documentos: DocumentoReferenciaPdf[]): DocumentoReferenciaPdf[] {
-    const mapaMaximos = new Map<number, DocumentoReferenciaPdf>();
+    const mapaMaximos = new Map<string, DocumentoReferenciaPdf>();
 
     documentos = documentos.filter(
       (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
     );
 
     for (const doc of documentos) {
-      const existente = mapaMaximos.get(doc.tipo_id);
+      const dependenciaId = doc.metadatos?.['dependencia_id'];
+      const clave = dependenciaId !== undefined ? `${doc.tipo_id}_${dependenciaId}` : String(doc.tipo_id);
+      const existente = mapaMaximos.get(clave);
 
       if (!existente || doc.nuxeo_id > existente.nuxeo_id) {
-        mapaMaximos.set(doc.tipo_id, doc);
+        mapaMaximos.set(clave, doc);
       }
     }
 

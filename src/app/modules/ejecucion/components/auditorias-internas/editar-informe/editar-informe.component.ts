@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { formularioInformacionAuditoria } from "./editar-informe.utilidades";
+import { formularioDependencias, formularioInformacionAuditoria } from "./editar-informe.utilidades";
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -13,12 +13,15 @@ import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-audi
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import { RolService } from 'src/app/core/services/rol.service';
+import { ImplicitAutenticationService } from 'src/app/core/services/implicit_autentication.service';
+import { TercerosCrudService } from 'src/app/core/services/terceros-crud.service';
+import { UserService } from 'src/app/core/services/user.service';
 import { environment } from 'src/environments/environment';
 import { accionesEjecucionFinal, accionesEjecucionPreliminar } from 'src/app/shared/utils/accionesPorRolYEstado';
 import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evaluados.component';
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
-import { join } from 'node:path';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
   selector: 'app-editar-informe',
@@ -38,21 +41,95 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   @ViewChild("resumenHallazgosComp")
   resumenHallazgosComponent!: ResumenHallazgosComponent;
 
+  @ViewChildren("formularioDependenciasComp")
+  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
+  formularioDependencias: Formulario = formularioDependencias;
+
+
   formInformacion: Formulario | undefined;
   formAspectosGenerales: FormGroup;
   formInformeFinal: FormGroup;
   formRespuestaPreliminar: FormGroup;
 
   informeId!: string;
+  auditoriaId: string = '';
   informeData: any = null;
+  auditoria: Auditoria | null = null;
   estadoId: number = 0;
   soloLectura: boolean = false;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
+  private stepInicial: number = 0;
+
+  usuarioId: number = 0;
+  usuarioRol: string = '';
+  dependenciaIds: number[] = [];
 
   // Cuando el informe ya fue aprobado por el auditado -> Pasa a informe final
   get pasosInicialesSoloLectura(): boolean {
     return this.estadoId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+  }
+
+  /**
+   * Muestra el paso de revisión del preinforme (paso 5) para:
+   * - Auditados en estado REVISION_PREINFORME_AUDITADO (agregan sus observaciones)
+   * - Auditores en estado CREANDO_INFORME_FINAL (agregan observaciones del auditor)
+   */
+  get esRevisionPreinformeAuditado(): boolean {
+    const REVISION = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO;
+    const CREANDO_FINAL = environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
+    const roles = this.rolService.getRoles();
+
+    if (this.estadoId === REVISION) {
+      return roles.some(r => r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA);
+    }
+
+    if (this.estadoId === CREANDO_FINAL) {
+      return roles.some(r => [
+        environment.ROL.ADMIN, //TODO: QUITAR
+        environment.ROL.AUDITOR_EXPERTO,
+        environment.ROL.AUDITOR,
+        environment.ROL.AUDITOR_ASISTENTE,
+      ].includes(r));
+    }
+
+    return false;
+  }
+
+  /** Auditado puede escribir su observación solo en REVISION_PREINFORME_AUDITADO */
+  get puedeEscribirObservacionAuditado(): boolean {
+    if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) return false;
+    const roles = this.rolService.getRoles();
+    return roles.some(r =>
+      r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA,
+    );
+  }
+
+  /** Auditor puede escribir observación y marcar hallazgos en CREANDO_INFORME_FINAL */
+  get puedeEscribirObservacionAuditor(): boolean {
+    if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL) return false;
+    const roles = this.rolService.getRoles();
+    return roles.some(r => [
+      environment.ROL.ADMIN, //TODO: QUITAR
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+    ].includes(r));
+  }
+
+  /** Auditado puede terminar sus observaciones en REVISION_PREINFORME_AUDITADO */
+  get puedeTerminarObservaciones(): boolean {
+    if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) return false;
+    const roles = this.rolService.getRoles();
+    return roles.some(r => r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA);
+  }
+
+  /**
+   * En el estado REVISION_PREINFORME_AUDITADO nadie puede editar temas/subtemas/hallazgos.
+   * Se usa para bloquear los pasos iniciales independientemente de soloLectura.
+   */
+  get bloqueadoEnRevision(): boolean {
+    return this.estadoId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO;
   }
 
   constructor(
@@ -66,7 +143,11 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     private referenciaPdfService: ReferenciaPdfService,
     private planAnualAuditoriaService: PlanAnualAuditoriaService,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private rolService: RolService
+    private rolService: RolService,
+    private autenticationService: ImplicitAutenticationService,
+    private tercerosCrudService: TercerosCrudService,
+    private userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.formAspectosGenerales = this.fb.group({
       aspecto_general: [''],
@@ -83,10 +164,52 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.soloLectura = this.route.snapshot.queryParamMap.get('soloLectura') === 'true';
+    const stepParam = this.route.snapshot.queryParamMap.get('step');
+    this.stepInicial = stepParam ? parseInt(stepParam, 10) : 0;
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.informeId = this.route.snapshot.paramMap.get("id")!;
     this.cargarInforme();
+    this.cargarUsuario();
+  }
+
+  private async cargarUsuario(): Promise<void> {
+    try {
+      const doc = await this.autenticationService.getDocument() as string | number;
+      this.usuarioId = Number(doc);
+      const rolPrioridad = [
+        environment.ROL.JEFE_DEPENDENCIA,
+        environment.ROL.ASISTENTE_DEPENDENCIA,
+        environment.ROL.AUDITOR_EXPERTO,
+        environment.ROL.AUDITOR,
+        environment.ROL.AUDITOR_ASISTENTE,
+      ];
+      const roles = this.rolService.getRoles();
+      this.usuarioRol = roles.find(r => rolPrioridad.includes(r)) ?? roles[0] ?? '';
+
+      let cargoId: number | null = null;
+      if (roles.includes(environment.ROL.JEFE_DEPENDENCIA)) {
+        cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+      } else if (roles.includes(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+        cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+      }
+
+      if (cargoId !== null) {
+        const personaId = await this.userService.getPersonaId();
+        this.tercerosCrudService
+          .get(`vinculacion?query=TerceroPrincipalId:${personaId},Activo:true,CargoId:${cargoId}&fields=DependenciaId`)
+          .subscribe({
+            next: (resp: any) => {
+              this.dependenciaIds = (resp ?? [])
+                .map((v: any) => v.DependenciaId)
+                .filter((id: any) => id != null);
+            },
+            error: () => { this.dependenciaIds = []; },
+          });
+      }
+    } catch (e) {
+      console.error('Error al cargar datos del usuario:', e);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -95,6 +218,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   cargarFormularios(): void {
     this.formInformacion = formularioInformacionAuditoria;
+    this.formularioDependencias = formularioDependencias;
   }
 
   manejarResponsiveStepper() {
@@ -149,6 +273,9 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
         this.estadoId = res.Data?.[0]?.estado_id ?? 0;
         this.forzarSoloLecturaSegunPermisos();
         this.aplicarModoSoloLecturaPasosIniciales();
+        if (this.stepInicial > 0) {
+          setTimeout(() => { this.stepper.selectedIndex = this.stepInicial; }, 0);
+        }
       },
       error: () => { }
     });
@@ -172,13 +299,14 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   }
 
   private aplicarModoSoloLecturaPasosIniciales(): void {
-    const deshabilitarPasosIniciales = this.pasosInicialesSoloLectura || this.soloLectura;
-    if (!deshabilitarPasosIniciales) return;
+    const bloquearPasosIniciales =
+      this.pasosInicialesSoloLectura || this.soloLectura || this.bloqueadoEnRevision;
 
-    this.formAspectosGenerales.disable({ emitEvent: false });
-
-    if (this.formularioInformacionComponent?.form) {
-      this.formularioInformacionComponent.form.disable({ emitEvent: false });
+    if (bloquearPasosIniciales) {
+      this.formAspectosGenerales.disable({ emitEvent: false });
+      if (this.formularioInformacionComponent?.form) {
+        this.formularioInformacionComponent.form.disable({ emitEvent: false });
+      }
     }
 
     if (this.soloLectura) {
@@ -191,12 +319,14 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   poblarFormularios(): void {
     if (!this.informeData) return;
 
+    this.auditoriaId = this.informeData.auditoria_id || '';
+
     // Poblar formulario de aspectos generales (paso 2)
     this.formAspectosGenerales.patchValue({
       aspecto_general: this.informeData.aspecto_general
     });
 
-    // Poblar formulario de respuesta preliminar (paso 5)
+    // Poblar formulario de respuesta preliminar (paso 5/6)
     this.formRespuestaPreliminar.patchValue({
       respuesta_preliminar: this.informeData.respuesta_preliminar
     });
@@ -210,20 +340,15 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   }
 
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
-  poblarFormularioInformacion(auditoria?: any): void {
+  poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
+    this.auditoria = auditoria || null;
+    this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
       consecutivo_no_auditoria: auditoria?.consecutivo_no_auditoria,
       macroproceso: auditoria?.macroproceso_nombre,
       proceso: auditoria?.proceso_nombre,
-      dependencia: auditoria?.dependencia_nombre,
-      jefe_nombre: auditoria?.jefe_nombre,
-      asistente_nombre: auditoria?.asistente_nombre,
-      correo_dependencia: auditoria?.correo_dependencia,
-      jefe_correo: auditoria?.jefe_correo,
-      asistente_correo: auditoria?.asistente_correo,
-      correo_complementario: auditoria.correo_complementario.map((c: any) => c.correo).join(", "),
       objetivo_auditoria: auditoria?.objetivo,
       alcance_auditoria: auditoria?.alcance,
       criterios: auditoria?.criterio,
@@ -237,6 +362,21 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     }
 
     this.formularioInformacionComponent.form.patchValue(valoresIniciales);
+
+    this.formularioDependenciasComponent.forEach((comp, i) => {
+      const dep = auditoria?.datos_dependencias[i];
+      console.log('Poblando dependencia:', dep);
+      const correo = auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      comp.form.patchValue({
+        dependencia_id: dep?.dependencia_id,
+        jefe_nombre: dep?.jefe_nombre,
+        jefe_correo: dep?.jefe_correo,
+        asistente_nombre: dep?.asistente_nombre,
+        asistente_correo: dep?.asistente_correo,
+        correo_dependencia: dep?.correo_dependencia,
+        correo_complementario: correo,
+      });
+    });
   }
 
   enviarFormInformacion() {
@@ -297,6 +437,51 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
         this.resumenHallazgosComponent.cargarHallazgos();
       }
     }
+  }
+
+  guardarRevisionAuditado(): void {
+    // Las observaciones se guardan individualmente en el componente de revisión.
+    this.stepper.next();
+  }
+
+  async terminarObservaciones(): Promise<void> {
+    const confirmado = await this.alertaService.showConfirmAlert(
+      "¿Está seguro(a) de terminar las observaciones del preinforme? Esta acción no se puede deshacer."
+    );
+    if (!confirmado.value) return;
+
+    const auditoriaId = this.informeData?.auditoria_id;
+    if (!auditoriaId) {
+      this.alertaService.showErrorAlert("No fue posible identificar la auditoría.");
+      return;
+    }
+
+    this.planAnualAuditoriaService.post('auditoria-estado', {
+      auditoria_id: auditoriaId,
+      fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
+      estado_id: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
+      usuario_id: this.usuarioId,
+      usuario_rol: this.usuarioRol,
+      observacion: "",
+    }).subscribe({
+      next: () => {
+        this.planAnualAuditoriaService.post('auditoria-estado', {
+          auditoria_id: auditoriaId,
+          fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
+          estado_id: environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL,
+          usuario_id: this.usuarioId,
+          usuario_rol: this.usuarioRol,
+          observacion: "",
+        }).subscribe({
+          next: () => {
+            this.alertaService.showSuccessAlert("Las observaciones han sido registradas y enviadas al auditor.", "Observaciones enviadas");
+            this.regresarRuta();
+          },
+          error: () => this.alertaService.showErrorAlert("Error al registrar el estado de informe final."),
+        });
+      },
+      error: () => this.alertaService.showErrorAlert("Error al registrar las observaciones."),
+    });
   }
 
   guardarRespuestaPreliminar() {

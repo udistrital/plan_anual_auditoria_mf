@@ -80,7 +80,7 @@ export class DescargaService {
   ): Promise<void> {
     const zip = new JSZip();
     const nombreBaseContador = new Map<string, number>();
-    const suffixNormalizado = suffix ? `-${suffix}` : '';
+    const suffixNormalizado = suffix ? `-${suffix.replace(/\s+/g, '-')}` : '';
   
     try {
       documentos.forEach((doc, index) => {

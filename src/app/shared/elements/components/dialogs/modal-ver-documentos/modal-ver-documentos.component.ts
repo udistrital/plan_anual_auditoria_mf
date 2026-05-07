@@ -55,11 +55,19 @@ export interface ModalVerDocumentosData {
   entityId: string;
   titulo?: string;
   descripcion?: string;
-  vigenciaNombre?: string;
+  sufijo?: string;
   tabs?: TabDocumento[];
   inferTabs?: boolean;
   tipo?: number;
   textoBotonCerrar?: string;
+  accionesFooter?: AccionFooterModal[];
+}
+
+export interface AccionFooterModal {
+  nombre: string;
+  icono?: string;
+  color?: string;
+  accion: () => boolean | Promise<boolean>;
 }
 
 @Component({
@@ -75,10 +83,11 @@ export class ModalVerDocumentosComponent implements OnInit {
 
   titulo: string = "Ver documentos";
   descripcion: string = "Documentos";
-  vigenciaSuffix: string = "";
+  suffix: string = "";
   textoBotonCerrar: string = "Regresar";
   consultarPorTipo: boolean = false;
   tabs: TabDocumento[] = [];
+  accionesFooter: AccionFooterModal[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ModalVerDocumentosData,
@@ -93,11 +102,10 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.descripcion) this.descripcion = data.descripcion;
     if (data.tabs) this.tabs = data.tabs;
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
+    if (data.accionesFooter) this.accionesFooter = data.accionesFooter;
     if (data.tipo) this.consultarPorTipo = true;
-    if (data.vigenciaNombre) {
-      this.vigenciaSuffix = data.vigenciaNombre
-          ? `-${data.vigenciaNombre.replace(/\s+/g, '-')}`
-          : '';
+    if (data.sufijo) {
+      this.suffix = data.sufijo ? data.sufijo : '';
     }
   }
 
@@ -124,7 +132,10 @@ export class ModalVerDocumentosComponent implements OnInit {
    */
   async cargarDocumentos() {
     try {
-      const opciones = this.consultarPorTipo ? { tipo_id: this.data.tipo } : {};
+      const tieneTabsConDocumentoId = this.tabs.some((tab) => !!tab.documentoId);
+      const opciones = this.consultarPorTipo
+        ? { tipo_id: this.data.tipo }
+        : { deduplicarPorTipo: !tieneTabsConDocumentoId };
       const enlacesConTipo = await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.data.entityId, opciones)
       );
@@ -193,6 +204,9 @@ export class ModalVerDocumentosComponent implements OnInit {
         const documento = documentosDisponibles[documentoIdx];
         this.documentosPorTab[index] = documento.base64;
         this.documentoInfoPorTab[index] = documento;
+        if (!this.tabs[index].documentoId) {
+          this.tabs[index].documentoId = documento._id;
+        }
         documentosDisponibles.splice(documentoIdx, 1);
       });
     } catch (error) {
@@ -220,6 +234,13 @@ export class ModalVerDocumentosComponent implements OnInit {
 
   async ejecutarBotonTab(boton: BotonTabDocumento): Promise<void> {
     await boton.accion(this.getBotonContext());
+  }
+
+  async ejecutarAccionFooter(accionFooter: AccionFooterModal): Promise<void> {
+    const debeCerrar = await accionFooter.accion();
+    if (debeCerrar) {
+      this.dialogRef.close(true);
+    }
   }
 
   getBotonContext(): BotonTabDocumentoContext {
@@ -286,11 +307,12 @@ export class ModalVerDocumentosComponent implements OnInit {
   }
 
   async descargarTodo() {
+    const suffixNormalizado = this.suffix ? `-${this.suffix.replace(/\s+/g, '-')}` : '';
     try {
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        `documentos${this.vigenciaSuffix}.zip`,
-        this.vigenciaSuffix,
+        `documentos${suffixNormalizado}.zip`,
+        this.suffix,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);

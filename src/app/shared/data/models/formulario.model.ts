@@ -24,6 +24,7 @@ export class Campo {
   placeholder?: string;
   validaciones?: any;
   icono?: string;
+  tooltip?: string;
   parametros?: {
     urlParametros?: string;
     opciones?: Array<{

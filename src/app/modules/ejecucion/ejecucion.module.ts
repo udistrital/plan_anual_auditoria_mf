@@ -18,6 +18,8 @@ import { RevisionDocumentosSeguimientoComponent } from './components/seguimiento
 import { ModalRechazoSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component';
 import { ModalHistorialRechazosComponent } from './components/auditorias-internas/modal-historial-rechazos/modal-historial-rechazos.component';
 import { ModalHistorialRechazosSeguimientoComponent } from './components/seguimiento-informes/modal-historial-rechazos-seguimiento/modal-historial-rechazos-seguimiento.component';
+import { RevisionPreinformeComponent } from './components/auditorias-internas/editar-informe/revision-preinforme/revision-preinforme.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -36,12 +38,14 @@ import { ModalHistorialRechazosSeguimientoComponent } from './components/seguimi
     ModalRechazoSeguimientoComponent,
     ModalHistorialRechazosComponent,
     ModalHistorialRechazosSeguimientoComponent,
+    RevisionPreinformeComponent,
   ],
   imports: [
     CommonModule,
     SharedModule,
     EjecucionRoutingModule,
     MaterialModule,
+    ReactiveFormsModule,
   ]
 })
 export class EjecucionModule { }
