@@ -75,16 +75,6 @@ export const environment = {
   },
 
   NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS: {
-    ToAddresses: [
-      "pruebaspaa26auditado@yopmail.com",
-    ],
-    CcAddresses: [
-      // "copy.to@ejemplo.com"
-    ],
-    BccAddresses: []
-  },
-
-  NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS: {
     ToAddresses: [],
     CcAddresses: [
       // "copy.to@ejemplo.com"
