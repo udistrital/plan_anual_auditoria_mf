@@ -75,6 +75,16 @@ export const environment = {
   },
 
   NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa26auditado@yopmail.com",
+    ],
+    CcAddresses: [
+      // "copy.to@ejemplo.com"
+    ],
+    BccAddresses: []
+  },
+
+  NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_AUDITADO_DESTINATARIOS: {
     ToAddresses: [],
     CcAddresses: [
       // "copy.to@ejemplo.com"
@@ -98,6 +108,14 @@ export const environment = {
     CcAddresses: [
       // "copy.to@ejemplo.com"
     ],
+    BccAddresses: []
+  },
+
+  NOTIFICACION_PREINFORME_ENVIO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa26auditado@yopmail.com",
+    ],
+    CcAddresses: [],
     BccAddresses: []
   },
 
@@ -245,4 +263,6 @@ export const environment = {
     JEFE_DEPENDENCIA_ID: 312,
     ASISTENTE_DEPENDENCIA_ID: 320,
   },
+
+  DIAS_REVISION_PREINFORME: 3,
 };
