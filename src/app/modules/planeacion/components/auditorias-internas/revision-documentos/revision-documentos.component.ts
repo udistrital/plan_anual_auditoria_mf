@@ -307,6 +307,9 @@ export class RevisionDocumentosComponent implements OnInit {
           documentoId: documento._id,
           botones: [{
             nombre: "Descargar Carta",
+            color: "primary",
+            estilo: "border: 1px solid var(--md-primary-500);",
+            tipo: "stroked",
             accion: async () => {
               const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
               this.descargaService.descargarArchivo(
@@ -317,7 +320,9 @@ export class RevisionDocumentosComponent implements OnInit {
           cargueAdjuntoConfig: {
             nombreBoton: "Cargar Carta Firmada",
             iconoBoton: "upload_file",
-            colorBoton: "accent",
+            colorBoton: "primary",
+            tipoBoton: "stroked",
+            estiloBoton: "border: 1px solid var(--md-primary-500);",
             idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
             descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
             referenciaTipoFallback: "Auditoria",
