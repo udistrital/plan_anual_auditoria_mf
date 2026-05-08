@@ -6,11 +6,11 @@ import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla
 const routes: Routes = [
   {
     path: '',
-    component: PlanDeMejoramientoComponent,
+    component: PlanDeMejoramientoComponent,   
   },
   {
     path: 'registrar-plan/:id',
-    component: RegistrarPlanComponent,
+    component: RegistrarPlanComponent,      
   },
 ];
 

@@ -41,13 +41,13 @@
       <!-- Tipo de Acción -->
       <ng-container matColumnDef="tipoAccion">
         <th mat-header-cell *matHeaderCellDef><b>Tipo de Acción</b></th>
-        <td mat-cell *matCellDef="let fila">{{ fila.accion?.tipoAccion ?? 'Sin Tipo' }}</td>
+        <td mat-cell *matCellDef="let fila">{{ fila.accion?.tipoAccion }}</td>
       </ng-container>
 
       <!-- Acción Planteada -->
       <ng-container matColumnDef="accionPlanteada">
         <th mat-header-cell *matHeaderCellDef><b>Acción Planteada</b></th>
-        <td mat-cell *matCellDef="let fila">{{ fila.accion?.accionPlanteada ?? 'Sin Acción' }}</td>
+        <td mat-cell *matCellDef="let fila">{{ fila.accion?.accionPlanteada }}</td>
       </ng-container>
 
       <!-- Nombre Indicador -->
