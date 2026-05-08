@@ -39,6 +39,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
   @Input() auditoriaId!: string;
   @Input() soloLectura: boolean = false;
+  @Input() temasRaw: any[] | null = null;
+  @Input() hallazgosRaw: any[] | null = null;
   @Output() datosActualizados = new EventEmitter<void>();
 
   aspectosForm: UntypedFormGroup = this.fb.group({});
@@ -60,22 +62,30 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     this.aspectosForm = this.fb.group({
       temas: this.fb.array([]),
     });
-
-    if (this.informeId) {
-      this.cargarTemas();
-    }
-
     this.actualizarModoSoloLectura();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['informeId'] && this.informeId) {
-      this.cargarTemas();
+    if ((changes['temasRaw'] || changes['hallazgosRaw']) && this.temasRaw !== null && this.hallazgosRaw !== null) {
+      this.usarDatosProporcionados();
     }
-
     if (changes['soloLectura']) {
       this.actualizarModoSoloLectura();
     }
+  }
+
+  private usarDatosProporcionados(): void {
+    const temas: Tema[] = JSON.parse(JSON.stringify(this.temasRaw));
+    for (const tema of temas) {
+      for (const subtema of (tema.subtema || [])) {
+        (subtema as any).hallazgo = (this.hallazgosRaw || []).filter(
+          (h: any) => h.subtema_id?.toString() === (subtema as any)._id?.toString() && h.activo !== false
+        );
+      }
+    }
+    this.temasData = temas;
+    this.construirFormulario();
+    this.actualizarModoSoloLectura();
   }
 
   private actualizarModoSoloLectura(): void {

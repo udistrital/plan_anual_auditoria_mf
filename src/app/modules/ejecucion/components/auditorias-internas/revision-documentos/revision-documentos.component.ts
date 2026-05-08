@@ -1,5 +1,7 @@
+import Holidays from 'date-holidays';
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 import { ModalRechazoAuditoriaEjecucionComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
 import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
@@ -7,11 +9,17 @@ import { environment } from "src/environments/environment";
 //Servicios
 import { RolService } from "src/app/core/services/rol.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
+import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
+import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
+import { TercerosService } from "src/app/shared/services/terceros.service";
+import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 
 const configAuditado = {
   estadoAprobacion: [
@@ -80,12 +88,16 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly userService: UserService,
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly nuxeoService: NuxeoService,
-    private readonly descargaService: DescargaService
+    private readonly descargaService: DescargaService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly tercerosService: TercerosService,
   ) { }
 
   ngOnInit(): void {
@@ -178,6 +190,10 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       for (const estado of estados) {
         const auditoriaEstado = this.construirObjetoAuditoriaEstado(estado);
         await this.planAuditoriaService.post("auditoria-estado", auditoriaEstado).toPromise();
+      }      
+
+      if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE)) {
+        await this.guardarFechaRevisionPreinforme();
       }
 
       const mensaje = this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
@@ -189,6 +205,150 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
     }
   }
+
+  private async guardarFechaRevisionPreinforme(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(
+        this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
+      );
+      const informeId = res?.Data?.[0]?._id;
+      if (!informeId) return;
+      const dias = environment.DIAS_REVISION_PREINFORME;
+      const fechaFin = this.calcularFechaFinHabiles(new Date(), dias);
+      await firstValueFrom(
+        this.planAuditoriaService.put(`informe/${informeId}`, { fecha_fin_revision: fechaFin, dias_revision: dias })
+      );
+      this.notificarEnvioPreinformeAuditado(fechaFin);
+    } catch {
+      // no bloquea el flujo de aprobación
+    }
+  }
+
+  private readonly _hd = new Holidays('CO');
+  private readonly _festivosCache: Record<number, Set<string>> = {};
+
+  private calcularFechaFinHabiles(desde: Date, dias: number): Date {
+    const result = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate());
+
+    const startYear = result.getFullYear();
+    if (!this._festivosCache[startYear]) {
+      const festivos = this._hd.getHolidays(startYear)
+        .filter(h => h.type === 'public')
+        .map(h => h.date.substring(0, 10));
+      this._festivosCache[startYear] = new Set(festivos);
+    }
+    const startKey = `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, '0')}-${String(result.getDate()).padStart(2, '0')}`;
+    // El día de revisión cuenta (sábado/domingo incluidos), excepto si es festivo
+    let count = this._festivosCache[startYear].has(startKey) ? 0 : 1;
+
+    while (count < dias + 1) {
+      result.setDate(result.getDate() + 1);
+      const dow = result.getDay();
+      if (dow === 0 || dow === 6) continue;
+
+      const year = result.getFullYear();
+      if (!this._festivosCache[year]) {
+        const festivos = this._hd.getHolidays(year)
+          .filter(h => h.type === 'public')
+          .map(h => h.date.substring(0, 10));
+        this._festivosCache[year] = new Set(festivos);
+      }
+
+      const key = `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, '0')}-${String(result.getDate()).padStart(2, '0')}`;
+      if (!this._festivosCache[year].has(key)) count++;
+    }
+
+    return result;
+  }
+
+  private async notificarEnvioPreinformeAuditado(fechaFin: Date): Promise<void> {
+    try {
+      const [auditoriaRes, tercero]: [any, any] = await Promise.all([
+        firstValueFrom(this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`)),
+        firstValueFrom(this.tercerosService.getAuthenticatedUserTerceroIdentification()).catch(() => null),
+      ]);
+
+      const datosAuditoria = auditoriaRes?.Data;
+
+      // Obtener correos de dependencias
+      const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
+      const correosDependencias: string[] = dependenciasInfo.flatMap((dep: any) => {
+        const correos: string[] = [];
+        if (dep.jefe_correo) correos.push(dep.jefe_correo);
+        if (dep.asistente_correo) correos.push(dep.asistente_correo);
+        if (dep.correo_dependencia) correos.push(dep.correo_dependencia);
+        if (dep.correo_complementario) correos.push(dep.correo_complementario);
+        return correos;
+      });
+
+      // Obtener correos complementarios adicionales
+      const correosComplementarios: string[] = datosAuditoria?.correo_complementario ?? [];
+      const correosComplementariosFinales = correosComplementarios.flatMap((depComp: any) => {
+        const correosComp: string[] = [];
+        if (depComp.correo) correosComp.push(depComp.correo);
+        return correosComp;
+      });
+
+      const fechaLimiteFormateada = fechaFin.toLocaleDateString('es-CO', {
+        timeZone: 'America/Bogota',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+
+      const destinatariosFijos = environment.NOTIFICACION_PREINFORME_ENVIO_AUDITADO_DESTINATARIOS;
+      const destinatarios: DestinatariosEmail = {
+        ToAddresses: [...correosDependencias, ...correosComplementariosFinales, ...(destinatariosFijos.ToAddresses ?? [])],
+        CcAddresses: destinatariosFijos.CcAddresses ?? [],
+        BccAddresses: destinatariosFijos.BccAddresses ?? [],
+      };
+
+      const variables: VariablesSolicitud = {
+        titulo_solicitud: 'Revisión de Informe Preliminar',
+        tipo_solicitud: `Revisión del informe preliminar. Fecha límite: ${fechaLimiteFormateada}`,
+        nombre_documento: `Informe Preliminar${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+        vigencia: datosAuditoria?.vigencia_nombre ?? String(datosAuditoria?.vigencia_id ?? ''),
+        rol_remitente: rolRemitentePorRol[this.role!] ?? 'Jefe OCI',
+        nombre_remitente: tercero?.NombreCompleto ?? 'Jefe OCI',
+        fecha_envio: new Date().toLocaleDateString('es-CO'),
+      };
+
+      const response: any = await firstValueFrom(
+        this.notificacionesService.enviarNotificacionSolicitud(destinatarios, variables)
+      );
+
+      if (response?.Status == 200) {
+        this.registrarNotificacion(destinatarios, variables);
+      }
+    } catch (error) {
+      console.warn('Error al notificar envío de preinforme a auditado:', error);
+    }
+  }
+
+  private registrarNotificacion(
+    destinatarios: DestinatariosEmail,
+    variables: VariablesSolicitud,
+  ): void {
+    const payload = {
+      plantilla: PLANTILLA_SOLICITUD_NOMBRE,
+      fecha_envio: new Date(),
+      metadato: {
+        ...variables,
+        tipo_notificacion: 'envio_preinforme_auditado',
+        destinatarios_to: destinatarios.ToAddresses ?? [],
+        destinatarios_cc: destinatarios.CcAddresses ?? [],
+        destinatarios_bcc: destinatarios.BccAddresses ?? [],
+      },
+      referencia_id: this.auditoriaId,
+      referencia_tipo: 'AUDITORIA INTERNA',
+    };
+    this.notificacionRegistroCrudService.post(payload).subscribe({
+      next: (res) => console.debug('Registro de notificación guardado:', res),
+      error: (err) => console.warn('Error guardando registro de notificación:', err),
+    });
+  }
+
+
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
     const faseId =

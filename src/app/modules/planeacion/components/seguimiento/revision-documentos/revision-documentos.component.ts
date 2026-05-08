@@ -220,7 +220,8 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
           switchMap((terceros: any[]) => {
             const correosAuditores = terceros
               .filter((t) => t?.UsuarioWSO2)
-              .map((t) => t.UsuarioWSO2);
+              .map((t) => t.UsuarioWSO2)
+              .filter((v: string) => v.includes('@'));
 
             const toAddressesDinamicos: string[] = dependenciasInfo.flatMap((dep) => {
               const correos: string[] = [];
@@ -352,7 +353,8 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
             // Auditores van al To
             const correosAuditores = terceros
               .filter((t) => t?.UsuarioWSO2)
-              .map((t) => t.UsuarioWSO2);
+              .map((t) => t.UsuarioWSO2)
+              .filter((v: string) => v.includes('@'));
 
             // Dependencia auditada va al Cc
             const correosDependencia: string[] = dependenciasInfo.flatMap((dep) => {

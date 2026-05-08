@@ -29,6 +29,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   @Input() tipoEvaluacionId: any;
   @Input() role: any;
   @Input() personaId: any;
+  @Input() accionesPermitidas: string[] | null = null;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -152,12 +153,11 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   }
 
   getAccionesPorRolYEstado(estadoId: number): string[] {
-
     // para traer las acciones posterior del ./utils/accionesPorRolYEstado
-
-    if (true) {
-    return ["Asignar Auditor(es)", "Registrar Plan", "Enviar a Revisión", "Ver Documentos Auditoría"];
-    }
+    const acciones = ["Asignar Auditor(es)", "Registrar Plan", "Enviar a Revisión", "Ver Documentos Auditoría"];
+    return this.accionesPermitidas
+      ? acciones.filter(a => this.accionesPermitidas!.includes(a))
+      : acciones;
   }
 
   getIconoAccion(accion: string): string {

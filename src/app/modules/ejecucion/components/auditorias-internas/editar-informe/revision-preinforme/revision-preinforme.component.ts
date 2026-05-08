@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -27,18 +27,30 @@ const ROLES_AUDITOR = [
 })
 export class RevisionPreinformeComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() temasRaw: any[] | null = null;
+  @Input() hallazgosRaw: any[] | null = null;
   @Input() puedeEscribirObservacionAuditado: boolean = false;
   @Input() puedeEscribirObservacionAuditor: boolean = false;
   @Input() usuarioId: number = 0;
   @Input() usuarioRol: string = '';
   @Input() dependenciaIds: number[] = [];
+  @Input() fechaFinRevision: Date | null = null;
+  @Output() datosModificados = new EventEmitter<void>();
+
+  get fechaFinFormateada(): string {
+    if (!this.fechaFinRevision) return '';
+    return new Date(this.fechaFinRevision).toLocaleDateString('es-CO', {
+      timeZone: 'America/Bogota',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
 
   temas: TemaObs[] = [];
   cargando = false;
 
-  // hallazgoId → texto actual del textarea
   textoInline = new Map<string, string>();
-  // hallazgoIds guardando (spinner/disable)F
   guardandoSet = new Set<string>();
 
   constructor(
@@ -46,27 +58,20 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
     private alertaService: AlertService,
   ) {}
 
-  ngOnInit(): void {
-    if (this.informeId) this.cargarDatos();
-  }
+  ngOnInit(): void { }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['informeId'] && this.informeId) this.cargarDatos();
+    if ((changes['temasRaw'] || changes['hallazgosRaw']) && this.temasRaw !== null && this.hallazgosRaw !== null) {
+      this.cargarObservacionesYReconstruir();
+    }
   }
 
-  async cargarDatos(): Promise<void> {
+  private async cargarObservacionesYReconstruir(): Promise<void> {
+    if (!this.temasRaw || !this.hallazgosRaw) return;
     this.cargando = true;
     try {
-      const [temasResp, hallazgosResp]: [any, any] = await Promise.all([
-        firstValueFrom(this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`)),
-        firstValueFrom(this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}&limit=0`)),
-      ]);
-
-      const temasRaw: any[] = temasResp?.Data || [];
-      const hallazgosRaw: any[] = hallazgosResp?.Data || [];
-      const obsMap = await this.cargarObservaciones(hallazgosRaw.map((h: any) => h._id));
-
-      this.temas = temasRaw
+      const obsMap = await this.cargarObservaciones(this.hallazgosRaw.map((h: any) => h._id));
+      this.temas = this.temasRaw
         .filter((t: any) => t.activo !== false)
         .map((tema: any) => ({
           tema,
@@ -74,7 +79,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
             .filter((st: any) => st.activo !== false)
             .map((subtema: any) => ({
               subtema,
-              hallazgos: hallazgosRaw
+              hallazgos: this.hallazgosRaw!
                 .filter((h: any) =>
                   h.subtema_id?.toString() === subtema._id?.toString() && h.activo !== false,
                 )
@@ -88,10 +93,9 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
                 }),
             })),
         }));
-
       this.inicializarTextos();
     } catch (error) {
-      console.error('Error al cargar datos de revisión:', error);
+      console.error('Error al cargar observaciones de revisión:', error);
     }
     this.cargando = false;
   }
@@ -116,15 +120,19 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
   private async cargarObservaciones(ids: string[]): Promise<Map<string, any[]>> {
     const map = new Map<string, any[]>();
     if (!ids.length) return map;
-    const results = await Promise.all(
-      ids.map((id) =>
-        firstValueFrom(
-          this.planAnualAuditoriaService.get(`observacion?query=hallazgo_id:${id},activo:true&limit=0`),
-        ).then((resp: any) => ({ id, data: resp?.Data || [] })),
-      ),
+    const resp: any = await firstValueFrom(
+      this.planAnualAuditoriaService.get(`observacion?query=hallazgo_id__in:${ids.join('|')},activo:true&limit=0`),
     );
-    results.forEach(({ id, data }) => map.set(id, data));
+    for (const obs of (resp?.Data || [])) {
+      const hid = obs.hallazgo_id?.toString();
+      if (!map.has(hid)) map.set(hid, []);
+      map.get(hid)!.push(obs);
+    }
     return map;
+  }
+
+  hallazgoNumeral(hallazgos: HallazgoObs[], k: number): number {
+    return hallazgos.slice(0, k + 1).filter(h => !h.hallazgo.rechazado).length;
   }
 
   miObservacionAuditado(item: HallazgoObs): any | null {
@@ -176,7 +184,8 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
   private onGuardadoExitoso(hallazgoId: string): void {
     this.guardandoSet.delete(hallazgoId);
     this.alertaService.showSuccessAlert('Observación guardada');
-    this.cargarDatos();
+    // Solo cambió una observación — solo recargamos observaciones (temas/hallazgos no cambiaron)
+    this.cargarObservacionesYReconstruir();
   }
 
   private onGuardadoError(hallazgoId: string): void {
@@ -189,8 +198,9 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
       .showConfirmAlert(`¿Está seguro(a) de rechazar el hallazgo "${hallazgo.titulo || hallazgo.criterio}"?`)
       .then((result) => {
         if (!result.isConfirmed) return;
-        this.planAnualAuditoriaService.put(`hallazgo/${hallazgo._id}`, { rechazado: true, rechazado_por: this.usuarioId }).subscribe({
-          next: () => { this.alertaService.showSuccessAlert('Hallazgo rechazado'); this.cargarDatos(); },
+        const data = { rechazado: true, rechazado_por: this.usuarioId, rechazado_por_rol: this.usuarioRol };
+        this.planAnualAuditoriaService.put(`hallazgo/${hallazgo._id}`, data).subscribe({
+          next: () => { this.alertaService.showSuccessAlert('Hallazgo rechazado'); this.datosModificados.emit(); },
           error: () => this.alertaService.showErrorAlert('Error al rechazar el hallazgo'),
         });
       });

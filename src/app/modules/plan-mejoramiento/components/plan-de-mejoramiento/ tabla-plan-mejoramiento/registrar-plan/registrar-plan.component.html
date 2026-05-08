@@ -56,8 +56,9 @@
     </div>
     <div class="col-12">
       <app-tabla-hallazgos
-        *ngIf="auditoria"
+        *ngIf="auditoria && planMejoramientoId"
         [auditoriaId]="auditoriaId"
+        [planMejoramientoId]="planMejoramientoId"
         [auditoria]="auditoria"
       ></app-tabla-hallazgos>
     </div>
@@ -65,15 +66,16 @@
 
 <!-- Footer -->
     <div class="d-flex justify-content-end mt-4" style="gap: 16px;">
-    <button mat-raised-button color="primary">
-        <mat-icon>visibility</mat-icon>
-        Vista Previa
-    </button>
-    <button mat-raised-button color="primary">Guardar</button>
-    <button mat-stroked-button color="primary">
+      <button mat-raised-button color="primary" (click)="guardar()">
+        <mat-icon>save</mat-icon>
+        Guardar
+      </button>
+      <button mat-stroked-button color="primary"
+              (click)="enviarAuditor()"
+              [disabled]="enviando || !planMejoramientoId">
         <mat-icon>send</mat-icon>
         Enviar a Auditor
-    </button>
+      </button>
     </div>
 
 </ng-template>

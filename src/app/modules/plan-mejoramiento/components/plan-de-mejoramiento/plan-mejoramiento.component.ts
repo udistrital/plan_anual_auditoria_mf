@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { TablaPlanMejoramientoComponent } from "./ tabla-plan-mejoramiento/tabla-plan-mejoramiento.component";
@@ -26,15 +27,18 @@ export class PlanDeMejoramientoComponent implements OnInit {
   role: string | null = null;
   /** ID de persona del usuario actual */
   personaId: number | null = null;
+  accionesPermitidas: string[] | null = null;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly rolService: RolService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly route: ActivatedRoute
   ) {}
 
   async ngOnInit() {
+    this.accionesPermitidas = this.route.snapshot.data['accionesPermitidas'] ?? null;
     this.iniciarForm();
     this.cargarVigencias();
     this.cargarTiposEvaluacion();

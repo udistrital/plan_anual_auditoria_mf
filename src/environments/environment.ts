@@ -11,17 +11,17 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
-  PLAN_ANUAL_AUDITORIA_SERVICE: 
+  PLAN_ANUAL_AUDITORIA_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
   PLAN_ANUAL_AUDITORIA_MID:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
-    OIKOS_SERVICE:
+  OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
-  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "f5703026-3fc8-48d1-bb41-fd2479656c23",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -48,7 +48,7 @@ export const environment = {
 
   NOTIFICACION_PLAN_AUDITORIA_RECHAZO_DESTINATARIOS: {
     ToAddresses: [
-      "pruebaspaa26auditor@yopmail.com",  
+      "pruebaspaa26auditor@yopmail.com",
     ],
     CcAddresses: [
       "pruebaspaa26@yopmail.com",
@@ -68,7 +68,7 @@ export const environment = {
 
   NOTIFICACION_PROGRAMA_TRABAJO_RECHAZO_JEFE_DESTINATARIOS: {
     ToAddresses: [
-      "pruebaspaa26auditor@yopmail.com", 
+      "pruebaspaa26auditor@yopmail.com",
     ],
     CcAddresses: [
       // "copy.to@ejemplo.com"
@@ -105,7 +105,15 @@ export const environment = {
     BccAddresses: []
   },
 
-  VIGENCIAS : {
+  NOTIFICACION_PREINFORME_ENVIO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa26auditado@yopmail.com",
+    ],
+    CcAddresses: [],
+    BccAddresses: []
+  },
+
+  VIGENCIAS: {
     TIPO_PARAMETRO_ID: 121,
   },
 
@@ -141,7 +149,7 @@ export const environment = {
     },
     EJECUCION: {
       POR_EJECUTAR: 7069,
-      
+
       // INFORME PRELIMINAR
       CREANDO_PREINFORME: 7070,
       REVISION_PREINFORME_JEFE: 7071,
@@ -250,10 +258,5 @@ export const environment = {
     ASISTENTE_DEPENDENCIA_ID: 320,
   },
 
-  // idsCamposFormulario: {
-  //   Objetivo: 6770,
-  //   Alcance: 6771,
-  //   Criterios: 6772,
-  //   Recursos: 6770
-  // } as const
+  DIAS_REVISION_PREINFORME: 3,
 };
