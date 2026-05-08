@@ -6,6 +6,7 @@ import {
 } from "@angular/material/dialog";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { environment } from "src/environments/environment";
@@ -27,6 +28,7 @@ export class ModalAprobacionSecretarioComponent {
     private dialog: MatDialog,
     private alertService: AlertService,
     private planAuditoriaService: PlanAnualAuditoriaService,
+    private planAuditoriaMidService: PlanAnualAuditoriaMid,
     private nuxeoService: NuxeoService,
     private referenciaPdfService: ReferenciaPdfService,
     private router: Router
@@ -123,22 +125,20 @@ export class ModalAprobacionSecretarioComponent {
   }
 
   aceptarPlanAuditoria(): void {
-    // 1. Generar auditorías a partir del plan aprobado
     const generarAuditoriasDto = {
       usuario_id: this.infoModal.usuarioId,
       usuario_rol: this.infoModal.usuarioRol,
       observacion: "Generación automática de auditorías luego de aprobación del plan por parte del secretario técnico",
-      "estado_id_padre_actual": environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
-      "estado_id_padre_nuevo": environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
-      "estado_id_hija_nuevo": environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+      estado_id_padre_actual: environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
+      estado_id_padre_nuevo: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
+      estado_id_hija_nuevo: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
       fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
-    }
-    this.planAuditoriaService.post(`plan-auditoria/${this.infoModal.planAuditoriaId}/generar-auditorias`, generarAuditoriasDto)
+    };
+
+    this.planAuditoriaMidService.post(`plan-auditoria/${this.infoModal.planAuditoriaId}/generar-auditorias`, generarAuditoriasDto)
       .subscribe({
         next: (response: any) => {
-          if (response && response.Status === 201) {
-
-            // 2. Actualizar el estado del plan de auditoría a "Aprobado por Secretario Técnico"
+          if (response?.Success && response?.Status === 201) {
             const planEstado = this.construirObjetoPlanEstado(
               this.infoModal.planAuditoriaId,
               environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID
@@ -156,8 +156,7 @@ export class ModalAprobacionSecretarioComponent {
                 console.error(error);
               }
             });
-          }
-          else {
+          } else {
             this.alertService.showErrorAlert("Error al generar las auditorías del plan.");
             console.error('Generar auditorías: respuesta inesperada', response);
           }

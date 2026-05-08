@@ -1,7 +1,7 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, Inject, Input, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
@@ -16,6 +16,7 @@ import {
 } from "./tabla-auditorias-especiales.utilidades";
 import { catchError, firstValueFrom, map, Observable, of, throwError } from 'rxjs';
 import { error } from 'node:console';
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: 'app-tabla-auditorias-especiales',
@@ -40,6 +41,7 @@ export class TablaAuditoriasEspecialesComponent {
   displayedColumns: string[] = [];
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) public infoModal: any,
     private planAuditoriaMid: PlanAnualAuditoriaMid,
     private planAuditoriaService: PlanAnualAuditoriaService,
     private alertaService: AlertService,
@@ -309,23 +311,48 @@ export class TablaAuditoriasEspecialesComponent {
     if (!auditoriaPadre._id) {
       return;
     }
-
-    this.planAuditoriaService.post(`auditoria-padre/${auditoriaPadre._id}/generar-auditoria`, {}).subscribe({
-      next: () => {
-        this.alertaService.showSuccessAlert("Auditoría generada exitosamente").then(() => {
-          const offset = this.pageIndex * this.pageSize;
-          this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
-        });
-      },
-      error: (error) => {
-        let mensajeError = "Error al generar la auditoría";
-        if (error?.error?.Data?.includes("número máximo")) {
-          mensajeError = "No se pueden generar más auditorías concretas para esta auditoría padre.";
-        }
-        console.error("Error al generar la auditoría:", error);
-        this.alertaService.showErrorAlert(mensajeError);
-      }
-    });
+  
+    const generarAuditoriasDto = {
+      usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.usuarioRol,
+      observacion: "Generación manual de auditoría",
+      estado_id_padre_actual: environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
+      estado_id_padre_nuevo: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
+      estado_id_hija_nuevo: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+      fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+    };
+  
+    this.planAuditoriaMid
+      .post(
+        `auditoria-padre/${auditoriaPadre._id}/generar-auditoria`,
+        generarAuditoriasDto, 
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (response?.auditoriasCreadas || response?.Success) {
+            this.alertaService
+              .showSuccessAlert("Auditoría generada exitosamente")
+              .then(() => {
+                const offset = this.pageIndex * this.pageSize;
+                this.cargarAuditorias(this.vigenciaId!, this.pageSize, offset);
+              });
+          } else {
+            this.alertaService.showErrorAlert(
+              "No se pudo generar la auditoría",
+            );
+          }
+        },
+        error: (error) => {
+          const backendMessage =
+            error?.error?.message || "Error al generar la auditoría";
+        
+          const mensajeTexto = Array.isArray(backendMessage)
+            ? backendMessage.join(" ")
+            : backendMessage;
+        
+          this.alertaService.showAlert("",mensajeTexto);
+        },
+      });
   }
 
   async traerAuditoriasConcretas(
