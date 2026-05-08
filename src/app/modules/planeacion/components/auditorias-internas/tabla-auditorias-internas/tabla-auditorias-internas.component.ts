@@ -271,12 +271,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       });
   }
 
-  puedeRemplazarDocumento(rol: string): boolean {
-    return [
+  puedeRemplazarDocumento(rol: string, estado_id: number): boolean {
+    const esAuditor = [
         environment.ROL.AUDITOR_EXPERTO,
         environment.ROL.AUDITOR,
         environment.ROL.AUDITOR_ASISTENTE
       ].includes(rol);
+    const esEstadoAuditado = [
+        environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO,
+        environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO
+      ].includes(estado_id);
+
+    return esAuditor && esEstadoAuditado;
   }
 
   private esUsuarioAuditado(): boolean {
@@ -329,7 +335,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   async verDocumentos(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     const getAdjuntoConfigByRole = (rol: string): CargueAdjuntoTabConfig | undefined => {
-      if (!this.puedeRemplazarDocumento(rol))
+      if (!this.puedeRemplazarDocumento(rol, auditoria.estado_id))
         return undefined;
 
       return {
