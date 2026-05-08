@@ -1,17 +1,20 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
+import { OikosService } from 'src/app/core/services/oikos.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
-import { AccionPlan } from '../tabla-hallazgos/tabla-hallazgos.component';
+import { AccionPlan, ResultadoModalAccion } from '../tabla-hallazgos/tabla-hallazgos.component';
 
 export interface DatosModalAccion {
   hallazgo: any;
   accion: AccionPlan | null;
   auditoria: any;
+  planMejoramientoId: string;
 }
 
 export interface Dependencia {
-  id: string;
+  id: number;
   nombre: string;
 }
 
@@ -23,23 +26,17 @@ export interface Dependencia {
 export class ModalRegistrarAccionComponent implements OnInit {
   form!: FormGroup;
   modoEdicion = false;
-  /** Nombre de la dependencia líder (read-only, viene de la auditoría) */
   dependenciaLider = '';
 
-  /** Lista de dependencias disponibles para seleccionar (mock para pruebas) */
-  dependenciasDisponibles: Dependencia[] = [
-    { id: '1', nombre: 'Oficina de Control Interno' },
-    { id: '2', nombre: 'Gestión de Docencia' },
-    { id: '3', nombre: 'Gestión de Bienestar' },
-    { id: '4', nombre: 'Gestión Financiera' },
-    { id: '5', nombre: 'Gestión de TI' },
-  ];
-
-  /** Dependencia actualmente seleccionada en el dropdown */
+  todasDependencias: Dependencia[] = [];
+  dependenciasDisponibles: Dependencia[] = [];
   responsableSeleccionado: Dependencia | null = null;
-
-  /** Responsables ya agregados (se muestran como chips) */
   responsablesAgregados: Dependencia[] = [];
+
+  private responsablesActuales: { _id: string; dependencia_id: number; dependencia_lider: boolean }[] = [];
+
+  cargandoDependencias = false;
+
   tiposAccion = [
     { id: 1, nombre: 'Preventiva' },
     { id: 2, nombre: 'Correctiva' },
@@ -67,18 +64,21 @@ export class ModalRegistrarAccionComponent implements OnInit {
     private readonly dialogRef: MatDialogRef<ModalRegistrarAccionComponent>,
     private readonly fb: FormBuilder,
     private readonly alertService: AlertService,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly oikosService: OikosService,
   ) {}
 
   ngOnInit(): void {
     this.modoEdicion = !!this.data.accion;
     this.iniciarForm();
-    this.iniciarResponsables();
+    this.iniciarDependenciaLider();
+    this.cargarDependencias();
     if (this.modoEdicion) this.poblarForm();
   }
 
   private iniciarForm(): void {
     this.form = this.fb.group({
-      causa:            ['', Validators.required],
+      causa:            [this.data.hallazgo?.causa ?? '', Validators.required],
       tipoAccion:       ['', Validators.required],
       accionPlanteada:  ['', Validators.required],
       nombreIndicador:  [''],
@@ -87,57 +87,79 @@ export class ModalRegistrarAccionComponent implements OnInit {
     });
   }
 
-  private iniciarResponsables(): void {
-    // Dependencia líder viene de la auditoría (read-only)
+  private iniciarDependenciaLider(): void {
     this.dependenciaLider =
       this.data.auditoria?.jefe_nombre ??
       this.data.auditoria?.dependencia_nombre ??
       '';
   }
 
+  private cargarDependencias(): void {
+    this.cargandoDependencias = true;
+    this.oikosService.get('dependencia?limit=0&query=Activo:true').subscribe({
+      next: (res: any) => {
+        const lista: any[] = Array.isArray(res) ? res : (res.Data ?? []);
+        this.todasDependencias = lista.map((d: any) => ({
+          id:     d.Id ?? d.id,
+          nombre: d.Nombre ?? d.nombre,
+        }));
+        this.actualizarDisponibles();
+        this.cargandoDependencias = false;
+
+        if (this.modoEdicion) this.cargarResponsablesExistentes();
+      },
+      error: () => { this.cargandoDependencias = false; }
+    });
+  }
+
+  private cargarResponsablesExistentes(): void {
+    const accionId = this.data.accion?.accionId;
+    if (!accionId) return;
+
+    this.planAuditoriaService
+      .get(`responsable-accion?query=accion_mejora_id:${accionId},activo:true`)
+      .subscribe({
+        next: (res) => {
+          this.responsablesActuales = res.Data ?? [];
+          // Mostrar en UI solo los que NO son líderes
+          const dependenciasActuales = this.responsablesActuales.filter(r => !r.dependencia_lider);
+          this.responsablesAgregados = dependenciasActuales.map(r => {
+            const dep = this.todasDependencias.find(d => d.id === r.dependencia_id);
+            return { id: r.dependencia_id, nombre: dep?.nombre ?? `Dependencia ${r.dependencia_id}` };
+          });
+          this.actualizarDisponibles();
+        },
+        error: () => {}
+      });
+  }
+
   private poblarForm(): void {
     const a = this.data.accion!;
     this.form.patchValue({
-      causa:            a.tipoAccion,
-      tipoAccion:       a.tipoAccion,
+      causa:            this.data.hallazgo?.causa ?? '',
+      tipoAccion:       a.tipoAccionId ?? '',
       accionPlanteada:  a.accionPlanteada,
       nombreIndicador:  a.nombreIndicador,
       formulaIndicador: a.formulaIndicador,
       meta:             a.meta,
     });
+  }
 
-    // Restaurar responsables guardados en la acción
-    if (a.responsable) {
-      this.responsablesAgregados = [{ id: '0', nombre: a.responsable }];
-    }
+  private actualizarDisponibles(): void {
+    const idsAgregados = new Set(this.responsablesAgregados.map(r => r.id));
+    this.dependenciasDisponibles = this.todasDependencias.filter(d => !idsAgregados.has(d.id));
   }
 
   agregarResponsable(): void {
     if (!this.responsableSeleccionado) return;
-
-    const yaExiste = this.responsablesAgregados.some(
-      r => r.id === this.responsableSeleccionado!.id
-    );
-    if (yaExiste) {
-      this.alertService.showAlert(
-        'Responsable duplicado',
-        'Esta dependencia ya fue agregada como responsable.'
-      );
-      return;
-    }
-
     this.responsablesAgregados = [...this.responsablesAgregados, { ...this.responsableSeleccionado }];
-    this.dependenciasDisponibles = this.dependenciasDisponibles.filter(
-      d => d.id !== this.responsableSeleccionado!.id
-    );
     this.responsableSeleccionado = null;
+    this.actualizarDisponibles();
   }
 
   eliminarResponsable(index: number): void {
-    const eliminado = this.responsablesAgregados[index];
-    // Devolver al dropdown
-    this.dependenciasDisponibles = [...this.dependenciasDisponibles, eliminado];
     this.responsablesAgregados = this.responsablesAgregados.filter((_, i) => i !== index);
+    this.actualizarDisponibles();
   }
 
   guardarYCerrar(): void {
@@ -148,35 +170,58 @@ export class ModalRegistrarAccionComponent implements OnInit {
     }
 
     if (this.responsablesAgregados.length === 0) {
-      this.alertService.showAlert(
-        'Sin responsables',
-        'Debe agregar al menos un responsable de la acción.'
-      );
+      this.alertService.showAlert('Sin responsables', 'Debe agregar al menos un responsable de la acción.');
       return;
     }
 
-    this.alertService
-      .showConfirmAlert('¿Guardar cambios?')
-      .then((confirmado) => {
-        if (!confirmado.value) return;
+    this.alertService.showConfirmAlert('¿Guardar cambios?').then(conf => {
+      if (!conf.value) return;
 
-        const v = this.form.value;
+      const v = this.form.value;
+      const liderDependenciaId: number = this.data.auditoria?.dependencia_id ?? 0;
 
-        const accionGuardada: AccionPlan = {
-          numero:           this.data.accion?.numero ?? '',
-          tipoAccion:       this.tiposAccion.find(t => t.id === v.tipoAccion)?.nombre ?? v.tipoAccion,
+      // IDs de dependencias (no-lider) que ya estaban en DB
+      const idsActualesNoLider = new Set(
+        this.responsablesActuales
+          .filter(r => !r.dependencia_lider)
+          .map(r => r.dependencia_id)
+      );
+      const idsEnUI = new Set(this.responsablesAgregados.map(r => r.id));
+
+      // Registros a eliminar: estaban en DB pero el usuario los quitó
+      const responsablesAEliminar = this.responsablesActuales
+        .filter(r => !r.dependencia_lider && !idsEnUI.has(r.dependencia_id))
+        .map(r => r._id);
+
+      const responsablesNuevos: { dependencia_id: number; dependencia_lider: boolean }[] = [];
+
+      // En creación: incluir la dependencia líder solo si tiene ID válido
+      if (!this.modoEdicion && liderDependenciaId) {
+        responsablesNuevos.push({ dependencia_id: liderDependenciaId, dependencia_lider: true });
+      }
+
+      // Dependencias que el usuario agregó y no estaban en DB
+      this.responsablesAgregados.forEach(r => {
+        if (!idsActualesNoLider.has(r.id)) {
+          responsablesNuevos.push({ dependencia_id: r.id, dependencia_lider: false });
+        }
+      });
+
+      const resultado: ResultadoModalAccion = {
+        accion: {
+          accionId:         this.data.accion?.accionId,
+          tipoAccionId:     v.tipoAccion,
           accionPlanteada:  v.accionPlanteada,
           nombreIndicador:  v.nombreIndicador,
           formulaIndicador: v.formulaIndicador,
           meta:             v.meta,
-          // Concatenar nombres de responsables si hay varios
-          responsable:      this.responsablesAgregados.map(r => r.nombre).join(', '),
-          fechaInicio:      '',
-          fechaFin:         '',
-        };
+        },
+        responsablesNuevos,
+        responsablesAEliminar,
+      };
 
-        this.alertService.showSuccessAlert('Acción guardada correctamente.', 'Guardado');
-        this.dialogRef.close(accionGuardada);
-      });
+      this.alertService.showSuccessAlert('Acción guardada correctamente.', 'Guardado');
+      this.dialogRef.close(resultado);
+    });
   }
 }

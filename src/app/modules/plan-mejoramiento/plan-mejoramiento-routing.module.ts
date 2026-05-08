@@ -6,11 +6,16 @@ import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla
 const routes: Routes = [
   {
     path: '',
+    component: PlanDeMejoramientoComponent,   
+  },
+  {
+    path: 'asignar-auditores',
     component: PlanDeMejoramientoComponent,
+    data: { accionesPermitidas: ['Asignar Auditor(es)'] },
   },
   {
     path: 'registrar-plan/:id',
-    component: RegistrarPlanComponent,
+    component: RegistrarPlanComponent,      
   },
 ];
 

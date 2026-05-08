@@ -625,3 +625,157 @@ export const accionesEjecucionFinal: {
     ],
   },
 };
+
+export const accionesPlanMejoramiento: {
+  [rol: string]: { [estado: number]: string[] };
+} = {
+  [environment.ROL.JEFE]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Aprobar Plan",
+      "Rechazar Plan",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+  },
+
+  [environment.ROL.AUDITOR_EXPERTO]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Aprobar Plan",
+      "Rechazar Plan",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+  },
+
+  [environment.ROL.AUDITOR]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Aprobar Plan",
+      "Rechazar Plan",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+  },
+
+  [environment.ROL.AUDITOR_ASISTENTE]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
+      "Asignar Auditor(es)",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+  },
+
+  [environment.ROL.JEFE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Enviar a Revisión",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
+      "Registrar Plan",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Enviar a Revisión",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+  },
+
+  [environment.ROL.ASISTENTE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Enviar a Revisión",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
+      "Registrar Plan",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Enviar a Revisión",
+    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+      "Ver Documentos Auditoría",
+    ],
+  },
+};

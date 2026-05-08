@@ -48,7 +48,7 @@ export const environment = {
 
   NOTIFICACION_PLAN_AUDITORIA_RECHAZO_DESTINATARIOS: {
     ToAddresses: [
-      "pruebaspaa26auditor@yopmail.com",  
+      "pruebaspaa26auditor@yopmail.com",
     ],
     CcAddresses: [
       "pruebaspaa26@yopmail.com",
@@ -56,7 +56,7 @@ export const environment = {
     BccAddresses: []
   },
 
-   NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS: {
+  NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS: {
     ToAddresses: [
       "pruebaspaa266jefe@yopmail.com",
     ],
@@ -101,7 +101,15 @@ export const environment = {
     BccAddresses: []
   },
 
-  VIGENCIAS : {
+  NOTIFICACION_PREINFORME_ENVIO_AUDITADO_DESTINATARIOS: {
+    ToAddresses: [
+      "pruebaspaa26auditado@yopmail.com",
+    ],
+    CcAddresses: [],
+    BccAddresses: []
+  },
+
+  VIGENCIAS: {
     TIPO_PARAMETRO_ID: 100,
   },
 
@@ -136,8 +144,9 @@ export const environment = {
       APROBADO_PROGRAMA_AUDITADO: 5318,
     },
     EJECUCION: {
-      // INFORME PRELIMINAR
       POR_EJECUTAR: 5319,
+      
+      // INFORME PRELIMINAR
       CREANDO_PREINFORME: 5320,
       REVISION_PREINFORME_JEFE: 5321,
       APROBADO_PREINFORME_JEFE: 5322,
@@ -244,4 +253,6 @@ export const environment = {
     JEFE_DEPENDENCIA_ID: 312,
     ASISTENTE_DEPENDENCIA_ID: 320,
   },
+
+  DIAS_REVISION_PREINFORME: 3,
 };
