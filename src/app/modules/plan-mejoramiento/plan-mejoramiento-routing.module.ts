@@ -9,6 +9,11 @@ const routes: Routes = [
     component: PlanDeMejoramientoComponent,   
   },
   {
+    path: 'asignar-auditores',
+    component: PlanDeMejoramientoComponent,
+    data: { accionesPermitidas: ['Asignar Auditor(es)'] },
+  },
+  {
     path: 'registrar-plan/:id',
     component: RegistrarPlanComponent,      
   },
