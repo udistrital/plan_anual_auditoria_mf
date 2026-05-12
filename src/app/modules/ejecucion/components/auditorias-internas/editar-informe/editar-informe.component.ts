@@ -90,7 +90,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
     if (this.estadoId === CREANDO_FINAL) {
       return roles.some(r => [
-        environment.ROL.ADMIN, //TODO: QUITAR
         environment.ROL.AUDITOR_EXPERTO,
         environment.ROL.AUDITOR,
         environment.ROL.AUDITOR_ASISTENTE,
@@ -114,7 +113,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL) return false;
     const roles = this.rolService.getRoles();
     return roles.some(r => [
-      environment.ROL.ADMIN, //TODO: QUITAR
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,

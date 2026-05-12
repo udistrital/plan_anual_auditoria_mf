@@ -174,7 +174,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId__in:${macroprocesosIdBarSeparated}&limit=0`)
       .pipe(
-        map((res: any) => res && res.Data ? res.Data : []),
+        map((res: any) => res?.Data),
         catchError(() => of([])),
       )
       .subscribe((data: Parametro[]) => {

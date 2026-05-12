@@ -93,11 +93,15 @@ export class DescargaService {
           .find(([_, id]) => id === doc.tipo_id)?.[0];
 
         // Asignar un nombre adecuado al archivo
-        const nombreBase = nombreBasePersonalizado
-          ? `${nombreBasePersonalizado}${suffixNormalizado}`
-          : tipoDocumento
-            ? `${tipoDocumento.toLowerCase().replaceAll('_', '-')}${suffixNormalizado}`
-            : `documento_${index + 1}${suffixNormalizado}`;
+        let nombreBase: string;
+
+        if (nombreBasePersonalizado) {
+          nombreBase = `${nombreBasePersonalizado}${suffixNormalizado}`;
+        } else if (tipoDocumento) {
+          nombreBase = `${tipoDocumento.toLowerCase().replaceAll('_', '-')}${suffixNormalizado}`;
+        } else {
+          nombreBase = `documento_${index + 1}${suffixNormalizado}`;
+        }
 
         const ocurrencias = (nombreBaseContador.get(nombreBase) ?? 0) + 1;
         nombreBaseContador.set(nombreBase, ocurrencias);
@@ -139,6 +143,6 @@ export class DescargaService {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/^-|-$/g, '');
   }
 }

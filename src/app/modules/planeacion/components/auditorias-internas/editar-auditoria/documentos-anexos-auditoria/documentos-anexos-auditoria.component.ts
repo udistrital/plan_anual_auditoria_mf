@@ -11,6 +11,7 @@ import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/d
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { ModalVisualizarRecargarCompromisoEticoComponent } from "./modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface CartaRepresentacionDocumento {
   base64: string;
@@ -108,19 +109,12 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         });
       });
 
-      const auditoria = res?.Data || {};
-      const dependenciasIds = Array.isArray(auditoria.dependencia_id) ? auditoria.dependencia_id : [];
-      const dependenciasNombres = Array.isArray(auditoria.dependencia_nombre)
-        ? auditoria.dependencia_nombre
-        : typeof auditoria.dependencia_nombre === "string" && auditoria.dependencia_nombre.length > 0
-          ? [auditoria.dependencia_nombre]
-          : [];
-
-      this.cartasRepresentacionEsperadas = dependenciasIds.map((dependenciaId: number, index: number) => ({
+      const auditoria: Auditoria = res?.Data ?? {};
+      this.cartasRepresentacionEsperadas = auditoria.dependencia_id.map((dependenciaId: number, index: number) => ({
         base64: "",
         dependenciaId,
         dependenciaNombre: this.normalizarNombreDependencia(
-          dependenciasNombres[index],
+          auditoria.dependencia_nombre[index],
           `Dependencia ${index + 1}`
         ),
         guardado: false,
@@ -148,7 +142,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           const cartasVigentes = documentosDelTipo.map((documentoAdjunto, index) => {
             const dependenciaId =
               typeof documentoAdjunto?.metadatos?.["dependencia_id"] === "number"
-                ? (documentoAdjunto.metadatos?.["dependencia_id"] as number)
+                ? (documentoAdjunto.metadatos?.["dependencia_id"])
                 : null;
 
             return {
@@ -441,7 +435,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           }));
 
           this.verDocumentoMultiple(cartas, documento, documentosDOCX);
-          return;
         });
       }
 

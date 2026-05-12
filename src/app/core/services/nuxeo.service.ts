@@ -28,7 +28,7 @@ export class NuxeoService {
       reader.readAsDataURL(file);
       reader.onload = () => {
         const result = reader.result!;
-        let encoded = result.toString().replace(/^data:(.*,)?/, "");
+        let encoded = (result as string).replace(/^data:(.*,)?/, "");
         if (encoded.length % 4 > 0) {
           encoded += "=".repeat(4 - (encoded.length % 4));
         }

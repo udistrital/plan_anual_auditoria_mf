@@ -46,7 +46,7 @@ export class ReferenciaPdfService {
       nuxeo_id: nuxeoResponse.Id,
       nuxeo_enlace: nuxeoResponse.Enlace,
       tipo_id: tipo_id,
-      metadatos: metadatos || {},
+      metadatos: metadatos ?? {},
       activo: true,
       fecha_creacion: new Date().toISOString(),
     };

@@ -142,7 +142,7 @@ export class TablaAuditoriasEspecialesComponent {
           cronograma: auditoria.cronograma_nombre?.join(", ") ?? "Sin Cronograma",
           cronogramaId: auditoria.cronograma_id ?? [],
           cantidadAuditorias: auditoria.cantidad_auditorias ?? 0,
-          vigencia_id: (auditoria.vigencia_id || this.vigenciaId) ?? 0,
+          vigencia_id: (auditoria.vigencia_id ?? this.vigenciaId) ?? 0,
           estado_nombre: auditoria.estado_nombre ?? "Sin estado",
           estado: auditoria.estado_nombre ?? "Sin estado",
           estado_id: auditoria.estado_id ?? 0,
@@ -225,13 +225,9 @@ export class TablaAuditoriasEspecialesComponent {
       subtitulo: auditoria.subtitulo ?? '',
       tipo_evaluacion_nombre: auditoria.tipo_evaluacion_nombre ? [auditoria.tipo_evaluacion_nombre] : [],
       tipo_evaluacion_id: auditoria.tipo_evaluacion_id ? [auditoria.tipo_evaluacion_id] : [],
-      cronograma_nombre: Array.isArray(auditoria.cronograma_nombre)
-        ? auditoria.cronograma_nombre
-        : (auditoria.cronograma_nombre ? [auditoria.cronograma_nombre] : []),
-      cronograma_id: Array.isArray(auditoria.cronograma_id)
-        ? auditoria.cronograma_id
-        : (auditoria.cronograma_id ? [auditoria.cronograma_id] : []),
-      vigencia_id: (auditoria.vigencia_id || this.vigenciaId) ?? 0,
+      cronograma_nombre: auditoria?.cronograma_nombre!,
+      cronograma_id: auditoria.cronograma_id!,
+      vigencia_id: (auditoria.vigencia_id ?? this.vigenciaId) ?? 0,
       vigencia_nombre: "",
       estado_nombre: auditoria.estado_nombre ?? "Sin estado",
       estado_id: auditoria.estado_id ?? 0,
@@ -358,7 +354,6 @@ export class TablaAuditoriasEspecialesComponent {
     auditoriaPadre: AuditoriaEspecialTablaRow
   ): Promise<AuditoriaEspecialTablaRow[]> {
     const padreId = auditoriaPadre._id ?? "padre-sin-id";
-    const numeroPadre = auditoriaPadre.numero ?? "0";
 
     const auditoriasConcretas = await firstValueFrom(
       this.planAuditoriaMid.get(`auditoria?query=activo:true,auditoria_padre_id:${auditoriaPadre._id}&auditores`).pipe(
@@ -376,7 +371,7 @@ export class TablaAuditoriasEspecialesComponent {
                 _id: item._id || `${padreId}-concreta-${index + 1}`,
                 auditoria_padre_id: padreId,
                 titulo: item.titulo ?? "Sin Titulo",
-                subtitulo: item.subtitulo || `Sin Subtítulo (#${numeroConcreto})`,
+                subtitulo: item.subtitulo ?? `Sin Subtítulo (#${numeroConcreto})`,
                 tipo_evaluacion_id: item.tipo_evaluacion_id ?? 0,
                 tipo_evaluacion_nombre: item.tipo_evaluacion_nombre ?? "Sin Asignar",
                 cronograma_id: item.cronograma_id ?? [],

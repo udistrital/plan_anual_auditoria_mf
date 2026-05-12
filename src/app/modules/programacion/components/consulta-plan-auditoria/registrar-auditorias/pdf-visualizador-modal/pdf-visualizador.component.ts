@@ -7,8 +7,6 @@ import {
 } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import { environment } from "src/environments/environment";
-
 //servicios
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";

@@ -45,7 +45,7 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
   }[] = [];
 
   /** Auditores marcados para eliminar al guardar */
-  private auditoresAEliminar: string[] = [];
+  private readonly auditoresAEliminar: string[] = [];
 
   cargando: boolean = false;
 

@@ -191,9 +191,11 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   }
 
   enviarAprobacion(plan: any): void {
+    console.log("Enviar a aprobación:", plan);
   }
 
   verDocumentosAuditoria(plan: any): void {
+    console.log("Ver documentos de auditoría:", plan);
   }
 
   private resetTabla(): void {

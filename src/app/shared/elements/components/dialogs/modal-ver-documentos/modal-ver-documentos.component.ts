@@ -274,22 +274,22 @@ export class ModalVerDocumentosComponent implements OnInit {
     }
 
     const metadatos = {
-      ...(documentoActual.metadatos || {}),
-      ...(config.metadatosAdicionales || {}),
+      ...(documentoActual.metadatos ?? {}),
+      ...(config.metadatosAdicionales ?? {}),
     };
 
     const dialogRef = this.matDialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: config.tipoArchivo ?? "pdf",
-        id: documentoActual.referencia_id || this.data.entityId,
+        id: documentoActual.referencia_id ?? this.data.entityId,
         idTipoDocumento: config.idTipoDocumento,
         descripcion: config.descripcion,
         cargaLambda: false,
         tipoIdReferencia: documentoActual.tipo_id,
         referencia:
-          documentoActual.referencia_tipo ||
-          config.referenciaTipoFallback ||
+          documentoActual.referencia_tipo ??
+          config.referenciaTipoFallback ??
           "Auditoria",
         metadatos,
         documentoIdActualizar: documentoActual._id,

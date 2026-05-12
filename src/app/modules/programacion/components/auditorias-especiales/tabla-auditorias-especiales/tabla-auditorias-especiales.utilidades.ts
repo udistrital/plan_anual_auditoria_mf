@@ -14,7 +14,7 @@ function prepararCadenaAuditores(auditoria: AuditoriaEspecialTablaRow): string {
   if (!auditoria?.auditores_nombre || auditoria.auditores_nombre.length === 0)
     return "Sin Auditores";
 
-  const auditores: string[] = auditoria.auditores_nombre!.map(nombre =>
+  const auditores: string[] = auditoria.auditores_nombre.map(nombre =>
       nombre.trim().toLowerCase().split(" ")
         .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
         .join(" ")

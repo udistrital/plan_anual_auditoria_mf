@@ -77,14 +77,16 @@
 
       <!-- Campo tipo radiobutton -->
       <div *ngSwitchCase="'radiobutton'">
-        <label>{{ campo.etiqueta }}</label>
-        <mat-radio-group [formControlName]="campo.nombre">
-          <div *ngFor="let opcion of campo.parametros?.opciones ?? []">
-            <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
-              {{ opcion.Nombre }}
-            </mat-radio-button>
-          </div>
-        </mat-radio-group>
+        <label>
+          {{ campo.etiqueta }}
+          <mat-radio-group [formControlName]="campo.nombre">
+            <div *ngFor="let opcion of campo.parametros?.opciones ?? []">
+              <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
+                {{ opcion.Nombre }}
+              </mat-radio-button>
+            </div>
+          </mat-radio-group>
+        </label>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
@@ -181,14 +183,14 @@
                 info
               </mat-icon>
             </b>
+            <quill-editor 
+              [formControlName]="campo.nombre"
+              [modules]="campo.quillConfig!"
+              [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
+              [ngStyle]="{ 'width': '100%'}"
+              >
+            </quill-editor>
           </label>
-          <quill-editor 
-            [formControlName]="campo.nombre"
-            [modules]="campo.quillConfig!"
-            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
-            [ngStyle]="{ 'width': '100%'}"
-            >
-          </quill-editor>
           <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
             {{ campo.etiqueta }} es requerido
           </mat-error>

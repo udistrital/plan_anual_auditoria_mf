@@ -14,7 +14,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
-import { BotonTabDocumentoContext, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, VariablesCartaRepresentacion } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
@@ -22,7 +22,7 @@ import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
-import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface DocumentoAdjuntoRevision {
   _id?: string;
@@ -438,22 +438,14 @@ export class RevisionDocumentosComponent implements OnInit {
         });
       });
 
-      const auditoria = res?.Data || {};
-      const dependenciasIds = Array.isArray(auditoria.dependencia_id)
-        ? auditoria.dependencia_id
-        : [];
-      const dependenciasNombres = Array.isArray(auditoria.dependencia_nombre)
-        ? auditoria.dependencia_nombre
-        : typeof auditoria.dependencia_nombre === "string" && auditoria.dependencia_nombre.trim()
-          ? [auditoria.dependencia_nombre]
-          : [];
+      const auditoria: Auditoria = res?.Data ?? {};
 
-      dependenciasIds.forEach((dependenciaId: number, index: number) => {
+      auditoria.dependencia_id.forEach((dependenciaId: number, index: number) => {
         if (typeof dependenciaId !== "number") {
           return;
         }
 
-        const nombreDependencia = this.normalizarNombreDependencia(dependenciasNombres[index]);
+        const nombreDependencia = this.normalizarNombreDependencia(auditoria.dependencia_nombre[index]);
         if (nombreDependencia) {
           this.dependenciasPorId.set(dependenciaId, nombreDependencia);
         }

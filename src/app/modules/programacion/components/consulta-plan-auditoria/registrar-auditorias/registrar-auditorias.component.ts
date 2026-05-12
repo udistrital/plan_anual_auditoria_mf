@@ -80,7 +80,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.modoEditarExtraordinario = Boolean(localStorage.getItem('extra-edit'));
-    const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
+    const vigencia = JSON.parse(localStorage.getItem('vigencia') ?? '{}');
     this.vigenciaId = vigencia?.Id ?? 0;
     this.vigenciaNombre = vigencia?.Nombre ?? '';
     localStorage.removeItem('vigencia');

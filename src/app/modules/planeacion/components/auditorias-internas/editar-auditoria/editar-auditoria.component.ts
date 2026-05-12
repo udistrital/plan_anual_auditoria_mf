@@ -181,8 +181,8 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
 
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
-      .subscribe((res) => {
-        const datosActualizados = (res as any)?.Data;
+      .subscribe((res: any) => {
+        const datosActualizados = res?.Data;
         if (datosActualizados) {
           this.auditoria = { ...this.auditoria, ...datosActualizados };
         }

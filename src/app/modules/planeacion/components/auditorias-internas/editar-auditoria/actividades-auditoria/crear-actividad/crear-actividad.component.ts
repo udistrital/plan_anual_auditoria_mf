@@ -29,8 +29,6 @@ export class CrearActividadComponent {
     this.maxFechaStr = data.maxFechaStr ?? null;
   }
 
-  ngOnInit(): void {}
-
   crearActividad(actividadData: ActividadPlan) {
     let actividadJson: Actividad = {
       auditoria_id: this.auditoriaId,

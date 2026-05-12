@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 interface HallazgoResumen {
   numero: string;
@@ -11,7 +11,7 @@ interface HallazgoResumen {
   templateUrl: './resumen-hallazgos.component.html',
   styleUrls: ['./resumen-hallazgos.component.css']
 })
-export class ResumenHallazgosComponent implements OnInit, OnChanges {
+export class ResumenHallazgosComponent implements OnChanges {
   @Input() informeId!: string;
   @Input() temasRaw: any[] | null = null;
   @Input() hallazgosRaw: any[] | null = null;
@@ -19,8 +19,6 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
   displayedColumns: string[] = ['numero', 'criterio', 'descripcion'];
   hallazgos: HallazgoResumen[] = [];
   cargando = false;
-
-  ngOnInit(): void { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['temasRaw'] || changes['hallazgosRaw']) && this.temasRaw !== null && this.hallazgosRaw !== null) {

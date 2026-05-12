@@ -118,7 +118,6 @@ export class ModalVerDocumentoComponent implements OnInit {
   descargarDocumentoDOCX(indice: number = this.indiceSeleccionado): void {
     if (this.onDescargarDocumentoDOCX) {
       this.onDescargarDocumentoDOCX(indice);
-      return;
     }
   }
 

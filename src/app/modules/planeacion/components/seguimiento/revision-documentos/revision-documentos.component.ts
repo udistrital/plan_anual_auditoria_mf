@@ -22,6 +22,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 @Component({
   selector: "app-revision-documentos-seguimiento",
@@ -183,11 +184,11 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
       }),
 
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
         const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
         dependenciasInfo.forEach((dep) => 
-          datosAuditoria.correo_complementario.forEach((correo: any) => {
+          datosAuditoria.correo_complementario?.forEach((correo: any) => {
             if (correo.dependencia_id === dep.dependencia_id)
               dep.correo_complementario = correo.correo;
           })
@@ -262,7 +263,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Revisión de Programa de Auditoría",
               tipo_solicitud: "revisión y firma",
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
               nombre_remitente: nombreRemitente || rolRemitente,
@@ -411,7 +412,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
                   this.registrarNotificacion(
                     auditoriaId,
                     destinatarios,
-                    variablesCartaRepresentacion as any,
+                    variablesCartaRepresentacion,
                     "aceptacion_auditado_cargue_documento"
                   );
                 }

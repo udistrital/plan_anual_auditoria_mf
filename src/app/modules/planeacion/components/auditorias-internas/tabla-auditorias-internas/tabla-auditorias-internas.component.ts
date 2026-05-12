@@ -706,14 +706,14 @@ export class TablaAuditoriasInternasComponent implements OnInit {
                 const dependenciaNombre =
                   typeof carta.metadatos?.["dependencia_nombre"] === "string"
                     ? carta.metadatos?.["dependencia_nombre"]
-                    : carta.nombre || `Dependencia ${index + 1}`;
+                    : carta.nombre ?? `Dependencia ${index + 1}`;
                 const valorFirmado = carta.metadatos?.["firmado"];
-                const firmado =
-                  typeof valorFirmado === "boolean"
-                    ? valorFirmado
-                    : typeof valorFirmado === "string"
-                      ? valorFirmado.toLowerCase() === "true"
-                      : false;
+                let firmado = false;
+                if (typeof valorFirmado === "boolean") {
+                  firmado = valorFirmado;
+                } else if (typeof valorFirmado === "string") {
+                  firmado = valorFirmado.toLowerCase() === "true";
+                }
 
                 return {
                   titulo: `Carta de Representación ${dependenciaNombre}`,

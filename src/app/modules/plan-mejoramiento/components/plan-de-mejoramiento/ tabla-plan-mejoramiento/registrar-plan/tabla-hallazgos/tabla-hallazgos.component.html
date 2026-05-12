@@ -106,12 +106,12 @@
         </td>
       </ng-container>
 
-      <!-- ── Columna de GRUPO (ocupa todo el ancho) ── -->
+      <!-- ── Columna de GRUPO (ocupa el ancho completo) ── -->
       <ng-container matColumnDef="grupo">
         <td mat-cell *matCellDef="let fila" [attr.colspan]="columnas.length + 1">
           <div class="d-flex align-items-center justify-content-between px-1 py-1">
             <span class="d-flex align-items-center gap-1" style="cursor:pointer"
-                  (click)="toggleHallazgo(fila.hallazgoId)">
+                  (click)="toggleHallazgo(fila.hallazgoId)" (keyup)="toggleHallazgo(fila.hallazgoId)">
               <mat-icon class="icono-grupo">
                 {{ getHallazgo(fila.hallazgoId)?.expandido ? 'remove' : 'add' }}
               </mat-icon>
