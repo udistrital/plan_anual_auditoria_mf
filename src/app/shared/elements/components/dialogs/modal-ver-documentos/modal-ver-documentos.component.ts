@@ -26,12 +26,16 @@ export interface BotonTabDocumento {
   accion: (context?: BotonTabDocumentoContext) => void | Promise<void>;
   color?: string;
   icono?: string;
+  estilo?: string;
+  tipo?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
 }
 
 export interface CargueAdjuntoTabConfig {
   nombreBoton?: string;
   iconoBoton?: string;
   colorBoton?: string;
+  estiloBoton?: string;
+  tipoBoton?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
   tipoArchivo?: "pdf" | "xlsx";
   idTipoDocumento: number;
   descripcion: string;
@@ -67,6 +71,7 @@ export interface AccionFooterModal {
   nombre: string;
   icono?: string;
   color?: string;
+  tipoBoton?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
   accion: () => boolean | Promise<boolean>;
 }
 
