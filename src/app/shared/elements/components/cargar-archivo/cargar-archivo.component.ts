@@ -19,11 +19,11 @@ export class CargarArchivoComponent {
 
   constructor(
     public dialogRef: MatDialogRef<CargarArchivoComponent>,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private nuxeoService: NuxeoService,
-    private alertService: AlertService,
-    private modalService: ModalService,
-    private referenciaPdfService: ReferenciaPdfService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
+    private readonly alertService: AlertService,
+    private readonly modalService: ModalService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
 
     @Inject(MAT_DIALOG_DATA)
     public data: {

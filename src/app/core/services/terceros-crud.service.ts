@@ -21,7 +21,7 @@ export const TERCERO_ID_POR_DOCUMENTO_ENDPOINT = 'tercero/identificacion';
 })
 export class TercerosCrudService {
 
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath("TERCEROS_SERVICE");
   }
 

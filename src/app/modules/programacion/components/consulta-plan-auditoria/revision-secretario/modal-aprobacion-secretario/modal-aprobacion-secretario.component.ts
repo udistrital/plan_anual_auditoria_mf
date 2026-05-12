@@ -24,14 +24,14 @@ export class ModalAprobacionSecretarioComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    public dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
-    private dialog: MatDialog,
-    private alertService: AlertService,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMidService: PlanAnualAuditoriaMid,
-    private nuxeoService: NuxeoService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router
+    public readonly dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
+    private readonly dialog: MatDialog,
+    private readonly alertService: AlertService,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMidService: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router
   ) {}
 
   onArchivoSelecionado(event: Event): void {

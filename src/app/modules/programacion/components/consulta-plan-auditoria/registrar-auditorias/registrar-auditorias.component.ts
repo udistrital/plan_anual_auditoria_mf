@@ -62,19 +62,19 @@ export class RegistrarAuditoriasComponent implements OnInit {
   vigenciaNombre: string = "";
 
   constructor(
-    private alertaService: AlertService,
-    private route: ActivatedRoute,
-    private dialog: MatDialog,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private nuxeoService: NuxeoService,
-    private descargaService: DescargaService,
-    private router: Router,
-    private spinnerService: SpinnerService,
-    private rolService: RolService,
-    private userService: UserService,
-    private documentoUtils: DocumentoUtils,
-    private referenciaPdfService: ReferenciaPdfService,
+    private readonly alertaService: AlertService,
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService,
+    private readonly router: Router,
+    private readonly spinnerService: SpinnerService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly documentoUtils: DocumentoUtils,
+    private readonly referenciaPdfService: ReferenciaPdfService,
   ) { }
 
   async ngOnInit(): Promise<void> {

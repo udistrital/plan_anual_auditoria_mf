@@ -9,7 +9,7 @@ import { RolService } from "./core/services/rol.service";
 export class AppComponent {
   title = "plan_anual_auditoria_mf";
   
-  constructor(private rolService: RolService) {}
+  constructor(private readonly rolService: RolService) {}
 
   ngOnInit(): void {
     this.rolService.cargarRoles();

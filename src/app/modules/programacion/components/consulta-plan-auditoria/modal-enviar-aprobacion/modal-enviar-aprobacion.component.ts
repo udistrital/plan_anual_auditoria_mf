@@ -10,8 +10,8 @@ export class ModalEnviarAprobacionComponent {
   form: FormGroup;
 
   constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<ModalEnviarAprobacionComponent>
+    private readonly fb: FormBuilder,
+    private readonly dialogRef: MatDialogRef<ModalEnviarAprobacionComponent>
   ) {
     this.form = this.fb.group({
       observacion: [''],

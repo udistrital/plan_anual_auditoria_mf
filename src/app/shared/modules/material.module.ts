@@ -20,6 +20,7 @@ import { MatListModule } from "@angular/material/list";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatExpansionModule } from "@angular/material/expansion";
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   exports: [
@@ -45,6 +46,7 @@ import { MatExpansionModule } from "@angular/material/expansion";
     MatTableModule,
     MatTooltipModule,
     MatListModule,
+    MatProgressSpinnerModule,    
   ],
 })
 export class MaterialModule {}

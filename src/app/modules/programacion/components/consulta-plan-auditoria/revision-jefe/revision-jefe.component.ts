@@ -40,21 +40,21 @@ export class RevisionJefeComponent implements OnInit {
   vigenciaNombre: string = "";
 
   constructor(
-    private route: ActivatedRoute,
-    public dialog: MatDialog,
-    private alertService: AlertService,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private nuxeoService: NuxeoService,
-    private userService: UserService,
-    private router: Router,
-    private descargaService: DescargaService,
-    private tercerosService: TercerosService,
-    private notificacionesService: NotificacionesService,
-    private notificacionRegistroCrudService: NotificacionRegistroCrudService,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private rolService: RolService,
-    private documentoUtils: DocumentoUtils,
+    private readonly route: ActivatedRoute,
+    public readonly dialog: MatDialog,
+    private readonly alertService: AlertService,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly userService: UserService,
+    private readonly router: Router,
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly rolService: RolService,
+    private readonly documentoUtils: DocumentoUtils,
   ) {}
 
   async ngOnInit() {

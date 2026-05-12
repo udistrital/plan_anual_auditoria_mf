@@ -17,7 +17,7 @@ export class ModalListaRechazosComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private planAuditoria: any,
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 
   ngOnInit(): void {

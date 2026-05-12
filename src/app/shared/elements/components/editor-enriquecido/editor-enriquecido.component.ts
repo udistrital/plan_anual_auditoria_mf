@@ -49,7 +49,7 @@ export class EditorEnriquecidoComponent implements OnInit, ControlValueAccessor 
     ],
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(private readonly fb: FormBuilder) {
     this.editorForm = this.fb.group({
       editorContent: [''],
     });

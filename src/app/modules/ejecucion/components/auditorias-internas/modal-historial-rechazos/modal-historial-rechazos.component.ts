@@ -13,8 +13,8 @@ export class ModalHistorialRechazosComponent implements OnInit {
   cargando = true;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data: { auditoriaId: string },
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    @Inject(MAT_DIALOG_DATA) private readonly data: { auditoriaId: string },
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) { }
 
   ngOnInit(): void {

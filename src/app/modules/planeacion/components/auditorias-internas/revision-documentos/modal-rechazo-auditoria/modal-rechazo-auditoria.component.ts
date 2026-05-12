@@ -28,11 +28,11 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    public dialogRef: MatDialogRef<ModalMotivosRechazoComponent>,
-    private alertService: AlertService,
-    private fb: FormBuilder,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router,
+    public readonly dialogRef: MatDialogRef<ModalMotivosRechazoComponent>,
+    private readonly alertService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router,
     private readonly tercerosService: TercerosService,
     private readonly notificacionesService: NotificacionesService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,

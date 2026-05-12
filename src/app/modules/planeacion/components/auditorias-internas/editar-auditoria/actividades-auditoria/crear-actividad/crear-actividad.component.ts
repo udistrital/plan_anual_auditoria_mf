@@ -21,9 +21,9 @@ export class CrearActividadComponent {
       minFechaStr?: string;
       maxFechaStr?: string;
     },
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private dialogRef: MatDialogRef<CrearActividadComponent>
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly dialogRef: MatDialogRef<CrearActividadComponent>
   ) {
     this.auditoriaId = data.auditoriaId;
     this.minFechaStr = data.minFechaStr || null;

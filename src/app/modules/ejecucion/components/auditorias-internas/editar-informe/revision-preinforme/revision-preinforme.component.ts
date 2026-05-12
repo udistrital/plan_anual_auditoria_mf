@@ -54,8 +54,8 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
   guardandoSet = new Set<string>();
 
   constructor(
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService,
   ) {}
 
   ngOnInit(): void { }

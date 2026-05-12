@@ -41,7 +41,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   };
 
   constructor(
-    public dialog: MatDialog,
+    public readonly dialog: MatDialog,
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,

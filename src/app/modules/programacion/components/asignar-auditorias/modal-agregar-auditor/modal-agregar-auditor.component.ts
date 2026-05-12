@@ -34,13 +34,13 @@ export class ModalAgregarAuditorComponent implements OnInit {
   auditorDesasignar: AuditorDesasignar | null = null;
 
   constructor(
-    private alertaService: AlertService,
-    private fb: FormBuilder,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    public dialogRef: MatDialogRef<ModalAgregarAuditorComponent>,
-    private AutenticacionMidService: AutenticacionMidService,
-    private userService: UserService,
+    private readonly alertaService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    public readonly dialogRef: MatDialogRef<ModalAgregarAuditorComponent>,
+    private readonly AutenticacionMidService: AutenticacionMidService,
+    private readonly userService: UserService,
     @Inject(MAT_DIALOG_DATA) public data: { auditoria?: Auditoria, usuarioRol: string }
   ) {
     this.auditoresSeleccionados = this.fb.array<FormGroup>([]);

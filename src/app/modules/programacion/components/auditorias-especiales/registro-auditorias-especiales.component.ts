@@ -30,12 +30,12 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   constructor(
-    private fb: FormBuilder,
-    private alertaService: AlertService, 
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private userService: UserService,
-    private rolService: RolService
+    private readonly fb: FormBuilder,
+    private readonly alertaService: AlertService, 
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly userService: UserService,
+    private readonly rolService: RolService
   ) {}
 
   ngOnInit(): void {

@@ -24,11 +24,11 @@ export class ModalRechazoSeguimientoComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    public dialogRef: MatDialogRef<ModalRechazoSeguimientoComponent>,
-    private alertService: AlertService,
-    private fb: FormBuilder,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router
+    public readonly dialogRef: MatDialogRef<ModalRechazoSeguimientoComponent>,
+    private readonly alertService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router
   ) { }
 
   ngOnInit() {

@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
@@ -29,7 +28,6 @@ export interface ConsultaDocumentosReferenciaOptions {
 })
 export class ReferenciaPdfService {
   constructor(
-    private readonly http: HttpClient,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService
   ) { }
 

@@ -42,10 +42,10 @@ export class TablaAuditoriasEspecialesComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private alertaService: AlertService,
-    private dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService,
+    private readonly dialog: MatDialog,
   ) {
     this.construirTabla();
   }

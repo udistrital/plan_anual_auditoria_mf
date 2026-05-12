@@ -7,7 +7,7 @@ import { map, catchError, mergeMap } from "rxjs/operators";
   providedIn: "root",
 })
 export class NuxeoService {
-  constructor(private gestorDocumentalService: GestorDocumentalService) {}
+  constructor(private readonly gestorDocumentalService: GestorDocumentalService) {}
 
   obtenerUrlFile(base64: any, minetype: any) {
     return new Promise<string>((resolve, reject) => {
@@ -46,7 +46,7 @@ export class NuxeoService {
       mergeMap((fileDatas: string[]) => {
         const sendFileData = files.map((file, i) => ({
           IdTipoDocumento: file.IdTipoDocumento,
-          nombre: (file.nombre || "").replace(/[\.]/g),
+          nombre: (file.nombre || "").replace(/[.]/g),
           metadatos: file.metadatos ? file.metadatos : {},
           descripcion: file.descripcion ? file.descripcion : "",
           file: fileDatas[i],

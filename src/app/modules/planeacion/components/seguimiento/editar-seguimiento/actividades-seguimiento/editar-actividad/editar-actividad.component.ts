@@ -19,9 +19,9 @@ export class EditarActividadSeguimientoComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<EditarActividadSeguimientoComponent>,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly dialogRef: MatDialogRef<EditarActividadSeguimientoComponent>,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
 
   ) {
     this.actividadData = data.actividad;

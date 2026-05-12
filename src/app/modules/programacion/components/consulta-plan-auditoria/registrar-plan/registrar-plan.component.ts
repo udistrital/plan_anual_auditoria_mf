@@ -31,12 +31,12 @@ export class RegistrarPlanComponent implements OnInit {
   // parametros: Record<string, any> = {};
 
   constructor(
-    private alertaService: AlertService,
-    private cdr: ChangeDetectorRef,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private route: ActivatedRoute,
-    private router: Router
+    private readonly alertaService: AlertService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {

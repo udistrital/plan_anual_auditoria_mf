@@ -16,8 +16,8 @@ export class ModalVisualizarRecargarCompromisoEticoComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string; soloLectura?: boolean },
-    private dialog: MatDialog,
-    private dialogRef: MatDialogRef<ModalVisualizarRecargarCompromisoEticoComponent>,
+    private readonly dialog: MatDialog,
+    private readonly dialogRef: MatDialogRef<ModalVisualizarRecargarCompromisoEticoComponent>,
   ) { }
 
   ngOnInit() {

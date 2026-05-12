@@ -50,8 +50,8 @@ export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
   ];
 
   constructor(
-    private rolService: RolService,
-    private router: Router,
+    private readonly rolService: RolService,
+    private readonly router: Router,
   ) { }
 
   ngOnInit() {

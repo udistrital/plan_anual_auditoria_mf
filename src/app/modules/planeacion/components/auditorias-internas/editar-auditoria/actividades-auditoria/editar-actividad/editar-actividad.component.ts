@@ -31,9 +31,9 @@ export class EditarActividadComponent implements OnInit {
       minFechaStr?: string;
       maxFechaStr?: string;
     },
-    private dialogRef: MatDialogRef<EditarActividadComponent>,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly dialogRef: MatDialogRef<EditarActividadComponent>,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;

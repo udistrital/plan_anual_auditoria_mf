@@ -9,7 +9,7 @@ export const NOTIFICACION_REGISTRO_ENDPOINT = 'notificacion';
 })
 export class NotificacionRegistroCrudService {
 
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath('PLAN_ANUAL_AUDITORIA_SERVICE');
   }
   

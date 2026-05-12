@@ -43,14 +43,14 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   orientation: "horizontal" | "vertical" = "horizontal";
 
   constructor(
-    private alertaService: AlertService,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-    private dialog: MatDialog,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder,
+    private readonly dialog: MatDialog,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly changeDetector: ChangeDetectorRef
   ) {
     this.formAspectosGenerales = this.fb.group({

@@ -28,8 +28,8 @@ export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
   };
 
   constructor(
-    private fb: UntypedFormBuilder,
-    private alertaService: AlertService
+    private readonly fb: UntypedFormBuilder,
+    private readonly alertaService: AlertService
   ) {}
 
   ngOnInit(): void {

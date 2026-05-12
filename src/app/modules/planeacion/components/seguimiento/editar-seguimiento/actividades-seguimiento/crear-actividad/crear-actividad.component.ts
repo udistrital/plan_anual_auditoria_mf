@@ -16,9 +16,9 @@ export class CrearActividadSeguimientoComponent {
   maxFechaStr: string | null = null;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private dialogRef: MatDialogRef<CrearActividadSeguimientoComponent>,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly dialogRef: MatDialogRef<CrearActividadSeguimientoComponent>,
   ) {
     this.auditoriaId = data.auditoriaId;
     this.minFechaStr = data.minFechaStr || null;

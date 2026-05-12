@@ -43,9 +43,9 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
   };
 
   constructor(
-    private fb: UntypedFormBuilder,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private alertaService: AlertService
+    private readonly fb: UntypedFormBuilder,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService
   ) { }
 
   ngOnInit(): void {

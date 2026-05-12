@@ -17,8 +17,8 @@ export class AsignarAuditoriasComponent implements OnInit {
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada!: number;
   constructor(
-    private fb: FormBuilder,
-    private parametrosUtilsService: ParametrosUtilsService
+    private readonly fb: FormBuilder,
+    private readonly parametrosUtilsService: ParametrosUtilsService
   ) {}
 
   ngOnInit() {

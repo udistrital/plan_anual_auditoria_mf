@@ -41,12 +41,12 @@ export class ActividadesAuditoriaComponent implements OnInit {
   ];
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private nuxeoService: NuxeoService,
-    private descargaService: DescargaService,
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService,
   ) {}
 
   resetComponent() { }

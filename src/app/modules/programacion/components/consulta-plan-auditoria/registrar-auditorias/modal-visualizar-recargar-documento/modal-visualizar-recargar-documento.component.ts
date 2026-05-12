@@ -17,7 +17,7 @@ export class ModalVisualizarRecargarDocumentoComponent {
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string,
      },
-     private dialog: MatDialog,
+     private readonly dialog: MatDialog,
 
   ) { }
   ngOnInit() {

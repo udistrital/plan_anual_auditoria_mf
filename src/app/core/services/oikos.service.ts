@@ -7,7 +7,7 @@ import { RequestManager } from '../managers/requestManager';
 
 export class OikosService {
 
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath('OIKOS_SERVICE');
   }
 

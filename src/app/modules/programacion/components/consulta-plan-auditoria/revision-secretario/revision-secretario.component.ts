@@ -29,18 +29,18 @@ export class RevisionSecretarioComponent {
   mostrarBotones: boolean = true;
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private nuxeoService: NuxeoService,
-    private userService: UserService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private descargaService: DescargaService,
-    private tercerosService: TercerosService,
-    private rolService: RolService,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private documentoUtils: DocumentoUtils,
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly userService: UserService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService,
+    private readonly rolService: RolService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly documentoUtils: DocumentoUtils,
   ) { }
 
   botonSeleccionado: string = "formato";

@@ -36,10 +36,10 @@ export class ActividadesSeguimientoComponent implements OnInit {
   ];
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService:PlanAnualAuditoriaService,
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     
   ) { }
 

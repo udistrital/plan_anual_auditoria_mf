@@ -21,7 +21,7 @@ export class ActividadFormularioComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
 
-  constructor(private fb: FormBuilder) {
+  constructor(private readonly fb: FormBuilder) {
     this.form = this.fb.group({
       actividad: ['', Validators.required],
       fechaInicio: ['', Validators.required],

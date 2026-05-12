@@ -5,7 +5,7 @@ import { RequestManager } from "../managers/requestManager";
   providedIn: "root",
 })
 export class GestorDocumentalService {
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath("GESTOR_DOCUMENTAL_SERVICE");
   }
 

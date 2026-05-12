@@ -17,10 +17,10 @@ export class ModalAprobacionAuditadoComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    private dialogRef: MatDialogRef<ModalAprobacionAuditadoComponent>,
-    private alertService: AlertService,
-    private nuxeoService: NuxeoService,
-    private referenciaPdfService: ReferenciaPdfService,
+    private readonly dialogRef: MatDialogRef<ModalAprobacionAuditadoComponent>,
+    private readonly alertService: AlertService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
   ) {}
 
   onArchivoSelecionado(event: Event): void {

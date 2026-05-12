@@ -28,8 +28,8 @@ export class ModalPdfVisualizadorComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string, vigenciaNombre: string, actualizado: boolean },
-    private alertService: AlertService,
-    private descargaService: DescargaService,
+    private readonly alertService: AlertService,
+    private readonly descargaService: DescargaService,
   ) { }
 
   ngOnInit() {

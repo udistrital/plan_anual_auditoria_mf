@@ -74,7 +74,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private rolService: RolService,
+    private readonly rolService: RolService,
     private readonly userService: UserService,
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,

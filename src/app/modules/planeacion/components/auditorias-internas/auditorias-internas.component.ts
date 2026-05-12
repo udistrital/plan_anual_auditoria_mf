@@ -23,10 +23,10 @@ export class AuditoriasInternasComponent implements OnInit {
   personaId: number | null = null;
 
   constructor(
-    private fb: FormBuilder,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private rolService: RolService,
-    private userService: UserService,
+    private readonly fb: FormBuilder,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
   ) { }
 
   async ngOnInit() {

@@ -50,15 +50,15 @@ export class TablaSeguimientosComponent implements OnInit {
   ]);
 
   constructor(
-    private alertaService: AlertService,
-    private rolService: RolService,
-    private userService: UserService,
-    private changeDetector: ChangeDetectorRef,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router,
-    private dialog: MatDialog
+    private readonly alertaService: AlertService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) { }
 
   ngOnInit() {

@@ -27,11 +27,11 @@ export class AddAuditoriaModalComponent implements OnInit {
   TODOS = "Todos";
 
   constructor(
-    private alertaService: AlertService,
-    private fb: FormBuilder,
-    private parametrosService: ParametrosService,
-    private oikosService: OikosService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly parametrosService: ParametrosService,
+    private readonly oikosService: OikosService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
