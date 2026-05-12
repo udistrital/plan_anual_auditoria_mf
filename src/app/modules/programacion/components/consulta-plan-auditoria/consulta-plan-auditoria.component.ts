@@ -258,7 +258,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] ?? [])
       )
     );
   }
@@ -385,7 +385,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       exhaustMap((terceroIdentification) => of(terceroIdentification.NombreCompleto)),
 
       exhaustMap((nombreRemitente) => {
-        const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Usuario";
+        const rolRemitente = rolRemitentePorRol[this.roles[0]] ?? "Usuario";
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
           [],
           environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"]

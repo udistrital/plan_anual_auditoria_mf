@@ -292,7 +292,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = this.auditoria.datos_dependencias[i];
-      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo || "";
+      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep.dependencia_id,
         jefe_nombre: dep.jefe_nombre,
@@ -459,7 +459,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 

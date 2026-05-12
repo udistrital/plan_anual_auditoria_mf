@@ -60,7 +60,7 @@
         <mat-label>{{ campo.etiqueta }}</mat-label>
         <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
         <mat-select [formControlName]="campo.nombre" (selectionChange)="onSelectionChange($event, campo)">
-          <mat-option *ngFor="let opcion of campo.parametros?.opciones || []" [value]="opcion.Id"
+          <mat-option *ngFor="let opcion of campo.parametros?.opciones ?? []" [value]="opcion.Id"
             [disabled]="opcion.deshabilitado">
             {{ opcion.Nombre }}
           </mat-option>
@@ -79,7 +79,7 @@
       <div *ngSwitchCase="'radiobutton'">
         <label>{{ campo.etiqueta }}</label>
         <mat-radio-group [formControlName]="campo.nombre">
-          <div *ngFor="let opcion of campo.parametros?.opciones || []">
+          <div *ngFor="let opcion of campo.parametros?.opciones ?? []">
             <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
               {{ opcion.Nombre }}
             </mat-radio-button>

@@ -218,7 +218,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
     );
   }
@@ -325,7 +325,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           .split(" ")
           .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
           .join(" ");
-      mapa.set(id, nombre || "Dependencia desconocida");
+      mapa.set(id, nombre ?? "Dependencia desconocida");
     });
     return mapa;
   }
@@ -356,7 +356,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .map((carta) => {
         const cargueAdjuntoConfig = getAdjuntoConfigByRole(this.role);
         return {
-          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) || "Dependencia desconocida"),
+          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) ?? "Dependencia desconocida"),
           documentoId: carta._id,
           tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           cargueAdjuntoConfig: cargueAdjuntoConfig
@@ -556,7 +556,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 

@@ -42,11 +42,11 @@
             <div class="col-12 my-4">
               <button mat-stroked-button color="primary" class="mx-2 width-100-md"
                 style="border: 1px solid var(--md-primary-500)" (click)="accionBotonRechazo()">
-                <mat-icon>{{ rolesAprobacion[role]?.esRedireccionHallazgos ? 'rate_review' : 'disabled_by_default' }}</mat-icon>{{ rolesAprobacion[role]?.botonRechazo || "Rechazar Informe" }}
+                <mat-icon>{{ rolesAprobacion[role]?.esRedireccionHallazgos ? 'rate_review' : 'disabled_by_default' }}</mat-icon>{{ rolesAprobacion[role]?.botonRechazo ?? "Rechazar Informe" }}
               </button>
               <button class="mx-2 width-100-md mt-md" mat-raised-button color="primary" (click)="preguntarAprobacion()">
                 <mat-icon>fact_check</mat-icon>
-                {{ rolesAprobacion[role]?.botonAprobacion || "" }}
+                {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
               </button>
             </div>
           </div>

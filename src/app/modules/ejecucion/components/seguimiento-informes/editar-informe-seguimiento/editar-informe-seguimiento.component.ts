@@ -136,7 +136,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
   poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
-    this.auditoria = auditoria || null;
+    this.auditoria = auditoria ?? null;
     this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
@@ -159,7 +159,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = this.auditoria?.datos_dependencias[i];
-      const correo = this.auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      const correo = this.auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep?.dependencia_id,
         jefe_nombre: dep?.jefe_nombre,
@@ -192,7 +192,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   guardarInformacion(informacion: any) {
     const campos = {
       fecha_emision: informacion.fecha_emision_informe,
-      muestra: informacion.muestra || null,
+      muestra: informacion.muestra ?? null,
     };
     this.guardarPaso(campos, "La información se ha guardado correctamente", "No se pudo guardar la información");
   }

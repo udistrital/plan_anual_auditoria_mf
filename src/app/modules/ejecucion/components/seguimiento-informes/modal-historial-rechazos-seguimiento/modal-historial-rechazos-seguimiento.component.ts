@@ -31,7 +31,7 @@ export class ModalHistorialRechazosSeguimientoComponent implements OnInit {
         `auditoria-estado?query=auditoria_id:${auditoriaId},estado_id:${estadoRechazadoJefe},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
       )
       .subscribe((res) => {
-        this.rechazos = res.Data || [];
+        this.rechazos = res.Data ?? [];
         this.cargando = false;
       });
   }

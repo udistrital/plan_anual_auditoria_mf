@@ -34,10 +34,10 @@ export const tituloAuditoriaEspecial = (
   auditoria: AuditoriaEspecialTablaRow,
 ): string => {
   if (auditoria.esAuditoriaConcreta) {
-    return auditoria.subtitulo || "Sin Subtitulo";
+    return auditoria.subtitulo ?? "Sin Subtitulo";
   }
 
-  return auditoria.titulo || "Sin Titulo";
+  return auditoria.titulo ?? "Sin Titulo";
 };
 
 export const cronogramaAuditoriaEspecial = (
@@ -75,7 +75,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     header: "Tipo de evaluacion",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       auditoria.esAuditoriaConcreta ? ""
-        : auditoria.tipo_evaluacion_nombre || "Sin Asignar",
+        : auditoria.tipo_evaluacion_nombre ?? "Sin Asignar",
     sortable: false,
   },
   {
@@ -96,7 +96,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
-      auditoria.estado_nombre || "Sin estado",
+      auditoria.estado_nombre ?? "Sin estado",
     sortable: false,
   },
   {

@@ -143,7 +143,7 @@ export class TablaSeguimientosComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] ?? [])
       )
     );
   }

@@ -563,7 +563,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
           key as keyof typeof environment.TIPO_DOCUMENTO_PARAMETROS
         ];
     
-    return this.documentos.find(doc => doc.tipo_id === tipoId)?.base64 || "";
+    return this.documentos.find(doc => doc.tipo_id === tipoId)?.base64 ?? '';
   }
 
   async descargarTodo() {

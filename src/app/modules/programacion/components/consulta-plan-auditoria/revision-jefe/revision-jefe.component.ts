@@ -59,7 +59,7 @@ export class RevisionJefeComponent implements OnInit {
 
   async ngOnInit() {
     console.debug("Inicializando RevisionJefeComponent...");
-    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") ?? '';
     this.roles = this.rolService.getRoles();
     this.obtenerVigenciaActual();
     this.obtenerEstadoActual();
@@ -83,9 +83,9 @@ export class RevisionJefeComponent implements OnInit {
         console.debug("Vigencias obtenidas:", vigencias);
         const vigenciaId = plan?.Data?.vigencia_id;
         console.debug("Vigencia ID obtenida del plan:", vigenciaId);
-        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre ?? '';
         console.debug("Vigencia Nombre encontrada:", vigenciaNombre);
-        this.vigenciaNombre = vigenciaNombre || "";
+        this.vigenciaNombre = vigenciaNombre ?? '';
       },
       error: (error) => {
         console.error("Error al obtener la vigencia:", error);
@@ -103,11 +103,11 @@ export class RevisionJefeComponent implements OnInit {
       .subscribe({
         next: (response: any) => {
           const estadoActual = response?.Data?.[0];
-          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.estadoIdActual = estadoActual?.estado_id ?? null;
           this.mostrarBotones =
             this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
 
-          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual ?? 0, this.roles, callbacks);
         },
         error: (error) => {
           console.error("Error al obtener el estado actual:", error);

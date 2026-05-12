@@ -53,7 +53,7 @@ export class RevisionSecretarioComponent {
   
   async ngOnInit() {
     console.debug("Inicializando RevisionSecretarioComponent...");
-    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") ?? '';
     this.roles = this.rolService.getRoles();
     this.obtenerVigenciaActual();
     this.obtenerEstadoActual();
@@ -74,8 +74,8 @@ export class RevisionSecretarioComponent {
     }).subscribe({
       next: ({ plan, vigencias }: any) => {
         const vigenciaId = plan?.Data?.vigencia_id;
-        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
-        this.vigenciaNombre = vigenciaNombre || "";
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre ?? '';
+        this.vigenciaNombre = vigenciaNombre ?? '';
       },
       error: (error) => {
         console.error("Error al obtener la vigencia:", error);
@@ -93,11 +93,11 @@ export class RevisionSecretarioComponent {
       .subscribe({
         next: (response: any) => {
           const estadoActual = response?.Data?.[0];
-          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.estadoIdActual = estadoActual?.estado_id ?? null;
           this.mostrarBotones =
               this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
 
-          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual ?? 0, this.roles, callbacks);
         },
         error: (error) => {
           console.error("Error al obtener el estado actual:", error);

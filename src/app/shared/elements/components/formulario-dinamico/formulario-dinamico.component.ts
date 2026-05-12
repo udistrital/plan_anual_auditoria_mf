@@ -31,7 +31,7 @@ export class FormularioDinamicoComponent implements OnInit {
           this.form.addControl(
             campo.nombre,
             this.fb.control(
-              { value: campo.valor || "", disabled: campo.deshabilitado },
+              { value: campo.valor ?? '', disabled: campo.deshabilitado },
               validators
             )
           );

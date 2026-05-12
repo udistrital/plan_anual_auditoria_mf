@@ -21,8 +21,8 @@ export class CrearActividadSeguimientoComponent {
     private readonly dialogRef: MatDialogRef<CrearActividadSeguimientoComponent>,
   ) {
     this.auditoriaId = data.auditoriaId;
-    this.minFechaStr = data.minFechaStr || null;
-    this.maxFechaStr = data.maxFechaStr || null;
+    this.minFechaStr = data.minFechaStr ?? null;
+    this.maxFechaStr = data.maxFechaStr ?? null;
   }
 
   ngOnInit(): void {

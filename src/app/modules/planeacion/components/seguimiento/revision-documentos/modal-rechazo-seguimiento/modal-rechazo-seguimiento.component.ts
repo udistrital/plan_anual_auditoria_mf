@@ -117,7 +117,7 @@ export class ModalRechazoSeguimientoComponent {
         ? "Jefe de Dependencia"
         : role === environment.ROL.ASISTENTE_DEPENDENCIA
           ? "Asistente de Dependencia"
-          : role || "Revisor";
+          : role ?? "Revisor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 

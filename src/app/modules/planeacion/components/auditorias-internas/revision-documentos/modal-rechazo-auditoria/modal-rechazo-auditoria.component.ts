@@ -118,7 +118,7 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
         ? "Jefe de Dependencia"
         : role === environment.ROL.ASISTENTE_DEPENDENCIA
           ? "Asistente de Dependencia"
-          : role || "Revisor";
+          : role ?? "Revisor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -193,7 +193,7 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
 
             const variablesRechazo: VariablesRechazo = {
               titulo_rechazo: "Rechazo de Programa de Auditoría",
-              motivo_rechazo: this.formObservaciones.get("observaciones")?.value || "",
+              motivo_rechazo: this.formObservaciones.get("observaciones")?.value ?? '',
               nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,

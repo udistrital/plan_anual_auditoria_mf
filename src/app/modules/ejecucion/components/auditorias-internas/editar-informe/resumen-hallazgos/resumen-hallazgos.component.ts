@@ -37,7 +37,7 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
       temaCount++;
       let subtemaCount = 0;
 
-      for (const subtema of (tema.subtema || [])) {
+      for (const subtema of (tema.subtema ?? [])) {
         if (!subtema.activo) continue;
         subtemaCount++;
         let hallazgoCount = 0;

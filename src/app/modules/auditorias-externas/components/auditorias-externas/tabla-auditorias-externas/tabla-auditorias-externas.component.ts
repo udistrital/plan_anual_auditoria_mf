@@ -94,7 +94,7 @@ export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] ?? [])
       )
     );
   }

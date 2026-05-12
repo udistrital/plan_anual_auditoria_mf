@@ -75,7 +75,7 @@
                 (click)="preguntarAprobacionAuditoria()"
               >
                 <mat-icon>fact_check</mat-icon>
-                {{ rolesAprobacion[role]?.botonAprobacion || "" }}
+                {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
               </button>
             </div>
           </div>

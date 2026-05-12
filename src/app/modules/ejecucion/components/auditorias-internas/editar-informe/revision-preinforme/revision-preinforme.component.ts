@@ -75,7 +75,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
         .filter((t: any) => t.activo !== false)
         .map((tema: any) => ({
           tema,
-          subtemas: (tema.subtema || [])
+          subtemas: (tema.subtema ?? [])
             .filter((st: any) => st.activo !== false)
             .map((subtema: any) => ({
               subtema,
@@ -84,11 +84,11 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
                   h.subtema_id?.toString() === subtema._id?.toString() && h.activo !== false,
                 )
                 .map((hallazgo: any) => {
-                  const obs: any[] = obsMap.get(hallazgo._id) || [];
+                  const obs: any[] = obsMap.get(hallazgo._id) ?? [];
                   return {
                     hallazgo,
                     observacionesAuditado: obs.filter((o) => !ROLES_AUDITOR.includes(o.usuario_rol)),
-                    observacionAuditor: obs.find((o) => ROLES_AUDITOR.includes(o.usuario_rol)) || null,
+                    observacionAuditor: obs.find((o) => ROLES_AUDITOR.includes(o.usuario_rol)) ?? null,
                   };
                 }),
             })),
@@ -123,7 +123,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
     const resp: any = await firstValueFrom(
       this.planAnualAuditoriaService.get(`observacion?query=hallazgo_id__in:${ids.join('|')},activo:true&limit=0`),
     );
-    for (const obs of (resp?.Data || [])) {
+    for (const obs of (resp?.Data ?? [])) {
       const hid = obs.hallazgo_id?.toString();
       if (!map.has(hid)) map.set(hid, []);
       map.get(hid)!.push(obs);
@@ -136,7 +136,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
   }
 
   miObservacionAuditado(item: HallazgoObs): any | null {
-    return item.observacionesAuditado.find((o) => o.usuario_id === this.usuarioId) || null;
+    return item.observacionesAuditado.find((o) => o.usuario_id === this.usuarioId) ?? null;
   }
 
   estaGuardando(hallazgoId: string): boolean {

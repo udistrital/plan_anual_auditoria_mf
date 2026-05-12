@@ -70,7 +70,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
     this.cargando = true;
     this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
       next: (response: any) => {
-        this.temasData = response?.Data || [];
+        this.temasData = response?.Data ?? [];
         this.construirFormulario();
         this.cargando = false;
       },
@@ -89,11 +89,11 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
 
       const subtemasArray = this.fb.array([]);
 
-      (tema.subtema || []).forEach((subtema: any) => {
+      (tema.subtema ?? []).forEach((subtema: any) => {
         if (!subtema.activo) return;
 
         subtemasArray.push(this.fb.group({
-          _id: [subtema._id || null],
+          _id: [subtema._id ?? null],
           nombre: [subtema.titulo ?? '', Validators.required],
           isNew: [false],
           isModified: [false],
@@ -101,7 +101,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       });
 
       temasArray.push(this.fb.group({
-        _id: [tema._id || null],
+        _id: [tema._id ?? null],
         nombre: [tema.titulo ?? '', Validators.required],
         subtemas: subtemasArray,
         isNew: [false],
@@ -236,7 +236,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
               tema_id: temaId,
               titulo: subtemaForm.nombre
             }));
-            const subtemasEnResponse = response?.Data?.subtema || [];
+            const subtemasEnResponse = response?.Data?.subtema ?? [];
             subtemaId = subtemasEnResponse[subtemasEnResponse.length - 1]?._id;
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {

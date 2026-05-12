@@ -47,7 +47,7 @@ export class NuxeoService {
       mergeMap((fileDatas: string[]) => {
         const sendFileData = files.map((file, i) => ({
           IdTipoDocumento: file.IdTipoDocumento,
-          nombre: (file.nombre || "").replace(/[.]/g),
+          nombre: (file.nombre ?? '').replace(/[.]/g),
           metadatos: file.metadatos ? file.metadatos : {},
           descripcion: file.descripcion ? file.descripcion : "",
           file: fileDatas[i],
@@ -77,7 +77,7 @@ export class NuxeoService {
     }
 
     throw new Error(
-      `Formato de archivo no soportado para ${file?.nombre || "archivo sin nombre"}`
+      `Formato de archivo no soportado para ${file?.nombre ?? "archivo sin nombre"}`
     );
   }
 

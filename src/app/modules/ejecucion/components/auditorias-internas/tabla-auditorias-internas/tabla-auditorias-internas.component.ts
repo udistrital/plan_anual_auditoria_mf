@@ -176,9 +176,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const acciones = this.roles.flatMap((rol) => {
       // Usar solo las acciones correspondientes según la etapa
       if (mostrarComoInforme) {
-        return accionesEjecucionFinal[rol]?.[estado] || [];
+        return accionesEjecucionFinal[rol]?.[estado] ?? [];
       } else {
-        return accionesEjecucionPreliminar[rol]?.[estado] || [];
+        return accionesEjecucionPreliminar[rol]?.[estado] ?? [];
       }
     });
 

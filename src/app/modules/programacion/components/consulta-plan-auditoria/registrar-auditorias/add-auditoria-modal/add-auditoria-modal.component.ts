@@ -48,31 +48,31 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.isEditMode = !!this.data.auditoria;
     this.auditoriaForm = this.fb.group({
       tituloActividad: [
-        this.data.auditoria?.auditoria || "",
+        this.data.auditoria?.auditoria ?? '',
         Validators.required,
       ],
       tipoEvaluacion: [
-        this.data.auditoria?.tipoEvaluacionId || [],
+        this.data.auditoria?.tipoEvaluacionId ?? [],
         Validators.required,
       ],
       macroprocesos: [
-        this.data.auditoria?.macroprocesosId || [],
+        this.data.auditoria?.macroprocesosId ?? [],
         Validators.required,
       ],
       procesos: [
-        this.data.auditoria?.procesosId || [],
+        this.data.auditoria?.procesosId ?? [],
         Validators.required,
       ],
       dependencias: [
-        this.data.auditoria?.dependenciasId || [],
+        this.data.auditoria?.dependenciasId ?? [],
         Validators.required,
       ],
       cronogramaActividades: [
-        this.data.auditoria?.cronogramaId || [],
+        this.data.auditoria?.cronogramaId ?? [],
         Validators.required,
       ],
       cantidadAuditorias: [
-        this.data.auditoria?.cantidadAuditorias || [],
+        this.data.auditoria?.cantidadAuditorias ?? [],
         Validators.required,
       ]
     });
@@ -94,7 +94,7 @@ export class AddAuditoriaModalComponent implements OnInit {
   }
 
   actualizarProcesosSeleccionados(): void {
-    const procesosActuales = this.auditoriaForm.get("procesos").value || [];
+    const procesosActuales = this.auditoriaForm.get("procesos").value ?? [];
     const procesosFiltrados = procesosActuales.filter((procesoId: number) =>
       this.procesos.some((proceso) => proceso.Id === procesoId)
     );

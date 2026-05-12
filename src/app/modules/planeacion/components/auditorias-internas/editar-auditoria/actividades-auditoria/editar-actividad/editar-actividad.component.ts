@@ -37,8 +37,8 @@ export class EditarActividadComponent implements OnInit {
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;
-    this.minFechaStr = data.minFechaStr || null;
-    this.maxFechaStr = data.maxFechaStr || null;
+    this.minFechaStr = data.minFechaStr ?? null;
+    this.maxFechaStr = data.maxFechaStr ?? null;
     console.debug('Actividad Data:', this.actividadData);
     console.debug('ID Auditoria:', this.idAuditoria);
   }

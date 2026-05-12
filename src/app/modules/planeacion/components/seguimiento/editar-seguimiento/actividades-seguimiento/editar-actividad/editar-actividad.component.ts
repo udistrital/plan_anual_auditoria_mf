@@ -26,8 +26,8 @@ export class EditarActividadSeguimientoComponent {
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;
-    this.minFechaStr = data.minFechaStr || null;
-    this.maxFechaStr = data.maxFechaStr || null;
+    this.minFechaStr = data.minFechaStr ?? null;
+    this.maxFechaStr = data.maxFechaStr ?? null;
    }
 
   ngOnInit(): void {

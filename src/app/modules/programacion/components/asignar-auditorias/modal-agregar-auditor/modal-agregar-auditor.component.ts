@@ -54,9 +54,9 @@ export class ModalAgregarAuditorComponent implements OnInit {
       this.usuarioId = usuarioId;
     });
     this.form = this.fb.group({
-      tituloAuditoria: [this.data.auditoria?.titulo || ""],
-      subtituloAuditoria: [this.data.auditoria?.subtitulo || ""],
-      tipoEvaluacion: [this.data.auditoria?.tipo_evaluacion_nombre || []],
+      tituloAuditoria: [this.data.auditoria?.titulo ?? ''],
+      subtituloAuditoria: [this.data.auditoria?.subtitulo ?? ''],
+      tipoEvaluacion: [this.data.auditoria?.tipo_evaluacion_nombre ?? []],
       auditoresSeleccionados: this.auditoresSeleccionados,
       auditor: [""],
     });
@@ -68,7 +68,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
     ).subscribe({
       next: (res) => {
         this.auditoresSeleccionados.clear();
-        const auditoresRelacionados = res.Data || [];
+        const auditoresRelacionados = res.Data ?? [];
   
         // Separar auditores asignados y no asignados
         this.auditoresAsignados = auditoresRelacionados.filter(
@@ -253,7 +253,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
       return;
     }
   
-    const controls = this.auditoresSeleccionados.controls || [];
+    const controls = this.auditoresSeleccionados.controls ?? [];
     const newCache: Auditor[][] = [];
   
     // IDs de auditores NO asignados
@@ -276,8 +276,8 @@ export class ModalAgregarAuditorComponent implements OnInit {
     // mantener referencias estables
     const maxLen = Math.max(this.auditoresDisponiblesCache.length, newCache.length);
     for (let i = 0; i < maxLen; i++) {
-      const oldArr = this.auditoresDisponiblesCache[i] || [];
-      const newArr = newCache[i] || [];
+      const oldArr = this.auditoresDisponiblesCache[i] ?? [];
+      const newArr = newCache[i] ?? [];
       if (!this.areAuditorArraysEqual(oldArr, newArr)) {
         this.auditoresDisponiblesCache[i] = newArr;
       }
@@ -329,7 +329,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get(
       `auditor?query=auditoria_id:${this.data.auditoria?._id},activo:true,auditor_id:${auditorPayload.auditor_id}`
     ).subscribe((res) => {
-      const auditorAsignado = res.Data[0] || null;
+      const auditorAsignado = res.Data[0] ?? null;
   
       const request$ = auditorAsignado
         ? this.planAnualAuditoriaService.put(`auditor/${auditorAsignado._id}`, auditorPayload)
@@ -399,7 +399,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
             const auditoresSeleccionados =
               this.auditoresSeleccionados.value.map(
                 (item: { auditor: Auditor | null; lider: boolean }) => ({
-                  documento: item.auditor?.documento || 0,
+                  documento: item.auditor?.documento ?? 0,
                   lider: item.lider,
                   id: item.auditor?.id,
                 })

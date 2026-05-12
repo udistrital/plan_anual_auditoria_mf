@@ -246,7 +246,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
             this.auditoriaId,
             infoDocumento.parametro
           );
-          this.documentosExistentes[infoDocumento.parametro] = documentoRefNuxeo?.res?.Enlace || null;
+          this.documentosExistentes[infoDocumento.parametro] = documentoRefNuxeo?.res?.Enlace ?? null;
         },
         error: (error) => {
           console.error("Error al subir el documento", error);

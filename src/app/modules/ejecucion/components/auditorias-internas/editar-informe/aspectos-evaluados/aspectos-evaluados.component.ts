@@ -77,8 +77,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   private usarDatosProporcionados(): void {
     const temas: Tema[] = JSON.parse(JSON.stringify(this.temasRaw));
     for (const tema of temas) {
-      for (const subtema of (tema.subtema || [])) {
-        (subtema as any).hallazgo = (this.hallazgosRaw || []).filter(
+      for (const subtema of (tema.subtema ?? [])) {
+        (subtema as any).hallazgo = (this.hallazgosRaw ?? []).filter(
           (h: any) => h.subtema_id?.toString() === (subtema as any)._id?.toString() && h.activo !== false
         );
       }
@@ -106,7 +106,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     this.cargando = true;
     this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
       next: async (response: any) => {
-        const temas = response?.Data || [];
+        const temas = response?.Data ?? [];
 
         // Cargar hallazgos de cada tema en paralelo y asignarlos a sus subtemas
         await this.asignarHallazgosASubtemas(temas);
@@ -130,13 +130,13 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       const resp: any = await firstValueFrom(
         this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}`)
       );
-      hallazgosTotales = resp?.Data || [];
+      hallazgosTotales = resp?.Data ?? [];
     } catch {
       hallazgosTotales = [];
     }
 
     for (const tema of temas) {
-      for (const subtema of (tema.subtema || [])) {
+      for (const subtema of (tema.subtema ?? [])) {
         const subtemaIdStr = subtema._id?.toString();
         subtema.hallazgo = hallazgosTotales.filter(
           (h: any) => h.subtema_id?.toString() === subtemaIdStr && h.activo !== false
@@ -154,16 +154,16 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
       const subtemasArray = this.fb.array([]);
 
-      (tema.subtema || []).forEach((subtema: any) => {
+      (tema.subtema ?? []).forEach((subtema: any) => {
         if (!subtema.activo) return;
 
         const hallazgosArray = this.fb.array([]);
 
-        (subtema.hallazgo || []).forEach((hallazgo: any) => {
+        (subtema.hallazgo ?? []).forEach((hallazgo: any) => {
           if (!hallazgo.activo) return;
 
           hallazgosArray.push(this.fb.group({
-            _id: [hallazgo._id || null],
+            _id: [hallazgo._id ?? null],
             criterio: [hallazgo.criterio ?? '', Validators.required],
             hallazgo: [hallazgo.titulo ?? '', Validators.required],
             descripcion: [hallazgo.descripcion ?? '', Validators.required],
@@ -171,14 +171,14 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         });
 
         subtemasArray.push(this.fb.group({
-          _id: [subtema._id || null],
+          _id: [subtema._id ?? null],
           nombre: [subtema.titulo ?? '', Validators.required],
           hallazgos: hallazgosArray,
         }));
       });
 
       temasArray.push(this.fb.group({
-        _id: [tema._id || null],
+        _id: [tema._id ?? null],
         nombre: [tema.titulo ?? '', Validators.required],
         subtemas: subtemasArray,
       }));
@@ -380,7 +380,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
               titulo: subtemaForm.nombre
             }));
             // El servidor devuelve el tema con los subtemas embebidos; el nuevo es el último
-            const subtemasEnResponse = response?.Data?.subtema || [];
+            const subtemasEnResponse = response?.Data?.subtema ?? [];
             subtemaId = subtemasEnResponse[subtemasEnResponse.length - 1]?._id;
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {

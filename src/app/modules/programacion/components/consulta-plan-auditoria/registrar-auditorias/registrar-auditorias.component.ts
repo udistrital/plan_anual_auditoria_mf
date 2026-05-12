@@ -81,7 +81,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.modoEditarExtraordinario = Boolean(localStorage.getItem('extra-edit'));
     const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
-    this.vigenciaId = vigencia?.Id || 0;
+    this.vigenciaId = vigencia?.Id ?? 0;
     this.vigenciaNombre = vigencia?.Nombre ?? '';
     localStorage.removeItem('vigencia');
     localStorage.removeItem('extra-edit');
@@ -172,7 +172,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         .get(`estado?query=plan_auditoria_id:${this.id},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
-      this.estadoIdActual = estadoActual?.estado_id || null;
+      this.estadoIdActual = estadoActual?.estado_id ?? null;
 
       // Si no hay estado, asumir que está en borrador
       if (this.estadoIdActual === null) {

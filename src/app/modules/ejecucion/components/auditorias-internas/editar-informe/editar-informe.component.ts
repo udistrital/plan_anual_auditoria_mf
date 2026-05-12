@@ -243,8 +243,8 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
       firstValueFrom(this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`)),
       firstValueFrom(this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}&limit=0`)),
     ]).then(([temasResp, hallazgosResp]: [any, any]) => {
-      this.temasRaw = temasResp?.Data || [];
-      this.hallazgosRaw = hallazgosResp?.Data || [];
+      this.temasRaw = temasResp?.Data ?? [];
+      this.hallazgosRaw = hallazgosResp?.Data ?? [];
     }).catch(() => {
       this.temasRaw = [];
       this.hallazgosRaw = [];
@@ -360,7 +360,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
   poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
-    this.auditoria = auditoria || null;
+    this.auditoria = auditoria ?? null;
     this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
@@ -384,7 +384,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = auditoria?.datos_dependencias[i];
       console.log('Poblando dependencia:', dep);
-      const correo = auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      const correo = auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep?.dependencia_id,
         jefe_nombre: dep?.jefe_nombre,
@@ -419,7 +419,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   guardarInformacion(informacion: any) {
     const campos = {
       fecha_emision: informacion.fecha_emision,
-      muestra: informacion.muestra || null,
+      muestra: informacion.muestra ?? null,
     };
     this.guardarPaso(campos, "La informacion se ha guardado correctamente", "No se pudo guardar la informacion");
   }

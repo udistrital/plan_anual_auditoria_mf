@@ -140,7 +140,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
       this.documentos.forEach((documento) => {
         const tipoDocumento = documento.parametro;
-        const documentosDelTipo = (documentosPorTipo.get(tipoDocumento) || []).filter(
+        const documentosDelTipo = (documentosPorTipo.get(tipoDocumento) ?? []).filter(
           (adjunto) => !!adjunto.nuxeo_enlace
         );
 
@@ -152,7 +152,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
                 : null;
 
             return {
-              nuxeoId: documentoAdjunto.nuxeo_enlace || null,
+              nuxeoId: documentoAdjunto.nuxeo_enlace ?? null,
               dependenciaNombre: this.resolverNombreDependencia(
                 dependenciaId,
                 documentoAdjunto?.nombre,
@@ -164,11 +164,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
           this.cartasRepresentacionExistentes = this.filtrarCartasRepresentacionVigentes(cartasVigentes);
 
-          this.documentosExistentes[tipoDocumento] = this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+          this.documentosExistentes[tipoDocumento] = this.cartasRepresentacionExistentes[0]?.nuxeoId ?? null;
           return;
         }
 
-        this.documentosExistentes[tipoDocumento] = documentosDelTipo[0]?.nuxeo_enlace || null;
+        this.documentosExistentes[tipoDocumento] = documentosDelTipo[0]?.nuxeo_enlace ?? null;
 
         if (tipoDocumento === environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO) {
           this.idCompromisoEtico = this.documentosExistentes[tipoDocumento];
@@ -212,7 +212,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   ): Map<number, DocumentoAdjuntoInicial[]> {
     return documentosAdjuntos.reduce((mapa, documentoAdjunto) => {
       const tipoId = documentoAdjunto.tipo_id;
-      const listaActual = mapa.get(tipoId) || [];
+      const listaActual = mapa.get(tipoId) ?? [];
       listaActual.push(documentoAdjunto);
       mapa.set(tipoId, listaActual);
       return mapa;
@@ -291,7 +291,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           );
 
           return {
-            base64: cartaRenderizada?.base64 || "",
+            base64: cartaRenderizada?.base64 ?? '',
             dependenciaNombre: esperada.dependenciaNombre,
             dependenciaId: esperada.dependenciaId,
             guardado: false,
@@ -524,7 +524,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
           items.forEach(({ indice, infoDocumento: info }, i) => {
             const documentoRefNuxeo = responses[i];
-            const enlaceDocumento = documentoRefNuxeo?.res?.Enlace || null;
+            const enlaceDocumento = documentoRefNuxeo?.res?.Enlace ?? null;
 
             this.guardarReferencia(
               documentoRefNuxeo,
@@ -564,7 +564,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
                   }
 
                   this.documentosExistentes[info.parametro] =
-                    this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+                    this.cartasRepresentacionExistentes[0]?.nuxeoId ?? null;
                 } else {
                   this.documentosExistentes[info.parametro] = enlaceDocumento;
                 }
@@ -670,7 +670,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       this.nuxeoService.guardarArchivos([payload]).subscribe({
         next: (response: any) => {
           const documentoRefNuxeo = response[0];
-          const enlaceDocumento = documentoRefNuxeo?.res?.Enlace || null;
+          const enlaceDocumento = documentoRefNuxeo?.res?.Enlace ?? null;
 
           this.guardarReferencia(
             documentoRefNuxeo,
@@ -712,7 +712,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
                 }
 
                 this.documentosExistentes[infoDocumento.parametro] =
-                  this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+                  this.cartasRepresentacionExistentes[0]?.nuxeoId ?? null;
               } else {
                 this.documentosExistentes[infoDocumento.parametro] = enlaceDocumento;
               }
@@ -761,7 +761,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   private mapearCartasDesdeRespuestaPlantilla(data: any): CartaRepresentacionDocumento[] {
     if (Array.isArray(data)) {
       return data.map((item: any, index: number) => ({
-        base64: item?.base64 || "",
+        base64: item?.base64 ?? '',
         dependenciaNombre: this.normalizarNombreDependencia(
           item?.dependencia_nombre,
           this.resolverNombreDependencia(
@@ -777,7 +777,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
     return [
       {
-        base64: data || "",
+        base64: data ?? '',
         dependenciaNombre: "Dependencia 1",
         dependenciaId: null,
         guardado: false,

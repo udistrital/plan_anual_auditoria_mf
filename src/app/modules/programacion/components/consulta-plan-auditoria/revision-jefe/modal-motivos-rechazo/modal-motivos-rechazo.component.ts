@@ -124,7 +124,7 @@ export class ModalMotivosRechazoComponent implements OnInit {
 
         console.log("vigenciaNombre resuelta:", vigenciaNombre);
 
-        const correoAuditor = tercero?.UsuarioWSO2 || null;
+        const correoAuditor = tercero?.UsuarioWSO2 ?? null;
         console.log("UsuarioWSO2:", correoAuditor);
 
         if (!correoAuditor) {

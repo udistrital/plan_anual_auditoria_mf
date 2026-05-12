@@ -268,7 +268,7 @@ export class TablaSeguimientoComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
     );
   }
@@ -472,7 +472,7 @@ export class TablaSeguimientoComponent implements OnInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 

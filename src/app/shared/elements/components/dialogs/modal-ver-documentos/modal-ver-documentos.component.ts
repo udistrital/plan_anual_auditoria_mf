@@ -10,6 +10,8 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 
+type TipoBoton = 'flat' | 'stroked' | 'raised' | 'basic';
+
 interface DocumentoModal extends DocumentoReferenciaPdf {
   base64: string;
 }
@@ -27,7 +29,7 @@ export interface BotonTabDocumento {
   color?: string;
   icono?: string;
   estilo?: string;
-  tipo?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
+  tipo?: TipoBoton;
 }
 
 export interface CargueAdjuntoTabConfig {
@@ -35,7 +37,7 @@ export interface CargueAdjuntoTabConfig {
   iconoBoton?: string;
   colorBoton?: string;
   estiloBoton?: string;
-  tipoBoton?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
+  tipoBoton?: TipoBoton;
   tipoArchivo?: "pdf" | "xlsx";
   idTipoDocumento: number;
   descripcion: string;
@@ -71,7 +73,7 @@ export interface AccionFooterModal {
   nombre: string;
   icono?: string;
   color?: string;
-  tipoBoton?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
+  tipoBoton?: TipoBoton;
   accion: () => boolean | Promise<boolean>;
 }
 
@@ -279,7 +281,7 @@ export class ModalVerDocumentosComponent implements OnInit {
     const dialogRef = this.matDialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
-        tipoArchivo: config.tipoArchivo || "pdf",
+        tipoArchivo: config.tipoArchivo ?? "pdf",
         id: documentoActual.referencia_id || this.data.entityId,
         idTipoDocumento: config.idTipoDocumento,
         descripcion: config.descripcion,

@@ -86,7 +86,7 @@ export class RegistrarPlanComponent implements OnInit {
         .get(`estado?query=plan_auditoria_id:${this.planId},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
-      this.estadoIdActual = estadoActual?.estado_id || null;
+      this.estadoIdActual = estadoActual?.estado_id ?? null;
       this.modoEditar,
         (this.modoEditar =
           this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
@@ -116,16 +116,16 @@ export class RegistrarPlanComponent implements OnInit {
       this.formulario.campos?.forEach((campo) => {
         switch (campo.nombre) {
           case "objetivo":
-            campo.valor = objetivo || "";
+            campo.valor = objetivo ?? '';
             break;
           case "alcance":
-            campo.valor = alcance || "";
+            campo.valor = alcance ?? '';
             break;
           case "criterio":
-            campo.valor = criterio || "";
+            campo.valor = criterio ?? '';
             break;
           case "recurso":
-            campo.valor = recurso || "";
+            campo.valor = recurso ?? '';
             break;
           default:
             break;

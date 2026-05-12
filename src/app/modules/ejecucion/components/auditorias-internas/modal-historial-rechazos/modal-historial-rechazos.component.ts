@@ -33,7 +33,7 @@ export class ModalHistorialRechazosComponent implements OnInit {
         `auditoria-estado?query=auditoria_id:${auditoriaId},estado_id__in:${estadoRechazadoJefe}|${estadoRechazadoJefeFinal},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
       )
       .subscribe((res) => {
-        this.rechazos = (res.Data || []).map((r: any) => ({
+        this.rechazos = (res.Data ?? []).map((r: any) => ({
           ...r,
           tipoRechazo:
             r.estado?.id === estadoRechazadoJefe
