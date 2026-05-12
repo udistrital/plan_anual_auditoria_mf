@@ -7,7 +7,6 @@ import { TablaSeguimientoComponent } from "./tabla-seguimiento/tabla-seguimiento
 @Component({
   selector: "app-seguimiento",
   templateUrl: "./seguimiento.component.html",
-  styleUrl: "./seguimiento.component.css",
 })
 export class SeguimientoComponent implements OnInit {
   @ViewChild(TablaSeguimientoComponent)

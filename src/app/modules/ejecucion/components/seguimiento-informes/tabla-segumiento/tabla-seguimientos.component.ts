@@ -178,7 +178,7 @@ export class TablaSeguimientosComponent implements OnInit {
   private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           onInformeId(res.Data[0]._id);
         } else {
           this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({

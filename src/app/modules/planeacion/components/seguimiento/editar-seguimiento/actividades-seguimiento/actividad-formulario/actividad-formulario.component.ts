@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
@@ -6,7 +6,6 @@ import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anua
 @Component({
   selector: 'app-actividad-seguimiento-formulario',
   templateUrl: './actividad-formulario.component.html',
-  styleUrls: ['./actividad-formulario.component.css'],
 })
 export class ActividadSeguimientoFormularioComponent {
   @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales

@@ -1,5 +1,5 @@
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -8,7 +8,6 @@ import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-modal-aprobacion-auditado',
   templateUrl: './modal-aprobacion-auditado.component.html',
-  styleUrl: './modal-aprobacion-auditado.component.css'
 })
 export class ModalAprobacionAuditadoComponent {
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;

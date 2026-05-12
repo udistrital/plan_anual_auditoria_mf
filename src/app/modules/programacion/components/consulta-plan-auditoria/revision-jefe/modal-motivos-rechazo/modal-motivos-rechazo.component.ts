@@ -16,7 +16,6 @@ import { PLANTILLA_RECHAZO_NOMBRE } from "src/app/core/services/notificaciones-m
 @Component({
   selector: "app-modal-motivos-rechazo",
   templateUrl: "./modal-motivos-rechazo.component.html",
-  styleUrls: ["./modal-motivos-rechazo.component.css"],
 })
 export class ModalMotivosRechazoComponent implements OnInit {
   formObservaciones!: FormGroup;

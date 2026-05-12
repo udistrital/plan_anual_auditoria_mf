@@ -122,7 +122,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${meses_id}&limit=0`)
       .subscribe((res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.meses = res.Data;
           if (callback) callback();
         }
@@ -138,7 +138,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${tipo_evaluacion_id}&limit=0`)
       .subscribe((res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.evaluaciones = res.Data;
           if (callback) callback();
         }
@@ -155,7 +155,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${macroprocesos_id}&limit=0`)
       .subscribe((res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.macroprocesos = res.Data;
           if (callback) callback();
         }

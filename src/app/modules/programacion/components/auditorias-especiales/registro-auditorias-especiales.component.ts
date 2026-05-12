@@ -13,7 +13,6 @@ import { UserService } from "src/app/core/services/user.service";
 @Component({
   selector: "app-registro-auditorias-especiales",
   templateUrl: "./registro-auditorias-especiales.component.html",
-  styleUrls: ["./registro-auditorias-especiales.component.css"],
 })
 export class RegistroAuditoriasEspecialesComponent implements OnInit {
   @ViewChild(TablaAuditoriasEspecialesComponent)

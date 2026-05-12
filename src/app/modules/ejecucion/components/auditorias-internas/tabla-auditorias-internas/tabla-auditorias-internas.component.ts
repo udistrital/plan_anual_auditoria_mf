@@ -218,7 +218,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   verInformeSoloLectura(auditoria: Auditoria) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           this.router.navigate(
             [`/ejecucion/auditorias-internas/editar-informe/${res.Data[0]._id}`],
             { queryParams: { soloLectura: true } }
@@ -234,7 +234,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           onInformeId(res.Data[0]._id);
         } else {
           this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({

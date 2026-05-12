@@ -10,7 +10,6 @@ import { environment } from "src/environments/environment";
 @Component({
   selector: "app-auditorias-internas",
   templateUrl: "./auditorias-internas.component.html",
-  styleUrl: "./auditorias-internas.component.css",
 })
 export class AuditoriasInternasComponent implements OnInit {
   @ViewChild(TablaAuditoriasInternasComponent)

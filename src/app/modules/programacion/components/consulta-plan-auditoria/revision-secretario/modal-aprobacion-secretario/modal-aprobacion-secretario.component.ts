@@ -15,7 +15,6 @@ import { Router } from "@angular/router";
 @Component({
   selector: "app-modal-aprobacion-secretario",
   templateUrl: "./modal-aprobacion-secretario.component.html",
-  styleUrl: "./modal-aprobacion-secretario.component.css",
 })
 export class ModalAprobacionSecretarioComponent {
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;

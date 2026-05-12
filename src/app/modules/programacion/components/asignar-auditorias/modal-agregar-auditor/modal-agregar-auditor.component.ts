@@ -1,6 +1,6 @@
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
-import { Component, Inject, OnInit, OnDestroy } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import { Subscription } from 'rxjs';
 import { FormArray, FormBuilder, FormControl, FormGroup } from "@angular/forms";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
@@ -209,7 +209,7 @@ export class ModalAgregarAuditorComponent implements OnInit {
 
   cargarAuditores() {
     this.AutenticacionMidService.get("rol/periods").subscribe((res) => {
-      if (res && res.Data) {
+      if (res?.Data) {
         const auditorMap = new Map();
 
         res.Data.filter(

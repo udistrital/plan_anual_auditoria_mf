@@ -6,7 +6,6 @@ import { environment } from "src/environments/environment";
 @Component({
   selector: 'app-modal-visualizar-recargar-documento',
   templateUrl: './modal-visualizar-recargar-documento.component.html',
-  styleUrl: './modal-visualizar-recargar-documento.component.css'
 })
 
 export class ModalVisualizarRecargarDocumentoComponent {

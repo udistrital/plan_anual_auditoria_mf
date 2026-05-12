@@ -193,7 +193,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         )
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data)) {
+            if (Array.isArray(res?.Data)) {
               resolve(res.Data as DocumentoAdjuntoInicial[]);
               return;
             }
@@ -379,7 +379,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+            if (res?.Data?.length > 0) {
               resolve(res.Data[0].nuxeo_enlace);
             } else {
               resolve(null);

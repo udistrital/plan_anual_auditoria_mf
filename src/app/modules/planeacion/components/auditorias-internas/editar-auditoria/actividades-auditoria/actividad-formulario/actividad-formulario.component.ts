@@ -6,7 +6,6 @@ import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anua
 @Component({
   selector: 'app-actividad-formulario',
   templateUrl: './actividad-formulario.component.html',
-  styleUrls: ['./actividad-formulario.component.css'],
 })
 export class ActividadFormularioComponent implements OnInit, OnDestroy {
   @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales

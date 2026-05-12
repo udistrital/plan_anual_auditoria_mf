@@ -111,7 +111,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
     this.PlanAnualAuditoriaMid.get(url).subscribe(
       (res) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           this.dataSource.data = res.Data.map((item: AuditoriaModel): Partial<Auditoria> => {
             return {
               id: item._id ?? "",
@@ -411,7 +411,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}?auditoria-padre=true`)
       .subscribe({
         next: (res) => {
-          if (res && res.Data) {
+          if (res?.Data) {
             const base64 = res.Data;
 
             const payload = {
@@ -607,7 +607,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   renderizar() {
     this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}?auditoria-padre=true`).subscribe(
       (res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.dialog.open(ModalPdfVisualizadorComponent, {
             data: {
               base64Document: res.Data,
@@ -647,7 +647,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+            if (res?.Data?.length > 0) {
               resolve(res.Data[0].nuxeo_enlace); // Tomar el primer valor
             } else {
               resolve(null);

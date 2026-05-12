@@ -1,6 +1,5 @@
-import { Component, Input, Inject, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ActividadFormularioComponent } from '../actividad-formulario/actividad-formulario.component'
+import { Component, Inject, OnInit } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
@@ -10,7 +9,6 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 @Component({
   selector: 'app-editar-actividad',
   templateUrl: './editar-actividad.component.html',
-  styleUrl: './editar-actividad.component.css'
 })
 export class EditarActividadComponent implements OnInit {
   //@Input() actividadData: any = {}; 

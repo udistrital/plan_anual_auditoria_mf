@@ -62,7 +62,7 @@ export class RegistrarPlanComponent implements OnInit {
       .get(`plan-mejoramiento?query=auditoria_id:${this.auditoriaId},activo:true`)
       .subscribe({
         next: (res) => {
-          if (res.Data?.length) {
+          if (res?.Data?.length > 0) {
             this.planMejoramientoId = res.Data[0]._id;
             this.cargando = false;
           } else {

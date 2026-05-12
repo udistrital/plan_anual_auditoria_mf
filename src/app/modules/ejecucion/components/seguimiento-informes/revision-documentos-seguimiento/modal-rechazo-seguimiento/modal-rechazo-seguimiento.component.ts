@@ -9,7 +9,6 @@ import { environment } from "src/environments/environment";
 @Component({
   selector: "app-modal-rechazo-seguimiento",
   templateUrl: "./modal-rechazo-seguimiento.component.html",
-  styleUrl: "./modal-rechazo-seguimiento.component.css",
 })
 export class ModalRechazoSeguimientoComponent {
   formObservaciones!: FormGroup;

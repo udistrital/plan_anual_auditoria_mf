@@ -32,7 +32,7 @@ export class ParametrosUtilsService {
     return this.parametrosService.get(endpoint).pipe(
       map((res: any) => {
         // Validamos que la respuesta contenga Data
-        if (res && res.Data) {
+        if (res?.Data) {
           return res.Data;
         }
         return [];

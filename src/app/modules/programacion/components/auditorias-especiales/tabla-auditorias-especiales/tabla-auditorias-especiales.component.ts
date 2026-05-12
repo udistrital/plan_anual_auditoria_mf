@@ -15,7 +15,6 @@ import {
   colocacionesContructorTablaEspeciales,
 } from "./tabla-auditorias-especiales.utilidades";
 import { catchError, firstValueFrom, map, Observable, of, throwError } from 'rxjs';
-import { error } from 'node:console';
 import { environment } from "src/environments/environment";
 
 @Component({
