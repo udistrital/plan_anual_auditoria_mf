@@ -64,7 +64,7 @@ export class TablaConsultaAuditoriasComponent {
             this.planAuditoriaId = tienePAAAprobado ? res.Data[0]?._id : "";
             resolve(tienePAAAprobado);
           },
-          error: (error) => {
+          error: (error: Error) => {
             console.error("Error al verificar PAA aprobado:", error);
             reject(error);
           }

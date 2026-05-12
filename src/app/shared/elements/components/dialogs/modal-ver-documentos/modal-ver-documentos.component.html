@@ -17,7 +17,7 @@
                     class="modal-btn"
                     mat-flat-button
                     [color]="boton.color || 'accent'"
-                    [style]="boton.estilo || ''"
+                    [style]="boton.estilo ?? ''"
                     (click)="ejecutarBotonTab(boton)"
                 >
                     {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
@@ -27,7 +27,7 @@
                     class="modal-btn"
                     mat-stroked-button
                     [color]="boton.color || 'accent'"
-                    [style]="boton.estilo || ''"
+                    [style]="boton.estilo ?? ''"
                     (click)="ejecutarBotonTab(boton)"
                 >
                     {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
@@ -37,7 +37,7 @@
                     class="modal-btn"
                     mat-raised-button
                     [color]="boton.color || 'accent'"
-                    [style]="boton.estilo || ''"
+                    [style]="boton.estilo ?? ''"
                     (click)="ejecutarBotonTab(boton)"
                 >
                     {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
@@ -47,7 +47,7 @@
                     class="modal-btn"
                     mat-button
                     [color]="boton.color || 'accent'"
-                    [style]="boton.estilo || ''"
+                    [style]="boton.estilo ?? ''"
                     (click)="ejecutarBotonTab(boton)"
                 >
                     {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
@@ -60,7 +60,7 @@
                 class="modal-btn"
                 mat-flat-button
                 [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton || ''"
+                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
                 (click)="abrirCargueAdjuntoTabActual()"
             >
                 {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
@@ -71,7 +71,7 @@
                 class="modal-btn"
                 mat-stroked-button
                 [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton || ''"
+                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
                 (click)="abrirCargueAdjuntoTabActual()"
             >
                 {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
@@ -82,7 +82,7 @@
                 class="modal-btn"
                 mat-raised-button
                 [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton || ''"
+                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
                 (click)="abrirCargueAdjuntoTabActual()"
             >
                 {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
@@ -93,7 +93,7 @@
                 class="modal-btn"
                 mat-button
                 [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton || ''"
+                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
                 (click)="abrirCargueAdjuntoTabActual()"
             >
                 {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}

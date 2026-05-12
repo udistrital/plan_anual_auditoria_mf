@@ -47,8 +47,8 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
           hallazgoCount++;
           lista.push({
             numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
-            criterio: h.criterio || '',
-            descripcion: h.descripcion || ''
+            criterio: h.criterio ?? '',
+            descripcion: h.descripcion ?? ''
           });
         }
       }

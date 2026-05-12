@@ -17,8 +17,8 @@ import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-
 export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
   @Input() soloLectura: boolean = false;
-  @Input() minFechaStr?: String;
-  @Input() maxFechaStr?: String;
+  @Input() minFechaStr?: string;
+  @Input() maxFechaStr?: string;
   datos = new MatTableDataSource<any>([]);
   
   columnsToDisplay: string[] = [
@@ -66,7 +66,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
       .subscribe((res) => {
         const actividades: any[] = res.Data;
 
-        if (!(actividades.length > 0)) {
+        if (actividades.length === 0) {
           return this.alertaService.showAlert(
             "No hay actividades registradas",
             "Actualmente no hay actividades registradas para la vigencia seleccionada."

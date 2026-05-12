@@ -108,9 +108,9 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
           const id: string = item.hallazgo._id;
           if (this.puedeEscribirObservacionAuditado) {
             const miObs = item.observacionesAuditado.find((o: any) => o.usuario_id === this.usuarioId);
-            this.textoInline.set(id, miObs?.observacion || '');
+            this.textoInline.set(id, miObs?.observacion ?? '');
           } else if (this.puedeEscribirObservacionAuditor) {
-            this.textoInline.set(id, item.observacionAuditor?.observacion || '');
+            this.textoInline.set(id, item.observacionAuditor?.observacion ?? '');
           }
         }
       }
@@ -149,7 +149,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
 
   guardarObservacion(item: HallazgoObs, observacionExistente: any | null): void {
     const hallazgoId: string = item.hallazgo._id;
-    const texto = (this.textoInline.get(hallazgoId) || '').trim();
+    const texto = (this.textoInline.get(hallazgoId) ?? '').trim();
 
     if (!texto) {
       this.alertaService.showAlert('Campo vacío', 'La observación no puede estar vacía.');

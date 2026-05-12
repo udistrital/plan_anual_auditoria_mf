@@ -91,7 +91,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
               resolve(null);
             }
           },
-          (error) => {
+          (error: Error) => {
             console.error("Error al buscar documento adjunto", error);
             reject(error);
           }
@@ -158,7 +158,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
                 resolve(null);
               }
             },
-            (error) => {
+            (error: Error) => {
               console.log("Error al buscar el compromiso Ético");
               this.alertService.showErrorAlert("Error al buscar Compromiso Ético");
               reject(error);

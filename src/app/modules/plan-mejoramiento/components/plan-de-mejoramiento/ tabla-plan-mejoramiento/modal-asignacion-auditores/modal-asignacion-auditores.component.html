@@ -18,7 +18,7 @@
           </div>
           <mat-form-field appearance="outline" class="col-12">
             <mat-label>Nombre de la auditoría</mat-label>
-            <input matInput [value]="data.auditoria?.titulo || ''" readonly />
+            <input matInput [value]="data.auditoria?.titulo ?? ''" readonly />
           </mat-form-field>
         </div>
         <div class="col-6 ps-2">
@@ -27,7 +27,7 @@
           </div>
           <mat-form-field appearance="outline" class="col-12">
             <mat-label>Tipo de evaluación</mat-label>
-            <input matInput [value]="data.auditoria?.tipo_evaluacion_nombre || ''" readonly />
+            <input matInput [value]="data.auditoria?.tipo_evaluacion_nombre ?? ''" readonly />
           </mat-form-field>
         </div>
       </div>

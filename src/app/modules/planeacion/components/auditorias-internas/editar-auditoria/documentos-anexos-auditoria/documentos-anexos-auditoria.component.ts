@@ -200,7 +200,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
             resolve([]);
           },
-          (error) => {
+          (error: Error) => {
             reject(error);
           }
         );
@@ -385,7 +385,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
               resolve(null);
             }
           },
-          (error) => {
+          (error: Error) => {
             console.log("Error al buscar el compromiso Ético");
             this.alertService.showErrorAlert("Error al buscar Compromiso Ético");
             reject(error);

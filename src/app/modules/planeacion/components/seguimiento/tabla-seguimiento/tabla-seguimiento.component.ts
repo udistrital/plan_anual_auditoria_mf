@@ -124,7 +124,7 @@ export class TablaSeguimientoComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaSeguimiento = false;
           this.auditoriasDataSource.data = [];
           return this.alertService.showAlert(

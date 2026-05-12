@@ -82,7 +82,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.modoEditarExtraordinario = Boolean(localStorage.getItem('extra-edit'));
     const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
     this.vigenciaId = vigencia?.Id || 0;
-    this.vigenciaNombre = vigencia?.Nombre || '';
+    this.vigenciaNombre = vigencia?.Nombre ?? '';
     localStorage.removeItem('vigencia');
     localStorage.removeItem('extra-edit');
     await this.obtenerEstadoActual();
@@ -653,7 +653,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
               resolve(null);
             }
           },
-          (error) => {
+          (error: Error) => {
             console.error("Error al buscar Matriz", error);
             this.alertaService.showErrorAlert("Error al buscar Matriz");
             reject(error);

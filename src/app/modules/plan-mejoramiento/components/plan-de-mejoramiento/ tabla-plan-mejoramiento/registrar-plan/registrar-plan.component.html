@@ -16,23 +16,23 @@
     </div>
     <mat-form-field appearance="outline" class="col-md-3 col-12">
       <mat-label>No. Auditoría</mat-label>
-      <input matInput [value]="auditoria?.consecutivo_no_auditoria || ''" readonly />
+      <input matInput [value]="auditoria?.consecutivo_no_auditoria ?? ''" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-5 col-12">
       <mat-label>Nombre de auditoría</mat-label>
-      <input matInput [value]="auditoria?.titulo || ''" readonly />
+      <input matInput [value]="auditoria?.titulo ?? ''" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-4 col-12">
       <mat-label>Proceso Responsable</mat-label>
-      <input matInput [value]="auditoria?.proceso_nombre || ''" readonly />
+      <input matInput [value]="auditoria?.proceso_nombre ?? ''" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-4 col-12">
       <mat-label>Líder del Proceso</mat-label>
-      <input matInput [value]="auditoria?.jefe_nombre || ''" readonly />
+      <input matInput [value]="auditoria?.jefe_nombre ?? ''" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-4 col-12">
       <mat-label>Gestores del Proceso</mat-label>
-      <input matInput [value]="auditoria?.dependencia_nombre || ''" readonly />
+      <input matInput [value]="auditoria?.dependencia_nombre ?? ''" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-2 col-12">
       <mat-label>Fecha (DD/MM/AA)</mat-label>

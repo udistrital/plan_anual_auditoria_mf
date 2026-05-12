@@ -337,7 +337,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   poblarFormularios(): void {
     if (!this.informeData) return;
 
-    this.auditoriaId = this.informeData.auditoria_id || '';
+    this.auditoriaId = this.informeData.auditoria_id ?? '';
 
     // Poblar formulario de aspectos generales (paso 2)
     this.formAspectosGenerales.patchValue({

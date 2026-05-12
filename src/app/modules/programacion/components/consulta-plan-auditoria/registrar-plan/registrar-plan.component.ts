@@ -42,7 +42,7 @@ export class RegistrarPlanComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.route.params.subscribe(async (params) => {
       this.planId = params["id"];
-      this.vigenciaNombre = localStorage.getItem('vigencia') || '';
+      this.vigenciaNombre = localStorage.getItem('vigencia') ?? '';
       this.inicializarFormulario();
 
       try {

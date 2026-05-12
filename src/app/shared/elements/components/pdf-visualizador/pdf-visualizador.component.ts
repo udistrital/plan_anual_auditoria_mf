@@ -1,20 +1,17 @@
 import {
   Component,
   Input,
-  OnInit,
   ViewChild,
   ElementRef,
-  Inject,
   OnChanges, SimpleChanges
 } from "@angular/core";
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 @Component({
   selector: "app-pdf-visualizador",
   templateUrl: "./pdf-visualizador.component.html",
   styleUrls: ["./pdf-visualizador.component.css"],
 })
-export class PdfVisualizadorComponent implements OnInit {
+export class PdfVisualizadorComponent implements OnChanges {
   @ViewChild("pdfCanvas", { static: true })
   pdfCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -22,9 +19,7 @@ export class PdfVisualizadorComponent implements OnInit {
   pdfSrc: Uint8Array | undefined;
 
   @Input() base64Document: string = "";
-  ngOnInit() {
 
-  }
   // Este método se ejecuta cada vez que el valor de base64Document cambia.
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['base64Document'] && this.base64Document) {

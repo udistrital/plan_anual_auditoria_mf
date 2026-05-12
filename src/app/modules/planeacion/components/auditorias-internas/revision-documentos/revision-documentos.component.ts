@@ -200,7 +200,7 @@ export class RevisionDocumentosComponent implements OnInit {
               resolve();
             }
           },
-          error: (error) => {
+          error: (error: Error) => {
             this.alertService.showErrorAlert("Error al aprobar el plan.");
             reject(error);
           }

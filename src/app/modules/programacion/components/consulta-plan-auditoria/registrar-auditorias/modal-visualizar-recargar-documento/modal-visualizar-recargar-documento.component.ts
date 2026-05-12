@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { MatDialog } from "@angular/material/dialog";
+import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 

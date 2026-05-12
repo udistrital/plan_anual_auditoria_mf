@@ -82,7 +82,7 @@
                       *ngIf="puedeEscribirObservacionAuditado && obs.usuario_id === usuarioId && !item.hallazgo.rechazado; else obsLectura">
                       <mat-form-field appearance="outline" class="hallazgo-input">
                         <mat-label>Observación</mat-label>
-                        <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) || ''"
+                        <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
                           (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
                           [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
                           placeholder="Ingrese su observación...">
@@ -110,7 +110,7 @@
                     *ngIf="puedeEscribirObservacionAuditado && !miObservacionAuditado(item) && !item.hallazgo.rechazado">
                     <mat-form-field appearance="outline" class="hallazgo-input">
                       <mat-label>Observación</mat-label>
-                      <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) || ''"
+                      <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
                         (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
                         [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
                         placeholder="Ingrese su observación...">
@@ -136,7 +136,7 @@
                   <ng-container *ngIf="puedeEscribirObservacionAuditor && !item.hallazgo.rechazado">
                     <mat-form-field appearance="outline" class="hallazgo-input">
                       <mat-label>Observación del auditor</mat-label>
-                      <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) || ''"
+                      <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
                         (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
                         [disabled]="estaGuardando(item.hallazgo._id)"
                         placeholder="Ingrese la observación del auditor...">

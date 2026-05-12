@@ -294,7 +294,7 @@ export class CargarArchivoComponent {
           console.log("Archivo subido a Nuxeo", response);
           resolve(response[0]);
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.alertService.showErrorAlert("Error al subir el archivo.");
           console.error("Error al subir el archivo", error);
           reject(error);

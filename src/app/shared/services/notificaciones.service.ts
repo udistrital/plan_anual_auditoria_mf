@@ -113,7 +113,7 @@ export interface VariablesCartaRepresentacion {
 })
 export class NotificacionesService {
 
-  constructor(private notificacionesMidService: NotificacionesMidService) {}
+  constructor(private readonly notificacionesMidService: NotificacionesMidService) {}
 
   /** Sender email address used for notifications */
   private remitenteEmail = environment['ORIGEN_CORREO_NOTIFICACIONES'];

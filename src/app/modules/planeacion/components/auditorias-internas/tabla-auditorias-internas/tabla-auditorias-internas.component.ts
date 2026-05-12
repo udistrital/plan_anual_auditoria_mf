@@ -22,9 +22,8 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
-import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
-import { catchError, exhaustMap, map, tap } from "rxjs/operators";
-import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { forkJoin, lastValueFrom, of, throwError, catchError, exhaustMap, tap } from "rxjs";
+import { ModalVerDocumentosComponent, TabDocumento, CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
   NotificacionesService,
@@ -34,7 +33,6 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -168,7 +166,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
           return this.alertService.showAlert(

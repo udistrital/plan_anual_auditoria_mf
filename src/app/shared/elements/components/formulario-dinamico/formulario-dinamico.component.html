@@ -5,7 +5,7 @@
       <mat-form-field *ngSwitchCase="'text'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>
         <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <input matInput [formControlName]="campo.nombre" [placeholder]="campo.placeholder || ''" />
+        <input matInput [formControlName]="campo.nombre" [placeholder]="campo.placeholder ?? ''" />
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
@@ -26,7 +26,7 @@
       <mat-form-field *ngSwitchCase="'email'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>
         <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <input matInput type="email" [formControlName]="campo.nombre" [placeholder]="campo.placeholder || ''" />
+        <input matInput type="email" [formControlName]="campo.nombre" [placeholder]="campo.placeholder ?? ''" />
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
@@ -121,8 +121,8 @@
       <mat-form-field *ngSwitchCase="'date-range'" appearance="outline" class="example-full-width">
         <mat-label>{{ campo.etiqueta }}</mat-label>
         <mat-date-range-input [rangePicker]="pickerRange">
-          <input matStartDate [placeholder]="campo.parametros?.etiqueta_inicio || ''" />
-          <input matEndDate [placeholder]="campo.parametros?.etiqueta_fin || ''" />
+          <input matStartDate [placeholder]="campo.parametros?.etiqueta_inicio ?? ''" />
+          <input matEndDate [placeholder]="campo.parametros?.etiqueta_fin ?? ''" />
         </mat-date-range-input>
         <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle matIconSuffix [for]="pickerRange"></mat-datepicker-toggle>
@@ -149,7 +149,7 @@
           matInput
           [style.height.px]="campo.parametros?.altura || 72"
           [formControlName]="campo.nombre"
-          [placeholder]="campo.placeholder || ''"
+          [placeholder]="campo.placeholder ?? ''"
         ></textarea>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
@@ -185,7 +185,7 @@
           <quill-editor 
             [formControlName]="campo.nombre"
             [modules]="campo.quillConfig!"
-            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder || '')"
+            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
             [ngStyle]="{ 'width': '100%'}"
             >
           </quill-editor>

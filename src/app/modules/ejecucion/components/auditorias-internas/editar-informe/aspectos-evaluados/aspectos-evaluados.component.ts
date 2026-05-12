@@ -164,22 +164,22 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
           hallazgosArray.push(this.fb.group({
             _id: [hallazgo._id || null],
-            criterio: [hallazgo.criterio || '', Validators.required],
-            hallazgo: [hallazgo.titulo || '', Validators.required],
-            descripcion: [hallazgo.descripcion || '', Validators.required],
+            criterio: [hallazgo.criterio ?? '', Validators.required],
+            hallazgo: [hallazgo.titulo ?? '', Validators.required],
+            descripcion: [hallazgo.descripcion ?? '', Validators.required],
           }));
         });
 
         subtemasArray.push(this.fb.group({
           _id: [subtema._id || null],
-          nombre: [subtema.titulo || '', Validators.required],
+          nombre: [subtema.titulo ?? '', Validators.required],
           hallazgos: hallazgosArray,
         }));
       });
 
       temasArray.push(this.fb.group({
         _id: [tema._id || null],
-        nombre: [tema.titulo || '', Validators.required],
+        nombre: [tema.titulo ?? '', Validators.required],
         subtemas: subtemasArray,
       }));
     });

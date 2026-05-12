@@ -87,7 +87,7 @@ export class TablaSeguimientosComponent implements OnInit {
         return { ...auditoria, acciones };
       });
 
-      if (!(auditorias.length > 0)) {
+      if (auditorias.length === 0) {
         this.banderaTablaAuditorias = false;
         this.auditoriasDataSource.data = [];
         return this.alertaService.showAlert(

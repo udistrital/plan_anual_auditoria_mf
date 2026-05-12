@@ -77,7 +77,7 @@ export class EditorEnriquecidoComponent implements OnInit, ControlValueAccessor 
   ngOnInit(): void { }
 
   writeValue(value: string): void {
-    this.valueSignal.set(value || '');
+    this.valueSignal.set(value ?? '');
   }
 
   registerOnChange(fn: any): void {

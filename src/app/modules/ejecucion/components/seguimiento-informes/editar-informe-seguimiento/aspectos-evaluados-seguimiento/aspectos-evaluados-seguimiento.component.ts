@@ -94,7 +94,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
 
         subtemasArray.push(this.fb.group({
           _id: [subtema._id || null],
-          nombre: [subtema.titulo || '', Validators.required],
+          nombre: [subtema.titulo ?? '', Validators.required],
           isNew: [false],
           isModified: [false],
         }));
@@ -102,7 +102,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
 
       temasArray.push(this.fb.group({
         _id: [tema._id || null],
-        nombre: [tema.titulo || '', Validators.required],
+        nombre: [tema.titulo ?? '', Validators.required],
         subtemas: subtemasArray,
         isNew: [false],
         isModified: [false],
