@@ -115,8 +115,9 @@ export class NotificacionesService {
 
   constructor(private notificacionesMidService: NotificacionesMidService) {}
 
+  private readonly notificacionesHabilitadas: boolean = environment['NOTIFICACIONES_HABILITADAS'] ?? true;
   /** Sender email address used for notifications */
-  private remitenteEmail = environment['ORIGEN_CORREO_NOTIFICACIONES'];
+  private readonly remitenteEmail: string = environment['ORIGEN_CORREO_NOTIFICACIONES'];
 
   /**
    * Send a notification email for a request using the NOTIFICACIONES_MID_SERVICE.
@@ -128,6 +129,7 @@ export class NotificacionesService {
     destinatarios: DestinatariosEmail,
     variables: VariablesSolicitud
   ): Observable<any> {
+    if (!this.notificacionesHabilitadas) return new Observable(o => o.complete());
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_SOLICITUD_NOMBRE,
@@ -152,6 +154,7 @@ export class NotificacionesService {
     destinatarios: DestinatariosEmail,
     variables: VariablesRechazo
   ): Observable<any> {
+    if (!this.notificacionesHabilitadas) return new Observable(o => o.complete());
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_RECHAZO_NOMBRE,
@@ -176,6 +179,7 @@ export class NotificacionesService {
     destinatarios: DestinatariosEmail,
     variables: VariablesCartaRepresentacion
   ): Observable<any> {
+    if (!this.notificacionesHabilitadas) return new Observable(o => o.complete());
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_CARTA_REPRESENTACION_NOMBRE,
