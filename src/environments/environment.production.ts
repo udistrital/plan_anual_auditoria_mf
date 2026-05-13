@@ -220,19 +220,19 @@ export const environment = {
       VALORES: {
         MACROPROCESO: {
           PARAMETRO_ID: 5267,
-          TIPO_PARAMETRO_ID: 148,
+          TIPO_PARAMETRO_ID: 108,
         },
         PROCESO: {
           PARAMETRO_ID: 5268,
-          TIPO_PARAMETRO_ID: 149,
+          TIPO_PARAMETRO_ID: 109,
         },
         DEPENDENCIA: {
-          PARAMETRO_ID: 6798,
+          PARAMETRO_ID: 5245,
         },
       },
     },
-    CARGOS_LIDER_ID: 150,
-    CARGOS_RESPONSABLE_ID: 151,
+    CARGOS_LIDER_ID: 0,
+    CARGOS_RESPONSABLE_ID: 0,
   },
 
   ROL: {
