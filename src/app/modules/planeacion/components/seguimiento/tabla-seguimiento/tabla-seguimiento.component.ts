@@ -291,34 +291,6 @@ export class TablaSeguimientoComponent implements OnInit {
     acciones[accion]?.();
   }
 
-  verDocumento(auditoria: Auditoria) {
-    const auditoriaId = auditoria._id;
-    this.planAuditoriaMid
-      .get(`plantilla/plan-trabajo/${auditoriaId}`)
-      .subscribe((res) => {
-        const documentoBase64 = res.Data;
-        const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
-          width: "1000px",
-          data: documentoBase64,
-          autoFocus: false,
-        });
-
-        const modalInstance = dialogRef.componentInstance;
-        modalInstance.botonGuardar = {
-          icono: "save",
-          texto: "Guardar documento",
-        };
-
-        dialogRef.afterClosed().subscribe((res) => {
-          if (!res) return;
-
-          if (res.accion === "guardarDocumento") {
-            this.guardarDocumento(documentoBase64, auditoria);
-          }
-        });
-      });
-  }
-
   verAuditoria(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     this.router.navigate([
