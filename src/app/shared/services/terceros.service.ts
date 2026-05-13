@@ -22,6 +22,14 @@ interface TerceroResponse {
   Tercero: TerceroIdentification;
 };
 
+export interface VinculacionResponse {
+  "Id": number;
+  "CargoId": number;
+  "DependenciaId": number;
+  "PeriodoId": number;
+  "TerceroPrincipalId": TerceroIdentification;
+};
+
 /**
  * This service provides methods to interact with the TERCEROS_SERVICE API,
  * specifically for retrieving identification data of third parties.
@@ -118,6 +126,15 @@ export class TercerosService {
         ...(envDestinatarios.BccAddresses ?? []),
       ])],
     };
+  }
+
+  /**
+   * Retrieve vinculaciones (job positions) for a given Tercero ID, filtering only active ones.
+   * @param id The ID of the Tercero for which to retrieve vinculaciones.
+   * @returns An Observable containing an array of VinculacionResponse objects representing the active vinculaciones of the Tercero.
+   */
+  public getVinculacionByTerceroId(id: number): Observable<VinculacionResponse[]> {
+    return this.tercerosCrudService.get(`vinculacion?query=TerceroPrincipalId.Id:${id},Activo:true&limit=0`);
   }
 
 }
