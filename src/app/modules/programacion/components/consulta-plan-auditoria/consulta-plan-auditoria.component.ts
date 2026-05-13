@@ -302,7 +302,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         if (result.isConfirmed) {
           this.planAnualAuditoriaService
             .get(
-              `documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`
+              `documento?query=referencia_id:${element.id},tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL},activo:true`
             )
             .subscribe({
               next: (documentos) => {
