@@ -10,7 +10,7 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 })
 export class CrearActividadComponent {
   auditoriaId: string;
-  datos: any | [] = [];
+  datos: Array<any> = [];
   minFechaStr: string | null = null;
   maxFechaStr: string | null = null;
 

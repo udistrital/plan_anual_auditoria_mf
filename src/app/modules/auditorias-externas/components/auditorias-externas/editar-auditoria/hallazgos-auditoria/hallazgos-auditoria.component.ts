@@ -23,7 +23,7 @@ export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
 
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-      return !!(control && control.invalid && (control.dirty || control.touched));
+      return !!(control?.invalid && (control?.dirty || control?.touched));
     }
   };
 

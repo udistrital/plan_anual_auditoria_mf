@@ -158,7 +158,7 @@ export class TablaAuditoriasEspecialesComponent {
         usuario_rol: this.usuarioRol,
         planAuditoriaId: null,
         vigenciaId: this.vigenciaId,
-        isEditExtraordinario: false, // TODO: Definir si se considera auditoría extraordinaria
+        isEditExtraordinario: false,
         auditoria: auditoriaPadre,
       },
     });

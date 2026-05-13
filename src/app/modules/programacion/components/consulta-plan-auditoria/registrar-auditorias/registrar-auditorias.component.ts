@@ -227,7 +227,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         )
         .pipe(
           map((res: any) => {
-            if (!res || !res.base64)
+            if (!res?.base64)
               throw new Error("Respuesta inválida del servidor: base64 no encontrado");
 
             return res.base64;
@@ -259,7 +259,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         )
         .pipe(
           map((res: any) => {
-            if (!res || !res.base64)
+            if (!res?.base64)
               throw new Error("Respuesta inválida del servidor: base64 no encontrado");
 
             return res.base64;

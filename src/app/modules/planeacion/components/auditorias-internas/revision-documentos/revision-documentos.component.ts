@@ -590,11 +590,11 @@ export class RevisionDocumentosComponent implements OnInit {
       }),
 
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
         const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
         dependenciasInfo.forEach((dep) => 
-          datosAuditoria.correo_complementario.forEach((correo: any) => {
+          datosAuditoria.correo_complementario?.forEach((correo: any) => {
             if (correo.dependencia_id === dep.dependencia_id)
               dep.correo_complementario = correo.correo;
           })
@@ -664,7 +664,7 @@ export class RevisionDocumentosComponent implements OnInit {
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Revisión de Programa de Auditoría",
               tipo_solicitud: "revisión y firma",
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
               nombre_remitente: nombreRemitente || rolRemitente,

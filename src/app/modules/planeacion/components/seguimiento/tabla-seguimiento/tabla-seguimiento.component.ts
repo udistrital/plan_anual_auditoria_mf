@@ -219,11 +219,13 @@ export class TablaSeguimientoComponent implements OnInit {
     queryParams += `&limit=${limit}`
     queryParams += `&offset=${offset}`;
 
-    const cargoId = this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)
-      ? environment.CARGO.JEFE_DEPENDENCIA_ID
-      : this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)
-        ? environment.CARGO.ASISTENTE_DEPENDENCIA_ID
-        : 0;
+    let cargoId = 0;
+
+    if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
+      cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+    } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+    }
 
     return `${endpoint}${this.usuarioId}/${cargoId}?${queryParams}`;
   }

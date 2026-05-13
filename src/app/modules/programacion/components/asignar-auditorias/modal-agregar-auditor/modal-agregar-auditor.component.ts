@@ -17,7 +17,7 @@ import { environment } from "src/environments/environment";
   styleUrl: "./modal-agregar-auditor.component.css",
 })
 export class ModalAgregarAuditorComponent implements OnInit {
-  form: FormGroup | any;
+  form: FormGroup<any> = null as any;
   evaluaciones: Parametro[] = [];
   tipoEvaluacion: number[] = [];
   auditores: Auditor[] = [];

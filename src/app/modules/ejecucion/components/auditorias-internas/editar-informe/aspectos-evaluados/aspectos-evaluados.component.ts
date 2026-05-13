@@ -48,7 +48,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   cargando = false;
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
-      return !!(control && control.invalid && (control.dirty || control.touched));
+      return !!(control?.invalid && (control?.dirty || control?.touched));
     }
   };
 

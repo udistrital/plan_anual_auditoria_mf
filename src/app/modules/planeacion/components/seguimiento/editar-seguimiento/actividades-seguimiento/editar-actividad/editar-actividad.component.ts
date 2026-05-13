@@ -29,9 +29,6 @@ export class EditarActividadSeguimientoComponent {
     this.maxFechaStr = data.maxFechaStr ?? null;
    }
 
-  ngOnInit(): void {
-  }
-
   editarActividad(actividadData: ActividadPlan) {
     console.debug('Editar actividad:', actividadData);
     let actividadJson: Actividad = {

@@ -253,7 +253,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   cargarInforme(): void {
     this.planAnualAuditoriaService.get(`informe/${this.informeId}`).subscribe({
       next: (response: any) => {
-        if (response && response.Data) {
+        if (response?.Data) {
           this.informeData = response.Data;
           this.poblarFormularios();
           this.cargarEstadoAuditoria();

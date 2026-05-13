@@ -17,6 +17,7 @@ import { PLANTILLA_RECHAZO_NOMBRE } from "src/app/core/services/notificaciones-m
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 @Component({
   selector: "app-modal-rechazo-auditoria",
@@ -111,13 +112,13 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
    */
   private notificarRechazo(auditoriaId: string): void {
     const role = this.infoModal.role;
-    const rolRemitente = role === environment.ROL.JEFE
-      ? "Jefe OCI"
-      : role === environment.ROL.JEFE_DEPENDENCIA
-        ? "Jefe de Dependencia"
-        : role === environment.ROL.ASISTENTE_DEPENDENCIA
-          ? "Asistente de Dependencia"
-          : role ?? "Revisor";
+    const roleLabels: Record<string, string> = {
+      [environment.ROL.JEFE]: "Jefe OCI",
+      [environment.ROL.JEFE_DEPENDENCIA]: "Jefe de Dependencia",
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: "Asistente de Dependencia",
+    };
+
+    const rolRemitente = roleLabels[role] ?? role ?? "Revisor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -134,7 +135,7 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
       }),
 
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
 
         // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
@@ -193,7 +194,7 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
             const variablesRechazo: VariablesRechazo = {
               titulo_rechazo: "Rechazo de Programa de Auditoría",
               motivo_rechazo: this.formObservaciones.get("observaciones")?.value ?? '',
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
               nombre_remitente: nombreRemitente || rolRemitente,

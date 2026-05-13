@@ -16,7 +16,7 @@ import { environment } from "src/environments/environment";
   styleUrls: ["./add-auditoria-modal.component.css"], 
 })
 export class AddAuditoriaModalComponent implements OnInit {
-  auditoriaForm: FormGroup | any;
+  auditoriaForm: FormGroup<any> = new FormGroup({});
   evaluaciones: Parametro[] = [];
   meses: Parametro[] = [];
   macroprocesos: Parametro[] = [];
@@ -88,13 +88,13 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.inicializarCantidadAuditorias();
 
     // When the macroproceso changes, clear the proceso selection and reload procesos.
-    this.auditoriaForm.get("macroprocesos").valueChanges.subscribe(() => {
+    this.auditoriaForm.get("macroprocesos")?.valueChanges.subscribe(() => {
       this.cargarProcesos(this.actualizarProcesosSeleccionados.bind(this));
     });
   }
 
   actualizarProcesosSeleccionados(): void {
-    const procesosActuales = this.auditoriaForm.get("procesos").value ?? [];
+    const procesosActuales = this.auditoriaForm.get("procesos")?.value ?? [];
     const procesosFiltrados = procesosActuales.filter((procesoId: number) =>
       this.procesos.some((proceso) => proceso.Id === procesoId)
     );
@@ -168,7 +168,7 @@ export class AddAuditoriaModalComponent implements OnInit {
    * @param callback Optional callback function to execute after loading procesos
    */
   cargarProcesos(callback?: () => void) {
-    const macroprocesosId = this.auditoriaForm.get("macroprocesos").value;
+    const macroprocesosId = this.auditoriaForm.get("macroprocesos")?.value;
     const macroprocesosIdBarSeparated = Array.isArray(macroprocesosId) ? macroprocesosId.join("|") : macroprocesosId;
     const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
     this.parametrosService
@@ -196,20 +196,19 @@ export class AddAuditoriaModalComponent implements OnInit {
 
   asignarTodos(): void {
     const seleccion = [this.TODOS];
-    this.auditoriaForm.get("cronogramaActividades").setValue(seleccion);
+    this.auditoriaForm.get("cronogramaActividades")?.setValue(seleccion);
   }
 
   cambioMes(): void {
-    const seleccionados = this.auditoriaForm.get("cronogramaActividades").value;
+    const seleccionados = this.auditoriaForm.get("cronogramaActividades")?.value;
 
     if (seleccionados.includes(this.TODOS) && seleccionados.length > 1) {
       this.auditoriaForm
-        .get("cronogramaActividades")
-        .setValue(seleccionados.filter((mes: string) => mes !== this.TODOS));
+        .get("cronogramaActividades")?.setValue(seleccionados.filter((mes: string) => mes !== this.TODOS));
     }
 
     if (seleccionados.length === 0) {
-      this.auditoriaForm.get("cronogramaActividades").setValue([this.TODOS]);
+      this.auditoriaForm.get("cronogramaActividades")?.setValue([this.TODOS]);
     }
   }
 

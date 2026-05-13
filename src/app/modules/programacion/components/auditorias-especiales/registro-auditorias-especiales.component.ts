@@ -95,8 +95,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
             },
             error: (error) => {
               if (
-                error.error?.Data &&
-                error.error.Data.includes("Ya existe una auditoría")
+                error?.error?.Data.includes("Ya existe una auditoría")
               ) {
                 this.alertaService.showAlert(
                   "Vigencia duplicada",

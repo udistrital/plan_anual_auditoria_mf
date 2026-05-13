@@ -71,7 +71,7 @@ export class ReferenciaPdfService {
         .get(`documento?query=${queryBase}${queryMetadatos}`)
         .pipe(
           switchMap((response) => {
-            if (response && response.Data.length > 0) {
+            if (response?.Data?.length > 0) {
               const documentoId = response.Data[0]._id; // ID del documento existente
               console.log("actualizacion payload", payload);
               return this.planAnualAuditoriaService.put(
@@ -95,12 +95,7 @@ export class ReferenciaPdfService {
       )
       .pipe(
         map((response: any) => {
-          if (
-            response &&
-            response.Data &&
-            Array.isArray(response.Data) &&
-            response.Data.length > 0
-          ) {
+          if (response?.Data?.length > 0) {
             const firstItem = response.Data[0];
             if (firstItem.nuxeo_enlace) {
               return firstItem.nuxeo_enlace;

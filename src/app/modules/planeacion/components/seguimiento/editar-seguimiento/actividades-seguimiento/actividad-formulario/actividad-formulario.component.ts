@@ -18,7 +18,7 @@ export class ActividadSeguimientoFormularioComponent {
   minFecha: Date | null = null;
   maxFecha: Date | null = null;
 
-  private subs = new Subscription();
+  private readonly subs = new Subscription();
 
   constructor(private readonly fb: FormBuilder) {
     this.form = this.fb.group({

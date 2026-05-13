@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -10,7 +10,7 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
   selector: 'app-editar-actividad',
   templateUrl: './editar-actividad.component.html',
 })
-export class EditarActividadComponent implements OnInit {
+export class EditarActividadComponent {
   //@Input() actividadData: any = {}; 
   /*actividad = {
     nombreActividad: 'Actividad Ejemplo',
@@ -40,8 +40,6 @@ export class EditarActividadComponent implements OnInit {
     console.debug('Actividad Data:', this.actividadData);
     console.debug('ID Auditoria:', this.idAuditoria);
   }
-
-  ngOnInit(): void {}
 
   editarActividad(actividadData: ActividadPlan) {
     console.debug('Editar actividad:', actividadData);

@@ -144,16 +144,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         break;
       case 'jefe_OCI':
         query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE}`;
+        const estado = estadoId ? `&estado_id=${estadoId}` : '';
         endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
+            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado}`
             : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
         break;
       default:
         if (estadoId) {
           query += `,estado_id:${estadoId}`;
         }
+          const estado2 = estadoId ? `&estado_id=${estadoId}` : '';
           endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
+            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado2}`
             : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
     }
 
@@ -569,7 +571,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       ),
 
       exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
 
         // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
         const vigenciaId = datosAuditoria?.vigencia_id;
@@ -584,7 +586,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Revisión de Programa de Auditoría",
           tipo_solicitud: "revisión y aprobación",
-          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: nombreRemitente || rolRemitente,

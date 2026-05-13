@@ -16,7 +16,7 @@ export class ModalListaRechazosComponent implements OnInit {
   cargando: boolean = true;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private planAuditoria: any,
+    @Inject(MAT_DIALOG_DATA) private readonly planAuditoria: any,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 

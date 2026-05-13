@@ -90,7 +90,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   cargarInforme(): void {
     this.planAnualAuditoriaService.get(`informe/${this.informeId}`).subscribe({
       next: (response: any) => {
-        if (response && response.Data) {
+        if (response?.Data) {
           this.informeData = response.Data;
           this.poblarFormularios();
           this.cargarAuditoriaParaFormulario();

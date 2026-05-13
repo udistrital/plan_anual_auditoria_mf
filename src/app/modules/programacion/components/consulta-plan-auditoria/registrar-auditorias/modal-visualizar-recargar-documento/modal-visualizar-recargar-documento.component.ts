@@ -28,7 +28,7 @@ export class ModalVisualizarRecargarDocumentoComponent {
     }
   }
   actualizarDocumento(){
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: 'pdf',

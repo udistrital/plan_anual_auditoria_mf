@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
@@ -133,7 +133,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
         return;
       }
 
-      const dialogRef = this.dialog.open(CargarArchivoComponent, {
+      this.dialog.open(CargarArchivoComponent, {
         width: "800px",
         data: {
           tipoArchivo: "pdf",

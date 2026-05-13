@@ -43,7 +43,10 @@ export class ActividadesSeguimientoComponent implements OnInit {
     
   ) { }
 
-  resetComponent() { }
+  resetComponent() {
+    console.log("Reseteando componente de actividades de seguimiento");
+  }
+  
   onStepLeave() {
     this.resetComponent();
   }
@@ -55,7 +58,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
    }
 
   subirArchivo(tipoArchivo: string): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "600px",
       data: { tipoArchivo },
     });

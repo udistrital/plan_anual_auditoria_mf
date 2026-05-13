@@ -10,7 +10,7 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 })
 export class CrearActividadSeguimientoComponent {
   auditoriaId: string;
-  datos: any | [] = [];
+  datos: Array<any> = [];
   minFechaStr: string | null = null;
   maxFechaStr: string | null = null;
 
@@ -22,9 +22,6 @@ export class CrearActividadSeguimientoComponent {
     this.auditoriaId = data.auditoriaId;
     this.minFechaStr = data.minFechaStr ?? null;
     this.maxFechaStr = data.maxFechaStr ?? null;
-  }
-
-  ngOnInit(): void {
   }
 
   crearActividad(actividadData: ActividadPlan) {

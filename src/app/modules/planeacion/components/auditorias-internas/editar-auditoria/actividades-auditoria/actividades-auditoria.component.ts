@@ -7,7 +7,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
 import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import  { EditarActividadComponent } from './editar-actividad/editar-actividad.component'
+import { EditarActividadComponent } from './editar-actividad/editar-actividad.component'
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
@@ -49,7 +49,10 @@ export class ActividadesAuditoriaComponent implements OnInit {
     private readonly descargaService: DescargaService,
   ) {}
 
-  resetComponent() { }
+  resetComponent() {
+    console.log("Reseteando componente de actividades de auditoría");
+  }
+  
   onStepLeave() {
     this.resetComponent();
   }
@@ -62,7 +65,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
   }
 
   subirArchivo(tipoArchivo: string): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "600px",
       data: { tipoArchivo },
     });

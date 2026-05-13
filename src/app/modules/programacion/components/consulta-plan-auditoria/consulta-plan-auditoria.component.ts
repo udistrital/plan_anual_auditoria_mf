@@ -137,7 +137,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
-    const EN_BORRADOR_ID = environment.PLAN_ESTADO.EN_BORRADOR_ID;
     this.PlanAnualAuditoriaMid.get(
       `plan-auditoria?sortby=vigencia_id&order=desc&query=&limit=${limit}&offset=${offset}`
     ).subscribe(
@@ -234,8 +233,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         },
         (error) => {
           if (
-            error.error?.Data &&
-            error.error.Data.includes("Ya existe un plan")
+            error?.error?.Data.includes("Ya existe un plan")
           ) {
             this.alertaService.showAlert(
               "SELECCIONE OTRA VIGENCIA",
@@ -480,7 +478,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verMotivosRechazo(plan: any) {
-    const dialogRef = this.dialog.open(ModalListaRechazosComponent, {
+    this.dialog.open(ModalListaRechazosComponent, {
       width: "1000px",
       data: plan,
       autoFocus: false,
