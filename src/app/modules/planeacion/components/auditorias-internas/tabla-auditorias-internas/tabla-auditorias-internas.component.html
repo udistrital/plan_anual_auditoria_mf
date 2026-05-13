@@ -59,6 +59,10 @@
                     </mat-menu>
                   </ng-container>
                 </div>
+
+                <div *ngSwitchCase="'estado'">
+                  <span>{{ getEstadoConColor(row) }}</span>
+                </div>
                 <span *ngSwitchDefault>{{ columna.cell(row) }}</span>
               </ng-container>
             </td>

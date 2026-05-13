@@ -22,6 +22,7 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
@@ -276,6 +277,20 @@ export class TablaSeguimientoComponent implements OnInit {
   // Obtener el icono dependiendo de la acción
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado) {
+      if (estado?.startsWith(prefijo)) {
+        return emojiColorPorPrefijoEstado[prefijo];
+      }
+    }
+    return "⚪";
+  }
+
+  getEstadoConColor(auditoria: any): string {
+    const estado = auditoria.estado_nombre ?? "Sin estado";
+    return `${this.escogerEmojiColorEstado(estado)} ${estado}`;
   }
 
   // Acciones
