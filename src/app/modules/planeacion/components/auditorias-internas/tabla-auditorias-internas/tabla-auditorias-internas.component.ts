@@ -142,13 +142,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
         endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
         break;
-      case 'jefe_OCI':
-        query += `,estado_id:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE}`;
-        const estado = estadoId ? `&estado_id=${estadoId}` : '';
-        endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado}`
-            : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
-        break;
       default:
         if (estadoId) {
           query += `,estado_id:${estadoId}`;
