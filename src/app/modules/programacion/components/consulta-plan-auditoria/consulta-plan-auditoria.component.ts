@@ -312,7 +312,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       if (observacion === null || observacion === undefined) return;
 
       this.planAnualAuditoriaService
-        .get(`documento?query=referencia_id:${element.id},tipo_id:6810,activo:true`)
+        .get(`documento?query=referencia_id:${element.id},tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL},activo:true`)
         .subscribe({
           next: (documentos) => {
             if (documentos && documentos.Data.length > 0) {
