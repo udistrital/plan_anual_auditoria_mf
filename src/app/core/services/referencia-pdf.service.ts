@@ -124,7 +124,7 @@ export class ReferenciaPdfService {
       )
       .pipe(
         map((response: any) => {
-          if (response && response.Data && Array.isArray(response.Data)) {
+          if (Array.isArray(response?.Data)) {
             const documentosValidos = response.Data.filter(
               (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
             );

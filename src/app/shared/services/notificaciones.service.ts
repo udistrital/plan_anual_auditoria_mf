@@ -116,7 +116,7 @@ export class NotificacionesService {
   constructor(private readonly notificacionesMidService: NotificacionesMidService) {}
 
   /** Sender email address used for notifications */
-  private remitenteEmail = environment['ORIGEN_CORREO_NOTIFICACIONES'];
+  private readonly remitenteEmail = environment['ORIGEN_CORREO_NOTIFICACIONES'];
 
   /**
    * Send a notification email for a request using the NOTIFICACIONES_MID_SERVICE.

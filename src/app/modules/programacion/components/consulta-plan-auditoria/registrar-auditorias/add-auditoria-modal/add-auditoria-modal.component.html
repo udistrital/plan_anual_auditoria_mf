@@ -28,8 +28,8 @@
               />
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('tituloActividad').hasError('required') &&
-                  auditoriaForm.get('tituloActividad').touched
+                  auditoriaForm.get('tituloActividad')?.hasError('required') &&
+                  auditoriaForm.get('tituloActividad')?.touched
                 "
               >
                 El título de la actividad es requerido
@@ -56,8 +56,8 @@
               </mat-select>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('tipoEvaluacion').hasError('required') &&
-                  auditoriaForm.get('tipoEvaluacion').touched
+                  auditoriaForm.get('tipoEvaluacion')?.hasError('required') &&
+                  auditoriaForm.get('tipoEvaluacion')?.touched
                 "
               >
                 Seleccione el tipo de evaluación
@@ -87,8 +87,8 @@
               </mat-select>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('macroprocesos').hasError('required') &&
-                  auditoriaForm.get('macroprocesos').touched
+                  auditoriaForm.get('macroprocesos')?.hasError('required') &&
+                  auditoriaForm.get('macroprocesos')?.touched
                 "
               >
                 Seleccione los macroprocesos
@@ -118,8 +118,8 @@
               </mat-select>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('procesos').hasError('required') &&
-                  auditoriaForm.get('procesos').touched &&
+                  auditoriaForm.get('procesos')?.hasError('required') &&
+                  auditoriaForm.get('procesos')?.touched &&
                   procesos.length > 0
                 "
               >
@@ -127,8 +127,8 @@
               </mat-error>
               <mat-error
                 *ngIf="
-                  auditoriaForm.get('procesos').hasError('required') &&
-                  auditoriaForm.get('procesos').touched &&
+                  auditoriaForm.get('procesos')?.hasError('required') &&
+                  auditoriaForm.get('procesos')?.touched &&
                   procesos.length === 0
                 "
               >
@@ -151,7 +151,7 @@
               [items]="dependencias"
               [labelKey]="'Nombre'"
               [valueKey]="'Id'"
-              [selectionControl]="auditoriaForm.get('dependencias')"
+              [selectionControl]="getControl('dependencias')"
             ></app-search-selection>
           </div>
 
@@ -180,8 +180,8 @@
                 *ngIf="
                   auditoriaForm
                     .get('cronogramaActividades')
-                    .hasError('required') &&
-                  auditoriaForm.get('cronogramaActividades').touched
+                    ?.hasError('required') &&
+                  auditoriaForm.get('cronogramaActividades')?.touched
                 "
               >
                 Seleccione al menos un mes para el cronograma
@@ -201,7 +201,7 @@
               [items]="cantidadesAuditorias"
               [labelKey]="'Nombre'"
               [valueKey]="'Id'"
-              [selectionControl]="auditoriaForm.get('cantidadAuditorias')"
+              [selectionControl]="getControl('cantidadAuditorias')"
             ></app-search-selection>
           </div>
 

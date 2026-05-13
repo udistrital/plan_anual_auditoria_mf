@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { catchError, map, of } from "rxjs";
 import { OikosService } from "src/app/core/services/oikos.service";
@@ -16,7 +16,7 @@ import { environment } from "src/environments/environment";
   styleUrls: ["./add-auditoria-modal.component.css"], 
 })
 export class AddAuditoriaModalComponent implements OnInit {
-  auditoriaForm: FormGroup<any> = new FormGroup({});
+  auditoriaForm: FormGroup;
   evaluaciones: Parametro[] = [];
   meses: Parametro[] = [];
   macroprocesos: Parametro[] = [];
@@ -42,10 +42,7 @@ export class AddAuditoriaModalComponent implements OnInit {
       isEditExtraordinario: boolean;
       auditoria?: Auditoria
     }
-  ) {}
-
-  ngOnInit(): void {
-    this.isEditMode = !!this.data.auditoria;
+  ) {
     this.auditoriaForm = this.fb.group({
       tituloActividad: [
         this.data.auditoria?.auditoria ?? '',
@@ -76,6 +73,14 @@ export class AddAuditoriaModalComponent implements OnInit {
         Validators.required,
       ]
     });
+  }
+
+  getControl(nombre: string): FormControl {
+    return this.auditoriaForm.get(nombre) as FormControl;
+  }
+
+  ngOnInit(): void {
+    this.isEditMode = !!this.data.auditoria;
 
     console.debug("Datos recibidos para edición:", this.data.auditoria);
     console.debug("Valor inicial del formulario:", this.auditoriaForm.value);

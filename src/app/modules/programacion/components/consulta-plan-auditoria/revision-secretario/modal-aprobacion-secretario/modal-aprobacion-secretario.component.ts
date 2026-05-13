@@ -1,7 +1,6 @@
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import {
   MAT_DIALOG_DATA,
-  MatDialog,
   MatDialogRef,
 } from "@angular/material/dialog";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -24,7 +23,6 @@ export class ModalAprobacionSecretarioComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
     public readonly dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
-    private readonly dialog: MatDialog,
     private readonly alertService: AlertService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly planAuditoriaMidService: PlanAnualAuditoriaMid,
@@ -70,7 +68,7 @@ export class ModalAprobacionSecretarioComponent {
     const payload = [
       {
         IdTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_COMITE_COORDINADOR,
-        nombre: this.archivo!.name,
+        nombre: this.archivo.name,
         descripcion: "Acta de comité coordinador",
         metadatos: {},
         file: this.archivo,

@@ -7,7 +7,6 @@ import { FormularioDinamicoComponent } from "src/app/shared/elements/components/
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { formularioPAA } from "./registrar-plan.utilidades";
-import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 
 @Component({
   selector: "app-registrar-plan",
@@ -87,10 +86,8 @@ export class RegistrarPlanComponent implements OnInit {
         .toPromise();
       const estadoActual = response?.Data?.[0];
       this.estadoIdActual = estadoActual?.estado_id ?? null;
-      this.modoEditar,
-        (this.modoEditar =
-          this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO);
+      this.modoEditar = (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO);
       this.actualizarEstadoCampos();
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
@@ -210,7 +207,6 @@ export class RegistrarPlanComponent implements OnInit {
         content: planData.recurso,
       },
     ];
-    return;
   }
 
   regresarRuta() {

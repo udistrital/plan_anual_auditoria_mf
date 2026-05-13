@@ -16,7 +16,6 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "s
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
-import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { RolService } from "src/app/core/services/rol.service";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";

@@ -77,16 +77,16 @@
 
       <!-- Campo tipo radiobutton -->
       <div *ngSwitchCase="'radiobutton'">
-        <label>
+        <label [htmlFor]="campo.nombre">
           {{ campo.etiqueta }}
-          <mat-radio-group [formControlName]="campo.nombre">
-            <div *ngFor="let opcion of campo.parametros?.opciones ?? []">
-              <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
-                {{ opcion.Nombre }}
-              </mat-radio-button>
-            </div>
-          </mat-radio-group>
         </label>
+        <mat-radio-group [formControlName]="campo.nombre">
+          <div *ngFor="let opcion of campo.parametros?.opciones ?? []">
+            <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
+              {{ opcion.Nombre }}
+            </mat-radio-button>
+          </div>
+        </mat-radio-group>
         <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
           {{ campo.etiqueta }} es requerido
         </mat-error>
@@ -126,7 +126,7 @@
           <input matStartDate [placeholder]="campo.parametros?.etiqueta_inicio ?? ''" />
           <input matEndDate [placeholder]="campo.parametros?.etiqueta_fin ?? ''" />
         </mat-date-range-input>
-        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+        <mat-hint>DD/MM/YYYY – DD/MM/YYYY</mat-hint>
         <mat-datepicker-toggle matIconSuffix [for]="pickerRange"></mat-datepicker-toggle>
         <mat-icon
           *ngIf="campo.tooltip"
@@ -168,7 +168,7 @@
 
         <!-- Campo tipo editor de texto enriquecido -->
         <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand">
-          <label class="titulo-quill">
+          <label [htmlFor]="campo.nombre" class="titulo-quill">
             <b>
               <mat-icon>edit_note</mat-icon>
               {{ campo.etiqueta }}
@@ -183,14 +183,14 @@
                 info
               </mat-icon>
             </b>
-            <quill-editor 
-              [formControlName]="campo.nombre"
-              [modules]="campo.quillConfig!"
-              [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
-              [ngStyle]="{ 'width': '100%'}"
-              >
-            </quill-editor>
           </label>
+          <quill-editor 
+            [formControlName]="campo.nombre"
+            [modules]="campo.quillConfig!"
+            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
+            [ngStyle]="{ 'width': '100%'}"
+            >
+          </quill-editor>
           <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
             {{ campo.etiqueta }} es requerido
           </mat-error>

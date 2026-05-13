@@ -2,7 +2,6 @@ import {
   Component,
   forwardRef,
   Input,
-  OnInit,
   signal,
   effect,
   WritableSignal,
@@ -12,10 +11,7 @@ import {
   FormBuilder,
   FormGroup,
   NG_VALUE_ACCESSOR,
-  ReactiveFormsModule,
 } from '@angular/forms';
-import { QuillEditorComponent } from 'ngx-quill';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-editor-enriquecido',
@@ -29,11 +25,11 @@ import { CommonModule } from '@angular/common';
     }
   ],
 })
-export class EditorEnriquecidoComponent implements OnInit, ControlValueAccessor {
+export class EditorEnriquecidoComponent implements ControlValueAccessor {
   @Input() placeholder: string = 'Escribe aquí...';
 
   editorForm: FormGroup;
-  private valueSignal: WritableSignal<string> = signal('');
+  private readonly valueSignal: WritableSignal<string> = signal('');
   private onTouchedCallback: () => void = () => { };
   private onChangeCallback: (value: string) => void = () => { };
 
@@ -73,8 +69,6 @@ export class EditorEnriquecidoComponent implements OnInit, ControlValueAccessor 
       }
     });
   }
-
-  ngOnInit(): void { }
 
   writeValue(value: string): void {
     this.valueSignal.set(value ?? '');

@@ -13,7 +13,6 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 

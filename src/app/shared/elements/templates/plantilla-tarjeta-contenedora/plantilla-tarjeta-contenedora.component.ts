@@ -14,7 +14,6 @@ import { SafeHtml } from "@angular/platform-browser";
 @Component({
   selector: "plantilla-tarjeta-contenedora",
   templateUrl: "./plantilla-tarjeta-contenedora.component.html",
-  styleUrls: ["./plantilla-tarjeta-contenedora.component.css"],
 })
 export class PlantillaTarjetaContenedoraComponent {
   /**
