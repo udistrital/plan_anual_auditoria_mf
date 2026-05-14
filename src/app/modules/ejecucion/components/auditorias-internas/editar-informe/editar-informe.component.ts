@@ -401,28 +401,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     this.formularioInformacionComponent.onSubmit();
   }
 
-  preguntarGuardadoInformacion(dataForm: any) {
-    if (!dataForm) {
-      return this.alertaService.showAlert("Formulario incompleto", "Debe llenar todos los campos obligatorios");
-    }
 
-    this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de guardar la información?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.guardarInformacion(dataForm);
-      });
-  }
-
-  guardarInformacion(informacion: any) {
-    const campos = {
-      fecha_emision: informacion.fecha_emision,
-      muestra: informacion.muestra || null,
-    };
-    this.guardarPaso(campos, "La informacion se ha guardado correctamente", "No se pudo guardar la informacion");
-  }
 
   private guardarPaso(camposActualizados: any, mensajeExito: string, mensajeError: string): void {
     const payload = { ...this.informeData, ...camposActualizados };
@@ -440,17 +419,72 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     });
   }
 
-  guardarAspectosGenerales() {
-    this.guardarPaso(this.formAspectosGenerales.value, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales");
+  private async confirmarGuardado(accion: () => any): Promise<void> {
+    const confirmado = await this.alertaService.showConfirmAlert("¿Está seguro(a) de guardar la información?");
+    if (!confirmado.value) return;
+    await accion();
   }
 
-  // Guarda los aspectos evaluados (temas, subtemas, hallazgos) y avanza al siguiente paso
+  // Confirmación y guardado paso 1 - Información general
+  guardarInformacion(dataForm: any) {
+    if (!dataForm) {
+      return this.alertaService.showAlert("Formulario incompleto", "Debe llenar todos los campos obligatorios");
+    }
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        { fecha_emision: dataForm.fecha_emision, muestra: dataForm.muestra || null },
+        "La informacion se ha guardado correctamente",
+        "No se pudo guardar la informacion"
+      )
+    );
+  }
+
+  // Confirmación y guardado paso 2 - Aspectos generales
+  guardarAspectosGenerales() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        this.formAspectosGenerales.value,
+        "Los aspectos generales se han guardado correctamente",
+        "No se pudieron guardar los aspectos generales"
+      )
+    );
+  }
+
+  // Confirmación y guardado paso 3 - Temas, subtemas y hallazgos
+  guardarAspectos() {
+    this.confirmarGuardado(() => this.aspectosEvaluadosComponent?.guardarAspectos());
+  }
+  guardarAspectosYContinuar() {
+    this.confirmarGuardado(() => this.guardarAspectosEvaluados());
+  }
   async guardarAspectosEvaluados(): Promise<void> {
     if (this.aspectosEvaluadosComponent) {
       const ok = await this.aspectosEvaluadosComponent.guardarAspectos();
       if (ok) this.stepper.next();
       this.cargarTemasYHallazgos();
     }
+  }
+
+  // Confirmación y guardado paso 5/6 - Respuesta preliminar
+  guardarRespuestaPreliminar() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        this.formRespuestaPreliminar.value,
+        "La respuesta preliminar se ha guardado correctamente",
+        "No se pudo guardar la respuesta preliminar"
+      )
+    );
+  }
+
+  // Confirmación y guardado paso 6/7 - Informe final
+  guardarInformeFinal() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        this.formInformeFinal.value,
+        "El informe final se ha guardado correctamente",
+        "No se pudo guardar el informe final"
+      )
+    );
   }
 
   guardarRevisionAuditado(): void {
@@ -496,10 +530,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
       },
       error: () => this.alertaService.showErrorAlert("Error al registrar las observaciones."),
     });
-  }
-
-  guardarRespuestaPreliminar() {
-    this.guardarPaso(this.formRespuestaPreliminar.value, "La respuesta preliminar se ha guardado correctamente", "No se pudo guardar la respuesta preliminar");
   }
 
   verPreinforme(): void {
@@ -641,10 +671,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
           },
         });
     }
-  }
-
-  guardarInformeFinal() {
-    this.guardarPaso(this.formInformeFinal.value, "El infrorme final se ha guardado correctamente", "No se pudo guardar el informe final");
   }
 
   // Se ejecuta cuando se eliminan temas, subtemas o hallazgos

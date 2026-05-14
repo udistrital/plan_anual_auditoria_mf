@@ -6,12 +6,12 @@
   </div>
   <mat-card class="p-3">
     <mat-card-content>
-      <div class="d-flex align-items-center gap-2 my-1" *ngIf="subtitle">
-        <mat-icon color="primary">calendar_today</mat-icon>
+      <div class="d-flex align-items-center my-1" *ngIf="subtitle">
+        <mat-icon color="primary" style="margin-right: 5px;">calendar_today</mat-icon>
         <b>Vigencia {{ subtitle }}</b>
       </div>
-      <div class="d-flex align-items-center gap-2 my-1" *ngIf="subtitleChild">
-        <mat-icon color="primary">bookmark</mat-icon>
+      <div class="d-flex align-items-center my-1" *ngIf="subtitleChild">
+        <mat-icon color="primary" style="margin-right: 5px;">bookmark</mat-icon>
         <b>{{ subtitleChild }}</b>
       </div>
       <div class="d-flex justify-content-between align-items-center my-2">

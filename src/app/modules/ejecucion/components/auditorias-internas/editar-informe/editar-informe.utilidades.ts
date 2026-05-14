@@ -46,31 +46,49 @@ export const formularioInformacionAuditoria: Formulario = {
       nombre: "objetivo_auditoria",
       etiqueta: "Objetivo de la Auditoría",
       icono: "flag",
-      tipo: "textarea",
+      tipo: "quill",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: true,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-      parametros: { altura: 120 },
+      placeholder: "",
+      quillConfig: {
+        toolbar: [
+          ["bold", "italic"],
+          [{ list: "ordered" }, { list: "bullet" }]
+        ],
+      },
     },
     {
       nombre: "alcance_auditoria",
       etiqueta: "Alcance de la Auditoría",
       icono: "visibility",
-      tipo: "textarea",
+      tipo: "quill",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: true,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-      parametros: { altura: 120 },
+      placeholder: "",
+      quillConfig: {
+        toolbar: [
+          ["bold", "italic"],
+          [{ list: "ordered" }, { list: "bullet" }]
+        ],
+      },
     },
     {
       nombre: "criterios",
       etiqueta: "Criterios",
       icono: "check_circle",
-      tipo: "textarea",
+      tipo: "quill",
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: true,
-      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-      parametros: { altura: 120 },
+      claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12 mb-4",
+      placeholder: "",
+      quillConfig: {
+        toolbar: [
+          ["bold", "italic"],
+          [{ list: "ordered" }, { list: "bullet" }]
+        ],
+      },
     },
     {
       nombre: "muestra",

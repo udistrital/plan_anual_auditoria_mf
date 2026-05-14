@@ -106,4 +106,23 @@ export class FormularioDinamicoComponent implements OnInit {
     const valorSeleccionado = event.value;
     this.campoSeleccionado.emit({ campo, valor: valorSeleccionado });
   }
+
+  getQuillFormats(quillConfig: any): string[] | undefined {
+    try {
+      if (!quillConfig?.toolbar) return undefined;
+      const formats = new Set<string>();
+      for (const group of quillConfig.toolbar) {
+        for (const item of group) {
+          if (typeof item === "string") {
+            formats.add(item);
+          } else if (typeof item === "object") {
+            Object.keys(item).forEach((k) => formats.add(k));
+          }
+        }
+      }
+      return formats.size > 0 ? [...formats] : undefined;
+    } catch {
+      return undefined;
+    }
+  }
 }
