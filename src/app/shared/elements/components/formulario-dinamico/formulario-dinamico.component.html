@@ -224,7 +224,7 @@
             }
             <!-- Campo tipo editor de texto enriquecido -->
             @case ('quill') {
-              <div class="ql-editor-auto-expand">
+              <div class="ql-editor-auto-expand"  [class.editor-deshabilitado]="form.controls[campo.nombre].disabled">
                 <label [htmlFor]="campo.nombre" class="titulo-quill">
                   <b>
                     <mat-icon>edit_note</mat-icon>

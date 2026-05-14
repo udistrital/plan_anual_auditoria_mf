@@ -99,6 +99,7 @@ export class RevisionPreinformeComponent implements OnChanges {
   }
 
   private inicializarTextos(): void {
+    const previo = new Map(this.textoInline);
     this.textoInline.clear();
     for (const temaItem of this.temas) {
       for (const subtemaItem of temaItem.subtemas) {
@@ -106,9 +107,11 @@ export class RevisionPreinformeComponent implements OnChanges {
           const id: string = item.hallazgo._id;
           if (this.puedeEscribirObservacionAuditado) {
             const miObs = item.observacionesAuditado.find((o: any) => o.usuario_id === this.usuarioId);
-            this.textoInline.set(id, miObs?.observacion ?? '');
+            // Si ya hay obs guardada en servidor, usarla; si no, preservar el texto no guardado
+            this.textoInline.set(id, miObs?.observacion ?? previo.get(id) ?? '');
           } else if (this.puedeEscribirObservacionAuditor) {
-            this.textoInline.set(id, item.observacionAuditor?.observacion ?? '');
+            const obsAuditor = item.observacionAuditor?.observacion;
+            this.textoInline.set(id, obsAuditor ?? previo.get(id) ?? '');
           }
         }
       }

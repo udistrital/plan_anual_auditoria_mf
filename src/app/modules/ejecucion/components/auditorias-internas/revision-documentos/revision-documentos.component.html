@@ -8,15 +8,17 @@
     <div class="col-12">
       <div class="row">
 
-        <div class="col-sm-12 col-md-5 col-lg-4">
-          <div class="d-flex flex-column borde-redondo">
+        <div class="col-sm-12 col-md-5 col-lg-4 mt-md">
+          <div class="d-flex flex-column borde-redondo documentos-panel">
             <h3 class="mb-3">Documentos</h3>
-            @for (doc of opcionesDocumentos; track doc; let i = $index) {
-              <button class="mb-2 custom-button" mat-stroked-button [ngClass]="selectedTab === i ? 'selected' : ''"
-                (click)="selectTab(i)">
-                {{ doc.nombre }}
-              </button>
-            }
+            <div class="documentos-scroll">
+              @for (doc of opcionesDocumentos; track doc; let i = $index) {
+                <button class="mb-2 custom-button" mat-stroked-button [ngClass]="selectedTab === i ? 'selected' : ''"
+                  (click)="selectTab(i)">
+                  {{ doc.nombre }}
+                </button>
+              }
+            </div>
             <button mat-button color="primary" class="mt-2" (click)="descargarTodo()">
               Descargar Todo <mat-icon> file_download</mat-icon>
             </button>
