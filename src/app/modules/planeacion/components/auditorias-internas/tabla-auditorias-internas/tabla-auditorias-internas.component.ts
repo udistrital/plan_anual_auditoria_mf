@@ -22,8 +22,10 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
-import { forkJoin, lastValueFrom, of, throwError, catchError, exhaustMap, tap } from "rxjs";
-import { ModalVerDocumentosComponent, TabDocumento, CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
+import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
+import { catchError, exhaustMap, map, tap } from "rxjs/operators";
+import { CargueAdjuntoTabConfig, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
   NotificacionesService,
@@ -221,6 +223,20 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado) {
+      if (estado?.startsWith(prefijo)) {
+        return emojiColorPorPrefijoEstado[prefijo];
+      }
+    }
+    return "⚪";
+  }
+
+  getEstadoConColor(auditoria: any): string {
+    const estado = auditoria.estado_nombre ?? "Sin estado";
+    return `${this.escogerEmojiColorEstado(estado)} ${estado}`;
   }
 
   realizarAccion(auditoria: any, accion: string) {

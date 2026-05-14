@@ -78,6 +78,11 @@
                         }
                       </div>
                     }
+                    @case('estado') {
+                      <div>
+                        <span>{{ getEstadoConColor(row) }}</span>
+                      </div>
+                    }
                     @default {
                       <span>{{ columna.cell(row) }}</span>
                     }

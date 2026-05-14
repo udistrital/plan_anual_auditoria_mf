@@ -129,7 +129,6 @@ export class NotificacionesService {
     destinatarios: DestinatariosEmail,
     variables: VariablesSolicitud
   ): Observable<any> {
-    if (!this.notificacionesHabilitadas) return new Observable(o => o.complete());
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_SOLICITUD_NOMBRE,
@@ -140,7 +139,12 @@ export class NotificacionesService {
         }
       ]
     };
-        
+
+    if (!this.notificacionesHabilitadas) {
+      console.log('[Notificaciones] DESHABILITADAS - enviarNotificacionSolicitud payload:', cuerpo);
+      return new Observable(o => o.complete());
+    }
+
     return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
   }
 
@@ -154,7 +158,6 @@ export class NotificacionesService {
     destinatarios: DestinatariosEmail,
     variables: VariablesRechazo
   ): Observable<any> {
-    if (!this.notificacionesHabilitadas) return new Observable(o => o.complete());
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_RECHAZO_NOMBRE,
@@ -165,6 +168,11 @@ export class NotificacionesService {
         }
       ]
     };
+
+    if (!this.notificacionesHabilitadas) {
+      console.log('[Notificaciones] DESHABILITADAS - enviarNotificacionRechazo payload:', cuerpo);
+      return new Observable(o => o.complete());
+    }
 
     return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
   }
@@ -179,7 +187,6 @@ export class NotificacionesService {
     destinatarios: DestinatariosEmail,
     variables: VariablesCartaRepresentacion
   ): Observable<any> {
-    if (!this.notificacionesHabilitadas) return new Observable(o => o.complete());
     const cuerpo: CuerpoTemplatedEmail = {
       Source: this.remitenteEmail,
       Template: PLANTILLA_CARTA_REPRESENTACION_NOMBRE,
@@ -190,6 +197,11 @@ export class NotificacionesService {
         }
       ]
     };
+
+    if (!this.notificacionesHabilitadas) {
+      console.log('[Notificaciones] DESHABILITADAS - enviarNotificacionCartaRepresentacion payload:', cuerpo);
+      return new Observable(o => o.complete());
+    }
 
     return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
   }
