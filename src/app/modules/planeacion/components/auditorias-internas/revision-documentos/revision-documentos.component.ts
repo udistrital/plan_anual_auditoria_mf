@@ -289,14 +289,21 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   async obtenerDependenciasIdAuditado(): Promise<number[]> {
+    const cargosAuditado = [environment.CARGO.JEFE_DEPENDENCIA_ID, environment.CARGO.ASISTENTE_DEPENDENCIA_ID];
     return firstValueFrom(this.tercerosService.getVinculacionByTerceroId(this.usuarioId).pipe(
-      // TODO: ¿Cómo manejar los periodos?
       switchMap((vinculaciones: VinculacionResponse[]) =>
-        of(vinculaciones.filter((v) => v.DependenciaId != null).map((v) => v.DependenciaId))
+        of(vinculaciones.filter((v) =>
+          v.DependenciaId != null && cargosAuditado.includes(v.CargoId)
+        ).map((v) => v.DependenciaId))
       ),
       catchError((error) =>
         throwError(() => new Error("Error al obtener las vinculaciones del auditado", error))
       ),
+      switchMap((dependenciasIds: number[]) => {
+        const idsUnicos = [...new Set(dependenciasIds)];
+        console.debug("Dependencias ID únicas para el auditado:", idsUnicos);
+        return of(idsUnicos);
+      }),
     ));
   };
 
