@@ -14,9 +14,10 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 
 @Component({
-  selector: "app-revision-documentos-seguimiento",
-  templateUrl: "./revision-documentos-seguimiento.component.html",
-  styleUrl: "./revision-documentos-seguimiento.component.css",
+    selector: "app-revision-documentos-seguimiento",
+    templateUrl: "./revision-documentos-seguimiento.component.html",
+    styleUrl: "./revision-documentos-seguimiento.component.css",
+    standalone: false
 })
 export class RevisionDocumentosSeguimientoComponent implements OnInit {
   auditoriaId: string = "";

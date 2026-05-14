@@ -25,9 +25,10 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 @Component({
-  selector: "app-revision-documentos-seguimiento",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+    selector: "app-revision-documentos-seguimiento",
+    templateUrl: "./revision-documentos.component.html",
+    styleUrl: "./revision-documentos.component.css",
+    standalone: false
 })
 export class RevisionDocumentosSeguimientoComponent implements OnInit {
   auditoriaId: string = "";

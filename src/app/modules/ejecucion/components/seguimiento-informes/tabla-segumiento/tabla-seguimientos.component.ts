@@ -22,9 +22,10 @@ import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEsta
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-seguimientos",
-  templateUrl: "./tabla-seguimientos.component.html",
-  styleUrls: ["./tabla-seguimientos.component.css"],
+    selector: "app-tabla-seguimientos",
+    templateUrl: "./tabla-seguimientos.component.html",
+    styleUrls: ["./tabla-seguimientos.component.css"],
+    standalone: false
 })
 export class TablaSeguimientosComponent implements OnInit {
   @Input() vigenciaId: any;

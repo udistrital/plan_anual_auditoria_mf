@@ -15,9 +15,10 @@ import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditori
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
-  selector: 'app-editar-informe-seguimiento',
-  templateUrl: './editar-informe-seguimiento.component.html',
-  styleUrls: ['./editar-informe-seguimiento.component.css']
+    selector: 'app-editar-informe-seguimiento',
+    templateUrl: './editar-informe-seguimiento.component.html',
+    styleUrls: ['./editar-informe-seguimiento.component.css'],
+    standalone: false
 })
 export class EditarInformeSeguimientoComponent implements OnInit {
   @ViewChild("stepper") stepper!: MatStepper;

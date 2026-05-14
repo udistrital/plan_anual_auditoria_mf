@@ -32,9 +32,10 @@ import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
 
 @Component({
-  selector: "app-tabla-seguimiento",
-  templateUrl: "./tabla-seguimiento.component.html",
-  styleUrl: "./tabla-seguimiento.component.css",
+    selector: "app-tabla-seguimiento",
+    templateUrl: "./tabla-seguimiento.component.html",
+    styleUrl: "./tabla-seguimiento.component.css",
+    standalone: false
 })
 export class TablaSeguimientoComponent implements OnInit {
   @Input() vigenciaId: any;

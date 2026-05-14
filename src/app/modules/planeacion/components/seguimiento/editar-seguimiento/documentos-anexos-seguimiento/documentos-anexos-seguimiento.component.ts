@@ -13,9 +13,10 @@ import { environment } from "src/environments/environment";
 import { ModalVisualizarRecargarCompromisoEticoComponent } from "../../../auditorias-internas/editar-auditoria/documentos-anexos-auditoria/modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
 
 @Component({
-  selector: "app-documentos-anexos-seguimiento",
-  templateUrl: "./documentos-anexos-seguimiento.component.html",
-  styleUrls: ["./documentos-anexos-seguimiento.component.css"],
+    selector: "app-documentos-anexos-seguimiento",
+    templateUrl: "./documentos-anexos-seguimiento.component.html",
+    styleUrls: ["./documentos-anexos-seguimiento.component.css"],
+    standalone: false
 })
 export class DocumentosAnexosSeguimientoComponent implements OnInit {
   @Output() guardarDocumentos = new EventEmitter<any>();

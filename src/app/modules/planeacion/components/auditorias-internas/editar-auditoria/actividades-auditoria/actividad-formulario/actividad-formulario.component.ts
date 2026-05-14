@@ -4,8 +4,9 @@ import { Subscription } from 'rxjs';
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
-  selector: 'app-actividad-formulario',
-  templateUrl: './actividad-formulario.component.html',
+    selector: 'app-actividad-formulario',
+    templateUrl: './actividad-formulario.component.html',
+    standalone: false
 })
 export class ActividadFormularioComponent implements OnInit, OnDestroy {
   @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales

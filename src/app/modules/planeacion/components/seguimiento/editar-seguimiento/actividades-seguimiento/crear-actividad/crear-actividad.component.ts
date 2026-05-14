@@ -5,8 +5,9 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 import { Actividad } from 'src/app/shared/data/models/actividad';
 @Component({
-  selector: 'app-crear-actividad-seguimiento',
-  templateUrl: './crear-actividad.component.html',
+    selector: 'app-crear-actividad-seguimiento',
+    templateUrl: './crear-actividad.component.html',
+    standalone: false
 })
 export class CrearActividadSeguimientoComponent {
   auditoriaId: string;

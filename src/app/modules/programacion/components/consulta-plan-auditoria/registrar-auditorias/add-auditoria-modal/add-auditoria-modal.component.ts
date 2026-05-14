@@ -11,9 +11,10 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-add-auditoria-modal",
-  templateUrl: "./add-auditoria-modal.component.html",
-  styleUrls: ["./add-auditoria-modal.component.css"], 
+    selector: "app-add-auditoria-modal",
+    templateUrl: "./add-auditoria-modal.component.html",
+    styleUrls: ["./add-auditoria-modal.component.css"],
+    standalone: false
 })
 export class AddAuditoriaModalComponent implements OnInit {
   auditoriaForm: FormGroup;

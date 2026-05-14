@@ -78,9 +78,10 @@ export interface AccionFooterModal {
 }
 
 @Component({
-  selector: "app-modal-ver-documentos",
-  templateUrl: "./modal-ver-documentos.component.html",
-  styleUrl: "./modal-ver-documentos.component.css",
+    selector: "app-modal-ver-documentos",
+    templateUrl: "./modal-ver-documentos.component.html",
+    styleUrl: "./modal-ver-documentos.component.css",
+    standalone: false
 })
 export class ModalVerDocumentosComponent implements OnInit {
   selectedTab: number = 0;

@@ -9,9 +9,10 @@ import { colocacionesContructorTabla } from "./tabla-auditorias-externas.utilida
 import { Router } from "@angular/router";
 
 @Component({
-  selector: "app-tabla-auditorias-externas",
-  templateUrl: "./tabla-auditorias-externas.component.html",
-  styleUrls: ["./tabla-auditorias-externas.component.css"],
+    selector: "app-tabla-auditorias-externas",
+    templateUrl: "./tabla-auditorias-externas.component.html",
+    styleUrls: ["./tabla-auditorias-externas.component.css"],
+    standalone: false
 })
 export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
   @Input() vigenciaId: any;

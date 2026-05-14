@@ -20,8 +20,9 @@ import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 @Component({
-  selector: "app-modal-rechazo-auditoria",
-  templateUrl: "./modal-rechazo-auditoria.component.html",
+    selector: "app-modal-rechazo-auditoria",
+    templateUrl: "./modal-rechazo-auditoria.component.html",
+    standalone: false
 })
 export class ModalRechazoAuditoriaComponent implements OnInit {
   formObservaciones!: FormGroup;

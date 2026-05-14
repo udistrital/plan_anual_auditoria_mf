@@ -7,8 +7,9 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-rechazo-seguimiento",
-  templateUrl: "./modal-rechazo-seguimiento.component.html",
+    selector: "app-modal-rechazo-seguimiento",
+    templateUrl: "./modal-rechazo-seguimiento.component.html",
+    standalone: false
 })
 export class ModalRechazoSeguimientoComponent {
   formObservaciones!: FormGroup;

@@ -7,9 +7,10 @@ import {
 } from "@angular/core";
 
 @Component({
-  selector: "app-pdf-visualizador",
-  templateUrl: "./pdf-visualizador.component.html",
-  styleUrls: ["./pdf-visualizador.component.css"],
+    selector: "app-pdf-visualizador",
+    templateUrl: "./pdf-visualizador.component.html",
+    styleUrls: ["./pdf-visualizador.component.css"],
+    standalone: false
 })
 export class PdfVisualizadorComponent implements OnChanges {
   @ViewChild("pdfCanvas", { static: true })

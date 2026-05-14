@@ -7,8 +7,9 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 
 
 @Component({
-  selector: 'app-editar-actividad',
-  templateUrl: './editar-actividad.component.html',
+    selector: 'app-editar-actividad',
+    templateUrl: './editar-actividad.component.html',
+    standalone: false
 })
 export class EditarActividadComponent {
   //@Input() actividadData: any = {}; 

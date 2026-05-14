@@ -47,9 +47,10 @@ interface DocumentoRevisionItem {
 }
 
 @Component({
-  selector: "app-revision-documentos",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+    selector: "app-revision-documentos",
+    templateUrl: "./revision-documentos.component.html",
+    styleUrl: "./revision-documentos.component.css",
+    standalone: false
 })
 export class RevisionDocumentosComponent implements OnInit {
   auditoriaId: string = "";

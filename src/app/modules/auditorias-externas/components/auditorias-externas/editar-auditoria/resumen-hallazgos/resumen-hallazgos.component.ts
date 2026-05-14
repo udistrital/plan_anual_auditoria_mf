@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { HallazgoResumen } from '../hallazgos-auditoria/hallazgos-auditoria.component';
 
 @Component({
-  selector: 'app-resumen-hallazgos',
-  templateUrl: './resumen-hallazgos.component.html',
-  styleUrls: ['./resumen-hallazgos.component.css']
+    selector: 'app-resumen-hallazgos',
+    templateUrl: './resumen-hallazgos.component.html',
+    styleUrls: ['./resumen-hallazgos.component.css'],
+    standalone: false
 })
 export class ResumenHallazgosComponent {
   @Input() hallazgos: HallazgoResumen[] = [];

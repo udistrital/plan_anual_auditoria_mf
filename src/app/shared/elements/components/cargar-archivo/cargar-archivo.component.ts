@@ -9,8 +9,9 @@ import { environment } from "src/environments/environment";
 import * as XLSX from "xlsx";
 
 @Component({
-  selector: "app-cargar-archivo",
-  templateUrl: "./cargar-archivo.component.html",
+    selector: "app-cargar-archivo",
+    templateUrl: "./cargar-archivo.component.html",
+    standalone: false
 })
 export class CargarArchivoComponent {
   archivo: File | null = null;

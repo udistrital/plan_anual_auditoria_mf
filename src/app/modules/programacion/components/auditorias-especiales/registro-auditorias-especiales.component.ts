@@ -11,8 +11,9 @@ import { TablaAuditoriasEspecialesComponent } from "./tabla-auditorias-especiale
 import { UserService } from "src/app/core/services/user.service";
 
 @Component({
-  selector: "app-registro-auditorias-especiales",
-  templateUrl: "./registro-auditorias-especiales.component.html",
+    selector: "app-registro-auditorias-especiales",
+    templateUrl: "./registro-auditorias-especiales.component.html",
+    standalone: false
 })
 export class RegistroAuditoriasEspecialesComponent implements OnInit {
   @ViewChild(TablaAuditoriasEspecialesComponent)

@@ -20,9 +20,10 @@ const ROLES_AUDITOR = [
 ];
 
 @Component({
-  selector: 'app-revision-preinforme',
-  templateUrl: './revision-preinforme.component.html',
-  styleUrls: ['./revision-preinforme.component.css'],
+    selector: 'app-revision-preinforme',
+    templateUrl: './revision-preinforme.component.html',
+    styleUrls: ['./revision-preinforme.component.css'],
+    standalone: false
 })
 export class RevisionPreinformeComponent implements OnChanges {
   @Input() informeId!: string;

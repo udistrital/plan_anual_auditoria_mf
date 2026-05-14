@@ -4,9 +4,10 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-historial-rechazos-seguimiento",
-  templateUrl: "./modal-historial-rechazos-seguimiento.component.html",
-  styleUrl: "./modal-historial-rechazos-seguimiento.component.css",
+    selector: "app-modal-historial-rechazos-seguimiento",
+    templateUrl: "./modal-historial-rechazos-seguimiento.component.html",
+    styleUrl: "./modal-historial-rechazos-seguimiento.component.css",
+    standalone: false
 })
 export class ModalHistorialRechazosSeguimientoComponent implements OnInit {
   rechazos: any[] = [];

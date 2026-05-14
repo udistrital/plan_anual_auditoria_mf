@@ -12,9 +12,10 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-agregar-auditor",
-  templateUrl: "./modal-agregar-auditor.component.html",
-  styleUrl: "./modal-agregar-auditor.component.css",
+    selector: "app-modal-agregar-auditor",
+    templateUrl: "./modal-agregar-auditor.component.html",
+    styleUrl: "./modal-agregar-auditor.component.css",
+    standalone: false
 })
 export class ModalAgregarAuditorComponent implements OnInit {
   form: FormGroup<any> = null as any;

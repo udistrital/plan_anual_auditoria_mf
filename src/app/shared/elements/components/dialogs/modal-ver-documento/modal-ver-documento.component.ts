@@ -15,9 +15,10 @@ interface ModalDocumentoMultipleData {
 }
 
 @Component({
-  selector: "app-modal-ver-documento",
-  templateUrl: "./modal-ver-documento.component.html",
-  styleUrl: "./modal-ver-documento.component.css",
+    selector: "app-modal-ver-documento",
+    templateUrl: "./modal-ver-documento.component.html",
+    styleUrl: "./modal-ver-documento.component.css",
+    standalone: false
 })
 export class ModalVerDocumentoComponent implements OnInit {
   @Input() botonGuardar = { icono: "", texto: "" };

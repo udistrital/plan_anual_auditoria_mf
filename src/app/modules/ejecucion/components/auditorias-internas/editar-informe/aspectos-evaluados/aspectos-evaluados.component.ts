@@ -31,9 +31,10 @@ interface Tema {
 }
 
 @Component({
-  selector: 'app-aspectos-evaluados',
-  templateUrl: './aspectos-evaluados.component.html',
-  styleUrls: ['./aspectos-evaluados.component.css'],
+    selector: 'app-aspectos-evaluados',
+    templateUrl: './aspectos-evaluados.component.html',
+    styleUrls: ['./aspectos-evaluados.component.css'],
+    standalone: false
 })
 export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   @Input() informeId!: string;

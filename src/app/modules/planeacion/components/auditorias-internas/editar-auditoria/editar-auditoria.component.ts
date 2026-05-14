@@ -35,9 +35,10 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 @Component({
-  selector: "app-editar-auditoria",
-  templateUrl: "./editar-auditoria.component.html",
-  styleUrls: ["./editar-auditoria.component.css"],
+    selector: "app-editar-auditoria",
+    templateUrl: "./editar-auditoria.component.html",
+    styleUrls: ["./editar-auditoria.component.css"],
+    standalone: false
 })
 export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;

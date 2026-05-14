@@ -25,9 +25,10 @@ import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/d
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
-  selector: 'app-editar-informe',
-  templateUrl: './editar-informe.component.html',
-  styleUrls: ['./editar-informe.component.css']
+    selector: 'app-editar-informe',
+    templateUrl: './editar-informe.component.html',
+    styleUrls: ['./editar-informe.component.css'],
+    standalone: false
 })
 
 export class EditarInformeComponent implements OnInit, AfterViewInit {

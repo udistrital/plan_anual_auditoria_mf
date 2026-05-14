@@ -14,8 +14,9 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
 import { PLANTILLA_RECHAZO_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 
 @Component({
-  selector: "app-modal-motivos-rechazo",
-  templateUrl: "./modal-motivos-rechazo.component.html",
+    selector: "app-modal-motivos-rechazo",
+    templateUrl: "./modal-motivos-rechazo.component.html",
+    standalone: false
 })
 export class ModalMotivosRechazoComponent implements OnInit {
   formObservaciones!: FormGroup;

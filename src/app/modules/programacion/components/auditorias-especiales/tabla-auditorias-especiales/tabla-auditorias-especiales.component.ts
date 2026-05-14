@@ -18,9 +18,10 @@ import { catchError, firstValueFrom, map, Observable, of, throwError } from 'rxj
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: 'app-tabla-auditorias-especiales',
-  templateUrl: './tabla-auditorias-especiales.component.html',
-  styleUrl: './tabla-auditorias-especiales.component.css'
+    selector: 'app-tabla-auditorias-especiales',
+    templateUrl: './tabla-auditorias-especiales.component.html',
+    styleUrl: './tabla-auditorias-especiales.component.css',
+    standalone: false
 })
 export class TablaAuditoriasEspecialesComponent {
   @Input() vigenciaId: number | null = null;

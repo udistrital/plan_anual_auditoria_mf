@@ -5,9 +5,10 @@ import { TablaConsultaAuditoriasComponent } from "./tabla-consulta-auditorias/ta
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
-  selector: "app-asignar-auditorias",
-  templateUrl: "./asignar-auditorias.component.html",
-  styleUrls: ["./asignar-auditorias.component.css"],
+    selector: "app-asignar-auditorias",
+    templateUrl: "./asignar-auditorias.component.html",
+    styleUrls: ["./asignar-auditorias.component.css"],
+    standalone: false
 })
 export class AsignarAuditoriasComponent implements OnInit {
   @ViewChild(TablaConsultaAuditoriasComponent)

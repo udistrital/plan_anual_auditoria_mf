@@ -10,9 +10,10 @@ export interface HallazgoResumen {
 }
 
 @Component({
-  selector: 'app-hallazgos-auditoria',
-  templateUrl: './hallazgos-auditoria.component.html',
-  styleUrls: ['./hallazgos-auditoria.component.css']
+    selector: 'app-hallazgos-auditoria',
+    templateUrl: './hallazgos-auditoria.component.html',
+    styleUrls: ['./hallazgos-auditoria.component.css'],
+    standalone: false
 })
 export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
   @Input() auditoriaId!: string;

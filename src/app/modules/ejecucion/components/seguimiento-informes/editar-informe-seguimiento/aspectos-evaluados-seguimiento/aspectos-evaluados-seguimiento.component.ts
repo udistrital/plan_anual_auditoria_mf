@@ -25,9 +25,10 @@ interface Tema {
 }
 
 @Component({
-  selector: 'app-aspectos-evaluados-seguimiento',
-  templateUrl: './aspectos-evaluados-seguimiento.component.html',
-  styleUrls: ['./aspectos-evaluados-seguimiento.component.css'],
+    selector: 'app-aspectos-evaluados-seguimiento',
+    templateUrl: './aspectos-evaluados-seguimiento.component.html',
+    styleUrls: ['./aspectos-evaluados-seguimiento.component.css'],
+    standalone: false
 })
 export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges {
   @Input() informeId!: string;

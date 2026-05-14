@@ -8,8 +8,9 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-auditorias-internas",
-  templateUrl: "./auditorias-internas.component.html",
+    selector: "app-auditorias-internas",
+    templateUrl: "./auditorias-internas.component.html",
+    standalone: false
 })
 export class AuditoriasInternasComponent implements OnInit {
   @ViewChild(TablaAuditoriasInternasComponent)

@@ -40,9 +40,10 @@ interface DocumentoAdjuntoInicial {
 }
 
 @Component({
-  selector: "app-documentos-anexos-auditoria",
-  templateUrl: "./documentos-anexos-auditoria.component.html",
-  styleUrls: ["./documentos-anexos-auditoria.component.css"],
+    selector: "app-documentos-anexos-auditoria",
+    templateUrl: "./documentos-anexos-auditoria.component.html",
+    styleUrls: ["./documentos-anexos-auditoria.component.css"],
+    standalone: false
 })
 export class DocumentosAnexosAuditoriaComponent implements OnInit {
   @Output() guardarDocumentos = new EventEmitter<any>();

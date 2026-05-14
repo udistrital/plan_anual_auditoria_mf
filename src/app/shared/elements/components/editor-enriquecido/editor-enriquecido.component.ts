@@ -14,16 +14,17 @@ import {
 } from '@angular/forms';
 
 @Component({
-  selector: 'app-editor-enriquecido',
-  templateUrl: './editor-enriquecido.component.html',
-  styleUrls: ['./editor-enriquecido.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => EditorEnriquecidoComponent),
-      multi: true
-    }
-  ],
+    selector: 'app-editor-enriquecido',
+    templateUrl: './editor-enriquecido.component.html',
+    styleUrls: ['./editor-enriquecido.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => EditorEnriquecidoComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class EditorEnriquecidoComponent implements ControlValueAccessor {
   @Input() placeholder: string = 'Escribe aquí...';

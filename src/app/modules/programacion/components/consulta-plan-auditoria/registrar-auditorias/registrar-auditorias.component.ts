@@ -26,9 +26,10 @@ import { UserService } from "src/app/core/services/user.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
 @Component({
-  selector: "app-registrar-auditorias",
-  templateUrl: "./registrar-auditorias.component.html",
-  styleUrls: ["./registrar-auditorias.component.css"],
+    selector: "app-registrar-auditorias",
+    templateUrl: "./registrar-auditorias.component.html",
+    styleUrls: ["./registrar-auditorias.component.css"],
+    standalone: false
 })
 export class RegistrarAuditoriasComponent implements OnInit {
   displayedColumns: string[] = [

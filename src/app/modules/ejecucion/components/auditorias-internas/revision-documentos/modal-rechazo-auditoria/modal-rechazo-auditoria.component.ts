@@ -7,8 +7,9 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-rechazo-auditoria-ejecucion",
-  templateUrl: "./modal-rechazo-auditoria.component.html",
+    selector: "app-modal-rechazo-auditoria-ejecucion",
+    templateUrl: "./modal-rechazo-auditoria.component.html",
+    standalone: false
 })
 export class ModalRechazoAuditoriaEjecucionComponent {
   formObservaciones!: FormGroup;

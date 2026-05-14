@@ -5,9 +5,10 @@ import { environment } from "src/environments/environment";
 import { forkJoin } from "rxjs";
 
 @Component({
-  selector: "app-modal-lista-rechazos",
-  templateUrl: "./modal-lista-rechazos.component.html",
-  styleUrl: "./modal-lista-rechazos.component.css",
+    selector: "app-modal-lista-rechazos",
+    templateUrl: "./modal-lista-rechazos.component.html",
+    styleUrl: "./modal-lista-rechazos.component.css",
+    standalone: false
 })
 export class ModalListaRechazosComponent implements OnInit {
   rechazos: any[] = [];

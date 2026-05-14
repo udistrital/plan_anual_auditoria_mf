@@ -19,9 +19,10 @@ import { CargarArchivoComponent } from 'src/app/shared/elements/components/carga
 import { ModalVisualizarRecargarInformeAuditoriaComponent } from './modal-visualizar-recargar-informe-auditoria/modal-visualizar-recargar-informe-auditoria.component';
 
 @Component({
-  selector: 'app-editar-auditoria',
-  templateUrl: './editar-auditoria.component.html',
-  styleUrls: ['./editar-auditoria.component.css']
+    selector: 'app-editar-auditoria',
+    templateUrl: './editar-auditoria.component.html',
+    styleUrls: ['./editar-auditoria.component.css'],
+    standalone: false
 })
 export class EditarAuditoriaComponent implements OnInit {
   @ViewChild("stepper") stepper!: MatStepper;

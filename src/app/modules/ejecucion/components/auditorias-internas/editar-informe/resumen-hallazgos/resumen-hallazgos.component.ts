@@ -7,9 +7,10 @@ interface HallazgoResumen {
 }
 
 @Component({
-  selector: 'app-resumen-hallazgos',
-  templateUrl: './resumen-hallazgos.component.html',
-  styleUrls: ['./resumen-hallazgos.component.css']
+    selector: 'app-resumen-hallazgos',
+    templateUrl: './resumen-hallazgos.component.html',
+    styleUrls: ['./resumen-hallazgos.component.css'],
+    standalone: false
 })
 export class ResumenHallazgosComponent implements OnChanges {
   @Input() informeId!: string;

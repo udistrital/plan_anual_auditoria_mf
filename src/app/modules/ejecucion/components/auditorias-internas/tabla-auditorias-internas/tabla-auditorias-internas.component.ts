@@ -17,9 +17,10 @@ import { accionesEjecucionFinal, accionesEjecucionPreliminar } from "src/app/sha
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-auditorias-internas",
-  templateUrl: "./tabla-auditorias-internas.component.html",
-  styleUrls: ["./tabla-auditorias-internas.component.css"],
+    selector: "app-tabla-auditorias-internas",
+    templateUrl: "./tabla-auditorias-internas.component.html",
+    styleUrls: ["./tabla-auditorias-internas.component.css"],
+    standalone: false
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;

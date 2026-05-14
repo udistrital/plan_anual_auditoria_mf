@@ -41,9 +41,10 @@ interface DocumentoAdjuntoCarta {
 }
 
 @Component({
-  selector: "app-tabla-auditorias-internas",
-  templateUrl: "./tabla-auditorias-internas.component.html",
-  styleUrl: "./tabla-auditorias-internas.component.css",
+    selector: "app-tabla-auditorias-internas",
+    templateUrl: "./tabla-auditorias-internas.component.html",
+    styleUrl: "./tabla-auditorias-internas.component.css",
+    standalone: false
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;

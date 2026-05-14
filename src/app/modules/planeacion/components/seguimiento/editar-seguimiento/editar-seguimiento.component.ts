@@ -32,9 +32,10 @@ import { catchError, exhaustMap, tap } from "rxjs/operators";
 
 
 @Component({
-  selector: "app-editar-seguimiento",
-  templateUrl: "./editar-seguimiento.component.html",
-  styleUrls: ["./editar-seguimiento.component.css"],
+    selector: "app-editar-seguimiento",
+    templateUrl: "./editar-seguimiento.component.html",
+    styleUrls: ["./editar-seguimiento.component.css"],
+    standalone: false
 })
 export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;

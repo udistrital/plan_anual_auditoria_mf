@@ -17,9 +17,10 @@ import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
-  selector: "app-revision-secretario",
-  templateUrl: "./revision-secretario.component.html",
-  styleUrl: "./revision-secretario.component.css",
+    selector: "app-revision-secretario",
+    templateUrl: "./revision-secretario.component.html",
+    styleUrl: "./revision-secretario.component.css",
+    standalone: false
 })
 export class RevisionSecretarioComponent {
   selectedTab: number = 0;

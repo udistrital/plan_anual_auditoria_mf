@@ -9,9 +9,10 @@ import { environment } from "src/environments/environment";
 import { formularioPAA } from "./registrar-plan.utilidades";
 
 @Component({
-  selector: "app-registrar-plan",
-  templateUrl: "./registrar-plan.component.html",
-  styleUrl: "./registrar-plan.component.css",
+    selector: "app-registrar-plan",
+    templateUrl: "./registrar-plan.component.html",
+    styleUrl: "./registrar-plan.component.css",
+    standalone: false
 })
 export class RegistrarPlanComponent implements OnInit {
   @ViewChild(FormularioDinamicoComponent)

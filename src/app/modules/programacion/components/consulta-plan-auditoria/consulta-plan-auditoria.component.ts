@@ -31,9 +31,10 @@ import { ModalEnviarAprobacionComponent } from "./modal-enviar-aprobacion/modal-
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
 @Component({
-  selector: "app-consulta-plan-auditoria",
-  templateUrl: "./consulta-plan-auditoria.component.html",
-  styleUrls: ["./consulta-plan-auditoria.component.css"],
+    selector: "app-consulta-plan-auditoria",
+    templateUrl: "./consulta-plan-auditoria.component.html",
+    styleUrls: ["./consulta-plan-auditoria.component.css"],
+    standalone: false
 })
 export class ConsultaPlanAuditoriaComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;

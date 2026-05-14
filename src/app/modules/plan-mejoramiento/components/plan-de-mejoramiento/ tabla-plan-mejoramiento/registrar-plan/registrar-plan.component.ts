@@ -9,9 +9,10 @@ import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-registrar-plan',
-  templateUrl: './registrar-plan.component.html',
-  styleUrls: ['./registrar-plan.component.css'],
+    selector: 'app-registrar-plan',
+    templateUrl: './registrar-plan.component.html',
+    styleUrls: ['./registrar-plan.component.css'],
+    standalone: false
 })
 export class RegistrarPlanComponent implements OnInit {
   auditoriaId!: string;

@@ -21,9 +21,10 @@ import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
-  selector: "app-revision-jefe",
-  templateUrl: "./revision-jefe.component.html",
-  styleUrls: ["./revision-jefe.component.css"],
+    selector: "app-revision-jefe",
+    templateUrl: "./revision-jefe.component.html",
+    styleUrls: ["./revision-jefe.component.css"],
+    standalone: false
 })
 export class RevisionJefeComponent implements OnInit {
   selectedTab: number = 0;

@@ -6,8 +6,9 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-modal-aprobacion-auditado',
-  templateUrl: './modal-aprobacion-auditado.component.html',
+    selector: 'app-modal-aprobacion-auditado',
+    templateUrl: './modal-aprobacion-auditado.component.html',
+    standalone: false
 })
 export class ModalAprobacionAuditadoComponent {
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;

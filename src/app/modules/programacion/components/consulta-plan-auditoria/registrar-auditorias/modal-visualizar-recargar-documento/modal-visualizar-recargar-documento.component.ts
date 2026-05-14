@@ -4,8 +4,9 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: 'app-modal-visualizar-recargar-documento',
-  templateUrl: './modal-visualizar-recargar-documento.component.html',
+    selector: 'app-modal-visualizar-recargar-documento',
+    templateUrl: './modal-visualizar-recargar-documento.component.html',
+    standalone: false
 })
 
 export class ModalVisualizarRecargarDocumentoComponent {

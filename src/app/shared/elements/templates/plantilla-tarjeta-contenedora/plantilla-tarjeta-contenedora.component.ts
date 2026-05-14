@@ -12,8 +12,9 @@ import { SafeHtml } from "@angular/platform-browser";
  * Permite mostrar un encabezado, un botón opcional, y contenido personalizado a través de un `TemplateRef`.
  */
 @Component({
-  selector: "plantilla-tarjeta-contenedora",
-  templateUrl: "./plantilla-tarjeta-contenedora.component.html",
+    selector: "plantilla-tarjeta-contenedora",
+    templateUrl: "./plantilla-tarjeta-contenedora.component.html",
+    standalone: false
 })
 export class PlantillaTarjetaContenedoraComponent {
   /**

@@ -65,9 +65,10 @@ const configJefe = {
 };
 
 @Component({
-  selector: "app-revision-documentos-ejecucion",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+    selector: "app-revision-documentos-ejecucion",
+    templateUrl: "./revision-documentos.component.html",
+    styleUrl: "./revision-documentos.component.css",
+    standalone: false
 })
 export class RevisionDocumentosEjecucionComponent implements OnInit {
   auditoriaId: string = "";

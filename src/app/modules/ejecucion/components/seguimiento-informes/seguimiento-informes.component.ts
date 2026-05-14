@@ -5,8 +5,9 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
 import { TablaSeguimientosComponent } from "./tabla-segumiento/tabla-seguimientos.component";
 
 @Component({
-  selector: "app-seguimiento-informes",
-  templateUrl: "./seguimiento-informes.component.html",
+    selector: "app-seguimiento-informes",
+    templateUrl: "./seguimiento-informes.component.html",
+    standalone: false
 })
 export class SeguimientoInformesComponent implements OnInit {
   @ViewChild(TablaSeguimientosComponent)

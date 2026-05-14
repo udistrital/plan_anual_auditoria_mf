@@ -13,9 +13,10 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-actividades-auditoria",
-  templateUrl: "./actividades-auditoria.component.html",
-  styleUrls: ["./actividades-auditoria.component.css"],
+    selector: "app-actividades-auditoria",
+    templateUrl: "./actividades-auditoria.component.html",
+    styleUrls: ["./actividades-auditoria.component.css"],
+    standalone: false
 })
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: string;
