@@ -24,141 +24,143 @@
                     placeholder="Título de la Auditoría"
                     formControlName="tituloAuditoria"
                     readonly
-                  />
-                </mat-form-field>
-                <mat-form-field class="col-6" appearance="outline">
-                  <mat-label>Nombre complementario</mat-label>
-                  <mat-icon matPrefix color="primary">developer_board</mat-icon>
-                  <input
-                    matInput
-                    placeholder="Subtítulo de la Auditoría"
-                    formControlName="subtituloAuditoria"
-                  />
-                </mat-form-field>
-              </div>
-            </div>
-            <div class="col-12 col-md-12 col-xl-4">
+                    />
+                  </mat-form-field>
+                  <mat-form-field class="col-6" appearance="outline">
+                    <mat-label>Nombre complementario</mat-label>
+                    <mat-icon matPrefix color="primary">developer_board</mat-icon>
+                    <input
+                      matInput
+                      placeholder="Subtítulo de la Auditoría"
+                      formControlName="subtituloAuditoria"
+                      />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="col-12 col-md-12 col-xl-4">
+                  <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                    <b>Tipo de evaluación</b>
+                  </div>
+                  <mat-form-field class="col-12" appearance="outline">
+
+                    <mat-icon matPrefix color="primary">assessment</mat-icon>
+                    <input
+                      matInput
+                      placeholder="Tipo de Evaluación"
+                      formControlName="tipoEvaluacion"
+                      readonly
+                      />
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                  <b>Auditores</b>
+                </div>
+
+                <div class="row d-flex align-items-center">
+                  @for (auditorControl of auditoresSeleccionados.controls; track auditorControl; let i = $index) {
+                    <div
+                      [formGroup]="auditorControl"
+                      class="col-12 d-flex align-items-center mt-3" track auditorControl
+                      >
+                      <div class="col-8 p-0">
+                        <app-search-selection
+                          label="Auditor"
+                          icon="person"
+                          placeholder="Seleccione un auditor"
+                          [items]="auditoresDisponibles(i)"
+                          [labelKey]="'nombre'"
+                          [selectionControl]="getAuditorControl(i)"
+                        ></app-search-selection>
+                      </div>
+                      <mat-checkbox
+                        class="col-3 mx-2"
+                        formControlName="lider"
+                        (change) = "onLiderChange(i)">
+                      Auditor Lider </mat-checkbox>
+                      <button
+                        mat-icon-button
+                        color="primary"
+                        aria-label="Desasignar auditor"
+                        matTooltip="Desasignar auditor"
+                        (click)="desasignarAuditor(i)"
+                        >
+                        <mat-icon>exit_to_app</mat-icon>
+                      </button>
+                      <button
+                        mat-icon-button
+                        color="warn"
+                        aria-label="Eliminar auditor"
+                        matTooltip="Eliminar auditor"
+                        (click)="eliminarAuditor(i)"
+                        >
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  }
+
+                  <div class="col-12 mt-3">
+                    <button mat-raised-button color="primary" (click)="agregarAuditor()">
+                      <mat-icon>add</mat-icon> Agregar Auditor
+                    </button>
+                  </div>
+                </div>
+              </form>
+
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
-                <b>Tipo de evaluación</b>
+                <b>Auditores Desasignados</b>
               </div>
-              <mat-form-field class="col-12" appearance="outline">
-                
-                <mat-icon matPrefix color="primary">assessment</mat-icon>
-                <input
-                matInput
-                placeholder="Tipo de Evaluación"
-                formControlName="tipoEvaluacion"
-                readonly
-                />
-              </mat-form-field>
+
+              <div class="auditores-lista">
+                @for (auditor of auditoresNoAsignados; track auditor; let i = $index) {
+                  <div
+                    class="auditor-item"
+                    [ngClass]="{ 'fondo-acento-50': i % 2 === 0 }"
+                    >
+                    <div class="auditor-info">
+                      <mat-icon color="primary">person</mat-icon>
+                      <span class="auditor-nombre">
+                        {{ auditor.nombre }}
+                      </span>
+                    </div>
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      aria-label="Reasignar auditor"
+                      matTooltip="Reasignar auditor"
+                      (click)="asignarAuditor(auditor)"
+                      >
+                      <mat-icon>login</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
-          </div>
-
-          <div class="fondo-acento-50 d-flex justify-content-center my-3">
-            <b>Auditores</b>
-          </div>
-
-          <div class="row d-flex align-items-center">
-            <div
-              *ngFor="let auditorControl of auditoresSeleccionados.controls; let i = index" [formGroup]="auditorControl"
-              class="col-12 d-flex align-items-center mt-3" track auditorControl
-            >
-              <div class="col-8 p-0">
-                <app-search-selection
-                  label="Auditor"
-                  icon="person"
-                  placeholder="Seleccione un auditor"
-                  [items]="auditoresDisponibles(i)"
-                  [labelKey]="'nombre'"
-                  [selectionControl]="getAuditorControl(i)"
-                ></app-search-selection>
-              </div>
-              <mat-checkbox
-              class="col-3 mx-2"
-              formControlName="lider"
-              (change) = "onLiderChange(i)">
-              Auditor Lider </mat-checkbox>
+            <div class="d-flex justify-content-center align-items-center my-2">
+              <mat-icon color="primary"> info </mat-icon>
+              <p class="mx-2">¿Guardar cambios?</p>
+            </div>
+            <mat-dialog-actions align="center">
               <button
-                mat-icon-button
+                mat-stroked-button
                 color="primary"
-                aria-label="Desasignar auditor"
-                matTooltip="Desasignar auditor"
-                (click)="desasignarAuditor(i)"
+                style="border: 1px solid var(--md-primary-500)"
+                [mat-dialog-close]
+                class="mb-sm"
                 >
-                <mat-icon>exit_to_app</mat-icon>
+                <mat-icon>close</mat-icon>No, cerrar
               </button>
               <button
-                mat-icon-button
-                color="warn"
-                aria-label="Eliminar auditor"
-                matTooltip="Eliminar auditor"
-                (click)="eliminarAuditor(i)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          
-            <div class="col-12 mt-3">
-              <button mat-raised-button color="primary" (click)="agregarAuditor()">
-                <mat-icon>add</mat-icon> Agregar Auditor
-              </button>
-            </div>
-          </div>
-        </form>
-
-        <div class="fondo-acento-50 d-flex justify-content-center my-3">
-          <b>Auditores Desasignados</b>
-        </div>
-        
-        <div class="auditores-lista">
-          <div
-            *ngFor="let auditor of auditoresNoAsignados; let i = index"
-            class="auditor-item"
-            [ngClass]="{ 'fondo-acento-50': i % 2 === 0 }"
-          >
-            <div class="auditor-info">
-              <mat-icon color="primary">person</mat-icon>
-              <span class="auditor-nombre">
-                {{ auditor.nombre }}
-              </span>
-            </div>
-        
-            <button
-                mat-icon-button
+                mat-raised-button
                 color="primary"
-                aria-label="Reasignar auditor"
-                matTooltip="Reasignar auditor"
-                (click)="asignarAuditor(auditor)"
+                (click)="guardarAuditoria()"
+                class="mb-sm"
                 >
-                <mat-icon>login</mat-icon>
-            </button>
+                <mat-icon>save</mat-icon>
+                Si, guardar y cerrar
+              </button>
+            </mat-dialog-actions>
           </div>
         </div>
-      </div>
-      <div class="d-flex justify-content-center align-items-center my-2">
-        <mat-icon color="primary"> info </mat-icon>
-        <p class="mx-2">¿Guardar cambios?</p>
-      </div>
-      <mat-dialog-actions align="center">
-        <button
-          mat-stroked-button
-          color="primary"
-          style="border: 1px solid var(--md-primary-500)"
-          [mat-dialog-close]
-          class="mb-sm"
-        >
-          <mat-icon>close</mat-icon>No, cerrar
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="guardarAuditoria()"
-          class="mb-sm"
-        >
-          <mat-icon>save</mat-icon>
-          Si, guardar y cerrar
-        </button>
-      </mat-dialog-actions>
-    </div>
-  </div>
-</ng-template>
+      </ng-template>

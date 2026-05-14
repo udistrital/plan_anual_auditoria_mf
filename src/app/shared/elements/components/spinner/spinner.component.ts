@@ -3,9 +3,11 @@ import { SpinnerService } from "src/app/shared/services/spinner.service";
 
 @Component({
     selector: "app-spinner",
-    template: `<div *ngIf="isLoading | async" class="backdrop">
+    template: `@if (isLoading | async) {
+  <div class="backdrop">
     <span class="loader"></span>
-  </div> `,
+  </div>
+}`,
     styleUrl: "./spinner.component.css",
     standalone: false
 })

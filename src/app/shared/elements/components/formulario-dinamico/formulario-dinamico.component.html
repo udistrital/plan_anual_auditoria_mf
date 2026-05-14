@@ -1,205 +1,266 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="example-form">
   <div class="row">
-    <div *ngFor="let campo of formulario.campos" [ngSwitch]="campo.tipo" [ngClass]="['col', campo.claseGrid]">
-      <!-- Campo tipo texto -->
-      <mat-form-field *ngSwitchCase="'text'" appearance="outline" class="example-full-width">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <input matInput [formControlName]="campo.nombre" [placeholder]="campo.placeholder ?? ''" />
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('minlength')">
-          {{ campo.etiqueta }} no puede ser menor a
-          {{ getValidacionValor(campo, "minLength") }} caracteres
-        </mat-error>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('maxlength')">
-          {{ campo.etiqueta }} no puede ser mayor a
-          {{ getValidacionValor(campo, "maxLength") }} caracteres
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Campo oculto -->
-      <input *ngSwitchCase="'hidden'" type="hidden" [formControlName]="campo.nombre" />
-
-      <!-- Campo tipo email -->
-      <mat-form-field *ngSwitchCase="'email'" appearance="outline" class="example-full-width">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <input matInput type="email" [formControlName]="campo.nombre" [placeholder]="campo.placeholder ?? ''" />
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-        <mat-error *ngIf="
-            form.controls[campo.nombre].hasError('email') &&
-            !form.controls[campo.nombre].hasError('required')
-          ">{{ campo.etiqueta }} no tiene un formato de correo válido
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Campo tipo número -->
-      <mat-form-field *ngSwitchCase="'number'" appearance="outline" class="example-full-width">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <input matInput type="number" [formControlName]="campo.nombre" />
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('min')">
-          {{ campo.etiqueta }} no puede ser menor que
-          {{ getValidacionValor(campo, "min") }}
-        </mat-error>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('max')">
-          {{ campo.etiqueta }} no puede ser mayor que
-          {{ getValidacionValor(campo, "max") }}
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Campo tipo select -->
-      <mat-form-field *ngSwitchCase="'select'" appearance="outline" class="example-full-width">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <mat-select [formControlName]="campo.nombre" (selectionChange)="onSelectionChange($event, campo)">
-          <mat-option *ngFor="let opcion of campo.parametros?.opciones ?? []" [value]="opcion.Id"
-            [disabled]="opcion.deshabilitado">
-            {{ opcion.Nombre }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Campo tipo checkbox -->
-      <mat-checkbox *ngSwitchCase="'checkbox'" [formControlName]="campo.nombre" class="example-full-width">
-        {{ campo.etiqueta }}
-      </mat-checkbox>
-
-      <!-- Campo tipo radiobutton -->
-      <div *ngSwitchCase="'radiobutton'">
-        <label [htmlFor]="campo.nombre">
-          {{ campo.etiqueta }}
-        </label>
-        <mat-radio-group [formControlName]="campo.nombre">
-          <div *ngFor="let opcion of campo.parametros?.opciones ?? []">
-            <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
-              {{ opcion.Nombre }}
-            </mat-radio-button>
-          </div>
-        </mat-radio-group>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-      </div>
-
-      <!-- Campo tipo fecha -->
-      <mat-form-field *ngSwitchCase="'date'" appearance="outline" class="col-12">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker"
-          [formControlName]="campo.nombre"
-          [placeholder]="campo.placeholder || 'Seleccione una fecha'"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-icon
-          *ngIf="campo.tooltip"
-          matSuffix
-          class="tooltip-icon ms-1"
-          [matTooltip]="campo.tooltip"
-          matTooltipPosition="right"
-          matTooltipClass="tooltip-multilinea"
-          aria-label="Información adicional"
-        >
-          info
-        </mat-icon>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Campo tipo rango de fecha -->
-      <mat-form-field *ngSwitchCase="'date-range'" appearance="outline" class="example-full-width">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-date-range-input [rangePicker]="pickerRange">
-          <input matStartDate [placeholder]="campo.parametros?.etiqueta_inicio ?? ''" />
-          <input matEndDate [placeholder]="campo.parametros?.etiqueta_fin ?? ''" />
-        </mat-date-range-input>
-        <mat-hint>DD/MM/YYYY – DD/MM/YYYY</mat-hint>
-        <mat-datepicker-toggle matIconSuffix [for]="pickerRange"></mat-datepicker-toggle>
-        <mat-icon
-          *ngIf="campo.tooltip"
-          matSuffix
-          class="tooltip-icon ms-1"
-          color="primary"
-          [matTooltip]="campo.tooltip"
-          matTooltipPosition="right"
-          matTooltipClass="tooltip-multilinea-amplio tooltip-multilinea-top"
-          aria-label="Información adicional"
-        >
-          info
-        </mat-icon>
-        <mat-date-range-picker #pickerRange></mat-date-range-picker>
-      </mat-form-field>
-
-      <!-- Campo tipo textarea -->
-      <mat-form-field *ngSwitchCase="'textarea'" appearance="outline" class="example-full-width">
-        <mat-label>{{ campo.etiqueta }}</mat-label>
-        <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
-        <textarea
-          matInput
-          [style.height.px]="campo.parametros?.altura || 72"
-          [formControlName]="campo.nombre"
-          [placeholder]="campo.placeholder ?? ''"
-        ></textarea>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-          {{ campo.etiqueta }} es requerido
-        </mat-error>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('minlength')">
-          {{ campo.etiqueta }} no puede ser menor a
-          {{ getValidacionValor(campo, "minLength") }} caracteres
-        </mat-error>
-        <mat-error *ngIf="form.controls[campo.nombre].hasError('maxlength')">
-          {{ campo.etiqueta }} no puede ser mayor a
-          {{ getValidacionValor(campo, "maxLength") }} caracteres
-        </mat-error>
-      </mat-form-field>
-
-        <!-- Campo tipo editor de texto enriquecido -->
-        <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand">
-          <label [htmlFor]="campo.nombre" class="titulo-quill">
-            <b>
-              <mat-icon>edit_note</mat-icon>
+    @for (campo of formulario.campos; track campo) {
+      <div [ngClass]="['col', campo.claseGrid]">
+        @switch (campo.tipo) {
+          <!-- Campo tipo texto -->
+          @case ('text') {
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>{{ campo.etiqueta }}</mat-label>
+              @if (campo.icono) {
+                <mat-icon matPrefix>{{ campo.icono }}</mat-icon>
+              }
+              <input matInput [formControlName]="campo.nombre" [placeholder]="campo.placeholder ?? ''" />
+              @if (form.controls[campo.nombre].hasError('required')) {
+                <mat-error>
+                  {{ campo.etiqueta }} es requerido
+                </mat-error>
+              }
+              @if (form.controls[campo.nombre].hasError('minlength')) {
+                <mat-error>
+                  {{ campo.etiqueta }} no puede ser menor a
+                  {{ getValidacionValor(campo, "minLength") }} caracteres
+                </mat-error>
+              }
+              @if (form.controls[campo.nombre].hasError('maxlength')) {
+                <mat-error>
+                  {{ campo.etiqueta }} no puede ser mayor a
+                  {{ getValidacionValor(campo, "maxLength") }} caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Campo oculto -->
+          @case ('hidden') {
+            <input type="hidden" [formControlName]="campo.nombre" />
+          }
+          <!-- Campo tipo email -->
+          @case ('email') {
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>{{ campo.etiqueta }}</mat-label>
+              @if (campo.icono) {
+                <mat-icon matPrefix>{{ campo.icono }}</mat-icon>
+              }
+              <input matInput type="email" [formControlName]="campo.nombre" [placeholder]="campo.placeholder ?? ''" />
+              @if (form.controls[campo.nombre].hasError('required')) {
+                <mat-error>
+                  {{ campo.etiqueta }} es requerido
+                </mat-error>
+              }
+              @if (
+                form.controls[campo.nombre].hasError('email') &&
+                !form.controls[campo.nombre].hasError('required')
+                ) {
+                <mat-error>{{ campo.etiqueta }} no tiene un formato de correo válido
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Campo tipo número -->
+          @case ('number') {
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>{{ campo.etiqueta }}</mat-label>
+              @if (campo.icono) {
+                <mat-icon matPrefix>{{ campo.icono }}</mat-icon>
+              }
+              <input matInput type="number" [formControlName]="campo.nombre" />
+              @if (form.controls[campo.nombre].hasError('required')) {
+                <mat-error>
+                  {{ campo.etiqueta }} es requerido
+                </mat-error>
+              }
+              @if (form.controls[campo.nombre].hasError('min')) {
+                <mat-error>
+                  {{ campo.etiqueta }} no puede ser menor que
+                  {{ getValidacionValor(campo, "min") }}
+                </mat-error>
+              }
+              @if (form.controls[campo.nombre].hasError('max')) {
+                <mat-error>
+                  {{ campo.etiqueta }} no puede ser mayor que
+                  {{ getValidacionValor(campo, "max") }}
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Campo tipo select -->
+          @case ('select') {
+            <mat-form-field appearance="outline" class="example-full-width">
+              <mat-label>{{ campo.etiqueta }}</mat-label>
+              @if (campo.icono) {
+                <mat-icon matPrefix>{{ campo.icono }}</mat-icon>
+              }
+              <mat-select [formControlName]="campo.nombre" (selectionChange)="onSelectionChange($event, campo)">
+                @for (opcion of campo.parametros?.opciones ?? []; track opcion) {
+                  <mat-option [value]="opcion.Id"
+                    [disabled]="opcion.deshabilitado">
+                    {{ opcion.Nombre }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (form.controls[campo.nombre].hasError('required')) {
+                <mat-error>
+                  {{ campo.etiqueta }} es requerido
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Campo tipo checkbox -->
+          @case ('checkbox') {
+            <mat-checkbox [formControlName]="campo.nombre" class="example-full-width">
               {{ campo.etiqueta }}
-              <mat-icon
-                *ngIf="campo.tooltip"
-                class="tooltip-icon ms-1"
-                [matTooltip]="campo.tooltip"
-                matTooltipPosition="right"
-                matTooltipClass="tooltip-multilinea-amplio tooltip-multilinea-top"
-                aria-label="Información adicional"
-              >
-                info
-              </mat-icon>
-            </b>
-          </label>
-          <quill-editor 
-            [formControlName]="campo.nombre"
-            [modules]="campo.quillConfig!"
-            [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
-            [ngStyle]="{ 'width': '100%'}"
-            >
-          </quill-editor>
-          <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
-            {{ campo.etiqueta }} es requerido
-          </mat-error>
+            </mat-checkbox>
+          }
+          <!-- Campo tipo radiobutton -->
+          @case ('radiobutton') {
+            <div>
+              <label [htmlFor]="campo.nombre">
+                {{ campo.etiqueta }}
+              </label>
+              <mat-radio-group [formControlName]="campo.nombre">
+                @for (opcion of campo.parametros?.opciones ?? []; track opcion) {
+                  <div>
+                    <mat-radio-button [value]="opcion.Id" [disabled]="opcion.deshabilitado">
+                      {{ opcion.Nombre }}
+                    </mat-radio-button>
+                  </div>
+                }
+              </mat-radio-group>
+              @if (form.controls[campo.nombre].hasError('required')) {
+                <mat-error>
+                  {{ campo.etiqueta }} es requerido
+                </mat-error>
+              }
+            </div>
+          }
+          <!-- Campo tipo fecha -->
+          @case ('date') {
+            <mat-form-field appearance="outline" class="col-12">
+              <mat-label>{{ campo.etiqueta }}</mat-label>
+              <input
+                matInput
+                [matDatepicker]="picker"
+                [formControlName]="campo.nombre"
+                [placeholder]="campo.placeholder || 'Seleccione una fecha'"
+                />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                @if (campo.tooltip) {
+                  <mat-icon
+                    matSuffix
+                    class="tooltip-icon ms-1"
+                    [matTooltip]="campo.tooltip"
+                    matTooltipPosition="right"
+                    matTooltipClass="tooltip-multilinea"
+                    aria-label="Información adicional"
+                    >
+                    info
+                  </mat-icon>
+                }
+                <mat-datepicker #picker></mat-datepicker>
+                @if (form.controls[campo.nombre].hasError('required')) {
+                  <mat-error>
+                    {{ campo.etiqueta }} es requerido
+                  </mat-error>
+                }
+              </mat-form-field>
+            }
+            <!-- Campo tipo rango de fecha -->
+            @case ('date-range') {
+              <mat-form-field appearance="outline" class="example-full-width">
+                <mat-label>{{ campo.etiqueta }}</mat-label>
+                <mat-date-range-input [rangePicker]="pickerRange">
+                  <input matStartDate [placeholder]="campo.parametros?.etiqueta_inicio ?? ''" />
+                  <input matEndDate [placeholder]="campo.parametros?.etiqueta_fin ?? ''" />
+                </mat-date-range-input>
+                <mat-hint>DD/MM/YYYY – DD/MM/YYYY</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="pickerRange"></mat-datepicker-toggle>
+                @if (campo.tooltip) {
+                  <mat-icon
+                    matSuffix
+                    class="tooltip-icon ms-1"
+                    color="primary"
+                    [matTooltip]="campo.tooltip"
+                    matTooltipPosition="right"
+                    matTooltipClass="tooltip-multilinea-amplio tooltip-multilinea-top"
+                    aria-label="Información adicional"
+                    >
+                    info
+                  </mat-icon>
+                }
+                <mat-date-range-picker #pickerRange></mat-date-range-picker>
+              </mat-form-field>
+            }
+            <!-- Campo tipo textarea -->
+            @case ('textarea') {
+              <mat-form-field appearance="outline" class="example-full-width">
+                <mat-label>{{ campo.etiqueta }}</mat-label>
+                @if (campo.icono) {
+                  <mat-icon matPrefix>{{ campo.icono }}</mat-icon>
+                }
+                <textarea
+                  matInput
+                  [style.height.px]="campo.parametros?.altura || 72"
+                  [formControlName]="campo.nombre"
+                  [placeholder]="campo.placeholder ?? ''"
+                ></textarea>
+                @if (form.controls[campo.nombre].hasError('required')) {
+                  <mat-error>
+                    {{ campo.etiqueta }} es requerido
+                  </mat-error>
+                }
+                @if (form.controls[campo.nombre].hasError('minlength')) {
+                  <mat-error>
+                    {{ campo.etiqueta }} no puede ser menor a
+                    {{ getValidacionValor(campo, "minLength") }} caracteres
+                  </mat-error>
+                }
+                @if (form.controls[campo.nombre].hasError('maxlength')) {
+                  <mat-error>
+                    {{ campo.etiqueta }} no puede ser mayor a
+                    {{ getValidacionValor(campo, "maxLength") }} caracteres
+                  </mat-error>
+                }
+              </mat-form-field>
+            }
+            <!-- Campo tipo editor de texto enriquecido -->
+            @case ('quill') {
+              <div class="ql-editor-auto-expand">
+                <label [htmlFor]="campo.nombre" class="titulo-quill">
+                  <b>
+                    <mat-icon>edit_note</mat-icon>
+                    {{ campo.etiqueta }}
+                    @if (campo.tooltip) {
+                      <mat-icon
+                        class="tooltip-icon ms-1"
+                        [matTooltip]="campo.tooltip"
+                        matTooltipPosition="right"
+                        matTooltipClass="tooltip-multilinea-amplio tooltip-multilinea-top"
+                        aria-label="Información adicional"
+                        >
+                        info
+                      </mat-icon>
+                    }
+                  </b>
+                </label>
+                <quill-editor
+                  [formControlName]="campo.nombre"
+                  [modules]="campo.quillConfig!"
+                  [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder ?? '')"
+                  [ngStyle]="{ 'width': '100%'}"
+                  >
+                </quill-editor>
+                @if (form.controls[campo.nombre].hasError('required')) {
+                  <mat-error>
+                    {{ campo.etiqueta }} es requerido
+                  </mat-error>
+                }
+              </div>
+            }
+            <!-- <mat-divider *ngSwitchCase="'divider'"></mat-divider>
+            <mat-icon *ngSwitchCase="'icono'" aria-hidden="false" [aria-label]="campo.parametros?.icono" [fontIcon]="campo.parametros?.icono">
+            </mat-icon> -->
+          }
         </div>
-
-      <!-- <mat-divider *ngSwitchCase="'divider'"></mat-divider>
-
-        <mat-icon *ngSwitchCase="'icono'" aria-hidden="false" [aria-label]="campo.parametros?.icono" [fontIcon]="campo.parametros?.icono">
-        </mat-icon> -->
+      }
     </div>
-  </div>
-</form>
+  </form>

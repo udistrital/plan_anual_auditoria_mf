@@ -12,26 +12,29 @@
       <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
         <mat-label>Seleccione una vigencia: </mat-label>
         <mat-icon color="primary" matPrefix>today</mat-icon>
-        <mat-select 
+        <mat-select
           formControlName="vigencia"
           (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
           track vigencia
-        >
+          >
           <mat-option disabled value="">--Seleccionar--</mat-option>
-          <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia">
-            {{ vigencia.Nombre }}
-          </mat-option>
+          @for (vigencia of vigencias; track vigencia) {
+            <mat-option [value]="vigencia">
+              {{ vigencia.Nombre }}
+            </mat-option>
+          }
         </mat-select>
       </mat-form-field>
-      <button
-        *ngIf="permiso"
-        class="mx-3"
-        mat-raised-button
-        color="primary"
-        (click)="nuevaAuditoria()"
-      >
-        Crear Auditoría Especial
-      </button>
+      @if (permiso) {
+        <button
+          class="mx-3"
+          mat-raised-button
+          color="primary"
+          (click)="nuevaAuditoria()"
+          >
+          Crear Auditoría Especial
+        </button>
+      }
     </form>
     <p>Seleccione el año de auditoría especial a realizar</p>
   </div>

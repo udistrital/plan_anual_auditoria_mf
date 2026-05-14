@@ -1,13 +1,17 @@
 <mat-form-field class="col-12" appearance="outline">
-  <mat-label *ngIf="label">{{label}}</mat-label>
-  <mat-icon matPrefix *ngIf="icon" color="primary">{{icon}}</mat-icon>
+  @if (label) {
+    <mat-label>{{label}}</mat-label>
+  }
+  @if (icon) {
+    <mat-icon matPrefix color="primary">{{icon}}</mat-icon>
+  }
   <mat-select
     [multiple]="multiple"
     #matSelect
     class="col-12"
     [formControl]="selectionControl"
     [placeholder]="placeholder"
-  >
+    >
     <mat-option>
       <ngx-mat-select-search
         [formControl]="formFilterControl"
@@ -16,26 +20,30 @@
       ></ngx-mat-select-search>
     </mat-option>
 
-    <mat-option *ngFor="let selectable of (filteredSelectables | async)" [value]="selectable.value">
-      {{selectable.label}}
-    </mat-option>
+    @for (selectable of (filteredSelectables | async); track selectable) {
+      <mat-option [value]="selectable.value">
+        {{selectable.label}}
+      </mat-option>
+    }
   </mat-select>
-  <mat-error
-    *ngIf="
-      selectionControl.hasError('required') &&
-      selectionControl.touched &&
-      selectables.length > 0
-    "
-  >
-    {{noSelectionErrorMessage}}
-  </mat-error>
-  <mat-error
-    *ngIf="
-      selectionControl.hasError('required') &&
-      selectionControl.touched &&
-      selectables.length === 0
-    "
-  >
-    {{noOptionsErrorMessage}}
-  </mat-error>
+  @if (
+    selectionControl.hasError('required') &&
+    selectionControl.touched &&
+    selectables.length > 0
+    ) {
+    <mat-error
+      >
+      {{noSelectionErrorMessage}}
+    </mat-error>
+  }
+  @if (
+    selectionControl.hasError('required') &&
+    selectionControl.touched &&
+    selectables.length === 0
+    ) {
+    <mat-error
+      >
+      {{noOptionsErrorMessage}}
+    </mat-error>
+  }
 </mat-form-field>

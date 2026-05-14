@@ -25,214 +25,225 @@
                 matInput
                 formControlName="tituloActividad"
                 placeholder="Título de la Actividad"
-              />
-              <mat-error
-                *ngIf="
+                />
+                @if (
                   auditoriaForm.get('tituloActividad')?.hasError('required') &&
                   auditoriaForm.get('tituloActividad')?.touched
-                "
-              >
-                El título de la actividad es requerido
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-
-          <!-- Tipo de Evaluación -->
-          <div class="col-12 col-md-6 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Tipo de evaluación</b>
+                  ) {
+                  <mat-error
+                    >
+                    El título de la actividad es requerido
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <mat-form-field class="col-12" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">assessment</mat-icon>
-              <mat-select formControlName="tipoEvaluacion">
-                <mat-option
-                  *ngFor="let evaluacion of evaluaciones"
-                  [value]="evaluacion.Id"
-                >
-                  {{ evaluacion.Nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
+
+
+            <!-- Tipo de Evaluación -->
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Tipo de evaluación</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">assessment</mat-icon>
+                <mat-select formControlName="tipoEvaluacion">
+                  @for (evaluacion of evaluaciones; track evaluacion) {
+                    <mat-option
+                      [value]="evaluacion.Id"
+                      >
+                      {{ evaluacion.Nombre }}
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (
                   auditoriaForm.get('tipoEvaluacion')?.hasError('required') &&
                   auditoriaForm.get('tipoEvaluacion')?.touched
-                "
-              >
-                Seleccione el tipo de evaluación
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-
-          <!-- Macroprocesos -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Macroprocesos</b>
+                  ) {
+                  <mat-error
+                    >
+                    Seleccione el tipo de evaluación
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <mat-form-field class="col-12" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <mat-select
-                multiple
-                formControlName="macroprocesos"
-              >
-                <mat-option
-                  *ngFor="let macro of macroprocesos"
-                  [value]="macro.Id"
-                >
-                  {{ macro.Nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
+
+
+            <!-- Macroprocesos -->
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Macroprocesos</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">account_tree</mat-icon>
+                <mat-select
+                  multiple
+                  formControlName="macroprocesos"
+                  >
+                  @for (macro of macroprocesos; track macro) {
+                    <mat-option
+                      [value]="macro.Id"
+                      >
+                      {{ macro.Nombre }}
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (
                   auditoriaForm.get('macroprocesos')?.hasError('required') &&
                   auditoriaForm.get('macroprocesos')?.touched
-                "
-              >
-                Seleccione los macroprocesos
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-
-          <!-- Procesos -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Procesos</b>
+                  ) {
+                  <mat-error
+                    >
+                    Seleccione los macroprocesos
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <mat-form-field class="col-12" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">account_tree</mat-icon>
-              <mat-select
-                multiple
-                formControlName="procesos"
-              >
-                <mat-option
-                  *ngFor="let proceso of procesos"
-                  [value]="proceso.Id"
-                >{{
-                  proceso.Nombre
-                }}</mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
+
+
+            <!-- Procesos -->
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Procesos</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">account_tree</mat-icon>
+                <mat-select
+                  multiple
+                  formControlName="procesos"
+                  >
+                  @for (proceso of procesos; track proceso) {
+                    <mat-option
+                      [value]="proceso.Id"
+                      >{{
+                      proceso.Nombre
+                    }}</mat-option>
+                  }
+                </mat-select>
+                @if (
                   auditoriaForm.get('procesos')?.hasError('required') &&
                   auditoriaForm.get('procesos')?.touched &&
                   procesos.length > 0
-                "
-              >
-                Seleccione los procesos
-              </mat-error>
-              <mat-error
-                *ngIf="
+                  ) {
+                  <mat-error
+                    >
+                    Seleccione los procesos
+                  </mat-error>
+                }
+                @if (
                   auditoriaForm.get('procesos')?.hasError('required') &&
                   auditoriaForm.get('procesos')?.touched &&
                   procesos.length === 0
-                "
-              >
-                Seleccione un macroproceso con procesos.
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-
-          <!-- Dependencias -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Dependencias</b>
+                  ) {
+                  <mat-error
+                    >
+                    Seleccione un macroproceso con procesos.
+                  </mat-error>
+                }
+              </mat-form-field>
             </div>
-            <app-search-selection
-              multiple
-              label="Dependencias"
-              icon="apartment"
-              placeholder="Seleccionar dependencias"
-              [items]="dependencias"
-              [labelKey]="'Nombre'"
-              [valueKey]="'Id'"
-              [selectionControl]="getControl('dependencias')"
-            ></app-search-selection>
-          </div>
 
 
-          <!-- Cronograma de Actividades -->
-          <div class="col-12 col-md-6 col-xl-8">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Cronograma de actividades</b>
-            </div>
-            <mat-form-field class="col-12" appearance="outline">
-              <mat-label>Seleccionar </mat-label>
-              <mat-icon matPrefix color="primary">date_range</mat-icon>
-              <mat-select
-                formControlName="cronogramaActividades"
+            <!-- Dependencias -->
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Dependencias</b>
+              </div>
+              <app-search-selection
                 multiple
-                (selectionChange)="cambioMes()"
-              >
-                <mat-option (click)="asignarTodos()" [value]="TODOS">{{
-                  TODOS
-                }}</mat-option>
-                <mat-option *ngFor="let mes of meses" [value]="mes.Id">{{
-                  mes.Nombre
-                }}</mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
-                  auditoriaForm
-                    .get('cronogramaActividades')
-                    ?.hasError('required') &&
-                  auditoriaForm.get('cronogramaActividades')?.touched
-                "
-              >
-                Seleccione al menos un mes para el cronograma
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <!-- Cantidad de Auditorías -->
-          <div class="col-12 col-md-4 col-xl-4">
-            <div class="fondo-acento-50 d-flex justify-content-center my-3">
-              <b>Cantidad de Auditorías</b>
+                label="Dependencias"
+                icon="apartment"
+                placeholder="Seleccionar dependencias"
+                [items]="dependencias"
+                [labelKey]="'Nombre'"
+                [valueKey]="'Id'"
+                [selectionControl]="getControl('dependencias')"
+              ></app-search-selection>
             </div>
-            <app-search-selection
-              label="Cantidad de Auditorías"
-              icon="assignment"
-              placeholder="Seleccione la cantidad"
-              [items]="cantidadesAuditorias"
-              [labelKey]="'Nombre'"
-              [valueKey]="'Id'"
-              [selectionControl]="getControl('cantidadAuditorias')"
-            ></app-search-selection>
+
+
+            <!-- Cronograma de Actividades -->
+            <div class="col-12 col-md-6 col-xl-8">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Cronograma de actividades</b>
+              </div>
+              <mat-form-field class="col-12" appearance="outline">
+                <mat-label>Seleccionar </mat-label>
+                <mat-icon matPrefix color="primary">date_range</mat-icon>
+                <mat-select
+                  formControlName="cronogramaActividades"
+                  multiple
+                  (selectionChange)="cambioMes()"
+                  >
+                  <mat-option (click)="asignarTodos()" [value]="TODOS">{{
+                    TODOS
+                  }}</mat-option>
+                  @for (mes of meses; track mes) {
+                    <mat-option [value]="mes.Id">{{
+                      mes.Nombre
+                    }}</mat-option>
+                  }
+                </mat-select>
+                @if (
+                  auditoriaForm
+                  .get('cronogramaActividades')
+                  ?.hasError('required') &&
+                  auditoriaForm.get('cronogramaActividades')?.touched
+                  ) {
+                  <mat-error
+                    >
+                    Seleccione al menos un mes para el cronograma
+                  </mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Cantidad de Auditorías -->
+            <div class="col-12 col-md-4 col-xl-4">
+              <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                <b>Cantidad de Auditorías</b>
+              </div>
+              <app-search-selection
+                label="Cantidad de Auditorías"
+                icon="assignment"
+                placeholder="Seleccione la cantidad"
+                [items]="cantidadesAuditorias"
+                [labelKey]="'Nombre'"
+                [valueKey]="'Id'"
+                [selectionControl]="getControl('cantidadAuditorias')"
+              ></app-search-selection>
+            </div>
+
+
+
           </div>
-
-
-
+        </form>
+        <div class="d-flex justify-content-center align-items-center my-2">
+          <mat-icon color="primary"> info </mat-icon>
+          <p class="mx-2">¿Añadir Auditoría?</p>
         </div>
-      </form>
-      <div class="d-flex justify-content-center align-items-center my-2">
-        <mat-icon color="primary"> info </mat-icon>
-        <p class="mx-2">¿Añadir Auditoría?</p>
+        <mat-dialog-actions align="center">
+          <button
+            mat-stroked-button
+            color="primary"
+            style="border: 1px solid var(--md-primary-500)"
+            [mat-dialog-close]
+            class="mb-sm"
+            >
+            <mat-icon>close</mat-icon>No, cerrar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="guardarAuditoria()"
+            class="mb-sm"
+            >
+            <mat-icon>save</mat-icon>
+            Si, guardar y cerrar
+          </button>
+        </mat-dialog-actions>
       </div>
-      <mat-dialog-actions align="center">
-        <button
-          mat-stroked-button
-          color="primary"
-          style="border: 1px solid var(--md-primary-500)"
-          [mat-dialog-close]
-          class="mb-sm"
-        >
-          <mat-icon>close</mat-icon>No, cerrar
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="guardarAuditoria()"
-          class="mb-sm"
-        >
-          <mat-icon>save</mat-icon>
-          Si, guardar y cerrar
-        </button>
-      </mat-dialog-actions>
     </div>
-  </div>
-</ng-template>
+  </ng-template>

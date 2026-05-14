@@ -1,164 +1,204 @@
 <plantilla-modal [icono]="'list_alt'" [titulo]="titulo" [descripcion]="descripcion" [contenido]="contenidoDeModal"
-    [footer]="footerDeModal"></plantilla-modal>
+[footer]="footerDeModal"></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-    <div class="d-flex flex-row-reverse my-2">
-        <button
+  <div class="d-flex flex-row-reverse my-2">
+    <button
+      class="modal-btn"
+      mat-flat-button color="primary"
+      (click)="descargarTodo()"
+      >
+      Descargar Todo <mat-icon>insert_drive_file</mat-icon>
+    </button>
+    @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
+      @for (boton of tabs[selectedTab].botones; track boton) {
+        @switch (boton.tipo || 'flat') {
+          @case ('flat') {
+            <button
+              class="modal-btn"
+              mat-flat-button
+              [color]="boton.color || 'accent'"
+              [style]="boton.estilo ?? ''"
+              (click)="ejecutarBotonTab(boton)"
+              >
+              {{ boton.nombre }} @if (boton.icono) {
+              <mat-icon>{{ boton.icono }}</mat-icon>
+            }
+          </button>
+        }
+        @case ('stroked') {
+          <button
             class="modal-btn"
-            mat-flat-button color="primary"
-            (click)="descargarTodo()"
-        >
-            Descargar Todo <mat-icon>insert_drive_file</mat-icon>
+            mat-stroked-button
+            [color]="boton.color || 'accent'"
+            [style]="boton.estilo ?? ''"
+            (click)="ejecutarBotonTab(boton)"
+            >
+            {{ boton.nombre }} @if (boton.icono) {
+            <mat-icon>{{ boton.icono }}</mat-icon>
+          }
         </button>
-        <ng-container *ngIf="tabs && tabs[selectedTab] && tabs[selectedTab].botones">
-            <ng-container *ngFor="let boton of tabs[selectedTab].botones" [ngSwitch]="boton.tipo || 'flat'">
-                <button
-                    *ngSwitchCase="'flat'"
-                    class="modal-btn"
-                    mat-flat-button
-                    [color]="boton.color || 'accent'"
-                    [style]="boton.estilo ?? ''"
-                    (click)="ejecutarBotonTab(boton)"
-                >
-                    {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
-                </button>
-                <button
-                    *ngSwitchCase="'stroked'"
-                    class="modal-btn"
-                    mat-stroked-button
-                    [color]="boton.color || 'accent'"
-                    [style]="boton.estilo ?? ''"
-                    (click)="ejecutarBotonTab(boton)"
-                >
-                    {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
-                </button>
-                <button
-                    *ngSwitchCase="'raised'"
-                    class="modal-btn"
-                    mat-raised-button
-                    [color]="boton.color || 'accent'"
-                    [style]="boton.estilo ?? ''"
-                    (click)="ejecutarBotonTab(boton)"
-                >
-                    {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
-                </button>
-                <button
-                    *ngSwitchCase="'basic'"
-                    class="modal-btn"
-                    mat-button
-                    [color]="boton.color || 'accent'"
-                    [style]="boton.estilo ?? ''"
-                    (click)="ejecutarBotonTab(boton)"
-                >
-                    {{ boton.nombre }} <mat-icon *ngIf="boton.icono">{{ boton.icono }}</mat-icon>
-                </button>
-            </ng-container>
-        </ng-container>
-        <ng-container *ngIf="tabs && tabs[selectedTab] && tabs[selectedTab].cargueAdjuntoConfig" [ngSwitch]="tabs[selectedTab].cargueAdjuntoConfig?.tipoBoton || 'flat'">
-            <button
-                *ngSwitchCase="'flat'"
-                class="modal-btn"
-                mat-flat-button
-                [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-                (click)="abrirCargueAdjuntoTabActual()"
-            >
-                {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-                <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-            </button>
-            <button
-                *ngSwitchCase="'stroked'"
-                class="modal-btn"
-                mat-stroked-button
-                [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-                (click)="abrirCargueAdjuntoTabActual()"
-            >
-                {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-                <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-            </button>
-            <button
-                *ngSwitchCase="'raised'"
-                class="modal-btn"
-                mat-raised-button
-                [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-                (click)="abrirCargueAdjuntoTabActual()"
-            >
-                {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-                <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-            </button>
-            <button
-                *ngSwitchCase="'basic'"
-                class="modal-btn"
-                mat-button
-                [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-                [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-                (click)="abrirCargueAdjuntoTabActual()"
-            >
-                {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-                <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-            </button>
-        </ng-container>
-    </div>
-    <div class="row">
-        <div class="col-sm-12 col-md-4 col-lg-3 d-flex flex-column">
-            <ng-container *ngFor="let tab of tabs; let i = index">
-                <button *ngIf="documentosPorTab[i] || tab.obligatorio" class="mb-2 tab-btn" mat-stroked-button
-                    [ngClass]="selectedTab === i ? 'selected' : ''" (click)="selectTab(i)">
-                    {{ tab.nombre }}
-                    <span *ngIf="tab.fecha_subida" >{{ tab.fecha_subida | date:'dd/MM/yyyy' }}</span>
-                </button>
-            </ng-container>
-        </div>
-        <div class="col-sm-12 col-md-8 col-lg-9">
-            <div *ngIf="documentosPorTab[selectedTab]" style="border: 1px solid #ebdddd">
-                <app-pdf-visualizador [base64Document]="documentosPorTab[selectedTab]"></app-pdf-visualizador>
-            </div>
-        </div>
-    </div>
+      }
+      @case ('raised') {
+        <button
+          class="modal-btn"
+          mat-raised-button
+          [color]="boton.color || 'accent'"
+          [style]="boton.estilo ?? ''"
+          (click)="ejecutarBotonTab(boton)"
+          >
+          {{ boton.nombre }} @if (boton.icono) {
+          <mat-icon>{{ boton.icono }}</mat-icon>
+        }
+      </button>
+    }
+    @case ('basic') {
+      <button
+        class="modal-btn"
+        mat-button
+        [color]="boton.color || 'accent'"
+        [style]="boton.estilo ?? ''"
+        (click)="ejecutarBotonTab(boton)"
+        >
+        {{ boton.nombre }} @if (boton.icono) {
+        <mat-icon>{{ boton.icono }}</mat-icon>
+      }
+    </button>
+  }
+}
+}
+}
+@if (tabs && tabs[selectedTab] && tabs[selectedTab].cargueAdjuntoConfig) {
+  @switch (tabs[selectedTab].cargueAdjuntoConfig?.tipoBoton || 'flat') {
+    @case ('flat') {
+      <button
+        class="modal-btn"
+        mat-flat-button
+        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
+        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
+        (click)="abrirCargueAdjuntoTabActual()"
+        >
+        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
+        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
+      </button>
+    }
+    @case ('stroked') {
+      <button
+        class="modal-btn"
+        mat-stroked-button
+        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
+        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
+        (click)="abrirCargueAdjuntoTabActual()"
+        >
+        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
+        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
+      </button>
+    }
+    @case ('raised') {
+      <button
+        class="modal-btn"
+        mat-raised-button
+        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
+        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
+        (click)="abrirCargueAdjuntoTabActual()"
+        >
+        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
+        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
+      </button>
+    }
+    @case ('basic') {
+      <button
+        class="modal-btn"
+        mat-button
+        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
+        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
+        (click)="abrirCargueAdjuntoTabActual()"
+        >
+        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
+        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
+      </button>
+    }
+  }
+}
+</div>
+<div class="row">
+  <div class="col-sm-12 col-md-4 col-lg-3 d-flex flex-column">
+    @for (tab of tabs; track tab; let i = $index) {
+      @if (documentosPorTab[i] || tab.obligatorio) {
+        <button class="mb-2 tab-btn" mat-stroked-button
+          [ngClass]="selectedTab === i ? 'selected' : ''" (click)="selectTab(i)">
+          {{ tab.nombre }}
+          @if (tab.fecha_subida) {
+            <span >{{ tab.fecha_subida | date:'dd/MM/yyyy' }}</span>
+          }
+        </button>
+      }
+    }
+  </div>
+  <div class="col-sm-12 col-md-8 col-lg-9">
+    @if (documentosPorTab[selectedTab]) {
+      <div style="border: 1px solid #ebdddd">
+        <app-pdf-visualizador [base64Document]="documentosPorTab[selectedTab]"></app-pdf-visualizador>
+      </div>
+    }
+  </div>
+</div>
 </ng-template>
 <ng-template #footerDeModal>
-    <ng-container *ngFor="let accionFooter of accionesFooter" [ngSwitch]="accionFooter.tipoBoton || 'flat'">
+  @for (accionFooter of accionesFooter; track accionFooter) {
+    @switch (accionFooter.tipoBoton || 'flat') {
+      @case ('flat') {
         <button
-            *ngSwitchCase="'flat'"
-            mat-flat-button
-            [color]="accionFooter.color || 'primary'"
-            class="my-3 mx-2"
-            (click)="ejecutarAccionFooter(accionFooter)"
-        >
-            <mat-icon *ngIf="accionFooter.icono">{{ accionFooter.icono }}</mat-icon>{{ accionFooter.nombre }}
-        </button>
-        <button
-            *ngSwitchCase="'stroked'"
+          mat-flat-button
+          [color]="accionFooter.color || 'primary'"
+          class="my-3 mx-2"
+          (click)="ejecutarAccionFooter(accionFooter)"
+          >
+          @if (accionFooter.icono) {
+            <mat-icon>{{ accionFooter.icono }}</mat-icon>
+            }{{ accionFooter.nombre }}
+          </button>
+        }
+        @case ('stroked') {
+          <button
             mat-stroked-button
             [color]="accionFooter.color || 'primary'"
             class="my-3 mx-2"
             (click)="ejecutarAccionFooter(accionFooter)"
-        >
-            <mat-icon *ngIf="accionFooter.icono">{{ accionFooter.icono }}</mat-icon>{{ accionFooter.nombre }}
-        </button>
-        <button
-            *ngSwitchCase="'raised'"
-            mat-raised-button
-            [color]="accionFooter.color || 'primary'"
-            class="my-3 mx-2"
-            (click)="ejecutarAccionFooter(accionFooter)"
-        >
-            <mat-icon *ngIf="accionFooter.icono">{{ accionFooter.icono }}</mat-icon>{{ accionFooter.nombre }}
-        </button>
-        <button
-            *ngSwitchCase="'basic'"
-            mat-button
-            [color]="accionFooter.color || 'primary'"
-            class="my-3 mx-2"
-            (click)="ejecutarAccionFooter(accionFooter)"
-        >
-            <mat-icon *ngIf="accionFooter.icono">{{ accionFooter.icono }}</mat-icon>{{ accionFooter.nombre }}
-        </button>
-    </ng-container>
-    <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]
-        class="my-3">
-        <mat-icon>toll</mat-icon>{{ textoBotonCerrar }}
-    </button>
-</ng-template>
+            >
+            @if (accionFooter.icono) {
+              <mat-icon>{{ accionFooter.icono }}</mat-icon>
+              }{{ accionFooter.nombre }}
+            </button>
+          }
+          @case ('raised') {
+            <button
+              mat-raised-button
+              [color]="accionFooter.color || 'primary'"
+              class="my-3 mx-2"
+              (click)="ejecutarAccionFooter(accionFooter)"
+              >
+              @if (accionFooter.icono) {
+                <mat-icon>{{ accionFooter.icono }}</mat-icon>
+                }{{ accionFooter.nombre }}
+              </button>
+            }
+            @case ('basic') {
+              <button
+                mat-button
+                [color]="accionFooter.color || 'primary'"
+                class="my-3 mx-2"
+                (click)="ejecutarAccionFooter(accionFooter)"
+                >
+                @if (accionFooter.icono) {
+                  <mat-icon>{{ accionFooter.icono }}</mat-icon>
+                  }{{ accionFooter.nombre }}
+                </button>
+              }
+            }
+          }
+          <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]
+            class="my-3">
+            <mat-icon>toll</mat-icon>{{ textoBotonCerrar }}
+          </button>
+        </ng-template>
