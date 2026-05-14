@@ -165,7 +165,7 @@
       </mat-form-field>
 
         <!-- Campo tipo editor de texto enriquecido -->
-        <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand">
+        <div *ngSwitchCase="'quill'" class="ql-editor-auto-expand" [class.editor-deshabilitado]="form.controls[campo.nombre].disabled">
           <label class="titulo-quill">
             <b>
               <mat-icon>edit_note</mat-icon>
@@ -182,12 +182,13 @@
               </mat-icon>
             </b>
           </label>
-          <quill-editor 
+          <quill-editor
             [formControlName]="campo.nombre"
             [modules]="campo.quillConfig!"
+            [formats]="$any(getQuillFormats(campo.quillConfig))"
             [placeholder]="form.controls[campo.nombre].disabled ? '' : (campo.placeholder || '')"
             [ngStyle]="{ 'width': '100%'}"
-            >
+          >
           </quill-editor>
           <mat-error *ngIf="form.controls[campo.nombre].hasError('required')">
             {{ campo.etiqueta }} es requerido

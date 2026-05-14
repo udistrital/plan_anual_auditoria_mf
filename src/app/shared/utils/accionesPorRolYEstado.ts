@@ -298,6 +298,7 @@ export const accionesEjecucionPreliminar: {
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
+      "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
@@ -357,8 +358,12 @@ export const accionesEjecucionPreliminar: {
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Preinforme",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
+      "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
@@ -396,6 +401,9 @@ export const accionesEjecucionPreliminar: {
   },
 
   [environment.ROL.AUDITOR]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Preinforme",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
@@ -436,6 +444,9 @@ export const accionesEjecucionPreliminar: {
   },
 
   [environment.ROL.AUDITOR_ASISTENTE]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Preinforme",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_PREINFORME]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
@@ -547,7 +558,6 @@ export const accionesEjecucionFinal: {
       "Editar Informe",
       "Ver Documentos del informe",
       "Historial de Rechazos",
-      "Enviar a Aprobación por Jefe",
     ],
   },
 
@@ -561,7 +571,6 @@ export const accionesEjecucionFinal: {
       "Ver Informe",
       "Ver Documentos del informe",
       "Historial de Rechazos",
-
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Ver Informe",
@@ -586,7 +595,6 @@ export const accionesEjecucionFinal: {
       "Ver Informe",
       "Ver Documentos del informe",
       "Historial de Rechazos",
-
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Ver Informe",

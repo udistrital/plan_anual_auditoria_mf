@@ -23,26 +23,22 @@ export class ModalHistorialRechazosComponent implements OnInit {
 
   cargarRechazos() {
     const { auditoriaId } = this.data;
-    const estadoRechazadoJefe =
-      environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE;
-    const estadoRechazadoJefeFinal =
-      environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE;
+    const estadoRechazadoJefe = environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE;
+    const estadoRechazadoJefeFinal = environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE;
 
     this.planAuditoriaMid
       .get(
         `auditoria-estado?query=auditoria_id:${auditoriaId},estado_id__in:${estadoRechazadoJefe}|${estadoRechazadoJefeFinal},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
       )
-      .subscribe((res) => {
-        this.rechazos = (res.Data || []).map((r: any) => ({
-          ...r,
-          tipoRechazo:
-            r.estado?.id === estadoRechazadoJefe
-              ? "Rechazado por"
-              : "Observaciones de",
-          icono:
-            r.estado?.id === estadoRechazadoJefe ? "cancel" : "rate_review",
-        }));
-        this.cargando = false;
+      .subscribe({
+        next: (res) => {
+          this.rechazos = res?.Data || [];
+          this.cargando = false;
+        },
+        error: () => {
+          this.rechazos = [];
+          this.cargando = false;
+        },
       });
   }
 }

@@ -1,7 +1,16 @@
-<plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="
-    '<p>Gestión Auditoría / Ejecución / <b>Auditorías Internas</b> </p>'
-  " [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()"
-  [mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
+<plantilla-tarjeta-contenedora
+  [title]="(soloLectura && pasosInicialesSoloLectura && bloqueadoEnRevision) ? 'Ver Informe' : 'Editar Informe'"
+  [subtitle]="auditoria?.vigencia_nombre || ''"
+  [subtitleChild]="(auditoria?.titulo || '') + (auditoria?.subtitulo ? ' - ' + auditoria?.subtitulo : '')"
+  [breadcrumb]="
+    (soloLectura && pasosInicialesSoloLectura && bloqueadoEnRevision)
+      ? '<p>Gestión Auditoría / Ejecución / Auditorías Internas / <b>Ver Informe</b></p>'
+      : '<p>Gestión Auditoría / Ejecución / Auditorías Internas / <b>Editar Informe</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row" [class.modo-lectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision">
@@ -29,7 +38,7 @@
           </div>
           <div *ngIf="formInformacion != null" class="mt-4">
             <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
-              (submitFormulario)="preguntarGuardadoInformacion($event)">
+              (submitFormulario)="guardarInformacion($event)">
             </app-formulario-dinamico>
             <div class="d-flex align-items-center fondo-acento-50 my-3">
               <div>
@@ -123,10 +132,10 @@
               <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
                 Volver
               </button>
-              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
+              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-raised-button color="primary" (click)="guardarAspectos()">
                 Guardar
               </button>
-              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
+              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosYContinuar()">
                 Guardar y continuar
               </button>
               <button *ngIf="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" matStepperNext mat-flat-button color="primary" class="mx-2">
@@ -284,7 +293,7 @@
                   Ver informe final
                 </button>
                 <button *ngIf="!soloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
-                  Guardar y continuar
+                  Guardar
                 </button>
               </div>
             </form>

@@ -77,6 +77,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   usuarioId: any;
   documentos: { base64: string; tipo_id: number }[] = [];
   opcionesDocumentos: { nombre: string; base64: string }[] = [];
+  dependenciasPorId: Map<number, string> = new Map<number, string>();
   rolesAprobacion: { [key: string]: any } = {
     [environment.ROL.JEFE]: configJefe,
     [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
@@ -125,48 +126,99 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   cargarDocumentos() {
     this.documentos = [];
+    this.opcionesDocumentos = [];
 
-    const tipoDocumentoIndiceMap: { [key: number]: number } = {
-      [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR]: 0,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL]: 1,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 2 : 1,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 3 : 2,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 4 : 3,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO]: this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL ? 5 : 4,
-    };
+    const tieneInformeFinal = this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
 
-    this.opcionesDocumentos = this.estadoAuditoriaId >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL
-      ? [
-        { nombre: "Informe Preliminar", base64: "" },
-        { nombre: "Informe Final", base64: "" },
-        { nombre: "Programa de Trabajo", base64: "" },
-        { nombre: "Oficio Anuncio Solicitud Información", base64: "" },
-        { nombre: "Carta de Representación", base64: "" },
-        { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
-      ]
-      : [
-        { nombre: "Informe Preliminar", base64: "" },
-        { nombre: "Programa de Trabajo", base64: "" },
-        { nombre: "Oficio Anuncio Solicitud Información", base64: "" },
-        { nombre: "Carta de Representación", base64: "" },
-        { nombre: "Compromiso Ético del Auditor Interno", base64: "" },
-      ];
+    let docInformePreliminar = '';
+    let docInformeFinal = '';
+    let docProgramaTrabajo = '';
+    let docSolicitudInformacion = '';
+    const cartasRepresentacion: { base64: string; documento: any }[] = [];
+    let docCompromisoEtico = '';
 
     this.referenciaPdfService
-      .consultarDocumentos(this.auditoriaId)
+      .consultarDocumentos(this.auditoriaId, { deduplicarPorTipo: false })
       .subscribe(async (res) => {
+        await this.cargarDependenciasPorAuditoria();
+
         const promesas = res.map(async (documento) => {
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
           this.documentos.push({ base64, tipo_id: documento.tipo_id });
 
-          const indice = tipoDocumentoIndiceMap[documento.tipo_id];
-          if (indice !== undefined) {
-            this.opcionesDocumentos[indice] = { ...this.opcionesDocumentos[indice], base64 };
+          switch (documento.tipo_id) {
+            case environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_PRELIMINAR:
+              docInformePreliminar = base64;
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL:
+              docInformeFinal = base64;
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO:
+              docProgramaTrabajo = base64;
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION:
+              docSolicitudInformacion = base64;
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION:
+              cartasRepresentacion.push({ base64, documento });
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO:
+              docCompromisoEtico = base64;
+              break;
           }
         });
 
         await Promise.all(promesas);
+
+        const opciones: { nombre: string; base64: string }[] = [
+          { nombre: 'Informe Preliminar', base64: docInformePreliminar },
+          ...(tieneInformeFinal ? [{ nombre: 'Informe Final', base64: docInformeFinal }] : []),
+          { nombre: 'Programa de Trabajo', base64: docProgramaTrabajo },
+          { nombre: 'Oficio Anuncio Solicitud Información', base64: docSolicitudInformacion },
+          ...cartasRepresentacion.map(({ base64, documento }, i) => ({
+            nombre: `Carta de Representación ${this.resolverNombreDependencia(documento, i)}`,
+            base64,
+          })),
+          { nombre: 'Compromiso Ético del Auditor Interno', base64: docCompromisoEtico },
+        ];
+
+        this.opcionesDocumentos = opciones.filter(doc => !!doc.base64);
+
+        if (this.selectedTab >= this.opcionesDocumentos.length) {
+          this.selectedTab = 0;
+        }
       });
+  }
+
+  private async cargarDependenciasPorAuditoria(): Promise<void> {
+    this.dependenciasPorId = new Map<number, string>();
+    try {
+      const res: any = await new Promise((resolve, reject) => {
+        this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`).subscribe({ next: resolve, error: reject });
+      });
+      const datosDependencias: any[] = res?.Data?.datos_dependencias ?? [];
+      datosDependencias.forEach((dep) => {
+        if (typeof dep.dependencia_id === 'number' && typeof dep.dependencia_nombre === 'string' && dep.dependencia_nombre.trim()) {
+          this.dependenciasPorId.set(dep.dependencia_id, this.formatearNombreDependencia(dep.dependencia_nombre));
+        }
+      });
+    } catch {
+      // no bloquear la carga de documentos
+    }
+  }
+
+  private resolverNombreDependencia(documento: any, index: number): string {
+    const depId = documento?.metadatos?.['dependencia_id'];
+    if (typeof depId === 'number') {
+      const nombre = this.dependenciasPorId.get(depId);
+      if (nombre) return nombre;
+    }
+    return `Dependencia ${index + 1}`;
+  }
+
+  private formatearNombreDependencia(nombre: string): string {
+    return nombre.toLowerCase().split(/\s+/).filter(Boolean)
+      .map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
   }
 
   preguntarAprobacion() {
