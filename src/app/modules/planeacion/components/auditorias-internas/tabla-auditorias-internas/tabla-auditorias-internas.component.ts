@@ -24,7 +24,7 @@ import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
-import { catchError, exhaustMap, map, tap } from "rxjs/operators";
+import { catchError, exhaustMap, tap } from "rxjs/operators";
 import { CargueAdjuntoTabConfig, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
@@ -140,19 +140,16 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
     let endpoint = "";
 
-    switch (this.tipoConsulta) {
-      case 'auditado':
-        query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
-        endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
-        break;
-      default:
-        if (estadoId) {
-          query += `,estado_id:${estadoId}`;
-        }
-          const estado2 = estadoId ? `&estado_id=${estadoId}` : '';
-          endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado2}`
-            : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+    if (this.tipoConsulta === 'auditado') {
+      query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+      endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
+    } else {
+      if (estadoId) query += `,estado_id:${estadoId}`;
+      
+      const estado2 = estadoId ? `&estado_id=${estadoId}` : '';
+      endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
+        ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado2}`
+        : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
     }
 
     this.planAuditoriaMid

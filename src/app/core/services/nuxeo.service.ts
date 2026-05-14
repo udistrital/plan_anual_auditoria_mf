@@ -34,7 +34,10 @@ export class NuxeoService {
         }
         resolve(encoded);
       };
-      reader.onerror = (error) => reject(error);
+      reader.onerror = (error) => {
+        const err = new Error(error.type, { cause: error });
+        reject(err);
+      }
     });
   }
 

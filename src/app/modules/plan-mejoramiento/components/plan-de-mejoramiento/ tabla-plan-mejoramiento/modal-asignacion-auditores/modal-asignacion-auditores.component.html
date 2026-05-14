@@ -46,8 +46,12 @@
 
     <!-- Fila 3: Auditores Responsables Auditoría — se muestran de inmediato (solo lectura) -->
     <div class="col-12 mb-3">
-      <p class="mb-2"><b>Auditor(es) Responsables Auditoría</b></p>
       <table class="tabla-auditores-readonly w-100">
+        <thead>
+          <tr>
+            <th><b>Auditor(es) Responsables Auditoría</b></th>
+          </tr>
+        </thead>
         <tbody>
           @for (auditor of auditoresAuditoria; track auditor) {
             <tr>
