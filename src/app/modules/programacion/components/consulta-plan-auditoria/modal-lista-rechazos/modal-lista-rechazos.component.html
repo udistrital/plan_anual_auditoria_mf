@@ -13,7 +13,7 @@
   </div>
 
   <!-- Rechazos -->
-  <ng-container *ngFor="let rechazo of rechazos">
+  @for (rechazo of rechazos; track rechazo) {
     <div class="px-3 my-2">
       <div class="row">
         <div class="col-12 col-sm-12">
@@ -44,10 +44,10 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  }
 
   <!-- Revisiones Jefe con observación -->
-  <ng-container *ngFor="let revision of revisionesJefe">
+  @for (revision of revisionesJefe; track revision) {
     <div class="px-3 my-2">
       <div class="row">
         <div class="col-12 col-sm-12">
@@ -78,28 +78,30 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  }
 
   <!-- Skeleton mientras carga -->
-  <ng-container *ngIf="rechazos.length === 0 && revisionesJefe.length === 0 && cargando">
-    <div *ngFor="let _ of [].constructor(numRechazos)" class="px-3 my-2">
-      <div class="row">
-        <div class="col-12 col-sm-12">
-          <div class="fondo-chip mb-3 skeleton-container">
-            <div class="my-2">
-              <p class="skeleton skeleton-title"></p>
-              <p class="skeleton skeleton-text"></p>
-              <div class="d-flex flex-wrap mt-4">
-                <div class="chip mb-sm skeleton skeleton-chip"></div>
-                <div class="chip mb-sm skeleton skeleton-chip"></div>
-                <div class="chip mb-sm skeleton skeleton-chip"></div>
+  @if (rechazos.length === 0 && revisionesJefe.length === 0 && cargando) {
+    @for (_ of [].constructor(numRechazos); track _) {
+      <div class="px-3 my-2">
+        <div class="row">
+          <div class="col-12 col-sm-12">
+            <div class="fondo-chip mb-3 skeleton-container">
+              <div class="my-2">
+                <p class="skeleton skeleton-title"></p>
+                <p class="skeleton skeleton-text"></p>
+                <div class="d-flex flex-wrap mt-4">
+                  <div class="chip mb-sm skeleton skeleton-chip"></div>
+                  <div class="chip mb-sm skeleton skeleton-chip"></div>
+                  <div class="chip mb-sm skeleton skeleton-chip"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </ng-container>
+    }
+  }
 </ng-template>
 
 <ng-template #footerDeModal>
@@ -109,7 +111,7 @@
     style="border: 1px solid var(--md-primary-500)"
     [mat-dialog-close]
     class="my-3"
-  >
+    >
     <mat-icon>toll</mat-icon>Regresar
   </button>
 </ng-template>

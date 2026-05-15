@@ -3,15 +3,16 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-modal-enviar-aprobacion',
-  templateUrl: './modal-enviar-aprobacion.component.html',
+    selector: 'app-modal-enviar-aprobacion',
+    templateUrl: './modal-enviar-aprobacion.component.html',
+    standalone: false
 })
 export class ModalEnviarAprobacionComponent {
   form: FormGroup;
 
   constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<ModalEnviarAprobacionComponent>
+    private readonly fb: FormBuilder,
+    private readonly dialogRef: MatDialogRef<ModalEnviarAprobacionComponent>
   ) {
     this.form = this.fb.group({
       observacion: [''],

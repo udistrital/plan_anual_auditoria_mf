@@ -1,5 +1,5 @@
 <plantilla-tarjeta-contenedora [breadcrumb]="'<p>Gestión Auditoría / Ejecución / <b>Seguimiento e Informes</b></p>'"
-  [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
+[contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
 </plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -25,41 +25,47 @@
               Información general del seguimiento
             </div>
           </div>
-          <div *ngIf="formularioInformacion != null" class="mt-4">
-            <app-formulario-dinamico #formularioInformacionComp [formulario]="formularioInformacion"
-              (submitFormulario)="preguntarGuardadoInformacion($event)">
-            </app-formulario-dinamico>
-             <div class="d-flex align-items-center fondo-acento-50 my-3">
-              <div>
-                <mat-icon>assignment</mat-icon>
-              </div>
-              <div class="mx-3">
-                <h2>Dependencias</h2>
-                Informacion de las dependencias
-              </div>
-            </div>
-            <mat-accordion *ngIf="auditoria" multi="true">
-              <mat-expansion-panel *ngFor="let dep of auditoria.datos_dependencias">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    {{ dep.dependencia_nombre }}
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="p-3">
-                  <app-formulario-dinamico
-                    #formularioDependenciasComp
-                    [formulario]="formularioDependencias"
-                  >
-                  </app-formulario-dinamico>
+          @if (formularioInformacion != null) {
+            <div class="mt-4">
+              <app-formulario-dinamico #formularioInformacionComp [formulario]="formularioInformacion"
+                (submitFormulario)="preguntarGuardadoInformacion($event)">
+              </app-formulario-dinamico>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>assignment</mat-icon>
                 </div>
-              </mat-expansion-panel>
-            </mat-accordion>
-            <div class="d-flex justify-content-end mt-4">
-              <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
-                Guardar y Continuar
-              </button>
+                <div class="mx-3">
+                  <h2>Dependencias</h2>
+                  Informacion de las dependencias
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of auditoria.datos_dependencias; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasComp
+                          [formulario]="formularioDependencias"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+              <div class="d-flex justify-content-end mt-4">
+                <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+                  Guardar y Continuar
+                </button>
+              </div>
             </div>
-          </div>
+          }
         </mat-step>
 
         <!-- Paso 2: Aspectos Generales -->
@@ -80,7 +86,7 @@
           <div class="mt-4">
             <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
               <app-editor-enriquecido formControlName="aspecto_general"
-                placeholder="Edita tu texto..."></app-editor-enriquecido>
+              placeholder="Edita tu texto..."></app-editor-enriquecido>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
                   Volver
@@ -139,7 +145,7 @@
           <div class="mt-4">
             <form [formGroup]="formObservacionesConclusiones" (ngSubmit)="guardarObservacionesConclusiones()">
               <app-editor-enriquecido formControlName="observacion_conclusion"
-                placeholder="Edita tu texto..."></app-editor-enriquecido>
+              placeholder="Edita tu texto..."></app-editor-enriquecido>
 
               <h3 class="titulo-seccion mt-4">Notas</h3>
               <app-editor-enriquecido formControlName="nota" placeholder="Edita tu texto..."></app-editor-enriquecido>

@@ -25,9 +25,10 @@ import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/d
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
-  selector: 'app-editar-informe',
-  templateUrl: './editar-informe.component.html',
-  styleUrls: ['./editar-informe.component.css']
+    selector: 'app-editar-informe',
+    templateUrl: './editar-informe.component.html',
+    styleUrls: ['./editar-informe.component.css'],
+    standalone: false
 })
 
 export class EditarInformeComponent implements OnInit, AfterViewInit {
@@ -90,7 +91,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
     if (this.estadoId === CREANDO_FINAL) {
       return roles.some(r => [
-        environment.ROL.ADMIN, //TODO: QUITAR
         environment.ROL.AUDITOR_EXPERTO,
         environment.ROL.AUDITOR,
         environment.ROL.AUDITOR_ASISTENTE,
@@ -114,7 +114,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL) return false;
     const roles = this.rolService.getRoles();
     return roles.some(r => [
-      environment.ROL.ADMIN, //TODO: QUITAR
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
@@ -137,20 +136,20 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   }
 
   constructor(
-    private alertaService: AlertService,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private route: ActivatedRoute,
-    private dialog: MatDialog,
-    private fb: FormBuilder,
-    private nuxeoService: NuxeoService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private rolService: RolService,
-    private autenticationService: ImplicitAutenticationService,
-    private tercerosCrudService: TercerosCrudService,
-    private userService: UserService,
+    private readonly alertaService: AlertService,
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
+    private readonly fb: FormBuilder,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly rolService: RolService,
+    private readonly autenticationService: ImplicitAutenticationService,
+    private readonly tercerosCrudService: TercerosCrudService,
+    private readonly userService: UserService,
     private readonly changeDetector: ChangeDetectorRef,
   ) {
     this.formAspectosGenerales = this.fb.group({
@@ -243,8 +242,8 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
       firstValueFrom(this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`)),
       firstValueFrom(this.planAnualAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}&limit=0`)),
     ]).then(([temasResp, hallazgosResp]: [any, any]) => {
-      this.temasRaw = temasResp?.Data || [];
-      this.hallazgosRaw = hallazgosResp?.Data || [];
+      this.temasRaw = temasResp?.Data ?? [];
+      this.hallazgosRaw = hallazgosResp?.Data ?? [];
     }).catch(() => {
       this.temasRaw = [];
       this.hallazgosRaw = [];
@@ -255,7 +254,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   cargarInforme(): void {
     this.planAnualAuditoriaService.get(`informe/${this.informeId}`).subscribe({
       next: (response: any) => {
-        if (response && response.Data) {
+        if (response?.Data) {
           this.informeData = response.Data;
           this.poblarFormularios();
           this.cargarEstadoAuditoria();
@@ -337,7 +336,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   poblarFormularios(): void {
     if (!this.informeData) return;
 
-    this.auditoriaId = this.informeData.auditoria_id || '';
+    this.auditoriaId = this.informeData.auditoria_id ?? '';
 
     // Poblar formulario de aspectos generales (paso 2)
     this.formAspectosGenerales.patchValue({
@@ -360,7 +359,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
   poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
-    this.auditoria = auditoria || null;
+    this.auditoria = auditoria ?? null;
     this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
@@ -383,8 +382,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = auditoria?.datos_dependencias[i];
-      console.log('Poblando dependencia:', dep);
-      const correo = auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      const correo = auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep?.dependencia_id,
         jefe_nombre: dep?.jefe_nombre,
@@ -399,29 +397,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
 
   enviarFormInformacion() {
     this.formularioInformacionComponent.onSubmit();
-  }
-
-  preguntarGuardadoInformacion(dataForm: any) {
-    if (!dataForm) {
-      return this.alertaService.showAlert("Formulario incompleto", "Debe llenar todos los campos obligatorios");
-    }
-
-    this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de guardar la información?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.guardarInformacion(dataForm);
-      });
-  }
-
-  guardarInformacion(informacion: any) {
-    const campos = {
-      fecha_emision: informacion.fecha_emision,
-      muestra: informacion.muestra || null,
-    };
-    this.guardarPaso(campos, "La informacion se ha guardado correctamente", "No se pudo guardar la informacion");
   }
 
   private guardarPaso(camposActualizados: any, mensajeExito: string, mensajeError: string): void {
@@ -440,17 +415,72 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     });
   }
 
-  guardarAspectosGenerales() {
-    this.guardarPaso(this.formAspectosGenerales.value, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales");
+  private async confirmarGuardado(accion: () => any): Promise<void> {
+    const confirmado = await this.alertaService.showConfirmAlert("¿Está seguro(a) de guardar la información?");
+    if (!confirmado.value) return;
+    await accion();
   }
 
-  // Guarda los aspectos evaluados (temas, subtemas, hallazgos) y avanza al siguiente paso
+  // Confirmación y guardado paso 1 - Información general
+  guardarInformacion(dataForm: any) {
+    if (!dataForm) {
+      return this.alertaService.showAlert("Formulario incompleto", "Debe llenar todos los campos obligatorios");
+    }
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        { fecha_emision: dataForm.fecha_emision, muestra: dataForm.muestra || null },
+        "La informacion se ha guardado correctamente",
+        "No se pudo guardar la informacion"
+      )
+    );
+  }
+
+  // Confirmación y guardado paso 2 - Aspectos generales
+  guardarAspectosGenerales() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        this.formAspectosGenerales.value,
+        "Los aspectos generales se han guardado correctamente",
+        "No se pudieron guardar los aspectos generales"
+      )
+    );
+  }
+
+  // Confirmación y guardado paso 3 - Temas, subtemas y hallazgos
+  guardarAspectos() {
+    this.confirmarGuardado(() => this.aspectosEvaluadosComponent?.guardarAspectos());
+  }
+  guardarAspectosYContinuar() {
+    this.confirmarGuardado(() => this.guardarAspectosEvaluados());
+  }
   async guardarAspectosEvaluados(): Promise<void> {
     if (this.aspectosEvaluadosComponent) {
       const ok = await this.aspectosEvaluadosComponent.guardarAspectos();
       if (ok) this.stepper.next();
       this.cargarTemasYHallazgos();
     }
+  }
+
+  // Confirmación y guardado paso 5/6 - Respuesta preliminar
+  guardarRespuestaPreliminar() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        this.formRespuestaPreliminar.value,
+        "La respuesta preliminar se ha guardado correctamente",
+        "No se pudo guardar la respuesta preliminar"
+      )
+    );
+  }
+
+  // Confirmación y guardado paso 6/7 - Informe final
+  guardarInformeFinal() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(
+        this.formInformeFinal.value,
+        "El informe final se ha guardado correctamente",
+        "No se pudo guardar el informe final"
+      )
+    );
   }
 
   guardarRevisionAuditado(): void {
@@ -496,10 +526,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
       },
       error: () => this.alertaService.showErrorAlert("Error al registrar las observaciones."),
     });
-  }
-
-  guardarRespuestaPreliminar() {
-    this.guardarPaso(this.formRespuestaPreliminar.value, "La respuesta preliminar se ha guardado correctamente", "No se pudo guardar la respuesta preliminar");
   }
 
   verPreinforme(): void {
@@ -641,10 +667,6 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
           },
         });
     }
-  }
-
-  guardarInformeFinal() {
-    this.guardarPaso(this.formInformeFinal.value, "El infrorme final se ha guardado correctamente", "No se pudo guardar el informe final");
   }
 
   // Se ejecuta cuando se eliminan temas, subtemas o hallazgos

@@ -25,12 +25,14 @@
       <mat-form-field appearance="outline" class="col-12">
         <mat-label>Causa del Hallazgo</mat-label>
         <textarea matInput formControlName="causa"
-          rows="3" placeholder="Descripción de la causa del hallazgo"></textarea>
+        rows="3" placeholder="Descripción de la causa del hallazgo"></textarea>
         <mat-icon matSuffix color="primary" class="tip-suffix"
           [matTooltip]="tooltips.causa"
           matTooltipPosition="right"
-          matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
-        <mat-error *ngIf="form.get('causa')?.hasError('required')">Campo requerido</mat-error>
+        matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
+        @if (form.get('causa')?.hasError('required')) {
+          <mat-error>Campo requerido</mat-error>
+        }
       </mat-form-field>
     </div>
 
@@ -50,15 +52,19 @@
           <mat-form-field appearance="outline" class="col-12">
             <mat-label>Tipo de Acción <span class="text-danger">*</span></mat-label>
             <mat-select formControlName="tipoAccion">
-              <mat-option *ngFor="let tipo of tiposAccion" [value]="tipo.id">
-                {{ tipo.nombre }}
-              </mat-option>
+              @for (tipo of tiposAccion; track tipo) {
+                <mat-option [value]="tipo.id">
+                  {{ tipo.nombre }}
+                </mat-option>
+              }
             </mat-select>
             <mat-icon matSuffix color="primary" class="tip-suffix"
               [matTooltip]="form.get('tipoAccion')?.value === 1 ? tooltips.accionPreventiva : tooltips.accionCorrectiva"
               matTooltipPosition="right"
-              matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
-            <mat-error *ngIf="form.get('tipoAccion')?.hasError('required')">Campo requerido</mat-error>
+            matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
+            @if (form.get('tipoAccion')?.hasError('required')) {
+              <mat-error>Campo requerido</mat-error>
+            }
           </mat-form-field>
         </div>
       </div>
@@ -66,12 +72,14 @@
       <mat-form-field appearance="outline" class="col-12 mb-3">
         <mat-label>Acción Planteada <span class="text-danger">*</span></mat-label>
         <textarea matInput formControlName="accionPlanteada"
-          rows="3" placeholder="Descripción de la acción planteada"></textarea>
+        rows="3" placeholder="Descripción de la acción planteada"></textarea>
         <mat-icon matSuffix color="primary" class="tip-suffix"
           [matTooltip]="tooltips.accionPlanteada"
           matTooltipPosition="right"
-          matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
-        <mat-error *ngIf="form.get('accionPlanteada')?.hasError('required')">Campo requerido</mat-error>
+        matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
+        @if (form.get('accionPlanteada')?.hasError('required')) {
+          <mat-error>Campo requerido</mat-error>
+        }
       </mat-form-field>
 
       <!-- Indicadores: Nombre | Fórmula | Meta -->
@@ -84,7 +92,7 @@
             <mat-icon matSuffix color="primary" class="tip-suffix"
               [matTooltip]="tooltips.nombreIndicador"
               matTooltipPosition="above"
-              matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
+            matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
           </mat-form-field>
         </div>
         <div class="col-md-4 col-12">
@@ -95,7 +103,7 @@
             <mat-icon matSuffix color="primary" class="tip-suffix"
               [matTooltip]="tooltips.formulaIndicador"
               matTooltipPosition="above"
-              matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
+            matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
           </mat-form-field>
         </div>
         <div class="col-md-4 col-12">
@@ -106,7 +114,7 @@
             <mat-icon matSuffix color="primary" class="tip-suffix"
               [matTooltip]="tooltips.meta"
               matTooltipPosition="above"
-              matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
+            matTooltipClass="tooltip-multilinea">help_outline</mat-icon>
           </mat-form-field>
         </div>
       </div>
@@ -131,25 +139,26 @@
       </div>
 
       <!-- Lista de responsables ya agregados -->
-      <div
-        *ngFor="let resp of responsablesAgregados; let i = index"
-        class="auditor-readonly d-flex align-items-center justify-content-between mb-2"
-      >
-        <div class="d-flex align-items-center">
-          <mat-icon class="icon-chip">person</mat-icon>
-          <span>{{ resp.nombre }}</span>
-          <span class="auditor-tag">
-            <mat-icon>badge</mat-icon>
-            Responsable {{ i + 1 }}
-          </span>
+      @for (resp of responsablesAgregados; track resp; let i = $index) {
+        <div
+          class="auditor-readonly d-flex align-items-center justify-content-between mb-2"
+          >
+          <div class="d-flex align-items-center">
+            <mat-icon class="icon-chip">person</mat-icon>
+            <span>{{ resp.nombre }}</span>
+            <span class="auditor-tag">
+              <mat-icon>badge</mat-icon>
+              Responsable {{ i + 1 }}
+            </span>
+          </div>
+          <button mat-icon-button color="warn"
+            (click)="eliminarResponsable(i)"
+            matTooltip="Eliminar responsable"
+            type="button">
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
-        <button mat-icon-button color="warn"
-          (click)="eliminarResponsable(i)"
-          matTooltip="Eliminar responsable"
-          type="button">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
+      }
 
       <!-- Selector + botón Agregar -->
       <div class="d-flex align-items-center mt-2 gap-2">
@@ -157,9 +166,11 @@
           <mat-label>Dependencia Responsable de Acción</mat-label>
           <mat-icon color="primary" matPrefix>person_search</mat-icon>
           <mat-select [(ngModel)]="responsableSeleccionado" [ngModelOptions]="{standalone: true}">
-            <mat-option *ngFor="let dep of dependenciasDisponibles" [value]="dep">
-              {{ dep.nombre }}
-            </mat-option>
+            @for (dep of dependenciasDisponibles; track dep) {
+              <mat-option [value]="dep">
+                {{ dep.nombre }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
         <button mat-raised-button color="primary"

@@ -1,7 +1,6 @@
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import {
   MAT_DIALOG_DATA,
-  MatDialog,
   MatDialogRef,
 } from "@angular/material/dialog";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -13,9 +12,9 @@ import { environment } from "src/environments/environment";
 import { Router } from "@angular/router";
 
 @Component({
-  selector: "app-modal-aprobacion-secretario",
-  templateUrl: "./modal-aprobacion-secretario.component.html",
-  styleUrl: "./modal-aprobacion-secretario.component.css",
+    selector: "app-modal-aprobacion-secretario",
+    templateUrl: "./modal-aprobacion-secretario.component.html",
+    standalone: false
 })
 export class ModalAprobacionSecretarioComponent {
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
@@ -24,14 +23,13 @@ export class ModalAprobacionSecretarioComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    public dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
-    private dialog: MatDialog,
-    private alertService: AlertService,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMidService: PlanAnualAuditoriaMid,
-    private nuxeoService: NuxeoService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router
+    public readonly dialogRef: MatDialogRef<ModalAprobacionSecretarioComponent>,
+    private readonly alertService: AlertService,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMidService: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router
   ) {}
 
   onArchivoSelecionado(event: Event): void {
@@ -71,7 +69,7 @@ export class ModalAprobacionSecretarioComponent {
     const payload = [
       {
         IdTipoDocumento: environment.TIPO_DOCUMENTO.ACTA_COMITE_COORDINADOR,
-        nombre: this.archivo!.name,
+        nombre: this.archivo.name,
         descripcion: "Acta de comité coordinador",
         metadatos: {},
         file: this.archivo,

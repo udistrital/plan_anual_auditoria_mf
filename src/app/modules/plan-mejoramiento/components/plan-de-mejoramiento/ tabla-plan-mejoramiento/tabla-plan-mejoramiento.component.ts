@@ -20,9 +20,10 @@ import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 
 @Component({
-  selector: "app-tabla-plan-mejoramiento",
-  templateUrl: "./tabla-plan-mejoramiento.component.html",
-  styleUrls: ["./tabla-plan-mejoramiento.component.css"],
+    selector: "app-tabla-plan-mejoramiento",
+    templateUrl: "./tabla-plan-mejoramiento.component.html",
+    styleUrls: ["./tabla-plan-mejoramiento.component.css"],
+    standalone: false
 })
 export class TablaPlanMejoramientoComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -191,9 +192,11 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   }
 
   enviarAprobacion(plan: any): void {
+    console.log("Enviar a aprobación:", plan);
   }
 
   verDocumentosAuditoria(plan: any): void {
+    console.log("Ver documentos de auditoría:", plan);
   }
 
   private resetTabla(): void {

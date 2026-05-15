@@ -4,9 +4,10 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 
 @Component({
-  selector: "app-formulario-dinamico",
-  templateUrl: "./formulario-dinamico.component.html",
-  styleUrls: ["./formulario-dinamico.component.css"],
+    selector: "app-formulario-dinamico",
+    templateUrl: "./formulario-dinamico.component.html",
+    styleUrls: ["./formulario-dinamico.component.css"],
+    standalone: false
 })
 export class FormularioDinamicoComponent implements OnInit {
   @Input() formulario: Formulario = { campos: [] };
@@ -31,7 +32,7 @@ export class FormularioDinamicoComponent implements OnInit {
           this.form.addControl(
             campo.nombre,
             this.fb.control(
-              { value: campo.valor || "", disabled: campo.deshabilitado },
+              { value: campo.valor ?? '', disabled: campo.deshabilitado },
               validators
             )
           );
@@ -105,5 +106,24 @@ export class FormularioDinamicoComponent implements OnInit {
   onSelectionChange(event: any, campo: any): void {
     const valorSeleccionado = event.value;
     this.campoSeleccionado.emit({ campo, valor: valorSeleccionado });
+  }
+
+  getQuillFormats(quillConfig: any): string[] | undefined {
+    try {
+      if (!quillConfig?.toolbar) return undefined;
+      const formats = new Set<string>();
+      for (const group of quillConfig.toolbar) {
+        for (const item of group) {
+          if (typeof item === "string") {
+            formats.add(item);
+          } else if (typeof item === "object") {
+            Object.keys(item).forEach((k) => formats.add(k));
+          }
+        }
+      }
+      return formats.size > 0 ? [...formats] : undefined;
+    } catch {
+      return undefined;
+    }
   }
 }

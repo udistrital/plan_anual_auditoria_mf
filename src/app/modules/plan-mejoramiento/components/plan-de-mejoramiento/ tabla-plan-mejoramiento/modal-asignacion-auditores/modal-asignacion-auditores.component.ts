@@ -13,9 +13,10 @@ export interface DatosModalAsignacionAuditores {
 }
 
 @Component({
-  selector: "app-modal-asignacion-auditores",
-  templateUrl: "./modal-asignacion-auditores.component.html",
-  styleUrls: ["./modal-asignacion-auditores.component.css"],
+    selector: "app-modal-asignacion-auditores",
+    templateUrl: "./modal-asignacion-auditores.component.html",
+    styleUrls: ["./modal-asignacion-auditores.component.css"],
+    standalone: false
 })
 export class ModalAsignacionAuditoresComponent implements OnInit {
   /** Texto de descripción del modal (subtítulo con nombre de la auditoría) */
@@ -45,7 +46,7 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
   }[] = [];
 
   /** Auditores marcados para eliminar al guardar */
-  private auditoresAEliminar: string[] = [];
+  private readonly auditoresAEliminar: string[] = [];
 
   cargando: boolean = false;
 

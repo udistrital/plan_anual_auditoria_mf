@@ -1,15 +1,12 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot } from '@angular/router';
-import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
 
-    constructor(
-        private AlertService: AlertService
-    ) { }
+    constructor() { }
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
         const menuInfo = localStorage.getItem('menu');

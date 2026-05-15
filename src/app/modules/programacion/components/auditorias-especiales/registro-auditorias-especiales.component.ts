@@ -11,9 +11,9 @@ import { TablaAuditoriasEspecialesComponent } from "./tabla-auditorias-especiale
 import { UserService } from "src/app/core/services/user.service";
 
 @Component({
-  selector: "app-registro-auditorias-especiales",
-  templateUrl: "./registro-auditorias-especiales.component.html",
-  styleUrls: ["./registro-auditorias-especiales.component.css"],
+    selector: "app-registro-auditorias-especiales",
+    templateUrl: "./registro-auditorias-especiales.component.html",
+    standalone: false
 })
 export class RegistroAuditoriasEspecialesComponent implements OnInit {
   @ViewChild(TablaAuditoriasEspecialesComponent)
@@ -30,12 +30,12 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
   }
 
   constructor(
-    private fb: FormBuilder,
-    private alertaService: AlertService, 
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private userService: UserService,
-    private rolService: RolService
+    private readonly fb: FormBuilder,
+    private readonly alertaService: AlertService, 
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly userService: UserService,
+    private readonly rolService: RolService
   ) {}
 
   ngOnInit(): void {
@@ -96,8 +96,7 @@ export class RegistroAuditoriasEspecialesComponent implements OnInit {
             },
             error: (error) => {
               if (
-                error.error?.Data &&
-                error.error.Data.includes("Ya existe una auditoría")
+                error?.error?.Data.includes("Ya existe una auditoría")
               ) {
                 this.alertaService.showAlert(
                   "Vigencia duplicada",

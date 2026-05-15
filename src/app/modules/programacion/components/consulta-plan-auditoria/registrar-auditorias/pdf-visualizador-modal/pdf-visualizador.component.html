@@ -1,23 +1,25 @@
-<plantilla-modal 
-    [icono]="'list_alt'"
-    [titulo]="'Ver PAA'"
-    [descripcion]="data.actualizado ? 'Plan Anual de Auditoria actualizado' : 'Plan Anual de Auditoria'"
-    [contenido]="contenidoDeModal"
+<plantilla-modal
+  [icono]="'list_alt'"
+  [titulo]="'Ver PAA'"
+  [descripcion]="data.actualizado ? 'Plan Anual de Auditoria actualizado' : 'Plan Anual de Auditoria'"
+  [contenido]="contenidoDeModal"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   <div class="row">
-      <div class="col-12">
-          <div class="d-flex flex-row-reverse my-2">
-              <button mat-button color="primary" (click)="descargarPDF()">
-                Descargar PDF <mat-icon> insert_drive_file</mat-icon>
-              </button>
-          </div>
-          <div *ngIf="pdfLoaded">
-            <pdf-viewer [src]="pdfSrc" [render-text]="true" [original-size]="false" [show-all]="true" [zoom]="1.0"
-              class="pdf-container"
-              style="min-width: 200px; min-height: 520px; width: 100%; height: auto;"></pdf-viewer>
-          </div>
+    <div class="col-12">
+      <div class="d-flex flex-row-reverse my-2">
+        <button mat-button color="primary" (click)="descargarPDF()">
+          Descargar PDF <mat-icon> insert_drive_file</mat-icon>
+        </button>
       </div>
+      @if (pdfLoaded) {
+        <div>
+          <pdf-viewer [src]="pdfSrc" [render-text]="true" [original-size]="false" [show-all]="true" [zoom]="1.0"
+            class="pdf-container"
+          style="min-width: 200px; min-height: 520px; width: 100%; height: auto;"></pdf-viewer>
+        </div>
+      }
+    </div>
   </div>
 </ng-template>

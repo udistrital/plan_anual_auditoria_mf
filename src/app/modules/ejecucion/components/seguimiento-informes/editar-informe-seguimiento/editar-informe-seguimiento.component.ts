@@ -15,9 +15,10 @@ import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditori
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
-  selector: 'app-editar-informe-seguimiento',
-  templateUrl: './editar-informe-seguimiento.component.html',
-  styleUrls: ['./editar-informe-seguimiento.component.css']
+    selector: 'app-editar-informe-seguimiento',
+    templateUrl: './editar-informe-seguimiento.component.html',
+    styleUrls: ['./editar-informe-seguimiento.component.css'],
+    standalone: false
 })
 export class EditarInformeSeguimientoComponent implements OnInit {
   @ViewChild("stepper") stepper!: MatStepper;
@@ -43,14 +44,14 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   orientation: "horizontal" | "vertical" = "horizontal";
 
   constructor(
-    private alertaService: AlertService,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-    private dialog: MatDialog,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly breakpointObserver: BreakpointObserver,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder,
+    private readonly dialog: MatDialog,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly changeDetector: ChangeDetectorRef
   ) {
     this.formAspectosGenerales = this.fb.group({
@@ -90,7 +91,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   cargarInforme(): void {
     this.planAnualAuditoriaService.get(`informe/${this.informeId}`).subscribe({
       next: (response: any) => {
-        if (response && response.Data) {
+        if (response?.Data) {
           this.informeData = response.Data;
           this.poblarFormularios();
           this.cargarAuditoriaParaFormulario();
@@ -136,7 +137,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   // Pobla el formulario de información con datos del informe y de la auditoría enriquecida
   poblarFormularioInformacion(auditoria?: Auditoria): void {
     if (!this.formularioInformacionComponent) return;
-    this.auditoria = auditoria || null;
+    this.auditoria = auditoria ?? null;
     this.changeDetector.detectChanges();
 
     const valoresIniciales: any = {
@@ -159,7 +160,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = this.auditoria?.datos_dependencias[i];
-      const correo = this.auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo || "";
+      const correo = this.auditoria?.correo_complementario?.find((c: any) => c.dependencia_id === dep?.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep?.dependencia_id,
         jefe_nombre: dep?.jefe_nombre,
@@ -192,7 +193,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   guardarInformacion(informacion: any) {
     const campos = {
       fecha_emision: informacion.fecha_emision_informe,
-      muestra: informacion.muestra || null,
+      muestra: informacion.muestra ?? null,
     };
     this.guardarPaso(campos, "La información se ha guardado correctamente", "No se pudo guardar la información");
   }

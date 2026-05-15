@@ -2,14 +2,14 @@ import { Component } from "@angular/core";
 import { RolService } from "./core/services/rol.service";
 
 @Component({
-  selector: 'plan-anual-auditoria-mf',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+    selector: 'plan-anual-auditoria-mf',
+    templateUrl: './app.component.html',
+    standalone: false
 })
 export class AppComponent {
   title = "plan_anual_auditoria_mf";
   
-  constructor(private rolService: RolService) {}
+  constructor(private readonly rolService: RolService) {}
 
   ngOnInit(): void {
     this.rolService.cargarRoles();

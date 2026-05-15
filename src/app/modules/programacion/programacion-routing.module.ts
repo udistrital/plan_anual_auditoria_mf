@@ -7,7 +7,6 @@ import { RegistrarPlanComponent } from "./components/consulta-plan-auditoria/reg
 import { RevisionJefeComponent } from "./components/consulta-plan-auditoria/revision-jefe/revision-jefe.component";
 import { RevisionSecretarioComponent } from "./components/consulta-plan-auditoria/revision-secretario/revision-secretario.component";
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
-import { BasesComponent } from "src/app/shared/elements/components/bases/bases.component";
 
 const routes: Routes = [
   {

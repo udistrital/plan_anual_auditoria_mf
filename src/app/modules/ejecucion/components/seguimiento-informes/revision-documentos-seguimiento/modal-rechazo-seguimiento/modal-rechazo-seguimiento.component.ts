@@ -7,9 +7,9 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-rechazo-seguimiento",
-  templateUrl: "./modal-rechazo-seguimiento.component.html",
-  styleUrl: "./modal-rechazo-seguimiento.component.css",
+    selector: "app-modal-rechazo-seguimiento",
+    templateUrl: "./modal-rechazo-seguimiento.component.html",
+    standalone: false
 })
 export class ModalRechazoSeguimientoComponent {
   formObservaciones!: FormGroup;
@@ -24,11 +24,11 @@ export class ModalRechazoSeguimientoComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    public dialogRef: MatDialogRef<ModalRechazoSeguimientoComponent>,
-    private alertService: AlertService,
-    private fb: FormBuilder,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router
+    public readonly dialogRef: MatDialogRef<ModalRechazoSeguimientoComponent>,
+    private readonly alertService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router
   ) { }
 
   ngOnInit() {

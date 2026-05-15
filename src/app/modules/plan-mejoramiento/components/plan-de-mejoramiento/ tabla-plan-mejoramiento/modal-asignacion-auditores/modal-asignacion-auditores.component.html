@@ -18,7 +18,7 @@
           </div>
           <mat-form-field appearance="outline" class="col-12">
             <mat-label>Nombre de la auditoría</mat-label>
-            <input matInput [value]="data.auditoria?.titulo || ''" readonly />
+            <input matInput [value]="data.auditoria?.titulo ?? ''" readonly />
           </mat-form-field>
         </div>
         <div class="col-6 ps-2">
@@ -27,7 +27,7 @@
           </div>
           <mat-form-field appearance="outline" class="col-12">
             <mat-label>Tipo de evaluación</mat-label>
-            <input matInput [value]="data.auditoria?.tipo_evaluacion_nombre || ''" readonly />
+            <input matInput [value]="data.auditoria?.tipo_evaluacion_nombre ?? ''" readonly />
           </mat-form-field>
         </div>
       </div>
@@ -46,15 +46,21 @@
 
     <!-- Fila 3: Auditores Responsables Auditoría — se muestran de inmediato (solo lectura) -->
     <div class="col-12 mb-3">
-      <p class="mb-2"><b>Auditor(es) Responsables Auditoría</b></p>
       <table class="tabla-auditores-readonly w-100">
-        <tbody>
-          <tr *ngFor="let auditor of auditoresAuditoria">
-            <td>
-              <mat-icon class="icon-chip">person</mat-icon>
-              {{ auditor.nombre }}
-            </td>
+        <thead>
+          <tr>
+            <th><b>Auditor(es) Responsables Auditoría</b></th>
           </tr>
+        </thead>
+        <tbody>
+          @for (auditor of auditoresAuditoria; track auditor) {
+            <tr>
+              <td>
+                <mat-icon class="icon-chip">person</mat-icon>
+                {{ auditor.nombre }}
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
@@ -66,27 +72,28 @@
       </p>
 
       <!-- Lista de auditores del plan ya agregados -->
-      <div
-        *ngFor="let auditor of auditoresPlan; let i = index"
-        class="fondo-chip d-flex align-items-center justify-content-between mb-2"
-      >
-        <div class="d-flex align-items-center">
-          <mat-icon class="icon-chip">person</mat-icon>
-          <span>{{ auditor.nombre }}</span>
-          <span class="auditor-tag">
-            <mat-icon>badge</mat-icon>
-            Auditor {{ i + 1 }}
-          </span>
+      @for (auditor of auditoresPlan; track auditor; let i = $index) {
+        <div
+          class="fondo-chip d-flex align-items-center justify-content-between mb-2"
+          >
+          <div class="d-flex align-items-center">
+            <mat-icon class="icon-chip">person</mat-icon>
+            <span>{{ auditor.nombre }}</span>
+            <span class="auditor-tag">
+              <mat-icon>badge</mat-icon>
+              Auditor {{ i + 1 }}
+            </span>
+          </div>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="eliminarAuditorPlan(i)"
+            matTooltip="Eliminar auditor del plan"
+            >
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
-        <button
-          mat-icon-button
-          color="warn"
-          (click)="eliminarAuditorPlan(i)"
-          matTooltip="Eliminar auditor del plan"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
+      }
 
       <!-- Selector: spinner solo aquí mientras carga, el resto del modal ya es visible -->
       <div class="d-flex align-items-center mt-2 gap-2">
@@ -94,16 +101,19 @@
           <mat-label>Seleccione un auditor</mat-label>
           <mat-icon color="primary" matPrefix>person_search</mat-icon>
           <mat-select [(ngModel)]="auditorSeleccionado" [disabled]="cargando">
-            <mat-option *ngIf="cargando" disabled>
-              <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
-              Cargando auditores...
-            </mat-option>
-            <mat-option
-              *ngFor="let auditor of auditoresDisponibles"
-              [value]="auditor"
-            >
-              {{ auditor.nombre }}
-            </mat-option>
+            @if (cargando) {
+              <mat-option disabled>
+                <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
+                Cargando auditores...
+              </mat-option>
+            }
+            @for (auditor of auditoresDisponibles; track auditor) {
+              <mat-option
+                [value]="auditor"
+                >
+                {{ auditor.nombre }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
         <button
@@ -112,7 +122,7 @@
           class="btn-agregar mb-4"
           (click)="agregarAuditorPlan()"
           [disabled]="!auditorSeleccionado || cargando"
-        >
+          >
           <mat-icon>add</mat-icon> Agregar Auditor
         </button>
       </div>
@@ -134,7 +144,7 @@
       color="warn"
       class="btn-cerrar"
       [mat-dialog-close]
-    >
+      >
       <mat-icon>close</mat-icon> No, cerrar
     </button>
     <button
@@ -142,7 +152,7 @@
       color="primary"
       (click)="guardarYCerrar()"
       [disabled]="cargando"
-    >
+      >
       <mat-icon>save</mat-icon> Sí, guardar y cerrar
     </button>
   </div>

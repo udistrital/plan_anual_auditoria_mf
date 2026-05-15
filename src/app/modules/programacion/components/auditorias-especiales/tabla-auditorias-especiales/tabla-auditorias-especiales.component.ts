@@ -15,13 +15,13 @@ import {
   colocacionesContructorTablaEspeciales,
 } from "./tabla-auditorias-especiales.utilidades";
 import { catchError, firstValueFrom, map, Observable, of, throwError } from 'rxjs';
-import { error } from 'node:console';
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: 'app-tabla-auditorias-especiales',
-  templateUrl: './tabla-auditorias-especiales.component.html',
-  styleUrl: './tabla-auditorias-especiales.component.css'
+    selector: 'app-tabla-auditorias-especiales',
+    templateUrl: './tabla-auditorias-especiales.component.html',
+    styleUrl: './tabla-auditorias-especiales.component.css',
+    standalone: false
 })
 export class TablaAuditoriasEspecialesComponent {
   @Input() vigenciaId: number | null = null;
@@ -42,10 +42,10 @@ export class TablaAuditoriasEspecialesComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private alertaService: AlertService,
-    private dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService,
+    private readonly dialog: MatDialog,
   ) {
     this.construirTabla();
   }
@@ -86,22 +86,22 @@ export class TablaAuditoriasEspecialesComponent {
 
           const auditoriasPadre: AuditoriaEspecialTablaRow[] = res.Data.map(
             (item: Auditoria, index: number): AuditoriaEspecialTablaRow => {
-              const auditoriaId = item._id || "";
+              const auditoriaId = item._id ?? '';
               return {
                 numero: (offset + index + 1).toString(),
                 _id: auditoriaId,
-                titulo: item.titulo || "Sin Titulo",
+                titulo: item.titulo ?? "Sin Titulo",
                 subtitulo: "",
-                tipo_evaluacion_id: item.tipo_evaluacion_id || 0,
-                tipo_evaluacion_nombre: item.tipo_evaluacion_nombre || "Sin Asignar",
-                cronograma_id: item.cronograma_id || [],
-                cronograma_nombre: item.cronograma_nombre || [],
-                macroproceso_id: item.macroproceso_id || [],
-                proceso_id: item.proceso_id || [],
-                dependencia_id: item.dependencia_id || [],
-                estado_id: item.estado_id || 0,
-                estado_nombre: item.estado_nombre || "Sin estado",
-                cantidad_auditorias: item.cantidad_auditorias || 0,
+                tipo_evaluacion_id: item.tipo_evaluacion_id ?? 0,
+                tipo_evaluacion_nombre: item.tipo_evaluacion_nombre ?? "Sin Asignar",
+                cronograma_id: item.cronograma_id ?? [],
+                cronograma_nombre: item.cronograma_nombre ?? [],
+                macroproceso_id: item.macroproceso_id ?? [],
+                proceso_id: item.proceso_id ?? [],
+                dependencia_id: item.dependencia_id ?? [],
+                estado_id: item.estado_id ?? 0,
+                estado_nombre: item.estado_nombre ?? "Sin estado",
+                cantidad_auditorias: item.cantidad_auditorias ?? 0,
                 esAuditoriaConcreta: false,
                 filaOculta: false,
                 expandido: false,
@@ -130,23 +130,23 @@ export class TablaAuditoriasEspecialesComponent {
   editarAuditoria(auditoria?: AuditoriaEspecialTablaRow) {
     const auditoriaPadre: AuditoriaPadreRequest | undefined = auditoria
       ? {
-          id: auditoria._id || "",
-          auditoria: auditoria.titulo || "Sin Titulo",
-          tipoEvaluacion: auditoria.tipo_evaluacion_nombre || "Sin Asignar",
-          tipoEvaluacionId: auditoria.tipo_evaluacion_id || 0,
-          macroprocesos: auditoria.macroproceso || "Sin macroprocesos",
-          macroprocesosId: auditoria.macroproceso_id || [],
-          procesos: auditoria.proceso || "Sin procesos",
-          procesosId: auditoria.proceso_id || [],
-          dependencias: auditoria.dependencia || "Sin dependencias",
-          dependenciasId: auditoria.dependencia_id || [],
-          cronograma: auditoria.cronograma_nombre?.join(", ") || "Sin Cronograma",
-          cronogramaId: auditoria.cronograma_id || [],
-          cantidadAuditorias: auditoria.cantidad_auditorias || 0,
-          vigencia_id: auditoria.vigencia_id || this.vigenciaId || 0,
-          estado_nombre: auditoria.estado_nombre || "Sin estado",
-          estado: auditoria.estado_nombre || "Sin estado",
-          estado_id: auditoria.estado_id || 0,
+          id: auditoria._id ?? '',
+          auditoria: auditoria.titulo ?? "Sin Titulo",
+          tipoEvaluacion: auditoria.tipo_evaluacion_nombre ?? "Sin Asignar",
+          tipoEvaluacionId: auditoria.tipo_evaluacion_id ?? 0,
+          macroprocesos: auditoria.macroproceso ?? "Sin macroprocesos",
+          macroprocesosId: auditoria.macroproceso_id ?? [],
+          procesos: auditoria.proceso ?? "Sin procesos",
+          procesosId: auditoria.proceso_id ?? [],
+          dependencias: auditoria.dependencia ?? "Sin dependencias",
+          dependenciasId: auditoria.dependencia_id ?? [],
+          cronograma: auditoria.cronograma_nombre?.join(", ") ?? "Sin Cronograma",
+          cronogramaId: auditoria.cronograma_id ?? [],
+          cantidadAuditorias: auditoria.cantidad_auditorias ?? 0,
+          vigencia_id: (auditoria.vigencia_id ?? this.vigenciaId) ?? 0,
+          estado_nombre: auditoria.estado_nombre ?? "Sin estado",
+          estado: auditoria.estado_nombre ?? "Sin estado",
+          estado_id: auditoria.estado_id ?? 0,
           auditores: [],
         }
       : undefined;
@@ -159,7 +159,7 @@ export class TablaAuditoriasEspecialesComponent {
         usuario_rol: this.usuarioRol,
         planAuditoriaId: null,
         vigenciaId: this.vigenciaId,
-        isEditExtraordinario: false, // TODO: Definir si se considera auditoría extraordinaria
+        isEditExtraordinario: false,
         auditoria: auditoriaPadre,
       },
     });
@@ -222,21 +222,17 @@ export class TablaAuditoriasEspecialesComponent {
     const auditoriaParaAsignacion: AuditoriaAsignacion = {
       _id: auditoria._id,
       activo: true,
-      titulo: auditoria.titulo || "Sin Titulo",
-      subtitulo: auditoria.subtitulo || "",
+      titulo: auditoria.titulo ?? "Sin Titulo",
+      subtitulo: auditoria.subtitulo ?? '',
       tipo_evaluacion_nombre: auditoria.tipo_evaluacion_nombre ? [auditoria.tipo_evaluacion_nombre] : [],
       tipo_evaluacion_id: auditoria.tipo_evaluacion_id ? [auditoria.tipo_evaluacion_id] : [],
-      cronograma_nombre: Array.isArray(auditoria.cronograma_nombre)
-        ? auditoria.cronograma_nombre
-        : (auditoria.cronograma_nombre ? [auditoria.cronograma_nombre] : []),
-      cronograma_id: Array.isArray(auditoria.cronograma_id)
-        ? auditoria.cronograma_id
-        : (auditoria.cronograma_id ? [auditoria.cronograma_id] : []),
-      vigencia_id: auditoria.vigencia_id || this.vigenciaId || 0,
+      cronograma_nombre: auditoria?.cronograma_nombre!,
+      cronograma_id: auditoria.cronograma_id!,
+      vigencia_id: (auditoria.vigencia_id ?? this.vigenciaId) ?? 0,
       vigencia_nombre: "",
-      estado_nombre: auditoria.estado_nombre || "Sin estado",
-      estado_id: auditoria.estado_id || 0,
-      auditores: auditoria.auditores_id || [],
+      estado_nombre: auditoria.estado_nombre ?? "Sin estado",
+      estado_id: auditoria.estado_id ?? 0,
+      auditores: auditoria.auditores_id ?? [],
     };
 
     const dialogRef = this.dialog.open(ModalAgregarAuditorComponent, {
@@ -304,7 +300,7 @@ export class TablaAuditoriasEspecialesComponent {
   }
 
   numeroVisual(auditoria: AuditoriaEspecialTablaRow): string | number {
-    return auditoria.numero || "";
+    return auditoria.numero ?? '';
   }
 
   generarUnaAuditoria(auditoriaPadre: AuditoriaEspecialTablaRow): void {
@@ -344,7 +340,7 @@ export class TablaAuditoriasEspecialesComponent {
         },
         error: (error) => {
           const backendMessage =
-            error?.error?.message || "Error al generar la auditoría";
+            error?.error?.message ?? "Error al generar la auditoría";
         
           const mensajeTexto = Array.isArray(backendMessage)
             ? backendMessage.join(" ")
@@ -358,8 +354,7 @@ export class TablaAuditoriasEspecialesComponent {
   async traerAuditoriasConcretas(
     auditoriaPadre: AuditoriaEspecialTablaRow
   ): Promise<AuditoriaEspecialTablaRow[]> {
-    const padreId = auditoriaPadre._id || "padre-sin-id";
-    const numeroPadre = auditoriaPadre.numero || "0";
+    const padreId = auditoriaPadre._id ?? "padre-sin-id";
 
     const auditoriasConcretas = await firstValueFrom(
       this.planAuditoriaMid.get(`auditoria?query=activo:true,auditoria_padre_id:${auditoriaPadre._id}&auditores`).pipe(
@@ -376,23 +371,23 @@ export class TablaAuditoriasEspecialesComponent {
                 numero: "",
                 _id: item._id || `${padreId}-concreta-${index + 1}`,
                 auditoria_padre_id: padreId,
-                titulo: item.titulo || "Sin Titulo",
-                subtitulo: item.subtitulo || `Sin Subtítulo (#${numeroConcreto})`,
-                tipo_evaluacion_id: item.tipo_evaluacion_id || 0,
-                tipo_evaluacion_nombre: item.tipo_evaluacion_nombre || "Sin Asignar",
-                cronograma_id: item.cronograma_id || [],
-                cronograma_nombre: item.cronograma_nombre || [],
-                macroproceso_id: item.macroproceso_id || [],
-                macroproceso_nombre: item.macroproceso_nombre || [],
-                proceso_id: item.proceso_id || [],
-                proceso_nombre: item.proceso_nombre || [],
-                dependencia_id: item.dependencia_id || [],
-                dependencia_nombre: item.dependencia_nombre || [],
-                estado_id: item.estado_id || 0,
-                estado_nombre: item.estado_nombre || "Sin estado",
-                vigencia_id: item.vigencia_id || 0,
-                auditores_id: item.auditores?.map((auditor) => auditor.auditor_id) || [],
-                auditores_nombre: item.auditores?.map((auditor) => auditor.auditor_nombre) || [],
+                titulo: item.titulo ?? "Sin Titulo",
+                subtitulo: item.subtitulo ?? `Sin Subtítulo (#${numeroConcreto})`,
+                tipo_evaluacion_id: item.tipo_evaluacion_id ?? 0,
+                tipo_evaluacion_nombre: item.tipo_evaluacion_nombre ?? "Sin Asignar",
+                cronograma_id: item.cronograma_id ?? [],
+                cronograma_nombre: item.cronograma_nombre ?? [],
+                macroproceso_id: item.macroproceso_id ?? [],
+                macroproceso_nombre: item.macroproceso_nombre ?? [],
+                proceso_id: item.proceso_id ?? [],
+                proceso_nombre: item.proceso_nombre ?? [],
+                dependencia_id: item.dependencia_id ?? [],
+                dependencia_nombre: item.dependencia_nombre ?? [],
+                estado_id: item.estado_id ?? 0,
+                estado_nombre: item.estado_nombre ?? "Sin estado",
+                vigencia_id: item.vigencia_id ?? 0,
+                auditores_id: item.auditores?.map((auditor) => auditor.auditor_id) ?? [],
+                auditores_nombre: item.auditores?.map((auditor) => auditor.auditor_nombre) ?? [],
                 esAuditoriaConcreta: true,
                 filaOculta: true,
               };

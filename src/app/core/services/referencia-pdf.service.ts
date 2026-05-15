@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
@@ -29,7 +28,6 @@ export interface ConsultaDocumentosReferenciaOptions {
 })
 export class ReferenciaPdfService {
   constructor(
-    private readonly http: HttpClient,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService
   ) { }
 
@@ -48,7 +46,7 @@ export class ReferenciaPdfService {
       nuxeo_id: nuxeoResponse.Id,
       nuxeo_enlace: nuxeoResponse.Enlace,
       tipo_id: tipo_id,
-      metadatos: metadatos || {},
+      metadatos: metadatos ?? {},
       activo: true,
       fecha_creacion: new Date().toISOString(),
     };
@@ -73,7 +71,7 @@ export class ReferenciaPdfService {
         .get(`documento?query=${queryBase}${queryMetadatos}`)
         .pipe(
           switchMap((response) => {
-            if (response && response.Data.length > 0) {
+            if (response?.Data?.length > 0) {
               const documentoId = response.Data[0]._id; // ID del documento existente
               console.log("actualizacion payload", payload);
               return this.planAnualAuditoriaService.put(
@@ -97,12 +95,7 @@ export class ReferenciaPdfService {
       )
       .pipe(
         map((response: any) => {
-          if (
-            response &&
-            response.Data &&
-            Array.isArray(response.Data) &&
-            response.Data.length > 0
-          ) {
+          if (response?.Data?.length > 0) {
             const firstItem = response.Data[0];
             if (firstItem.nuxeo_enlace) {
               return firstItem.nuxeo_enlace;
@@ -131,7 +124,7 @@ export class ReferenciaPdfService {
       )
       .pipe(
         map((response: any) => {
-          if (response && response.Data && Array.isArray(response.Data)) {
+          if (Array.isArray(response?.Data)) {
             const documentosValidos = response.Data.filter(
               (item: DocumentoReferenciaPdf) => item?.nuxeo_enlace && item?.tipo_id
             );

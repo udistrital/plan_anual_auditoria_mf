@@ -1,17 +1,19 @@
-<plantilla-modal 
-    [icono]="'list_alt'"
-    [titulo]="'Ver Compromiso Ético'"
-    [descripcion]="'Compromiso Ético de auditoría interna'"
-    [contenido]="contenidoDeModal"
-    [footer]="footerDeModal"
+<plantilla-modal
+  [icono]="'list_alt'"
+  [titulo]="'Ver Compromiso Ético'"
+  [descripcion]="'Compromiso Ético de auditoría interna'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   <app-pdf-visualizador [base64Document]="base64"></app-pdf-visualizador>
 </ng-template>
 <ng-template #footerDeModal>
-  <button *ngIf="!soloLectura" mat-raised-button color="primary" (click)="actualizarDocumento()">
-    <mat-icon>file_upload</mat-icon>
-    Actualizar
-  </button>
+  @if (!soloLectura) {
+    <button mat-raised-button color="primary" (click)="actualizarDocumento()">
+      <mat-icon>file_upload</mat-icon>
+      Actualizar
+    </button>
+  }
 </ng-template>

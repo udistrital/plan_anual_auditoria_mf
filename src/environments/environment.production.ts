@@ -5,6 +5,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
+  NOTIFICACIONES_HABILITADAS: false,
   ORIGEN_CORREO_NOTIFICACIONES:
     "sisifonotificaciones@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
@@ -20,8 +21,8 @@ export const environment = {
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
-  PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
-  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "f5703026-3fc8-48d1-bb41-fd2479656c23",
+  PLANTILLA_CARGUE_MASIVO: "e29463ce-f900-425e-bda0-600afad90afd",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "ffcd463a-7c83-4f94-9578-b932c62a699f",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -192,12 +193,12 @@ export const environment = {
   },
 
   TIPO_DOCUMENTO: {
-    ACTA_COMITE_COORDINADOR: 179,
-    PROGRAMA_TRABAJO_AUDITORIA: 180,
-    MATRIZ_FUNCION_PUBLICA: 181,
-    PLANTILLAS: 182,
-    PLANES_AUDITORIA: 178,
-    ACTA_MODIFICACION: 194,
+    ACTA_COMITE_COORDINADOR: 118,
+    PROGRAMA_TRABAJO_AUDITORIA: 119,
+    MATRIZ_FUNCION_PUBLICA: 120,
+    PLANTILLAS: 121,
+    PLANES_AUDITORIA: 117,
+    ACTA_MODIFICACION: 122,
   },
 
   TIPO_DOCUMENTO_PARAMETROS: {
@@ -220,19 +221,19 @@ export const environment = {
       VALORES: {
         MACROPROCESO: {
           PARAMETRO_ID: 5267,
-          TIPO_PARAMETRO_ID: 148,
+          TIPO_PARAMETRO_ID: 108,
         },
         PROCESO: {
           PARAMETRO_ID: 5268,
-          TIPO_PARAMETRO_ID: 149,
+          TIPO_PARAMETRO_ID: 109,
         },
         DEPENDENCIA: {
-          PARAMETRO_ID: 6798,
+          PARAMETRO_ID: 5245,
         },
       },
     },
-    CARGOS_LIDER_ID: 150,
-    CARGOS_RESPONSABLE_ID: 151,
+    CARGOS_LIDER_ID: 0,
+    CARGOS_RESPONSABLE_ID: 0,
   },
 
   ROL: {

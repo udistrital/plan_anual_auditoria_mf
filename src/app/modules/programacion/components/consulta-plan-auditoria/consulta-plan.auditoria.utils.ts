@@ -84,7 +84,7 @@ export class DocumentoUtils {
       this.planAnualAuditoriaMid.get(url).pipe(
         map((response: any): string => {
           console.debug("Respuesta recibida del servicio de generación de PDF", response);
-          if (response && response.Data)
+          if (response?.Data)
             return response.Data;
 
           throw new Error("Respuesta inválida del servicio de generación de PDF")
@@ -166,7 +166,7 @@ export class DocumentoUtils {
     tipo_id: number
   ): Observable<boolean> {
     console.debug("Intentando guardar referencia para el documento", nuxeoResponse);
-    if (!nuxeoResponse || !nuxeoResponse.res || !nuxeoResponse.res.Enlace)
+    if (!nuxeoResponse?.res?.Enlace)
       return of(false);
     
     return this.referenciaPdfService

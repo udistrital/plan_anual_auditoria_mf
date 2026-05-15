@@ -22,25 +22,25 @@ export const seguimientosConstructorTabla = [
   {
     columnDef: "auditores",
     header: "Auditor(es)",
-    cell: (seguimiento: any) => seguimiento.auditores_nombres || "Auditor asignado",
+    cell: (seguimiento: any) => seguimiento.auditores_nombres ?? "Auditor asignado",
     sortable: false,
   },
   {
     columnDef: "dependencia",
     header: "Dependencia",
-    cell: (seguimiento: any) => seguimiento.dependencia_nombre || "Dependencia",
+    cell: (seguimiento: any) => seguimiento.dependencia_nombre ?? "Dependencia",
     sortable: false,
   },
   {
     columnDef: "lider",
     header: "Líder",
-    cell: (seguimiento: any) => seguimiento.lider_nombre || "Nombre Líder",
+    cell: (seguimiento: any) => seguimiento.lider_nombre ?? "Nombre Líder",
     sortable: false,
   },
   {
     columnDef: "responsable",
     header: "Responsable",
-    cell: (seguimiento: any) => seguimiento.responsable_nombre || "Nombre responsable",
+    cell: (seguimiento: any) => seguimiento.responsable_nombre ?? "Nombre responsable",
     sortable: false,
   },
   {

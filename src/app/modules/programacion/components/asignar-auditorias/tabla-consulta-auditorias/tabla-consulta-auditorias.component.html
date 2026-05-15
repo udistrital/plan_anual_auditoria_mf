@@ -1,4 +1,4 @@
-<ng-container *ngIf="banderaTabla">
+@if (banderaTabla) {
   <div class="row mt-4">
     <div class="col-12">
       <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
@@ -9,56 +9,59 @@
     <div class="col-12">
       <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
-          <ng-container
-            *ngFor="let columna of auditoriasContructorTabla"
-            [matColumnDef]="columna.columnDef"
-          >
-            <th
-              mat-header-cell
-              *matHeaderCellDef
-              mat-sort-header
-              [disabled]="!columna.sortable"
-            >
-              <b>{{ columna.header }}</b>
-            </th>
-
-            <td
-              mat-cell
-              *matCellDef="let row; let i = index"
-              [ngClass]="{ 'even-row': i % 2 === 0 }"
-            >
-              <ng-container
-                *ngIf="columna.columnDef as colDef"
-                [ngSwitch]="colDef"
+          @for (columna of auditoriasContructorTabla; track columna) {
+            <ng-container
+              [matColumnDef]="columna.columnDef"
               >
-                <div *ngSwitchCase="'numero'">
-                  <span>{{ pageIndex * pageSize + i + 1 }}</span>
-                </div>
-
-                <div *ngSwitchCase="'acciones'">
-                  <button
-                    mat-icon-button
-                    [matMenuTriggerFor]="menu"
-                    color="primary"
-                  >
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
-                    <button (click)="agregarAuditor(row)" mat-menu-item>
-                      <mat-icon color="primary">edit</mat-icon>
-                      Asignar Auditor(es)
-                    </button>
-                  </mat-menu>
-                </div>
-                <div *ngSwitchDefault>
-                  <span>
-                    {{ columna.cell(row) }}
-                  </span>
-                </div>
-              </ng-container>
-            </td>
-          </ng-container>
-
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header
+                [disabled]="!columna.sortable"
+                >
+                <b>{{ columna.header }}</b>
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let row; let i = index"
+                [ngClass]="{ 'even-row': i % 2 === 0 }"
+                >
+                @if (columna.columnDef; as colDef) {
+                  @switch (colDef) {
+                    @case ('numero') {
+                      <div>
+                        <span>{{ pageIndex * pageSize + i + 1 }}</span>
+                      </div>
+                    }
+                    @case ('acciones') {
+                      <div>
+                        <button
+                          mat-icon-button
+                          [matMenuTriggerFor]="menu"
+                          color="primary"
+                          >
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                          <button (click)="agregarAuditor(row)" mat-menu-item>
+                            <mat-icon color="primary">edit</mat-icon>
+                            Asignar Auditor(es)
+                          </button>
+                        </mat-menu>
+                      </div>
+                    }
+                    @default {
+                      <div>
+                        <span>
+                          {{ columna.cell(row) }}
+                        </span>
+                      </div>
+                    }
+                  }
+                }
+              </td>
+            </ng-container>
+          }
           <tr mat-header-row *matHeaderRowDef="tablaColumnas"></tr>
           <tr mat-row *matRowDef="let row; columns: tablaColumnas"></tr>
           <br />
@@ -75,4 +78,4 @@
       ></mat-paginator>
     </div>
   </div>
-</ng-container>
+}

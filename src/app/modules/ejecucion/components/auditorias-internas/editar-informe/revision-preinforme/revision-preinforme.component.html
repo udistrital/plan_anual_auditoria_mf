@@ -1,170 +1,171 @@
 <div>
 
-  <div *ngIf="cargando" class="d-flex justify-content-center py-4">
-    <p>Cargando...</p>
-  </div>
+  @if (cargando) {
+    <div class="d-flex justify-content-center py-4">
+      <p>Cargando...</p>
+    </div>
+  }
 
-  <div *ngIf="!cargando && temas.length === 0" class="text-center text-muted py-4">
-    No hay temas registrados para este informe.
-  </div>
+  @if (!cargando && temas.length === 0) {
+    <div class="text-center text-muted py-4">
+      No hay temas registrados para este informe.
+    </div>
+  }
 
   <div class="tree">
 
     <!-- ── TEMA ── -->
-    <div class="tree-node" *ngFor="let temaItem of temas; let i = index">
-      <div class="node-row tema-row">
-        <span class="node-dot tema-dot"></span>
-        <span class="nivel-label">Tema</span>
-        <span class="indice">{{ i + 2 }}</span>
-        <mat-form-field appearance="outline" class="node-input">
-          <mat-label>Nombre del Tema</mat-label>
-          <input matInput [value]="temaItem.tema.titulo" disabled>
-        </mat-form-field>
-      </div>
-
-      <div class="node-children">
-
-        <!-- ── SUBTEMA ── -->
-        <div class="tree-node" *ngFor="let subtemaItem of temaItem.subtemas; let j = index">
-          <div class="node-row subtema-row">
-            <span class="node-dot subtema-dot"></span>
-            <span class="nivel-label">Subtema</span>
-            <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
-            <mat-form-field appearance="outline" class="node-input">
-              <mat-label>Nombre del Subtema</mat-label>
-              <input matInput [value]="subtemaItem.subtema.titulo" disabled>
-            </mat-form-field>
-          </div>
-
-          <div class="node-children">
-
-            <!-- ── HALLAZGO ── -->
-            <div class="tree-node" *ngFor="let item of subtemaItem.hallazgos; let k = index">
-              <div class="node-row hallazgo-row">
-                <span class="node-dot hallazgo-dot"></span>
-                <span class="nivel-label">Hallazgo</span>
-                <span class="indice" *ngIf="!item.hallazgo.rechazado">{{ i + 2 }}.{{ j + 1 }}.{{ hallazgoNumeral(subtemaItem.hallazgos, k) }}</span>
-                <ng-container *ngIf="item.hallazgo?.rechazado">
-                  <div class="status">
-                    <mat-icon color="primary">block</mat-icon>
-                    <span>Hallazgo rechazado</span>
-                  </div>
-                </ng-container>
+    @for (temaItem of temas; track temaItem; let i = $index) {
+      <div class="tree-node">
+        <div class="node-row tema-row">
+          <span class="node-dot tema-dot"></span>
+          <span class="nivel-label">Tema</span>
+          <span class="indice">{{ i + 2 }}</span>
+          <mat-form-field appearance="outline" class="node-input">
+            <mat-label>Nombre del Tema</mat-label>
+            <input matInput [value]="temaItem.tema.titulo" disabled>
+          </mat-form-field>
+        </div>
+        <div class="node-children">
+          <!-- ── SUBTEMA ── -->
+          @for (subtemaItem of temaItem.subtemas; track subtemaItem; let j = $index) {
+            <div class="tree-node">
+              <div class="node-row subtema-row">
+                <span class="node-dot subtema-dot"></span>
+                <span class="nivel-label">Subtema</span>
+                <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
+                <mat-form-field appearance="outline" class="node-input">
+                  <mat-label>Nombre del Subtema</mat-label>
+                  <input matInput [value]="subtemaItem.subtema.titulo" disabled>
+                </mat-form-field>
               </div>
-
-              <div class="node-body">
-                <mat-form-field appearance="outline" class="hallazgo-input">
-                  <mat-label>Criterio</mat-label>
-                  <input matInput [value]="item.hallazgo.criterio" disabled>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="hallazgo-input">
-                  <mat-label>Hallazgo</mat-label>
-                  <input matInput [value]="item.hallazgo.titulo" disabled>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="hallazgo-input">
-                  <mat-label>Descripción</mat-label>
-                  <textarea matInput [value]="item.hallazgo.descripcion" rows="3" disabled></textarea>
-                </mat-form-field>
-
-                <!-- Observaciones de todos los auditados -->
-                <div class="observaciones">
-                  <div class="obs-header">
-                    <mat-icon class="obs-icono">forum</mat-icon>
-                    <span class="obs-titulo">Observaciones</span>
-                  </div>
-                  <div *ngIf="fechaFinRevision" class="fecha-revision">
-                    <mat-icon>schedule</mat-icon>
-                    <span>Fecha límite de revisión del auditado: <strong>{{ fechaFinFormateada }}</strong></span>
-                  </div>
-                  <ng-container *ngFor="let obs of item.observacionesAuditado">
-                    <!-- Mi observación: editable -->
-                    <ng-container
-                      *ngIf="puedeEscribirObservacionAuditado && obs.usuario_id === usuarioId && !item.hallazgo.rechazado; else obsLectura">
+              <div class="node-children">
+                <!-- ── HALLAZGO ── -->
+                @for (item of subtemaItem.hallazgos; track item; let k = $index) {
+                  <div class="tree-node">
+                    <div class="node-row hallazgo-row">
+                      <span class="node-dot hallazgo-dot"></span>
+                      <span class="nivel-label">Hallazgo</span>
+                      @if (!item.hallazgo.rechazado) {
+                        <span class="indice">{{ i + 2 }}.{{ j + 1 }}.{{ hallazgoNumeral(subtemaItem.hallazgos, k) }}</span>
+                      }
+                      @if (item.hallazgo?.rechazado) {
+                        <div class="status">
+                          <mat-icon color="primary">block</mat-icon>
+                          <span>Hallazgo rechazado</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="node-body">
                       <mat-form-field appearance="outline" class="hallazgo-input">
-                        <mat-label>Observación</mat-label>
-                        <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) || ''"
-                          (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
-                          [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
-                          placeholder="Ingrese su observación...">
-                      </textarea>
+                        <mat-label>Criterio</mat-label>
+                        <input matInput [value]="item.hallazgo.criterio" disabled>
                       </mat-form-field>
-                      <div class="d-flex justify-content-end">
-                        <button mat-flat-button color="primary" (click)="guardarObservacion(item, obs)"
-                          [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
-                          {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
-                        </button>
+                      <mat-form-field appearance="outline" class="hallazgo-input">
+                        <mat-label>Hallazgo</mat-label>
+                        <input matInput [value]="item.hallazgo.titulo" disabled>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="hallazgo-input">
+                        <mat-label>Descripción</mat-label>
+                        <textarea matInput [value]="item.hallazgo.descripcion" rows="3" disabled></textarea>
+                      </mat-form-field>
+                      <!-- Observaciones de los auditados -->
+                      <div class="observaciones">
+                        <div class="obs-header">
+                          <mat-icon class="obs-icono">forum</mat-icon>
+                          <span class="obs-titulo">Observaciones</span>
+                        </div>
+                        @if (fechaFinRevision) {
+                          <div class="fecha-revision">
+                            <mat-icon>schedule</mat-icon>
+                            <span>Fecha límite de revisión del auditado: <strong>{{ fechaFinFormateada }}</strong></span>
+                          </div>
+                        }
+                        @for (obs of item.observacionesAuditado; track obs) {
+                          <!-- Mi observación: editable -->
+                          @if (puedeEscribirObservacionAuditado && obs.usuario_id === usuarioId && !item.hallazgo.rechazado) {
+                            <mat-form-field appearance="outline" class="hallazgo-input">
+                              <mat-label>Observación</mat-label>
+                              <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
+                                (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
+                                [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
+                                placeholder="Ingrese su observación...">
+                              </textarea>
+                            </mat-form-field>
+                            <div class="d-flex justify-content-end">
+                              <button mat-flat-button color="primary" (click)="guardarObservacion(item, obs)"
+                                [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
+                                {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
+                              </button>
+                            </div>
+                          } @else {
+                            <mat-form-field appearance="outline" class="hallazgo-input">
+                              <mat-label>Observación del auditado ({{ obs.usuario_rol }})</mat-label>
+                              <textarea matInput [value]="obs.observacion" rows="3" disabled></textarea>
+                            </mat-form-field>
+                          }
+                          <!-- Observación de otro auditado: solo lectura -->
+                        }
+                        <!-- Si aún no tengo observación, muestro campo vacío para crear -->
+                        @if (puedeEscribirObservacionAuditado && !miObservacionAuditado(item) && !item.hallazgo.rechazado) {
+                          <mat-form-field appearance="outline" class="hallazgo-input">
+                            <mat-label>Observación</mat-label>
+                            <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
+                              (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
+                              [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
+                              placeholder="Ingrese su observación...">
+                            </textarea>
+                          </mat-form-field>
+                          <div class="d-flex justify-content-end">
+                            <button mat-flat-button color="primary" (click)="guardarObservacion(item, null)"
+                              [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
+                              {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
+                            </button>
+                          </div>
+                        }
+                        <!-- Observación del auditor (solo lectura si no es auditor, o si el hallazgo está rechazado) -->
+                        @if ((!puedeEscribirObservacionAuditor || item.hallazgo.rechazado) && item.observacionAuditor) {
+                          <mat-form-field
+                            appearance="outline" class="hallazgo-input">
+                            <mat-label>Observación del auditor</mat-label>
+                            <textarea matInput [value]="item.observacionAuditor.observacion" rows="3" disabled></textarea>
+                          </mat-form-field>
+                        }
+                        <!-- Observación editable del auditor -->
+                        @if (puedeEscribirObservacionAuditor && !item.hallazgo.rechazado) {
+                          <mat-form-field appearance="outline" class="hallazgo-input">
+                            <mat-label>Observación del auditor</mat-label>
+                            <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
+                              (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
+                              [disabled]="estaGuardando(item.hallazgo._id)"
+                              placeholder="Ingrese la observación del auditor...">
+                            </textarea>
+                          </mat-form-field>
+                          <div class="d-flex justify-content-end gap-2">
+                            @if (!item.hallazgo.rechazado) {
+                              <button mat-stroked-button color="primary" class="mx-2"
+                                (click)="rechazarHallazgo(item.hallazgo)" [disabled]="estaGuardando(item.hallazgo._id)">
+                                <mat-icon>block</mat-icon>
+                                Rechazar hallazgo
+                              </button>
+                            }
+                            <button mat-flat-button color="primary"
+                              (click)="guardarObservacion(item, item.observacionAuditor)"
+                              [disabled]="estaGuardando(item.hallazgo._id)">
+                              {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
+                            </button>
+                          </div>
+                        }
                       </div>
-                    </ng-container>
-                    <!-- Observación de otro auditado: solo lectura -->
-                    <ng-template #obsLectura>
-                      <mat-form-field appearance="outline" class="hallazgo-input">
-                        <mat-label>Observación del auditado ({{ obs.usuario_rol }})</mat-label>
-                        <textarea matInput [value]="obs.observacion" rows="3" disabled></textarea>
-                      </mat-form-field>
-                    </ng-template>
-                  </ng-container>
-
-
-                  <!-- Si aún no tengo observación, muestro campo vacío para crear -->
-                  <ng-container
-                    *ngIf="puedeEscribirObservacionAuditado && !miObservacionAuditado(item) && !item.hallazgo.rechazado">
-                    <mat-form-field appearance="outline" class="hallazgo-input">
-                      <mat-label>Observación</mat-label>
-                      <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) || ''"
-                        (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
-                        [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
-                        placeholder="Ingrese su observación...">
-                    </textarea>
-                    </mat-form-field>
-                    <div class="d-flex justify-content-end">
-                      <button mat-flat-button color="primary" (click)="guardarObservacion(item, null)"
-                        [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
-                        {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
-                      </button>
                     </div>
-                  </ng-container>
-
-                  <!-- Observación del auditor (solo lectura si no es auditor, o si el hallazgo está rechazado) -->
-                  <mat-form-field
-                    *ngIf="(!puedeEscribirObservacionAuditor || item.hallazgo.rechazado) && item.observacionAuditor"
-                    appearance="outline" class="hallazgo-input">
-                    <mat-label>Observación del auditor</mat-label>
-                    <textarea matInput [value]="item.observacionAuditor.observacion" rows="3" disabled></textarea>
-                  </mat-form-field>
-
-                  <!-- Observación editable del auditor -->
-                  <ng-container *ngIf="puedeEscribirObservacionAuditor && !item.hallazgo.rechazado">
-                    <mat-form-field appearance="outline" class="hallazgo-input">
-                      <mat-label>Observación del auditor</mat-label>
-                      <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) || ''"
-                        (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
-                        [disabled]="estaGuardando(item.hallazgo._id)"
-                        placeholder="Ingrese la observación del auditor...">
-                    </textarea>
-                    </mat-form-field>
-                    <div class="d-flex justify-content-end gap-2">
-                      <button *ngIf="!item.hallazgo.rechazado" mat-stroked-button color="primary" class="mx-2"
-                        (click)="rechazarHallazgo(item.hallazgo)" [disabled]="estaGuardando(item.hallazgo._id)">
-                        <mat-icon>block</mat-icon>
-                        Rechazar hallazgo
-                      </button>
-                      <button mat-flat-button color="primary"
-                        (click)="guardarObservacion(item, item.observacionAuditor)"
-                        [disabled]="estaGuardando(item.hallazgo._id)">
-                        {{ estaGuardando(item.hallazgo._id) ? 'Guardando...' : 'Guardar observación' }}
-                      </button>
-                    </div>
-                  </ng-container>
+                  </div>
+                  }<!-- /hallazgo -->
                 </div>
-
               </div>
-            </div><!-- /hallazgo -->
-
+              }<!-- /subtema -->
+            </div>
           </div>
-        </div><!-- /subtema -->
+          }<!-- /tema -->
 
+        </div>
       </div>
-    </div><!-- /tema -->
-
-  </div>
-</div>

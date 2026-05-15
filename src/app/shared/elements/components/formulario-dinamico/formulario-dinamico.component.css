@@ -10,13 +10,28 @@
   overflow-y: auto;
 }
 
+
+::ng-deep .editor-deshabilitado .ql-toolbar {
+  border-color: rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+  opacity: 0.38;
+}
+
+::ng-deep .editor-deshabilitado .ql-container {
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+::ng-deep .editor-deshabilitado .ql-editor {
+  color: rgba(0, 0, 0, 0.38);
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.38);
+}
+
 .titulo-quill {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 1.1rem;
   font-weight: 500;
-  margin-bottom: 8px;
   color: #731514;
   margin-top: 12px;
   margin-bottom: 12px;

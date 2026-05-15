@@ -1,14 +1,14 @@
 import { Component, ElementRef, Inject, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-modal-aprobacion-auditado',
-  templateUrl: './modal-aprobacion-auditado.component.html',
-  styleUrl: './modal-aprobacion-auditado.component.css'
+    selector: 'app-modal-aprobacion-auditado',
+    templateUrl: './modal-aprobacion-auditado.component.html',
+    standalone: false
 })
 export class ModalAprobacionAuditadoComponent {
   @ViewChild("fileInput", { static: false }) fileInput!: ElementRef;
@@ -17,10 +17,10 @@ export class ModalAprobacionAuditadoComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    private dialogRef: MatDialogRef<ModalAprobacionAuditadoComponent>,
-    private alertService: AlertService,
-    private nuxeoService: NuxeoService,
-    private referenciaPdfService: ReferenciaPdfService,
+    private readonly dialogRef: MatDialogRef<ModalAprobacionAuditadoComponent>,
+    private readonly alertService: AlertService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
   ) {}
 
   onArchivoSelecionado(event: Event): void {

@@ -1,24 +1,26 @@
 <div class="row">
-    <div class="col-12">
-      <div class="row">
-        <form [formGroup]="form">
-          <div class="row mt-2">
-            <!-- Campo: Nombre de Actividad -->
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="fondo-acento-50 d-flex justify-content-center my-3">
-                <b>Nombre de Actividad</b>
-              </div>
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Nombre de Actividad</mat-label>
-                <mat-icon matPrefix color="primary">task</mat-icon>
-                <input
-                  matInput
-                  placeholder="Nombre de la actividad"
-                  formControlName="actividad"
+  <div class="col-12">
+    <div class="row">
+      <form [formGroup]="form">
+        <div class="row mt-2">
+          <!-- Campo: Nombre de Actividad -->
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="fondo-acento-50 d-flex justify-content-center my-3">
+              <b>Nombre de Actividad</b>
+            </div>
+            <mat-form-field class="col-12" appearance="outline">
+              <mat-label>Nombre de Actividad</mat-label>
+              <mat-icon matPrefix color="primary">task</mat-icon>
+              <input
+                matInput
+                placeholder="Nombre de la actividad"
+                formControlName="actividad"
                 />
-                <mat-error *ngIf="form.get('actividad')?.hasError('required')">
-                  El nombre de la actividad es requerido
-                </mat-error>
+                @if (form.get('actividad')?.hasError('required')) {
+                  <mat-error>
+                    El nombre de la actividad es requerido
+                  </mat-error>
+                }
               </mat-form-field>
             </div>
 
@@ -36,229 +38,235 @@
                   formControlName="fechaInicio"
                   [min]="minFecha"
                   [max]="maxFecha"
-                />
-                <mat-datepicker-toggle
-                  matSuffix
-                  [for]="pickerInicio"
-                ></mat-datepicker-toggle>
-                <mat-datepicker #pickerInicio></mat-datepicker>
-                <mat-error *ngIf="form.get('fechaInicio')?.hasError('required')">
-                  La fecha de inicio es requerida
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <!-- Campo: Fecha Fin -->
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="fondo-acento-50 d-flex justify-content-center my-3">
-                <b>Fecha de Fin</b>
+                  />
+                  <mat-datepicker-toggle
+                    matSuffix
+                    [for]="pickerInicio"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #pickerInicio></mat-datepicker>
+                  @if (form.get('fechaInicio')?.hasError('required')) {
+                    <mat-error>
+                      La fecha de inicio es requerida
+                    </mat-error>
+                  }
+                </mat-form-field>
               </div>
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Fecha de Fin</mat-label>
-                <input
-                  matInput
-                  [matDatepicker]="pickerFin"
-                  placeholder="Seleccione una fecha"
-                  formControlName="fechaFin"
-                  [min]="fechaMinFin || minFecha"
-                  [max]="maxFecha"
-                />
-                <mat-datepicker-toggle
-                  matSuffix
-                  [for]="pickerFin"
-                  [disabled]="form.get('fechaFin')?.disabled"
-                ></mat-datepicker-toggle>
-                <mat-datepicker #pickerFin></mat-datepicker>
-                <mat-hint *ngIf="form.get('fechaFin')?.disabled">
-                  Primero seleccione una fecha de inicio
-                </mat-hint>
-                <mat-error *ngIf="form.get('fechaFin')?.hasError('required')">
-                  La fecha de fin es requerida
-                </mat-error>
-              </mat-form-field>
-            </div>
 
-            <!-- Campo: Observaciones -->
-            <div class="col-12">
-              <div class="fondo-acento-50 d-flex justify-content-center my-3">
-                <b>Observaciones</b>
+              <!-- Campo: Fecha Fin -->
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                  <b>Fecha de Fin</b>
+                </div>
+                <mat-form-field class="col-12" appearance="outline">
+                  <mat-label>Fecha de Fin</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="pickerFin"
+                    placeholder="Seleccione una fecha"
+                    formControlName="fechaFin"
+                    [min]="fechaMinFin || minFecha"
+                    [max]="maxFecha"
+                    />
+                    <mat-datepicker-toggle
+                      matSuffix
+                      [for]="pickerFin"
+                      [disabled]="form.get('fechaFin')?.disabled"
+                    ></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFin></mat-datepicker>
+                    @if (form.get('fechaFin')?.disabled) {
+                      <mat-hint>
+                        Primero seleccione una fecha de inicio
+                      </mat-hint>
+                    }
+                    @if (form.get('fechaFin')?.hasError('required')) {
+                      <mat-error>
+                        La fecha de fin es requerida
+                      </mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <!-- Campo: Observaciones -->
+                <div class="col-12">
+                  <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                    <b>Observaciones</b>
+                  </div>
+                  <mat-form-field class="col-12" appearance="outline">
+                    <mat-label>Observaciones</mat-label>
+                    <mat-icon matPrefix color="primary">description</mat-icon>
+                    <textarea
+                      matInput
+                      cols="5"
+                      placeholder="Observaciones de la actividad"
+                    formControlName="observaciones"></textarea>
+                  </mat-form-field>
+                </div>
               </div>
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Observaciones</mat-label>
-                <mat-icon matPrefix color="primary">description</mat-icon>
-                <textarea
-                  matInput
-                  cols="5"
-                  placeholder="Observaciones de la actividad"
-                  formControlName="observaciones"></textarea>
-              </mat-form-field>
-            </div>
-          </div>
 
-          <!-- Papeles de trabajo -->
-          <div class="row mt-2">
-            <div class="col-12">
-              <div class="fondo-acento-50 d-flex justify-content-center my-3">
-                <b>Papeles de trabajo</b>
-                <mat-icon
-                  matSuffix
-                  class="tooltip-icon ms-1"
-                  matTooltip="Los papeles de trabajo son los documentos elaborados por el auditor interno u obtenidos por él durante el transcurso de cada una de las fases del proceso."
-                  matTooltipPosition="right"
-                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
-                  aria-label="Información adicional"
-                >
-                  info
-                </mat-icon>
-              </div>
-            </div>
-            <!-- Referencia -->
-            <div class="col-12 col-md-6 col-xl-4">
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Referencia</mat-label>
-                <mat-icon matPrefix color="primary">bookmark</mat-icon>
-                <input
-                  matInput
-                  placeholder="Referencia"
-                  formControlName="papelTrabajoReferencia"
-                />
-                <mat-icon
-                  matSuffix
-                  class="tooltip-icon ms-1"
-                  color="primary"
-                  matTooltip="Marca que le hace al auditor a cada papel de trabajo de acuerdo a la actividad ejecutada y en cumplimiento de las Normas de Auditoria Generalmente Aceptadas."
-                  matTooltipPosition="right"
-                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
-                  aria-label="Información adicional"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
+              <!-- Papeles de trabajo -->
+              <div class="row mt-2">
+                <div class="col-12">
+                  <div class="fondo-acento-50 d-flex justify-content-center my-3">
+                    <b>Papeles de trabajo</b>
+                    <mat-icon
+                      matSuffix
+                      class="tooltip-icon ms-1"
+                      matTooltip="Los papeles de trabajo son los documentos elaborados por el auditor interno u obtenidos por él durante el transcurso de cada una de las fases del proceso."
+                      matTooltipPosition="right"
+                      matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                      aria-label="Información adicional"
+                      >
+                      info
+                    </mat-icon>
+                  </div>
+                </div>
+                <!-- Referencia -->
+                <div class="col-12 col-md-6 col-xl-4">
+                  <mat-form-field class="col-12" appearance="outline">
+                    <mat-label>Referencia</mat-label>
+                    <mat-icon matPrefix color="primary">bookmark</mat-icon>
+                    <input
+                      matInput
+                      placeholder="Referencia"
+                      formControlName="papelTrabajoReferencia"
+                      />
+                      <mat-icon
+                        matSuffix
+                        class="tooltip-icon ms-1"
+                        color="primary"
+                        matTooltip="Marca que le hace al auditor a cada papel de trabajo de acuerdo a la actividad ejecutada y en cumplimiento de las Normas de Auditoria Generalmente Aceptadas."
+                        matTooltipPosition="right"
+                        matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                        aria-label="Información adicional"
+                        >
+                        info
+                      </mat-icon>
+                    </mat-form-field>
+                  </div>
 
-            <!-- Descripción -->
-            <div class="col-12 col-md-6 col-xl-8">
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Descripción</mat-label>
-                <mat-icon matPrefix color="primary">description</mat-icon>
-                <input
-                  matInput
-                  placeholder="Descripción"
-                  formControlName="papelTrabajoDescripcion"
-                />
-                <mat-icon
-                  matSuffix
-                  class="tooltip-icon ms-1"
-                  color="primary"
-                  matTooltip="Tipo de documento (acta, procedimiento, lista de chequeo)."
-                  matTooltipPosition="right"
-                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
-                  aria-label="Información adicional"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
+                  <!-- Descripción -->
+                  <div class="col-12 col-md-6 col-xl-8">
+                    <mat-form-field class="col-12" appearance="outline">
+                      <mat-label>Descripción</mat-label>
+                      <mat-icon matPrefix color="primary">description</mat-icon>
+                      <input
+                        matInput
+                        placeholder="Descripción"
+                        formControlName="papelTrabajoDescripcion"
+                        />
+                        <mat-icon
+                          matSuffix
+                          class="tooltip-icon ms-1"
+                          color="primary"
+                          matTooltip="Tipo de documento (acta, procedimiento, lista de chequeo)."
+                          matTooltipPosition="right"
+                          matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                          aria-label="Información adicional"
+                          >
+                          info
+                        </mat-icon>
+                      </mat-form-field>
+                    </div>
 
-            <!-- Folios -->
-            <div class="col-12 col-md-6 col-xl-4">
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Folios</mat-label>
-                <mat-icon matPrefix color="primary">numbers</mat-icon>
-                <input
-                  matInput
-                  type="number"
-                  placeholder="Folios"
-                  formControlName="papelTrabajoFolios"
-                />
-                <mat-icon
-                  matSuffix
-                  class="tooltip-icon ms-1"
-                  color="primary"
-                  matTooltip="Se deben foliar los documentos de cada referencia y poner el numero de folios."
-                  matTooltipPosition="right"
-                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
-                  aria-label="Información adicional"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
+                    <!-- Folios -->
+                    <div class="col-12 col-md-6 col-xl-4">
+                      <mat-form-field class="col-12" appearance="outline">
+                        <mat-label>Folios</mat-label>
+                        <mat-icon matPrefix color="primary">numbers</mat-icon>
+                        <input
+                          matInput
+                          type="number"
+                          placeholder="Folios"
+                          formControlName="papelTrabajoFolios"
+                          />
+                          <mat-icon
+                            matSuffix
+                            class="tooltip-icon ms-1"
+                            color="primary"
+                            matTooltip="Se deben foliar los documentos de cada referencia y poner el numero de folios."
+                            matTooltipPosition="right"
+                            matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                            aria-label="Información adicional"
+                            >
+                            info
+                          </mat-icon>
+                        </mat-form-field>
+                      </div>
 
-            <!-- Medio -->
-            <div class="col-12 col-md-6 col-xl-4">
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Medio</mat-label>
-                <mat-icon matPrefix color="primary">folder_open</mat-icon>
-                <input
-                  matInput
-                  placeholder="Medio"
-                  formControlName="papelTrabajoMedio"
-                />
-                <mat-icon
-                  matSuffix
-                  class="tooltip-icon ms-1"
-                  color="primary"
-                  matTooltip="Relacionar si es medio físico, magnético."
-                  matTooltipPosition="right"
-                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
-                  aria-label="Información adicional"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
+                      <!-- Medio -->
+                      <div class="col-12 col-md-6 col-xl-4">
+                        <mat-form-field class="col-12" appearance="outline">
+                          <mat-label>Medio</mat-label>
+                          <mat-icon matPrefix color="primary">folder_open</mat-icon>
+                          <input
+                            matInput
+                            placeholder="Medio"
+                            formControlName="papelTrabajoMedio"
+                            />
+                            <mat-icon
+                              matSuffix
+                              class="tooltip-icon ms-1"
+                              color="primary"
+                              matTooltip="Relacionar si es medio físico, magnético."
+                              matTooltipPosition="right"
+                              matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                              aria-label="Información adicional"
+                              >
+                              info
+                            </mat-icon>
+                          </mat-form-field>
+                        </div>
 
-            <!-- Carpeta -->
-            <div class="col-12 col-md-6 col-xl-4">
-              <mat-form-field class="col-12" appearance="outline">
-                <mat-label>Carpeta</mat-label>
-                <mat-icon matPrefix color="primary">folder</mat-icon>
-                <input
-                  matInput
-                  placeholder="Carpeta"
-                  formControlName="papelTrabajoCarpeta"
-                />
-                <mat-icon
-                  matSuffix
-                  class="tooltip-icon ms-1"
-                  color="primary"
-                  matTooltip="Relacionar la carpeta del archivo de gestión donde se archivará."
-                  matTooltipPosition="right"
-                  matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
-                  aria-label="Información adicional"
-                >
-                  info
-                </mat-icon>
-              </mat-form-field>
-            </div>
-          </div>
+                        <!-- Carpeta -->
+                        <div class="col-12 col-md-6 col-xl-4">
+                          <mat-form-field class="col-12" appearance="outline">
+                            <mat-label>Carpeta</mat-label>
+                            <mat-icon matPrefix color="primary">folder</mat-icon>
+                            <input
+                              matInput
+                              placeholder="Carpeta"
+                              formControlName="papelTrabajoCarpeta"
+                              />
+                              <mat-icon
+                                matSuffix
+                                class="tooltip-icon ms-1"
+                                color="primary"
+                                matTooltip="Relacionar la carpeta del archivo de gestión donde se archivará."
+                                matTooltipPosition="right"
+                                matTooltipClass="tooltip-multilinea tooltip-multilinea-top"
+                                aria-label="Información adicional"
+                                >
+                                info
+                              </mat-icon>
+                            </mat-form-field>
+                          </div>
+                        </div>
 
-          <!-- Botones de acción -->
-          <div class="d-flex justify-content-center align-items-center my-4">
-            <p class="mx-2">¿Guardar cambios?</p>
-          </div>
-          <mat-dialog-actions align="center">
-            <button
-              mat-stroked-button
-              color="primary"
-              style="border: 1px solid var(--md-primary-500)"
-              [mat-dialog-close]
-              class="mb-sm"
-            >
-              <mat-icon>close</mat-icon>No, cerrar
-            </button>
-            <button
-              mat-raised-button
-              color="primary"
-              (click)="guardarActividad()"
-              class="mb-sm"
-            >
-              <mat-icon>save</mat-icon>
-              Si, guardar y cerrar
-            </button>
-          </mat-dialog-actions>
-        </form>
-      </div>
-    </div>
-  </div>
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-center align-items-center my-4">
+                          <p class="mx-2">¿Guardar cambios?</p>
+                        </div>
+                        <mat-dialog-actions align="center">
+                          <button
+                            mat-stroked-button
+                            color="primary"
+                            style="border: 1px solid var(--md-primary-500)"
+                            [mat-dialog-close]
+                            class="mb-sm"
+                            >
+                            <mat-icon>close</mat-icon>No, cerrar
+                          </button>
+                          <button
+                            mat-raised-button
+                            color="primary"
+                            (click)="guardarActividad()"
+                            class="mb-sm"
+                            >
+                            <mat-icon>save</mat-icon>
+                            Si, guardar y cerrar
+                          </button>
+                        </mat-dialog-actions>
+                      </form>
+                    </div>
+                  </div>
+                </div>
