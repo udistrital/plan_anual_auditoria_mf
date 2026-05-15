@@ -34,6 +34,7 @@ export class Campo {
     }>;
     vista?: "month" | "year" | "multi-year";
     fecha_inicio?: string;
+    fecha_minima_dependiente?: string;
     etiqueta_inicio?: string;
     etiqueta_fin?: string;
     altura?: number;

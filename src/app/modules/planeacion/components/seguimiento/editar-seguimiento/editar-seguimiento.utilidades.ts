@@ -72,6 +72,7 @@ export const formularioInformacionAuditoria: Formulario = {
       parametros: {
         vista: "year",
         fecha_inicio: "2026-01-01T05:00:00.000Z",
+        fecha_minima_dependiente: "fecha_ejecucion_inicial",
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
