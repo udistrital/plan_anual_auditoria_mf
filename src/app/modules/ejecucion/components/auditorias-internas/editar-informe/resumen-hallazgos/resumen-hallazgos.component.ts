@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 interface HallazgoResumen {
   numero: string;
@@ -7,11 +7,12 @@ interface HallazgoResumen {
 }
 
 @Component({
-  selector: 'app-resumen-hallazgos',
-  templateUrl: './resumen-hallazgos.component.html',
-  styleUrls: ['./resumen-hallazgos.component.css']
+    selector: 'app-resumen-hallazgos',
+    templateUrl: './resumen-hallazgos.component.html',
+    styleUrls: ['./resumen-hallazgos.component.css'],
+    standalone: false
 })
-export class ResumenHallazgosComponent implements OnInit, OnChanges {
+export class ResumenHallazgosComponent implements OnChanges {
   @Input() informeId!: string;
   @Input() temasRaw: any[] | null = null;
   @Input() hallazgosRaw: any[] | null = null;
@@ -19,8 +20,6 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
   displayedColumns: string[] = ['numero', 'criterio', 'descripcion'];
   hallazgos: HallazgoResumen[] = [];
   cargando = false;
-
-  ngOnInit(): void { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['temasRaw'] || changes['hallazgosRaw']) && this.temasRaw !== null && this.hallazgosRaw !== null) {
@@ -37,7 +36,7 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
       temaCount++;
       let subtemaCount = 0;
 
-      for (const subtema of (tema.subtema || [])) {
+      for (const subtema of (tema.subtema ?? [])) {
         if (!subtema.activo) continue;
         subtemaCount++;
         let hallazgoCount = 0;
@@ -47,8 +46,8 @@ export class ResumenHallazgosComponent implements OnInit, OnChanges {
           hallazgoCount++;
           lista.push({
             numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
-            criterio: h.criterio || '',
-            descripcion: h.descripcion || ''
+            criterio: h.criterio ?? '',
+            descripcion: h.descripcion ?? ''
           });
         }
       }

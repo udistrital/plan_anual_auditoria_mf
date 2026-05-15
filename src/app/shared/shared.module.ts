@@ -5,7 +5,6 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { CommonModule } from "@angular/common";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { BasesComponent } from "./elements/components/bases/bases.component";
 import { CargarArchivoComponent } from "./elements/components/cargar-archivo/cargar-archivo.component";
 import { FormularioDinamicoComponent } from "./elements/components/formulario-dinamico/formulario-dinamico.component";
 import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
@@ -24,7 +23,6 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
 
 @NgModule({
   declarations: [
-    BasesComponent,
     FormularioDinamicoComponent,
     CargarArchivoComponent,
     ModalVerDocumentoComponent,
@@ -48,7 +46,6 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
   ],
   exports: [
     //Componentes
-    BasesComponent,
     CargarArchivoComponent,
     FormularioDinamicoComponent,
     ModalVerDocumentoComponent,

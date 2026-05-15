@@ -1,5 +1,5 @@
 <plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="'<p>Gestión Auditoría / <b>Auditorías Externas</b></p>'"
-  [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
+[contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
 </plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -23,18 +23,19 @@
               Información general de la Auditoría
             </div>
           </div>
-          <div *ngIf="formInformacion != null" class="mt-4">
-            <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
-              (submitFormulario)="preguntarGuardadoInformacion($event)"
-              (campoSeleccionado)="manejarCambioSelect($event)">
-            </app-formulario-dinamico>
-
-            <div class="d-flex justify-content-end mt-4">
-              <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
-                Guardar y Continuar
-              </button>
+          @if (formInformacion != null) {
+            <div class="mt-4">
+              <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
+                (submitFormulario)="preguntarGuardadoInformacion($event)"
+                (campoSeleccionado)="manejarCambioSelect($event)">
+              </app-formulario-dinamico>
+              <div class="d-flex justify-content-end mt-4">
+                <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+                  Guardar y Continuar
+                </button>
+              </div>
             </div>
-          </div>
+          }
         </mat-step>
 
         <!-- Paso 2: Hallazgos -->
@@ -110,22 +111,24 @@
               <div class="documento-content">
                 <span class="mb-md">Informe Auditoría</span>
                 <div class="icon-buttons">
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    (click)="subirInformeAuditoria()"
-                    *ngIf="base64InformeAuditoria === null"
-                  >
-                    <mat-icon>upload</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    (click)="verInformeAuditoria()"
-                    *ngIf="base64InformeAuditoria !== null"
-                  >
-                    <mat-icon>visibility</mat-icon>
-                  </button>
+                  @if (base64InformeAuditoria === null) {
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="subirInformeAuditoria()"
+                      >
+                      <mat-icon>upload</mat-icon>
+                    </button>
+                  }
+                  @if (base64InformeAuditoria !== null) {
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="verInformeAuditoria()"
+                      >
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  }
                 </div>
               </div>
             </mat-card>

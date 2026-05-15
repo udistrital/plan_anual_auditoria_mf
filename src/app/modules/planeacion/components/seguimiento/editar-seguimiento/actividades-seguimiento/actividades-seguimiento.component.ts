@@ -10,15 +10,16 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-actividad.component'
 
 @Component({
-  selector: "app-actividades-seguimiento",
-  templateUrl: "./actividades-seguimiento.component.html",
-  styleUrls: ["./actividades-seguimiento.component.css"],
+    selector: "app-actividades-seguimiento",
+    templateUrl: "./actividades-seguimiento.component.html",
+    styleUrls: ["./actividades-seguimiento.component.css"],
+    standalone: false
 })
 export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
   @Input() soloLectura: boolean = false;
-  @Input() minFechaStr?: String;
-  @Input() maxFechaStr?: String;
+  @Input() minFechaStr?: string;
+  @Input() maxFechaStr?: string;
   datos = new MatTableDataSource<any>([]);
   
   columnsToDisplay: string[] = [
@@ -36,14 +37,17 @@ export class ActividadesSeguimientoComponent implements OnInit {
   ];
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService:PlanAnualAuditoriaService,
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     
   ) { }
 
-  resetComponent() { }
+  resetComponent() {
+    console.log("Reseteando componente de actividades de seguimiento");
+  }
+  
   onStepLeave() {
     this.resetComponent();
   }
@@ -55,7 +59,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
    }
 
   subirArchivo(tipoArchivo: string): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "600px",
       data: { tipoArchivo },
     });
@@ -66,7 +70,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
       .subscribe((res) => {
         const actividades: any[] = res.Data;
 
-        if (!(actividades.length > 0)) {
+        if (actividades.length === 0) {
           return this.alertaService.showAlert(
             "No hay actividades registradas",
             "Actualmente no hay actividades registradas para la vigencia seleccionada."

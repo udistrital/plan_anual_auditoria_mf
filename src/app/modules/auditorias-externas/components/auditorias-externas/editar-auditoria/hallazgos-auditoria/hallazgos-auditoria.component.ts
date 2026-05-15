@@ -10,9 +10,10 @@ export interface HallazgoResumen {
 }
 
 @Component({
-  selector: 'app-hallazgos-auditoria',
-  templateUrl: './hallazgos-auditoria.component.html',
-  styleUrls: ['./hallazgos-auditoria.component.css']
+    selector: 'app-hallazgos-auditoria',
+    templateUrl: './hallazgos-auditoria.component.html',
+    styleUrls: ['./hallazgos-auditoria.component.css'],
+    standalone: false
 })
 export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
   @Input() auditoriaId!: string;
@@ -23,13 +24,13 @@ export class HallazgosAuditoriaComponent implements OnInit, OnChanges {
 
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-      return !!(control && control.invalid && (control.dirty || control.touched));
+      return !!(control?.invalid && (control?.dirty || control?.touched));
     }
   };
 
   constructor(
-    private fb: UntypedFormBuilder,
-    private alertaService: AlertService
+    private readonly fb: UntypedFormBuilder,
+    private readonly alertaService: AlertService
   ) {}
 
   ngOnInit(): void {

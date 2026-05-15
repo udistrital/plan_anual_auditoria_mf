@@ -4,9 +4,10 @@ import { CargarArchivoComponent } from 'src/app/shared/elements/components/carga
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-modal-visualizar-recargar-compromiso-etico',
-  templateUrl: './modal-visualizar-recargar-compromiso-etico.component.html',
-  styleUrl: './modal-visualizar-recargar-compromiso-etico.component.css'
+    selector: 'app-modal-visualizar-recargar-compromiso-etico',
+    templateUrl: './modal-visualizar-recargar-compromiso-etico.component.html',
+    styleUrl: './modal-visualizar-recargar-compromiso-etico.component.css',
+    standalone: false
 })
 export class ModalVisualizarRecargarCompromisoEticoComponent {
   protected base64: string = "";
@@ -16,8 +17,8 @@ export class ModalVisualizarRecargarCompromisoEticoComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string; soloLectura?: boolean },
-    private dialog: MatDialog,
-    private dialogRef: MatDialogRef<ModalVisualizarRecargarCompromisoEticoComponent>,
+    private readonly dialog: MatDialog,
+    private readonly dialogRef: MatDialogRef<ModalVisualizarRecargarCompromisoEticoComponent>,
   ) { }
 
   ngOnInit() {

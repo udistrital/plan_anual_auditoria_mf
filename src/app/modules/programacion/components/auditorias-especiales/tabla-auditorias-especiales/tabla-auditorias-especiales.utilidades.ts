@@ -14,7 +14,7 @@ function prepararCadenaAuditores(auditoria: AuditoriaEspecialTablaRow): string {
   if (!auditoria?.auditores_nombre || auditoria.auditores_nombre.length === 0)
     return "Sin Auditores";
 
-  const auditores: string[] = auditoria.auditores_nombre!.map(nombre =>
+  const auditores: string[] = auditoria.auditores_nombre.map(nombre =>
       nombre.trim().toLowerCase().split(" ")
         .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
         .join(" ")
@@ -34,10 +34,10 @@ export const tituloAuditoriaEspecial = (
   auditoria: AuditoriaEspecialTablaRow,
 ): string => {
   if (auditoria.esAuditoriaConcreta) {
-    return auditoria.subtitulo || "Sin Subtitulo";
+    return auditoria.subtitulo ?? "Sin Subtitulo";
   }
 
-  return auditoria.titulo || "Sin Titulo";
+  return auditoria.titulo ?? "Sin Titulo";
 };
 
 export const cronogramaAuditoriaEspecial = (
@@ -75,7 +75,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     header: "Tipo de evaluacion",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       auditoria.esAuditoriaConcreta ? ""
-        : auditoria.tipo_evaluacion_nombre || "Sin Asignar",
+        : auditoria.tipo_evaluacion_nombre ?? "Sin Asignar",
     sortable: false,
   },
   {
@@ -96,7 +96,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
-      auditoria.estado_nombre || "Sin estado",
+      auditoria.estado_nombre ?? "Sin estado",
     sortable: false,
   },
   {

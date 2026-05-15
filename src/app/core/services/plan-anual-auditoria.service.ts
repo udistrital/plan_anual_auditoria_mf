@@ -7,7 +7,10 @@ import { RequestManager } from "../managers/requestManager";
   providedIn: "root",
 })
 export class PlanAnualAuditoriaService {
-  constructor(private requestManager: RequestManager, private http: HttpClient) {
+  constructor(
+    private readonly requestManager: RequestManager,
+    private readonly http: HttpClient
+  ) {
     this.requestManager.setPath("PLAN_ANUAL_AUDITORIA_SERVICE");
   }
   
@@ -37,7 +40,7 @@ export class PlanAnualAuditoriaService {
       headers: new HttpHeaders({ "Content-Type": "application/json", Authorization: `Bearer ${token}` }),
       body,
     };
-    return this.http.delete<any>(`${environment['PLAN_ANUAL_AUDITORIA_SERVICE' as keyof typeof environment]}${endpoint}`, options);
+    return this.http.delete<any>(`${environment.PLAN_ANUAL_AUDITORIA_SERVICE}${endpoint}`, options);
   }
 
   planilla(endpoint: string) {

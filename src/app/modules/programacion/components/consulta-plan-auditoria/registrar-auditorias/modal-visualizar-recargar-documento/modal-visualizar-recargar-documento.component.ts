@@ -1,13 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { MatDialog } from "@angular/material/dialog";
+import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: 'app-modal-visualizar-recargar-documento',
-  templateUrl: './modal-visualizar-recargar-documento.component.html',
-  styleUrl: './modal-visualizar-recargar-documento.component.css'
+    selector: 'app-modal-visualizar-recargar-documento',
+    templateUrl: './modal-visualizar-recargar-documento.component.html',
+    standalone: false
 })
 
 export class ModalVisualizarRecargarDocumentoComponent {
@@ -17,7 +16,7 @@ export class ModalVisualizarRecargarDocumentoComponent {
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string,
      },
-     private dialog: MatDialog,
+     private readonly dialog: MatDialog,
 
   ) { }
   ngOnInit() {
@@ -30,7 +29,7 @@ export class ModalVisualizarRecargarDocumentoComponent {
     }
   }
   actualizarDocumento(){
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
         tipoArchivo: 'pdf',

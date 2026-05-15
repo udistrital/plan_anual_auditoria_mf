@@ -81,9 +81,9 @@ steps:
 - name: nodejs_develop
   image: node:24-alpine
   commands:
-  - node --version
-  - npm i --legacy-peer-deps
-  - npm run build
+  - npm install -g pnpm
+  - pnpm install
+  - pnpm run build
   when:
     branch:
     - develop
@@ -93,9 +93,9 @@ steps:
 - name: nodejs_release
   image: node:24-alpine
   commands:
-  - node --version
-  - npm i --legacy-peer-deps
-  - npm run build:test
+  - npm install -g pnpm
+  - pnpm install
+  - pnpm run build:test
   when:
     branch:
     - release/*
@@ -105,9 +105,9 @@ steps:
 - name: nodejs_master
   image: node:24-alpine
   commands:
-  - node --version
-  - npm i --legacy-peer-deps
-  - npm run build:prod
+  - npm install -g pnpm
+  - pnpm install
+  - pnpm run build:prod
   when:
     branch:
     - master

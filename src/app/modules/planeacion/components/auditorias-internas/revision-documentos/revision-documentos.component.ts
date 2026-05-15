@@ -22,7 +22,7 @@ import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
-import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface DocumentoAdjuntoRevision {
   _id?: string;
@@ -47,9 +47,10 @@ interface DocumentoRevisionItem {
 }
 
 @Component({
-  selector: "app-revision-documentos",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+    selector: "app-revision-documentos",
+    templateUrl: "./revision-documentos.component.html",
+    styleUrl: "./revision-documentos.component.css",
+    standalone: false
 })
 export class RevisionDocumentosComponent implements OnInit {
   auditoriaId: string = "";
@@ -69,7 +70,7 @@ export class RevisionDocumentosComponent implements OnInit {
   cargueCartasDialogRef?: MatDialogRef<any>;
 
   constructor(
-    public dialog: MatDialog,
+    public readonly dialog: MatDialog,
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
@@ -200,7 +201,7 @@ export class RevisionDocumentosComponent implements OnInit {
               resolve();
             }
           },
-          error: (error) => {
+          error: (error: Error) => {
             this.alertService.showErrorAlert("Error al aprobar el plan.");
             reject(error);
           }
@@ -460,22 +461,14 @@ export class RevisionDocumentosComponent implements OnInit {
         });
       });
 
-      const auditoria = res?.Data || {};
-      const dependenciasIds = Array.isArray(auditoria.dependencia_id)
-        ? auditoria.dependencia_id
-        : [];
-      const dependenciasNombres = Array.isArray(auditoria.dependencia_nombre)
-        ? auditoria.dependencia_nombre
-        : typeof auditoria.dependencia_nombre === "string" && auditoria.dependencia_nombre.trim()
-          ? [auditoria.dependencia_nombre]
-          : [];
+      const auditoria: Auditoria = res?.Data ?? {};
 
-      dependenciasIds.forEach((dependenciaId: number, index: number) => {
+      auditoria.dependencia_id.forEach((dependenciaId: number, index: number) => {
         if (typeof dependenciaId !== "number") {
           return;
         }
 
-        const nombreDependencia = this.normalizarNombreDependencia(dependenciasNombres[index]);
+        const nombreDependencia = this.normalizarNombreDependencia(auditoria.dependencia_nombre[index]);
         if (nombreDependencia) {
           this.dependenciasPorId.set(dependenciaId, nombreDependencia);
         }
@@ -631,11 +624,11 @@ export class RevisionDocumentosComponent implements OnInit {
       }),
 
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
         const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
         dependenciasInfo.forEach((dep) => 
-          datosAuditoria.correo_complementario.forEach((correo: any) => {
+          datosAuditoria.correo_complementario?.forEach((correo: any) => {
             if (correo.dependencia_id === dep.dependencia_id)
               dep.correo_complementario = correo.correo;
           })
@@ -705,7 +698,7 @@ export class RevisionDocumentosComponent implements OnInit {
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Revisión de Programa de Auditoría",
               tipo_solicitud: "revisión y firma",
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
               nombre_remitente: nombreRemitente || rolRemitente,

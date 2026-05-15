@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
@@ -13,9 +13,10 @@ import { environment } from "src/environments/environment";
 import { ModalVisualizarRecargarCompromisoEticoComponent } from "../../../auditorias-internas/editar-auditoria/documentos-anexos-auditoria/modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
 
 @Component({
-  selector: "app-documentos-anexos-seguimiento",
-  templateUrl: "./documentos-anexos-seguimiento.component.html",
-  styleUrls: ["./documentos-anexos-seguimiento.component.css"],
+    selector: "app-documentos-anexos-seguimiento",
+    templateUrl: "./documentos-anexos-seguimiento.component.html",
+    styleUrls: ["./documentos-anexos-seguimiento.component.css"],
+    standalone: false
 })
 export class DocumentosAnexosSeguimientoComponent implements OnInit {
   @Output() guardarDocumentos = new EventEmitter<any>();
@@ -85,13 +86,13 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
         )
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+            if (res?.Data?.length > 0) {
               resolve(res.Data[0].nuxeo_enlace);
             } else {
               resolve(null);
             }
           },
-          (error) => {
+          (error: Error) => {
             console.error("Error al buscar documento adjunto", error);
             reject(error);
           }
@@ -133,7 +134,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
         return;
       }
 
-      const dialogRef = this.dialog.open(CargarArchivoComponent, {
+      this.dialog.open(CargarArchivoComponent, {
         width: "800px",
         data: {
           tipoArchivo: "pdf",
@@ -152,13 +153,13 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
         this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
           .subscribe(
             (res) => {
-              if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+              if (res?.Data?.length > 0) {
                 resolve(res.Data[0].nuxeo_enlace);
               } else {
                 resolve(null);
               }
             },
-            (error) => {
+            (error: Error) => {
               console.log("Error al buscar el compromiso Ético");
               this.alertService.showErrorAlert("Error al buscar Compromiso Ético");
               reject(error);
@@ -246,7 +247,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
             this.auditoriaId,
             infoDocumento.parametro
           );
-          this.documentosExistentes[infoDocumento.parametro] = documentoRefNuxeo?.res?.Enlace || null;
+          this.documentosExistentes[infoDocumento.parametro] = documentoRefNuxeo?.res?.Enlace ?? null;
         },
         error: (error) => {
           console.error("Error al subir el documento", error);

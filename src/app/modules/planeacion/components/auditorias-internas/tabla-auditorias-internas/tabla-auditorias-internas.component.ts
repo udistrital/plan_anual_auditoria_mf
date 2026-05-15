@@ -22,9 +22,10 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
-import { catchError, exhaustMap, map, tap } from "rxjs/operators";
-import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { catchError, exhaustMap, tap } from "rxjs/operators";
+import { CargueAdjuntoTabConfig, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
   NotificacionesService,
@@ -34,7 +35,6 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -43,9 +43,10 @@ interface DocumentoAdjuntoCarta {
 }
 
 @Component({
-  selector: "app-tabla-auditorias-internas",
-  templateUrl: "./tabla-auditorias-internas.component.html",
-  styleUrl: "./tabla-auditorias-internas.component.css",
+    selector: "app-tabla-auditorias-internas",
+    templateUrl: "./tabla-auditorias-internas.component.html",
+    styleUrl: "./tabla-auditorias-internas.component.css",
+    standalone: false
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -139,18 +140,16 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
     let endpoint = "";
 
-    switch (this.tipoConsulta) {
-      case 'auditado':
-        query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
-        endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
-        break;
-      default:
-        if (estadoId) {
-          query += `,estado_id:${estadoId}`;
-        }
-          endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
-            : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+    if (this.tipoConsulta === 'auditado') {
+      query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+      endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
+    } else {
+      if (estadoId) query += `,estado_id:${estadoId}`;
+      
+      const estado2 = estadoId ? `&estado_id=${estadoId}` : '';
+      endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
+        ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado2}`
+        : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
     }
 
     this.planAuditoriaMid
@@ -162,7 +161,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
           return this.alertService.showAlert(
@@ -214,13 +213,27 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
     );
   }
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado) {
+      if (estado?.startsWith(prefijo)) {
+        return emojiColorPorPrefijoEstado[prefijo];
+      }
+    }
+    return "⚪";
+  }
+
+  getEstadoConColor(auditoria: any): string {
+    const estado = auditoria.estado_nombre ?? "Sin estado";
+    return `${this.escogerEmojiColorEstado(estado)} ${estado}`;
   }
 
   realizarAccion(auditoria: any, accion: string) {
@@ -321,7 +334,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           .split(" ")
           .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
           .join(" ");
-      mapa.set(id, nombre || "Dependencia desconocida");
+      mapa.set(id, nombre ?? "Dependencia desconocida");
     });
     return mapa;
   }
@@ -352,7 +365,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .map((carta) => {
         const cargueAdjuntoConfig = getAdjuntoConfigByRole(this.role);
         return {
-          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) || "Dependencia desconocida"),
+          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) ?? "Dependencia desconocida"),
           documentoId: carta._id,
           tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           cargueAdjuntoConfig: cargueAdjuntoConfig
@@ -552,7 +565,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -565,7 +578,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       ),
 
       exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
 
         // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
         const vigenciaId = datosAuditoria?.vigencia_id;
@@ -580,7 +593,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Revisión de Programa de Auditoría",
           tipo_solicitud: "revisión y aprobación",
-          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: nombreRemitente || rolRemitente,
@@ -702,14 +715,14 @@ export class TablaAuditoriasInternasComponent implements OnInit {
                 const dependenciaNombre =
                   typeof carta.metadatos?.["dependencia_nombre"] === "string"
                     ? carta.metadatos?.["dependencia_nombre"]
-                    : carta.nombre || `Dependencia ${index + 1}`;
+                    : carta.nombre ?? `Dependencia ${index + 1}`;
                 const valorFirmado = carta.metadatos?.["firmado"];
-                const firmado =
-                  typeof valorFirmado === "boolean"
-                    ? valorFirmado
-                    : typeof valorFirmado === "string"
-                      ? valorFirmado.toLowerCase() === "true"
-                      : false;
+                let firmado = false;
+                if (typeof valorFirmado === "boolean") {
+                  firmado = valorFirmado;
+                } else if (typeof valorFirmado === "string") {
+                  firmado = valorFirmado.toLowerCase() === "true";
+                }
 
                 return {
                   titulo: `Carta de Representación ${dependenciaNombre}`,

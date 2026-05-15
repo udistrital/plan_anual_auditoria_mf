@@ -5,8 +5,8 @@ import { DomSanitizer } from "@angular/platform-browser";
 @NgModule({})
 export class IconosModule {
   constructor(
-    private matIconRegistry: MatIconRegistry,
-    private domSanitizer: DomSanitizer
+    private readonly matIconRegistry: MatIconRegistry,
+    private readonly domSanitizer: DomSanitizer
   ) {
     this.matIconRegistry.addSvgIconLiteral(
       "excel",

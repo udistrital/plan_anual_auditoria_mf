@@ -14,7 +14,9 @@
             <mat-select formControlName="vigencia" (selectionChange)="mostrarSeguimientosPorVigencia($event.value)"
               color="primary">
               <mat-option disabled value="">--Seleccionar--</mat-option>
-              <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia">{{ vigencia.Nombre }}</mat-option>
+              @for (vigencia of vigencias; track vigencia) {
+                <mat-option [value]="vigencia">{{ vigencia.Nombre }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <div class="col-md-8 col-12 d-flex align-items-center centrar-md">

@@ -21,7 +21,7 @@
         labelPosition="bottom"
         color="primary"
         [orientation]="orientation"
-      >
+        >
         <ng-template matStepperIcon="number">
           <mat-icon>lens</mat-icon>
         </ng-template>
@@ -40,65 +40,73 @@
               Informacion general de la auditoría
             </div>
           </div>
-          <div *ngIf="formularioInformacion != null" class="mt-4">
-            <app-formulario-dinamico
-              #formularioInformacionComp
-              [formulario]="formularioInformacion"
-              (submitFormulario)="preguntarGuardadoInformacion($event)"
-              (campoSeleccionado)="manejarCambioSelect($event)"
-            ></app-formulario-dinamico>
-            <div class="d-flex align-items-center fondo-acento-50 my-3">
-              <div>
-                <mat-icon>memory</mat-icon>
-              </div>
-              <div class="mx-3">
-                <h2>Solicitud de Información</h2>
-                Información para la ejecución de la auditoría
-              </div>
-            </div>
-            <div *ngIf="formularioTemas != null" class="mt-4">
+          @if (formularioInformacion != null) {
+            <div class="mt-4">
               <app-formulario-dinamico
-                #formularioTemasComp
-                [formulario]="formularioTemas"
-                >
-              </app-formulario-dinamico>
-            </div>
-            <div class="d-flex align-items-center fondo-acento-50 my-3">
-              <div>
-                <mat-icon>assignment</mat-icon>
+                #formularioInformacionComp
+                [formulario]="formularioInformacion"
+                (submitFormulario)="preguntarGuardadoInformacion($event)"
+                (campoSeleccionado)="manejarCambioSelect($event)"
+              ></app-formulario-dinamico>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>memory</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Solicitud de Información</h2>
+                  Información para la ejecución de la auditoría
+                </div>
               </div>
-              <div class="mx-3">
-                <h2>Dependencias</h2>
-                Informacion de las dependencias
-              </div>
-            </div>
-            <mat-accordion *ngIf="auditoria" multi="true">
-              <mat-expansion-panel *ngFor="let dep of auditoria.datos_dependencias">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    {{ dep.dependencia_nombre }}
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="p-3">
+              @if (formularioTemas != null) {
+                <div class="mt-4">
                   <app-formulario-dinamico
-                    #formularioDependenciasComp
-                    [formulario]="formularioDependencias"
-                  >
+                    #formularioTemasComp
+                    [formulario]="formularioTemas"
+                    >
                   </app-formulario-dinamico>
                 </div>
-              </mat-expansion-panel>
-            </mat-accordion>
-            <div class="d-flex justify-content-end mt-4">
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="enviarFormInformacion()"
-              >
-                <mat-icon>{{ soloLectura ? 'arrow_forward_ios' : 'save' }}</mat-icon>
-                {{ soloLectura ? 'Continuar' : 'Guardar y continuar' }}
-              </button>
+              }
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>assignment</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Dependencias</h2>
+                  Informacion de las dependencias
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of auditoria.datos_dependencias; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasComp
+                          [formulario]="formularioDependencias"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+              <div class="d-flex justify-content-end mt-4">
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="enviarFormInformacion()"
+                  >
+                  <mat-icon>{{ soloLectura ? 'arrow_forward_ios' : 'save' }}</mat-icon>
+                  {{ soloLectura ? 'Continuar' : 'Guardar y continuar' }}
+                </button>
+              </div>
             </div>
-          </div>
+          }
         </mat-step>
 
         <!-- Paso 2: Actividades -->
@@ -127,29 +135,31 @@
               <mat-icon>arrow_back_ios</mat-icon>
               Volver
             </button>
-            <button
-              *ngIf="!soloLectura"
-              mat-flat-button
-              color="primary"
-              class="mx-2"
-              (click)="crearActividad()"
-            >
-              <mat-icon>add_box</mat-icon>
-              Crear Actividad
-            </button>
+            @if (!soloLectura) {
+              <button
+                mat-flat-button
+                color="primary"
+                class="mx-2"
+                (click)="crearActividad()"
+                >
+                <mat-icon>add_box</mat-icon>
+                Crear Actividad
+              </button>
+            }
             <button matStepperNext mat-flat-button color="primary" class="mx-2">
               <mat-icon>{{ soloLectura ? 'arrow_forward_ios' : 'save' }}</mat-icon>
               {{ soloLectura ? 'Continuar' : 'Guardar y continuar' }}
             </button>
-            <button
-              *ngIf="!soloLectura"
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="subirArchivoCargueMasivo()"
-            >
-              <mat-icon>file_upload</mat-icon> Cargue Masivo
-            </button>
+            @if (!soloLectura) {
+              <button
+                class="mx-2"
+                mat-raised-button
+                color="primary"
+                (click)="subirArchivoCargueMasivo()"
+                >
+                <mat-icon>file_upload</mat-icon> Cargue Masivo
+              </button>
+            }
           </div>
         </mat-step>
 
@@ -177,10 +187,12 @@
               <mat-icon>arrow_back_ios</mat-icon>
               Volver
             </button>
-            <button *ngIf="!soloLectura" (click)="finalizarAuditoria()" mat-flat-button color="primary" class="mx-2">
-              <mat-icon>send</mat-icon>
-              Enviar a Aprobación
-            </button>
+            @if (!soloLectura) {
+              <button (click)="finalizarAuditoria()" mat-flat-button color="primary" class="mx-2">
+                <mat-icon>send</mat-icon>
+                Enviar a Aprobación
+              </button>
+            }
           </div>
         </mat-step>
       </mat-stepper>

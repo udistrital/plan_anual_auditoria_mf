@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver } from "@angular/cdk/layout";
@@ -19,11 +19,12 @@ import { CargarArchivoComponent } from 'src/app/shared/elements/components/carga
 import { ModalVisualizarRecargarInformeAuditoriaComponent } from './modal-visualizar-recargar-informe-auditoria/modal-visualizar-recargar-informe-auditoria.component';
 
 @Component({
-  selector: 'app-editar-auditoria',
-  templateUrl: './editar-auditoria.component.html',
-  styleUrls: ['./editar-auditoria.component.css']
+    selector: 'app-editar-auditoria',
+    templateUrl: './editar-auditoria.component.html',
+    styleUrls: ['./editar-auditoria.component.css'],
+    standalone: false
 })
-export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
+export class EditarAuditoriaComponent implements OnInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild("formularioInformacionComp")
@@ -67,8 +68,6 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
         if (campo) campo.parametros!.opciones = opciones;
       });
   }
-
-  ngAfterViewInit() { }
 
   private readonly selectActions: Record<string, (valor: any) => void> = {
     macroproceso: (valor) => this.manejarCambioMacroproceso(valor),

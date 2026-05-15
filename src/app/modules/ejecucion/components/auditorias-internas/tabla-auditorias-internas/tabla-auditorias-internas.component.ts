@@ -17,9 +17,10 @@ import { accionesEjecucionFinal, accionesEjecucionPreliminar } from "src/app/sha
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-auditorias-internas",
-  templateUrl: "./tabla-auditorias-internas.component.html",
-  styleUrls: ["./tabla-auditorias-internas.component.css"],
+    selector: "app-tabla-auditorias-internas",
+    templateUrl: "./tabla-auditorias-internas.component.html",
+    styleUrls: ["./tabla-auditorias-internas.component.css"],
+    standalone: false
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -51,15 +52,15 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   ]);
 
   constructor(
-    private alertaService: AlertService,
-    private rolService: RolService,
-    private userService: UserService,
-    private changeDetector: ChangeDetectorRef,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router,
-    private dialog: MatDialog
+    private readonly alertaService: AlertService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) { }
 
   async ngOnInit() {
@@ -119,7 +120,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
           return this.alertaService.showAlert(
@@ -176,9 +177,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const acciones = this.roles.flatMap((rol) => {
       // Usar solo las acciones correspondientes según la etapa
       if (mostrarComoInforme) {
-        return accionesEjecucionFinal[rol]?.[estado] || [];
+        return accionesEjecucionFinal[rol]?.[estado] ?? [];
       } else {
-        return accionesEjecucionPreliminar[rol]?.[estado] || [];
+        return accionesEjecucionPreliminar[rol]?.[estado] ?? [];
       }
     });
 
@@ -218,7 +219,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   verInformeSoloLectura(auditoria: Auditoria) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           this.router.navigate(
             [`/ejecucion/auditorias-internas/editar-informe/${res.Data[0]._id}`],
             { queryParams: { soloLectura: true } }
@@ -234,7 +235,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           onInformeId(res.Data[0]._id);
         } else {
           this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({

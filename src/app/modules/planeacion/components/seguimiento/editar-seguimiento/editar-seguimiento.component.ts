@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { MatStepper } from "@angular/material/stepper";
-import { ActividadesSeguimientoComponent as ActividadesSeguimientoComponent } from "./actividades-seguimiento/actividades-seguimiento.component";
+import { ActividadesSeguimientoComponent } from "./actividades-seguimiento/actividades-seguimiento.component";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 import {
   formularioDependencias,
@@ -32,9 +32,10 @@ import { catchError, exhaustMap, tap } from "rxjs/operators";
 
 
 @Component({
-  selector: "app-editar-seguimiento",
-  templateUrl: "./editar-seguimiento.component.html",
-  styleUrls: ["./editar-seguimiento.component.css"],
+    selector: "app-editar-seguimiento",
+    templateUrl: "./editar-seguimiento.component.html",
+    styleUrls: ["./editar-seguimiento.component.css"],
+    standalone: false
 })
 export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
@@ -173,14 +174,14 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
 
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
-      .subscribe((res) => {
+      .subscribe((res: any) => {
         this.cambiarEstado().subscribe(() => {
           this.alertaService.showSuccessAlert(
             "Información editados correctamente"
           );
           
         });
-        this.auditoria = (res as any).Data;
+        this.auditoria = res.Data;
         this.paso1Guardado = true;
         this.stepper.next();
       });
@@ -292,7 +293,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = this.auditoria.datos_dependencias[i];
-      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo || "";
+      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep.dependencia_id,
         jefe_nombre: dep.jefe_nombre,
@@ -459,7 +460,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -472,7 +473,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       ),
 
       exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
@@ -486,7 +487,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Revisión de Programa de Auditoría",
           tipo_solicitud: "revisión y aprobación",
-          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: nombreRemitente || rolRemitente,

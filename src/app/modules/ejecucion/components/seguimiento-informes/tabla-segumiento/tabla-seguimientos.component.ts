@@ -22,9 +22,10 @@ import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEsta
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-seguimientos",
-  templateUrl: "./tabla-seguimientos.component.html",
-  styleUrls: ["./tabla-seguimientos.component.css"],
+    selector: "app-tabla-seguimientos",
+    templateUrl: "./tabla-seguimientos.component.html",
+    styleUrls: ["./tabla-seguimientos.component.css"],
+    standalone: false
 })
 export class TablaSeguimientosComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -50,15 +51,15 @@ export class TablaSeguimientosComponent implements OnInit {
   ]);
 
   constructor(
-    private alertaService: AlertService,
-    private rolService: RolService,
-    private userService: UserService,
-    private changeDetector: ChangeDetectorRef,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router,
-    private dialog: MatDialog
+    private readonly alertaService: AlertService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -87,7 +88,7 @@ export class TablaSeguimientosComponent implements OnInit {
         return { ...auditoria, acciones };
       });
 
-      if (!(auditorias.length > 0)) {
+      if (auditorias.length === 0) {
         this.banderaTablaAuditorias = false;
         this.auditoriasDataSource.data = [];
         return this.alertaService.showAlert(
@@ -143,7 +144,7 @@ export class TablaSeguimientosComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] ?? [])
       )
     );
   }
@@ -178,7 +179,7 @@ export class TablaSeguimientosComponent implements OnInit {
   private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           onInformeId(res.Data[0]._id);
         } else {
           this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({

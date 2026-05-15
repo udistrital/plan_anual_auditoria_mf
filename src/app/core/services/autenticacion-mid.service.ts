@@ -6,7 +6,7 @@ import { RequestManager } from '../managers/requestManager';
 })
 export class AutenticacionMidService {
 
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath("AUTENTICACION_MID_SERVICE");
   }
 

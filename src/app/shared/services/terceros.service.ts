@@ -40,8 +40,8 @@ export interface VinculacionResponse {
 export class TercerosService {
 
   constructor(
-    private tercerosCrudService: TercerosCrudService,
-    private implicitAutenticationService: ImplicitAutenticationService
+    private readonly tercerosCrudService: TercerosCrudService,
+    private readonly implicitAutenticationService: ImplicitAutenticationService
   ) {}
 
   /**

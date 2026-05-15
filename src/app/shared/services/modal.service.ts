@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import Swal from 'sweetalert2';
 
+type IconoAlerta = 'success' | 'error' | 'warning' | 'info';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -10,7 +12,7 @@ export class ModalService {
 
   mostrarModal(
     mensaje: string, 
-    icono: 'success' | 'error' | 'warning' | 'info', 
+    icono: IconoAlerta, 
     titulo: string): void {
     Swal.fire({
       title: titulo.toUpperCase(),
@@ -27,7 +29,7 @@ export class ModalService {
 
   modalConfirmacion(
     mensaje: string, 
-    icono: 'success' | 'error' | 'warning' | 'info', 
+    icono: IconoAlerta, 
     titulo: string): Promise<any> {
     return Swal.fire({
       title: titulo,

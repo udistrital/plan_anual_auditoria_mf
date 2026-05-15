@@ -35,9 +35,10 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 @Component({
-  selector: "app-editar-auditoria",
-  templateUrl: "./editar-auditoria.component.html",
-  styleUrls: ["./editar-auditoria.component.css"],
+    selector: "app-editar-auditoria",
+    templateUrl: "./editar-auditoria.component.html",
+    styleUrls: ["./editar-auditoria.component.css"],
+    standalone: false
 })
 export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
@@ -181,8 +182,8 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
 
     this.planAuditoriaService
       .put(`auditoria/${auditoriaId}`, informacionEditar)
-      .subscribe((res) => {
-        const datosActualizados = (res as any)?.Data;
+      .subscribe((res: any) => {
+        const datosActualizados = res?.Data;
         if (datosActualizados) {
           this.auditoria = { ...this.auditoria, ...datosActualizados };
         }
@@ -360,7 +361,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
 
     this.formularioDependenciasComponent.forEach((comp, i) => {
       const dep = this.auditoria.datos_dependencias[i];
-      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo || "";
+      const correo = this.auditoria.correo_complementario?.find((c: any) => c.dependencia_id === dep.dependencia_id)?.correo ?? '';
       comp.form.patchValue({
         dependencia_id: dep.dependencia_id,
         jefe_nombre: dep.jefe_nombre,
@@ -531,7 +532,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -544,7 +545,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
       ),
 
       exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
@@ -558,7 +559,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Revisión de Programa de Auditoría",
           tipo_solicitud: "revisión y aprobación",
-          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: nombreRemitente || rolRemitente,

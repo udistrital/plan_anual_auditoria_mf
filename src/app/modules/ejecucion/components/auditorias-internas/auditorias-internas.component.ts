@@ -5,9 +5,10 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
 import { TablaAuditoriasInternasComponent } from "./tabla-auditorias-internas/tabla-auditorias-internas.component";
 
 @Component({
-  selector: "app-auditorias-internas",
-  templateUrl: "./auditorias-internas.component.html",
-  styleUrls: ["./auditorias-internas.component.css"]
+    selector: "app-auditorias-internas",
+    templateUrl: "./auditorias-internas.component.html",
+    styleUrls: ["./auditorias-internas.component.css"],
+    standalone: false
 })
 export class AuditoriasInternasComponent implements OnInit {
   @ViewChild(TablaAuditoriasInternasComponent)
@@ -18,8 +19,8 @@ export class AuditoriasInternasComponent implements OnInit {
   vigenciaSeleccionada!: number;
 
   constructor(
-    private fb: FormBuilder,
-    private parametrosUtilsService: ParametrosUtilsService,
+    private readonly fb: FormBuilder,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
   ) { }
 
   ngOnInit() {
