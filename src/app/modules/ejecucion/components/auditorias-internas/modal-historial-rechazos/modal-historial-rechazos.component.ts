@@ -4,17 +4,18 @@ import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditori
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-historial-rechazos",
-  templateUrl: "./modal-historial-rechazos.component.html",
-  styleUrl: "./modal-historial-rechazos.component.css",
+    selector: "app-modal-historial-rechazos",
+    templateUrl: "./modal-historial-rechazos.component.html",
+    styleUrl: "./modal-historial-rechazos.component.css",
+    standalone: false
 })
 export class ModalHistorialRechazosComponent implements OnInit {
   rechazos: any[] = [];
   cargando = true;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data: { auditoriaId: string },
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    @Inject(MAT_DIALOG_DATA) private readonly data: { auditoriaId: string },
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) { }
 
   ngOnInit(): void {
@@ -32,7 +33,7 @@ export class ModalHistorialRechazosComponent implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          this.rechazos = res?.Data || [];
+          this.rechazos = res?.Data as any[];
           this.cargando = false;
         },
         error: () => {

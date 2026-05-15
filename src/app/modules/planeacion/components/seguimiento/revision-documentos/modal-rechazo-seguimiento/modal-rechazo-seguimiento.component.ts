@@ -28,9 +28,9 @@ export interface RechazoData {
 }
 
 @Component({
-  selector: "app-modal-rechazo-seguimiento",
-  templateUrl: "./modal-rechazo-seguimiento.component.html",
-  styleUrl: "./modal-rechazo-seguimiento.component.css",
+    selector: "app-modal-rechazo-seguimiento",
+    templateUrl: "./modal-rechazo-seguimiento.component.html",
+    standalone: false
 })
 export class ModalRechazoSeguimientoComponent {
   formObservaciones!: FormGroup;
@@ -39,12 +39,11 @@ export class ModalRechazoSeguimientoComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: RechazoData,
-    public dialogRef: MatDialogRef<ModalMotivosRechazoComponent>,
-    private alertService: AlertService,
-    private fb: FormBuilder,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router
-    ,
+    public readonly dialogRef: MatDialogRef<ModalMotivosRechazoComponent>,
+    private readonly alertService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router,
     private readonly tercerosService: TercerosService,
     private readonly notificacionesService: NotificacionesService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
@@ -112,13 +111,13 @@ export class ModalRechazoSeguimientoComponent {
    */
   private notificarRechazo(auditoriaId: string): void {
     const role = this.infoModal.role;
-    const rolRemitente = role === environment.ROL.JEFE
-      ? "Jefe OCI"
-      : role === environment.ROL.JEFE_DEPENDENCIA
-        ? "Jefe de Dependencia"
-        : role === environment.ROL.ASISTENTE_DEPENDENCIA
-          ? "Asistente de Dependencia"
-          : role || "Revisor";
+    const roleLabels: Record<string, string> = {
+      [environment.ROL.JEFE]: "Jefe OCI",
+      [environment.ROL.JEFE_DEPENDENCIA]: "Jefe de Dependencia",
+      [environment.ROL.ASISTENTE_DEPENDENCIA]: "Asistente de Dependencia",
+    };
+
+    const rolRemitente = roleLabels[role as string] ?? role ?? "Revisor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -194,7 +193,7 @@ export class ModalRechazoSeguimientoComponent {
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Rechazo de Programa de Auditoría",
               tipo_solicitud: "revisión y corrección",
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
               nombre_remitente: nombreRemitente || rolRemitente,

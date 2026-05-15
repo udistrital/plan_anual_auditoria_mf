@@ -9,9 +9,10 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-plan-de-mejoramiento",
-  templateUrl: "./plan-mejoramiento.component.html",
-  styleUrls: ["./plan-mejoramiento.component.css"],
+    selector: "app-plan-de-mejoramiento",
+    templateUrl: "./plan-mejoramiento.component.html",
+    styleUrls: ["./plan-mejoramiento.component.css"],
+    standalone: false
 })
 export class PlanDeMejoramientoComponent implements OnInit {
   @ViewChild(TablaPlanMejoramientoComponent)

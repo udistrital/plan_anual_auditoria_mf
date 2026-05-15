@@ -4,9 +4,10 @@ import { ParametrosService } from "src/app/core/services/parametros.service";
 import { Formulario } from "src/app/shared/data/models/formulario.model";
 
 @Component({
-  selector: "app-formulario-dinamico",
-  templateUrl: "./formulario-dinamico.component.html",
-  styleUrls: ["./formulario-dinamico.component.css"],
+    selector: "app-formulario-dinamico",
+    templateUrl: "./formulario-dinamico.component.html",
+    styleUrls: ["./formulario-dinamico.component.css"],
+    standalone: false
 })
 export class FormularioDinamicoComponent implements OnInit {
   @Input() formulario: Formulario = { campos: [] };
@@ -31,7 +32,7 @@ export class FormularioDinamicoComponent implements OnInit {
           this.form.addControl(
             campo.nombre,
             this.fb.control(
-              { value: campo.valor || "", disabled: campo.deshabilitado },
+              { value: campo.valor ?? '', disabled: campo.deshabilitado },
               validators
             )
           );

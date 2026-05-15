@@ -19,7 +19,7 @@ export interface Parametro {
 export class ParametrosUtilsService {
 
   constructor(
-    private parametrosService: ParametrosService
+    private readonly parametrosService: ParametrosService
   ) {}
 
   /**
@@ -27,14 +27,12 @@ export class ParametrosUtilsService {
    * @returns {Observable<any[]>} Observable con el arreglo de vigencias.
    */
    public getVigencias(): Observable<any[]> {
-    environment.VIGENCIAS.TIPO_PARAMETRO_ID
-
     const endpoint = `parametro?query=TipoParametroId:${environment.VIGENCIAS.TIPO_PARAMETRO_ID},Activo:true&fields=Id,Nombre&limit=0&sortby=nombre&order=desc`;
     
     return this.parametrosService.get(endpoint).pipe(
       map((res: any) => {
         // Validamos que la respuesta contenga Data
-        if (res && res.Data) {
+        if (res?.Data) {
           return res.Data;
         }
         return [];

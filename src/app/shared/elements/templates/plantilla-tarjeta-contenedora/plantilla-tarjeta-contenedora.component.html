@@ -6,25 +6,30 @@
   </div>
   <mat-card class="p-3">
     <mat-card-content>
-      <div class="d-flex align-items-center my-1" *ngIf="subtitle">
-        <mat-icon color="primary" style="margin-right: 5px;">calendar_today</mat-icon>
-        <b>Vigencia {{ subtitle }}</b>
-      </div>
-      <div class="d-flex align-items-center my-1" *ngIf="subtitleChild">
-        <mat-icon color="primary" style="margin-right: 5px;">bookmark</mat-icon>
-        <b>{{ subtitleChild }}</b>
-      </div>
+      @if (subtitle) {
+        <div class="d-flex align-items-center my-1">
+          <mat-icon color="primary" style="margin-right: 5px;">calendar_today</mat-icon>
+          <b>Vigencia {{ subtitle }}</b>
+        </div>
+      }
+      @if (subtitleChild) {
+        <div class="d-flex align-items-center my-1">
+          <mat-icon color="primary" style="margin-right: 5px;">bookmark</mat-icon>
+          <b>{{ subtitleChild }}</b>
+        </div>
+      }
       <div class="d-flex justify-content-between align-items-center my-2">
         <h2 style="color: var(--md-primary-700)">{{ title }}</h2>
-        <button
-          *ngIf="mostrarBotonRegresar"
-          mat-stroked-button
-          color="primary"
-          style="border: 1px solid var(--md-primary-500)"
-          (click)="emitirEventoRegresar()"
-        >
-          <mat-icon>toll</mat-icon>Regresar
-        </button>
+        @if (mostrarBotonRegresar) {
+          <button
+            mat-stroked-button
+            color="primary"
+            style="border: 1px solid var(--md-primary-500)"
+            (click)="emitirEventoRegresar()"
+            >
+            <mat-icon>toll</mat-icon>Regresar
+          </button>
+        }
       </div>
       <ng-container *ngTemplateOutlet="contenido"></ng-container>
     </mat-card-content>

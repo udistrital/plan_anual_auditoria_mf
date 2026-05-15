@@ -7,7 +7,7 @@ import { map, catchError, mergeMap } from "rxjs/operators";
   providedIn: "root",
 })
 export class NuxeoService {
-  constructor(private gestorDocumentalService: GestorDocumentalService) {}
+  constructor(private readonly gestorDocumentalService: GestorDocumentalService) {}
 
   obtenerUrlFile(base64: any, minetype: any) {
     return new Promise<string>((resolve, reject) => {
@@ -27,13 +27,17 @@ export class NuxeoService {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
-        let encoded = reader.result!.toString().replace(/^data:(.*,)?/, "");
+        const result = reader.result!;
+        let encoded = (result as string).replace(/^data:(.*,)?/, "");
         if (encoded.length % 4 > 0) {
           encoded += "=".repeat(4 - (encoded.length % 4));
         }
         resolve(encoded);
       };
-      reader.onerror = (error) => reject(error);
+      reader.onerror = (error) => {
+        const err = new Error(error.type, { cause: error });
+        reject(err);
+      }
     });
   }
 
@@ -46,7 +50,7 @@ export class NuxeoService {
       mergeMap((fileDatas: string[]) => {
         const sendFileData = files.map((file, i) => ({
           IdTipoDocumento: file.IdTipoDocumento,
-          nombre: (file.nombre || "").replace(/[\.]/g),
+          nombre: (file.nombre ?? '').replace(/[.]/g),
           metadatos: file.metadatos ? file.metadatos : {},
           descripcion: file.descripcion ? file.descripcion : "",
           file: fileDatas[i],
@@ -76,7 +80,7 @@ export class NuxeoService {
     }
 
     throw new Error(
-      `Formato de archivo no soportado para ${file?.nombre || "archivo sin nombre"}`
+      `Formato de archivo no soportado para ${file?.nombre ?? "archivo sin nombre"}`
     );
   }
 

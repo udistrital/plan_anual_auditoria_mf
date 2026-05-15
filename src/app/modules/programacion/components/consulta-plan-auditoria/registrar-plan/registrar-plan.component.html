@@ -10,27 +10,28 @@
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
-      <ng-container *ngIf="modoEditar">
-        <app-formulario-dinamico
-          [formulario]="formulario"
-          (submitFormulario)="manejarEnvio($event)"
-          *ngIf="datosCargados"
-        />
+      @if (modoEditar) {
+        @if (datosCargados) {
+          <app-formulario-dinamico
+            [formulario]="formulario"
+            (submitFormulario)="manejarEnvio($event)"
+            />
+        }
         <div class="d-flex justify-content-end">
           <div class="button-container">
             <button
               mat-raised-button
               color="primary"
               (click)="guardarInformacion()"
-            >
+              >
               Guardar
             </button>
           </div>
         </div>
-      </ng-container>
-      <ng-container *ngIf="!modoEditar">
+      }
+      @if (!modoEditar) {
         <div class="row mt-1">
-          <ng-container *ngFor="let item of auditoriaItems">
+          @for (item of auditoriaItems; track item) {
             <div class="d-flex align-items-center fondo-chip mb-4">
               <div>
                 <mat-icon class="mx-1" color="primary">{{
@@ -42,9 +43,9 @@
                 <p>{{ item.content }}</p>
               </div>
             </div>
-          </ng-container>
+          }
         </div>
-      </ng-container>
+      }
     </div>
   </div>
 </ng-template>

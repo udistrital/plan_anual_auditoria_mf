@@ -1,12 +1,12 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 
 @Component({
-  selector: 'app-actividad-seguimiento-formulario',
-  templateUrl: './actividad-formulario.component.html',
-  styleUrls: ['./actividad-formulario.component.css'],
+    selector: 'app-actividad-seguimiento-formulario',
+    templateUrl: './actividad-formulario.component.html',
+    standalone: false
 })
 export class ActividadSeguimientoFormularioComponent {
   @Input() actividadData: ActividadPlan | null = null; // Recibe los datos iniciales
@@ -19,9 +19,9 @@ export class ActividadSeguimientoFormularioComponent {
   minFecha: Date | null = null;
   maxFecha: Date | null = null;
 
-  private subs = new Subscription();
+  private readonly subs = new Subscription();
 
-  constructor(private fb: FormBuilder) {
+  constructor(private readonly fb: FormBuilder) {
     this.form = this.fb.group({
       actividad: ['', Validators.required],
       fechaInicio: ['', Validators.required],

@@ -1,11 +1,13 @@
-<div *ngIf="pdfLoaded">
-  <pdf-viewer
-    [src]="pdfSrc"
-    [render-text]="true"
-    [original-size]="false"
-    [show-all]="true"
-    [zoom]="1.0"
-    class="pdf-container"
-    style="min-width: 200px; min-height: 550px; width: 100%; height: auto"
-  ></pdf-viewer>
-</div>
+@if (pdfLoaded) {
+  <div>
+    <pdf-viewer
+      [src]="pdfSrc"
+      [render-text]="true"
+      [original-size]="false"
+      [show-all]="true"
+      [zoom]="1.0"
+      class="pdf-container"
+      style="min-width: 200px; min-height: 550px; width: 100%; height: auto"
+    ></pdf-viewer>
+  </div>
+}

@@ -11,7 +11,6 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-seguimiento.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -33,9 +32,10 @@ import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
 
 @Component({
-  selector: "app-tabla-seguimiento",
-  templateUrl: "./tabla-seguimiento.component.html",
-  styleUrl: "./tabla-seguimiento.component.css",
+    selector: "app-tabla-seguimiento",
+    templateUrl: "./tabla-seguimiento.component.html",
+    styleUrl: "./tabla-seguimiento.component.css",
+    standalone: false
 })
 export class TablaSeguimientoComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -125,7 +125,7 @@ export class TablaSeguimientoComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaSeguimiento = false;
           this.auditoriasDataSource.data = [];
           return this.alertService.showAlert(
@@ -220,11 +220,13 @@ export class TablaSeguimientoComponent implements OnInit {
     queryParams += `&limit=${limit}`
     queryParams += `&offset=${offset}`;
 
-    const cargoId = this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)
-      ? environment.CARGO.JEFE_DEPENDENCIA_ID
-      : this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)
-        ? environment.CARGO.ASISTENTE_DEPENDENCIA_ID
-        : 0;
+    let cargoId = 0;
+
+    if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
+      cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+    } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
+      cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+    }
 
     return `${endpoint}${this.usuarioId}/${cargoId}?${queryParams}`;
   }
@@ -269,7 +271,7 @@ export class TablaSeguimientoComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
     );
   }
@@ -459,7 +461,7 @@ export class TablaSeguimientoComponent implements OnInit {
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -472,7 +474,7 @@ export class TablaSeguimientoComponent implements OnInit {
       ),
 
       exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
@@ -486,7 +488,7 @@ export class TablaSeguimientoComponent implements OnInit {
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Revisión de Programa de Auditoría",
           tipo_solicitud: "revisión y aprobación",
-          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: nombreRemitente || rolRemitente,

@@ -65,9 +65,10 @@ const configJefe = {
 };
 
 @Component({
-  selector: "app-revision-documentos-ejecucion",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+    selector: "app-revision-documentos-ejecucion",
+    templateUrl: "./revision-documentos.component.html",
+    styleUrl: "./revision-documentos.component.css",
+    standalone: false
 })
 export class RevisionDocumentosEjecucionComponent implements OnInit {
   auditoriaId: string = "";
@@ -85,7 +86,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   };
 
   constructor(
-    public dialog: MatDialog,
+    public readonly dialog: MatDialog,
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
@@ -358,7 +359,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       const variables: VariablesSolicitud = {
         titulo_solicitud: 'Revisión de Informe Preliminar',
         tipo_solicitud: `Revisión del informe preliminar. Fecha límite: ${fechaLimiteFormateada}`,
-        nombre_documento: `Informe Preliminar${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+        nombre_documento: `Informe Preliminar${datosAuditoria?.titulo ?  ' - ' + datosAuditoria.titulo : ''}`,
         vigencia: datosAuditoria?.vigencia_nombre ?? String(datosAuditoria?.vigencia_id ?? ''),
         rol_remitente: rolRemitentePorRol[this.role!] ?? 'Jefe OCI',
         nombre_remitente: tercero?.NombreCompleto ?? 'Jefe OCI',

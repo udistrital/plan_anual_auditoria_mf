@@ -8,8 +8,9 @@ export interface AuditoriaHija {
 }
 
 @Component({
-  selector: 'app-modal-auditorias-hijas',
-  templateUrl: './modal-auditorias-hijas.component.html',
+    selector: 'app-modal-auditorias-hijas',
+    templateUrl: './modal-auditorias-hijas.component.html',
+    standalone: false
 })
 export class ModalAuditoriasHijasComponent {
   displayedColumns = ['nombre', 'estado'];

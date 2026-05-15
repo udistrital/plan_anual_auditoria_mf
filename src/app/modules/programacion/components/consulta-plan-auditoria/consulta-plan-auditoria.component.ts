@@ -31,9 +31,10 @@ import { ModalEnviarAprobacionComponent } from "./modal-enviar-aprobacion/modal-
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
 @Component({
-  selector: "app-consulta-plan-auditoria",
-  templateUrl: "./consulta-plan-auditoria.component.html",
-  styleUrls: ["./consulta-plan-auditoria.component.css"],
+    selector: "app-consulta-plan-auditoria",
+    templateUrl: "./consulta-plan-auditoria.component.html",
+    styleUrls: ["./consulta-plan-auditoria.component.css"],
+    standalone: false
 })
 export class ConsultaPlanAuditoriaComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -74,7 +75,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private rolService: RolService,
+    private readonly rolService: RolService,
     private readonly userService: UserService,
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,
@@ -137,7 +138,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
-    const EN_BORRADOR_ID = environment.PLAN_ESTADO.EN_BORRADOR_ID;
     this.PlanAnualAuditoriaMid.get(
       `plan-auditoria?sortby=vigencia_id&order=desc&query=&limit=${limit}&offset=${offset}`
     ).subscribe(
@@ -234,8 +234,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         },
         (error) => {
           if (
-            error.error?.Data &&
-            error.error.Data.includes("Ya existe un plan")
+            error?.error?.Data.includes("Ya existe un plan")
           ) {
             this.alertaService.showAlert(
               "SELECCIONE OTRA VIGENCIA",
@@ -258,7 +257,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] ?? [])
       )
     );
   }
@@ -385,7 +384,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       exhaustMap((terceroIdentification) => of(terceroIdentification.NombreCompleto)),
 
       exhaustMap((nombreRemitente) => {
-        const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Usuario";
+        const rolRemitente = rolRemitentePorRol[this.roles[0]] ?? "Usuario";
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
           [],
           environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"]
@@ -480,7 +479,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verMotivosRechazo(plan: any) {
-    const dialogRef = this.dialog.open(ModalListaRechazosComponent, {
+    this.dialog.open(ModalListaRechazosComponent, {
       width: "1000px",
       data: plan,
       autoFocus: false,

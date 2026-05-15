@@ -5,9 +5,10 @@ import { environment } from "src/environments/environment";
 import { forkJoin } from "rxjs";
 
 @Component({
-  selector: "app-modal-lista-rechazos",
-  templateUrl: "./modal-lista-rechazos.component.html",
-  styleUrl: "./modal-lista-rechazos.component.css",
+    selector: "app-modal-lista-rechazos",
+    templateUrl: "./modal-lista-rechazos.component.html",
+    styleUrl: "./modal-lista-rechazos.component.css",
+    standalone: false
 })
 export class ModalListaRechazosComponent implements OnInit {
   rechazos: any[] = [];
@@ -16,8 +17,8 @@ export class ModalListaRechazosComponent implements OnInit {
   cargando: boolean = true;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private planAuditoria: any,
-    private planAuditoriaMid: PlanAnualAuditoriaMid
+    @Inject(MAT_DIALOG_DATA) private readonly planAuditoria: any,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 
   ngOnInit(): void {

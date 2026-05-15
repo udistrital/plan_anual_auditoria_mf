@@ -5,9 +5,9 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
 import { TablaSeguimientosComponent } from "./tabla-segumiento/tabla-seguimientos.component";
 
 @Component({
-  selector: "app-seguimiento-informes",
-  templateUrl: "./seguimiento-informes.component.html",
-  styleUrls: ["./seguimiento-informes.component.css"]
+    selector: "app-seguimiento-informes",
+    templateUrl: "./seguimiento-informes.component.html",
+    standalone: false
 })
 export class SeguimientoInformesComponent implements OnInit {
   @ViewChild(TablaSeguimientosComponent)
@@ -18,8 +18,8 @@ export class SeguimientoInformesComponent implements OnInit {
   vigenciaSeleccionada!: number;
 
   constructor(
-    private fb: FormBuilder,
-    private parametrosUtilsService: ParametrosUtilsService,
+    private readonly fb: FormBuilder,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
   ) { }
 
   ngOnInit() {

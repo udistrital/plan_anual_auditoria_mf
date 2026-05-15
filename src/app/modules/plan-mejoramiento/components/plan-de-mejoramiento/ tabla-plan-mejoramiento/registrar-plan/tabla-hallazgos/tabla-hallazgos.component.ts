@@ -53,9 +53,10 @@ export interface FilaTabla {
 const TIPO_NOMBRES: Record<number, string> = { 1: 'Preventiva', 2: 'Correctiva' };
 
 @Component({
-  selector: 'app-tabla-hallazgos',
-  templateUrl: './tabla-hallazgos.component.html',
-  styleUrls: ['./tabla-hallazgos.component.css'],
+    selector: 'app-tabla-hallazgos',
+    templateUrl: './tabla-hallazgos.component.html',
+    styleUrls: ['./tabla-hallazgos.component.css'],
+    standalone: false
 })
 export class TablaHallazgosComponent implements OnInit {
   @Input() auditoriaId!: string;

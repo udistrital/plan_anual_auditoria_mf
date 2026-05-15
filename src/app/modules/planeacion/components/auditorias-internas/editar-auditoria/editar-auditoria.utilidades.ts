@@ -1,5 +1,4 @@
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { environment } from "src/environments/environment";
 
 export const formularioInformacionAuditoria: Formulario = {
   campos: [

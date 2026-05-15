@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -7,25 +7,25 @@ import { environment } from 'src/environments/environment';
 interface HallazgoObs {
   hallazgo: any;
   observacionesAuditado: any[];
-  observacionAuditor: any | null;
+  observacionAuditor: any;
 }
 
 interface SubtemaObs { subtema: any; hallazgos: HallazgoObs[]; }
 interface TemaObs    { tema: any;   subtemas: SubtemaObs[];   }
 
 const ROLES_AUDITOR = [
-  environment.ROL.ADMIN, //TODO: QUITAR
   environment.ROL.AUDITOR_EXPERTO,
   environment.ROL.AUDITOR,
   environment.ROL.AUDITOR_ASISTENTE,
 ];
 
 @Component({
-  selector: 'app-revision-preinforme',
-  templateUrl: './revision-preinforme.component.html',
-  styleUrls: ['./revision-preinforme.component.css'],
+    selector: 'app-revision-preinforme',
+    templateUrl: './revision-preinforme.component.html',
+    styleUrls: ['./revision-preinforme.component.css'],
+    standalone: false
 })
-export class RevisionPreinformeComponent implements OnInit, OnChanges {
+export class RevisionPreinformeComponent implements OnChanges {
   @Input() informeId!: string;
   @Input() temasRaw: any[] | null = null;
   @Input() hallazgosRaw: any[] | null = null;
@@ -54,11 +54,9 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
   guardandoSet = new Set<string>();
 
   constructor(
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService,
   ) {}
-
-  ngOnInit(): void { }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['temasRaw'] || changes['hallazgosRaw']) && this.temasRaw !== null && this.hallazgosRaw !== null) {
@@ -75,7 +73,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
         .filter((t: any) => t.activo !== false)
         .map((tema: any) => ({
           tema,
-          subtemas: (tema.subtema || [])
+          subtemas: (tema.subtema ?? [])
             .filter((st: any) => st.activo !== false)
             .map((subtema: any) => ({
               subtema,
@@ -84,11 +82,11 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
                   h.subtema_id?.toString() === subtema._id?.toString() && h.activo !== false,
                 )
                 .map((hallazgo: any) => {
-                  const obs: any[] = obsMap.get(hallazgo._id) || [];
+                  const obs: any[] = obsMap.get(hallazgo._id) ?? [];
                   return {
                     hallazgo,
                     observacionesAuditado: obs.filter((o) => !ROLES_AUDITOR.includes(o.usuario_rol)),
-                    observacionAuditor: obs.find((o) => ROLES_AUDITOR.includes(o.usuario_rol)) || null,
+                    observacionAuditor: obs.find((o) => ROLES_AUDITOR.includes(o.usuario_rol)) ?? null,
                   };
                 }),
             })),
@@ -126,7 +124,7 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
     const resp: any = await firstValueFrom(
       this.planAnualAuditoriaService.get(`observacion?query=hallazgo_id__in:${ids.join('|')},activo:true&limit=0`),
     );
-    for (const obs of (resp?.Data || [])) {
+    for (const obs of (resp?.Data ?? [])) {
       const hid = obs.hallazgo_id?.toString();
       if (!map.has(hid)) map.set(hid, []);
       map.get(hid)!.push(obs);
@@ -138,8 +136,8 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
     return hallazgos.slice(0, k + 1).filter(h => !h.hallazgo.rechazado).length;
   }
 
-  miObservacionAuditado(item: HallazgoObs): any | null {
-    return item.observacionesAuditado.find((o) => o.usuario_id === this.usuarioId) || null;
+  miObservacionAuditado(item: HallazgoObs): any {
+    return item.observacionesAuditado.find((o) => o.usuario_id === this.usuarioId) ?? null;
   }
 
   estaGuardando(hallazgoId: string): boolean {
@@ -150,9 +148,9 @@ export class RevisionPreinformeComponent implements OnInit, OnChanges {
     this.textoInline.set(hallazgoId, texto);
   }
 
-  guardarObservacion(item: HallazgoObs, observacionExistente: any | null): void {
+  guardarObservacion(item: HallazgoObs, observacionExistente: any): void {
     const hallazgoId: string = item.hallazgo._id;
-    const texto = (this.textoInline.get(hallazgoId) || '').trim();
+    const texto = (this.textoInline.get(hallazgoId) ?? '').trim();
 
     if (!texto) {
       this.alertaService.showAlert('Campo vacío', 'La observación no puede estar vacía.');

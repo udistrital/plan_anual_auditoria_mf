@@ -9,41 +9,42 @@
 <ng-template #contenidoDePlantilla>
   <div class="row">
     <div class="col-12">
-      <form [formGroup]="vigenciaForm">      
+      <form [formGroup]="vigenciaForm">
         <div class="row">
           <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
             <mat-label>Seleccione una vigencia:</mat-label>
             <mat-icon class="mat-icon-outlined" color="primary" matPrefix>today</mat-icon>
-            <mat-select 
+            <mat-select
               formControlName="vigencia"
               (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
               color="primary"
-            >
-              <mat-option disabled value="">--Seleccionar--</mat-option>
-              <mat-option
-                *ngFor="let vigencia of vigencias"
-                [value]="vigencia"
-                >{{ vigencia.Nombre }}</mat-option
               >
-            </mat-select>
-          </mat-form-field>
-          <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
-            <mat-icon color="primary" class="me-2">info</mat-icon>
-            <p style="font-size: 14px">
-              Se cargarán las auditorías correspondientes a la vigencia
-              seleccionada.
-            </p>
+              <mat-option disabled value="">--Seleccionar--</mat-option>
+              @for (vigencia of vigencias; track vigencia) {
+                <mat-option
+                  [value]="vigencia"
+                  >{{ vigencia.Nombre }}</mat-option
+                  >
+                }
+              </mat-select>
+            </mat-form-field>
+            <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
+              <mat-icon color="primary" class="me-2">info</mat-icon>
+              <p style="font-size: 14px">
+                Se cargarán las auditorías correspondientes a la vigencia
+                seleccionada.
+              </p>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
-  
-  <div class="row">
-    <div class="col-12">
-      <app-tabla-consulta-auditorias
-        [vigenciaId]="vigenciaSeleccionada"
-      ></app-tabla-consulta-auditorias>
+
+    <div class="row">
+      <div class="col-12">
+        <app-tabla-consulta-auditorias
+          [vigenciaId]="vigenciaSeleccionada"
+        ></app-tabla-consulta-auditorias>
+      </div>
     </div>
-  </div>
-</ng-template>
+  </ng-template>

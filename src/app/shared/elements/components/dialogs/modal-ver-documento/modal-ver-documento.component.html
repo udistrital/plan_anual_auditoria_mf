@@ -7,44 +7,10 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <div style="z-index: 0" *ngIf="!modoMultiple">
-    <pdf-viewer
-      [src]="documentoSrc"
-      [render-text]="true"
-      [original-size]="false"
-      [show-all]="true"
-      [zoom]="0.98"
-      class="visualizador"
-    ></pdf-viewer>
-  </div>
-
-  <div class="multiple-container" *ngIf="modoMultiple">
-    <div class="multiple-listado">
-      <button
-        mat-stroked-button
-        class="multiple-item"
-        *ngFor="let documento of documentosMultiples; let i = index"
-        (click)="seleccionarDocumento(i)"
-        [class.listado-activo]="indiceSeleccionado === i"
-        matTooltip="Documento no firmado"
-        [matTooltipPosition]="'above'"
-        [matTooltipDisabled]="documento.firmado !== false"
-      >
-        <span class="multiple-item-title">{{ documento.titulo }}</span>
-        <mat-icon
-          class="multiple-item-check"
-          *ngIf="mostrarCheckGuardado && documento.guardado && documento.firmado !== false"
-        >check_circle</mat-icon>
-        <mat-icon
-          class="multiple-item-unsigned"
-          *ngIf="documento.firmado === false"
-        >warning_amber</mat-icon>
-      </button>
-    </div>
-
-    <div class="multiple-visor" *ngIf="documentoSeleccionadoSrc">
+  @if (!modoMultiple) {
+    <div style="z-index: 0">
       <pdf-viewer
-        [src]="documentoSeleccionadoSrc"
+        [src]="documentoSrc"
         [render-text]="true"
         [original-size]="false"
         [show-all]="true"
@@ -52,7 +18,49 @@
         class="visualizador"
       ></pdf-viewer>
     </div>
-  </div>
+  }
+
+  @if (modoMultiple) {
+    <div class="multiple-container">
+      <div class="multiple-listado">
+        @for (documento of documentosMultiples; track documento; let i = $index) {
+          <button
+            mat-stroked-button
+            class="multiple-item"
+            (click)="seleccionarDocumento(i)"
+            [class.listado-activo]="indiceSeleccionado === i"
+            matTooltip="Documento no firmado"
+            [matTooltipPosition]="'above'"
+            [matTooltipDisabled]="documento.firmado !== false"
+            >
+            <span class="multiple-item-title">{{ documento.titulo }}</span>
+            @if (mostrarCheckGuardado && documento.guardado && documento.firmado !== false) {
+              <mat-icon
+                class="multiple-item-check"
+              >check_circle</mat-icon>
+            }
+            @if (documento.firmado === false) {
+              <mat-icon
+                class="multiple-item-unsigned"
+              >warning_amber</mat-icon>
+            }
+          </button>
+        }
+      </div>
+      @if (documentoSeleccionadoSrc) {
+        <div class="multiple-visor">
+          <pdf-viewer
+            [src]="documentoSeleccionadoSrc"
+            [render-text]="true"
+            [original-size]="false"
+            [show-all]="true"
+            [zoom]="0.98"
+            class="visualizador"
+          ></pdf-viewer>
+        </div>
+      }
+    </div>
+  }
 </ng-template>
 <ng-template #footerDeModal>
   <button
@@ -61,39 +69,42 @@
     style="border: 1px solid var(--md-primary-500)"
     [mat-dialog-close]
     class="my-3"
-  >
+    >
     <mat-icon>toll</mat-icon>Regresar
   </button>
-  <button
-    mat-raised-button
-    color="primary"
-    class="my-3"
-    *ngIf="botonGuardar.texto"
-    (click)="modoMultiple ? guardarIndividual() : guardar()"
-  >
-    <mat-icon>{{ botonGuardar.icono }}</mat-icon
-    >{{ botonGuardar.texto }}
-  </button>
+  @if (botonGuardar.texto) {
+    <button
+      mat-raised-button
+      color="primary"
+      class="my-3"
+      (click)="modoMultiple ? guardarIndividual() : guardar()"
+      >
+      <mat-icon>{{ botonGuardar.icono }}</mat-icon
+        >{{ botonGuardar.texto }}
+      </button>
+    }
 
-  <button
-    mat-raised-button
-    color="primary"
-    class="my-3"
-    *ngIf="modoMultiple && botonGuardarTodos.texto"
-    (click)="guardarTodas()"
-  >
-    <mat-icon>{{ botonGuardarTodos.icono }}</mat-icon
-    >{{ botonGuardarTodos.texto }}
-  </button>
+    @if (modoMultiple && botonGuardarTodos.texto) {
+      <button
+        mat-raised-button
+        color="primary"
+        class="my-3"
+        (click)="guardarTodas()"
+        >
+        <mat-icon>{{ botonGuardarTodos.icono }}</mat-icon
+          >{{ botonGuardarTodos.texto }}
+        </button>
+      }
 
-  <button
-    mat-raised-button
-    color="primary"
-    class="my-3"
-    *ngIf="botonDescargarDOCX.texto && validarDescargaDOCX()"
-    (click)="descargarDocumentoDOCX()"
-  >
-    <mat-icon>{{ botonDescargarDOCX.icono }}</mat-icon
-    >{{ botonDescargarDOCX.texto }}
-  </button>
-</ng-template>
+      @if (botonDescargarDOCX.texto && validarDescargaDOCX()) {
+        <button
+          mat-raised-button
+          color="primary"
+          class="my-3"
+          (click)="descargarDocumentoDOCX()"
+          >
+          <mat-icon>{{ botonDescargarDOCX.icono }}</mat-icon
+            >{{ botonDescargarDOCX.texto }}
+          </button>
+        }
+      </ng-template>

@@ -113,7 +113,7 @@ export interface VariablesCartaRepresentacion {
 })
 export class NotificacionesService {
 
-  constructor(private notificacionesMidService: NotificacionesMidService) {}
+  constructor(private readonly notificacionesMidService: NotificacionesMidService) {}
 
   private readonly notificacionesHabilitadas: boolean = environment['NOTIFICACIONES_HABILITADAS'] ?? true;
   /** Sender email address used for notifications */

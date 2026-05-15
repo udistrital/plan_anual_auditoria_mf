@@ -11,66 +11,71 @@
   <div class="row mt-3">
     <div class="col-12">
       <div class="d-flex justify-content-between">
-        <div class="filter-section" *ngIf="mostrarOrdenamiento">
-          <label for="select" class="label-select">Ordenado por: </label>
-          <mat-form-field appearance="outline">
-            <mat-label>Selección </mat-label>
-            <mat-select id="select" [(ngModel)]="ordenSeleccionado">
-              <mat-option value="">Revertir</mat-option>
-              <mat-option value="tipo_evaluacion">Tipo de evaluación A-Z</mat-option>
-              <mat-option value="titulo">Nombre de auditoría A-Z</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <button mat-icon-button (click)="aplicarOrdenamiento()">
-            <mat-icon color="primary">sort</mat-icon>
-          </button>
-        </div>
-        <div>
-          <div class="d-flex flex-column" *ngIf="modoEditar">
-            <button
-              class="mb-2"
-              mat-raised-button
-              color="primary"
-              (click)="descargarPlantilla()"
-            >
-              <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
-            </button>
-            <button
-              class="mx-2"
-              mat-stroked-button
-              color="primary"
-              style="border: 1px solid var(--md-primary-500) !important"
-              (click)="exportarTabla()"
-            >
-              <mat-icon>file_download</mat-icon> Exportar Tabla
-            </button>
-            <button
-              class="mx-2 mt-2"
-              *ngIf="modoEditar"
-              mat-stroked-button
-              color="primary"
-              style="border: 1px solid var(--md-primary-500) !important"
-              (click)="eliminarAuditorias()"
-            >
-              <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
+        @if (mostrarOrdenamiento) {
+          <div class="filter-section">
+            <label for="select" class="label-select">Ordenado por: </label>
+            <mat-form-field appearance="outline">
+              <mat-label>Selección </mat-label>
+              <mat-select id="select" [(ngModel)]="ordenSeleccionado">
+                <mat-option value="">Revertir</mat-option>
+                <mat-option value="tipo_evaluacion">Tipo de evaluación A-Z</mat-option>
+                <mat-option value="titulo">Nombre de auditoría A-Z</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button mat-icon-button (click)="aplicarOrdenamiento()">
+              <mat-icon color="primary">sort</mat-icon>
             </button>
           </div>
+        }
+        <div>
+          @if (modoEditar) {
+            <div class="d-flex flex-column">
+              <button
+                class="mb-2"
+                mat-raised-button
+                color="primary"
+                (click)="descargarPlantilla()"
+                >
+                <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
+              </button>
+              <button
+                class="mx-2"
+                mat-stroked-button
+                color="primary"
+                style="border: 1px solid var(--md-primary-500) !important"
+                (click)="exportarTabla()"
+                >
+                <mat-icon>file_download</mat-icon> Exportar Tabla
+              </button>
+              @if (modoEditar) {
+                <button
+                  class="mx-2 mt-2"
+                  mat-stroked-button
+                  color="primary"
+                  style="border: 1px solid var(--md-primary-500) !important"
+                  (click)="eliminarAuditorias()"
+                  >
+                  <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
+                </button>
+              }
+            </div>
+          }
         </div>
       </div>
 
       <!-- Agregar cdkDropList a la tabla -->
       <div class="table-container rounded-table table-scroll"
-           cdkDropList
-           [cdkDropListDisabled]="!modoEditar && !modoEditarExtraordinario"
-           (cdkDropListDropped)="drop($event)"
-           cdkDropListAutoScrollDisabled="false">
+        cdkDropList
+        [cdkDropListDisabled]="!modoEditar && !modoEditarExtraordinario"
+        (cdkDropListDropped)="drop($event)"
+        cdkDropListAutoScrollDisabled="false">
         <table
           mat-table
           [dataSource]="dataSource"
           cdkDropList
           [cdkDropListDisabled]="!modoEditar && !modoEditarExtraordinario"
           (cdkDropListDropped)="drop($event)"
-        >
+          >
           <!-- No Column (Generado automáticamente) -->
           <ng-container matColumnDef="no">
             <th mat-header-cell *matHeaderCellDef class="header"><b>No.</b></th>
@@ -189,89 +194,97 @@
       </div>
 
       <div class="row mt-3">
-        <div
-          class="d-flex justify-content-end"
-          *ngIf="!modoEditar && !modoEditarExtraordinario; else botonesAcciones"
-        >
-          <button
-            class="mx-2"
-            mat-raised-button
-            color="primary"
-            (click)="verDocumentos()"
-          >
-            <mat-icon>visibility</mat-icon>
-            Ver Documentos
-          </button>
-          <button
-            class="mx-2"
-            mat-stroked-button
-            color="primary"
-            style="border: 1px solid var(--md-primary-500)"
-            (click)="exportarTabla()"
-          >
-            <mat-icon>file_download</mat-icon> Exportar tabla
-          </button>
-          <button
-            *ngIf="modoEditar"
-            class="mx-2"
-            mat-stroked-button
-            color="primary"
-            style="border: 1px solid var(--md-primary-500)"
-            (click)="eliminarAuditorias()"
-          >
-            <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
-          </button>
-        </div>
-        <ng-template #botonesAcciones>
+        @if (!modoEditar && !modoEditarExtraordinario) {
+          <div
+            class="d-flex justify-content-end"
+            >
+            <button
+              class="mx-2"
+              mat-raised-button
+              color="primary"
+              (click)="verDocumentos()"
+              >
+              <mat-icon>visibility</mat-icon>
+              Ver Documentos
+            </button>
+            <button
+              class="mx-2"
+              mat-stroked-button
+              color="primary"
+              style="border: 1px solid var(--md-primary-500)"
+              (click)="exportarTabla()"
+              >
+              <mat-icon>file_download</mat-icon> Exportar tabla
+            </button>
+            @if (modoEditar) {
+              <button
+                class="mx-2"
+                mat-stroked-button
+                color="primary"
+                style="border: 1px solid var(--md-primary-500)"
+                (click)="eliminarAuditorias()"
+                >
+                <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
+              </button>
+            }
+          </div>
+        } @else {
           <div class="d-flex justify-content-end">
-            <button
-              *ngIf="!modoEditarExtraordinario"
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="agregarAuditoria()"
-            >
-              <mat-icon>add_circle</mat-icon>
-              Añadir Auditoría
-            </button>
-            <button
-              *ngIf="!modoEditarExtraordinario"
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="subirArchivoCargueMasivo()"
-            >
-              <mat-icon>file_upload</mat-icon> Cargue Masivo
-            </button>
-            <button
-            *ngIf="modoEditarExtraordinario"
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="subirActaModificacion()"
-            >
-              <mat-icon>file_upload</mat-icon> Acta de Modificación
-            </button>
+            @if (!modoEditarExtraordinario) {
+              <button
+                class="mx-2"
+                mat-raised-button
+                color="primary"
+                (click)="agregarAuditoria()"
+                >
+                <mat-icon>add_circle</mat-icon>
+                Añadir Auditoría
+              </button>
+            }
+            @if (!modoEditarExtraordinario) {
+              <button
+                class="mx-2"
+                mat-raised-button
+                color="primary"
+                (click)="subirArchivoCargueMasivo()"
+                >
+                <mat-icon>file_upload</mat-icon> Cargue Masivo
+              </button>
+            }
+            @if (modoEditarExtraordinario) {
+              <button
+                class="mx-2"
+                mat-raised-button
+                color="primary"
+                (click)="subirActaModificacion()"
+                >
+                <mat-icon>file_upload</mat-icon> Acta de Modificación
+              </button>
+            }
             <button
               class="mx-2"
               mat-raised-button
               color="primary"
               (click)="renderizar()"
-            >
+              >
               <mat-icon>visibility</mat-icon>Ver
             </button>
-            <button *ngIf="base64Matriz===null" class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
-              <mat-icon>file_upload</mat-icon>Matriz
-            </button>
-            <button *ngIf="base64Matriz!==null && !modoEditarExtraordinario" class="mx-2" mat-raised-button color="primary" (click)="verMatriz()">
-              <mat-icon>visibility</mat-icon>Ver Matriz
-            </button>
+            @if (base64Matriz===null) {
+              <button class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
+                <mat-icon>file_upload</mat-icon>Matriz
+              </button>
+            }
+            @if (base64Matriz!==null && !modoEditarExtraordinario) {
+              <button class="mx-2" mat-raised-button color="primary" (click)="verMatriz()">
+                <mat-icon>visibility</mat-icon>Ver Matriz
+              </button>
+            }
             <button class="mx-2" mat-raised-button color="primary" (click)="guardarPaa()">
               <mat-icon>save</mat-icon>
               Guardar
             </button>
           </div>
-        </ng-template>
+        }
       </div>
     </div>
   </div>
