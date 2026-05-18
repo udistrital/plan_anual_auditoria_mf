@@ -142,8 +142,16 @@
                 [matDatepicker]="picker"
                 [formControlName]="campo.nombre"
                 [placeholder]="campo.placeholder || 'Seleccione una fecha'"
+                [min]="getFechaMinima(campo)"
                 />
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                @if (campo.parametros?.fecha_minima_dependiente; as fechaDependiente) {
+                  @if (esCampoDependienteDeshabilitado(fechaDependiente)) {
+                    <mat-hint>
+                      Primero seleccione {{ getNombreCampoLegible(fechaDependiente) }}
+                    </mat-hint>
+                  }
+                }
                 @if (campo.tooltip) {
                   <mat-icon
                     matSuffix
