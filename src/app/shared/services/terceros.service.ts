@@ -26,7 +26,6 @@ export interface VinculacionResponse {
   "Id": number;
   "CargoId": number;
   "DependenciaId": number;
-  "PeriodoId": number;
   "TerceroPrincipalId": TerceroIdentification;
 };
 
