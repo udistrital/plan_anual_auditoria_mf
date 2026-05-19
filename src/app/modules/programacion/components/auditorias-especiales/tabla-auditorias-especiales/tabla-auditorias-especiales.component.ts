@@ -189,10 +189,20 @@ export class TablaAuditoriasEspecialesComponent {
     if (auditoriasConcretas.length > 0)
       return;
 
+    const generarAuditoriasDto = {
+      usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.usuarioRol,
+      observacion: "Generación manual de auditoría",
+      estado_id_padre_actual: environment.AUDITORIA_PADRE_ESTADO.BORRADOR_ID,
+      estado_id_padre_nuevo: environment.AUDITORIA_PADRE_ESTADO.APROBADA_PAA_ID,
+      estado_id_hija_nuevo: environment.AUDITORIA_ESTADO.PROGRAMACION.POR_ASIGNAR,
+      fase_id: environment.AUDITORIA_FASE.PROGRAMACION,
+    };
+
     // Luego se genera la nueva auditoría concreta
     await firstValueFrom(
-      this.planAuditoriaService.post(
-        `auditoria-padre/${auditoriaPadre._id}/generar-auditoria`, {}
+      this.planAuditoriaMid.post(
+        `auditoria-padre/${auditoriaPadre._id}/generar-auditoria`, generarAuditoriasDto
       ).pipe(
         catchError((error) => throwError(() =>
           new Error("Error al generar la auditoría concreta.", error)
