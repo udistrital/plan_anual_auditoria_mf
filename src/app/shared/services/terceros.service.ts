@@ -128,12 +128,15 @@ export class TercerosService {
   }
 
   /**
-   * Retrieve vinculaciones (job positions) for a given Tercero ID, filtering only active ones.
+   * Retrieve active vinculaciones (job positions) for a given Tercero ID in most recent to least recent order.
    * @param id The ID of the Tercero for which to retrieve vinculaciones.
    * @returns An Observable containing an array of VinculacionResponse objects representing the active vinculaciones of the Tercero.
    */
   public getVinculacionByTerceroId(id: number): Observable<VinculacionResponse[]> {
-    return this.tercerosCrudService.get(`vinculacion?query=TerceroPrincipalId.Id:${id},Activo:true&limit=0`);
+    let url = "vinculacion?sortby=Id&order=desc&limit=0"; // Get all vinculaciones sorted by most recent (Id desc)
+    url += `&query=TerceroPrincipalId.Id:${id},Activo:true`; // Filter by Tercero ID and only active vinculaciones
+
+    return this.tercerosCrudService.get(url);
   }
 
 }
