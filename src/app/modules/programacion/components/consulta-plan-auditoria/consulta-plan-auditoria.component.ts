@@ -15,7 +15,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
-import { catchError, exhaustMap, Observable, of, tap, throwError } from "rxjs";
+import { catchError, exhaustMap, forkJoin, Observable, of, tap, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
@@ -203,7 +203,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
             const estadoBody = this.construirEstado(
               planAuditoriaId,
-              environment.PLAN_ESTADO.EN_BORRADOR_ID
+              environment.PLAN_ESTADO.EN_BORRADOR_ID,
+              "",
+              this.roles[0]
             );
 
             this.planAnualAuditoriaService.post("estado", estadoBody).subscribe(
@@ -378,15 +380,22 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
    * @returns An observable representing the full notification + registration process.
    */
   notificarEnvioPlan(element: any): Observable<any> {
-    return this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+    return forkJoin({
+      usuario: this.tercerosService.getAuthenticatedUserTerceroIdentification(),
+      jefeOCI: this.tercerosService.getJefeOCI(),
+    }).pipe(
 
       // Fetch the full name of the sender
-      exhaustMap((terceroIdentification) => of(terceroIdentification.NombreCompleto)),
+      exhaustMap(({ usuario,  jefeOCI }) => {
+        const nombreRemitente = usuario?.NombreCompleto || "Usuario";
+        const correoJefe = jefeOCI?.UsuarioWSO2;
+        return of({ nombreRemitente, correoJefe });
+      }),
 
-      exhaustMap((nombreRemitente) => {
+      exhaustMap((datosNotificacion) => {
         const rolRemitente = rolRemitentePorRol[this.roles[0]] ?? "Usuario";
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
-          [],
+          [datosNotificacion.correoJefe],
           environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"]
         );
         const variablesSolicitud: VariablesSolicitud = {
@@ -395,7 +404,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           nombre_documento: "Plan Anual de Auditoría",
           vigencia: element.vigencia,
           rol_remitente: rolRemitente,
-          nombre_remitente: nombreRemitente || rolRemitente,
+          nombre_remitente: datosNotificacion.nombreRemitente || rolRemitente,
           fecha_envio: new Date().toLocaleDateString()
         };
 

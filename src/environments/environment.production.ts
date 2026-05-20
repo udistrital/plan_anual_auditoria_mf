@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
 
   AUTENTICACION_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
@@ -257,4 +257,5 @@ export const environment = {
   },
 
   DIAS_REVISION_PREINFORME: 3,
+  DEPENDENCIA_OCI_ID: 32,
 };

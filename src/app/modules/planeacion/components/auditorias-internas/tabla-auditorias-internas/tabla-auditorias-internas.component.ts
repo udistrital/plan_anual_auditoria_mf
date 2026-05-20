@@ -555,11 +555,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
    * Resuelve el nombre del remitente autenticado y los datos de la auditoría en paralelo,
    * luego envía el correo y registra la notificación si el envío fue exitoso.
    */
-  /**
-   * Notifica al Jefe OCI cuando un auditor envía el programa de auditoría a revisión.
-   * Sigue el patrón de consulta-plan-auditoria: resuelve Terceros primero y sola,
-   * luego encadena la consulta de la auditoría y el envío de notificación.
-   */
   private notificarEnvioAJefe(auditoriaId: string): void {
     const rolRemitente = [
       environment.ROL.AUDITOR_EXPERTO,
@@ -574,10 +569,11 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
           nombreRemitente: of(tercero.NombreCompleto),
+          jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
         const datosAuditoria: Auditoria = auditoria?.Data;
 
         // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
@@ -586,7 +582,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
 
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
-          [],
+          [jefeOCI.UsuarioWSO2],
           environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS
         );
 

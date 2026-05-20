@@ -183,6 +183,7 @@ export class ModalAprobacionSecretarioComponent {
     return {
       plan_auditoria_id: planId,
       usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.usuarioRol,
       observacion,
       estado_id: estadoId,
     };

@@ -5,12 +5,14 @@ import { ImplicitAutenticationService } from "src/app/core/services/implicit_aut
 import {
   TercerosCrudService,
   TERCERO_ID_POR_DOCUMENTO_ENDPOINT,
-} from "../../core/services/terceros-crud.service";
+} from "src/app/core/services/terceros-crud.service";
 import { DestinatariosEmail } from "./notificaciones.service";
+import { environment as env } from "src/environments/environment";
 
 export interface TerceroIdentification {
   Id: number;
   NombreCompleto: string;
+  UsuarioWSO2: string;
 }
 
 interface TerceroResponse {
@@ -23,10 +25,10 @@ interface TerceroResponse {
 };
 
 export interface VinculacionResponse {
-  "Id": number;
-  "CargoId": number;
-  "DependenciaId": number;
-  "TerceroPrincipalId": TerceroIdentification;
+  Id: number;
+  CargoId: number;
+  DependenciaId: number;
+  TerceroPrincipalId: TerceroIdentification;
 };
 
 /**
@@ -137,6 +139,19 @@ export class TercerosService {
     url += `&query=TerceroPrincipalId.Id:${id},Activo:true`; // Filter by Tercero ID and only active vinculaciones
 
     return this.tercerosCrudService.get(url);
+  }
+
+  
+  /**
+   * Retrieve the TerceroIdentification of the Jefe OCI, which is needed for email notifications.
+   * @returns {Observable<TerceroIdentification>} An Observable containing the Jefe OCI's Tercero identification data.
+   */
+  public getJefeOCI(): Observable<TerceroIdentification> {
+    const url = `vinculacion?limit=0&order=desc&sortby=Id&query=Activo:true,DependenciaId:${env.DEPENDENCIA_OCI_ID},CargoId:${env.CARGO.JEFE_DEPENDENCIA_ID}`;
+    return this.tercerosCrudService.get(url).pipe(
+      switchMap((response: VinculacionResponse[]) => of(response[0])),
+      switchMap((vinculacion: VinculacionResponse) => of(vinculacion.TerceroPrincipalId)),
+    );
   }
 
 }
