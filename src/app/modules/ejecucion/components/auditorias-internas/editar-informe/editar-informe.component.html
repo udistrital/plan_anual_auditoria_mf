@@ -17,6 +17,12 @@
     <div class="col-12">
       <div [class.steps-bloqueados]="!pasosInicialesSoloLectura && !esRevisionPreinformeAuditado"
         [class.steps-bloqueados-con-revision]="!pasosInicialesSoloLectura && esRevisionPreinformeAuditado">
+        @if (informeData?.fecha_fin_revision && esRevisionPreinformeAuditado) {
+          <div class="fecha-revision mb-3">
+            <mat-icon>schedule</mat-icon>
+            <span>Fecha límite de revisión del auditado: <strong>{{ fechaFinRevisionFormateada }}</strong></span>
+          </div>
+        }
         <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
           <ng-template matStepperIcon="number">
             <mat-icon>lens</mat-icon>
