@@ -14,13 +14,13 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
-import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { TercerosService } from "src/app/shared/services/terceros.service";
+import { BotonTabDocumentoContext, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { TercerosService, VinculacionResponse } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, VariablesCartaRepresentacion } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
+import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
@@ -274,17 +274,39 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   async cargarCartasAuditado() {
-      const cartas = (await lastValueFrom(
+      var cartas = (await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {
           deduplicarPorTipo: false,
         })
-      )) as DocumentoAdjuntoRevision[];
+      )).filter((documento) =>
+        documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+      ) as DocumentoAdjuntoRevision[];
 
-      return cartas.filter(
-        (documento) =>
-          documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+      const dependenciasAuditado = await this.obtenerDependenciasIdAuditado();
+      cartas = cartas.filter((carta) =>
+        this.deberiaMostrarCarta(carta, dependenciasAuditado)
       );
+      return cartas;
   }
+
+  async obtenerDependenciasIdAuditado(): Promise<number[]> {
+    const cargosAuditado = [environment.CARGO.JEFE_DEPENDENCIA_ID, environment.CARGO.ASISTENTE_DEPENDENCIA_ID];
+    return firstValueFrom(this.tercerosService.getVinculacionByTerceroId(this.usuarioId).pipe(
+      switchMap((vinculaciones: VinculacionResponse[]) =>
+        of(vinculaciones.filter((v) =>
+          v.DependenciaId != null && cargosAuditado.includes(v.CargoId)
+        ).map((v) => v.DependenciaId))
+      ),
+      catchError((error) =>
+        throwError(() => new Error("Error al obtener las vinculaciones del auditado", error))
+      ),
+      switchMap((dependenciasIds: number[]) => {
+        const idsUnicos = [...new Set(dependenciasIds)];
+        console.debug("Dependencias ID únicas para el auditado:", idsUnicos);
+        return of(idsUnicos);
+      }),
+    ));
+  };
 
   async abrirModalCargueCartasFirmadas(): Promise<void> {
     try {
@@ -542,6 +564,17 @@ export class RevisionDocumentosComponent implements OnInit {
     }
 
     return fallback;
+  }
+
+  private deberiaMostrarCarta(
+    carta: DocumentoAdjuntoRevision,
+    dependenciasAuditado: number[]
+  ): boolean {
+    if (![environment.ROL.JEFE_DEPENDENCIA, environment.ROL.ASISTENTE_DEPENDENCIA].includes(this.role!))
+      return true;
+
+    const dependenciaId = Number(carta.metadatos?.["dependencia_id"]);
+    return Number.isFinite(dependenciaId) && dependenciasAuditado.includes(dependenciaId);
   }
 
   async descargarTodo() {
@@ -881,10 +914,18 @@ export class RevisionDocumentosComponent implements OnInit {
     this.planAuditoriaMid.get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
       .subscribe(async (res) => {
         await this.cargarDependenciasPorAuditoria();
+        const dependenciasAuditado = await this.obtenerDependenciasIdAuditado();
         let indiceCarta = 0;
 
         const promesas = res.map(async (documento: any) => {
           if (!documento?.nuxeo_enlace) {
+            return null;
+          }
+
+          if (
+            documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION &&
+            !this.deberiaMostrarCarta(documento, dependenciasAuditado)
+          ) {
             return null;
           }
 
