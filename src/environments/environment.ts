@@ -260,4 +260,5 @@ export const environment = {
   },
 
   DIAS_REVISION_PREINFORME: 3,
+  DEPENDENCIA_OCI_ID: 32,
 };
