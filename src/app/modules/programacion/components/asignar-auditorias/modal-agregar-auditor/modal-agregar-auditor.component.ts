@@ -499,8 +499,6 @@ export class ModalAgregarAuditorComponent implements OnInit {
   
               // 4. Recalcular disponibles
               this.recomputeAuditoresDisponibles();
-
-              this.dialogRef.close({ saved: true });
   
               // 5. Feedback
               this.alertaService.showSuccessAlert(
