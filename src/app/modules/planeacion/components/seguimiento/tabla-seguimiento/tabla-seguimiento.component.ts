@@ -65,6 +65,11 @@ export class TablaSeguimientoComponent implements OnInit {
     ["Iniciar Ejecución", "play_arrow"],
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
+  // Filtros de la vista (estado, consecutivo)
+  mostrarFiltros: boolean = false;
+  filtroEstado: number | null = null;
+  filtroConsecutivo: string = "";
+  estadoOptions: Array<{ id: number; nombre: string }> = [];
 
   constructor(
     private readonly alertService: AlertService,
@@ -89,6 +94,33 @@ export class TablaSeguimientoComponent implements OnInit {
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+    this.setMostrarFiltros();
+    if (this.mostrarFiltros) this.buildEstadoOptions();
+  }
+
+  private setMostrarFiltros(): void {
+    const esJefe = this.rolService.tieneRol(environment.ROL.JEFE);
+    const esAuditor = [
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+    ].some((r) => this.rolService.tieneRol(r));
+
+    this.mostrarFiltros = !!(esJefe || esAuditor);
+  }
+
+  private buildEstadoOptions(): void {
+    const prog = environment.AUDITORIA_ESTADO.PROGRAMACION || {};
+    const plan = environment.AUDITORIA_ESTADO.PLANEACION || {};
+    this.estadoOptions = [];
+    Object.keys(prog).forEach((k) => {
+      const id = (prog as any)[k];
+      this.estadoOptions.push({ id, nombre: k });
+    });
+    Object.keys(plan).forEach((k) => {
+      const id = (plan as any)[k];
+      this.estadoOptions.push({ id, nombre: k });
+    });
   }
 
   setPermisos() {
@@ -100,7 +132,8 @@ export class TablaSeguimientoComponent implements OnInit {
   async listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0
+    offset: number = 0,
+    _retry: boolean = false
   ) {
     let url;
     if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)) {
@@ -110,6 +143,25 @@ export class TablaSeguimientoComponent implements OnInit {
       url = this.urlAuditoriasPorVigenciaFiltroAuditado(vigenciaId, limit, offset);
     } else {
       url = this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
+    }
+
+    // Insertar filtros adicionales dentro del parámetro `query` (antes de &limit)
+    let filterSuffix = '';
+    if (this.filtroEstado) {
+      filterSuffix += `,estado_id:${this.filtroEstado}`;
+    }
+    if (this.filtroConsecutivo && this.filtroConsecutivo.trim() !== '') {
+      const c = this.filtroConsecutivo.trim();
+      filterSuffix += `,consecutivo_OCI__icontains:${c}`;
+    }
+
+    if (filterSuffix && url) {
+      const idx = url.indexOf('&limit=');
+      if (idx !== -1) {
+        url = url.slice(0, idx) + filterSuffix + url.slice(idx);
+      } else {
+        url = url + filterSuffix;
+      }
     }
 
     if (!url)
@@ -128,6 +180,25 @@ export class TablaSeguimientoComponent implements OnInit {
         if (auditorias.length === 0) {
           this.banderaTablaSeguimiento = false;
           this.auditoriasDataSource.data = [];
+
+          // Detectar si la búsqueda tenía filtros activos
+          const huboFiltroEstado = !!this.filtroEstado;
+          const huboFiltroConsecutivo = !!(this.filtroConsecutivo && this.filtroConsecutivo.trim() !== "");
+          const huboFiltrosActivos = huboFiltroEstado || huboFiltroConsecutivo;
+
+          if (huboFiltrosActivos && !_retry) {
+            this.alertService.showAlert(
+              "No se encontraron auditorías",
+              "No se encontraron auditorías con los filtros aplicados. Se mostrará la lista completa para la vigencia."
+            );
+
+            // limpiar filtros y reintentar una vez
+            this.filtroEstado = null;
+            this.filtroConsecutivo = "";
+            setTimeout(() => this.listarAuditoriasPorVigencia(vigenciaId, limit, offset, true), 200);
+            return;
+          }
+
           return this.alertService.showAlert(
             "No hay auditorías registradas",
             "Actualmente no hay auditorías registradas para la vigencia seleccionada."
@@ -237,6 +308,16 @@ export class TablaSeguimientoComponent implements OnInit {
         return column.columnDef !== "acciones" || this.mostrarAcciones;
       }
     );
+    // // Asegurar columna de consecutivo_OCI visible
+    // const existeConsecutivo = this.auditoriasContructorTabla.some((c: any) => c.columnDef === 'consecutivo_oci');
+    // if (!existeConsecutivo) {
+    //   this.auditoriasContructorTabla.unshift({
+    //     columnDef: 'consecutivo_oci',
+    //     header: 'Consecutivo OCI',
+    //     sortable: false,
+    //     cell: (row: any) => row.consecutivo_OCI ?? ''
+    //   });
+    // }
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
