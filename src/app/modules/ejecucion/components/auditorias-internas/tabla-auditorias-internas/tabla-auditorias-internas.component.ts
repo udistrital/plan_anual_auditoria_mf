@@ -9,6 +9,7 @@ import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { ModalHistorialRechazosComponent } from "../modal-historial-rechazos/modal-historial-rechazos.component";
+import { ModalAmpliarRevisionAuditadoComponent } from "../modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -49,6 +50,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Historial de Rechazos", "history"],
+    ["Ampliar tiempo de revisión auditado", "more_time"],
   ]);
 
   constructor(
@@ -199,6 +201,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
       "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Ampliar tiempo de revisión auditado": () => this.abrirModalAmpliarRevision(auditoria),
     };
     acciones[accion]?.();
   }
@@ -208,6 +211,31 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       data: { auditoriaId: auditoria._id },
       width: "1000px",
     });
+  }
+
+  async abrirModalAmpliarRevision(auditoria: Auditoria) {
+    const usuarioId = await this.userService.getPersonaId();
+    this.planAuditoriaService
+      .get(`informe?query=auditoria_id:${auditoria._id},activo:true`)
+      .subscribe({
+        next: (res: any) => {
+          const informe = res?.Data?.[0];
+          if (!informe || !informe.fecha_fin_revision) {
+            this.alertaService.showErrorAlert("No se encontró el informe o la fecha de revisión del auditado.");
+            return;
+          }
+          this.dialog.open(ModalAmpliarRevisionAuditadoComponent, {
+            width: "500px",
+            data: {
+              informeId: informe._id,
+              fechaFinRevision: informe.fecha_fin_revision,
+              diasRevision: informe.dias_revision ?? 3,
+              usuarioId,
+            },
+          });
+        },
+        error: () => this.alertaService.showErrorAlert("Error al buscar el informe."),
+      });
   }
 
   editarInforme(auditoria: Auditoria) {

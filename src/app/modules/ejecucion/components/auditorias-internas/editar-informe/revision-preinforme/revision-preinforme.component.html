@@ -75,12 +75,6 @@
                           <mat-icon class="obs-icono">forum</mat-icon>
                           <span class="obs-titulo">Observaciones</span>
                         </div>
-                        @if (fechaFinRevision) {
-                          <div class="fecha-revision">
-                            <mat-icon>schedule</mat-icon>
-                            <span>Fecha límite de revisión del auditado: <strong>{{ fechaFinFormateada }}</strong></span>
-                          </div>
-                        }
                         @for (obs of item.observacionesAuditado; track obs) {
                           <!-- Mi observación: editable -->
                           @if (puedeEscribirObservacionAuditado && obs.usuario_id === usuarioId && !item.hallazgo.rechazado) {

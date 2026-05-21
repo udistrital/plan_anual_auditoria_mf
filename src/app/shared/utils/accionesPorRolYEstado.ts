@@ -380,6 +380,7 @@ export const accionesEjecucionPreliminar: {
       "Ver Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
+      "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
@@ -423,6 +424,7 @@ export const accionesEjecucionPreliminar: {
       "Ver Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
+      "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
@@ -466,6 +468,7 @@ export const accionesEjecucionPreliminar: {
       "Ver Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
+      "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",

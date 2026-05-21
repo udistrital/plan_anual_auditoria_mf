@@ -80,6 +80,17 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
    * - Auditados en estado REVISION_PREINFORME_AUDITADO (agregan sus observaciones)
    * - Auditores en estado CREANDO_INFORME_FINAL (agregan observaciones del auditor)
    */
+  get fechaFinRevisionFormateada(): string {
+    const fecha = this.informeData?.fecha_fin_revision;
+    if (!fecha) return '';
+    return new Date(fecha).toLocaleDateString('es-CO', {
+      timeZone: 'America/Bogota',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
   get esRevisionPreinformeAuditado(): boolean {
     const REVISION = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO;
     const CREANDO_FINAL = environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;

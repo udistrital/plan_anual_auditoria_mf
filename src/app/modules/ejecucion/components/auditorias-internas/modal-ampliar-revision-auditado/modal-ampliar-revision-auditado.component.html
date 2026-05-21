@@ -1,0 +1,59 @@
+<plantilla-modal
+  [icono]="'update'"
+  [titulo]="'Ampliar tiempo de revisión'"
+  [descripcion]="'Modifique la fecha límite de revisión del auditado'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal">
+</plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-3">
+    <div class="col-12">
+      <form [formGroup]="form">
+
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="fecha-actual-card">
+              <mat-icon class="fecha-icono">event</mat-icon>
+              <div class="fecha-texto">
+                <span class="fecha-label">Fecha actual de revisión</span>
+                <span class="fecha-valor">{{ fechaActualTexto }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12">
+            <mat-label>Nueva fecha límite de revisión</mat-label>
+            <mat-icon color="primary" matPrefix>event_available</mat-icon>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="nuevaFechaFin"
+              [min]="minFechaNueva"
+              placeholder="Seleccione una fecha" />
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="form.get('nuevaFechaFin')?.hasError('required')">
+              La fecha es obligatoria
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="mb-3">
+    <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]>
+      <mat-icon>toll</mat-icon>No, regresar
+    </button>
+    <button mat-raised-button color="primary" (click)="confirmar()">
+      <mat-icon>save</mat-icon>
+      Guardar nueva fecha
+    </button>
+  </div>
+</ng-template>
