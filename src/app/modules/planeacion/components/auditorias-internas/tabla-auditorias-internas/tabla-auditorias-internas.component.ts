@@ -83,7 +83,19 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
 
   // Filtros de la vista (estado, consecutivo)
-  mostrarFiltros: boolean = false;
+  private readonly rolesConFiltros = [
+    environment.ROL.JEFE,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_ASISTENTE,
+  ];
+
+  get mostrarFiltros(): boolean {
+    return this.rolesConFiltros.some((rol) =>
+      this.rolService.tieneRol(rol)
+    );
+  }
+
   filtroEstado: number | null = null;
   filtroConsecutivo: string = "";
   estadoOptions: Array<{ id: number; nombre: string }> = [];
@@ -113,7 +125,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     });
     this.configurarTipoConsulta();
     // inicializar filtros visibles y opciones si aplica
-    this.setMostrarFiltros();
     if (this.mostrarFiltros) {
       this.buildEstadoOptions();
     }
@@ -140,31 +151,29 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
-  private setMostrarFiltros(): void {
-    const esJefe = this.rolService.tieneRol(environment.ROL.JEFE);
-    const esAuditor = [
-      environment.ROL.AUDITOR_EXPERTO,
-      environment.ROL.AUDITOR,
-      environment.ROL.AUDITOR_ASISTENTE,
-    ].some((r) => this.rolService.tieneRol(r));
-
-    this.mostrarFiltros = !!(esJefe || esAuditor);
-  }
+  
 
   private buildEstadoOptions(): void {
-    // Recolectar estados relevantes de environment
-    const prog = environment.AUDITORIA_ESTADO.PROGRAMACION || {};
-    const plan = environment.AUDITORIA_ESTADO.PLANEACION || {};
+    this.parametrosUtilsService
+      .getEstadosAuditoria(7060, 7080)
+      .subscribe({
+        next: (estados) => {
+          this.estadoOptions = estados.map((estado) => ({
+            id: estado.Id,
+            nombre: estado.Nombre,
+          }));
+        },
 
-    this.estadoOptions = [];
-    Object.keys(prog).forEach((k) => {
-      const id = (prog as any)[k];
-      this.estadoOptions.push({ id, nombre: k });
-    });
-    Object.keys(plan).forEach((k) => {
-      const id = (plan as any)[k];
-      this.estadoOptions.push({ id, nombre: k });
-    });
+        error: (error) => {
+          console.error(error);
+
+          this.alertService.showErrorAlert(
+            "No fue posible cargar los estados de auditoría."
+          );
+
+          this.estadoOptions = [];
+        },
+      });
   }
 
   // Note: filtro por auditor eliminado — no se mantiene método cargarAuditores

@@ -44,4 +44,52 @@ export class ParametrosUtilsService {
     );
   }
 
+  /**
+   * Obtiene estados de auditoría filtrados por un rango de IDs.
+   *
+   * @param desdeId ID inicial del rango
+   * @param hastaId ID final del rango
+   * @returns Observable con los estados encontrados
+   */
+  public getEstadosAuditoria(
+    desdeId?: number,
+    hastaId?: number
+  ): Observable<Parametro[]> {
+
+    let query = "TipoParametroId:159,Activo:true";
+
+    // Agregar filtros por rango si existen
+    if (desdeId !== undefined) {
+      query += `,Id__gte:${desdeId}`;
+    }
+
+    if (hastaId !== undefined) {
+      query += `,Id__lte:${hastaId}`;
+    }
+
+    const endpoint =
+      `parametro?query=${query}&fields=Id,Nombre&limit=0&sortby=Id&order=asc`;
+
+    return this.parametrosService.get(endpoint).pipe(
+      map((res: any) => {
+        if (res?.Data) {
+          return res.Data.map((estado: any) => ({
+            Id: estado.Id,
+            Nombre: estado.Nombre,
+          }));
+        }
+
+        return [];
+      }),
+
+      catchError((err) => {
+        console.error("Error cargando estados de auditoría:", err);
+
+        return throwError(
+          () => new Error("No se pudieron cargar los estados de auditoría")
+        );
+      })
+    );
+  }
+
 }
