@@ -1,0 +1,98 @@
+<plantilla-modal
+  [icono]="'report'"
+  [titulo]="titulo"
+  [descripcion]="descripcion"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="d-flex align-items-center mb-3">
+    <mat-icon color="primary">restore</mat-icon>
+    <h3 class="mx-2">Historial de observaciones</h3>
+  </div>
+
+  <div *ngIf="cargando" class="spinner-container">
+    <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <div *ngIf="rechazos.length === 0 && revisionesJefe.length === 0" class="sin-rechazos">
+      No se encontraron observaciones.
+    </div>
+
+    <div *ngFor="let rechazo of rechazos" class="px-3 my-2">
+      <div class="row">
+        <div class="col-12 col-sm-12">
+          <div class="fondo-chip fondo-chip--rechazo mb-3">
+            <div class="my-2">
+              <p class="mb-2">
+                <b style="color: var(--md-accent-800)">Observaciones:</b>
+              </p>
+              <p>{{ rechazo.observacion || 'Sin observación' }}</p>
+              <div class="d-flex flex-wrap mt-4">
+                <div class="chip mb-sm">
+                  <b>
+                    <mat-icon class="icon-chip">cancel</mat-icon>
+                    Rechazado por: {{ rechazo.usuario?.nombre || 'Usuario' }}
+                  </b>
+                </div>
+                <div class="chip mb-sm">
+                  <mat-icon class="icon-chip">person</mat-icon>
+                  <b>Rol: {{ rechazo.usuario_rol || 'No definido' }}</b>
+                </div>
+                <div class="chip mb-sm">
+                  <mat-icon class="icon-chip">calendar_today</mat-icon>
+                  <b>Fecha: {{ rechazo.fecha_ejecucion_estado | date : 'dd/MM/yyyy' }}</b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngFor="let revision of revisionesJefe" class="px-3 my-2">
+      <div class="row">
+        <div class="col-12 col-sm-12">
+          <div class="fondo-chip fondo-chip--revision mb-3">
+            <div class="my-2">
+              <p class="mb-2">
+                <b style="color: var(--md-primary-800)">Observaciones:</b>
+              </p>
+              <p>{{ revision.observacion || 'Sin observación' }}</p>
+              <div class="d-flex flex-wrap mt-4">
+                <div class="chip mb-sm">
+                  <b>
+                    <mat-icon class="icon-chip">comment</mat-icon>
+                    En Revisión por Jefe: {{ revision.usuario?.nombre || 'Usuario' }}
+                  </b>
+                </div>
+                <div class="chip mb-sm">
+                  <mat-icon class="icon-chip">person</mat-icon>
+                  <b>Rol: {{ revision.usuario_rol || 'No definido' }}</b>
+                </div>
+                <div class="chip mb-sm">
+                  <mat-icon class="icon-chip">calendar_today</mat-icon>
+                  <b>Fecha: {{ revision.fecha_ejecucion_estado | date : 'dd/MM/yyyy' }}</b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <button
+    mat-stroked-button
+    color="primary"
+    style="border: 1px solid var(--md-primary-500)"
+    [mat-dialog-close]
+    class="my-3"
+  >
+    <mat-icon>toll</mat-icon>Regresar
+  </button>
+</ng-template>

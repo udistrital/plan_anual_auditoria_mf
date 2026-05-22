@@ -11,6 +11,8 @@ import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plant
 import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/plantilla-modal.component";
 import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { ModalVerDocumentosComponent } from "./elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalHistorialRechazosAuditoriaComponent } from "./elements/components/dialogs/modal-historial-rechazos-auditoria/modal-historial-rechazos-auditoria.component";
+import { ModalEnviarAprobacionPlaneacionComponent } from "./elements/components/dialogs/modal-enviar-aprobacion-planeacion/modal-enviar-aprobacion-planeacion.component";
 import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 import { IconosModule } from "./modules/iconos.module";
@@ -27,6 +29,8 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
     CargarArchivoComponent,
     ModalVerDocumentoComponent,
     ModalVerDocumentosComponent,
+    ModalHistorialRechazosAuditoriaComponent,
+    ModalEnviarAprobacionPlaneacionComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,
@@ -50,6 +54,8 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
     FormularioDinamicoComponent,
     ModalVerDocumentoComponent,
     ModalVerDocumentosComponent,
+    ModalHistorialRechazosAuditoriaComponent,
+    ModalEnviarAprobacionPlaneacionComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,

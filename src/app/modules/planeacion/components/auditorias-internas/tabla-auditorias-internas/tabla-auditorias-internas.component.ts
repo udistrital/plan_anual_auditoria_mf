@@ -11,6 +11,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
+import { ModalHistorialRechazosAuditoriaComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos-auditoria/modal-historial-rechazos-auditoria.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { Auditoria, tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
@@ -35,6 +36,7 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { ModalEnviarAprobacionPlaneacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion-planeacion/modal-enviar-aprobacion-planeacion.component";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -78,6 +80,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Iniciar Ejecución", "play_arrow"],
+    ["Historial de Observaciones", "report"],
     ["Ver Cartas de representación", "mail"],
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
@@ -245,6 +248,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
       "Enviar a Aprobación por Jefe": () => this.preguntarEnvioAprobacionPorJefe(auditoria),
       "Iniciar Ejecución": () => this.iniciarEjecucion(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialRechazos(auditoria),
       "Ver Cartas de representación": () => this.verCartasRepresentacion(auditoria),
     };
     acciones[accion]?.();
@@ -424,6 +428,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ]);
   }
 
+  abrirHistorialRechazos(auditoria: Auditoria) {
+    this.dialog.open(ModalHistorialRechazosAuditoriaComponent, {
+      width: "1000px",
+      data: {
+        auditoriaId: auditoria._id,
+        estadoIds: [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE],
+        titulo: "Motivos de rechazo y observaciones",
+        descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
+      },
+    });
+  }
+
   revisarAuditoria(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     this.router.navigate([
@@ -459,15 +475,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    this.alertService
-      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.validarDocumentosAnexados(auditoria._id);
-        delete auditoria.estado_interno_id;
-      });
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionPlaneacionComponent, {
+      width: '500px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (observacion === null || observacion === undefined) {
+        return;
+      }
+      this.validarDocumentosAnexados(auditoria._id, observacion);
+      delete auditoria.estado_interno_id;
+    });
   }
 
   guardarDocumento(documentoBase64: any, auditoria: any) {
@@ -523,12 +542,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
-  enviarAprobacionPorJefe(auditoriaId: string) {
+  enviarAprobacionPorJefe(auditoriaId: string, observacion: string = "") {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
-      observacion: "",
+      observacion,
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
@@ -653,7 +672,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     });
   }
 
-  validarDocumentosAnexados(auditoriaId: any) {
+  validarDocumentosAnexados(auditoriaId: any, observacion: string = "") {
     const docs = [
       { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: 'solicitud de información' },
       { tipo: this.tipoDocumentoParametros.CARTA_PRESENTACION, nombre: 'carta de presentación' },
@@ -677,7 +696,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
             return;
           }
         }
-        this.enviarAprobacionPorJefe(auditoriaId);
+        this.enviarAprobacionPorJefe(auditoriaId, observacion);
       },
       error: (error) => {
         console.error(error);
