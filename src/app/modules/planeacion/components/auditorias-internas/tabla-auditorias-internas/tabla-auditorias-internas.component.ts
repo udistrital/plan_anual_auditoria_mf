@@ -11,7 +11,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalHistorialRechazosAuditoriaComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos-auditoria/modal-historial-rechazos-auditoria.component";
+import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { Auditoria, tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
@@ -36,7 +36,7 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { ModalEnviarAprobacionPlaneacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion-planeacion/modal-enviar-aprobacion-planeacion.component";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -429,7 +429,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   abrirHistorialRechazos(auditoria: Auditoria) {
-    this.dialog.open(ModalHistorialRechazosAuditoriaComponent, {
+    this.dialog.open(ModalHistorialRechazosComponent, {
       width: "1000px",
       data: {
         auditoriaId: auditoria._id,
@@ -475,7 +475,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    const dialogRef = this.dialog.open(ModalEnviarAprobacionPlaneacionComponent, {
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
       width: '500px',
       autoFocus: false,
     });

@@ -29,7 +29,7 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
-import { ModalEnviarAprobacionPlaneacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion-planeacion/modal-enviar-aprobacion-planeacion.component";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 
 @Component({
@@ -223,7 +223,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       );
     }
 
-    const dialogRef = this.dialog.open(ModalEnviarAprobacionPlaneacionComponent, {
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
       width: '500px',
       autoFocus: false,
     });
