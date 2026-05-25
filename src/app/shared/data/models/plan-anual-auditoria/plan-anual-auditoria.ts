@@ -32,6 +32,7 @@ export class Actividad{
     auditoriaId?: string;
     fechaInicio!: Date;
     fechaFin!: Date;
+    completada!: boolean;
     observaciones?: string;
     papelTrabajoReferencia?: string;
     papelTrabajoDescripcion?: string;

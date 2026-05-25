@@ -82,6 +82,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
             actividad: item.titulo,
             fechaInicio: new Date(item.fecha_inicio),
             fechaFin: new Date(item.fecha_fin),
+            completada: item.completada || false,
             observaciones: item.observacion,
             papelTrabajoReferencia: item.referencia,
             papelTrabajoDescripcion: item.descripcion,

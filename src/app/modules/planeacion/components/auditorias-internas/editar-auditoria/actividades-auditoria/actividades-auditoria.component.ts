@@ -113,6 +113,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
             fechaInicio: new Date(item.fecha_inicio),
             fechaFin: new Date(item.fecha_fin),
             observaciones: item.observacion,
+            completada: item.completada || false,
             papelTrabajoReferencia: item.referencia,
             papelTrabajoDescripcion: item.descripcion,
             papelTrabajoFolios: item.folio,
