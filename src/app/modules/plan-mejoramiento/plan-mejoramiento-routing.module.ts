@@ -6,7 +6,8 @@ import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla
 const routes: Routes = [
   {
     path: '',
-    component: PlanDeMejoramientoComponent,   
+    component: PlanDeMejoramientoComponent,
+    data: { accionesPermitidas: ['Registrar Plan', 'Enviar a Revisión', 'Aprobar Plan', 'Rechazar Plan', 'Ver Documentos Auditoría'] },
   },
   {
     path: 'asignar-auditores',

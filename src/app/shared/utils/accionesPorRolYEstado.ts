@@ -767,6 +767,9 @@ export const accionesPlanMejoramiento: {
   },
 
   [environment.ROL.JEFE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+    ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
       "Registrar Plan",
       "Enviar a Revisión",
@@ -789,6 +792,9 @@ export const accionesPlanMejoramiento: {
   },
 
   [environment.ROL.ASISTENTE_DEPENDENCIA]: {
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
+      "Registrar Plan",
+    ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
       "Registrar Plan",
       "Enviar a Revisión",

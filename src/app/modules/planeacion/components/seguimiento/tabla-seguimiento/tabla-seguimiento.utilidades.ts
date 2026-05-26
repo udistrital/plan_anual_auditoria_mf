@@ -41,6 +41,12 @@ export const colocacionesContructorTabla = [
     sortable: false,
   },
   {
+    columnDef: "consecutivo_OCI",
+    header: "Consecutivo OCI",
+    cell: (auditoria: any) => auditoria.consecutivo_OCI ?? 'no definido',
+    sortable: false,
+  },
+  {
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: any) => auditoria.estado_nombre,
