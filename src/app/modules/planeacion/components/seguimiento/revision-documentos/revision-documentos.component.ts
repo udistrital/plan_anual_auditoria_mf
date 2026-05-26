@@ -32,6 +32,7 @@ import { Auditoria } from "src/app/shared/data/models/auditoria";
 })
 export class RevisionDocumentosSeguimientoComponent implements OnInit {
   auditoriaId: string = "";
+  consecutivoOci: string = "";
   estadoAuditoriaId!: number;
   tipoEvaluacionId!: number;
   tipoEvaluacion!: string;
@@ -70,6 +71,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   ngOnInit(): void {
     this.inicializarDatos();
     this.cargarEstadoAuditoria();
+    this.cargarConsecutivoOci();
   }
 
   inicializarDatos() {
@@ -104,6 +106,12 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
           this.mostrarAcciones(this.role, this.estadoAuditoriaId);
         }
       });
+  }
+
+  cargarConsecutivoOci() {
+    this.planAuditoriaService
+      .get(`auditoria/${this.auditoriaId}`)
+      .subscribe((res) => { this.consecutivoOci = res.Data?.consecutivo_OCI ?? ""; });
   }
 
   preguntarAprobacionAuditoria() {
@@ -572,9 +580,13 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
 
   async descargarTodo() {
     try {
+      const sufijo = this.consecutivoOci ? `oci-${this.consecutivoOci}` : "";
+      const sufijoNombre = sufijo ? `-${sufijo}` : "";
+
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        "documentosAuditoria.zip"
+        `documentosAuditoria${sufijoNombre}.zip`,
+        sufijo,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
