@@ -47,6 +47,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   docCartaPresentacion: string = "";
   docCompromisoEstico: string = "";
   mostrarBotones: boolean = false;
+  mostrarBotonRechazo: boolean = false;
 
   constructor(
     public readonly dialog: MatDialog,
@@ -537,6 +538,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     };
     // retorna true, si el rol coincide con el estado de revision del rol
     this.mostrarBotones = condicionesVisibilidad[role]?.includes(estadoAuditoriaId) || false;
+    this.mostrarBotonRechazo = this.mostrarBotones && this.role === environment.ROL.JEFE;
   }
 
   cargarDocumentos() {
