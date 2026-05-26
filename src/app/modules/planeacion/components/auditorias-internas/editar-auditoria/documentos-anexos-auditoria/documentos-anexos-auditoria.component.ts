@@ -395,18 +395,19 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   verCompromisoEtico() {
     const dialogRef = this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
-      data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+      data: {
+        base64Document: this.base64CompromisoEtico,
+        id: this.auditoriaId,
+        onUpdated: (newBase64: string) => {
+          this.base64CompromisoEtico = newBase64;
+        },
+      },
       width: "1000px",
       autoFocus: false,
     });
 
-    dialogRef.afterClosed().subscribe((resultado: boolean | 'deleted') => {
-      if (resultado === 'deleted') {
-        this.base64CompromisoEtico = null;
-        this.idCompromisoEtico = null;
-      } else if (resultado === true) {
-        this.cargarCompromisoEtico();
-      }
+    dialogRef.afterClosed().subscribe(() => {
+      this.cargarCompromisoEtico();
     });
   }
 

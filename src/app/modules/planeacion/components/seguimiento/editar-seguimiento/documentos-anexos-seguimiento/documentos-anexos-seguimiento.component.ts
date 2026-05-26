@@ -174,7 +174,14 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit {
   
     verCompromisoEtico() {
         this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
-          data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId, soloLectura: this.soloLectura },
+          data: {
+            base64Document: this.base64CompromisoEtico,
+            id: this.auditoriaId,
+            soloLectura: this.soloLectura,
+            onUpdated: (newBase64: string) => {
+              this.base64CompromisoEtico = newBase64;
+            },
+          },
           width: "80%",
           height: "80vh",
         });
