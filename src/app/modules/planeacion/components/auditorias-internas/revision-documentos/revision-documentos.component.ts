@@ -334,6 +334,8 @@ export class RevisionDocumentosComponent implements OnInit {
 
         return {
           nombre: `Carta de representación ${dependenciaNombre}`,
+          nombreDescarga: "carta-representación",
+          presufijo: dependenciaNombre,
           tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           documentoId: documento._id,
           botones: [{
@@ -374,6 +376,8 @@ export class RevisionDocumentosComponent implements OnInit {
           descripcion:
             "Revise y cargue la carta de representación firmada para cada dependencia.",
           tabs,
+          sufijo: `oci-${this.consecutivoOci}`,
+          nombreArchivoDescarga: "cartas-representación",
           tipo: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           textoBotonCerrar: "Cerrar",
           accionesFooter: [
