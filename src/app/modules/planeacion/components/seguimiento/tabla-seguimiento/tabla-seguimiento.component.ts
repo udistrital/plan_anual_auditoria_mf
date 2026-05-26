@@ -11,6 +11,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-seguimiento.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
+import { ModalHistorialRechazosAuditoriaComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos-auditoria/modal-historial-rechazos-auditoria.component";
 import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -28,6 +29,7 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "s
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { ModalEnviarAprobacionPlaneacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion-planeacion/modal-enviar-aprobacion-planeacion.component";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
 
@@ -63,6 +65,7 @@ export class TablaSeguimientoComponent implements OnInit {
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Iniciar Ejecución", "play_arrow"],
+    ["Historial de Observaciones", "report"]
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
   
@@ -397,6 +400,7 @@ export class TablaSeguimientoComponent implements OnInit {
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
       "Enviar a Aprobación por Jefe": () => this.preguntarEnvioAprobacionPorJefe(auditoria),
       "Iniciar Ejecución": () => this.iniciarEjecucion(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialRechazos(auditoria),
     };
     acciones[accion]?.();
   }
@@ -415,6 +419,18 @@ export class TablaSeguimientoComponent implements OnInit {
     this.router.navigate([
       `/planeacion/seguimiento/editar/${auditoriaId}`,
     ]);
+  }
+
+  abrirHistorialRechazos(auditoria: Auditoria) {
+    this.dialog.open(ModalHistorialRechazosAuditoriaComponent, {
+      width: "1000px",
+      data: {
+        auditoriaId: auditoria._id,
+        estadoIds: [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE],
+        titulo: "Motivos de rechazo y observaciones",
+        descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
+      },
+    });
   }
 
   revisarAuditoria(auditoria: Auditoria) {
@@ -453,14 +469,17 @@ export class TablaSeguimientoComponent implements OnInit {
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    this.alertService
-      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.validarDocumentosAnexados(auditoria._id);
-      });
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionPlaneacionComponent, {
+      width: '500px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (observacion === null || observacion === undefined) {
+        return;
+      }
+      this.validarDocumentosAnexados(auditoria._id, observacion);
+    });
   }
 
   guardarDocumento(documentoBase64: any, auditoria: any) {
@@ -516,12 +535,12 @@ export class TablaSeguimientoComponent implements OnInit {
     }
   }
 
-  enviarAprobacionPorJefe(auditoriaId: string) {
+  enviarAprobacionPorJefe(auditoriaId: string, observacion: string = "") {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
-      observacion: "",
+      observacion,
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
@@ -669,13 +688,13 @@ export class TablaSeguimientoComponent implements OnInit {
     });
   }
 
-  validarDocumentosAnexados(auditoriaId: any) {
+  validarDocumentosAnexados(auditoriaId: any, observacion: string = "") {
     const docs = [
-      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información"},
-      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información" },
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' },
     ];
 
-    const requests = docs.map(d =>
+    const requests = docs.map((d) =>
       this.planAuditoriaService.get(
         `documento?query=referencia_id:${auditoriaId},tipo_id:${d.tipo},activo:true`
       )
@@ -691,12 +710,12 @@ export class TablaSeguimientoComponent implements OnInit {
             return;
           }
         }
-        this.enviarAprobacionPorJefe(auditoriaId);
+        this.enviarAprobacionPorJefe(auditoriaId, observacion);
       },
       error: (error) => {
         console.error(error);
         this.alertService.showErrorAlert("Error validando los documentos.");
-      }
+      },
     });
   }
 }
