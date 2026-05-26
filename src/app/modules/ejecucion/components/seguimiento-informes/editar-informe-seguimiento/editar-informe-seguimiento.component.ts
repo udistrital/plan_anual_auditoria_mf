@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { MatStepper } from "@angular/material/stepper";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Router, ActivatedRoute } from "@angular/router";
@@ -9,18 +9,24 @@ import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/
 import { AspectosEvaluadosSeguimientoComponent } from './aspectos-evaluados-seguimiento/aspectos-evaluados-seguimiento.component';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
+import { NuxeoService } from 'src/app/core/services/nuxeo.service';
+import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
+import { RolService } from 'src/app/core/services/rol.service';
+import { ImplicitAutenticationService } from 'src/app/core/services/implicit_autentication.service';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
+import { environment } from 'src/environments/environment';
+import { accionesEjecucionFinal, accionesEjecucionPreliminar } from 'src/app/shared/utils/accionesPorRolYEstado';
 
 @Component({
-    selector: 'app-editar-informe-seguimiento',
-    templateUrl: './editar-informe-seguimiento.component.html',
-    styleUrls: ['./editar-informe-seguimiento.component.css'],
-    standalone: false
+  selector: 'app-editar-informe-seguimiento',
+  templateUrl: './editar-informe-seguimiento.component.html',
+  styleUrls: ['./editar-informe-seguimiento.component.css'],
+  standalone: false
 })
-export class EditarInformeSeguimientoComponent implements OnInit {
+export class EditarInformeSeguimientoComponent implements OnInit, AfterViewInit {
   @ViewChild("stepper") stepper!: MatStepper;
 
   @ViewChild("formularioInformacionComp")
@@ -40,8 +46,10 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   informeId!: string;
   informeData: any = null;
   auditoria: Auditoria | null = null;
+  soloLectura: boolean = false;
   esLineal = false;
   orientation: "horizontal" | "vertical" = "horizontal";
+  estadoId: number = 0;
 
   constructor(
     private readonly alertaService: AlertService,
@@ -52,7 +60,10 @@ export class EditarInformeSeguimientoComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly rolService: RolService,
   ) {
     this.formAspectosGenerales = this.fb.group({
       aspecto_general: [''],
@@ -64,10 +75,24 @@ export class EditarInformeSeguimientoComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.soloLectura = this.route.snapshot.queryParamMap.get('soloLectura') === 'true';
     this.cargarFormularios();
     this.manejarResponsiveStepper();
     this.informeId = this.route.snapshot.paramMap.get("id")!;
     this.cargarInforme();
+  }
+
+  ngAfterViewInit(): void {
+    this.aplicarModoSoloLectura();
+  }
+
+  private aplicarModoSoloLectura(): void {
+    if (!this.soloLectura) return;
+    this.formAspectosGenerales.disable({ emitEvent: false });
+    this.formObservacionesConclusiones.disable({ emitEvent: false });
+    if (this.formularioInformacionComponent?.form) {
+      this.formularioInformacionComponent.form.disable({ emitEvent: false });
+    }
   }
 
   cargarFormularios(): void {
@@ -94,6 +119,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
         if (response?.Data) {
           this.informeData = response.Data;
           this.poblarFormularios();
+          this.cargarEstadoAuditoria();
           this.cargarAuditoriaParaFormulario();
         }
       },
@@ -101,6 +127,31 @@ export class EditarInformeSeguimientoComponent implements OnInit {
         console.error('Error al cargar el informe:', error);
       }
     });
+  }
+
+  cargarEstadoAuditoria(): void {
+    const auditoriaId = this.informeData?.auditoria_id;
+    if (!auditoriaId) return;
+    this.planAnualAuditoriaService.get(`auditoria-estado?query=auditoria_id:${auditoriaId},actual:true`).subscribe({
+      next: (res: any) => {
+        this.estadoId = res.Data?.[0]?.estado_id ?? 0;
+        this.forzarSoloLecturaSegunPermisos();
+        this.aplicarModoSoloLectura();
+      },
+      error: () => { }
+    });
+  }
+
+  private forzarSoloLecturaSegunPermisos(): void {
+    const roles = this.rolService.getRoles();
+    const puedeEditar = roles.some((rol) => {
+      const acciones =  accionesEjecucionFinal[rol]?.[this.estadoId] ?? []
+      return acciones.includes('Editar Informe');
+    });
+
+    if (!puedeEditar) {
+      this.soloLectura = true;
+    }
   }
 
   // Carga la auditoría desde el MID para obtener campos enriquecidos (macroproceso, dependencia, correos, etc.)
@@ -171,6 +222,8 @@ export class EditarInformeSeguimientoComponent implements OnInit {
         correo_complementario: correo,
       });
     });
+
+    this.aplicarModoSoloLectura();
   }
 
   enviarFormInformacion() {
@@ -181,13 +234,7 @@ export class EditarInformeSeguimientoComponent implements OnInit {
     if (!dataForm) {
       return this.alertaService.showAlert("Formulario incompleto", "Debe llenar todos los campos obligatorios");
     }
-
-    this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de guardar la información?")
-      .then((confirmado) => {
-        if (!confirmado.value) return;
-        this.guardarInformacion(dataForm);
-      });
+    this.confirmarGuardado(() => this.guardarInformacion(dataForm));
   }
 
   guardarInformacion(informacion: any) {
@@ -214,33 +261,102 @@ export class EditarInformeSeguimientoComponent implements OnInit {
     });
   }
 
-  guardarAspectosGenerales() {
-    this.guardarPaso(this.formAspectosGenerales.value, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales");
+  private async confirmarGuardado(accion: () => any): Promise<void> {
+    const confirmado = await this.alertaService.showConfirmAlert("¿Está seguro(a) de guardar la información?");
+    if (!confirmado.value) return;
+    await accion();
   }
 
-  // Guarda los aspectos evaluados (temas y subtemas) y avanza al siguiente paso
+  guardarAspectosGenerales() {
+    this.confirmarGuardado(() =>
+      this.guardarPaso(this.formAspectosGenerales.value, "Los aspectos generales se han guardado correctamente", "No se pudieron guardar los aspectos generales")
+    );
+  }
+
   async guardarAspectosEvaluados(): Promise<void> {
-    const ok = await this.aspectosEvaluadosComp.guardarAspectos();
-    if (ok) this.stepper.next();
+    this.confirmarGuardado(async () => {
+      const ok = await this.aspectosEvaluadosComp.guardarAspectos();
+      if (ok) this.stepper.next();
+    });
   }
 
   guardarObservacionesConclusiones() {
-    this.guardarPaso(this.formObservacionesConclusiones.value, "Las observaciones se han guardado correctamente", "No se pudieron guardar las observaciones");
+    this.confirmarGuardado(() =>
+      this.guardarPaso(this.formObservacionesConclusiones.value, "Las observaciones se han guardado correctamente", "No se pudieron guardar las observaciones")
+    );
   }
 
-  verInforme() {
-    this.dialog.open(ModalVerDocumentosComponent, {
-      width: "1200px",
-      data: {
-        entityId: this.informeId,
-        titulo: "Ver Documentos",
-        descripcion: "Documentos del Seguimiento",
-        tabs: [
-          { nombre: "Informe Final", tipoId: 0 },
-          { nombre: "Oficio Anuncio Solicitud Información", tipoId: 0 },
-        ],
-        textoBotonCerrar: "Guardar y Cerrar"
+  verInforme(): void {
+    const auditoriaId = this.informeData?.auditoria_id;
+    if (!auditoriaId) {
+      this.alertaService.showErrorAlert("No fue posible identificar la auditoría asociada.");
+      return;
+    }
+
+    this.planAuditoriaMid.get(`plantilla/informe-seguimiento/${auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+        if (!documentoBase64) {
+          this.alertaService.showErrorAlert("No fue posible generar el informe.");
+          return;
+        }
+        this.abrirModalVerInforme(documentoBase64);
+      },
+      error: () => {
+        this.alertaService.showErrorAlert("No fue posible generar el informe.");
       },
     });
+  }
+
+  private abrirModalVerInforme(documentoBase64: any): void {
+    const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
+      width: "1000px",
+      data: documentoBase64,
+      autoFocus: false,
+    });
+
+    if (!this.soloLectura) {
+      dialogRef.componentInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    }
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (res?.accion === "guardarDocumento") {
+        this.guardarDocumento(documentoBase64);
+      }
+    });
+  }
+
+  private guardarDocumento(documentoBase64: any): void {
+    const payload = {
+      IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+      nombre: "Informe Final",
+      descripcion: "Documento pdf (informe-seguimiento) de seguimiento de plan de auditoría",
+      metadatos: {},
+      file: documentoBase64,
+    };
+
+    this.nuxeoService.guardarArchivos([payload]).subscribe({
+      next: (response: any) => {
+        this.guardarReferencia(response[0]);
+      },
+      error: () => {
+        this.alertaService.showErrorAlert("Error al subir el documento.");
+      },
+    });
+  }
+
+  private guardarReferencia(nuxeoResponse: any): void {
+    if (!nuxeoResponse?.res?.Enlace) return;
+    this.referenciaPdfService
+      .guardarReferencia(
+        nuxeoResponse.res,
+        "Auditoria",
+        this.informeData?.auditoria_id,
+        environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL
+      )
+      .subscribe({
+        next: () => this.alertaService.showSuccessAlert("Informe guardado exitosamente."),
+        error: () => this.alertaService.showErrorAlert("Error al guardar la referencia del documento."),
+      });
   }
 }

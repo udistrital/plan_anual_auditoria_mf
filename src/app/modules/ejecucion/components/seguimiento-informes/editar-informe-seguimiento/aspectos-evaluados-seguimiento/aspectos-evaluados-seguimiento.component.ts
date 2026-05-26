@@ -32,6 +32,7 @@ interface Tema {
 })
 export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() soloLectura: boolean = false;
   @Output() datosActualizados = new EventEmitter<void>();
 
   aspectosForm: UntypedFormGroup = this.fb.group({});
@@ -54,6 +55,8 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       temas: this.fb.array([]),
     });
 
+    this.actualizarModoSoloLectura();
+
     if (this.informeId) {
       this.cargarTemas();
     }
@@ -62,6 +65,9 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['informeId'] && this.informeId) {
       this.cargarTemas();
+    }
+    if (changes['soloLectura']) {
+      this.actualizarModoSoloLectura();
     }
   }
 
@@ -73,6 +79,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       next: (response: any) => {
         this.temasData = response?.Data ?? [];
         this.construirFormulario();
+        this.actualizarModoSoloLectura();
         this.cargando = false;
       },
       error: (error) => {
@@ -80,6 +87,17 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
         this.cargando = false;
       }
     });
+  }
+
+  private actualizarModoSoloLectura(): void {
+    if (!this.aspectosForm) return;
+
+    if (this.soloLectura) {
+      this.aspectosForm.disable({ emitEvent: false });
+      return;
+    }
+
+    this.aspectosForm.enable({ emitEvent: false });
   }
 
   construirFormulario(): void {

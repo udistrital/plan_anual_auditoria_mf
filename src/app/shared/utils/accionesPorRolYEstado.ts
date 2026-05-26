@@ -332,6 +332,7 @@ export const accionesEjecucionPreliminar: {
 
   [environment.ROL.JEFE]: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
+      "Editar Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
     ],
@@ -386,6 +387,7 @@ export const accionesEjecucionPreliminar: {
       "Ver Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
+      "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
@@ -430,6 +432,7 @@ export const accionesEjecucionPreliminar: {
       "Ver Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
+      "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
@@ -468,7 +471,6 @@ export const accionesEjecucionPreliminar: {
       "Ver Preinforme",
       "Ver Documentos del informe",
       "Historial de Rechazos",
-      "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
@@ -565,6 +567,9 @@ export const accionesEjecucionFinal: {
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Informe",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
       "Editar Informe",
       "Ver Documentos del informe",
@@ -589,6 +594,9 @@ export const accionesEjecucionFinal: {
   },
 
   [environment.ROL.AUDITOR]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Informe",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
       "Editar Informe",
       "Ver Documentos del informe",
@@ -613,6 +621,9 @@ export const accionesEjecucionFinal: {
   },
 
   [environment.ROL.AUDITOR_ASISTENTE]: {
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Editar Informe",
+    ],
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
       "Editar Informe",
       "Ver Documentos del informe",
