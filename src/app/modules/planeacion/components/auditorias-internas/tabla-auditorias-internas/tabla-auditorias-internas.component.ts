@@ -82,6 +82,24 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
 
+  // Filtros de la vista (estado, consecutivo)
+  private readonly rolesConFiltros = [
+    environment.ROL.JEFE,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_ASISTENTE,
+  ];
+
+  get mostrarFiltros(): boolean {
+    return this.rolesConFiltros.some((rol) =>
+      this.rolService.tieneRol(rol)
+    );
+  }
+
+  filtroEstado: number | null = null;
+  filtroConsecutivo: string = "";
+  estadoOptions: Array<{ id: number; nombre: string }> = [];
+
   constructor(
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
@@ -106,6 +124,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.usuarioId = usuarioId;
     });
     this.configurarTipoConsulta();
+    // inicializar filtros visibles y opciones si aplica
+    if (this.mostrarFiltros) {
+      this.buildEstadoOptions();
+    }
   }
 
   setPermisos() {
@@ -129,24 +151,61 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
+  
+
+  private buildEstadoOptions(): void {
+    this.parametrosUtilsService
+      .getEstadosAuditoria(7060, 7080)
+      .subscribe({
+        next: (estados) => {
+          this.estadoOptions = estados.map((estado) => ({
+            id: estado.Id,
+            nombre: estado.Nombre,
+          }));
+        },
+
+        error: (error) => {
+          console.error(error);
+
+          this.alertService.showErrorAlert(
+            "No fue posible cargar los estados de auditoría."
+          );
+
+          this.estadoOptions = [];
+        },
+      });
+  }
+
+  // Note: filtro por auditor eliminado — no se mantiene método cargarAuditores
+
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0,
-    estadoId?: number
+    estadoId?: number,
+    _retry: boolean = false
   ) {
     this.auditoriasPorVigencia = [];
-
     let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
     let endpoint = "";
 
+    // Aplicar filtros según tipo de consulta y campos seleccionados
     if (this.tipoConsulta === 'auditado') {
       query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+      // Para usuarios auditados se mantiene endpoint auditado
       endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
     } else {
-      if (estadoId) query += `,estado_id:${estadoId}`;
-      
-      const estado2 = estadoId ? `&estado_id=${estadoId}` : '';
+      // estado seleccionado (prioriza el parámetro recibido si se provee)
+      const estadoFiltro = estadoId ?? this.filtroEstado;
+      if (estadoFiltro) query += `,estado_id:${estadoFiltro}`;
+
+      // consecutivo: buscar por coincidencia parcial en consecutivo_OCI
+      if (this.filtroConsecutivo && this.filtroConsecutivo.trim() !== '') {
+        const c = this.filtroConsecutivo.trim();
+        query += `,consecutivo_OCI__icontains:${c}`;
+      }
+
+      const estado2 = estadoFiltro ? `&estado_id=${estadoFiltro}` : '';
       endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
         ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado2}`
         : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
@@ -164,6 +223,28 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
+
+          // Determinar si la búsqueda estaba filtrada por el usuario
+          const estadoFiltro = estadoId ?? this.filtroEstado;
+          const hayFiltroConsecutivo = !!(this.filtroConsecutivo && this.filtroConsecutivo.trim() !== "");
+          const huboFiltrosActivos = !!(estadoFiltro || hayFiltroConsecutivo);
+
+          if (huboFiltrosActivos && !_retry) {
+            // Mostrar alerta y luego reiniciar búsqueda por defecto de la vigencia
+            this.alertService.showAlert(
+              "No se encontraron auditorías",
+              "No se encontraron auditorías con los filtros aplicados. Se mostrará la lista completa para la vigencia."
+            );
+
+            // Limpiar filtros y reintentar una vez
+            this.filtroEstado = null;
+            this.filtroConsecutivo = "";
+
+            // Rehacer la búsqueda por vigencia (sin filtros) una sola vez
+            setTimeout(() => this.listarAuditoriasPorVigencia(vigenciaId, limit, offset, undefined, true), 200);
+            return;
+          }
+
           return this.alertService.showAlert(
             "No hay auditorías registradas",
             "Actualmente no hay auditorías registradas para la vigencia seleccionada."
