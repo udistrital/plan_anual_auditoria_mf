@@ -1,3 +1,27 @@
+.historial-content {
+  min-width: 500px;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.descripcion {
+  margin-bottom: 16px;
+}
+
+.fecha {
+  margin-left: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.sin-rechazos {
+  padding: 16px 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+
 .fondo-chip {
   padding: 15px;
   color: var(--md-accent-900);
@@ -60,7 +84,6 @@
   margin: 4px;
 }
 
-/* Efecto de parpadeo */
 @keyframes shimmer {
   0% {
     background-position: 200% 0;
@@ -70,12 +93,10 @@
   }
 }
 
-/* Borde rojo para rechazos */
 .fondo-chip--rechazo {
   border-left-color: #c62828;
 }
 
-/* Borde naranja/ámbar para revisiones del jefe con observación */
 .fondo-chip--revision {
   border-left-color: #7D7C7A;
 }

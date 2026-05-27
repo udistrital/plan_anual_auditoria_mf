@@ -20,10 +20,6 @@ import { AddAuditoriaModalComponent } from "./components/consulta-plan-auditoria
 import { ModalPdfVisualizadorComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/pdf-visualizador-modal/pdf-visualizador.component";
 import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditoria/registrar-auditorias/registrar-auditorias.component";
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
-import { ModalListaRechazosComponent } from "./components/consulta-plan-auditoria/modal-lista-rechazos/modal-lista-rechazos.component";
-import { ModalEnviarAprobacionComponent } from "./components/consulta-plan-auditoria/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
-
-
 import { MatTooltip } from "@angular/material/tooltip";
 import { UnirConComaPipe } from "src/app/shared/pipes/unir-con-coma.pipe";
 import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-especiales/tabla-auditorias-especiales/tabla-auditorias-especiales.component";
@@ -36,7 +32,6 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     TablaAuditoriasEspecialesComponent,
     ModalAgregarAuditorComponent,
     ModalAprobacionSecretarioComponent,
-    ModalListaRechazosComponent,
     ModalMotivosRechazoComponent,
     ModalPdfVisualizadorComponent,
     RevisionJefeComponent,
@@ -47,7 +42,6 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     TablaConsultaAuditoriasComponent,
     ModalAuditoriasHijasComponent,
     ModalVisualizarRecargarDocumentoComponent,
-    ModalEnviarAprobacionComponent,
   ],
   imports: [
     CommonModule,

@@ -11,6 +11,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-seguimiento.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
+import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { Router } from "@angular/router";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { AlertService } from "src/app/shared/services/alert.service";
@@ -28,6 +29,7 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "s
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
 
@@ -63,8 +65,26 @@ export class TablaSeguimientoComponent implements OnInit {
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Iniciar Ejecución", "play_arrow"],
+    ["Historial de Observaciones", "report"]
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
+  
+  // Filtros de la vista (estado, consecutivo)
+   private readonly rolesConFiltros = [
+    environment.ROL.JEFE,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_ASISTENTE,
+  ];
+
+  get mostrarFiltros(): boolean {
+    return this.rolesConFiltros.some((rol) =>
+      this.rolService.tieneRol(rol)
+    );
+  }
+  filtroEstado: number | null = null;
+  filtroConsecutivo: string = "";
+  estadoOptions: Array<{ id: number; nombre: string }> = [];
 
   constructor(
     private readonly alertService: AlertService,
@@ -89,6 +109,33 @@ export class TablaSeguimientoComponent implements OnInit {
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+    if (this.mostrarFiltros) {
+      this.buildEstadoOptions();
+    }
+  }
+
+
+  private buildEstadoOptions(): void {
+    this.parametrosUtilsService
+      .getEstadosAuditoria(7060, 7080)
+      .subscribe({
+        next: (estados) => {
+          this.estadoOptions = estados.map((estado) => ({
+            id: estado.Id,
+            nombre: estado.Nombre,
+          }));
+        },
+
+        error: (error) => {
+          console.error(error);
+
+          this.alertService.showErrorAlert(
+            "No fue posible cargar los estados de auditoría."
+          );
+
+          this.estadoOptions = [];
+        },
+      });
   }
 
   setPermisos() {
@@ -100,7 +147,8 @@ export class TablaSeguimientoComponent implements OnInit {
   async listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0
+    offset: number = 0,
+    _retry: boolean = false
   ) {
     let url;
     if (this.rolService.tieneRol(environment.ROL.AUDITOR) || this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)) {
@@ -110,6 +158,25 @@ export class TablaSeguimientoComponent implements OnInit {
       url = this.urlAuditoriasPorVigenciaFiltroAuditado(vigenciaId, limit, offset);
     } else {
       url = this.urlAuditoriasPorVigenciaTodas(vigenciaId, limit, offset);
+    }
+
+    // Insertar filtros adicionales dentro del parámetro `query` (antes de &limit)
+    let filterSuffix = '';
+    if (this.filtroEstado) {
+      filterSuffix += `,estado_id:${this.filtroEstado}`;
+    }
+    if (this.filtroConsecutivo && this.filtroConsecutivo.trim() !== '') {
+      const c = this.filtroConsecutivo.trim();
+      filterSuffix += `,consecutivo_OCI__icontains:${c}`;
+    }
+
+    if (filterSuffix && url) {
+      const idx = url.indexOf('&limit=');
+      if (idx !== -1) {
+        url = url.slice(0, idx) + filterSuffix + url.slice(idx);
+      } else {
+        url = url + filterSuffix;
+      }
     }
 
     if (!url)
@@ -128,6 +195,25 @@ export class TablaSeguimientoComponent implements OnInit {
         if (auditorias.length === 0) {
           this.banderaTablaSeguimiento = false;
           this.auditoriasDataSource.data = [];
+
+          // Detectar si la búsqueda tenía filtros activos
+          const huboFiltroEstado = !!this.filtroEstado;
+          const huboFiltroConsecutivo = !!(this.filtroConsecutivo && this.filtroConsecutivo.trim() !== "");
+          const huboFiltrosActivos = huboFiltroEstado || huboFiltroConsecutivo;
+
+          if (huboFiltrosActivos && !_retry) {
+            this.alertService.showAlert(
+              "No se encontraron auditorías",
+              "No se encontraron auditorías con los filtros aplicados. Se mostrará la lista completa para la vigencia."
+            );
+
+            // limpiar filtros y reintentar una vez
+            this.filtroEstado = null;
+            this.filtroConsecutivo = "";
+            setTimeout(() => this.listarAuditoriasPorVigencia(vigenciaId, limit, offset, true), 200);
+            return;
+          }
+
           return this.alertService.showAlert(
             "No hay auditorías registradas",
             "Actualmente no hay auditorías registradas para la vigencia seleccionada."
@@ -237,6 +323,16 @@ export class TablaSeguimientoComponent implements OnInit {
         return column.columnDef !== "acciones" || this.mostrarAcciones;
       }
     );
+    // // Asegurar columna de consecutivo_OCI visible
+    // const existeConsecutivo = this.auditoriasContructorTabla.some((c: any) => c.columnDef === 'consecutivo_oci');
+    // if (!existeConsecutivo) {
+    //   this.auditoriasContructorTabla.unshift({
+    //     columnDef: 'consecutivo_oci',
+    //     header: 'Consecutivo OCI',
+    //     sortable: false,
+    //     cell: (row: any) => row.consecutivo_OCI ?? ''
+    //   });
+    // }
     this.tablaColumnas = this.auditoriasContructorTabla.map(
       (column: any) => column.columnDef
     );
@@ -304,6 +400,7 @@ export class TablaSeguimientoComponent implements OnInit {
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
       "Enviar a Aprobación por Jefe": () => this.preguntarEnvioAprobacionPorJefe(auditoria),
       "Iniciar Ejecución": () => this.iniciarEjecucion(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialRechazos(auditoria),
     };
     acciones[accion]?.();
   }
@@ -322,6 +419,18 @@ export class TablaSeguimientoComponent implements OnInit {
     this.router.navigate([
       `/planeacion/seguimiento/editar/${auditoriaId}`,
     ]);
+  }
+
+  abrirHistorialRechazos(auditoria: Auditoria) {
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      width: "1000px",
+      data: {
+        auditoriaId: auditoria._id,
+        estadoIds: [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE],
+        titulo: "Motivos de rechazo y observaciones",
+        descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
+      },
+    });
   }
 
   revisarAuditoria(auditoria: Auditoria) {
@@ -360,14 +469,17 @@ export class TablaSeguimientoComponent implements OnInit {
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    this.alertService
-      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.validarDocumentosAnexados(auditoria._id);
-      });
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
+      width: '500px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (observacion === null || observacion === undefined) {
+        return;
+      }
+      this.validarDocumentosAnexados(auditoria._id, observacion);
+    });
   }
 
   guardarDocumento(documentoBase64: any, auditoria: any) {
@@ -423,12 +535,12 @@ export class TablaSeguimientoComponent implements OnInit {
     }
   }
 
-  enviarAprobacionPorJefe(auditoriaId: string) {
+  enviarAprobacionPorJefe(auditoriaId: string, observacion: string = "") {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
-      observacion: "",
+      observacion,
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
@@ -576,13 +688,13 @@ export class TablaSeguimientoComponent implements OnInit {
     });
   }
 
-  validarDocumentosAnexados(auditoriaId: any) {
+  validarDocumentosAnexados(auditoriaId: any, observacion: string = "") {
     const docs = [
-      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información"},
-      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' }
+      { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: "solicitud de información" },
+      { tipo: this.tipoDocumentoParametros.COMPROMISO_ETICO, nombre: 'compromiso ético' },
     ];
 
-    const requests = docs.map(d =>
+    const requests = docs.map((d) =>
       this.planAuditoriaService.get(
         `documento?query=referencia_id:${auditoriaId},tipo_id:${d.tipo},activo:true`
       )
@@ -598,12 +710,12 @@ export class TablaSeguimientoComponent implements OnInit {
             return;
           }
         }
-        this.enviarAprobacionPorJefe(auditoriaId);
+        this.enviarAprobacionPorJefe(auditoriaId, observacion);
       },
       error: (error) => {
         console.error(error);
         this.alertService.showErrorAlert("Error validando los documentos.");
-      }
+      },
     });
   }
 }
