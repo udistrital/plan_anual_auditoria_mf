@@ -154,8 +154,13 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     mensajeAprobacion: string
   ) {
     try {
-      for (const estado of estadoAprobacion) {
-        await this.aprobarAuditoria(estado, mensajeAprobacion);
+      for (let i = 0; i < estadoAprobacion.length; i++) {
+        const esUltimoEstado = i === estadoAprobacion.length - 1;
+        await this.aprobarAuditoria(
+          estadoAprobacion[i],
+          mensajeAprobacion,
+          esUltimoEstado
+        );
       }
       const ultimoEstado = estadoAprobacion[estadoAprobacion.length - 1];
       if (ultimoEstado === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO) {
@@ -475,24 +480,36 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     });
   }
 
-  async aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
-    try {
-      const auditoriaEstado =
-        this.construirObjetoAuditoriaEstado(estadoAprobacion);
+  aprobarAuditoria(
+    estadoAprobacion: number,
+    mensajeAprobacion: string,
+    mostrarMensaje: boolean = true
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const auditoriaEstado = this.construirObjetoAuditoriaEstado(estadoAprobacion);
 
       this.planAuditoriaService
         .post("auditoria-estado", auditoriaEstado)
-        .subscribe(() => {
-          this.alertService.showSuccessAlert(
-            mensajeAprobacion,
-            "Auditoría enviada"
-          ).then(() => {
-            this.router.navigate([`/planeacion/seguimiento`]);
-          });
+        .subscribe({
+          next: () => {
+            if (mostrarMensaje) {
+              this.alertService.showSuccessAlert(
+                mensajeAprobacion,
+                "Auditoría enviada"
+              ).then(() => {
+                this.router.navigate([`/planeacion/seguimiento`]);
+                resolve();
+              });
+            } else {
+              resolve();
+            }
+          },
+          error: (error: Error) => {
+            this.alertService.showErrorAlert("Error al aprobar el plan.");
+            reject(error);
+          }
         });
-    } catch (error) {
-      this.alertService.showErrorAlert("Error al aprobar el plan.");
-    }
+    });
   }
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
