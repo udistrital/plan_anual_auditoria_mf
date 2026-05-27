@@ -182,7 +182,11 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
           );
           
         });
-        this.auditoria = res.Data;
+        const datosActualizados = res?.Data;
+        if (datosActualizados) {
+          this.auditoria = { ...this.auditoria, ...datosActualizados };
+        }
+
         this.paso1Guardado = true;
         this.stepper.next();
       });
