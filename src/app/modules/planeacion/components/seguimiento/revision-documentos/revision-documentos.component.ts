@@ -154,8 +154,13 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     mensajeAprobacion: string
   ) {
     try {
-      for (const estado of estadoAprobacion) {
-        await this.aprobarAuditoria(estado, mensajeAprobacion);
+      for (let i = 0; i < estadoAprobacion.length; i++) {
+        const esUltimoEstado = i === estadoAprobacion.length - 1;
+        await this.aprobarAuditoria(
+          estadoAprobacion[i],
+          mensajeAprobacion,
+          esUltimoEstado
+        );
       }
       const ultimoEstado = estadoAprobacion[estadoAprobacion.length - 1];
       if (ultimoEstado === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO) {
@@ -475,24 +480,36 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     });
   }
 
-  async aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string) {
-    try {
-      const auditoriaEstado =
-        this.construirObjetoAuditoriaEstado(estadoAprobacion);
+  aprobarAuditoria(
+    estadoAprobacion: number,
+    mensajeAprobacion: string,
+    mostrarMensaje: boolean = true
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const auditoriaEstado = this.construirObjetoAuditoriaEstado(estadoAprobacion);
 
       this.planAuditoriaService
         .post("auditoria-estado", auditoriaEstado)
-        .subscribe(() => {
-          this.alertService.showSuccessAlert(
-            mensajeAprobacion,
-            "Auditoría enviada"
-          ).then(() => {
-            this.router.navigate([`/planeacion/seguimiento`]);
-          });
+        .subscribe({
+          next: () => {
+            if (mostrarMensaje) {
+              this.alertService.showSuccessAlert(
+                mensajeAprobacion,
+                "Auditoría enviada"
+              ).then(() => {
+                this.router.navigate([`/planeacion/seguimiento`]);
+                resolve();
+              });
+            } else {
+              resolve();
+            }
+          },
+          error: (error: Error) => {
+            this.alertService.showErrorAlert("Error al aprobar el plan.");
+            reject(error);
+          }
         });
-    } catch (error) {
-      this.alertService.showErrorAlert("Error al aprobar el plan.");
-    }
+    });
   }
 
   construirObjetoAuditoriaEstado(estadoAprobacion: number) {
@@ -550,11 +567,83 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   cargarDocumentos() {
+    this.documentos = [];
+    this.docProgramaTrabajo = "";
+    this.docSolicitudInformacion = "";
+    this.docCartaPresentacion = "";
+    this.docCompromisoEstico = "";
+
+    const tipoDocumentoMap = {
+      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: "docSolicitudInformacion",
+      [environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO]: "docCompromisoEstico",
+    };
+
+    if (
+      this.role === environment.ROL.JEFE_DEPENDENCIA ||
+      this.role === environment.ROL.ASISTENTE_DEPENDENCIA
+    ) {
+      this.cargarDocumentosAuditado(tipoDocumentoMap);
+      return;
+    }
+
     this.referenciaPdfService
-      .consultarDocumentos(this.auditoriaId)
+      .consultarDocumentos(this.auditoriaId, { deduplicarPorTipo: false })
       .subscribe(async (res) => {
-        const promesas = res.map(async (documento) => {
+        const promesas = res.map(async (documento: any) => {
+          if (!documento?.nuxeo_enlace) {
+            return;
+          }
+
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
+          if (!base64) {
+            return;
+          }
+
+          const propiedad = tipoDocumentoMap[documento.tipo_id];
+          if (!propiedad) {
+            return; // ignorar tipos que no sean Solicitud o Compromiso
+          }
+
+          (this as any)[propiedad] = base64;
+
+          this.documentos.push({ base64, tipo_id: documento.tipo_id });
+        });
+
+        await Promise.all(promesas);
+      });
+  }
+
+  private async cargarDocumentosAuditado(tipoDocumentoMap: any) {
+    const personaId = await this.userService.getPersonaId();
+    let cargoId: number | undefined;
+
+    switch (this.role) {
+      case environment.ROL.JEFE_DEPENDENCIA:
+        cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+        break;
+      case environment.ROL.ASISTENTE_DEPENDENCIA:
+        cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+        break;
+    }
+
+    this.planAuditoriaMid
+      .get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
+      .subscribe(async (res: any[]) => {
+        const promesas = res.map(async (documento: any) => {
+          if (!documento?.nuxeo_enlace) {
+            return;
+          }
+
+          const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+
+          const propiedad = tipoDocumentoMap[documento.tipo_id];
+          if (!base64 || !propiedad) {
+            return;
+          }
+
+          (this as any)[propiedad] = base64;
+
           this.documentos.push({ base64, tipo_id: documento.tipo_id });
         });
 
