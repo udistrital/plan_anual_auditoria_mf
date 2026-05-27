@@ -119,30 +119,27 @@
         </div>
       </div>
 
-      <!-- Fechas: Inicio | Fin -->
+      <!-- Fechas: Inicio | Fin (autocalculadas, solo lectura) -->
       <div class="row">
         <div class="col-md-6 col-12">
           <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Fecha Inicio <span class="text-danger">*</span></mat-label>
+            <mat-label>Fecha Inicio</mat-label>
             <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" readonly />
-            <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-            <mat-datepicker #pickerInicio></mat-datepicker>
-            @if (form.get('fechaInicio')?.hasError('required')) {
-              <mat-error>Campo requerido</mat-error>
+            <mat-datepicker-toggle matSuffix [for]="pickerInicio" disabled></mat-datepicker-toggle>
+            <mat-datepicker #pickerInicio disabled></mat-datepicker>
+            @if (!form.getRawValue().fechaInicio) {
+              <mat-hint>Se calculará al registrar el informe final</mat-hint>
             }
           </mat-form-field>
         </div>
         <div class="col-md-6 col-12">
           <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Fecha Fin <span class="text-danger">*</span></mat-label>
-            <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" [min]="fechaMinFin" readonly />
-            <mat-datepicker-toggle matSuffix [for]="pickerFin" [disabled]="form.get('fechaFin')?.disabled"></mat-datepicker-toggle>
-            <mat-datepicker #pickerFin></mat-datepicker>
-            @if (form.get('fechaFin')?.disabled) {
-              <mat-hint>Primero seleccione una fecha de inicio</mat-hint>
-            }
-            @if (form.get('fechaFin')?.hasError('required')) {
-              <mat-error>Campo requerido</mat-error>
+            <mat-label>Fecha Fin</mat-label>
+            <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" readonly />
+            <mat-datepicker-toggle matSuffix [for]="pickerFin" disabled></mat-datepicker-toggle>
+            <mat-datepicker #pickerFin disabled></mat-datepicker>
+            @if (!form.getRawValue().fechaFin) {
+              <mat-hint>Se calculará al registrar el informe final</mat-hint>
             }
           </mat-form-field>
         </div>

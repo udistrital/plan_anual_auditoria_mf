@@ -249,6 +249,10 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         await this.guardarFechaRevisionPreinforme();
       }
 
+      if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
+        await this.guardarFechaAprobacionInformeFinal();
+      }
+
       const mensaje = this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
         ? "Informe final enviado"
         : "Informe preliminar enviado";
@@ -256,6 +260,23 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       this.router.navigate([`/ejecucion/auditorias-internas/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
+    }
+  }
+
+  private async guardarFechaAprobacionInformeFinal(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(
+        this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
+      );
+      const informeId = res?.Data?.[0]?._id;
+      if (!informeId) return;
+      await firstValueFrom(
+        this.planAuditoriaService.put(`informe/${informeId}`, {
+          fecha_aprobacion_informe: new Date().toISOString(),
+        })
+      );
+    } catch {
+      // no bloquea el flujo de aprobación
     }
   }
 

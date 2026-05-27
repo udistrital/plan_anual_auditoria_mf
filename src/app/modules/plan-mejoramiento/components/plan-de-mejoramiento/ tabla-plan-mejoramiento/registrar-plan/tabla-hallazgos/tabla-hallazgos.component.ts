@@ -68,6 +68,7 @@ export class TablaHallazgosComponent implements OnInit {
   @Input() planMejoramientoId!: string;
   @Input() auditoria: any;
 
+  fechaAprobacionInforme: string | null = null;
   hallazgos: HallazgoTabla[] = [];
   filas: FilaTabla[] = [];
   cargando = true;
@@ -166,7 +167,9 @@ export class TablaHallazgosComponent implements OnInit {
           if (!resInforme.Data?.length) {
             return of({ hallazgos: { Data: [] }, acciones: { Data: [] }, responsables: { Data: [] } });
           }
-          const informeId = resInforme.Data[0]._id;
+          const informe = resInforme.Data[0];
+          this.fechaAprobacionInforme = informe.fecha_aprobacion_informe ?? null;
+          const informeId = informe._id;
           return forkJoin({
             hallazgos: this.planAuditoriaService
               .get(`hallazgo?query=informe_id:${informeId},activo:true`),
@@ -252,6 +255,7 @@ export class TablaHallazgosComponent implements OnInit {
         accion: accion ?? null,
         auditoria: this.auditoria,
         planMejoramientoId: this.planMejoramientoId,
+        fechaAprobacionInforme: this.fechaAprobacionInforme,
       },
     });
 

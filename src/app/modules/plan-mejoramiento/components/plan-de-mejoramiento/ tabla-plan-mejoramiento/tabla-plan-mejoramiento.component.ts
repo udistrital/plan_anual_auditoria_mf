@@ -174,7 +174,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
             ...auditoria,
             planMejoramientoId: plan?._id ?? null,
             estadoPlanId,
-            estadoPlanNombre: plan?.estado_nombre ?? null,
+            estadoPlanNombre: plan?.estado_nombre ?? 'Sin Plan de Mejoramiento',
             auditores_plan: auditoresPlan,
             acciones: this.getAccionesPorRolYEstado(estadoPlanId),
           };

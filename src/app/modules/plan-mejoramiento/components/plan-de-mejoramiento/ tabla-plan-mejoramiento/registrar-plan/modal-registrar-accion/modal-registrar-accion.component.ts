@@ -5,12 +5,14 @@ import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-audi
 import { OikosService } from 'src/app/core/services/oikos.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { AccionPlan, ResultadoModalAccion } from '../tabla-hallazgos/tabla-hallazgos.component';
+import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 
 export interface DatosModalAccion {
   hallazgo: any;
   accion: AccionPlan | null;
   auditoria: any;
   planMejoramientoId: string;
+  fechaAprobacionInforme: string | null;
 }
 
 export interface Dependencia {
@@ -37,7 +39,6 @@ export class ModalRegistrarAccionComponent implements OnInit {
   private responsablesActuales: { _id: string; dependencia_id: number; dependencia_lider: boolean }[] = [];
 
   cargandoDependencias = false;
-  fechaMinFin: Date | null = null;
 
   tiposAccion = [
     { id: 1, nombre: 'Preventiva' },
@@ -79,6 +80,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
   }
 
   private iniciarForm(): void {
+    const { fechaInicio, fechaFin } = this.calcularFechas();
     this.form = this.fb.group({
       causa:            [this.data.hallazgo?.causa ?? '', Validators.required],
       tipoAccion:       ['', Validators.required],
@@ -86,24 +88,20 @@ export class ModalRegistrarAccionComponent implements OnInit {
       nombreIndicador:  [''],
       formulaIndicador: [''],
       meta:             [''],
-      fechaInicio:      [null, Validators.required],
-      fechaFin:         [{ value: null, disabled: true }, Validators.required],
+      fechaInicio:      [{ value: fechaInicio, disabled: true }],
+      fechaFin:         [{ value: fechaFin,    disabled: true }],
     });
+  }
 
-    this.form.get('fechaInicio')!.valueChanges.subscribe((fecha) => {
-      const controlFin = this.form.get('fechaFin')!;
-      if (fecha) {
-        controlFin.enable();
-        this.fechaMinFin = fecha;
-        if (controlFin.value && controlFin.value < fecha) {
-          controlFin.setValue(null);
-        }
-      } else {
-        controlFin.disable();
-        controlFin.setValue(null);
-        this.fechaMinFin = null;
-      }
-    });
+  private calcularFechas(): { fechaInicio: Date | null; fechaFin: Date | null } {
+    const iso = this.data.fechaAprobacionInforme;
+    if (!iso) return { fechaInicio: null, fechaFin: null };
+    const base = new Date(iso);
+    if (isNaN(base.getTime())) return { fechaInicio: null, fechaFin: null };
+    const fechaInicio = sumarDiasHabiles(base, 8);
+    const fechaFin = new Date(fechaInicio);
+    fechaFin.setDate(fechaFin.getDate() + 180);
+    return { fechaInicio, fechaFin };
   }
 
   private iniciarDependenciaLider(): void {
@@ -154,11 +152,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private poblarForm(): void {
     const a = this.data.accion!;
-    const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : null;
-    if (fechaInicio && !isNaN(fechaInicio.getTime())) {
-      this.fechaMinFin = fechaInicio;
-      this.form.get('fechaFin')!.enable();
-    }
+    const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : this.form.getRawValue().fechaInicio;
+    const fechaFin    = a.fechaFinISO    ? new Date(a.fechaFinISO)    : this.form.getRawValue().fechaFin;
     this.form.patchValue({
       causa:            this.data.hallazgo?.causa ?? '',
       tipoAccion:       a.tipoAccionId ?? '',
@@ -167,7 +162,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
       formulaIndicador: a.formulaIndicador,
       meta:             a.meta,
       fechaInicio,
-      fechaFin:         a.fechaFinISO ? new Date(a.fechaFinISO) : null,
+      fechaFin,
     });
   }
 
