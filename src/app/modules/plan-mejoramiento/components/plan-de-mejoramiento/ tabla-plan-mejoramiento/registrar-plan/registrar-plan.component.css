@@ -12,5 +12,5 @@
 }
 
 :host ::ng-deep .container {
-  max-width: 1400px !important;
+  max-width: 1600px !important;
 }

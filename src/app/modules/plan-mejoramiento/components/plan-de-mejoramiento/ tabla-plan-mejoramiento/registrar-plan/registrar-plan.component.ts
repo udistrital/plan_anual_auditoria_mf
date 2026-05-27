@@ -20,6 +20,27 @@ export class RegistrarPlanComponent implements OnInit {
   planMejoramientoId: string | null = null;
   cargando = true;
   enviando = false;
+  fuenteSeleccionada: number | null = null;
+
+  get lideresDelProceso(): string {
+    return (this.auditoria?.datos_dependencias ?? [])
+      .map((d: any) => d.jefe_nombre).filter(Boolean).join(', ') || '';
+  }
+
+  get gestoresDelProceso(): string {
+    return (this.auditoria?.datos_dependencias ?? [])
+      .map((d: any) => d.dependencia_nombre).filter(Boolean).join(', ') || '';
+  }
+
+  readonly fuentes = [
+    { id: 1, nombre: 'Auditoría Interna' },
+    { id: 2, nombre: 'Auditoría Externa' },
+    { id: 3, nombre: 'Producto/Servicio No Conforme' },
+    { id: 4, nombre: 'Quejas, reclamos o sugerencias' },
+    { id: 5, nombre: 'Revisión por la Dirección' },
+    { id: 6, nombre: 'Evaluación del desempeño' },
+    { id: 7, nombre: 'Mejoramiento Continuo' },
+  ];
 
   private usuarioId = 0;
   private role: string | null = null;
@@ -65,6 +86,7 @@ export class RegistrarPlanComponent implements OnInit {
         next: (res) => {
           if (res?.Data?.length > 0) {
             this.planMejoramientoId = res.Data[0]._id;
+            this.fuenteSeleccionada = res.Data[0].fuente ?? null;
             this.cargando = false;
           } else {
             this.crearPlanMejoramiento();
@@ -114,6 +136,13 @@ export class RegistrarPlanComponent implements OnInit {
       next: () => { this.cargando = false; },
       error: () => { this.cargando = false; }
     });
+  }
+
+  guardarFuente(): void {
+    if (!this.planMejoramientoId || this.fuenteSeleccionada === null) return;
+    this.planAuditoriaService
+      .put(`plan-mejoramiento/${this.planMejoramientoId}`, { fuente: this.fuenteSeleccionada })
+      .subscribe();
   }
 
   guardar(): void {

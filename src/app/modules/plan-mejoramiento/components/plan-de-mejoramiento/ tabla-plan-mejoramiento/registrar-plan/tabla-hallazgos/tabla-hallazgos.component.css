@@ -2,24 +2,36 @@
 table.mat-table {
   font-size: 12px;
   width: 100%;
+  table-layout: fixed;
 }
 
 table.mat-table th,
 table.mat-table td {
   padding: 4px 8px !important;
-  white-space: normal;
-  word-break: break-word;
   vertical-align: middle;
+  overflow: hidden;
 }
 
-/* Columnas con ancho fijo pequeño */
-.mat-column-noHallazgo   { width: 55px;  min-width: 55px;  }
-.mat-column-numero       { width: 45px;  min-width: 45px;  }
-.mat-column-tipoAccion   { width: 75px;  min-width: 75px;  }
-.mat-column-meta         { width: 55px;  min-width: 55px;  }
-.mat-column-fechaInicio  { width: 75px;  min-width: 75px;  }
-.mat-column-fechaFin     { width: 75px;  min-width: 75px;  }
-.mat-column-acciones     { width: 45px;  min-width: 45px;  }
+table.mat-table td {
+  max-height: 60px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Columnas con ancho fijo */
+.mat-column-noHallazgo      { width: 55px;  }
+.mat-column-descripcion     { width: 120px; }
+.mat-column-causa           { width: 120px; }
+.mat-column-numero          { width: 45px;  }
+.mat-column-tipoAccion      { width: 80px;  }
+.mat-column-accionPlanteada { width: 130px; }
+.mat-column-nombreIndicador { width: 100px; }
+.mat-column-formulaIndicador{ width: 100px; }
+.mat-column-meta            { width: 55px;  }
+.mat-column-responsable     { width: 120px; }
+.mat-column-fechaInicio     { width: 80px;  }
+.mat-column-fechaFin        { width: 80px;  }
+.mat-column-acciones        { width: 45px;  }
 
 /* Fila de cabecera de hallazgo */
 .fila-grupo-row td {
@@ -47,6 +59,13 @@ table.mat-table td {
 .fila-accion-row td {
   padding-top: 4px !important;
   padding-bottom: 4px !important;
+}
+
+.celda-truncada {
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Botón agregar acción compacto */
