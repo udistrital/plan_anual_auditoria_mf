@@ -1,8 +1,33 @@
+/* Tabla compacta */
+table.mat-table {
+  font-size: 12px;
+  width: 100%;
+}
+
+table.mat-table th,
+table.mat-table td {
+  padding: 4px 8px !important;
+  white-space: normal;
+  word-break: break-word;
+  vertical-align: middle;
+}
+
+/* Columnas con ancho fijo pequeño */
+.mat-column-noHallazgo   { width: 55px;  min-width: 55px;  }
+.mat-column-numero       { width: 45px;  min-width: 45px;  }
+.mat-column-tipoAccion   { width: 75px;  min-width: 75px;  }
+.mat-column-meta         { width: 55px;  min-width: 55px;  }
+.mat-column-fechaInicio  { width: 75px;  min-width: 75px;  }
+.mat-column-fechaFin     { width: 75px;  min-width: 75px;  }
+.mat-column-acciones     { width: 45px;  min-width: 45px;  }
+
 /* Fila de cabecera de hallazgo */
 .fila-grupo-row td {
   background-color: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
   padding: 4px 8px !important;
+  white-space: normal;
+  overflow: visible;
 }
 
 .fila-grupo-row:hover td {
@@ -20,13 +45,13 @@
 
 /* Filas de acción */
 .fila-accion-row td {
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
 }
 
 /* Botón agregar acción compacto */
 .fila-grupo-row button {
   height: 30px;
   line-height: 30px;
-  font-size: 13px;
+  font-size: 12px;
 }

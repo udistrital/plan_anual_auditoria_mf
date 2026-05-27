@@ -37,6 +37,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
   private responsablesActuales: { _id: string; dependencia_id: number; dependencia_lider: boolean }[] = [];
 
   cargandoDependencias = false;
+  fechaMinFin: Date | null = null;
 
   tiposAccion = [
     { id: 1, nombre: 'Preventiva' },
@@ -85,6 +86,23 @@ export class ModalRegistrarAccionComponent implements OnInit {
       nombreIndicador:  [''],
       formulaIndicador: [''],
       meta:             [''],
+      fechaInicio:      [null, Validators.required],
+      fechaFin:         [{ value: null, disabled: true }, Validators.required],
+    });
+
+    this.form.get('fechaInicio')!.valueChanges.subscribe((fecha) => {
+      const controlFin = this.form.get('fechaFin')!;
+      if (fecha) {
+        controlFin.enable();
+        this.fechaMinFin = fecha;
+        if (controlFin.value && controlFin.value < fecha) {
+          controlFin.setValue(null);
+        }
+      } else {
+        controlFin.disable();
+        controlFin.setValue(null);
+        this.fechaMinFin = null;
+      }
     });
   }
 
@@ -136,6 +154,11 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private poblarForm(): void {
     const a = this.data.accion!;
+    const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : null;
+    if (fechaInicio && !isNaN(fechaInicio.getTime())) {
+      this.fechaMinFin = fechaInicio;
+      this.form.get('fechaFin')!.enable();
+    }
     this.form.patchValue({
       causa:            this.data.hallazgo?.causa ?? '',
       tipoAccion:       a.tipoAccionId ?? '',
@@ -143,6 +166,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
       nombreIndicador:  a.nombreIndicador,
       formulaIndicador: a.formulaIndicador,
       meta:             a.meta,
+      fechaInicio,
+      fechaFin:         a.fechaFinISO ? new Date(a.fechaFinISO) : null,
     });
   }
 
@@ -178,7 +203,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
     this.alertService.showConfirmAlert('¿Guardar cambios?').then(conf => {
       if (!conf.value) return;
 
-      const v = this.form.value;
+      const v = this.form.getRawValue();
       const liderDependenciaId: number = this.data.auditoria?.dependencia_id ?? 0;
 
       // IDs de dependencias (no-lider) que ya estaban en DB
@@ -216,6 +241,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
           nombreIndicador:  v.nombreIndicador,
           formulaIndicador: v.formulaIndicador,
           meta:             v.meta,
+          fechaInicio:      v.fechaInicio ? (v.fechaInicio as Date).toISOString() : null,
+          fechaFin:         v.fechaFin ? (v.fechaFin as Date).toISOString() : null,
         },
         responsablesNuevos,
         responsablesAEliminar,

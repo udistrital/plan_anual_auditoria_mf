@@ -10,3 +10,7 @@
   opacity: 0.2;
   margin: 0.5rem 0 1rem;
 }
+
+:host ::ng-deep .container {
+  max-width: 1400px !important;
+}
