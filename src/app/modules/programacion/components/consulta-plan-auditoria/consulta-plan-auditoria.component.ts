@@ -10,7 +10,7 @@ import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual
 import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
+import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
@@ -26,7 +26,7 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { ModalEnviarAprobacionComponent } from "./modal-enviar-aprobacion/modal-enviar-aprobacion.component";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -488,9 +488,17 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verMotivosRechazo(plan: any) {
-    this.dialog.open(ModalListaRechazosComponent, {
+    this.dialog.open(ModalHistorialRechazosComponent, {
       width: "1000px",
-      data: plan,
+      data: {
+        auditoriaId: plan.id,
+        estadoIds: [
+          environment.PLAN_ESTADO.RECHAZADO,
+        ],
+        tipoEntidad: "plan",
+        titulo: "Historial de observaciones",
+        descripcion: `Historial de observaciones - Plan Anual de Auditoría ${plan.vigencia}`,
+      },
       autoFocus: false,
     });
   }
