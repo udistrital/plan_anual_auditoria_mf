@@ -134,7 +134,6 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Revisar Auditoría",
       "Iniciar Ejecución",
-      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -162,7 +161,6 @@ export const accionesPlaneacion: {
       "Revisar Auditoría",
       "Iniciar Ejecución",
       "Ver Cartas de representación",
-      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Ver Auditoría",
@@ -230,7 +228,6 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documentos",
       "Ver Cartas de representación",
-      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
@@ -265,7 +262,6 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documentos",
       "Ver Cartas de representación",
-      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
       "Editar Auditoría",
