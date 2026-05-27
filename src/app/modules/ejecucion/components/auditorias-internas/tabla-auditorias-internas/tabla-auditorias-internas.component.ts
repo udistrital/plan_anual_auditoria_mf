@@ -49,7 +49,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
-    ["Historial de Rechazos", "history"],
+    ["Historial de Observaciones", "history"],
     ["Ampliar tiempo de revisión auditado", "more_time"],
   ]);
 
@@ -177,7 +177,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const mostrarComoInforme = estado >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
 
     const acciones = this.roles.flatMap((rol) => {
-      // Usar solo las acciones correspondientes según la etapa
       if (mostrarComoInforme) {
         return accionesEjecucionFinal[rol]?.[estado] ?? [];
       } else {
@@ -185,7 +184,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       }
     });
 
-    return Array.from(new Set(acciones));
+    const accionesUnicas = Array.from(new Set(acciones));
+
+    // En REVISION_PREINFORME_AUDITADO el auditado entra únicamente por "Ver Documentos del informe"
+    const esAuditado = this.roles.some(r =>
+      r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA
+    );
+    if (esAuditado && estado === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) {
+      return accionesUnicas.filter(a => a !== 'Editar Preinforme');
+    }
+
+    return accionesUnicas;
   }
 
   getIconoAccion(accion: string): string {
@@ -200,13 +209,13 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialObservaciones(auditoria),
       "Ampliar tiempo de revisión auditado": () => this.abrirModalAmpliarRevision(auditoria),
     };
     acciones[accion]?.();
   }
 
-  abrirHistorialRechazos(auditoria: Auditoria) {
+  abrirHistorialObservaciones(auditoria: Auditoria) {
     this.dialog.open(ModalHistorialRechazosComponent, {
       data: { auditoriaId: auditoria._id },
       width: "1000px",

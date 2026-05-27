@@ -47,11 +47,20 @@
           @if (mostrarAcciones()) {
             <div class="row">
               <div class="col-12 my-4">
+                @if (dependenciaYaDecidio) {
+                  <div class="d-flex justify-content-center align-items-center gap-2 mb-3 text-muted">
+                    <mat-icon>check_circle</mat-icon>
+                    <span>Ya registraste tu decisión para esta dependencia.</span>
+                  </div>
+                }
                 <button mat-stroked-button color="primary" class="mx-2 width-100-md"
                   style="border: 1px solid var(--md-primary-500)" (click)="accionBotonRechazo()">
                   <mat-icon>{{ rolesAprobacion[role]?.esRedireccionHallazgos ? 'rate_review' : 'disabled_by_default' }}</mat-icon>{{ rolesAprobacion[role]?.botonRechazo ?? "Rechazar Informe" }}
                 </button>
-                <button class="mx-2 width-100-md mt-md" mat-raised-button color="primary" (click)="preguntarAprobacion()">
+                <button class="mx-2 width-100-md mt-md" mat-raised-button color="primary"
+                  (click)="preguntarAprobacion()"
+                  [disabled]="dependenciaYaDecidio || dependenciaTieneObservaciones === true"
+                  [matTooltip]="dependenciaYaDecidio ? 'Ya registraste tu decisión para esta dependencia.' : (dependenciaTieneObservaciones ? 'Tienes observaciones registradas. Finaliza desde Revisar hallazgos.' : '')">
                   <mat-icon>fact_check</mat-icon>
                   {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
                 </button>

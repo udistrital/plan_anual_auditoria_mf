@@ -1,10 +1,12 @@
 <div class="tabla-container" [formGroup]="aspectosForm">
 
-  <div class="section-actions">
-    <button mat-raised-button color="primary" (click)="agregarTema()">
-      <mat-icon>add</mat-icon> Agregar Tema
-    </button>
-  </div>
+  @if (!soloLectura) {
+    <div class="section-actions">
+      <button mat-raised-button color="primary" (click)="agregarTema()">
+        <mat-icon>add</mat-icon> Agregar Tema
+      </button>
+    </div>
+  }
 
   <div class="tree" formArrayName="temas">
 
@@ -23,9 +25,11 @@
               <mat-error>El nombre es requerido</mat-error>
             }
           </mat-form-field>
-          <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (!soloLectura) {
+            <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
         </div>
         <!-- Hijos: Subtemas -->
         <div class="node-children" formArrayName="subtemas">
@@ -44,17 +48,21 @@
                     <mat-error>El nombre es requerido</mat-error>
                   }
                 </mat-form-field>
-                <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                @if (!soloLectura) {
+                  <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
               </div>
             </div>
           }
-          <div class="add-leaf-action">
-            <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
-              <mat-icon>add</mat-icon> Agregar Subtema
-            </button>
-          </div>
+          @if (!soloLectura) {
+            <div class="add-leaf-action">
+              <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
+                <mat-icon>add</mat-icon> Agregar Subtema
+              </button>
+            </div>
+          }
         </div>
       </div>
     }
