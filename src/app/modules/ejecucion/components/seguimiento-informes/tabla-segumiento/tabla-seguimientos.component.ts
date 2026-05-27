@@ -48,7 +48,7 @@ export class TablaSeguimientosComponent implements OnInit {
     ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
-    ["Historial de Rechazos", "history"],
+    ["Historial de Observaciones", "history"],
   ]);
 
   constructor(
@@ -160,7 +160,7 @@ export class TablaSeguimientosComponent implements OnInit {
       "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialObservaciones(auditoria),
     };
     acciones[accion]?.();
   }
@@ -181,7 +181,7 @@ export class TablaSeguimientosComponent implements OnInit {
     });
   }
 
-  abrirHistorialRechazos(auditoria: any) {
+  abrirHistorialObservaciones(auditoria: any) {
     this.dialog.open(ModalHistorialRechazosSeguimientoComponent, {
       data: { auditoriaId: auditoria._id },
       width: "1000px",

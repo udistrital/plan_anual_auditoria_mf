@@ -340,13 +340,13 @@ export const accionesEjecucionPreliminar: {
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
   },
 
@@ -354,27 +354,27 @@ export const accionesEjecucionPreliminar: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
   },
 
@@ -390,36 +390,36 @@ export const accionesEjecucionPreliminar: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
   },
 
@@ -435,36 +435,36 @@ export const accionesEjecucionPreliminar: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Ampliar tiempo de revisión auditado",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
       "Enviar a Aprobación por Jefe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
   },
 
@@ -480,33 +480,33 @@ export const accionesEjecucionPreliminar: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_JEFE]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_JEFE]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO]: [
       "Ver Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE]: [
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO]: [ 
       "Editar Preinforme",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -548,23 +548,23 @@ export const accionesEjecucionFinal: {
     [environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Ver Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Ver Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -573,16 +573,16 @@ export const accionesEjecucionFinal: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
   },
 
@@ -598,17 +598,17 @@ export const accionesEjecucionFinal: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Ver Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Ver Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -625,17 +625,17 @@ export const accionesEjecucionFinal: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Ver Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Ver Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
   },
@@ -652,17 +652,17 @@ export const accionesEjecucionFinal: {
     [environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE]: [
       "Editar Informe",
       "Ver Documentos del informe",
-      "Historial de Rechazos",
+      "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
   },

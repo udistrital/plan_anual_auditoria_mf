@@ -1,10 +1,10 @@
-<plantilla-modal [icono]="'history'" [titulo]="'Historial de Rechazos'" [descripcion]="'Rechazos del informe final'"
+<plantilla-modal [icono]="'history'" [titulo]="'Historial de Observaciones'" [descripcion]="'Observaciones del informe final'"
 [contenido]="contenidoDeModal" [footer]="footerDeModal"></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   <div class="d-flex align-items-center mb-3">
     <mat-icon color="primary">restore</mat-icon>
-    <h3 class="mx-2">Historial de rechazos</h3>
+    <h3 class="mx-2">Historial de observaciones</h3>
   </div>
 
   <!-- Skeleton mientras carga -->
@@ -70,7 +70,7 @@
         <mat-icon color="primary" style="font-size: 40px; width: 40px; height: 40px;">
           inbox
         </mat-icon>
-        <p class="mt-2 mb-0">No hay rechazos registrados.</p>
+        <p class="mt-2 mb-0">No hay observaciones registradas.</p>
       </div>
     }
   }
