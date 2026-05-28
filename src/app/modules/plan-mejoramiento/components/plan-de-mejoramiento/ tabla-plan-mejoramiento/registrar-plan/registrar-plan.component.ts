@@ -85,9 +85,25 @@ export class RegistrarPlanComponent implements OnInit {
       .subscribe({
         next: (res) => {
           if (res?.Data?.length > 0) {
-            this.planMejoramientoId = res.Data[0]._id;
-            this.fuenteSeleccionada = res.Data[0].fuente ?? null;
-            this.cargando = false;
+            const plan = res.Data[0];
+            this.planMejoramientoId = plan._id;
+            this.fuenteSeleccionada = plan.fuente ?? null;
+
+            if (!plan.fecha_apertura) {
+              // Cascarón creado automáticamente: completar fechas y registrar estado 7082
+              const fechaApertura = new Date();
+              this.planAuditoriaService
+                .put(`plan-mejoramiento/${plan._id}`, {
+                  fecha_apertura: fechaApertura.toISOString(),
+                  fecha_limite:   sumarDiasHabiles(fechaApertura, 8).toISOString(),
+                })
+                .subscribe({
+                  next: () => this.registrarEstadoInicial(plan._id),
+                  error: () => { this.cargando = false; }
+                });
+            } else {
+              this.cargando = false;
+            }
           } else {
             this.crearPlanMejoramiento();
           }
@@ -146,6 +162,7 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   guardar(): void {
+    this.guardarFuente();
     this.alertService.showSuccessAlert(
       'El plan de mejoramiento ha sido guardado.',
       'Guardado'
