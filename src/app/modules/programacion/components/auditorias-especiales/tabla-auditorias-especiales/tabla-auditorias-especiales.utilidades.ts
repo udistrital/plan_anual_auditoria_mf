@@ -43,6 +43,10 @@ export const tituloAuditoriaEspecial = (
 export const cronogramaAuditoriaEspecial = (
   auditoria: AuditoriaEspecialTablaRow,
 ): string => {
+  if (auditoria.esAuditoriaConcreta) {
+    return "";
+  }
+
   if (Array.isArray(auditoria.cronograma_nombre) && auditoria.cronograma_nombre.length > 0) {
     return auditoria.cronograma_nombre.join(", ");
   }

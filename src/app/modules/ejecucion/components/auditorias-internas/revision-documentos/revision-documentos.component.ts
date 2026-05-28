@@ -19,6 +19,7 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "s
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
+import { TercerosCrudService } from "src/app/core/services/terceros-crud.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 
 const configAuditado = {
@@ -79,6 +80,12 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   documentos: { base64: string; tipo_id: number }[] = [];
   opcionesDocumentos: { nombre: string; base64: string }[] = [];
   dependenciasPorId: Map<number, string> = new Map<number, string>();
+  dependenciaIds: number[] = [];
+  informeId: string | null = null;
+  informeData: any = null;
+  datosDependencias: any[] = [];
+  dependenciaYaDecidio = false;
+  dependenciaTieneObservaciones: boolean | null = null;
   rolesAprobacion: { [key: string]: any } = {
     [environment.ROL.JEFE]: configJefe,
     [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
@@ -100,6 +107,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     private readonly notificacionesService: NotificacionesService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly tercerosService: TercerosService,
+    private readonly tercerosCrudService: TercerosCrudService,
   ) { }
 
   ngOnInit(): void {
@@ -223,6 +231,12 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
   }
 
   preguntarAprobacion() {
+    const esAuditado = this.role === environment.ROL.JEFE_DEPENDENCIA || this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
+    if (esAuditado && this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) {
+      this.aceptarInformeAuditado();
+      return;
+    }
+
     const rolAprobacion = this.rolesAprobacion[this.role!];
     if (!rolAprobacion) return;
 
@@ -474,7 +488,158 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         this.estadoAuditoriaId = res.Data[0]?.estado_id ?? environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
         this.configurarRevisionSegunEstado();
         this.cargarDocumentos();
+        const esAuditado = this.role === environment.ROL.JEFE_DEPENDENCIA || this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
+        if (this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO && esAuditado) {
+          this.cargarDatosAuditado();
+        }
       });
+  }
+
+  private async cargarDatosAuditado(): Promise<void> {
+    try {
+      const personaId = await this.userService.getPersonaId();
+      if (!this.usuarioId) this.usuarioId = personaId;
+
+      const cargoId = this.role === environment.ROL.JEFE_DEPENDENCIA
+        ? environment.CARGO.JEFE_DEPENDENCIA_ID
+        : environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+
+      const vinculacionRes: any = await firstValueFrom(
+        this.tercerosCrudService.get(`vinculacion?query=TerceroPrincipalId:${personaId},Activo:true,CargoId:${cargoId}&fields=DependenciaId`)
+      );
+      this.dependenciaIds = (vinculacionRes ?? [])
+        .map((v: any) => v.DependenciaId)
+        .filter((id: any) => id != null);
+
+      const informeRes: any = await firstValueFrom(
+        this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
+      );
+      this.informeData = informeRes?.Data?.[0] ?? null;
+      this.informeId = this.informeData?._id ?? null;
+
+      const auditoriaRes: any = await firstValueFrom(
+        this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`)
+      );
+      this.datosDependencias = auditoriaRes?.Data?.datos_dependencias ?? [];
+
+      // Solo las dependencias del usuario que pertenecen a esta auditoría
+      const depAuditoriaIds: number[] = this.datosDependencias
+        .map((d: any) => d.dependencia_id)
+        .filter((id: any) => id != null);
+      this.dependenciaIds = this.dependenciaIds.filter(id => depAuditoriaIds.includes(id));
+
+      const decididas: number[] = this.informeData?.dependencias_decididas ?? [];
+      this.dependenciaYaDecidio = this.dependenciaIds.some(id => decididas.includes(id));
+
+      if (!this.dependenciaYaDecidio && this.informeId) {
+        const hallazgosRes: any = await firstValueFrom(
+          this.planAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}&limit=0`)
+        );
+        const hallazgos = hallazgosRes?.Data ?? [];
+        if (hallazgos.length) {
+          const ids = hallazgos.map((h: any) => h._id).join('|');
+          const obsRes: any = await firstValueFrom(
+            this.planAuditoriaService.get(`observacion?query=hallazgo_id__in:${ids},activo:true&limit=0`)
+          );
+          const todasObs: any[] = obsRes?.Data ?? [];
+          this.dependenciaTieneObservaciones = todasObs.some(obs => {
+            const depIds: number[] = Array.isArray(obs.dependencia_id) ? obs.dependencia_id : [obs.dependencia_id];
+            return depIds.some(id => this.dependenciaIds.includes(id));
+          });
+        } else {
+          this.dependenciaTieneObservaciones = false;
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar datos del auditado:', error);
+    }
+  }
+
+  private async aceptarInformeAuditado(): Promise<void> {
+    const confirmado = await this.alertService.showConfirmAlert("¿Está seguro(a) de aceptar el informe preliminar?");
+    if (!confirmado.value) return;
+
+    if (!this.informeId || !this.informeData) {
+      this.alertService.showErrorAlert("No se pudo cargar la información del informe.");
+      return;
+    }
+
+    const decididas: number[] = [...(this.informeData?.dependencias_decididas ?? [])];
+    for (const depId of this.dependenciaIds) {
+      if (!decididas.includes(depId)) decididas.push(depId);
+    }
+
+    try {
+      await firstValueFrom(
+        this.planAuditoriaService.put(`informe/${this.informeId}`, { ...this.informeData, dependencias_decididas: decididas })
+      );
+      this.informeData = { ...this.informeData, dependencias_decididas: decididas };
+    } catch {
+      this.alertService.showErrorAlert("Error al registrar la decisión.");
+      return;
+    }
+
+    const todasDecidieron = decididas.length >= this.datosDependencias.length && this.datosDependencias.length > 0;
+
+    if (!todasDecidieron) {
+      try {
+        await firstValueFrom(
+          this.planAuditoriaService.post('auditoria-estado', this.construirObjetoAuditoriaEstado(
+            environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO
+          ))
+        );
+        await firstValueFrom(
+          this.planAuditoriaService.post('auditoria-estado', this.construirObjetoAuditoriaEstado(
+            environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO
+          ))
+        );
+      } catch {
+        this.alertService.showErrorAlert("Error al registrar el estado.");
+        return;
+      }
+      this.alertService.showSuccessAlert("Decisión registrada. Esperando a las demás dependencias.", "Informe aceptado");
+      this.router.navigate([`/ejecucion/auditorias-internas/`]);
+      return;
+    }
+
+    // Todas decidieron: verificar si hay observaciones para el estado agregado
+    let tieneObservaciones = false;
+    try {
+      const hallazgosRes: any = await firstValueFrom(
+        this.planAuditoriaService.get(`hallazgo?query=informe_id:${this.informeId}&limit=0`)
+      );
+      const hallazgosIds = (hallazgosRes?.Data ?? []).map((h: any) => h._id);
+      if (hallazgosIds.length) {
+        const obsRes: any = await firstValueFrom(
+          this.planAuditoriaService.get(`observacion?query=hallazgo_id__in:${hallazgosIds.join('|')},activo:true&limit=1`)
+        );
+        tieneObservaciones = (obsRes?.Data?.length ?? 0) > 0;
+      }
+    } catch { }
+
+    const estadoAgregado = tieneObservaciones
+      ? environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO
+      : environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO;
+
+    try {
+      await firstValueFrom(
+        this.planAuditoriaService.post('auditoria-estado', this.construirObjetoAuditoriaEstado(estadoAgregado))
+      );
+      await firstValueFrom(
+        this.planAuditoriaService.post('auditoria-estado', this.construirObjetoAuditoriaEstado(
+          environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL
+        ))
+      );
+    } catch {
+      this.alertService.showErrorAlert("Error al registrar el estado de la auditoría.");
+      return;
+    }
+
+    const mensaje = tieneObservaciones
+      ? "El informe pasa a la etapa final. Existen observaciones de otras dependencias."
+      : "El informe fue aceptado. Pasando a la etapa de informe final.";
+    this.alertService.showSuccessAlert(mensaje, "Completado");
+    this.router.navigate([`/ejecucion/auditorias-internas/`]);
   }
 
   private configurarRevisionSegunEstado(): void {

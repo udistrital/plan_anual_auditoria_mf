@@ -50,7 +50,7 @@ export const planMejoramientoConstructorTabla = [
   {
     columnDef: "estado",
     header: "Estado",
-    cell: (plan: any) => plan.estado_nombre ?? plan.estado?.estado_nombre,
+    cell: (plan: any) => plan.estadoPlanNombre,
     sortable: true,
   },
   {

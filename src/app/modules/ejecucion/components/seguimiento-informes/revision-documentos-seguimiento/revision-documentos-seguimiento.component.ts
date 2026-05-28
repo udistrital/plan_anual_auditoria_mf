@@ -26,10 +26,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   role: string | null = null;
   usuarioId: any;
   documentos: { base64: string; tipo_id: number }[] = [];
-  opcionesDocumentos: { nombre: string; base64: string }[] = [
-    { nombre: "Informe final", base64: "" },
-    { nombre: "Oficio Anuncio Solicitud Información", base64: "" }
-  ];
+  opcionesDocumentos: { nombre: string; base64: string }[] = [];
   rolesAprobacion: { [key: string]: any } = {
     [environment.ROL.JEFE]: {
       estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE],
@@ -77,10 +74,12 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   cargarDocumentos() {
-    const tipoDocumentoIndiceMap: { [key: number]: number } = {
-      [environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL]: 0,
-      [environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION]: 1,
-    };
+    this.documentos = [];
+    this.opcionesDocumentos = [];
+
+    let docInformeFinal = '';
+    let docSolicitudInformacion = '';
+    let docCompromisoEtnico = '';
 
     this.referenciaPdfService
       .consultarDocumentos(this.auditoriaId)
@@ -89,13 +88,32 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
           const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
           this.documentos.push({ base64, tipo_id: documento.tipo_id });
 
-          const indice = tipoDocumentoIndiceMap[documento.tipo_id];
-          if (indice !== undefined) {
-            this.opcionesDocumentos[indice] = { ...this.opcionesDocumentos[indice], base64 };
+          switch (documento.tipo_id) {
+            case environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL:
+              docInformeFinal = base64;
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO:
+              docCompromisoEtnico = base64;
+              break;
+            case environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION:
+              docSolicitudInformacion = base64;
+              break;
           }
         });
 
         await Promise.all(promesas);
+
+        const opciones = [
+          { nombre: 'Informe Final', base64: docInformeFinal },
+          { nombre: 'Oficio Anuncio Solicitud Información', base64: docSolicitudInformacion },
+          { nombre: 'Compromiso Ético', base64: docCompromisoEtnico },
+        ];
+
+        this.opcionesDocumentos = opciones.filter(doc => !!doc.base64);
+
+        if (this.selectedTab >= this.opcionesDocumentos.length) {
+          this.selectedTab = 0;
+        }
       });
   }
 

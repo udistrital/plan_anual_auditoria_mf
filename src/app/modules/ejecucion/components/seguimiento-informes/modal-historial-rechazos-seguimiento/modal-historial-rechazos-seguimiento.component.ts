@@ -24,16 +24,21 @@ export class ModalHistorialRechazosSeguimientoComponent implements OnInit {
 
   cargarRechazos() {
     const { auditoriaId } = this.data;
-    const estadoRechazadoJefe =
-      environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE;
+    const estadoRechazadoJefe = environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE;
 
     this.planAuditoriaMid
       .get(
         `auditoria-estado?query=auditoria_id:${auditoriaId},estado_id:${estadoRechazadoJefe},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
       )
-      .subscribe((res) => {
-        this.rechazos = res.Data ?? [];
-        this.cargando = false;
+      .subscribe({
+        next: (res) => {
+          this.rechazos = res?.Data ?? [];
+          this.cargando = false;
+        },
+        error: () => {
+          this.rechazos = [];
+          this.cargando = false;
+        },
       });
   }
 }

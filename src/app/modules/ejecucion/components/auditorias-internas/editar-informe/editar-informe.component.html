@@ -243,7 +243,7 @@
                   [puedeEscribirObservacionAuditor]="puedeEscribirObservacionAuditor"
                   [usuarioId]="usuarioId"
                   [usuarioRol]="usuarioRol"
-                  [dependenciaIds]="dependenciaIds"
+                  [dependenciaIds]="dependenciaIdsEnAuditoria"
                   [fechaFinRevision]="informeData?.fecha_fin_revision"
                   (datosModificados)="cargarTemasYHallazgos()">
                 </app-revision-preinforme>
@@ -256,7 +256,7 @@
                       Terminar observaciones
                     </button>
                   }
-                  @if (!puedeTerminarObservaciones) {
+                  @if (!puedeTerminarObservaciones && puedeEscribirObservacionAuditor) {
                     <button mat-flat-button color="primary" class="mx-2" matStepperNext type="button">
                       Continuar
                     </button>

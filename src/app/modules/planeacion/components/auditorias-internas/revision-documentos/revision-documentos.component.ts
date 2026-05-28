@@ -54,6 +54,7 @@ interface DocumentoRevisionItem {
 })
 export class RevisionDocumentosComponent implements OnInit {
   auditoriaId: string = "";
+  consecutivoOci: string = "";
   estadoAuditoriaId!: number;
   selectedTab: number = 0;
   documentosVisibles: DocumentoRevisionItem[] = [];
@@ -90,6 +91,7 @@ export class RevisionDocumentosComponent implements OnInit {
   ngOnInit(): void {
     this.inicializarDatos();
     this.cargarEstadoAuditoria();
+    this.cargarConsecutivoOci();
   }
 
   inicializarDatos() {
@@ -112,6 +114,12 @@ export class RevisionDocumentosComponent implements OnInit {
           res.Data[0]?.estado_id ??
           environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID;
       });
+  }
+
+  cargarConsecutivoOci() {
+    this.planAuditoriaService
+      .get(`auditoria/${this.auditoriaId}`)
+      .subscribe((res) => { this.consecutivoOci = res.Data?.consecutivo_OCI ?? ""; });
   }
 
   verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
@@ -326,6 +334,8 @@ export class RevisionDocumentosComponent implements OnInit {
 
         return {
           nombre: `Carta de representación ${dependenciaNombre}`,
+          nombreDescarga: "carta-representación",
+          presufijo: dependenciaNombre,
           tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           documentoId: documento._id,
           botones: [{
@@ -366,6 +376,8 @@ export class RevisionDocumentosComponent implements OnInit {
           descripcion:
             "Revise y cargue la carta de representación firmada para cada dependencia.",
           tabs,
+          sufijo: `oci-${this.consecutivoOci}`,
+          nombreArchivoDescarga: "cartas-representación",
           tipo: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           textoBotonCerrar: "Cerrar",
           accionesFooter: [
@@ -587,9 +599,12 @@ export class RevisionDocumentosComponent implements OnInit {
           fileName: documento.nombreArchivo,
         }));
 
+      const sufijo = this.consecutivoOci ? `oci-${this.consecutivoOci}` : "";
+      const sufijoNombre = sufijo ? `-${sufijo}` : "";
       await this.descargaService.descargarMultiplesArchivos(
         documentosDescarga,
-        "documentosAuditoria.zip"
+        `documentosAuditoria${sufijoNombre}.zip`,
+        sufijo,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);

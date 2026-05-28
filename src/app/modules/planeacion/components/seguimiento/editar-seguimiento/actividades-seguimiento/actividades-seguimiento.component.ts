@@ -8,6 +8,8 @@ import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anua
 import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-actividad.component'
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
+import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
 
 @Component({
@@ -44,7 +46,8 @@ export class ActividadesSeguimientoComponent implements OnInit {
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertaService: AlertService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
-    
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService,
   ) { }
 
   resetComponent() {
@@ -196,4 +199,22 @@ export class ActividadesSeguimientoComponent implements OnInit {
       this.listaractividades()
     });
   }
+
+  // Descarga la plantilla de cargue masivo de actividades desde el gestor documental.
+    async descargarPlantilla(): Promise<void> {
+      try {
+        const base64 = await this.nuxeoService.obtenerPorUUID(
+          environment.PLANTILLA_CARGUE_MASIVO_ACTIVIDADES
+        );
+        await this.descargaService.descargarArchivo(
+          base64,
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'plantilla_actividades'
+        );
+      } catch (error) {
+        console.error('Error al descargar la plantilla de actividades:', error);
+        this.alertaService.showErrorAlert('Error al descargar la plantilla');
+      }
+    }
+  
 }
