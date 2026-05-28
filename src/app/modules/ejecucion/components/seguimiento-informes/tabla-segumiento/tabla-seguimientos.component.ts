@@ -80,7 +80,18 @@ export class TablaSeguimientosComponent implements OnInit {
     offset: number = 0
   ) {
     this.auditoriasPorVigencia = [];
-    const url = `auditoria?query=vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.SEGUIMIENTO_ID},estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}&limit=${limit}&offset=${offset}`;
+
+    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
+    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
+    
+    let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}`;
+    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
+    queryParams += `,activo:true`;
+    queryParams += `&limit=${limit}`
+    queryParams += `&offset=${offset}`;
+
+    const url = `auditoria?${queryParams}`;
 
     this.planAuditoriaMid.get(url).subscribe((res) => {
       const auditorias: any[] = res.Data.map((auditoria: any) => {
