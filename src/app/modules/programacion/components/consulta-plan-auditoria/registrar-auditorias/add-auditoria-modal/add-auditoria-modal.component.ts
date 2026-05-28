@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { catchError, map, of } from "rxjs";
 import { OikosService } from "src/app/core/services/oikos.service";
@@ -11,12 +11,13 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-add-auditoria-modal",
-  templateUrl: "./add-auditoria-modal.component.html",
-  styleUrls: ["./add-auditoria-modal.component.css"], 
+    selector: "app-add-auditoria-modal",
+    templateUrl: "./add-auditoria-modal.component.html",
+    styleUrls: ["./add-auditoria-modal.component.css"],
+    standalone: false
 })
 export class AddAuditoriaModalComponent implements OnInit {
-  auditoriaForm: FormGroup | any;
+  auditoriaForm: FormGroup;
   evaluaciones: Parametro[] = [];
   meses: Parametro[] = [];
   macroprocesos: Parametro[] = [];
@@ -27,11 +28,11 @@ export class AddAuditoriaModalComponent implements OnInit {
   TODOS = "Todos";
 
   constructor(
-    private alertaService: AlertService,
-    private fb: FormBuilder,
-    private parametrosService: ParametrosService,
-    private oikosService: OikosService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly parametrosService: ParametrosService,
+    private readonly oikosService: OikosService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     public dialogRef: MatDialogRef<AddAuditoriaModalComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
@@ -42,40 +43,45 @@ export class AddAuditoriaModalComponent implements OnInit {
       isEditExtraordinario: boolean;
       auditoria?: Auditoria
     }
-  ) {}
-
-  ngOnInit(): void {
-    this.isEditMode = !!this.data.auditoria;
+  ) {
     this.auditoriaForm = this.fb.group({
       tituloActividad: [
-        this.data.auditoria?.auditoria || "",
+        this.data.auditoria?.auditoria ?? '',
         Validators.required,
       ],
       tipoEvaluacion: [
-        this.data.auditoria?.tipoEvaluacionId || [],
+        this.data.auditoria?.tipoEvaluacionId ?? [],
         Validators.required,
       ],
       macroprocesos: [
-        this.data.auditoria?.macroprocesosId || [],
+        this.data.auditoria?.macroprocesosId ?? [],
         Validators.required,
       ],
       procesos: [
-        this.data.auditoria?.procesosId || [],
+        this.data.auditoria?.procesosId ?? [],
         Validators.required,
       ],
       dependencias: [
-        this.data.auditoria?.dependenciasId || [],
+        this.data.auditoria?.dependenciasId ?? [],
         Validators.required,
       ],
       cronogramaActividades: [
-        this.data.auditoria?.cronogramaId || [],
+        this.data.auditoria?.cronogramaId ?? [],
         Validators.required,
       ],
       cantidadAuditorias: [
-        this.data.auditoria?.cantidadAuditorias || [],
+        this.data.auditoria?.cantidadAuditorias ?? [],
         Validators.required,
       ]
     });
+  }
+
+  getControl(nombre: string): FormControl {
+    return this.auditoriaForm.get(nombre) as FormControl;
+  }
+
+  ngOnInit(): void {
+    this.isEditMode = !!this.data.auditoria;
 
     console.debug("Datos recibidos para edición:", this.data.auditoria);
     console.debug("Valor inicial del formulario:", this.auditoriaForm.value);
@@ -88,13 +94,13 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.inicializarCantidadAuditorias();
 
     // When the macroproceso changes, clear the proceso selection and reload procesos.
-    this.auditoriaForm.get("macroprocesos").valueChanges.subscribe(() => {
+    this.auditoriaForm.get("macroprocesos")?.valueChanges.subscribe(() => {
       this.cargarProcesos(this.actualizarProcesosSeleccionados.bind(this));
     });
   }
 
   actualizarProcesosSeleccionados(): void {
-    const procesosActuales = this.auditoriaForm.get("procesos").value || [];
+    const procesosActuales = this.auditoriaForm.get("procesos")?.value ?? [];
     const procesosFiltrados = procesosActuales.filter((procesoId: number) =>
       this.procesos.some((proceso) => proceso.Id === procesoId)
     );
@@ -122,7 +128,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${meses_id}&limit=0`)
       .subscribe((res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.meses = res.Data;
           if (callback) callback();
         }
@@ -138,7 +144,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${tipo_evaluacion_id}&limit=0`)
       .subscribe((res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.evaluaciones = res.Data;
           if (callback) callback();
         }
@@ -155,7 +161,7 @@ export class AddAuditoriaModalComponent implements OnInit {
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${macroprocesos_id}&limit=0`)
       .subscribe((res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.macroprocesos = res.Data;
           if (callback) callback();
         }
@@ -168,13 +174,13 @@ export class AddAuditoriaModalComponent implements OnInit {
    * @param callback Optional callback function to execute after loading procesos
    */
   cargarProcesos(callback?: () => void) {
-    const macroprocesosId = this.auditoriaForm.get("macroprocesos").value;
+    const macroprocesosId = this.auditoriaForm.get("macroprocesos")?.value;
     const macroprocesosIdBarSeparated = Array.isArray(macroprocesosId) ? macroprocesosId.join("|") : macroprocesosId;
     const procesos_id = environment.INFO_AUDITORIA.TIPOS_PROCESO.VALORES.PROCESO.TIPO_PARAMETRO_ID;
     this.parametrosService
       .get(`parametro?query=TipoParametroId:${procesos_id},ParametroPadreId__in:${macroprocesosIdBarSeparated}&limit=0`)
       .pipe(
-        map((res: any) => res && res.Data ? res.Data : []),
+        map((res: any) => res?.Data),
         catchError(() => of([])),
       )
       .subscribe((data: Parametro[]) => {
@@ -196,20 +202,19 @@ export class AddAuditoriaModalComponent implements OnInit {
 
   asignarTodos(): void {
     const seleccion = [this.TODOS];
-    this.auditoriaForm.get("cronogramaActividades").setValue(seleccion);
+    this.auditoriaForm.get("cronogramaActividades")?.setValue(seleccion);
   }
 
   cambioMes(): void {
-    const seleccionados = this.auditoriaForm.get("cronogramaActividades").value;
+    const seleccionados = this.auditoriaForm.get("cronogramaActividades")?.value;
 
     if (seleccionados.includes(this.TODOS) && seleccionados.length > 1) {
       this.auditoriaForm
-        .get("cronogramaActividades")
-        .setValue(seleccionados.filter((mes: string) => mes !== this.TODOS));
+        .get("cronogramaActividades")?.setValue(seleccionados.filter((mes: string) => mes !== this.TODOS));
     }
 
     if (seleccionados.length === 0) {
-      this.auditoriaForm.get("cronogramaActividades").setValue([this.TODOS]);
+      this.auditoriaForm.get("cronogramaActividades")?.setValue([this.TODOS]);
     }
   }
 

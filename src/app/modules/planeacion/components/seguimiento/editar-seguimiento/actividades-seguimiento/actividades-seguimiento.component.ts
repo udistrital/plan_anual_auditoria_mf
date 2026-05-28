@@ -8,17 +8,21 @@ import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anua
 import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-actividad.component'
+import { NuxeoService } from "src/app/core/services/nuxeo.service";
+import { DescargaService } from "src/app/shared/services/descarga.service";
+import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-actividades-seguimiento",
-  templateUrl: "./actividades-seguimiento.component.html",
-  styleUrls: ["./actividades-seguimiento.component.css"],
+    selector: "app-actividades-seguimiento",
+    templateUrl: "./actividades-seguimiento.component.html",
+    styleUrls: ["./actividades-seguimiento.component.css"],
+    standalone: false
 })
 export class ActividadesSeguimientoComponent implements OnInit {
   @Input() idAuditoria!: string;
   @Input() soloLectura: boolean = false;
-  @Input() minFechaStr?: String;
-  @Input() maxFechaStr?: String;
+  @Input() minFechaStr?: string;
+  @Input() maxFechaStr?: string;
   datos = new MatTableDataSource<any>([]);
   
   columnsToDisplay: string[] = [
@@ -36,14 +40,18 @@ export class ActividadesSeguimientoComponent implements OnInit {
   ];
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService:PlanAnualAuditoriaService,
-    
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService,
   ) { }
 
-  resetComponent() { }
+  resetComponent() {
+    console.log("Reseteando componente de actividades de seguimiento");
+  }
+  
   onStepLeave() {
     this.resetComponent();
   }
@@ -55,7 +63,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
    }
 
   subirArchivo(tipoArchivo: string): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "600px",
       data: { tipoArchivo },
     });
@@ -66,7 +74,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
       .subscribe((res) => {
         const actividades: any[] = res.Data;
 
-        if (!(actividades.length > 0)) {
+        if (actividades.length === 0) {
           return this.alertaService.showAlert(
             "No hay actividades registradas",
             "Actualmente no hay actividades registradas para la vigencia seleccionada."
@@ -142,4 +150,22 @@ export class ActividadesSeguimientoComponent implements OnInit {
       this.listaractividades()
     });
   }
+
+  // Descarga la plantilla de cargue masivo de actividades desde el gestor documental.
+    async descargarPlantilla(): Promise<void> {
+      try {
+        const base64 = await this.nuxeoService.obtenerPorUUID(
+          environment.PLANTILLA_CARGUE_MASIVO_ACTIVIDADES
+        );
+        await this.descargaService.descargarArchivo(
+          base64,
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'plantilla_actividades'
+        );
+      } catch (error) {
+        console.error('Error al descargar la plantilla de actividades:', error);
+        this.alertaService.showErrorAlert('Error al descargar la plantilla');
+      }
+    }
+  
 }

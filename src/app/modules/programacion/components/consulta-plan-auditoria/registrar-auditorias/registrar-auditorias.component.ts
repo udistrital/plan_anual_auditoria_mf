@@ -26,9 +26,10 @@ import { UserService } from "src/app/core/services/user.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 
 @Component({
-  selector: "app-registrar-auditorias",
-  templateUrl: "./registrar-auditorias.component.html",
-  styleUrls: ["./registrar-auditorias.component.css"],
+    selector: "app-registrar-auditorias",
+    templateUrl: "./registrar-auditorias.component.html",
+    styleUrls: ["./registrar-auditorias.component.css"],
+    standalone: false
 })
 export class RegistrarAuditoriasComponent implements OnInit {
   displayedColumns: string[] = [
@@ -62,27 +63,27 @@ export class RegistrarAuditoriasComponent implements OnInit {
   vigenciaNombre: string = "";
 
   constructor(
-    private alertaService: AlertService,
-    private route: ActivatedRoute,
-    private dialog: MatDialog,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private nuxeoService: NuxeoService,
-    private descargaService: DescargaService,
-    private router: Router,
-    private spinnerService: SpinnerService,
-    private rolService: RolService,
-    private userService: UserService,
-    private documentoUtils: DocumentoUtils,
-    private referenciaPdfService: ReferenciaPdfService,
+    private readonly alertaService: AlertService,
+    private readonly route: ActivatedRoute,
+    private readonly dialog: MatDialog,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService,
+    private readonly router: Router,
+    private readonly spinnerService: SpinnerService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly documentoUtils: DocumentoUtils,
+    private readonly referenciaPdfService: ReferenciaPdfService,
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.modoEditarExtraordinario = Boolean(localStorage.getItem('extra-edit'));
-    const vigencia = JSON.parse(localStorage.getItem('vigencia') || '{}');
-    this.vigenciaId = vigencia?.Id || 0;
-    this.vigenciaNombre = vigencia?.Nombre || '';
+    const vigencia = JSON.parse(localStorage.getItem('vigencia') ?? '{}');
+    this.vigenciaId = vigencia?.Id ?? 0;
+    this.vigenciaNombre = vigencia?.Nombre ?? '';
     localStorage.removeItem('vigencia');
     localStorage.removeItem('extra-edit');
     await this.obtenerEstadoActual();
@@ -111,7 +112,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
 
     this.PlanAnualAuditoriaMid.get(url).subscribe(
       (res) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           this.dataSource.data = res.Data.map((item: AuditoriaModel): Partial<Auditoria> => {
             return {
               id: item._id ?? "",
@@ -172,7 +173,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         .get(`estado?query=plan_auditoria_id:${this.id},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
-      this.estadoIdActual = estadoActual?.estado_id || null;
+      this.estadoIdActual = estadoActual?.estado_id ?? null;
 
       // Si no hay estado, asumir que está en borrador
       if (this.estadoIdActual === null) {
@@ -227,7 +228,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         )
         .pipe(
           map((res: any) => {
-            if (!res || !res.base64)
+            if (!res?.base64)
               throw new Error("Respuesta inválida del servidor: base64 no encontrado");
 
             return res.base64;
@@ -259,7 +260,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
         )
         .pipe(
           map((res: any) => {
-            if (!res || !res.base64)
+            if (!res?.base64)
               throw new Error("Respuesta inválida del servidor: base64 no encontrado");
 
             return res.base64;
@@ -411,7 +412,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
     this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}?auditoria-padre=true`)
       .subscribe({
         next: (res) => {
-          if (res && res.Data) {
+          if (res?.Data) {
             const base64 = res.Data;
 
             const payload = {
@@ -607,7 +608,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   renderizar() {
     this.PlanAnualAuditoriaMid.get(`plantilla/${this.id}?auditoria-padre=true`).subscribe(
       (res) => {
-        if (res && res.Data) {
+        if (res?.Data) {
           this.dialog.open(ModalPdfVisualizadorComponent, {
             data: {
               base64Document: res.Data,
@@ -647,13 +648,13 @@ export class RegistrarAuditoriasComponent implements OnInit {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.id},referencia_tipo:Plan Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.MATRIZ_FUNCION_PUBLICA},activo:true&fields=nuxeo_enlace`)
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+            if (res?.Data?.length > 0) {
               resolve(res.Data[0].nuxeo_enlace); // Tomar el primer valor
             } else {
               resolve(null);
             }
           },
-          (error) => {
+          (error: Error) => {
             console.error("Error al buscar Matriz", error);
             this.alertaService.showErrorAlert("Error al buscar Matriz");
             reject(error);

@@ -14,7 +14,6 @@ export interface Selectable {
 @Component({
     selector: 'app-search-selection',
     templateUrl: './search-selection.component.html',
-    styleUrls: ['./search-selection.component.css'],
     standalone: false
 })
 export class SearchSelectionComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {

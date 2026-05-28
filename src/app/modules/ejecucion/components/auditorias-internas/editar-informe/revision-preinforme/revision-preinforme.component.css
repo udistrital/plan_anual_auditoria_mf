@@ -142,11 +142,6 @@
   color: #c62828;
 }
 
-/* .observaciones {
-  display: flex;
-  flex-direction: column;
-} */
-
 .obs-header {
   display: flex;
   align-items: center;

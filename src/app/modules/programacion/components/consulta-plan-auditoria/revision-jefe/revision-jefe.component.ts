@@ -16,15 +16,15 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "s
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
-import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { RolService } from "src/app/core/services/rol.service";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
-  selector: "app-revision-jefe",
-  templateUrl: "./revision-jefe.component.html",
-  styleUrls: ["./revision-jefe.component.css"],
+    selector: "app-revision-jefe",
+    templateUrl: "./revision-jefe.component.html",
+    styleUrls: ["./revision-jefe.component.css"],
+    standalone: false
 })
 export class RevisionJefeComponent implements OnInit {
   selectedTab: number = 0;
@@ -40,26 +40,26 @@ export class RevisionJefeComponent implements OnInit {
   vigenciaNombre: string = "";
 
   constructor(
-    private route: ActivatedRoute,
-    public dialog: MatDialog,
-    private alertService: AlertService,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private nuxeoService: NuxeoService,
-    private userService: UserService,
-    private router: Router,
-    private descargaService: DescargaService,
-    private tercerosService: TercerosService,
-    private notificacionesService: NotificacionesService,
-    private notificacionRegistroCrudService: NotificacionRegistroCrudService,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private rolService: RolService,
-    private documentoUtils: DocumentoUtils,
+    private readonly route: ActivatedRoute,
+    public readonly dialog: MatDialog,
+    private readonly alertService: AlertService,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly userService: UserService,
+    private readonly router: Router,
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService,
+    private readonly notificacionesService: NotificacionesService,
+    private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly rolService: RolService,
+    private readonly documentoUtils: DocumentoUtils,
   ) {}
 
   async ngOnInit() {
     console.debug("Inicializando RevisionJefeComponent...");
-    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") ?? '';
     this.roles = this.rolService.getRoles();
     this.obtenerVigenciaActual();
     this.obtenerEstadoActual();
@@ -83,9 +83,9 @@ export class RevisionJefeComponent implements OnInit {
         console.debug("Vigencias obtenidas:", vigencias);
         const vigenciaId = plan?.Data?.vigencia_id;
         console.debug("Vigencia ID obtenida del plan:", vigenciaId);
-        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre ?? '';
         console.debug("Vigencia Nombre encontrada:", vigenciaNombre);
-        this.vigenciaNombre = vigenciaNombre || "";
+        this.vigenciaNombre = vigenciaNombre ?? '';
       },
       error: (error) => {
         console.error("Error al obtener la vigencia:", error);
@@ -103,11 +103,11 @@ export class RevisionJefeComponent implements OnInit {
       .subscribe({
         next: (response: any) => {
           const estadoActual = response?.Data?.[0];
-          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.estadoIdActual = estadoActual?.estado_id ?? null;
           this.mostrarBotones =
             this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_JEFE_ID;
 
-          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual ?? 0, this.roles, callbacks);
         },
         error: (error) => {
           console.error("Error al obtener el estado actual:", error);
@@ -328,10 +328,10 @@ export class RevisionJefeComponent implements OnInit {
 
   async descargarTodo() {
     try {
-      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      const suffix = this.vigenciaNombre ? `${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        `documentosPAA${suffix}.zip`,
+        `documentosPAA-${suffix}.zip`,
         suffix
       );
     } catch (error) {

@@ -19,7 +19,7 @@ export interface Parametro {
 export class ParametrosUtilsService {
 
   constructor(
-    private parametrosService: ParametrosService
+    private readonly parametrosService: ParametrosService
   ) {}
 
   /**
@@ -27,14 +27,12 @@ export class ParametrosUtilsService {
    * @returns {Observable<any[]>} Observable con el arreglo de vigencias.
    */
    public getVigencias(): Observable<any[]> {
-    environment.VIGENCIAS.TIPO_PARAMETRO_ID
-
     const endpoint = `parametro?query=TipoParametroId:${environment.VIGENCIAS.TIPO_PARAMETRO_ID},Activo:true&fields=Id,Nombre&limit=0&sortby=nombre&order=desc`;
     
     return this.parametrosService.get(endpoint).pipe(
       map((res: any) => {
         // Validamos que la respuesta contenga Data
-        if (res && res.Data) {
+        if (res?.Data) {
           return res.Data;
         }
         return [];
@@ -42,6 +40,54 @@ export class ParametrosUtilsService {
       catchError(err => {
         console.error("Error cargando vigencias:", err);
         return throwError(() => new Error("No se pudieron cargar las vigencias"));
+      })
+    );
+  }
+
+  /**
+   * Obtiene estados de auditoría filtrados por un rango de IDs.
+   *
+   * @param desdeId ID inicial del rango
+   * @param hastaId ID final del rango
+   * @returns Observable con los estados encontrados
+   */
+  public getEstadosAuditoria(
+    desdeId?: number,
+    hastaId?: number
+  ): Observable<Parametro[]> {
+
+    let query = "TipoParametroId:159,Activo:true";
+
+    // Agregar filtros por rango si existen
+    if (desdeId !== undefined) {
+      query += `,Id__gte:${desdeId}`;
+    }
+
+    if (hastaId !== undefined) {
+      query += `,Id__lte:${hastaId}`;
+    }
+
+    const endpoint =
+      `parametro?query=${query}&fields=Id,Nombre&limit=0&sortby=Id&order=asc`;
+
+    return this.parametrosService.get(endpoint).pipe(
+      map((res: any) => {
+        if (res?.Data) {
+          return res.Data.map((estado: any) => ({
+            Id: estado.Id,
+            Nombre: estado.Nombre,
+          }));
+        }
+
+        return [];
+      }),
+
+      catchError((err) => {
+        console.error("Error cargando estados de auditoría:", err);
+
+        return throwError(
+          () => new Error("No se pudieron cargar los estados de auditoría")
+        );
       })
     );
   }

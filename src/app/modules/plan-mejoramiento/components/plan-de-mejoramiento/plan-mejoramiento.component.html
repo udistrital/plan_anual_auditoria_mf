@@ -2,7 +2,7 @@
   [title]="'Plan de Mejoramiento'"
   [breadcrumb]="'<p>Gestión de Planes / <b>Plan de Mejoramiento</b></p>'"
   [contenido]="contenidoDePlantilla"
->
+  >
 </plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -19,11 +19,13 @@
               formControlName="vigencia"
               (selectionChange)="onVigenciaChange($event.value)"
               color="primary"
-            >
+              >
               <mat-option disabled value="">--Seleccionar--</mat-option>
-              <mat-option *ngFor="let vigencia of vigencias" [value]="vigencia">
-                {{ vigencia.Nombre }}
-              </mat-option>
+              @for (vigencia of vigencias; track vigencia) {
+                <mat-option [value]="vigencia">
+                  {{ vigencia.Nombre }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 
@@ -42,11 +44,13 @@
               formControlName="tipoEvaluacion"
               (selectionChange)="onTipoEvaluacionChange($event.value)"
               color="primary"
-            >
+              >
               <mat-option disabled value="">--Seleccionar--</mat-option>
-              <mat-option *ngFor="let tipo of tiposEvaluacion" [value]="tipo">
-                {{ tipo.Nombre }}
-              </mat-option>
+              @for (tipo of tiposEvaluacion; track tipo) {
+                <mat-option [value]="tipo">
+                  {{ tipo.Nombre }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 
@@ -62,7 +66,6 @@
         [vigenciaId]="vigenciaSeleccionada"
         [tipoEvaluacionId]="tipoEvaluacionSeleccionado"
         [role]="role"
-        [personaId]="personaId"
         [accionesPermitidas]="accionesPermitidas"
       ></app-tabla-plan-mejoramiento>
     </div>

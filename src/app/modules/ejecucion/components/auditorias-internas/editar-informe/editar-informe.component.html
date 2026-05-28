@@ -1,296 +1,353 @@
-<plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="
-    '<p>Gestión Auditoría / Ejecución / <b>Auditorías Internas</b> </p>'
-  " [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()"
-  [mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
+<plantilla-tarjeta-contenedora
+  [title]="(soloLectura && pasosInicialesSoloLectura && bloqueadoEnRevision) ? 'Ver Informe' : 'Editar Informe'"
+  [subtitle]="auditoria?.vigencia_nombre || ''"
+  [subtitleChild]="(auditoria?.titulo || '') + (auditoria?.subtitulo ? ' - ' + auditoria?.subtitulo : '')"
+  [breadcrumb]="
+    (soloLectura && pasosInicialesSoloLectura && bloqueadoEnRevision)
+      ? '<p>Gestión Auditoría / Ejecución / Auditorías Internas / <b>Ver Informe</b></p>'
+      : '<p>Gestión Auditoría / Ejecución / Auditorías Internas / <b>Editar Informe</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row" [class.modo-lectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision">
     <div class="col-12">
       <div [class.steps-bloqueados]="!pasosInicialesSoloLectura && !esRevisionPreinformeAuditado"
-           [class.steps-bloqueados-con-revision]="!pasosInicialesSoloLectura && esRevisionPreinformeAuditado">
-      <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
-        <ng-template matStepperIcon="number">
-          <mat-icon>lens</mat-icon>
-        </ng-template>
-        <!-- Paso 1: Información -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 1</p>
-            <b style="color: var(--primary)">Información</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>assignment</mat-icon>
-            </div>
-            <div class="mx-3">
-              <h2>Información</h2>
-              Informacion general de la Auditoría
-            </div>
+        [class.steps-bloqueados-con-revision]="!pasosInicialesSoloLectura && esRevisionPreinformeAuditado">
+        @if (informeData?.fecha_fin_revision && esRevisionPreinformeAuditado) {
+          <div class="fecha-revision mb-3">
+            <mat-icon>schedule</mat-icon>
+            <span>Fecha límite de revisión del auditado: <strong>{{ fechaFinRevisionFormateada }}</strong></span>
           </div>
-          <div *ngIf="formInformacion != null" class="mt-4">
-            <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
-              (submitFormulario)="preguntarGuardadoInformacion($event)">
-            </app-formulario-dinamico>
+        }
+        <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
+          <ng-template matStepperIcon="number">
+            <mat-icon>lens</mat-icon>
+          </ng-template>
+          <!-- Paso 1: Información -->
+          <mat-step [completed]="true">
+            <ng-template matStepLabel>
+              <p>Paso 1</p>
+              <b style="color: var(--primary)">Información</b>
+            </ng-template>
             <div class="d-flex align-items-center fondo-acento-50 my-3">
               <div>
                 <mat-icon>assignment</mat-icon>
               </div>
               <div class="mx-3">
-                <h2>Dependencias</h2>
-                Informacion de las dependencias
+                <h2>Información</h2>
+                Informacion general de la Auditoría
               </div>
             </div>
-            <mat-accordion *ngIf="auditoria" multi="true">
-              <mat-expansion-panel *ngFor="let dep of auditoria.datos_dependencias">
-                <mat-expansion-panel-header>
-                  <mat-panel-title>
-                    {{ dep.dependencia_nombre }}
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="p-3">
-                  <app-formulario-dinamico
-                    #formularioDependenciasComp
-                    [formulario]="formularioDependencias"
-                  >
-                  </app-formulario-dinamico>
+            @if (formInformacion != null) {
+              <div class="mt-4">
+                <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
+                  (submitFormulario)="guardarInformacion($event)">
+                </app-formulario-dinamico>
+                <div class="d-flex align-items-center fondo-acento-50 my-3">
+                  <div>
+                    <mat-icon>assignment</mat-icon>
+                  </div>
+                  <div class="mx-3">
+                    <h2>Dependencias</h2>
+                    Informacion de las dependencias
+                  </div>
                 </div>
-              </mat-expansion-panel>
-            </mat-accordion>
-            <div class="d-flex justify-content-end mt-4">
-              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-raised-button color="primary" (click)="enviarFormInformacion()">
-                Guardar y continuar
-              </button>
-              <button *ngIf="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" mat-raised-button color="primary" matStepperNext>
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
+                @if (auditoria) {
+                  <mat-accordion multi="true">
+                    @for (dep of auditoria.datos_dependencias; track dep) {
+                      <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                          <mat-panel-title>
+                            {{ dep.dependencia_nombre }}
+                          </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="p-3">
+                          <app-formulario-dinamico
+                            #formularioDependenciasComp
+                            [formulario]="formularioDependencias"
+                            >
+                          </app-formulario-dinamico>
+                        </div>
+                      </mat-expansion-panel>
+                    }
+                  </mat-accordion>
+                }
+                <div class="d-flex justify-content-end mt-4">
+                  @if (!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision) {
+                    <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+                      Guardar y continuar
+                    </button>
+                  }
+                  @if (pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision) {
+                    <button mat-raised-button color="primary" matStepperNext>
+                      Continuar
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </mat-step>
 
-        <!-- Paso 2: Aspectos Generales -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 2</p>
-            <b style="color: var(--primary)">Aspectos Generales</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>assessment</mat-icon>
+          <!-- Paso 2: Aspectos Generales -->
+          <mat-step [completed]="true">
+            <ng-template matStepLabel>
+              <p>Paso 2</p>
+              <b style="color: var(--primary)">Aspectos Generales</b>
+            </ng-template>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>assessment</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Aspectos Generales</h2>
+                Aspectos generales
+              </div>
             </div>
-            <div class="mx-3">
-              <h2>Aspectos Generales</h2>
-              Aspectos generales
-            </div>
-          </div>
-          <div class="mt-4">
-            <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
-              <app-editor-enriquecido formControlName="aspecto_general"
+            <div class="mt-4">
+              <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
+                <app-editor-enriquecido formControlName="aspecto_general"
                 [placeholder]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
+                <div class="d-flex justify-content-end mt-4">
+                  <button matStepperPrevious mat-stroked-button color="primary">
+                    Volver
+                  </button>
+                  @if (!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision) {
+                    <button mat-flat-button color="primary" type="submit" class="mx-2">
+                      Guardar y continuar
+                    </button>
+                  }
+                  @if (pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision) {
+                    <button matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
+                      Continuar
+                    </button>
+                  }
+                </div>
+              </form>
+            </div>
+          </mat-step>
+
+          <!-- Paso 3: Aspectos Evaluados -->
+          <mat-step [completed]="true">
+            <ng-template matStepLabel>
+              <p>Paso 3</p>
+              <b style="color: var(--primary)">Aspectos Evaluados</b>
+            </ng-template>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>assessment</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Aspectos Evaluados</h2>
+                Aspectos evaluados
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <app-aspectos-evaluados [informeId]="informeId" [auditoriaId]="auditoriaId" [soloLectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
+              <div class="d-flex justify-content-end mt-4">
+                <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
+                  Volver
+                </button>
+                @if (!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision) {
+                  <button mat-raised-button color="primary" (click)="guardarAspectos()">
+                    Guardar
+                  </button>
+                }
+                @if (!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision) {
+                  <button mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosYContinuar()">
+                    Guardar y continuar
+                  </button>
+                }
+                @if (pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision) {
+                  <button matStepperNext mat-flat-button color="primary" class="mx-2">
+                    Continuar
+                  </button>
+                }
+              </div>
+            </div>
+          </mat-step>
+
+          <!-- Paso 4: Resumen de Hallazgos -->
+          <mat-step [completed]="true">
+            <ng-template matStepLabel>
+              <p>Paso 4</p>
+              <b style="color: var(--primary)">Resumen de Hallazgos</b>
+            </ng-template>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>visibility</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Resumen de Hallazgos</h2>
+                Resumen de hallazgos
+              </div>
+            </div>
+            <div class="mt-4">
+              <app-resumen-hallazgos [informeId]="informeId" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #resumenHallazgosComp></app-resumen-hallazgos>
               <div class="d-flex justify-content-end mt-4">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
-                <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-flat-button color="primary" type="submit" class="mx-2">
-                  Guardar y continuar
-                </button>
-                <button *ngIf="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
-                  Continuar
-                </button>
+                @if (!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision) {
+                  <button mat-flat-button color="primary" class="mx-2" (click)="verPreinforme()" type="button">
+                    Ver informe preliminar
+                  </button>
+                }
+                @if (pasosInicialesSoloLectura || esRevisionPreinformeAuditado) {
+                  <button matStepperNext mat-flat-button color="primary" class="mx-2">
+                    Continuar
+                  </button>
+                }
               </div>
-            </form>
-          </div>
-        </mat-step>
+            </div>
+          </mat-step>
 
-        <!-- Paso 3: Aspectos Evaluados -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 3</p>
-            <b style="color: var(--primary)">Aspectos Evaluados</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>assessment</mat-icon>
-            </div>
-            <div class="mx-3">
-              <h2>Aspectos Evaluados</h2>
-              Aspectos evaluados
-            </div>
-          </div>
+          <!-- Paso 5: Revisión del Preinforme (auditado en REVISION / auditor en CREANDO_INFORME_FINAL) -->
+          @if (esRevisionPreinformeAuditado) {
+            <mat-step [completed]="true">
+              <ng-template matStepLabel>
+                <p>Paso 5</p>
+                <b style="color: var(--primary)">Revisión de hallazgos</b>
+              </ng-template>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div><mat-icon>rate_review</mat-icon></div>
+                <div class="mx-3">
+                  <h2>Revisión de hallazgos</h2>
+                  @if (puedeEscribirObservacionAuditado) {
+                    <span>
+                      Observaciones de hallazgos
+                    </span>
+                  }
+                  @if (puedeEscribirObservacionAuditor) {
+                    <span>
+                      Observaciones de hallazgos
+                    </span>
+                  }
+                  @if (!puedeEscribirObservacionAuditado && !puedeEscribirObservacionAuditor) {
+                    <span>
+                      Vista de solo lectura del preinforme y sus observaciones.
+                    </span>
+                  }
+                </div>
+              </div>
+              <div class="mt-4">
+                <app-revision-preinforme
+                  [informeId]="informeId"
+                  [temasRaw]="temasRaw"
+                  [hallazgosRaw]="hallazgosRaw"
+                  [puedeEscribirObservacionAuditado]="puedeEscribirObservacionAuditado"
+                  [puedeEscribirObservacionAuditor]="puedeEscribirObservacionAuditor"
+                  [usuarioId]="usuarioId"
+                  [usuarioRol]="usuarioRol"
+                  [dependenciaIds]="dependenciaIdsEnAuditoria"
+                  [fechaFinRevision]="informeData?.fecha_fin_revision"
+                  (datosModificados)="cargarTemasYHallazgos()">
+                </app-revision-preinforme>
+                <div class="d-flex justify-content-end mt-4">
+                  <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious type="button">
+                    Volver
+                  </button>
+                  @if (puedeTerminarObservaciones) {
+                    <button mat-flat-button color="primary" class="mx-2" (click)="terminarObservaciones()" type="button">
+                      Terminar observaciones
+                    </button>
+                  }
+                  @if (!puedeTerminarObservaciones && puedeEscribirObservacionAuditor) {
+                    <button mat-flat-button color="primary" class="mx-2" matStepperNext type="button">
+                      Continuar
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-step>
+          }
 
-          <div class="mt-4">
-            <app-aspectos-evaluados [informeId]="informeId" [auditoriaId]="auditoriaId" [soloLectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
-            <div class="d-flex justify-content-end mt-4">
-              <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
-                Volver
-              </button>
-              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-raised-button color="primary" (click)="aspectosEvaluadosComp.guardarAspectos()">
-                Guardar
-              </button>
-              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-flat-button color="primary" class="mx-2" (click)="guardarAspectosEvaluados()">
-                Guardar y continuar
-              </button>
-              <button *ngIf="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" matStepperNext mat-flat-button color="primary" class="mx-2">
-                Continuar
-              </button>
+          <!-- Paso 5/6: Respuesta Preliminar -->
+          <mat-step [completed]="pasosInicialesSoloLectura">
+            <ng-template matStepLabel>
+              <p>Paso {{ esRevisionPreinformeAuditado ? 6 : 5 }}</p>
+              <b style="color: var(--primary)">Respuesta Preliminar</b>
+            </ng-template>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>description</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Respuesta Preliminar</h2>
+                Respuesta preliminar
+              </div>
             </div>
-          </div>
-        </mat-step>
-
-        <!-- Paso 4: Resumen de Hallazgos -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 4</p>
-            <b style="color: var(--primary)">Resumen de Hallazgos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>visibility</mat-icon>
-            </div>
-            <div class="mx-3">
-              <h2>Resumen de Hallazgos</h2>
-              Resumen de hallazgos
-            </div>
-          </div>
-          <div class="mt-4">
-            <app-resumen-hallazgos [informeId]="informeId" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #resumenHallazgosComp></app-resumen-hallazgos>
-            <div class="d-flex justify-content-end mt-4">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button *ngIf="!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision" mat-flat-button color="primary" class="mx-2" (click)="verPreinforme()" type="button">
-                Ver informe preliminar
-              </button>
-              <button *ngIf="pasosInicialesSoloLectura || esRevisionPreinformeAuditado" matStepperNext mat-flat-button color="primary" class="mx-2">
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
-
-        <!-- Paso 5: Revisión del Preinforme (auditado en REVISION / auditor en CREANDO_INFORME_FINAL) -->
-        <mat-step *ngIf="esRevisionPreinformeAuditado" [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 5</p>
-            <b style="color: var(--primary)">Revisión de hallazgos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>rate_review</mat-icon></div>
-            <div class="mx-3">
-              <h2>Revisión de hallazgos</h2>
-              <span *ngIf="puedeEscribirObservacionAuditado">
-                Observaciones de hallazgos
-              </span>
-              <span *ngIf="puedeEscribirObservacionAuditor">
-                Observaciones de hallazgos
-              </span>
-              <span *ngIf="!puedeEscribirObservacionAuditado && !puedeEscribirObservacionAuditor">
-                Vista de solo lectura del preinforme y sus observaciones.
-              </span>
-            </div>
-          </div>
-          <div class="mt-4">
-            <app-revision-preinforme
-              [informeId]="informeId"
-              [temasRaw]="temasRaw"
-              [hallazgosRaw]="hallazgosRaw"
-              [puedeEscribirObservacionAuditado]="puedeEscribirObservacionAuditado"
-              [puedeEscribirObservacionAuditor]="puedeEscribirObservacionAuditor"
-              [usuarioId]="usuarioId"
-              [usuarioRol]="usuarioRol"
-              [dependenciaIds]="dependenciaIds"
-              [fechaFinRevision]="informeData?.fecha_fin_revision"
-              (datosModificados)="cargarTemasYHallazgos()">
-            </app-revision-preinforme>
-            <div class="d-flex justify-content-end mt-4">
-              <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious type="button">
-                Volver
-              </button>
-              <button *ngIf="puedeTerminarObservaciones" mat-flat-button color="primary" class="mx-2" (click)="terminarObservaciones()" type="button">
-                Terminar observaciones
-              </button>
-              <button *ngIf="!puedeTerminarObservaciones" mat-flat-button color="primary" class="mx-2" matStepperNext type="button">
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
-
-        <!-- Paso 5/6: Respuesta Preliminar -->
-        <mat-step [completed]="pasosInicialesSoloLectura">
-          <ng-template matStepLabel>
-            <p>Paso {{ esRevisionPreinformeAuditado ? 6 : 5 }}</p>
-            <b style="color: var(--primary)">Respuesta Preliminar</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>description</mat-icon>
-            </div>
-            <div class="mx-3">
-              <h2>Respuesta Preliminar</h2>
-              Respuesta preliminar
-            </div>
-          </div>
-          <div class="mt-4">
-            <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="guardarRespuestaPreliminar()">
-              <app-editor-enriquecido formControlName="respuesta_preliminar"
+            <div class="mt-4">
+              <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="guardarRespuestaPreliminar()">
+                <app-editor-enriquecido formControlName="respuesta_preliminar"
                 [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
-              <div class="d-flex justify-content-end mt-4">
-                <button matStepperPrevious mat-stroked-button color="primary">
-                  Volver
-                </button>
-                <button *ngIf="!soloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
-                  Guardar y continuar
-                </button>
-                <button *ngIf="soloLectura" matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
-                  Continuar
-                </button>
-              </div>
-            </form>
-          </div>
-        </mat-step>
+                <div class="d-flex justify-content-end mt-4">
+                  <button matStepperPrevious mat-stroked-button color="primary">
+                    Volver
+                  </button>
+                  @if (!soloLectura) {
+                    <button mat-flat-button color="primary" type="submit" class="mx-2">
+                      Guardar y continuar
+                    </button>
+                  }
+                  @if (soloLectura) {
+                    <button matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
+                      Continuar
+                    </button>
+                  }
+                </div>
+              </form>
+            </div>
+          </mat-step>
 
-        <!-- Paso 6/7: Informe Final -->
-        <mat-step>
-          <ng-template matStepLabel>
-            <p>Paso {{ esRevisionPreinformeAuditado ? 7 : 6 }}</p>
-            <b style="color: var(--primary)">Informe Final</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div>
-              <mat-icon>description</mat-icon>
+          <!-- Paso 6/7: Informe Final -->
+          <mat-step>
+            <ng-template matStepLabel>
+              <p>Paso {{ esRevisionPreinformeAuditado ? 7 : 6 }}</p>
+              <b style="color: var(--primary)">Informe Final</b>
+            </ng-template>
+            <div class="d-flex align-items-center fondo-acento-50 my-3">
+              <div>
+                <mat-icon>description</mat-icon>
+              </div>
+              <div class="mx-3">
+                <h2>Informe Final</h2>
+                Informe final
+              </div>
             </div>
-            <div class="mx-3">
-              <h2>Informe Final</h2>
-              Informe final
-            </div>
-          </div>
-          <div class="mt-4">
-            <form [formGroup]="formInformeFinal" (ngSubmit)="guardarInformeFinal()">
-              <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
-              <app-editor-enriquecido formControlName="informe_final"
+            <div class="mt-4">
+              <form [formGroup]="formInformeFinal" (ngSubmit)="guardarInformeFinal()">
+                <h3 style="color: var(--primary)" class="my-2">Informe final</h3>
+                <app-editor-enriquecido formControlName="informe_final"
                 [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
 
-              <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
-              <app-editor-enriquecido formControlName="observacion_conclusion"
+                <h3 style="color: var(--primary)" class="my-2">Observaciones y Conclusiones</h3>
+                <app-editor-enriquecido formControlName="observacion_conclusion"
                 [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
 
-              <h3 style="color: var(--primary)" class="my-2">Notas</h3>
-              <app-editor-enriquecido formControlName="nota" [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
-              <div class="d-flex justify-content-end mt-4">
-                <button matStepperPrevious mat-stroked-button color="primary">
-                  Volver
-                </button>
-                <button mat-flat-button color="primary" class="mx-2" (click)="verInforme()" type="button">
-                  Ver informe final
-                </button>
-                <button *ngIf="!soloLectura" mat-flat-button color="primary" type="submit" class="mx-2">
-                  Guardar y continuar
-                </button>
-              </div>
-            </form>
-          </div>
-        </mat-step>
-      </mat-stepper>
+                <h3 style="color: var(--primary)" class="my-2">Notas</h3>
+                <app-editor-enriquecido formControlName="nota" [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
+                <div class="d-flex justify-content-end mt-4">
+                  <button matStepperPrevious mat-stroked-button color="primary">
+                    Volver
+                  </button>
+                  <button mat-flat-button color="primary" class="mx-2" (click)="verInforme()" type="button">
+                    Ver informe final
+                  </button>
+                  @if (!soloLectura) {
+                    <button mat-flat-button color="primary" type="submit" class="mx-2">
+                      Guardar
+                    </button>
+                  }
+                </div>
+              </form>
+            </div>
+          </mat-step>
+        </mat-stepper>
       </div>
     </div>
   </div>

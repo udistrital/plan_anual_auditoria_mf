@@ -7,9 +7,9 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-modal-rechazo-auditoria-ejecucion",
-  templateUrl: "./modal-rechazo-auditoria.component.html",
-  styleUrl: "./modal-rechazo-auditoria.component.css",
+    selector: "app-modal-rechazo-auditoria-ejecucion",
+    templateUrl: "./modal-rechazo-auditoria.component.html",
+    standalone: false
 })
 export class ModalRechazoAuditoriaEjecucionComponent {
   formObservaciones!: FormGroup;
@@ -24,11 +24,11 @@ export class ModalRechazoAuditoriaEjecucionComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public infoModal: any,
-    public dialogRef: MatDialogRef<ModalRechazoAuditoriaEjecucionComponent>,
-    private alertService: AlertService,
-    private fb: FormBuilder,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private router: Router
+    public readonly dialogRef: MatDialogRef<ModalRechazoAuditoriaEjecucionComponent>,
+    private readonly alertService: AlertService,
+    private readonly fb: FormBuilder,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly router: Router
   ) { }
 
   ngOnInit() {

@@ -24,7 +24,7 @@ export const PLANTILLA_CARTA_REPRESENTACION_NOMBRE = 'SISIFO_CARTA_REPRESENTACIO
 })
 export class NotificacionesMidService {
 
-  constructor(private requestManager: RequestManager) {
+  constructor(private readonly requestManager: RequestManager) {
     this.requestManager.setPath("NOTIFICACIONES_MID_SERVICE");
   }
 

@@ -1,4 +1,4 @@
-<ng-container *ngIf="banderaTablaSeguimiento">
+@if (banderaTablaSeguimiento) {
   <div class="row mt-4">
     <div class="col-12">
       <h3 class="my-3">Listado de Seguimientos e Informes de Ley Aprobados en el Plan Anual de Auditorías (PAA)</h3>
@@ -7,79 +7,115 @@
       </p>
     </div>
     <div class="col-12">
+      @if (mostrarFiltros) {
+        <div class="row mb-3">
+          <div class="col-12">
+            <form>
+              <div class="row">
+                <mat-form-field class="col-md-3 col-12" appearance="outline">
+                  <mat-label>Filtrar por estado</mat-label>
+                  <mat-select [(ngModel)]="filtroEstado" name="filtroEstado" (selectionChange)="listarAuditoriasPorVigencia(vigenciaId)">
+                    <mat-option [value]="">--Todos--</mat-option>
+                    @for (estado of estadoOptions; track estado) {
+                      <mat-option [value]="estado.id">{{ estado.nombre }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="col-md-6 col-12" appearance="outline">
+                  <mat-label>Filtrar por consecutivo OCI</mat-label>
+                  <input matInput [(ngModel)]="filtroConsecutivo" name="filtroConsecutivo" (ngModelChange)="listarAuditoriasPorVigencia(vigenciaId)" />
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
       <div class="table-container table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
-          <ng-container
-            *ngFor="let columna of auditoriasContructorTabla"
-            [matColumnDef]="columna.columnDef"
-          >
-            <th
-              mat-header-cell
-              *matHeaderCellDef
-              mat-sort-header
-              [disabled]="!columna.sortable"
-            >
-              <b>{{ columna.header }}</b>
-            </th>
-
-            <td
-              mat-cell
-              *matCellDef="let row; let i = index"
-              [ngClass]="{ 'even-row': i % 2 === 0 }"
-            >
-              <ng-container
-                *ngIf="columna.columnDef as colDef"
-                [ngSwitch]="colDef"
+          @for (columna of auditoriasContructorTabla; track columna) {
+            <ng-container
+              [matColumnDef]="columna.columnDef"
               >
-                <div *ngSwitchCase="'numero'">
-                  <span>{{ pageIndex * pageSize + i + 1 }}</span>
-                </div>
-
-                <!-- Tipo Evaluación -->
-                <div *ngSwitchCase="'tipo_evaluacion'">
-                  <span>{{ row.tipo_evaluacion_nombre }}</span>
-                </div>
-
-                <!-- Documentos -->
-                <div *ngSwitchCase="'documentos'">
-                  <button
-                    mat-icon-button
-                    color="primary"
-                    (click)="verDocumentos(row)"
-                  >
-                    <mat-icon>description</mat-icon>
-                  </button>
-                </div>
-
-                <!-- Acciones -->
-                <div *ngSwitchCase="'acciones'">
-                  <ng-container *ngIf="row.acciones?.length > 0">
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      [matMenuTriggerFor]="menu"
-                    >
-                      <mat-icon>more_vert</mat-icon>
-                    </button>
-                    <mat-menu #menu="matMenu">
-                      <button
-                        mat-menu-item
-                        (click)="realizarAccion(row, accion)"
-                        *ngFor="let accion of row.acciones"
-                      >
-                        <mat-icon color="primary">{{
-                          getIconoAccion(accion)
-                        }}</mat-icon>
-                        <span>{{ accion }}</span>
-                      </button>
-                    </mat-menu>
-                  </ng-container>
-                </div>
-                <span *ngSwitchDefault>{{ columna.cell(row) }}</span>
-              </ng-container>
-            </td>
-          </ng-container>
-
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header
+                [disabled]="!columna.sortable"
+                >
+                <b>{{ columna.header }}</b>
+              </th>
+              <td
+                mat-cell
+                *matCellDef="let row; let i = index"
+                [ngClass]="{ 'even-row': i % 2 === 0 }"
+                >
+                @if (columna.columnDef; as colDef) {
+                  @switch (colDef) {
+                    @case ('numero') {
+                      <div>
+                        <span>{{ pageIndex * pageSize + i + 1 }}</span>
+                      </div>
+                    }
+                    <!-- Tipo Evaluación -->
+                    @case ('tipo_evaluacion') {
+                      <div>
+                        <span>{{ row.tipo_evaluacion_nombre }}</span>
+                      </div>
+                    }
+                    <!-- Documentos -->
+                    @case ('documentos') {
+                      <div>
+                        <button
+                          mat-icon-button
+                          color="primary"
+                          (click)="verDocumentos(row)"
+                          >
+                          <mat-icon>description</mat-icon>
+                        </button>
+                      </div>
+                    }
+                    <!-- Acciones -->
+                    @case ('acciones') {
+                      <div>
+                        @if (row.acciones?.length > 0) {
+                          <button
+                            mat-icon-button
+                            color="primary"
+                            [matMenuTriggerFor]="menu"
+                            >
+                            <mat-icon>more_vert</mat-icon>
+                          </button>
+                          <mat-menu #menu="matMenu">
+                            @for (accion of row.acciones; track accion) {
+                              <button
+                                mat-menu-item
+                                (click)="realizarAccion(row, accion)"
+                                >
+                                <mat-icon color="primary">{{
+                                  getIconoAccion(accion)
+                                }}</mat-icon>
+                                <span>{{ accion }}</span>
+                              </button>
+                            }
+                          </mat-menu>
+                        }
+                      </div>
+                    }
+                    @case('estado') {
+                      <div>
+                        <span>{{ getEstadoConColor(row) }}</span>
+                      </div>
+                    }
+                    @default {
+                      <span>{{ columna.cell(row) }}</span>
+                    }
+                  }
+                }
+              </td>
+            </ng-container>
+          }
           <tr mat-header-row *matHeaderRowDef="tablaColumnas"></tr>
           <tr mat-row *matRowDef="let row; columns: tablaColumnas"></tr>
           <br />
@@ -96,4 +132,4 @@
       ></mat-paginator>
     </div>
   </div>
-</ng-container>
+}

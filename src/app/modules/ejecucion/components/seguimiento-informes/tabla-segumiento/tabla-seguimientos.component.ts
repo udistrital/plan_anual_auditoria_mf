@@ -22,9 +22,10 @@ import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEsta
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-seguimientos",
-  templateUrl: "./tabla-seguimientos.component.html",
-  styleUrls: ["./tabla-seguimientos.component.css"],
+    selector: "app-tabla-seguimientos",
+    templateUrl: "./tabla-seguimientos.component.html",
+    styleUrls: ["./tabla-seguimientos.component.css"],
+    standalone: false
 })
 export class TablaSeguimientosComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -44,21 +45,22 @@ export class TablaSeguimientosComponent implements OnInit {
   mostrarAcciones: boolean = false;
   iconosAccion = new Map<string, string>([
     ["Editar Informe", "edit"],
+    ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
-    ["Historial de Rechazos", "history"],
+    ["Historial de Observaciones", "history"],
   ]);
 
   constructor(
-    private alertaService: AlertService,
-    private rolService: RolService,
-    private userService: UserService,
-    private changeDetector: ChangeDetectorRef,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router,
-    private dialog: MatDialog
+    private readonly alertaService: AlertService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -87,7 +89,7 @@ export class TablaSeguimientosComponent implements OnInit {
         return { ...auditoria, acciones };
       });
 
-      if (!(auditorias.length > 0)) {
+      if (auditorias.length === 0) {
         this.banderaTablaAuditorias = false;
         this.auditoriasDataSource.data = [];
         return this.alertaService.showAlert(
@@ -143,7 +145,7 @@ export class TablaSeguimientosComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionFinal[rol]?.[estado] ?? [])
       )
     );
   }
@@ -155,14 +157,31 @@ export class TablaSeguimientosComponent implements OnInit {
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
       "Editar Informe": () => this.editarInforme(auditoria),
+      "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialObservaciones(auditoria),
     };
     acciones[accion]?.();
   }
 
-  abrirHistorialRechazos(auditoria: any) {
+  verInformeSoloLectura(auditoria: any) {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
+      next: (res: any) => {
+        if (res?.Data?.length > 0) {
+          this.router.navigate(
+            [`/ejecucion/seguimiento-informes/editar-informe/${res.Data[0]._id}`],
+            { queryParams: { soloLectura: true } }
+          );
+        } else {
+          this.alertaService.showErrorAlert('No se encontró un informe para esta auditoría.');
+        }
+      },
+      error: () => this.alertaService.showErrorAlert('Error al buscar el informe.')
+    });
+  }
+
+  abrirHistorialObservaciones(auditoria: any) {
     this.dialog.open(ModalHistorialRechazosSeguimientoComponent, {
       data: { auditoriaId: auditoria._id },
       width: "1000px",
@@ -178,7 +197,7 @@ export class TablaSeguimientosComponent implements OnInit {
   private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           onInformeId(res.Data[0]._id);
         } else {
           this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({

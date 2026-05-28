@@ -1,6 +1,5 @@
-import { Component, Input, Inject, OnInit } from '@angular/core';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ActividadFormularioComponent } from '../actividad-formulario/actividad-formulario.component'
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
@@ -8,11 +7,11 @@ import { Actividad } from 'src/app/shared/data/models/actividad';
 
 
 @Component({
-  selector: 'app-editar-actividad',
-  templateUrl: './editar-actividad.component.html',
-  styleUrl: './editar-actividad.component.css'
+    selector: 'app-editar-actividad',
+    templateUrl: './editar-actividad.component.html',
+    standalone: false
 })
-export class EditarActividadComponent implements OnInit {
+export class EditarActividadComponent {
   //@Input() actividadData: any = {}; 
   /*actividad = {
     nombreActividad: 'Actividad Ejemplo',
@@ -31,19 +30,17 @@ export class EditarActividadComponent implements OnInit {
       minFechaStr?: string;
       maxFechaStr?: string;
     },
-    private dialogRef: MatDialogRef<EditarActividadComponent>,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly dialogRef: MatDialogRef<EditarActividadComponent>,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
   ) {
     this.actividadData = data.actividad;
     this.idAuditoria = data.idAuditoria;
-    this.minFechaStr = data.minFechaStr || null;
-    this.maxFechaStr = data.maxFechaStr || null;
+    this.minFechaStr = data.minFechaStr ?? null;
+    this.maxFechaStr = data.maxFechaStr ?? null;
     console.debug('Actividad Data:', this.actividadData);
     console.debug('ID Auditoria:', this.idAuditoria);
   }
-
-  ngOnInit(): void {}
 
   editarActividad(actividadData: ActividadPlan) {
     console.debug('Editar actividad:', actividadData);

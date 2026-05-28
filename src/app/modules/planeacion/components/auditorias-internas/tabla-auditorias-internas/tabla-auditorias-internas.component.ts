@@ -11,6 +11,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
+import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { Auditoria, tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
@@ -22,9 +23,10 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
-import { catchError, exhaustMap, map, tap } from "rxjs/operators";
-import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { catchError, exhaustMap, tap } from "rxjs/operators";
+import { CargueAdjuntoTabConfig, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
   NotificacionesService,
@@ -34,7 +36,7 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { CargueAdjuntoTabConfig } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -43,9 +45,10 @@ interface DocumentoAdjuntoCarta {
 }
 
 @Component({
-  selector: "app-tabla-auditorias-internas",
-  templateUrl: "./tabla-auditorias-internas.component.html",
-  styleUrl: "./tabla-auditorias-internas.component.css",
+    selector: "app-tabla-auditorias-internas",
+    templateUrl: "./tabla-auditorias-internas.component.html",
+    styleUrl: "./tabla-auditorias-internas.component.css",
+    standalone: false
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -77,9 +80,28 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Revisar Auditoría", "content_paste_search"],
     ["Enviar a Aprobación por Jefe", "send"],
     ["Iniciar Ejecución", "play_arrow"],
+    ["Historial de Observaciones", "report"],
     ["Ver Cartas de representación", "mail"],
   ]);
   tipoDocumentoParametros = environment.TIPO_DOCUMENTO_PARAMETROS;
+
+  // Filtros de la vista (estado, consecutivo)
+  private readonly rolesConFiltros = [
+    environment.ROL.JEFE,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_ASISTENTE,
+  ];
+
+  get mostrarFiltros(): boolean {
+    return this.rolesConFiltros.some((rol) =>
+      this.rolService.tieneRol(rol)
+    );
+  }
+
+  filtroEstado: number | null = null;
+  filtroConsecutivo: string = "";
+  estadoOptions: Array<{ id: number; nombre: string }> = [];
 
   constructor(
     private readonly alertService: AlertService,
@@ -105,6 +127,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.usuarioId = usuarioId;
     });
     this.configurarTipoConsulta();
+    // inicializar filtros visibles y opciones si aplica
+    if (this.mostrarFiltros) {
+      this.buildEstadoOptions();
+    }
   }
 
   setPermisos() {
@@ -128,29 +154,64 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
+  
+
+  private buildEstadoOptions(): void {
+    this.parametrosUtilsService
+      .getEstadosAuditoria(7060, 7080)
+      .subscribe({
+        next: (estados) => {
+          this.estadoOptions = estados.map((estado) => ({
+            id: estado.Id,
+            nombre: estado.Nombre,
+          }));
+        },
+
+        error: (error) => {
+          console.error(error);
+
+          this.alertService.showErrorAlert(
+            "No fue posible cargar los estados de auditoría."
+          );
+
+          this.estadoOptions = [];
+        },
+      });
+  }
+
+  // Note: filtro por auditor eliminado — no se mantiene método cargarAuditores
+
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
     offset: number = 0,
-    estadoId?: number
+    estadoId?: number,
+    _retry: boolean = false
   ) {
     this.auditoriasPorVigencia = [];
-
     let query = `vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}`;
     let endpoint = "";
 
-    switch (this.tipoConsulta) {
-      case 'auditado':
-        query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
-        endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
-        break;
-      default:
-        if (estadoId) {
-          query += `,estado_id:${estadoId}`;
-        }
-          endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
-            ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estadoId ? `&estado_id=${estadoId}` : ''}`
-            : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
+    // Aplicar filtros según tipo de consulta y campos seleccionados
+    if (this.tipoConsulta === 'auditado') {
+      query += `,estado_id__gte:${environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO}`;
+      // Para usuarios auditados se mantiene endpoint auditado
+      endpoint = `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${query}&limit=${limit}&offset=${offset}`;
+    } else {
+      // estado seleccionado (prioriza el parámetro recibido si se provee)
+      const estadoFiltro = estadoId ?? this.filtroEstado;
+      if (estadoFiltro) query += `,estado_id:${estadoFiltro}`;
+
+      // consecutivo: buscar por coincidencia parcial en consecutivo_OCI
+      if (this.filtroConsecutivo && this.filtroConsecutivo.trim() !== '') {
+        const c = this.filtroConsecutivo.trim();
+        query += `,consecutivo_OCI__icontains:${c}`;
+      }
+
+      const estado2 = estadoFiltro ? `&estado_id=${estadoFiltro}` : '';
+      endpoint = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].includes(this.role) && this.personaId
+        ? `auditoria/auditor/${this.personaId}?query=${query}&limit=${limit}&offset=${offset}${estado2}`
+        : `auditoria?query=${query}&limit=${limit}&offset=${offset}`;
     }
 
     this.planAuditoriaMid
@@ -162,9 +223,31 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
+
+          // Determinar si la búsqueda estaba filtrada por el usuario
+          const estadoFiltro = estadoId ?? this.filtroEstado;
+          const hayFiltroConsecutivo = !!(this.filtroConsecutivo && this.filtroConsecutivo.trim() !== "");
+          const huboFiltrosActivos = !!(estadoFiltro || hayFiltroConsecutivo);
+
+          if (huboFiltrosActivos && !_retry) {
+            // Mostrar alerta y luego reiniciar búsqueda por defecto de la vigencia
+            this.alertService.showAlert(
+              "No se encontraron auditorías",
+              "No se encontraron auditorías con los filtros aplicados. Se mostrará la lista completa para la vigencia."
+            );
+
+            // Limpiar filtros y reintentar una vez
+            this.filtroEstado = null;
+            this.filtroConsecutivo = "";
+
+            // Rehacer la búsqueda por vigencia (sin filtros) una sola vez
+            setTimeout(() => this.listarAuditoriasPorVigencia(vigenciaId, limit, offset, undefined, true), 200);
+            return;
+          }
+
           return this.alertService.showAlert(
             "No hay auditorías registradas",
             "Actualmente no hay auditorías registradas para la vigencia seleccionada."
@@ -214,13 +297,27 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
     );
   }
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado) {
+      if (estado?.startsWith(prefijo)) {
+        return emojiColorPorPrefijoEstado[prefijo];
+      }
+    }
+    return "⚪";
+  }
+
+  getEstadoConColor(auditoria: any): string {
+    const estado = auditoria.estado_nombre ?? "Sin estado";
+    return `${this.escogerEmojiColorEstado(estado)} ${estado}`;
   }
 
   realizarAccion(auditoria: any, accion: string) {
@@ -232,6 +329,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Revisar Auditoría": () => this.revisarAuditoria(auditoria),
       "Enviar a Aprobación por Jefe": () => this.preguntarEnvioAprobacionPorJefe(auditoria),
       "Iniciar Ejecución": () => this.iniciarEjecucion(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialRechazos(auditoria),
       "Ver Cartas de representación": () => this.verCartasRepresentacion(auditoria),
     };
     acciones[accion]?.();
@@ -321,7 +419,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           .split(" ")
           .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
           .join(" ");
-      mapa.set(id, nombre || "Dependencia desconocida");
+      mapa.set(id, nombre ?? "Dependencia desconocida");
     });
     return mapa;
   }
@@ -352,7 +450,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       .map((carta) => {
         const cargueAdjuntoConfig = getAdjuntoConfigByRole(this.role);
         return {
-          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) || "Dependencia desconocida"),
+          nombre: "Carta de representación - " + (dependenciasCartas.get(carta.metadatos?.dependencia_id) ?? "Dependencia desconocida"),
           documentoId: carta._id,
           tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           cargueAdjuntoConfig: cargueAdjuntoConfig
@@ -411,6 +509,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ]);
   }
 
+  abrirHistorialRechazos(auditoria: Auditoria) {
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      width: "1000px",
+      data: {
+        auditoriaId: auditoria._id,
+        estadoIds: [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE],
+        titulo: "Motivos de rechazo y observaciones",
+        descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
+      },
+    });
+  }
+
   revisarAuditoria(auditoria: Auditoria) {
     const auditoriaId = auditoria._id;
     this.router.navigate([
@@ -446,15 +556,18 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
-    this.alertService
-      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.validarDocumentosAnexados(auditoria._id);
-        delete auditoria.estado_interno_id;
-      });
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
+      width: '500px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (observacion === null || observacion === undefined) {
+        return;
+      }
+      this.validarDocumentosAnexados(auditoria._id, observacion);
+      delete auditoria.estado_interno_id;
+    });
   }
 
   guardarDocumento(documentoBase64: any, auditoria: any) {
@@ -510,12 +623,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
   }
 
-  enviarAprobacionPorJefe(auditoriaId: string) {
+  enviarAprobacionPorJefe(auditoriaId: string, observacion: string = "") {
     const auditoriaEstado = {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
-      observacion: "",
+      observacion,
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
@@ -542,17 +655,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
    * Resuelve el nombre del remitente autenticado y los datos de la auditoría en paralelo,
    * luego envía el correo y registra la notificación si el envío fue exitoso.
    */
-  /**
-   * Notifica al Jefe OCI cuando un auditor envía el programa de auditoría a revisión.
-   * Sigue el patrón de consulta-plan-auditoria: resuelve Terceros primero y sola,
-   * luego encadena la consulta de la auditoría y el envío de notificación.
-   */
   private notificarEnvioAJefe(auditoriaId: string): void {
     const rolRemitente = [
       environment.ROL.AUDITOR_EXPERTO,
       environment.ROL.AUDITOR,
       environment.ROL.AUDITOR_ASISTENTE,
-    ].find(rol => this.rolService.tieneRol(rol)) || "Auditor";
+    ].find(rol => this.rolService.tieneRol(rol)) ?? "Auditor";
 
     this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
 
@@ -561,11 +669,12 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
           nombreRemitente: of(tercero.NombreCompleto),
+          jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
+        const datosAuditoria: Auditoria = auditoria?.Data;
 
         // Resolver vigencia igual que el PAA — desde ParametrosUtilsService
         const vigenciaId = datosAuditoria?.vigencia_id;
@@ -573,14 +682,14 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
 
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
-          [],
+          [jefeOCI.UsuarioWSO2],
           environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS
         );
 
         const variablesSolicitud: VariablesSolicitud = {
           titulo_solicitud: "Revisión de Programa de Auditoría",
           tipo_solicitud: "revisión y aprobación",
-          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+          nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
           nombre_remitente: nombreRemitente || rolRemitente,
@@ -644,7 +753,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     });
   }
 
-  validarDocumentosAnexados(auditoriaId: any) {
+  validarDocumentosAnexados(auditoriaId: any, observacion: string = "") {
     const docs = [
       { tipo: this.tipoDocumentoParametros.SOLICITUD_INFORMACION, nombre: 'solicitud de información' },
       { tipo: this.tipoDocumentoParametros.CARTA_PRESENTACION, nombre: 'carta de presentación' },
@@ -668,7 +777,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
             return;
           }
         }
-        this.enviarAprobacionPorJefe(auditoriaId);
+        this.enviarAprobacionPorJefe(auditoriaId, observacion);
       },
       error: (error) => {
         console.error(error);
@@ -702,14 +811,14 @@ export class TablaAuditoriasInternasComponent implements OnInit {
                 const dependenciaNombre =
                   typeof carta.metadatos?.["dependencia_nombre"] === "string"
                     ? carta.metadatos?.["dependencia_nombre"]
-                    : carta.nombre || `Dependencia ${index + 1}`;
+                    : carta.nombre ?? `Dependencia ${index + 1}`;
                 const valorFirmado = carta.metadatos?.["firmado"];
-                const firmado =
-                  typeof valorFirmado === "boolean"
-                    ? valorFirmado
-                    : typeof valorFirmado === "string"
-                      ? valorFirmado.toLowerCase() === "true"
-                      : false;
+                let firmado = false;
+                if (typeof valorFirmado === "boolean") {
+                  firmado = valorFirmado;
+                } else if (typeof valorFirmado === "string") {
+                  firmado = valorFirmado.toLowerCase() === "true";
+                }
 
                 return {
                   titulo: `Carta de Representación ${dependenciaNombre}`,

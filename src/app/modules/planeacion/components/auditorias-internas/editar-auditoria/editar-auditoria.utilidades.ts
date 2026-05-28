@@ -1,5 +1,4 @@
 import { Formulario } from "src/app/shared/data/models/formulario.model";
-import { environment } from "src/environments/environment";
 
 export const formularioInformacionAuditoria: Formulario = {
   campos: [
@@ -73,6 +72,7 @@ export const formularioInformacionAuditoria: Formulario = {
       parametros: {
         vista: "year",
         fecha_inicio: "2026-01-01T05:00:00.000Z",
+        fecha_minima_dependiente: "fecha_ejecucion_inicial",
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,

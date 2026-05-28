@@ -5,13 +5,13 @@ import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { TablaPlanMejoramientoComponent } from "./ tabla-plan-mejoramiento/tabla-plan-mejoramiento.component";
 import { RolService } from "src/app/core/services/rol.service";
-import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-plan-de-mejoramiento",
-  templateUrl: "./plan-mejoramiento.component.html",
-  styleUrls: ["./plan-mejoramiento.component.css"],
+    selector: "app-plan-de-mejoramiento",
+    templateUrl: "./plan-mejoramiento.component.html",
+    styleUrls: ["./plan-mejoramiento.component.css"],
+    standalone: false
 })
 export class PlanDeMejoramientoComponent implements OnInit {
   @ViewChild(TablaPlanMejoramientoComponent)
@@ -23,27 +23,22 @@ export class PlanDeMejoramientoComponent implements OnInit {
   vigenciaSeleccionada!: number;
   tipoEvaluacionSeleccionado!: number;
 
-  /** Rol prioritario del usuario actual */
   role: string | null = null;
-  /** ID de persona del usuario actual */
-  personaId: number | null = null;
   accionesPermitidas: string[] | null = null;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly rolService: RolService,
-    private readonly userService: UserService,
     private readonly route: ActivatedRoute
   ) {}
 
-  async ngOnInit() {
+  ngOnInit(): void {
     this.accionesPermitidas = this.route.snapshot.data['accionesPermitidas'] ?? null;
     this.iniciarForm();
     this.cargarVigencias();
     this.cargarTiposEvaluacion();
     this.obtenerRolPrioritario();
-    this.personaId = await this.userService.getPersonaId();
   }
 
   obtenerRolPrioritario(): void {

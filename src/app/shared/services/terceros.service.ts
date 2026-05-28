@@ -5,12 +5,14 @@ import { ImplicitAutenticationService } from "src/app/core/services/implicit_aut
 import {
   TercerosCrudService,
   TERCERO_ID_POR_DOCUMENTO_ENDPOINT,
-} from "../../core/services/terceros-crud.service";
+} from "src/app/core/services/terceros-crud.service";
 import { DestinatariosEmail } from "./notificaciones.service";
+import { environment as env } from "src/environments/environment";
 
 export interface TerceroIdentification {
   Id: number;
   NombreCompleto: string;
+  UsuarioWSO2: string;
 }
 
 interface TerceroResponse {
@@ -20,6 +22,13 @@ interface TerceroResponse {
     TipoDocumentoId: Object;
   },
   Tercero: TerceroIdentification;
+};
+
+export interface VinculacionResponse {
+  Id: number;
+  CargoId: number;
+  DependenciaId: number;
+  TerceroPrincipalId: TerceroIdentification;
 };
 
 /**
@@ -32,8 +41,8 @@ interface TerceroResponse {
 export class TercerosService {
 
   constructor(
-    private tercerosCrudService: TercerosCrudService,
-    private implicitAutenticationService: ImplicitAutenticationService
+    private readonly tercerosCrudService: TercerosCrudService,
+    private readonly implicitAutenticationService: ImplicitAutenticationService
   ) {}
 
   /**
@@ -118,6 +127,31 @@ export class TercerosService {
         ...(envDestinatarios.BccAddresses ?? []),
       ])],
     };
+  }
+
+  /**
+   * Retrieve active vinculaciones (job positions) for a given Tercero ID in most recent to least recent order.
+   * @param id The ID of the Tercero for which to retrieve vinculaciones.
+   * @returns An Observable containing an array of VinculacionResponse objects representing the active vinculaciones of the Tercero.
+   */
+  public getVinculacionByTerceroId(id: number): Observable<VinculacionResponse[]> {
+    let url = "vinculacion?sortby=Id&order=desc&limit=0"; // Get all vinculaciones sorted by most recent (Id desc)
+    url += `&query=TerceroPrincipalId.Id:${id},Activo:true`; // Filter by Tercero ID and only active vinculaciones
+
+    return this.tercerosCrudService.get(url);
+  }
+
+  
+  /**
+   * Retrieve the TerceroIdentification of the Jefe OCI, which is needed for email notifications.
+   * @returns {Observable<TerceroIdentification>} An Observable containing the Jefe OCI's Tercero identification data.
+   */
+  public getJefeOCI(): Observable<TerceroIdentification> {
+    const url = `vinculacion?limit=0&order=desc&sortby=Id&query=Activo:true,DependenciaId:${env.DEPENDENCIA_OCI_ID},CargoId:${env.CARGO.JEFE_DEPENDENCIA_ID}`;
+    return this.tercerosCrudService.get(url).pipe(
+      switchMap((response: VinculacionResponse[]) => of(response[0])),
+      switchMap((vinculacion: VinculacionResponse) => of(vinculacion.TerceroPrincipalId)),
+    );
   }
 
 }

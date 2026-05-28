@@ -19,6 +19,7 @@ import { ModalRechazoSeguimientoComponent } from './components/seguimiento-infor
 import { ModalHistorialRechazosComponent } from './components/auditorias-internas/modal-historial-rechazos/modal-historial-rechazos.component';
 import { ModalHistorialRechazosSeguimientoComponent } from './components/seguimiento-informes/modal-historial-rechazos-seguimiento/modal-historial-rechazos-seguimiento.component';
 import { RevisionPreinformeComponent } from './components/auditorias-internas/editar-informe/revision-preinforme/revision-preinforme.component';
+import { ModalAmpliarRevisionAuditadoComponent } from './components/auditorias-internas/modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
@@ -39,6 +40,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ModalHistorialRechazosComponent,
     ModalHistorialRechazosSeguimientoComponent,
     RevisionPreinformeComponent,
+    ModalAmpliarRevisionAuditadoComponent,
   ],
   imports: [
     CommonModule,

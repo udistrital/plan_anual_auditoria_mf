@@ -14,15 +14,15 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
-import { BotonTabDocumentoContext, ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { TercerosService } from "src/app/shared/services/terceros.service";
+import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { TercerosService, VinculacionResponse } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, VariablesCartaRepresentacion } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
+import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
-import { ModalAprobacionAuditadoComponent } from "./modal-aprobacion-auditado/modal-aprobacion-auditado.component";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface DocumentoAdjuntoRevision {
   _id?: string;
@@ -47,12 +47,14 @@ interface DocumentoRevisionItem {
 }
 
 @Component({
-  selector: "app-revision-documentos",
-  templateUrl: "./revision-documentos.component.html",
-  styleUrl: "./revision-documentos.component.css",
+    selector: "app-revision-documentos",
+    templateUrl: "./revision-documentos.component.html",
+    styleUrl: "./revision-documentos.component.css",
+    standalone: false
 })
 export class RevisionDocumentosComponent implements OnInit {
   auditoriaId: string = "";
+  consecutivoOci: string = "";
   estadoAuditoriaId!: number;
   selectedTab: number = 0;
   documentosVisibles: DocumentoRevisionItem[] = [];
@@ -69,7 +71,7 @@ export class RevisionDocumentosComponent implements OnInit {
   cargueCartasDialogRef?: MatDialogRef<any>;
 
   constructor(
-    public dialog: MatDialog,
+    public readonly dialog: MatDialog,
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
@@ -89,6 +91,7 @@ export class RevisionDocumentosComponent implements OnInit {
   ngOnInit(): void {
     this.inicializarDatos();
     this.cargarEstadoAuditoria();
+    this.cargarConsecutivoOci();
   }
 
   inicializarDatos() {
@@ -111,6 +114,12 @@ export class RevisionDocumentosComponent implements OnInit {
           res.Data[0]?.estado_id ??
           environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID;
       });
+  }
+
+  cargarConsecutivoOci() {
+    this.planAuditoriaService
+      .get(`auditoria/${this.auditoriaId}`)
+      .subscribe((res) => { this.consecutivoOci = res.Data?.consecutivo_OCI ?? ""; });
   }
 
   verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
@@ -200,7 +209,7 @@ export class RevisionDocumentosComponent implements OnInit {
               resolve();
             }
           },
-          error: (error) => {
+          error: (error: Error) => {
             this.alertService.showErrorAlert("Error al aprobar el plan.");
             reject(error);
           }
@@ -273,17 +282,39 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   async cargarCartasAuditado() {
-      const cartas = (await lastValueFrom(
+      let cartas = (await lastValueFrom(
         this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {
           deduplicarPorTipo: false,
         })
-      )) as DocumentoAdjuntoRevision[];
+      )).filter((documento) =>
+        documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+      ) as DocumentoAdjuntoRevision[];
 
-      return cartas.filter(
-        (documento) =>
-          documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+      const dependenciasAuditado = await this.obtenerDependenciasIdAuditado();
+      cartas = cartas.filter((carta) =>
+        this.deberiaMostrarCarta(carta, dependenciasAuditado)
       );
+      return cartas;
   }
+
+  async obtenerDependenciasIdAuditado(): Promise<number[]> {
+    const cargosAuditado = [environment.CARGO.JEFE_DEPENDENCIA_ID, environment.CARGO.ASISTENTE_DEPENDENCIA_ID];
+    return firstValueFrom(this.tercerosService.getVinculacionByTerceroId(this.usuarioId).pipe(
+      switchMap((vinculaciones: VinculacionResponse[]) =>
+        of(vinculaciones.filter((v) =>
+          v.DependenciaId != null && cargosAuditado.includes(v.CargoId)
+        ).map((v) => v.DependenciaId))
+      ),
+      catchError((error) =>
+        throwError(() => new Error("Error al obtener las vinculaciones del auditado", error))
+      ),
+      switchMap((dependenciasIds: number[]) => {
+        const idsUnicos = [...new Set(dependenciasIds)];
+        console.debug("Dependencias ID únicas para el auditado:", idsUnicos);
+        return of(idsUnicos);
+      }),
+    ));
+  };
 
   async abrirModalCargueCartasFirmadas(): Promise<void> {
     try {
@@ -303,6 +334,8 @@ export class RevisionDocumentosComponent implements OnInit {
 
         return {
           nombre: `Carta de representación ${dependenciaNombre}`,
+          nombreDescarga: "carta-representación",
+          presufijo: dependenciaNombre,
           tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           documentoId: documento._id,
           botones: [{
@@ -343,6 +376,8 @@ export class RevisionDocumentosComponent implements OnInit {
           descripcion:
             "Revise y cargue la carta de representación firmada para cada dependencia.",
           tabs,
+          sufijo: `oci-${this.consecutivoOci}`,
+          nombreArchivoDescarga: "cartas-representación",
           tipo: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
           textoBotonCerrar: "Cerrar",
           accionesFooter: [
@@ -438,22 +473,14 @@ export class RevisionDocumentosComponent implements OnInit {
         });
       });
 
-      const auditoria = res?.Data || {};
-      const dependenciasIds = Array.isArray(auditoria.dependencia_id)
-        ? auditoria.dependencia_id
-        : [];
-      const dependenciasNombres = Array.isArray(auditoria.dependencia_nombre)
-        ? auditoria.dependencia_nombre
-        : typeof auditoria.dependencia_nombre === "string" && auditoria.dependencia_nombre.trim()
-          ? [auditoria.dependencia_nombre]
-          : [];
+      const auditoria: Auditoria = res?.Data ?? {};
 
-      dependenciasIds.forEach((dependenciaId: number, index: number) => {
+      auditoria.dependencia_id.forEach((dependenciaId: number, index: number) => {
         if (typeof dependenciaId !== "number") {
           return;
         }
 
-        const nombreDependencia = this.normalizarNombreDependencia(dependenciasNombres[index]);
+        const nombreDependencia = this.normalizarNombreDependencia(auditoria.dependencia_nombre[index]);
         if (nombreDependencia) {
           this.dependenciasPorId.set(dependenciaId, nombreDependencia);
         }
@@ -551,6 +578,17 @@ export class RevisionDocumentosComponent implements OnInit {
     return fallback;
   }
 
+  private deberiaMostrarCarta(
+    carta: DocumentoAdjuntoRevision,
+    dependenciasAuditado: number[]
+  ): boolean {
+    if (![environment.ROL.JEFE_DEPENDENCIA, environment.ROL.ASISTENTE_DEPENDENCIA].includes(this.role!))
+      return true;
+
+    const dependenciaId = Number(carta.metadatos?.["dependencia_id"]);
+    return Number.isFinite(dependenciaId) && dependenciasAuditado.includes(dependenciaId);
+  }
+
   async descargarTodo() {
     try {
       const documentosDescarga = this.documentosVisibles
@@ -561,9 +599,12 @@ export class RevisionDocumentosComponent implements OnInit {
           fileName: documento.nombreArchivo,
         }));
 
+      const sufijo = this.consecutivoOci ? `oci-${this.consecutivoOci}` : "";
+      const sufijoNombre = sufijo ? `-${sufijo}` : "";
       await this.descargaService.descargarMultiplesArchivos(
         documentosDescarga,
-        "documentosAuditoria.zip"
+        `documentosAuditoria${sufijoNombre}.zip`,
+        sufijo,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
@@ -598,11 +639,11 @@ export class RevisionDocumentosComponent implements OnInit {
       }),
 
       exhaustMap(({ auditoria, auditores, vigencias, nombreRemitente }: any) => {
-        const datosAuditoria = auditoria?.Data;
+        const datosAuditoria: Auditoria = auditoria?.Data;
         const listaAuditores: any[] = auditores?.Data ?? [];
         const dependenciasInfo: any[] = datosAuditoria?.datos_dependencias ?? [];
         dependenciasInfo.forEach((dep) => 
-          datosAuditoria.correo_complementario.forEach((correo: any) => {
+          datosAuditoria.correo_complementario?.forEach((correo: any) => {
             if (correo.dependencia_id === dep.dependencia_id)
               dep.correo_complementario = correo.correo;
           })
@@ -672,7 +713,7 @@ export class RevisionDocumentosComponent implements OnInit {
             const variablesSolicitud: VariablesSolicitud = {
               titulo_solicitud: "Revisión de Programa de Auditoría",
               tipo_solicitud: "revisión y firma",
-              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ` - ${datosAuditoria.titulo}` : ''}`,
+              nombre_documento: `Programa de Auditoría${datosAuditoria?.titulo ? ' - ' + datosAuditoria.titulo : ''}`,
               vigencia: vigenciaNombre,
               rol_remitente: rolRemitente,
               nombre_remitente: nombreRemitente || rolRemitente,
@@ -888,10 +929,18 @@ export class RevisionDocumentosComponent implements OnInit {
     this.planAuditoriaMid.get(`auditado/${personaId}/documento?auditoria_id=${this.auditoriaId}&cargo_id=${cargoId}`)
       .subscribe(async (res) => {
         await this.cargarDependenciasPorAuditoria();
+        const dependenciasAuditado = await this.obtenerDependenciasIdAuditado();
         let indiceCarta = 0;
 
         const promesas = res.map(async (documento: any) => {
           if (!documento?.nuxeo_enlace) {
+            return null;
+          }
+
+          if (
+            documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION &&
+            !this.deberiaMostrarCarta(documento, dependenciasAuditado)
+          ) {
             return null;
           }
 

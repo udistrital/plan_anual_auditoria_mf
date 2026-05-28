@@ -4,9 +4,10 @@ import { CargarArchivoComponent } from 'src/app/shared/elements/components/carga
 import { environment } from 'src/environments/environment';
 
 @Component({
-  selector: 'app-modal-visualizar-recargar-informe-auditoria',
-  templateUrl: './modal-visualizar-recargar-informe-auditoria.component.html',
-  styleUrl: './modal-visualizar-recargar-informe-auditoria.component.css'
+    selector: 'app-modal-visualizar-recargar-informe-auditoria',
+    templateUrl: './modal-visualizar-recargar-informe-auditoria.component.html',
+    styleUrl: './modal-visualizar-recargar-informe-auditoria.component.css',
+    standalone: false
 })
 export class ModalVisualizarRecargarInformeAuditoriaComponent implements OnInit {
   protected base64: string = '';

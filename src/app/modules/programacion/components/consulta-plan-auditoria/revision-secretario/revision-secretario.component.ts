@@ -13,14 +13,14 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
-  selector: "app-revision-secretario",
-  templateUrl: "./revision-secretario.component.html",
-  styleUrl: "./revision-secretario.component.css",
+    selector: "app-revision-secretario",
+    templateUrl: "./revision-secretario.component.html",
+    styleUrl: "./revision-secretario.component.css",
+    standalone: false
 })
 export class RevisionSecretarioComponent {
   selectedTab: number = 0;
@@ -29,18 +29,18 @@ export class RevisionSecretarioComponent {
   mostrarBotones: boolean = true;
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private nuxeoService: NuxeoService,
-    private userService: UserService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private descargaService: DescargaService,
-    private tercerosService: TercerosService,
-    private rolService: RolService,
-    private parametrosUtilsService: ParametrosUtilsService,
-    private documentoUtils: DocumentoUtils,
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly userService: UserService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService,
+    private readonly rolService: RolService,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
+    private readonly documentoUtils: DocumentoUtils,
   ) { }
 
   botonSeleccionado: string = "formato";
@@ -53,7 +53,7 @@ export class RevisionSecretarioComponent {
   
   async ngOnInit() {
     console.debug("Inicializando RevisionSecretarioComponent...");
-    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") || "";
+    this.planAuditoriaId = this.route.snapshot.paramMap.get("id") ?? '';
     this.roles = this.rolService.getRoles();
     this.obtenerVigenciaActual();
     this.obtenerEstadoActual();
@@ -74,8 +74,8 @@ export class RevisionSecretarioComponent {
     }).subscribe({
       next: ({ plan, vigencias }: any) => {
         const vigenciaId = plan?.Data?.vigencia_id;
-        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre || "";
-        this.vigenciaNombre = vigenciaNombre || "";
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre ?? '';
+        this.vigenciaNombre = vigenciaNombre ?? '';
       },
       error: (error) => {
         console.error("Error al obtener la vigencia:", error);
@@ -93,11 +93,11 @@ export class RevisionSecretarioComponent {
       .subscribe({
         next: (response: any) => {
           const estadoActual = response?.Data?.[0];
-          this.estadoIdActual = estadoActual?.estado_id || null;
+          this.estadoIdActual = estadoActual?.estado_id ?? null;
           this.mostrarBotones =
               this.estadoIdActual === environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID;
 
-          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual || 0, this.roles, callbacks);
+          this.tabs = this.documentoUtils.getTabsVerDocumentos(this.planAuditoriaId, this.estadoIdActual ?? 0, this.roles, callbacks);
         },
         error: (error) => {
           console.error("Error al obtener el estado actual:", error);
@@ -192,10 +192,10 @@ export class RevisionSecretarioComponent {
 
   async descargarTodo() {
     try {
-      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      const suffix = this.vigenciaNombre ? `${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        `documentosPAA${suffix}.zip`,
+        `documentosPAA-${suffix}.zip`,
         suffix
       );
     } catch (error) {

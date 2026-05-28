@@ -9,6 +9,7 @@ import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { ModalHistorialRechazosComponent } from "../modal-historial-rechazos/modal-historial-rechazos.component";
+import { ModalAmpliarRevisionAuditadoComponent } from "../modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -17,9 +18,10 @@ import { accionesEjecucionFinal, accionesEjecucionPreliminar } from "src/app/sha
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-auditorias-internas",
-  templateUrl: "./tabla-auditorias-internas.component.html",
-  styleUrls: ["./tabla-auditorias-internas.component.css"],
+    selector: "app-tabla-auditorias-internas",
+    templateUrl: "./tabla-auditorias-internas.component.html",
+    styleUrls: ["./tabla-auditorias-internas.component.css"],
+    standalone: false
 })
 export class TablaAuditoriasInternasComponent implements OnInit {
   @Input() vigenciaId: any;
@@ -47,19 +49,20 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
-    ["Historial de Rechazos", "history"],
+    ["Historial de Observaciones", "history"],
+    ["Ampliar tiempo de revisión auditado", "more_time"],
   ]);
 
   constructor(
-    private alertaService: AlertService,
-    private rolService: RolService,
-    private userService: UserService,
-    private changeDetector: ChangeDetectorRef,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private planAuditoriaService: PlanAnualAuditoriaService,
-    private referenciaPdfService: ReferenciaPdfService,
-    private router: Router,
-    private dialog: MatDialog
+    private readonly alertaService: AlertService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly router: Router,
+    private readonly dialog: MatDialog
   ) { }
 
   async ngOnInit() {
@@ -119,7 +122,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           return { ...auditoria, acciones };
         });
 
-        if (!(auditorias.length > 0)) {
+        if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
           return this.alertaService.showAlert(
@@ -174,15 +177,24 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const mostrarComoInforme = estado >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
 
     const acciones = this.roles.flatMap((rol) => {
-      // Usar solo las acciones correspondientes según la etapa
       if (mostrarComoInforme) {
-        return accionesEjecucionFinal[rol]?.[estado] || [];
+        return accionesEjecucionFinal[rol]?.[estado] ?? [];
       } else {
-        return accionesEjecucionPreliminar[rol]?.[estado] || [];
+        return accionesEjecucionPreliminar[rol]?.[estado] ?? [];
       }
     });
 
-    return Array.from(new Set(acciones));
+    const accionesUnicas = Array.from(new Set(acciones));
+
+    // En REVISION_PREINFORME_AUDITADO el auditado entra únicamente por "Ver Documentos del informe"
+    const esAuditado = this.roles.some(r =>
+      r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA
+    );
+    if (esAuditado && estado === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) {
+      return accionesUnicas.filter(a => a !== 'Editar Preinforme');
+    }
+
+    return accionesUnicas;
   }
 
   getIconoAccion(accion: string): string {
@@ -197,16 +209,42 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialObservaciones(auditoria),
+      "Ampliar tiempo de revisión auditado": () => this.abrirModalAmpliarRevision(auditoria),
     };
     acciones[accion]?.();
   }
 
-  abrirHistorialRechazos(auditoria: Auditoria) {
+  abrirHistorialObservaciones(auditoria: Auditoria) {
     this.dialog.open(ModalHistorialRechazosComponent, {
       data: { auditoriaId: auditoria._id },
       width: "1000px",
     });
+  }
+
+  async abrirModalAmpliarRevision(auditoria: Auditoria) {
+    const usuarioId = await this.userService.getPersonaId();
+    this.planAuditoriaService
+      .get(`informe?query=auditoria_id:${auditoria._id},activo:true`)
+      .subscribe({
+        next: (res: any) => {
+          const informe = res?.Data?.[0];
+          if (!informe || !informe.fecha_fin_revision) {
+            this.alertaService.showErrorAlert("No se encontró el informe o la fecha de revisión del auditado.");
+            return;
+          }
+          this.dialog.open(ModalAmpliarRevisionAuditadoComponent, {
+            width: "500px",
+            data: {
+              informeId: informe._id,
+              fechaFinRevision: informe.fecha_fin_revision,
+              diasRevision: informe.dias_revision ?? 3,
+              usuarioId,
+            },
+          });
+        },
+        error: () => this.alertaService.showErrorAlert("Error al buscar el informe."),
+      });
   }
 
   editarInforme(auditoria: Auditoria) {
@@ -218,7 +256,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   verInformeSoloLectura(auditoria: Auditoria) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           this.router.navigate(
             [`/ejecucion/auditorias-internas/editar-informe/${res.Data[0]._id}`],
             { queryParams: { soloLectura: true } }
@@ -234,7 +272,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   private obtenerOCrearInforme(auditoriaId: string, onInformeId: (informeId: string) => void) {
     this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoriaId},activo:true`).subscribe({
       next: (res: any) => {
-        if (res.Data && res.Data.length > 0) {
+        if (res?.Data?.length > 0) {
           onInformeId(res.Data[0]._id);
         } else {
           this.planAuditoriaService.post('informe', { auditoria_id: auditoriaId }).subscribe({

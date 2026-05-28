@@ -5,13 +5,13 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { Actividad as ActividadPlan } from 'src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria';
 import { Actividad } from 'src/app/shared/data/models/actividad';
 @Component({
-  selector: 'app-crear-actividad',
-  templateUrl: './crear-actividad.component.html',
-  styleUrl: './crear-actividad.component.css'
+    selector: 'app-crear-actividad',
+    templateUrl: './crear-actividad.component.html',
+    standalone: false
 })
 export class CrearActividadComponent {
   auditoriaId: string;
-  datos: any | [] = [];
+  datos: Array<any> = [];
   minFechaStr: string | null = null;
   maxFechaStr: string | null = null;
 
@@ -21,16 +21,14 @@ export class CrearActividadComponent {
       minFechaStr?: string;
       maxFechaStr?: string;
     },
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private dialogRef: MatDialogRef<CrearActividadComponent>
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly dialogRef: MatDialogRef<CrearActividadComponent>
   ) {
     this.auditoriaId = data.auditoriaId;
-    this.minFechaStr = data.minFechaStr || null;
-    this.maxFechaStr = data.maxFechaStr || null;
+    this.minFechaStr = data.minFechaStr ?? null;
+    this.maxFechaStr = data.maxFechaStr ?? null;
   }
-
-  ngOnInit(): void {}
 
   crearActividad(actividadData: ActividadPlan) {
     let actividadJson: Actividad = {

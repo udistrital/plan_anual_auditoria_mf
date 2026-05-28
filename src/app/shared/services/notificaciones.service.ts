@@ -113,10 +113,11 @@ export interface VariablesCartaRepresentacion {
 })
 export class NotificacionesService {
 
-  constructor(private notificacionesMidService: NotificacionesMidService) {}
+  constructor(private readonly notificacionesMidService: NotificacionesMidService) {}
 
+  private readonly notificacionesHabilitadas: boolean = environment['NOTIFICACIONES_HABILITADAS'] ?? true;
   /** Sender email address used for notifications */
-  private remitenteEmail = environment['ORIGEN_CORREO_NOTIFICACIONES'];
+  private readonly remitenteEmail: string = environment['ORIGEN_CORREO_NOTIFICACIONES'];
 
   /**
    * Send a notification email for a request using the NOTIFICACIONES_MID_SERVICE.
@@ -138,7 +139,12 @@ export class NotificacionesService {
         }
       ]
     };
-        
+
+    if (!this.notificacionesHabilitadas) {
+      console.log('[Notificaciones] DESHABILITADAS - enviarNotificacionSolicitud payload:', cuerpo);
+      return new Observable(o => o.complete());
+    }
+
     return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
   }
 
@@ -163,6 +169,11 @@ export class NotificacionesService {
       ]
     };
 
+    if (!this.notificacionesHabilitadas) {
+      console.log('[Notificaciones] DESHABILITADAS - enviarNotificacionRechazo payload:', cuerpo);
+      return new Observable(o => o.complete());
+    }
+
     return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
   }
 
@@ -186,6 +197,11 @@ export class NotificacionesService {
         }
       ]
     };
+
+    if (!this.notificacionesHabilitadas) {
+      console.log('[Notificaciones] DESHABILITADAS - enviarNotificacionCartaRepresentacion payload:', cuerpo);
+      return new Observable(o => o.complete());
+    }
 
     return this.notificacionesMidService.post(TEMPLATED_EMAIL_ENDPOINT, cuerpo);
   }

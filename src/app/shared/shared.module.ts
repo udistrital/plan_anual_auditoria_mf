@@ -5,13 +5,14 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { CommonModule } from "@angular/common";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { BasesComponent } from "./elements/components/bases/bases.component";
 import { CargarArchivoComponent } from "./elements/components/cargar-archivo/cargar-archivo.component";
 import { FormularioDinamicoComponent } from "./elements/components/formulario-dinamico/formulario-dinamico.component";
 import { PlantillaTarjetaContenedoraComponent } from "./elements/templates/plantilla-tarjeta-contenedora/plantilla-tarjeta-contenedora.component";
 import { PlantillaModalComponent } from "./elements/templates/plantilla-modal/plantilla-modal.component";
 import { ModalVerDocumentoComponent } from "./elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { ModalVerDocumentosComponent } from "./elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ModalHistorialRechazosComponent } from "./elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
+import { ModalEnviarAprobacionComponent } from "./elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 import { MatPaginatorIntl } from "@angular/material/paginator";
 import { CustomPaginadorIntl } from "./services/custom-paginador.service";
 import { IconosModule } from "./modules/iconos.module";
@@ -24,11 +25,12 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
 
 @NgModule({
   declarations: [
-    BasesComponent,
     FormularioDinamicoComponent,
     CargarArchivoComponent,
     ModalVerDocumentoComponent,
     ModalVerDocumentosComponent,
+    ModalHistorialRechazosComponent,
+    ModalEnviarAprobacionComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,
@@ -48,11 +50,12 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
   ],
   exports: [
     //Componentes
-    BasesComponent,
     CargarArchivoComponent,
     FormularioDinamicoComponent,
     ModalVerDocumentoComponent,
     ModalVerDocumentosComponent,
+    ModalHistorialRechazosComponent,
+    ModalEnviarAprobacionComponent,
     PlantillaTarjetaContenedoraComponent,
     PlantillaModalComponent,
     PdfVisualizadorComponent,

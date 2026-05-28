@@ -10,6 +10,8 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
 
+type TipoBoton = 'flat' | 'stroked' | 'raised' | 'basic';
+
 interface DocumentoModal extends DocumentoReferenciaPdf {
   base64: string;
 }
@@ -27,7 +29,7 @@ export interface BotonTabDocumento {
   color?: string;
   icono?: string;
   estilo?: string;
-  tipo?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
+  tipo?: TipoBoton;
 }
 
 export interface CargueAdjuntoTabConfig {
@@ -35,7 +37,7 @@ export interface CargueAdjuntoTabConfig {
   iconoBoton?: string;
   colorBoton?: string;
   estiloBoton?: string;
-  tipoBoton?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
+  tipoBoton?: TipoBoton;
   tipoArchivo?: "pdf" | "xlsx";
   idTipoDocumento: number;
   descripcion: string;
@@ -46,6 +48,8 @@ export interface CargueAdjuntoTabConfig {
 
 export interface TabDocumento {
   nombre: string;
+  nombreDescarga?: string;
+  presufijo?: string;
   tipoId: number;
   fecha_subida?: string;
   obligatorio?: boolean;
@@ -60,6 +64,7 @@ export interface ModalVerDocumentosData {
   titulo?: string;
   descripcion?: string;
   sufijo?: string;
+  nombreArchivoDescarga?: string;
   tabs?: TabDocumento[];
   inferTabs?: boolean;
   tipo?: number;
@@ -71,14 +76,15 @@ export interface AccionFooterModal {
   nombre: string;
   icono?: string;
   color?: string;
-  tipoBoton?: 'flat' | 'stroked' | 'raised' | 'basic'; // Tipo de botón
+  tipoBoton?: TipoBoton;
   accion: () => boolean | Promise<boolean>;
 }
 
 @Component({
-  selector: "app-modal-ver-documentos",
-  templateUrl: "./modal-ver-documentos.component.html",
-  styleUrl: "./modal-ver-documentos.component.css",
+    selector: "app-modal-ver-documentos",
+    templateUrl: "./modal-ver-documentos.component.html",
+    styleUrl: "./modal-ver-documentos.component.css",
+    standalone: false
 })
 export class ModalVerDocumentosComponent implements OnInit {
   selectedTab: number = 0;
@@ -89,6 +95,7 @@ export class ModalVerDocumentosComponent implements OnInit {
   titulo: string = "Ver documentos";
   descripcion: string = "Documentos";
   suffix: string = "";
+  nombreArchivoDescarga: string = "documentos";
   textoBotonCerrar: string = "Regresar";
   consultarPorTipo: boolean = false;
   tabs: TabDocumento[] = [];
@@ -109,6 +116,9 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
     if (data.accionesFooter) this.accionesFooter = data.accionesFooter;
     if (data.tipo) this.consultarPorTipo = true;
+    if (data.nombreArchivoDescarga) {
+      this.nombreArchivoDescarga = data.nombreArchivoDescarga;
+    }
     if (data.sufijo) {
       this.suffix = data.sufijo ? data.sufijo : '';
     }
@@ -272,22 +282,22 @@ export class ModalVerDocumentosComponent implements OnInit {
     }
 
     const metadatos = {
-      ...(documentoActual.metadatos || {}),
-      ...(config.metadatosAdicionales || {}),
+      ...(documentoActual.metadatos ?? {}),
+      ...(config.metadatosAdicionales ?? {}),
     };
 
     const dialogRef = this.matDialog.open(CargarArchivoComponent, {
       width: "800px",
       data: {
-        tipoArchivo: config.tipoArchivo || "pdf",
-        id: documentoActual.referencia_id || this.data.entityId,
+        tipoArchivo: config.tipoArchivo ?? "pdf",
+        id: documentoActual.referencia_id ?? this.data.entityId,
         idTipoDocumento: config.idTipoDocumento,
         descripcion: config.descripcion,
         cargaLambda: false,
         tipoIdReferencia: documentoActual.tipo_id,
         referencia:
-          documentoActual.referencia_tipo ||
-          config.referenciaTipoFallback ||
+          documentoActual.referencia_tipo ??
+          config.referenciaTipoFallback ??
           "Auditoria",
         metadatos,
         documentoIdActualizar: documentoActual._id,
@@ -312,15 +322,42 @@ export class ModalVerDocumentosComponent implements OnInit {
   }
 
   async descargarTodo() {
-    const suffixNormalizado = this.suffix ? `-${this.suffix.replace(/\s+/g, '-')}` : '';
     try {
+      const documentosDescarga = this.obtenerDocumentosAsignadosATabs();
+      const suffixNormalizado = this.suffix ? `-${this.suffix.replace(/\s+/g, '-')}` : '';
+
       await this.descargaService.descargarMultiplesArchivos(
-        this.documentos,
-        `documentos${suffixNormalizado}.zip`,
+        documentosDescarga,
+        `${this.nombreArchivoDescarga}${suffixNormalizado}.zip`,
         this.suffix,
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
     }
   }
+
+  private obtenerDocumentosAsignadosATabs(): { base64: string; tipo_id: number; fileName: string }[] {
+    return this.tabs
+      .map((tab, index) => {
+        const documento = this.documentoInfoPorTab[index];
+        if (!documento?.base64) {
+          return null;
+        }
+
+        const nombreBase = tab.nombreDescarga ?? tab.nombre;
+        const segmentosNombre = [nombreBase];
+
+        if (tab.presufijo?.trim()) {
+          segmentosNombre.push(tab.presufijo.trim());
+        }
+
+        return {
+          base64: documento.base64,
+          tipo_id: tab.tipoId,
+          fileName: segmentosNombre.join("-"),
+        };
+      })
+      .filter((documento): documento is { base64: string; tipo_id: number; fileName: string } => !!documento);
+  }
+
 }

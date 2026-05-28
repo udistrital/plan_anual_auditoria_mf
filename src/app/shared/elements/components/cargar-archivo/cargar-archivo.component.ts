@@ -1,4 +1,4 @@
-import { PlanAnualAuditoriaMid } from "./../../../../core/services/plan-anual-auditoria-mid.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { Component, ElementRef, Inject, ViewChild } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -9,9 +9,9 @@ import { environment } from "src/environments/environment";
 import * as XLSX from "xlsx";
 
 @Component({
-  selector: "app-cargar-archivo",
-  templateUrl: "./cargar-archivo.component.html",
-  styleUrl: "./cargar-archivo.component.css",
+    selector: "app-cargar-archivo",
+    templateUrl: "./cargar-archivo.component.html",
+    standalone: false
 })
 export class CargarArchivoComponent {
   archivo: File | null = null;
@@ -19,11 +19,11 @@ export class CargarArchivoComponent {
 
   constructor(
     public dialogRef: MatDialogRef<CargarArchivoComponent>,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private nuxeoService: NuxeoService,
-    private alertService: AlertService,
-    private modalService: ModalService,
-    private referenciaPdfService: ReferenciaPdfService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
+    private readonly alertService: AlertService,
+    private readonly modalService: ModalService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
 
     @Inject(MAT_DIALOG_DATA)
     public data: {
@@ -255,7 +255,7 @@ export class CargarArchivoComponent {
         payload
       ).toPromise();
 
-      if (response && response.Data) {
+      if (response?.Data) {
         console.log("Archivo enviado exitosamente al MID", response);
         this.resultados(response.Data);
         return true;
@@ -294,7 +294,7 @@ export class CargarArchivoComponent {
           console.log("Archivo subido a Nuxeo", response);
           resolve(response[0]);
         },
-        error: (error) => {
+        error: (error: Error) => {
           this.alertService.showErrorAlert("Error al subir el archivo.");
           console.error("Error al subir el archivo", error);
           reject(error);

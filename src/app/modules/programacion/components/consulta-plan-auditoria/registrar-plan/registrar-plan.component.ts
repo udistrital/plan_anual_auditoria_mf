@@ -7,12 +7,12 @@ import { FormularioDinamicoComponent } from "src/app/shared/elements/components/
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { formularioPAA } from "./registrar-plan.utilidades";
-import { Auditoria } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria";
 
 @Component({
-  selector: "app-registrar-plan",
-  templateUrl: "./registrar-plan.component.html",
-  styleUrl: "./registrar-plan.component.css",
+    selector: "app-registrar-plan",
+    templateUrl: "./registrar-plan.component.html",
+    styleUrl: "./registrar-plan.component.css",
+    standalone: false
 })
 export class RegistrarPlanComponent implements OnInit {
   @ViewChild(FormularioDinamicoComponent)
@@ -31,18 +31,18 @@ export class RegistrarPlanComponent implements OnInit {
   // parametros: Record<string, any> = {};
 
   constructor(
-    private alertaService: AlertService,
-    private cdr: ChangeDetectorRef,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private route: ActivatedRoute,
-    private router: Router
+    private readonly alertaService: AlertService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.route.params.subscribe(async (params) => {
       this.planId = params["id"];
-      this.vigenciaNombre = localStorage.getItem('vigencia') || '';
+      this.vigenciaNombre = localStorage.getItem('vigencia') ?? '';
       this.inicializarFormulario();
 
       try {
@@ -86,11 +86,9 @@ export class RegistrarPlanComponent implements OnInit {
         .get(`estado?query=plan_auditoria_id:${this.planId},actual:true`)
         .toPromise();
       const estadoActual = response?.Data?.[0];
-      this.estadoIdActual = estadoActual?.estado_id || null;
-      this.modoEditar,
-        (this.modoEditar =
-          this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
-          this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO);
+      this.estadoIdActual = estadoActual?.estado_id ?? null;
+      this.modoEditar = (this.estadoIdActual === environment.PLAN_ESTADO.EN_BORRADOR_ID ||
+        this.estadoIdActual === environment.PLAN_ESTADO.RECHAZADO);
       this.actualizarEstadoCampos();
     } catch (error) {
       console.error("Error al obtener el estado actual:", error);
@@ -116,16 +114,16 @@ export class RegistrarPlanComponent implements OnInit {
       this.formulario.campos?.forEach((campo) => {
         switch (campo.nombre) {
           case "objetivo":
-            campo.valor = objetivo || "";
+            campo.valor = objetivo ?? '';
             break;
           case "alcance":
-            campo.valor = alcance || "";
+            campo.valor = alcance ?? '';
             break;
           case "criterio":
-            campo.valor = criterio || "";
+            campo.valor = criterio ?? '';
             break;
           case "recurso":
-            campo.valor = recurso || "";
+            campo.valor = recurso ?? '';
             break;
           default:
             break;
@@ -210,7 +208,6 @@ export class RegistrarPlanComponent implements OnInit {
         content: planData.recurso,
       },
     ];
-    return;
   }
 
   regresarRuta() {

@@ -7,16 +7,15 @@ import {
 } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 
-import { environment } from "src/environments/environment";
-
 //servicios
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
-  selector: "app-modal-pdf-visualizador",
-  templateUrl: "./pdf-visualizador.component.html",
-  styleUrls: ["./pdf-visualizador.component.css"],
+    selector: "app-modal-pdf-visualizador",
+    templateUrl: "./pdf-visualizador.component.html",
+    styleUrls: ["./pdf-visualizador.component.css"],
+    standalone: false
 })
 export class ModalPdfVisualizadorComponent implements OnInit {
   @ViewChild("pdfCanvas", { static: true })
@@ -28,8 +27,8 @@ export class ModalPdfVisualizadorComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: { base64Document: string; id: string, vigenciaNombre: string, actualizado: boolean },
-    private alertService: AlertService,
-    private descargaService: DescargaService,
+    private readonly alertService: AlertService,
+    private readonly descargaService: DescargaService,
   ) { }
 
   ngOnInit() {

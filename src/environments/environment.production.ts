@@ -1,10 +1,11 @@
 export const environment = {
-  production: false,
+  production: true,
 
   AUTENTICACION_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
+  NOTIFICACIONES_HABILITADAS: false,
   ORIGEN_CORREO_NOTIFICACIONES:
     "sisifonotificaciones@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
@@ -256,4 +257,5 @@ export const environment = {
   },
 
   DIAS_REVISION_PREINFORME: 3,
+  DEPENDENCIA_OCI_ID: 32,
 };

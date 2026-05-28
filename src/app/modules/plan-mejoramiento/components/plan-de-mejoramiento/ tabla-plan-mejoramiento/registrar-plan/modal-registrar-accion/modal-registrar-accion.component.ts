@@ -19,9 +19,10 @@ export interface Dependencia {
 }
 
 @Component({
-  selector: 'app-modal-registrar-accion',
-  templateUrl: './modal-registrar-accion.component.html',
-  styleUrls: ['./modal-registrar-accion.component.css'],
+    selector: 'app-modal-registrar-accion',
+    templateUrl: './modal-registrar-accion.component.html',
+    styleUrls: ['./modal-registrar-accion.component.css'],
+    standalone: false
 })
 export class ModalRegistrarAccionComponent implements OnInit {
   form!: FormGroup;

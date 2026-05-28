@@ -10,28 +10,32 @@
   <div class="row mt-3">
     <div class="col-12">
       <!-- Selector -->
-      <div class="section" *ngIf="permisoCreacion">
-        <div class="filter-section">
-          <mat-form-field appearance="outline" style="width: 320px">
-            <mat-label>Seleccione el año del PAA:</mat-label>
-            <mat-icon color="primary" matPrefix>today</mat-icon>
-            <mat-select id="ano-select" [(value)]="selectedYearId">
-              <mat-option *ngFor="let year of years" [value]="year.Id">
-                {{ year.Nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <button
-            mat-raised-button
-            color="primary"
-            class="mx-3"
-            (click)="crearPlan()"
-          >
-            Crear PAA
-          </button>
+      @if (permisoCreacion) {
+        <div class="section">
+          <div class="filter-section">
+            <mat-form-field appearance="outline" style="width: 320px">
+              <mat-label>Seleccione el año del PAA:</mat-label>
+              <mat-icon color="primary" matPrefix>today</mat-icon>
+              <mat-select id="ano-select" [(value)]="selectedYearId">
+                @for (year of years; track year) {
+                  <mat-option [value]="year.Id">
+                    {{ year.Nombre }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-raised-button
+              color="primary"
+              class="mx-3"
+              (click)="crearPlan()"
+              >
+              Crear PAA
+            </button>
+          </div>
+          <p>Seleccione el año del PAA de auditoría (PAA) a realizar</p>
         </div>
-        <p>Seleccione el año del PAA de auditoría (PAA) a realizar</p>
-      </div>
+      }
 
       <div class="row mt-3">
         <div class="col-12">
@@ -52,7 +56,7 @@
                   mat-cell
                   *matCellDef="let element; let i = index"
                   [ngClass]="{ 'even-row': i % 2 === 0 }"
-                >
+                  >
                   {{ i + 1 + offset }}
                 </td>
               </ng-container>
@@ -101,27 +105,28 @@
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
                 <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-                  <ng-container *ngIf="element.acciones?.length > 0">
+                  @if (element.acciones?.length > 0) {
                     <button
                       mat-icon-button
                       color="primary"
                       [matMenuTriggerFor]="menu"
-                    >
+                      >
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
-                      <button
-                        mat-menu-item
-                        (click)="realizarAccion(element, accion)"
-                        *ngFor="let accion of element.acciones"
-                      >
-                        <mat-icon color="primary">{{
-                          getIconoAccion(accion)
-                        }}</mat-icon>
-                        <span>{{ accion }}</span>
-                      </button>
+                      @for (accion of element.acciones; track accion) {
+                        <button
+                          mat-menu-item
+                          (click)="realizarAccion(element, accion)"
+                          >
+                          <mat-icon color="primary">{{
+                            getIconoAccion(accion)
+                          }}</mat-icon>
+                          <span>{{ accion }}</span>
+                        </button>
+                      }
                     </mat-menu>
-                  </ng-container>
+                  }
                 </td>
               </ng-container>
 

@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
+import { Subscription } from "rxjs";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -11,6 +12,7 @@ import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/d
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { ModalVisualizarRecargarCompromisoEticoComponent } from "./modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
+import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface CartaRepresentacionDocumento {
   base64: string;
@@ -39,11 +41,12 @@ interface DocumentoAdjuntoInicial {
 }
 
 @Component({
-  selector: "app-documentos-anexos-auditoria",
-  templateUrl: "./documentos-anexos-auditoria.component.html",
-  styleUrls: ["./documentos-anexos-auditoria.component.css"],
+    selector: "app-documentos-anexos-auditoria",
+    templateUrl: "./documentos-anexos-auditoria.component.html",
+    styleUrls: ["./documentos-anexos-auditoria.component.css"],
+    standalone: false
 })
-export class DocumentosAnexosAuditoriaComponent implements OnInit {
+export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
   @Output() guardarDocumentos = new EventEmitter<any>();
   @Input() soloLectura: boolean = false;
 
@@ -54,6 +57,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   documentosExistentes: { [tipoId: number]: string | null } = {};
   cartasRepresentacionEsperadas: CartaRepresentacionDocumento[] = [];
   cartasRepresentacionExistentes: CartaRepresentacionPersistida[] = [];
+  private routeSubscription: Subscription | null = null;
 
   documentos = [
     {
@@ -93,10 +97,30 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-    await this.cargarCartasRepresentacionEsperadas();
-    await this.cargarEstadoDocumentos();
-    await this.cargarCompromisoEticoDesdeEstadoInicial();
+    this.routeSubscription = this.route.paramMap.subscribe(async (params) => {
+      const newAuditoriaId = params.get("id");
+      if (!newAuditoriaId || newAuditoriaId === this.auditoriaId) {
+        return;
+      }
+
+      this.auditoriaId = newAuditoriaId;
+      this.resetDocumentoState();
+      await this.cargarCartasRepresentacionEsperadas();
+      await this.cargarEstadoDocumentos();
+      await this.cargarCompromisoEticoDesdeEstadoInicial();
+    });
+  }
+
+  ngOnDestroy() {
+    this.routeSubscription?.unsubscribe();
+  }
+
+  private resetDocumentoState(): void {
+    this.idCompromisoEtico = null;
+    this.base64CompromisoEtico = null;
+    this.documentosExistentes = {};
+    this.cartasRepresentacionExistentes = [];
+    this.cartasRepresentacionEsperadas = [];
   }
 
   private async cargarCartasRepresentacionEsperadas(): Promise<void> {
@@ -108,19 +132,12 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         });
       });
 
-      const auditoria = res?.Data || {};
-      const dependenciasIds = Array.isArray(auditoria.dependencia_id) ? auditoria.dependencia_id : [];
-      const dependenciasNombres = Array.isArray(auditoria.dependencia_nombre)
-        ? auditoria.dependencia_nombre
-        : typeof auditoria.dependencia_nombre === "string" && auditoria.dependencia_nombre.length > 0
-          ? [auditoria.dependencia_nombre]
-          : [];
-
-      this.cartasRepresentacionEsperadas = dependenciasIds.map((dependenciaId: number, index: number) => ({
+      const auditoria: Auditoria = res?.Data ?? {};
+      this.cartasRepresentacionEsperadas = auditoria.dependencia_id.map((dependenciaId: number, index: number) => ({
         base64: "",
         dependenciaId,
         dependenciaNombre: this.normalizarNombreDependencia(
-          dependenciasNombres[index],
+          auditoria.dependencia_nombre[index],
           `Dependencia ${index + 1}`
         ),
         guardado: false,
@@ -140,7 +157,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
       this.documentos.forEach((documento) => {
         const tipoDocumento = documento.parametro;
-        const documentosDelTipo = (documentosPorTipo.get(tipoDocumento) || []).filter(
+        const documentosDelTipo = (documentosPorTipo.get(tipoDocumento) ?? []).filter(
           (adjunto) => !!adjunto.nuxeo_enlace
         );
 
@@ -148,11 +165,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           const cartasVigentes = documentosDelTipo.map((documentoAdjunto, index) => {
             const dependenciaId =
               typeof documentoAdjunto?.metadatos?.["dependencia_id"] === "number"
-                ? (documentoAdjunto.metadatos?.["dependencia_id"] as number)
+                ? (documentoAdjunto.metadatos?.["dependencia_id"])
                 : null;
 
             return {
-              nuxeoId: documentoAdjunto.nuxeo_enlace || null,
+              nuxeoId: documentoAdjunto.nuxeo_enlace ?? null,
               dependenciaNombre: this.resolverNombreDependencia(
                 dependenciaId,
                 documentoAdjunto?.nombre,
@@ -164,11 +181,11 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
           this.cartasRepresentacionExistentes = this.filtrarCartasRepresentacionVigentes(cartasVigentes);
 
-          this.documentosExistentes[tipoDocumento] = this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+          this.documentosExistentes[tipoDocumento] = this.cartasRepresentacionExistentes[0]?.nuxeoId ?? null;
           return;
         }
 
-        this.documentosExistentes[tipoDocumento] = documentosDelTipo[0]?.nuxeo_enlace || null;
+        this.documentosExistentes[tipoDocumento] = documentosDelTipo[0]?.nuxeo_enlace ?? null;
 
         if (tipoDocumento === environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO) {
           this.idCompromisoEtico = this.documentosExistentes[tipoDocumento];
@@ -193,14 +210,14 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
         )
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data)) {
+            if (Array.isArray(res?.Data)) {
               resolve(res.Data as DocumentoAdjuntoInicial[]);
               return;
             }
 
             resolve([]);
           },
-          (error) => {
+          (error: Error) => {
             reject(error);
           }
         );
@@ -212,7 +229,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   ): Map<number, DocumentoAdjuntoInicial[]> {
     return documentosAdjuntos.reduce((mapa, documentoAdjunto) => {
       const tipoId = documentoAdjunto.tipo_id;
-      const listaActual = mapa.get(tipoId) || [];
+      const listaActual = mapa.get(tipoId) ?? [];
       listaActual.push(documentoAdjunto);
       mapa.set(tipoId, listaActual);
       return mapa;
@@ -291,7 +308,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           );
 
           return {
-            base64: cartaRenderizada?.base64 || "",
+            base64: cartaRenderizada?.base64 ?? '',
             dependenciaNombre: esperada.dependenciaNombre,
             dependenciaId: esperada.dependenciaId,
             guardado: false,
@@ -322,9 +339,9 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
    */
   private async cargarCompromisoEtico(): Promise<void> {
     try {
-      if (this.idCompromisoEtico === null) {
-        this.idCompromisoEtico = await this.buscarCompromisoEtico();
-      }
+      // Limpiar estado visible inmediatamente para evitar mostrar el documento anterior
+      this.base64CompromisoEtico = null;
+      this.idCompromisoEtico = await this.buscarCompromisoEtico();
 
       if (this.idCompromisoEtico !== null) {
         await this.buscarBase64(this.idCompromisoEtico);
@@ -338,6 +355,9 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   private async cargarCompromisoEticoDesdeEstadoInicial(): Promise<void> {
     try {
+      // Siempre consultar el nuxeo_enlace actual en la carga inicial
+      this.base64CompromisoEtico = null;
+      this.idCompromisoEtico = await this.buscarCompromisoEtico();
       if (this.idCompromisoEtico !== null) {
         await this.buscarBase64(this.idCompromisoEtico);
       } else {
@@ -379,13 +399,13 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       this.planAnualAuditoriaService.get(`documento?query=referencia_id:${this.auditoriaId},referencia_tipo:Auditoria,tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO},activo:true&fields=nuxeo_enlace`)
         .subscribe(
           (res) => {
-            if (res && Array.isArray(res.Data) && res.Data.length > 0) {
+            if (res?.Data?.length > 0) {
               resolve(res.Data[0].nuxeo_enlace);
             } else {
               resolve(null);
             }
           },
-          (error) => {
+          (error: Error) => {
             console.log("Error al buscar el compromiso Ético");
             this.alertService.showErrorAlert("Error al buscar Compromiso Ético");
             reject(error);
@@ -398,20 +418,36 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     this.base64CompromisoEtico = await this.nuxeoService.obtenerPorUUID(nuxeoId);
   }
 
-  verCompromisoEtico() {
+  private async asegurarCompromisoEticoCargado(): Promise<void> {
+    if (this.base64CompromisoEtico) {
+      return;
+    }
+
+    if (this.idCompromisoEtico) {
+      await this.buscarBase64(this.idCompromisoEtico);
+      return;
+    }
+
+    await this.cargarCompromisoEtico();
+  }
+
+  async verCompromisoEtico() {
+    await this.asegurarCompromisoEticoCargado();
+
     const dialogRef = this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
-      data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+      data: {
+        base64Document: this.base64CompromisoEtico,
+        id: this.auditoriaId,
+        onUpdated: (newBase64: string) => {
+          this.base64CompromisoEtico = newBase64;
+        },
+      },
       width: "1000px",
       autoFocus: false,
     });
 
-    dialogRef.afterClosed().subscribe((resultado: boolean | 'deleted') => {
-      if (resultado === 'deleted') {
-        this.base64CompromisoEtico = null;
-        this.idCompromisoEtico = null;
-      } else if (resultado === true) {
-        this.cargarCompromisoEtico();
-      }
+    dialogRef.afterClosed().subscribe(() => {
+      // No es necesario recargar si el modal ya actualizó el base64 vía onUpdated.
     });
   }
 
@@ -441,7 +477,6 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
           }));
 
           this.verDocumentoMultiple(cartas, documento, documentosDOCX);
-          return;
         });
       }
 
@@ -524,7 +559,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
           items.forEach(({ indice, infoDocumento: info }, i) => {
             const documentoRefNuxeo = responses[i];
-            const enlaceDocumento = documentoRefNuxeo?.res?.Enlace || null;
+            const enlaceDocumento = documentoRefNuxeo?.res?.Enlace ?? null;
 
             this.guardarReferencia(
               documentoRefNuxeo,
@@ -564,7 +599,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
                   }
 
                   this.documentosExistentes[info.parametro] =
-                    this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+                    this.cartasRepresentacionExistentes[0]?.nuxeoId ?? null;
                 } else {
                   this.documentosExistentes[info.parametro] = enlaceDocumento;
                 }
@@ -670,7 +705,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
       this.nuxeoService.guardarArchivos([payload]).subscribe({
         next: (response: any) => {
           const documentoRefNuxeo = response[0];
-          const enlaceDocumento = documentoRefNuxeo?.res?.Enlace || null;
+          const enlaceDocumento = documentoRefNuxeo?.res?.Enlace ?? null;
 
           this.guardarReferencia(
             documentoRefNuxeo,
@@ -712,7 +747,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
                 }
 
                 this.documentosExistentes[infoDocumento.parametro] =
-                  this.cartasRepresentacionExistentes[0]?.nuxeoId || null;
+                  this.cartasRepresentacionExistentes[0]?.nuxeoId ?? null;
               } else {
                 this.documentosExistentes[infoDocumento.parametro] = enlaceDocumento;
               }
@@ -761,7 +796,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   private mapearCartasDesdeRespuestaPlantilla(data: any): CartaRepresentacionDocumento[] {
     if (Array.isArray(data)) {
       return data.map((item: any, index: number) => ({
-        base64: item?.base64 || "",
+        base64: item?.base64 ?? '',
         dependenciaNombre: this.normalizarNombreDependencia(
           item?.dependencia_nombre,
           this.resolverNombreDependencia(
@@ -777,7 +812,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
     return [
       {
-        base64: data || "",
+        base64: data ?? '',
         dependenciaNombre: "Dependencia 1",
         dependenciaId: null,
         guardado: false,

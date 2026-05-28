@@ -12,9 +12,10 @@ import { RolService } from "src/app/core/services/rol.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-tabla-consulta-auditorias",
-  templateUrl: "./tabla-consulta-auditorias.component.html",
-  styleUrl: "./tabla-consulta-auditorias.component.css",
+    selector: "app-tabla-consulta-auditorias",
+    templateUrl: "./tabla-consulta-auditorias.component.html",
+    styleUrl: "./tabla-consulta-auditorias.component.css",
+    standalone: false
 })
 export class TablaConsultaAuditoriasComponent {
   @Input() vigenciaId: any;
@@ -64,7 +65,7 @@ export class TablaConsultaAuditoriasComponent {
             this.planAuditoriaId = tienePAAAprobado ? res.Data[0]?._id : "";
             resolve(tienePAAAprobado);
           },
-          error: (error) => {
+          error: (error: Error) => {
             console.error("Error al verificar PAA aprobado:", error);
             reject(error);
           }

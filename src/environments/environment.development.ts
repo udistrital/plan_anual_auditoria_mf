@@ -5,6 +5,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
+  NOTIFICACIONES_HABILITADAS: false,
   ORIGEN_CORREO_NOTIFICACIONES:
     "sisifonotificaciones@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
@@ -21,7 +22,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
-  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "f5703026-3fc8-48d1-bb41-fd2479656c23",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
@@ -256,4 +257,5 @@ export const environment = {
   },
 
   DIAS_REVISION_PREINFORME: 3,
+  DEPENDENCIA_OCI_ID: 32,
 };

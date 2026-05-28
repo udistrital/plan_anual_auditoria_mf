@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
@@ -7,21 +7,22 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { Actividad as ActividadPlan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual-auditoria"
 import { Actividad } from "src/app/shared/data/models/actividad";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
-import  { EditarActividadComponent } from './editar-actividad/editar-actividad.component'
+import { EditarActividadComponent } from './editar-actividad/editar-actividad.component'
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-actividades-auditoria",
-  templateUrl: "./actividades-auditoria.component.html",
-  styleUrls: ["./actividades-auditoria.component.css"],
+    selector: "app-actividades-auditoria",
+    templateUrl: "./actividades-auditoria.component.html",
+    styleUrls: ["./actividades-auditoria.component.css"],
+    standalone: false
 })
 export class ActividadesAuditoriaComponent implements OnInit {
-  @Input() idAuditoria!: String;
+  @Input() idAuditoria!: string;
   @Input() soloLectura: boolean = false;
-  @Input() minFechaStr!: String;
-  @Input() maxFechaStr!: String;
+  @Input() minFechaStr!: string;
+  @Input() maxFechaStr!: string;
   minFecha: Date | null = null;
   maxFecha: Date | null = null;
   datos = new MatTableDataSource<any>([]);
@@ -41,15 +42,18 @@ export class ActividadesAuditoriaComponent implements OnInit {
   ];
 
   constructor(
-    public dialog: MatDialog,
-    private planAuditoriaMid: PlanAnualAuditoriaMid,
-    private alertaService: AlertService,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private nuxeoService: NuxeoService,
-    private descargaService: DescargaService,
+    public readonly dialog: MatDialog,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly alertaService: AlertService,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly descargaService: DescargaService,
   ) {}
 
-  resetComponent() { }
+  resetComponent() {
+    console.log("Reseteando componente de actividades de auditoría");
+  }
+  
   onStepLeave() {
     this.resetComponent();
   }
@@ -62,7 +66,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
   }
 
   subirArchivo(tipoArchivo: string): void {
-    const dialogRef = this.dialog.open(CargarArchivoComponent, {
+    this.dialog.open(CargarArchivoComponent, {
       width: "600px",
       data: { tipoArchivo },
     });
@@ -95,7 +99,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
       .subscribe((res) => {
         const actividades: any[] = res.Data;
 
-        if (!(actividades.length > 0)) {
+        if (actividades.length === 0) {
           return this.alertaService.showAlert(
             "No hay actividades registradas",
             "Actualmente no hay actividades registradas para la vigencia seleccionada."

@@ -10,9 +10,11 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
+import { forkJoin, of } from "rxjs";
+import { catchError, map, switchMap } from "rxjs/operators";
 import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
+import { accionesPlanMejoramiento } from "src/app/shared/utils/accionesPorRolYEstado";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
-import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -20,15 +22,15 @@ import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 
 @Component({
-  selector: "app-tabla-plan-mejoramiento",
-  templateUrl: "./tabla-plan-mejoramiento.component.html",
-  styleUrls: ["./tabla-plan-mejoramiento.component.css"],
+    selector: "app-tabla-plan-mejoramiento",
+    templateUrl: "./tabla-plan-mejoramiento.component.html",
+    styleUrls: ["./tabla-plan-mejoramiento.component.css"],
+    standalone: false
 })
 export class TablaPlanMejoramientoComponent implements OnInit {
   @Input() vigenciaId: any;
   @Input() tipoEvaluacionId: any;
   @Input() role: any;
-  @Input() personaId: any;
   @Input() accionesPermitidas: string[] | null = null;
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -55,6 +57,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     ["Asignar Auditor(es)",       "manage_accounts"],
     ["Registrar Plan",            "edit"],
     ["Enviar a Revisión",         "send"],
+    ["Aprobar Plan",              "check_circle"],
+    ["Rechazar Plan",             "cancel"],
     ["Ver Documentos Auditoría",  "description"],
   ]);
 
@@ -63,15 +67,13 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
     private readonly router: Router
   ) {}
 
-  async ngOnInit() {
+  ngOnInit(): void {
     this.roles = this.rolService.getRoles();
-    this.usuarioId = await this.userService.getPersonaId();
     this.configurarTipoConsulta();
   }
 
@@ -79,17 +81,18 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     if (this.rolService.tieneRol(environment.ROL.JEFE_DEPENDENCIA)) {
       this.tipoConsulta = "auditado";
       this.cargoId = environment.CARGO.JEFE_DEPENDENCIA_ID;
+      this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     } else if (this.rolService.tieneRol(environment.ROL.ASISTENTE_DEPENDENCIA)) {
       this.tipoConsulta = "auditado";
       this.cargoId = environment.CARGO.ASISTENTE_DEPENDENCIA_ID;
+      this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     } else if (
       this.rolService.tieneRol(environment.ROL.AUDITOR) ||
       this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE) ||
       this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
     ) {
       this.tipoConsulta = "auditor";
-    } else {
-      this.tipoConsulta = "general";
+      this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     }
   }
 
@@ -103,13 +106,53 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     this.tipoEvaluacionId = tipoEvaluacionId;
     this.planesPorVigencia = [];
 
-    const baseQuery = `vigencia_id:${vigenciaId},tipo_evaluacion_id:${tipoEvaluacionId},activo:true`;
+    const estadoEjecucionFinal = environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE;
+    const baseQuery = `vigencia_id:${vigenciaId},tipo_evaluacion_id:${tipoEvaluacionId},activo:true,estado_id:${estadoEjecucionFinal}`;
     const endpoint = this.construirEndpoint(baseQuery, limit, offset);
 
-    this.planAuditoriaMid.get(endpoint).subscribe({
-      next: (res) => {
+    this.planAuditoriaMid.get(endpoint).pipe(
+      switchMap((res) => {
         const auditorias: any[] = res?.Data ?? [];
 
+        if (!auditorias.length) {
+          return of({ auditorias: [], count: 0, planes: [], auditores: [] });
+        }
+
+        const planes$ = forkJoin(
+          auditorias.map((a) =>
+            this.planAuditoriaMid
+              .get(`plan-mejoramiento?query=auditoria_id:${a._id},activo:true`)
+              .pipe(catchError(() => of({ Data: [] })))
+          )
+        );
+
+        return planes$.pipe(
+          switchMap((planesRes) => {
+            const planes = planesRes.map((r: any) => r.Data?.[0] ?? null);
+
+            const auditores$ = forkJoin(
+              planes.map((plan: any) =>
+                plan
+                  ? this.planAuditoriaMid
+                      .get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${plan._id},activo:true`)
+                      .pipe(catchError(() => of({ Data: [] })))
+                  : of({ Data: [] })
+              )
+            );
+
+            return auditores$.pipe(
+              map((auditoresRes) => ({
+                auditorias,
+                count: res?.MetaData?.Count ?? auditorias.length,
+                planes,
+                auditores: auditoresRes,
+              }))
+            );
+          })
+        );
+      })
+    ).subscribe({
+      next: ({ auditorias, count, planes, auditores }) => {
         if (!auditorias.length) {
           this.alertaService.showAlert(
             "Sin resultados",
@@ -119,15 +162,25 @@ export class TablaPlanMejoramientoComponent implements OnInit {
           return;
         }
 
-        this.planesPorVigencia = auditorias.map((auditoria: any) => {
-          const estadoId = auditoria.estado?.estado_id ?? auditoria.estado_id;
+        this.planesPorVigencia = auditorias.map((auditoria: any, i: number) => {
+          const plan = planes[i];
+          const estadoPlanId = plan?.estado_id
+            ?? environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO;
+          const auditoresPlan = ((auditores as any[])[i]?.Data ?? []).map((a: any) => ({
+            nombre: a.auditor_nombre ?? `Auditor ${a.auditor_id}`,
+          }));
+
           return {
             ...auditoria,
-            acciones: this.getAccionesPorRolYEstado(estadoId),
+            planMejoramientoId: plan?._id ?? null,
+            estadoPlanId,
+            estadoPlanNombre: plan?.estado_nombre ?? null,
+            auditores_plan: auditoresPlan,
+            acciones: this.getAccionesPorRolYEstado(estadoPlanId),
           };
         });
 
-        this.totalRegistros = res?.MetaData?.Count ?? auditorias.length;
+        this.totalRegistros = count;
         this.banderaTablePlanes = true;
         this.construirTabla();
       },
@@ -144,17 +197,18 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   private construirEndpoint(baseQuery: string, limit: number, offset: number): string {
     switch (this.tipoConsulta) {
       case "auditado":
-        return `auditoria/auditado/${this.personaId}/${this.cargoId}?query=${baseQuery}&limit=${limit}&offset=${offset}`;
+        return `auditoria/auditado/${this.usuarioId}/${this.cargoId}?query=${baseQuery}&limit=${limit}&offset=${offset}`;
       case "auditor":
-        return `auditoria/auditor/${this.personaId}?query=${baseQuery}&limit=${limit}&offset=${offset}`;
+        return `auditoria/auditor/${this.usuarioId}?query=${baseQuery}&limit=${limit}&offset=${offset}`;
       default:
         return `auditoria?query=${baseQuery}&limit=${limit}&offset=${offset}`;
     }
   }
 
   getAccionesPorRolYEstado(estadoId: number): string[] {
-    // para traer las acciones posterior del ./utils/accionesPorRolYEstado
-    const acciones = ["Asignar Auditor(es)", "Registrar Plan", "Enviar a Revisión", "Ver Documentos Auditoría"];
+    const acciones = Array.from(
+      new Set(this.roles.flatMap(rol => accionesPlanMejoramiento[rol]?.[estadoId] ?? []))
+    );
     return this.accionesPermitidas
       ? acciones.filter(a => this.accionesPermitidas!.includes(a))
       : acciones;
@@ -169,6 +223,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       "Asignar Auditor(es)":      () => this.asignarAuditores(plan),
       "Registrar Plan":           () => this.registrarPlan(plan),
       "Enviar a Revisión":        () => this.enviarAprobacion(plan),
+      "Aprobar Plan":             () => this.aprobarPlan(plan),
+      "Rechazar Plan":            () => this.rechazarPlan(plan),
       "Ver Documentos Auditoría": () => this.verDocumentosAuditoria(plan),
     };
     acciones[accion]?.();
@@ -190,10 +246,16 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       this.router.navigate([`/plan-mejoramiento/registrar-plan/${plan._id}`]);
   }
 
-  enviarAprobacion(plan: any): void {
+  enviarAprobacion(_plan: any): void {
   }
 
-  verDocumentosAuditoria(plan: any): void {
+  aprobarPlan(_plan: any): void {
+  }
+
+  rechazarPlan(_plan: any): void {
+  }
+
+  verDocumentosAuditoria(_plan: any): void {
   }
 
   private resetTabla(): void {
@@ -209,12 +271,10 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     this.tablaColumnas = this.planesConstructorTabla.map((c: any) => c.columnDef);
     this.planesDataSource = new MatTableDataSource(this.planesPorVigencia);
     if (this.paginator) {
-      this.planesDataSource.paginator = this.paginator;
       this.paginator.length = this.totalRegistros;
       this.paginator.pageSize = this.pageSize;
       this.paginator.pageIndex = this.pageIndex;
     }
-    if (this.sort) this.planesDataSource.sort = this.sort;
     this.changeDetector.detectChanges();
   }
 

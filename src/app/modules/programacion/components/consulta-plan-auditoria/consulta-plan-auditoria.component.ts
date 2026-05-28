@@ -10,12 +10,12 @@ import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual
 import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalListaRechazosComponent } from "./modal-lista-rechazos/modal-lista-rechazos.component";
+import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
-import { catchError, exhaustMap, Observable, of, tap, throwError } from "rxjs";
+import { catchError, exhaustMap, forkJoin, Observable, of, tap, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
@@ -26,14 +26,15 @@ import {
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { ModalEnviarAprobacionComponent } from "./modal-enviar-aprobacion/modal-enviar-aprobacion.component";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
 @Component({
-  selector: "app-consulta-plan-auditoria",
-  templateUrl: "./consulta-plan-auditoria.component.html",
-  styleUrls: ["./consulta-plan-auditoria.component.css"],
+    selector: "app-consulta-plan-auditoria",
+    templateUrl: "./consulta-plan-auditoria.component.html",
+    styleUrls: ["./consulta-plan-auditoria.component.css"],
+    standalone: false
 })
 export class ConsultaPlanAuditoriaComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -74,7 +75,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
-    private rolService: RolService,
+    private readonly rolService: RolService,
     private readonly userService: UserService,
     private readonly notificacionesService: NotificacionesService,
     private readonly tercerosService: TercerosService,
@@ -137,7 +138,6 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   cargarPlanesAuditoria(limit: number, offset: number) {
-    const EN_BORRADOR_ID = environment.PLAN_ESTADO.EN_BORRADOR_ID;
     this.PlanAnualAuditoriaMid.get(
       `plan-auditoria?sortby=vigencia_id&order=desc&query=&limit=${limit}&offset=${offset}`
     ).subscribe(
@@ -203,7 +203,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
             const estadoBody = this.construirEstado(
               planAuditoriaId,
-              environment.PLAN_ESTADO.EN_BORRADOR_ID
+              environment.PLAN_ESTADO.EN_BORRADOR_ID,
+              "",
+              this.roles[0]
             );
 
             this.planAnualAuditoriaService.post("estado", estadoBody).subscribe(
@@ -234,8 +236,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
         },
         (error) => {
           if (
-            error.error?.Data &&
-            error.error.Data.includes("Ya existe un plan")
+            error?.error?.Data.includes("Ya existe un plan")
           ) {
             this.alertaService.showAlert(
               "SELECCIONE OTRA VIGENCIA",
@@ -258,7 +259,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesProgramacion[rol]?.[estado] ?? [])
       )
     );
   }
@@ -379,15 +380,22 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
    * @returns An observable representing the full notification + registration process.
    */
   notificarEnvioPlan(element: any): Observable<any> {
-    return this.tercerosService.getAuthenticatedUserTerceroIdentification().pipe(
+    return forkJoin({
+      usuario: this.tercerosService.getAuthenticatedUserTerceroIdentification(),
+      jefeOCI: this.tercerosService.getJefeOCI(),
+    }).pipe(
 
       // Fetch the full name of the sender
-      exhaustMap((terceroIdentification) => of(terceroIdentification.NombreCompleto)),
+      exhaustMap(({ usuario,  jefeOCI }) => {
+        const nombreRemitente = usuario?.NombreCompleto || "Usuario";
+        const correoJefe = jefeOCI?.UsuarioWSO2;
+        return of({ nombreRemitente, correoJefe });
+      }),
 
-      exhaustMap((nombreRemitente) => {
-        const rolRemitente = rolRemitentePorRol[this.roles[0]] || "Usuario";
+      exhaustMap((datosNotificacion) => {
+        const rolRemitente = rolRemitentePorRol[this.roles[0]] ?? "Usuario";
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
-          [],
+          [datosNotificacion.correoJefe],
           environment["NOTIFICACION_PLAN_AUDITORIA_DESTINATARIOS"]
         );
         const variablesSolicitud: VariablesSolicitud = {
@@ -396,7 +404,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           nombre_documento: "Plan Anual de Auditoría",
           vigencia: element.vigencia,
           rol_remitente: rolRemitente,
-          nombre_remitente: nombreRemitente || rolRemitente,
+          nombre_remitente: datosNotificacion.nombreRemitente || rolRemitente,
           fecha_envio: new Date().toLocaleDateString()
         };
 
@@ -480,9 +488,17 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   }
 
   verMotivosRechazo(plan: any) {
-    const dialogRef = this.dialog.open(ModalListaRechazosComponent, {
+    this.dialog.open(ModalHistorialRechazosComponent, {
       width: "1000px",
-      data: plan,
+      data: {
+        auditoriaId: plan.id,
+        estadoIds: [
+          environment.PLAN_ESTADO.RECHAZADO,
+        ],
+        tipoEntidad: "plan",
+        titulo: "Historial de observaciones",
+        descripcion: `Historial de observaciones - Plan Anual de Auditoría ${plan.vigencia}`,
+      },
       autoFocus: false,
     });
   }

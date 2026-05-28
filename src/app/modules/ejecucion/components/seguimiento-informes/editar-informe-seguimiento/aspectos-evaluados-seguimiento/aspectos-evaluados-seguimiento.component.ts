@@ -25,12 +25,14 @@ interface Tema {
 }
 
 @Component({
-  selector: 'app-aspectos-evaluados-seguimiento',
-  templateUrl: './aspectos-evaluados-seguimiento.component.html',
-  styleUrls: ['./aspectos-evaluados-seguimiento.component.css'],
+    selector: 'app-aspectos-evaluados-seguimiento',
+    templateUrl: './aspectos-evaluados-seguimiento.component.html',
+    styleUrls: ['./aspectos-evaluados-seguimiento.component.css'],
+    standalone: false
 })
 export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() soloLectura: boolean = false;
   @Output() datosActualizados = new EventEmitter<void>();
 
   aspectosForm: UntypedFormGroup = this.fb.group({});
@@ -38,20 +40,22 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
   cargando = false;
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
-      return !!(control && control.invalid && (control.dirty || control.touched));
+      return !!(control?.invalid && (control?.dirty || control?.touched));
     }
   };
 
   constructor(
-    private fb: UntypedFormBuilder,
-    private planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private alertaService: AlertService
+    private readonly fb: UntypedFormBuilder,
+    private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
+    private readonly alertaService: AlertService
   ) { }
 
   ngOnInit(): void {
     this.aspectosForm = this.fb.group({
       temas: this.fb.array([]),
     });
+
+    this.actualizarModoSoloLectura();
 
     if (this.informeId) {
       this.cargarTemas();
@@ -62,6 +66,9 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
     if (changes['informeId'] && this.informeId) {
       this.cargarTemas();
     }
+    if (changes['soloLectura']) {
+      this.actualizarModoSoloLectura();
+    }
   }
 
   cargarTemas(): void {
@@ -70,8 +77,9 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
     this.cargando = true;
     this.planAnualAuditoriaService.get(`tema?query=informe_id:${this.informeId}`).subscribe({
       next: (response: any) => {
-        this.temasData = response?.Data || [];
+        this.temasData = response?.Data ?? [];
         this.construirFormulario();
+        this.actualizarModoSoloLectura();
         this.cargando = false;
       },
       error: (error) => {
@@ -79,6 +87,17 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
         this.cargando = false;
       }
     });
+  }
+
+  private actualizarModoSoloLectura(): void {
+    if (!this.aspectosForm) return;
+
+    if (this.soloLectura) {
+      this.aspectosForm.disable({ emitEvent: false });
+      return;
+    }
+
+    this.aspectosForm.enable({ emitEvent: false });
   }
 
   construirFormulario(): void {
@@ -89,20 +108,20 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
 
       const subtemasArray = this.fb.array([]);
 
-      (tema.subtema || []).forEach((subtema: any) => {
+      (tema.subtema ?? []).forEach((subtema: any) => {
         if (!subtema.activo) return;
 
         subtemasArray.push(this.fb.group({
-          _id: [subtema._id || null],
-          nombre: [subtema.titulo || '', Validators.required],
+          _id: [subtema._id ?? null],
+          nombre: [subtema.titulo ?? '', Validators.required],
           isNew: [false],
           isModified: [false],
         }));
       });
 
       temasArray.push(this.fb.group({
-        _id: [tema._id || null],
-        nombre: [tema.titulo || '', Validators.required],
+        _id: [tema._id ?? null],
+        nombre: [tema.titulo ?? '', Validators.required],
         subtemas: subtemasArray,
         isNew: [false],
         isModified: [false],
@@ -236,7 +255,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
               tema_id: temaId,
               titulo: subtemaForm.nombre
             }));
-            const subtemasEnResponse = response?.Data?.subtema || [];
+            const subtemasEnResponse = response?.Data?.subtema ?? [];
             subtemaId = subtemasEnResponse[subtemasEnResponse.length - 1]?._id;
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {

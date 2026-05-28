@@ -9,9 +9,10 @@ import { colocacionesContructorTabla } from "./tabla-auditorias-externas.utilida
 import { Router } from "@angular/router";
 
 @Component({
-  selector: "app-tabla-auditorias-externas",
-  templateUrl: "./tabla-auditorias-externas.component.html",
-  styleUrls: ["./tabla-auditorias-externas.component.css"],
+    selector: "app-tabla-auditorias-externas",
+    templateUrl: "./tabla-auditorias-externas.component.html",
+    styleUrls: ["./tabla-auditorias-externas.component.css"],
+    standalone: false
 })
 export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
   @Input() vigenciaId: any;
@@ -50,8 +51,8 @@ export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
   ];
 
   constructor(
-    private rolService: RolService,
-    private router: Router,
+    private readonly rolService: RolService,
+    private readonly router: Router,
   ) { }
 
   ngOnInit() {
@@ -94,7 +95,7 @@ export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
   getAccionesPorRolYEstado(estado: number) {
     return Array.from(
       new Set(
-        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] || [])
+        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] ?? [])
       )
     );
   }
