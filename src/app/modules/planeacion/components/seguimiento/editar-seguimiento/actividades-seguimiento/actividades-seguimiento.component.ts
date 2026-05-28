@@ -11,6 +11,8 @@ import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
+import { RolService } from "src/app/core/services/rol.service";
+import { mostrarAccionPlaneacionMarcarActividadCompletada } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
     selector: "app-actividades-seguimiento",
@@ -24,7 +26,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
   @Input() minFechaStr?: string;
   @Input() maxFechaStr?: string;
   datos = new MatTableDataSource<any>([]);
-  enEjecucion: boolean = false;
+  mostrarMarcarCompletada: boolean = false;
   
   columnsToDisplay: string[] = [
     "no",
@@ -48,6 +50,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly nuxeoService: NuxeoService,
     private readonly descargaService: DescargaService,
+    private readonly rolService: RolService
   ) { }
 
   resetComponent() {
@@ -61,11 +64,11 @@ export class ActividadesSeguimientoComponent implements OnInit {
     if (this.soloLectura) {
       this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
     }
-    this.cargarEnEjecucion();
+    this.cargarMostrarCargarCompletada();
     this.listaractividades();
   }
 
-  cargarEnEjecucion() {
+  cargarMostrarCargarCompletada() {
     let url = "auditoria-estado";
     url += `?query=auditoria_id:${this.idAuditoria},actual:true,activo:true`;
     url += "&sortby=_id",
@@ -74,8 +77,12 @@ export class ActividadesSeguimientoComponent implements OnInit {
     this.planAnualAuditoriaService.get(url).subscribe({
       next: (res) => {
         const estadoAuditoria = res.Data[0]?.estado_id || 0;
-        this.enEjecucion = estadoAuditoria >= environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
-        if (this.enEjecucion) {
+        const roles = this.rolService.getRoles();
+
+        this.mostrarMarcarCompletada = roles.some((rol: string) =>
+          mostrarAccionPlaneacionMarcarActividadCompletada(rol, estadoAuditoria)
+        );
+        if (this.mostrarMarcarCompletada) {
           this.columnsToDisplay.push("acciones");
         }
       },

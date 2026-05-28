@@ -112,7 +112,7 @@
               </button>
             }
             <!-- Solo mostrar la opción de marcar como completada si la actividad no está completada y la auditoría está en ejecución -->
-            @if (enEjecucion && !element.completada) {
+            @if (mostrarMarcarCompletada && !element.completada) {
               <button mat-menu-item (click)="marcarCompletada(element)">
                 <mat-icon color="primary">check_circle</mat-icon>
                 Marcar como Completada

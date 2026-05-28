@@ -365,16 +365,6 @@ export class TablaSeguimientoComponent implements OnInit {
 
   // Usar un conjunto para evitar duplicados en las acciones
   getAccionesPorRolYEstado(estado: number) {
-    const rolesAuditor = [
-      environment.ROL.AUDITOR_EXPERTO,
-      environment.ROL.AUDITOR,
-      environment.ROL.AUDITOR_ASISTENTE
-    ];
-    if (estado >= environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR
-        && this.roles.some(rol => rolesAuditor.includes(rol))) {
-      return ["Ver Auditoría"];
-    }
-
     return Array.from(
       new Set(
         this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
