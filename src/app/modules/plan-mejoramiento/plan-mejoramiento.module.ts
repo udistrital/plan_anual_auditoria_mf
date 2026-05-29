@@ -12,6 +12,7 @@ import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla
 import { TablaHallazgosComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/tabla-hallazgos/tabla-hallazgos.component';
 import { ModalRegistrarAccionComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/modal-registrar-accion/modal-registrar-accion.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
+import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { MaterialModule } from 'src/app/shared/modules/material.module';
     RegistrarPlanComponent,
     TablaHallazgosComponent,
     ModalRegistrarAccionComponent,
+    RegistroAvancesComponent,
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,176 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Registro de avances'"
+  [subtitle]="auditoria.vigencia_nombre || ''"
+  [subtitleChild]="auditoria.titulo + (auditoria.subtitulo ? ' - ' + auditoria.subtitulo : '') || ''"
+  [breadcrumb]="'<p>Gestión Auditoría / Plan de Mejoramiento / Gestión de acciones / <b>Registrar Avances</b></p>'"
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresar()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <mat-stepper
+        [linear]="true"
+        #stepper
+        labelPosition="bottom"
+        color="primary"
+        [orientation]="'horizontal'"
+      >
+        <ng-template matStepperIcon="number">
+          <mat-icon>lens</mat-icon>
+        </ng-template>
+
+        <!-- Paso 1: Información auditoria -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 1</p>
+            <b style="color: var(--primary)">Información Auditoría</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Informacion general de la auditoría
+            </div>
+          </div>
+          @if (formularioInformacionAuditoria) {
+            <div class="mt-4">
+              <app-formulario-dinamico
+                #formularioInformacionAuditoriaComp
+                [formulario]="formularioInformacionAuditoria"
+              >
+              </app-formulario-dinamico>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>assignment</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Dependencias</h2>
+                  Informacion de las dependencias
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of auditoria.datos_dependencias; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasComp
+                          [formulario]="formularioDependencias"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+            </div>
+          }
+          <div class="mt-4">
+            <div class="d-flex justify-content-end mt-4">
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="stepper.next()"
+                class="mx-2"
+              >Continuar</button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 2: Información acción -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 2</p>
+            <b style="color: var(--primary)">Información Acción</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Informacion general de la acción
+            </div>
+          </div>
+          @if (formularioInformacionAccion) {
+            <div class="mt-4">
+              <app-formulario-dinamico
+                #formularioInformacionAccionComp
+                [formulario]="formularioInformacionAccion"
+              >
+              </app-formulario-dinamico>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>assignment</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Dependencias</h2>
+                  Informacion de las dependencias
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of auditoria.datos_dependencias; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasComp
+                          [formulario]="formularioDependencias"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+            </div>
+          }
+          <div class="mt-4">
+            <div class="d-flex justify-content-end mt-4">
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="stepper.next()"
+                class="mx-2"
+              >Continuar</button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 3: Registro avances -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 3</p>
+            <b style="color: var(--primary)">Registro de avances</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Registro de avances</h2>
+              Registro de avances de la acción
+            </div>
+          </div>
+        </mat-step>
+
+      </mat-stepper>
+    </div>
+  </div>
+
+</ng-template>
