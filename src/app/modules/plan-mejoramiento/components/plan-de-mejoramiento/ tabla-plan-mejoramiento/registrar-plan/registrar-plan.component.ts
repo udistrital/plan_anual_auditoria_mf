@@ -172,6 +172,23 @@ export class RegistrarPlanComponent implements OnInit {
   enviarAuditor(): void {
     if (!this.planMejoramientoId) return;
 
+    this.planAuditoriaService
+      .get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)
+      .subscribe({
+        next: (res) => {
+          if (!(res?.Data?.length)) {
+            this.alertService.showAlert(
+              'Sin auditores asignados',
+              'Debe asignar al menos un auditor responsable antes de enviar el plan a revisión.'
+            );
+            return;
+          }
+          this.ejecutarEnvioAuditor();
+        },
+      });
+  }
+
+  private ejecutarEnvioAuditor(): void {
     this.alertService.showConfirmAlert(
       '¿Enviar el plan al auditor para revisión?'
     ).then(conf => {
