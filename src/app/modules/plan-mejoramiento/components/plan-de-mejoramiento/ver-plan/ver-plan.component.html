@@ -1,0 +1,85 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Ver Plan de Mejoramiento'"
+  [breadcrumb]="'<p>Planes de Mejoramiento / <b>Ver Plan de Mejoramiento</b></p>'"
+  [contenido]="contenidoDePlantilla"
+  [mostrarBotonRegresar]="true"
+  (regresar)="regresar()"
+>
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+
+  @if (cargando) {
+    <div class="text-center py-4">
+      <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+    </div>
+  }
+
+  @if (!cargando) {
+    <!-- Información Plan de Mejoramiento -->
+    <div class="row mt-3">
+      <div class="col-12 mb-3">
+        <h5 class="seccion-titulo">Información Plan de Mejoramiento</h5>
+      </div>
+      <mat-form-field appearance="outline" class="col-md-3 col-12">
+        <mat-label>No. Auditoría</mat-label>
+        <input matInput [value]="auditoria?.consecutivo_no_auditoria ?? ''" readonly />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="col-md-5 col-12">
+        <mat-label>Nombre de auditoría</mat-label>
+        <input matInput [value]="auditoria?.titulo ?? ''" readonly />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="col-md-4 col-12">
+        <mat-label>Proceso Responsable</mat-label>
+        <input matInput [value]="auditoria?.proceso_nombre ?? ''" readonly />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="col-md-4 col-12">
+        <mat-label>Líder(es) del Proceso</mat-label>
+        <input matInput [value]="lideresDelProceso" readonly />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="col-md-4 col-12">
+        <mat-label>Gestores del Proceso</mat-label>
+        <input matInput [value]="gestoresDelProceso" readonly />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="col-md-2 col-12">
+        <mat-label>Fecha (DD/MM/AA)</mat-label>
+        <input matInput [value]="auditoria?.fecha_inicio | date:'dd/MM/yy'" readonly />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="col-md-2 col-12">
+        <mat-label>Fuente</mat-label>
+        <input matInput [value]="fuenteNombre" readonly />
+      </mat-form-field>
+    </div>
+
+    <hr class="separador" />
+
+    <!-- Tabla de hallazgos (solo lectura) -->
+    <div class="row mt-3">
+      <div class="col-12 mb-2">
+        <h5 class="seccion-titulo mb-1">Formulación Plan de Trabajo</h5>
+      </div>
+      <div class="col-12">
+        @if (planMejoramientoId) {
+          <app-tabla-hallazgos
+            [auditoriaId]="auditoriaId"
+            [planMejoramientoId]="planMejoramientoId"
+            [auditoria]="auditoria"
+            [soloLectura]="true"
+          ></app-tabla-hallazgos>
+        }
+      </div>
+    </div>
+
+    @if (mostrarAccionesRevision()) {
+      <div class="d-flex justify-content-end mt-4" style="gap: 12px;">
+        <button mat-stroked-button color="warn" (click)="rechazar()" [disabled]="!planMejoramientoId">
+          <mat-icon>cancel</mat-icon> Rechazar Plan
+        </button>
+        <button mat-raised-button color="primary" (click)="aprobar()" [disabled]="!planMejoramientoId">
+          <mat-icon>check_circle</mat-icon> Aprobar Plan
+        </button>
+      </div>
+    }
+  }
+
+</ng-template>

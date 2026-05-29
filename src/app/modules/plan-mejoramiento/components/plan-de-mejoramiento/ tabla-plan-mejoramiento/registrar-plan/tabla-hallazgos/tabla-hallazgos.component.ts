@@ -67,17 +67,24 @@ export class TablaHallazgosComponent implements OnInit {
   @Input() auditoriaId!: string;
   @Input() planMejoramientoId!: string;
   @Input() auditoria: any;
+  @Input() soloLectura = false;
 
   fechaAprobacionInforme: string | null = null;
   hallazgos: HallazgoTabla[] = [];
   filas: FilaTabla[] = [];
   cargando = true;
 
-  columnas = [
+  private readonly columnasTodas = [
     'noHallazgo', 'descripcion', 'causa', 'numero', 'tipoAccion',
     'accionPlanteada', 'nombreIndicador', 'formulaIndicador',
     'meta', 'responsable', 'fechaInicio', 'fechaFin', 'acciones',
   ];
+
+  get columnas(): string[] {
+    return this.soloLectura
+      ? this.columnasTodas.filter(c => c !== 'acciones')
+      : this.columnasTodas;
+  }
 
   esFilaGrupo  = (_i: number, fila: FilaTabla) =>  fila.esGrupo;
   esFilaAccion = (_i: number, fila: FilaTabla) => !fila.esGrupo;
