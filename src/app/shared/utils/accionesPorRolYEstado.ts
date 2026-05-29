@@ -201,6 +201,9 @@ export const accionesPlaneacion: {
       "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Ver Auditoría",
+    ],
   },
 
   [environment.ROL.AUDITOR]: {
@@ -234,6 +237,9 @@ export const accionesPlaneacion: {
       "Enviar a Aprobación por Jefe",
       "Ver Documentos",
       "Historial de Observaciones",
+    ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Ver Auditoría",
     ],
   },
 
@@ -269,6 +275,9 @@ export const accionesPlaneacion: {
       "Historial de Observaciones",
       "Enviar a Aprobación por Jefe",
     ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Ver Auditoría",
+    ],
   },
 
   [environment.ROL.JEFE_DEPENDENCIA]: {
@@ -303,6 +312,20 @@ export const accionesPlaneacion: {
     ],
   },
 };
+
+export function mostrarAccionPlaneacionMarcarActividadCompletada(rol: string, estado: number): boolean {
+  const rolesAuditor = [
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR_ASISTENTE
+  ];
+  if (!rolesAuditor.includes(rol))
+    return false;
+
+  const estadoMin = environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE;
+  const estadoMax = environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR;
+  return estado >= estadoMin && estado <= estadoMax;
+}
 
 export const accionesEjecucionPreliminar: {
   [rol: string]: { [estado: number]: string[] };
