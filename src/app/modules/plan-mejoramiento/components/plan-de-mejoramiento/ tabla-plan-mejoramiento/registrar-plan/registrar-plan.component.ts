@@ -20,6 +20,27 @@ export class RegistrarPlanComponent implements OnInit {
   planMejoramientoId: string | null = null;
   cargando = true;
   enviando = false;
+  fuenteSeleccionada: number | null = null;
+
+  get lideresDelProceso(): string {
+    return (this.auditoria?.datos_dependencias ?? [])
+      .map((d: any) => d.jefe_nombre).filter(Boolean).join(', ') || '';
+  }
+
+  get gestoresDelProceso(): string {
+    return (this.auditoria?.datos_dependencias ?? [])
+      .map((d: any) => d.dependencia_nombre).filter(Boolean).join(', ') || '';
+  }
+
+  readonly fuentes = [
+    { id: 1, nombre: 'Auditoría Interna' },
+    { id: 2, nombre: 'Auditoría Externa' },
+    { id: 3, nombre: 'Producto/Servicio No Conforme' },
+    { id: 4, nombre: 'Quejas, reclamos o sugerencias' },
+    { id: 5, nombre: 'Revisión por la Dirección' },
+    { id: 6, nombre: 'Evaluación del desempeño' },
+    { id: 7, nombre: 'Mejoramiento Continuo' },
+  ];
 
   private usuarioId = 0;
   private role: string | null = null;
@@ -64,8 +85,25 @@ export class RegistrarPlanComponent implements OnInit {
       .subscribe({
         next: (res) => {
           if (res?.Data?.length > 0) {
-            this.planMejoramientoId = res.Data[0]._id;
-            this.cargando = false;
+            const plan = res.Data[0];
+            this.planMejoramientoId = plan._id;
+            this.fuenteSeleccionada = plan.fuente ?? null;
+
+            if (!plan.fecha_apertura) {
+              // Cascarón creado automáticamente: completar fechas y registrar estado 7082
+              const fechaApertura = new Date();
+              this.planAuditoriaService
+                .put(`plan-mejoramiento/${plan._id}`, {
+                  fecha_apertura: fechaApertura.toISOString(),
+                  fecha_limite:   sumarDiasHabiles(fechaApertura, 8).toISOString(),
+                })
+                .subscribe({
+                  next: () => this.registrarEstadoInicial(plan._id),
+                  error: () => { this.cargando = false; }
+                });
+            } else {
+              this.cargando = false;
+            }
           } else {
             this.crearPlanMejoramiento();
           }
@@ -116,7 +154,15 @@ export class RegistrarPlanComponent implements OnInit {
     });
   }
 
+  guardarFuente(): void {
+    if (!this.planMejoramientoId || this.fuenteSeleccionada === null) return;
+    this.planAuditoriaService
+      .put(`plan-mejoramiento/${this.planMejoramientoId}`, { fuente: this.fuenteSeleccionada })
+      .subscribe();
+  }
+
   guardar(): void {
+    this.guardarFuente();
     this.alertService.showSuccessAlert(
       'El plan de mejoramiento ha sido guardado.',
       'Guardado'
@@ -126,6 +172,23 @@ export class RegistrarPlanComponent implements OnInit {
   enviarAuditor(): void {
     if (!this.planMejoramientoId) return;
 
+    this.planAuditoriaService
+      .get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)
+      .subscribe({
+        next: (res) => {
+          if (!(res?.Data?.length)) {
+            this.alertService.showAlert(
+              'Sin auditores asignados',
+              'Debe asignar al menos un auditor responsable antes de enviar el plan a revisión.'
+            );
+            return;
+          }
+          this.ejecutarEnvioAuditor();
+        },
+      });
+  }
+
+  private ejecutarEnvioAuditor(): void {
     this.alertService.showConfirmAlert(
       '¿Enviar el plan al auditor para revisión?'
     ).then(conf => {

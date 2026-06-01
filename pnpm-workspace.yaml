@@ -1,4 +1,5 @@
 allowBuilds:
+  '@enzedonline/quill-blot-formatter2': true
   '@parcel/watcher': false
   canvas: false
   esbuild: false

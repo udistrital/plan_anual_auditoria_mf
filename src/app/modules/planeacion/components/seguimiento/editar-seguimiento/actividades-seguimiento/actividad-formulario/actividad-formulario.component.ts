@@ -26,6 +26,7 @@ export class ActividadSeguimientoFormularioComponent {
       actividad: ['', Validators.required],
       fechaInicio: ['', Validators.required],
       fechaFin: [{ value: '', disabled: true }, Validators.required],
+      completada: [false],
       observaciones: ['', null],
       papelTrabajoReferencia: ['', null],
       papelTrabajoDescripcion: ['', null],

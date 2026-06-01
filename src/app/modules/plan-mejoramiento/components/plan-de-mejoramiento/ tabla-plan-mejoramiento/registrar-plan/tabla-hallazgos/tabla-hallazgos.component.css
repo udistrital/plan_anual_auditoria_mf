@@ -1,8 +1,45 @@
+/* Tabla compacta */
+table.mat-table {
+  font-size: 12px;
+  width: 100%;
+  table-layout: fixed;
+}
+
+table.mat-table th,
+table.mat-table td {
+  padding: 4px 8px !important;
+  vertical-align: middle;
+  overflow: hidden;
+}
+
+table.mat-table td {
+  max-height: 60px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Columnas con ancho fijo */
+.mat-column-noHallazgo      { width: 55px;  }
+.mat-column-descripcion     { width: 120px; }
+.mat-column-causa           { width: 120px; }
+.mat-column-numero          { width: 45px;  }
+.mat-column-tipoAccion      { width: 80px;  }
+.mat-column-accionPlanteada { width: 130px; }
+.mat-column-nombreIndicador { width: 100px; }
+.mat-column-formulaIndicador{ width: 100px; }
+.mat-column-meta            { width: 55px;  }
+.mat-column-responsable     { width: 120px; }
+.mat-column-fechaInicio     { width: 80px;  }
+.mat-column-fechaFin        { width: 80px;  }
+.mat-column-acciones        { width: 45px;  }
+
 /* Fila de cabecera de hallazgo */
 .fila-grupo-row td {
   background-color: #f5f5f5;
   border-bottom: 1px solid #e0e0e0;
   padding: 4px 8px !important;
+  white-space: normal;
+  overflow: visible;
 }
 
 .fila-grupo-row:hover td {
@@ -20,13 +57,20 @@
 
 /* Filas de acción */
 .fila-accion-row td {
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.celda-truncada {
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Botón agregar acción compacto */
 .fila-grupo-row button {
   height: 30px;
   line-height: 30px;
-  font-size: 13px;
+  font-size: 12px;
 }

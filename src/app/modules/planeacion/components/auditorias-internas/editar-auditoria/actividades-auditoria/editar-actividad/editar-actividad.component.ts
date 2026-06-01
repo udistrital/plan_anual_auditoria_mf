@@ -49,6 +49,7 @@ export class EditarActividadComponent {
       titulo: actividadData.actividad,
       fecha_inicio: actividadData.fechaInicio.toISOString(),
       fecha_fin: actividadData.fechaFin.toISOString(),
+      completada: actividadData.completada,
       observacion: actividadData.observaciones,
       referencia: actividadData.papelTrabajoReferencia,
       descripcion: actividadData.papelTrabajoDescripcion,

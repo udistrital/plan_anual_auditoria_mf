@@ -11,6 +11,8 @@ import  { EditarActividadSeguimientoComponent } from './editar-actividad/editar-
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
+import { RolService } from "src/app/core/services/rol.service";
+import { mostrarAccionPlaneacionMarcarActividadCompletada } from "src/app/shared/utils/accionesPorRolYEstado";
 
 @Component({
     selector: "app-actividades-seguimiento",
@@ -24,6 +26,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
   @Input() minFechaStr?: string;
   @Input() maxFechaStr?: string;
   datos = new MatTableDataSource<any>([]);
+  mostrarMarcarCompletada: boolean = false;
   
   columnsToDisplay: string[] = [
     "no",
@@ -36,6 +39,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
     "carpeta",
     "medio",
     "observaciones",
+    "completada",
     "acciones",
   ];
 
@@ -46,6 +50,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly nuxeoService: NuxeoService,
     private readonly descargaService: DescargaService,
+    private readonly rolService: RolService
   ) { }
 
   resetComponent() {
@@ -59,8 +64,58 @@ export class ActividadesSeguimientoComponent implements OnInit {
     if (this.soloLectura) {
       this.columnsToDisplay = this.columnsToDisplay.filter(col => col !== "acciones");
     }
+    this.cargarMostrarCargarCompletada();
     this.listaractividades();
-   }
+  }
+
+  cargarMostrarCargarCompletada() {
+    let url = "auditoria-estado";
+    url += `?query=auditoria_id:${this.idAuditoria},actual:true,activo:true`;
+    url += "&sortby=_id",
+    url += "&order=desc";
+    url += "&limit=1";
+    this.planAnualAuditoriaService.get(url).subscribe({
+      next: (res) => {
+        const estadoAuditoria = res.Data[0]?.estado_id || 0;
+        const roles = this.rolService.getRoles();
+
+        this.mostrarMarcarCompletada = roles.some((rol: string) =>
+          mostrarAccionPlaneacionMarcarActividadCompletada(rol, estadoAuditoria)
+        );
+        if (this.mostrarMarcarCompletada) {
+          this.columnsToDisplay.push("acciones");
+        }
+      },
+      error: (error) => {
+        console.error("Error al cargar el estado de la auditoría:", error);
+        this.alertaService.showErrorAlert("Error al cargar el estado de la auditoría");
+      }
+    });
+  }
+
+  marcarCompletada(actividad: ActividadPlan): void {
+    this.alertaService
+      .showConfirmAlert("¿Está seguro(a) de marcar esta actividad como completada? Esta acción no puede deshacerse.")
+      .then((result) => {
+        if (result.isConfirmed) {
+          const actividadActualizada = { ...actividad, completada: true };
+          this.planAnualAuditoriaService.put(`actividad/${actividad.id}`, actividadActualizada).subscribe({
+            next: () => {
+              this.alertaService.showSuccessAlert("Actividad marcada como completada");
+              this.listaractividades();
+            },
+            error: (error) => {
+              console.error("Error al marcar la actividad como completada:", error);
+              this.alertaService.showErrorAlert("Error al marcar la actividad como completada");
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error al confirmar la acción:", error);
+        this.alertaService.showErrorAlert("Error al marcar la actividad como completada");
+      });
+  }
 
   subirArchivo(tipoArchivo: string): void {
     this.dialog.open(CargarArchivoComponent, {
@@ -86,6 +141,7 @@ export class ActividadesSeguimientoComponent implements OnInit {
             actividad: item.titulo,
             fechaInicio: new Date(item.fecha_inicio),
             fechaFin: new Date(item.fecha_fin),
+            completada: item.completada || false,
             observaciones: item.observacion,
             papelTrabajoReferencia: item.referencia,
             papelTrabajoDescripcion: item.descripcion,
