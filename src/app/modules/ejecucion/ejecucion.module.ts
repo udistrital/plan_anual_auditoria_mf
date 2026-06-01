@@ -22,6 +22,10 @@ import { RevisionPreinformeComponent } from './components/auditorias-internas/ed
 import { ModalAmpliarRevisionAuditadoComponent } from './components/auditorias-internas/modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
+import Quill from 'quill';
+import BlotFormatter from '@enzedonline/quill-blot-formatter2';
+Quill.register('modules/blotFormatter', BlotFormatter);
+
 @NgModule({
   declarations: [
     SeguimientoInformesComponent,
