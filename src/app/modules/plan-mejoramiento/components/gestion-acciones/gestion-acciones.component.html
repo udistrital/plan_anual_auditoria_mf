@@ -1,0 +1,219 @@
+<plantilla-tarjeta-contenedora
+  [title]="'Gestión de Acciones'"
+  [breadcrumb]="'<p>Plan de Mejoramiento / <b>Gestión de Acciones</b></p>'"
+  [contenido]="contenidoDePlantilla"
+>
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <form [formGroup]="filtrosForm">
+
+    <!-- ── Selector de vigencia ───────────────────────────── -->
+    <div class="row align-items-center mt-2 mb-3">
+      <mat-form-field appearance="outline" class="col-xl-3 col-md-4 col-12">
+        <mat-label>Seleccione una vigencia <span class="text-danger">*</span></mat-label>
+        <mat-icon color="primary" matPrefix>today</mat-icon>
+        <mat-select
+          formControlName="vigencia"
+          (selectionChange)="onVigenciaChange()"
+        >
+          <mat-option disabled [value]="null">--Seleccionar--</mat-option>
+          @for (v of vigencias; track v.Id) {
+            <mat-option [value]="v.Id">{{ v.Nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="col-xl-5 col-md-6 col-12 d-flex align-items-center info-vigencia">
+        <mat-icon color="primary" class="me-2 icono-info">info</mat-icon>
+        <span>Se cargarán las acciones correspondientes a la vigencia seleccionada</span>
+      </div>
+    </div>
+
+    <!-- ── Filtros de búsqueda ────────────────────────────── -->
+    <h6 class="seccion-titulo mb-3">Filtros de Búsqueda</h6>
+
+    <div class="row filtros-grid">
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>No. Auditoría</mat-label>
+        <input matInput formControlName="noAuditoria" />
+        <mat-icon matSuffix class="icono-busqueda">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>Nombre Auditoría</mat-label>
+        <input matInput formControlName="nombreAuditoria" />
+        <mat-icon matSuffix class="icono-busqueda">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>No. Hallazgo</mat-label>
+        <input matInput formControlName="noHallazgo" />
+        <mat-icon matSuffix class="icono-busqueda">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>No. Acción</mat-label>
+        <input matInput formControlName="noAccion" />
+        <mat-icon matSuffix class="icono-busqueda">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>Auditor Responsable...</mat-label>
+        <input matInput formControlName="auditorResponsable" />
+        <mat-icon matSuffix class="icono-busqueda">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>Dependencia Respo...</mat-label>
+        <input matInput formControlName="dependenciaResponsable" />
+        <mat-icon matSuffix class="icono-busqueda">search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>Desde</mat-label>
+        <input matInput [matDatepicker]="pickerDesde" formControlName="desde" readonly />
+        <mat-datepicker-toggle matSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+        <mat-datepicker #pickerDesde></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="col-xl-2 col-md-4 col-sm-6 col-12">
+        <mat-label>Hasta</mat-label>
+        <input matInput [matDatepicker]="pickerHasta" formControlName="hasta" readonly />
+        <mat-datepicker-toggle matSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+        <mat-datepicker #pickerHasta></mat-datepicker>
+      </mat-form-field>
+
+    </div>
+
+    <!-- Botones de filtro -->
+    <div class="d-flex gap-2 mb-4 mt-1">
+      <button mat-raised-button color="primary" type="button" (click)="aplicarFiltros()">
+        <mat-icon>filter_list</mat-icon> Aplicar filtros
+      </button>
+      <button mat-stroked-button color="primary" type="button" (click)="limpiarFiltros()">
+        <mat-icon>clear</mat-icon> Limpiar
+      </button>
+    </div>
+
+  </form>
+
+  <!-- ── Listado de acciones ───────────────────────────────── -->
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <h6 class="seccion-titulo mb-0">Listado de Acciones Planes de Mejoramiento</h6>
+      <p class="texto-subtitulo mb-0">Seleccione la acción para consultar y/o cargar actividades</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="exportarTabla()" class="btn-exportar">
+      <mat-icon>file_download</mat-icon> Exportar tabla
+    </button>
+  </div>
+
+  @if (cargando) {
+    <div class="text-center py-5">
+      <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+    </div>
+  }
+
+  @if (!cargando) {
+    <div class="table-container rounded-table table-scroll">
+      <table mat-table [dataSource]="dataSource" class="w-100">
+
+        <ng-container matColumnDef="noAuditoria">
+          <th mat-header-cell *matHeaderCellDef><b>No Auditoría</b></th>
+          <td mat-cell *matCellDef="let row">{{ row.noAuditoria }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="nombreAuditoria">
+          <th mat-header-cell *matHeaderCellDef><b>Nombre Auditoría</b></th>
+          <td mat-cell *matCellDef="let row">
+            <div class="celda-truncada" [title]="row.nombreAuditoria">{{ row.nombreAuditoria }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="noHallazgo">
+          <th mat-header-cell *matHeaderCellDef><b>No Hallazgo</b></th>
+          <td mat-cell *matCellDef="let row">{{ row.noHallazgo }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="noAccion">
+          <th mat-header-cell *matHeaderCellDef><b>No Accion</b></th>
+          <td mat-cell *matCellDef="let row">{{ row.noAccion }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="auditoresResponsablesPlan">
+          <th mat-header-cell *matHeaderCellDef><b>Auditor(es) Responsable(s) Plan</b></th>
+          <td mat-cell *matCellDef="let row">
+            <div class="celda-truncada" [title]="row.auditoresResponsablesPlan">{{ row.auditoresResponsablesPlan }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="dependenciaResponsable">
+          <th mat-header-cell *matHeaderCellDef><b>Dependencia Responsable de la Acción</b></th>
+          <td mat-cell *matCellDef="let row">
+            <div class="celda-truncada" [title]="row.dependenciaResponsable">{{ row.dependenciaResponsable }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaInicio">
+          <th mat-header-cell *matHeaderCellDef><b>Fecha Inicio</b></th>
+          <td mat-cell *matCellDef="let row">{{ row.fechaInicio }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaFin">
+          <th mat-header-cell *matHeaderCellDef><b>Fecha Fin</b></th>
+          <td mat-cell *matCellDef="let row">{{ row.fechaFin }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef><b>Estado</b></th>
+          <td mat-cell *matCellDef="let row">
+            <span class="chip-estado">{{ row.estado }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="primary"
+              [matMenuTriggerFor]="menuAccion"
+              matTooltip="Ver opciones">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menuAccion="matMenu">
+              <button mat-menu-item (click)="verActividades(row)">
+                <mat-icon color="primary">visibility</mat-icon>
+                <span>Ver actividades</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"
+          class="fila-accion"
+          (click)="verActividades(row)">
+        </tr>
+
+        <!-- Estado vacío -->
+        <tr class="mat-row fila-vacia" *matNoDataRow>
+          <td [attr.colspan]="columnas.length">
+            <div class="estado-vacio">
+              <mat-icon class="icono-vacio">inbox</mat-icon>
+              <p>
+                @if (filtrosForm.get('vigencia')?.value) {
+                  No se encontraron acciones con los filtros aplicados.
+                } @else {
+                  Seleccione una vigencia para cargar las acciones.
+                }
+              </p>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+  }
+
+</ng-template>

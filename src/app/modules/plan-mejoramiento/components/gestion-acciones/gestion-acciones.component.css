@@ -1,0 +1,147 @@
+/* ── Contenedor raíz ─────────────────────────────────────── */
+:host ::ng-deep .container {
+  max-width: 100% !important;
+  padding-left: 60px !important;
+  padding-right: 60px !important;
+}
+
+:host ::ng-deep mat-card {
+  min-height: calc(100vh - 280px);
+}
+
+:host {
+  display: block;
+  transition: width ease-in-out 400ms;
+}
+
+/* ── Tipografía de secciones ─────────────────────────────── */
+.seccion-titulo {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.texto-subtitulo {
+  font-size: 13px;
+  color: #666;
+}
+
+/* ── Mensaje informativo de vigencia ─────────────────────── */
+.info-vigencia {
+  font-size: 13px;
+  color: #555;
+}
+
+.icono-info {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Ícono de búsqueda en inputs ─────────────────────────── */
+.icono-busqueda {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  color: #888;
+  cursor: default;
+}
+
+/* ── Grid de filtros ─────────────────────────────────────── */
+.filtros-grid {
+  row-gap: 0;
+}
+
+/* ── Botón exportar ──────────────────────────────────────── */
+.btn-exportar {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Tabla ───────────────────────────────────────────────── */
+table.mat-table {
+  font-size: 12px;
+  width: 100%;
+}
+
+table.mat-table th,
+table.mat-table td {
+  padding: 6px 10px !important;
+  vertical-align: middle;
+}
+
+table.mat-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Anchos de columna */
+.mat-column-noAuditoria              { width: 80px;  min-width: 70px;  }
+.mat-column-nombreAuditoria          { width: 160px; min-width: 120px; }
+.mat-column-noHallazgo               { width: 80px;  min-width: 70px;  }
+.mat-column-noAccion                 { width: 70px;  min-width: 60px;  }
+.mat-column-auditoresResponsablesPlan{ width: 160px; min-width: 120px; }
+.mat-column-dependenciaResponsable   { width: 180px; min-width: 130px; }
+.mat-column-fechaInicio              { width: 90px;  min-width: 80px;  }
+.mat-column-fechaFin                 { width: 90px;  min-width: 80px;  }
+.mat-column-estado                   { width: 120px; min-width: 100px; }
+.mat-column-acciones                 { width: 60px;  min-width: 50px;  }
+
+/* Fila de datos con hover */
+.fila-accion {
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.fila-accion:hover td {
+  background-color: #f5f5f5;
+}
+
+/* Celda truncada con tooltip */
+.celda-truncada {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chip de estado */
+.chip-estado {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  background-color: #e8f0fe;
+  color: var(--primary, #1a237e);
+  white-space: nowrap;
+}
+
+/* Estado vacío de la tabla */
+.fila-vacia td {
+  border: none !important;
+}
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #9e9e9e;
+}
+
+.icono-vacio {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.estado-vacio p {
+  font-size: 14px;
+  margin: 0;
+  text-align: center;
+}
