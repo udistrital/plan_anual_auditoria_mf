@@ -1,3 +1,11 @@
 .even-row {
   background-color: #f9f9f9;
 }
+
+.celda-lista {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 220px;
+}

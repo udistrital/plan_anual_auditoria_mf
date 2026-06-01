@@ -7,12 +7,14 @@
 @if (!cargando) {
   <div>
     <!-- Cabecera exportar -->
-    <div class="d-flex justify-content-end mb-2">
-      <button mat-stroked-button color="primary">
-        <mat-icon>upload</mat-icon> Exportar tabla
-      </button>
-    </div>
-    <div class="table-container rounded-table table-scroll">
+    @if (!soloLectura) {
+      <div class="d-flex justify-content-end mb-2">
+        <button mat-stroked-button color="primary">
+          <mat-icon>upload</mat-icon> Exportar tabla
+        </button>
+      </div>
+    }
+    <div class="table-container rounded-table table-scroll" style="overflow-x: auto; width: 100%;">
       <table mat-table [dataSource]="filas" class="w-100">
         <!-- No Hallazgo -->
         <ng-container matColumnDef="noHallazgo">
@@ -42,17 +44,23 @@
         <!-- Acción Planteada -->
         <ng-container matColumnDef="accionPlanteada">
           <th mat-header-cell *matHeaderCellDef><b>Acción Planteada</b></th>
-          <td mat-cell *matCellDef="let fila">{{ fila.accion?.accionPlanteada }}</td>
+          <td mat-cell *matCellDef="let fila" [title]="fila.accion?.accionPlanteada ?? ''">
+            <div class="celda-truncada">{{ fila.accion?.accionPlanteada }}</div>
+          </td>
         </ng-container>
         <!-- Nombre Indicador -->
         <ng-container matColumnDef="nombreIndicador">
           <th mat-header-cell *matHeaderCellDef><b>Nombre de Indicador</b></th>
-          <td mat-cell *matCellDef="let fila">{{ fila.accion?.nombreIndicador }}</td>
+          <td mat-cell *matCellDef="let fila" [title]="fila.accion?.nombreIndicador ?? ''">
+            <div class="celda-truncada">{{ fila.accion?.nombreIndicador }}</div>
+          </td>
         </ng-container>
         <!-- Fórmula Indicador -->
         <ng-container matColumnDef="formulaIndicador">
           <th mat-header-cell *matHeaderCellDef><b>Formula de Indicador</b></th>
-          <td mat-cell *matCellDef="let fila">{{ fila.accion?.formulaIndicador }}</td>
+          <td mat-cell *matCellDef="let fila" [title]="fila.accion?.formulaIndicador ?? ''">
+            <div class="celda-truncada">{{ fila.accion?.formulaIndicador }}</div>
+          </td>
         </ng-container>
         <!-- Meta -->
         <ng-container matColumnDef="meta">
@@ -74,23 +82,25 @@
           <th mat-header-cell *matHeaderCellDef><b>Fecha Fin</b></th>
           <td mat-cell *matCellDef="let fila">{{ fila.accion?.fechaFin }}</td>
         </ng-container>
-        <!-- Acciones (menú) -->
+        <!-- Acciones (menú) — oculto en modo lectura -->
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
           <td mat-cell *matCellDef="let fila">
-            <button mat-icon-button color="primary" [matMenuTriggerFor]="menuAccion">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menuAccion="matMenu">
-              <button mat-menu-item
-                (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId), fila.accion)">
-                <mat-icon color="primary">edit</mat-icon> Editar Acción
+            @if (!soloLectura) {
+              <button mat-icon-button color="primary" [matMenuTriggerFor]="menuAccion">
+                <mat-icon>more_vert</mat-icon>
               </button>
-              <button mat-menu-item
-                (click)="eliminarAccion(getHallazgo(fila.hallazgoId), fila.accion)">
-                <mat-icon color="warn">delete</mat-icon> Eliminar Acción
-              </button>
-            </mat-menu>
+              <mat-menu #menuAccion="matMenu">
+                <button mat-menu-item
+                  (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId), fila.accion)">
+                  <mat-icon color="primary">edit</mat-icon> Editar Acción
+                </button>
+                <button mat-menu-item
+                  (click)="eliminarAccion(getHallazgo(fila.hallazgoId), fila.accion)">
+                  <mat-icon color="warn">delete</mat-icon> Eliminar Acción
+                </button>
+              </mat-menu>
+            }
           </td>
         </ng-container>
         <!-- ── Columna de GRUPO (ocupa el ancho completo) ── -->
@@ -104,10 +114,12 @@
                 </mat-icon>
                 <b>{{ fila.hallazgoIndice }}</b>&nbsp;&nbsp;{{ fila.hallazgoDescripcion }}
               </span>
-              <button mat-stroked-button color="primary"
-                (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId))">
-                <mat-icon>add</mat-icon> Agregar Acción
-              </button>
+              @if (!soloLectura) {
+                <button mat-stroked-button color="primary"
+                  (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId))">
+                  <mat-icon>add</mat-icon> Agregar Acción
+                </button>
+              }
             </div>
           </td>
         </ng-container>
