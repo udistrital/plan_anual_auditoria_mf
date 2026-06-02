@@ -31,6 +31,34 @@
             </button>
           }
         </div>
+        <div class="node-row tema-row">
+          <span class="nivel-label">Descripción</span>
+          <div class="node-input editor-wrapper">
+            <label class="descripcion-label">Descripción del Tema</label>
+            <quill-editor formControlName="descripcion_titulo" [modules]="editorModules" [placeholder]="placeholder" class="quill-editor-custom">
+              <div quill-editor-toolbar class="toolbar">
+                <span class="ql-formats">
+                  <button class="ql-bold" [title]="'Bold'"></button>
+                  <button class="ql-italic" [title]="'Italic'"></button>
+                  <button class="ql-underline" [title]="'Underline'"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-list" value="ordered"></button>
+                  <button class="ql-list" value="bullet"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-align" value=""></button>
+                  <button class="ql-align" value="center"></button>
+                  <button class="ql-align" value="right"></button>
+                  <button class="ql-align" value="justify"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-image" [title]="'Insert Image'"></button>
+                </span>
+              </div>
+            </quill-editor>
+          </div>
+        </div>
         <!-- Hijos: Subtemas -->
         <div class="node-children" formArrayName="subtemas">
           <!-- ── SUBTEMA ── -->
