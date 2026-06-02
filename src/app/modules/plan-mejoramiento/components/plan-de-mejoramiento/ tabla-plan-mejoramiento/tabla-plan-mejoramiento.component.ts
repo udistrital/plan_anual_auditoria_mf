@@ -15,11 +15,13 @@ import { catchError, map, switchMap } from "rxjs/operators";
 import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
 import { accionesPlanMejoramiento } from "src/app/shared/utils/accionesPorRolYEstado";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
+import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
+import { ModalHistorialObservacionesComponent } from "./modal-historial-observaciones/modal-historial-observaciones.component";
 
 @Component({
     selector: "app-tabla-plan-mejoramiento",
@@ -57,9 +59,11 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     ["Asignar Auditor(es)",       "manage_accounts"],
     ["Registrar Plan",            "edit"],
     ["Enviar a Revisión",         "send"],
+    ["Ver Plan",                  "visibility"],
     ["Aprobar Plan",              "check_circle"],
     ["Rechazar Plan",             "cancel"],
     ["Ver Documentos Auditoría",  "description"],
+    ["Ver Observaciones",         "history"],
   ]);
 
   constructor(
@@ -67,6 +71,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
     private readonly router: Router
@@ -92,6 +97,9 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
     ) {
       this.tipoConsulta = "auditor";
+      this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
+    } else {
+      // JEFE y otros roles usan endpoint general; igual necesitan usuarioId para registrar estados
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     }
   }
@@ -174,7 +182,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
             ...auditoria,
             planMejoramientoId: plan?._id ?? null,
             estadoPlanId,
-            estadoPlanNombre: plan?.estado_nombre ?? null,
+            estadoPlanNombre: plan?.estado_nombre ?? 'Sin Plan de Mejoramiento',
             auditores_plan: auditoresPlan,
             acciones: this.getAccionesPorRolYEstado(estadoPlanId),
           };
@@ -223,9 +231,11 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       "Asignar Auditor(es)":      () => this.asignarAuditores(plan),
       "Registrar Plan":           () => this.registrarPlan(plan),
       "Enviar a Revisión":        () => this.enviarAprobacion(plan),
+      "Ver Plan":                 () => this.verPlan(plan),
       "Aprobar Plan":             () => this.aprobarPlan(plan),
       "Rechazar Plan":            () => this.rechazarPlan(plan),
       "Ver Documentos Auditoría": () => this.verDocumentosAuditoria(plan),
+      "Ver Observaciones":        () => this.verObservaciones(plan),
     };
     acciones[accion]?.();
   }
@@ -246,7 +256,51 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       this.router.navigate([`/plan-mejoramiento/registrar-plan/${plan._id}`]);
   }
 
-  enviarAprobacion(_plan: any): void {
+  enviarAprobacion(plan: any): void {
+    const planId = plan.planMejoramientoId;
+    if (!planId) {
+      this.alertaService.showAlert('Sin plan', 'Primero debe registrar el plan desde la acción "Registrar Plan".');
+      return;
+    }
+
+    // auditores_plan ya viene cargado desde listarPlanesPorFiltros (MID)
+    const auditores: any[] = plan.auditores_plan ?? [];
+    if (!auditores.length) {
+      this.alertaService.showAlert(
+        'Sin auditores asignados',
+        'Debe asignar al menos un auditor responsable antes de enviar el plan a revisión.'
+      );
+      return;
+    }
+
+    this.alertaService.showConfirmAlert('¿Enviar el plan al auditor para revisión?').then(conf => {
+      if (!conf.value) return;
+
+      const body = {
+        plan_mejoramiento_id:   planId,
+        usuario_id:             this.usuarioId,
+        usuario_rol:            this.role,
+        observacion:            'Plan enviado a revisión del auditor',
+        estado_id:              environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR,
+        fase_id:                environment.AUDITORIA_FASE.PLAN_MEJORAMIENTO,
+        fecha_ejecucion_estado: new Date().toISOString(),
+        activo:                 true,
+      };
+
+      this.planAuditoriaService.post('plan-mejoramiento-estado', body).subscribe({
+        next: () => {
+          this.alertaService.showSuccessAlert('El plan fue enviado al auditor para revisión.', 'Enviado');
+          this.listarPlanesPorFiltros(this.vigenciaId, this.tipoEvaluacionId, this.pageSize, this.pageIndex * this.pageSize);
+        },
+        error: () => {
+          this.alertaService.showErrorAlert('Error al enviar el plan al auditor.');
+        }
+      });
+    });
+  }
+
+  verPlan(plan: any): void {
+    this.router.navigate([`/plan-mejoramiento/ver-plan/${plan._id}`]);
   }
 
   aprobarPlan(_plan: any): void {
@@ -255,7 +309,19 @@ export class TablaPlanMejoramientoComponent implements OnInit {
   rechazarPlan(_plan: any): void {
   }
 
+  verObservaciones(plan: any): void {
+    if (!plan.planMejoramientoId) {
+      this.alertaService.showAlert('Sin plan', 'No hay plan de mejoramiento registrado para esta auditoría.');
+      return;
+    }
+    this.dialog.open(ModalHistorialObservacionesComponent, {
+      width: '1000px',
+      data: { planMejoramientoId: plan.planMejoramientoId },
+    });
+  }
+
   verDocumentosAuditoria(_plan: any): void {
+    // pendiente
   }
 
   private resetTabla(): void {
