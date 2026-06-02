@@ -160,6 +160,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Revisar Auditoría",
+      "Iniciar Ejecución",
       "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
