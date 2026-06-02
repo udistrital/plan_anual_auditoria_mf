@@ -586,7 +586,7 @@ export class TablaSeguimientoComponent implements OnInit {
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }: any) => {
         const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
