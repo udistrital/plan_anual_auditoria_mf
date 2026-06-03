@@ -477,10 +477,11 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
           nombreRemitente: of(tercero.NombreCompleto),
+          jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
         const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
@@ -488,7 +489,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
 
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
-          [],
+          [jefeOCI.UsuarioWSO2],
           environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS
         );
 
