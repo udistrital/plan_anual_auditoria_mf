@@ -369,7 +369,7 @@ export class TablaSeguimientoComponent implements OnInit {
       new Set(
         this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
-    );
+    ).filter((accion) => accion !== "Ver Cartas de representación");
   }
 
   // Obtener el icono dependiendo de la acción
