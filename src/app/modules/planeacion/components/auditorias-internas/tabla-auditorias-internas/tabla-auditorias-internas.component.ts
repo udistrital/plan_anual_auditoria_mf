@@ -11,7 +11,7 @@ import { MatTableDataSource } from "@angular/material/table";
 import { colocacionesContructorTabla } from "./tabla-auditorias-internas.utilidades";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component";
 import { Router } from "@angular/router";
 import { Auditoria, tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
@@ -517,10 +517,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       width: "1000px",
       data: {
         auditoriaId: auditoria._id,
-        estadoIds: [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE],
+        estadoEndpoint: "auditoria-estado",
+        auditoriaIdReferencia: "auditoria_id",
+        estadoRevisionIds: [
+          environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE,
+        ],
+        estadoRechazoIds: [
+          environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE,
+        ],
         titulo: "Motivos de rechazo y observaciones",
         descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
-      },
+      } as HistorialRechazosData,
     });
   }
 
