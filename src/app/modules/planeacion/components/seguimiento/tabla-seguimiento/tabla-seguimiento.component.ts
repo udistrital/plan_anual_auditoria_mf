@@ -117,7 +117,10 @@ export class TablaSeguimientoComponent implements OnInit {
 
   private buildEstadoOptions(): void {
     this.parametrosUtilsService
-      .getEstadosAuditoria(7060, 7080)
+      .getEstadosAuditoria(
+        environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE
+      )
       .subscribe({
         next: (estados) => {
           this.estadoOptions = estados.map((estado) => ({
