@@ -20,7 +20,6 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
-import { numerarHallazgos } from "src/app/shared/utils/numeracion-hallazgos.util";
 
 const configAuditado = {
   estadoAprobacion: [
@@ -250,16 +249,23 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         await this.guardarFechaRevisionPreinforme();
       }
 
+      let selladoConFallos = false;
       if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
         await this.guardarFechaAprobacionInformeFinal();
-        await this.sellarNumeracionHallazgos();
+        selladoConFallos = !(await this.sellarNumeracionHallazgos());
         await this.crearCascaronPlanMejoramiento();
       }
 
       const mensaje = this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
         ? "Informe final enviado"
         : "Informe preliminar enviado";
-      this.alertService.showSuccessAlert(mensajeAprobacion, mensaje);
+      await this.alertService.showSuccessAlert(mensajeAprobacion, mensaje);
+      if (selladoConFallos) {
+        await this.alertService.showNotification(
+          "Aviso",
+          "La numeración de hallazgos no pudo completarse."
+        );
+      }
       this.router.navigate([`/ejecucion/auditorias-internas/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
@@ -283,31 +289,23 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     }
   }
 
-  private async sellarNumeracionHallazgos(): Promise<void> {
+  /**
+   * Dispara el sellado de numeración de hallazgos en el MID
+   * Devuelve `true` si se selló todo correctamente, `false` si hubo
+   * fallos (parciales o de red). 
+   */
+  private async sellarNumeracionHallazgos(): Promise<boolean> {
     try {
-      const informeRes: any = await firstValueFrom(
-        this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
-      );
-      const informeId = informeRes?.Data?.[0]?._id;
-      if (!informeId) return;
-
-      const [temasRes, hallazgosRes]: any[] = await Promise.all([
-        firstValueFrom(this.planAuditoriaService.get(`tema?query=informe_id:${informeId}&limit=0`)),
-        firstValueFrom(this.planAuditoriaService.get(`hallazgo?query=informe_id:${informeId},activo:true&limit=0`)),
-      ]);
-
-      const numerados = numerarHallazgos(temasRes?.Data ?? [], hallazgosRes?.Data ?? []);
-      if (numerados.length === 0) return;
-
-      await Promise.all(
-        numerados.map((n) =>
-          firstValueFrom(
-            this.planAuditoriaService.put(`hallazgo/${n.hallazgoId}`, { no_hallazgo: n.numero })
-          )
+      const res: any = await firstValueFrom(
+        this.planAuditoriaMid.put(
+          `informe/auditoria/${this.auditoriaId}/numeracion-hallazgo`,
+          {},
         )
       );
+      const fallidos = res?.Data?.fallidos ?? [];
+      return fallidos.length === 0;
     } catch {
-      // no bloquea el flujo de aprobación
+      return false;
     }
   }
 
@@ -384,7 +382,6 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       this._festivosCache[startYear] = new Set(festivos);
     }
     const startKey = `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, '0')}-${String(result.getDate()).padStart(2, '0')}`;
-    // El día de revisión cuenta (sábado/domingo incluidos), excepto si es festivo
     let count = this._festivosCache[startYear].has(startKey) ? 0 : 1;
 
     while (count < dias + 1) {
