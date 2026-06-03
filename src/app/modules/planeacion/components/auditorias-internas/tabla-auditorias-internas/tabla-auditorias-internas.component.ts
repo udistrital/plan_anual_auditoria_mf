@@ -673,7 +673,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }: any) => {
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
         const datosAuditoria: Auditoria = auditoria?.Data;
 
         // Resolver vigencia igual que el PAA — desde ParametrosUtilsService

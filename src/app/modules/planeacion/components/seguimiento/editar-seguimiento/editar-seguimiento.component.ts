@@ -481,7 +481,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }: any) => {
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
         const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
