@@ -20,6 +20,7 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
+import { numerarHallazgos } from "src/app/shared/utils/numeracion-hallazgos.util";
 
 const configAuditado = {
   estadoAprobacion: [
@@ -251,6 +252,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
       if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
         await this.guardarFechaAprobacionInformeFinal();
+        await this.sellarNumeracionHallazgos();
         await this.crearCascaronPlanMejoramiento();
       }
 
@@ -275,6 +277,34 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         this.planAuditoriaService.put(`informe/${informeId}`, {
           fecha_aprobacion_informe: new Date().toISOString(),
         })
+      );
+    } catch {
+      // no bloquea el flujo de aprobación
+    }
+  }
+
+  private async sellarNumeracionHallazgos(): Promise<void> {
+    try {
+      const informeRes: any = await firstValueFrom(
+        this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
+      );
+      const informeId = informeRes?.Data?.[0]?._id;
+      if (!informeId) return;
+
+      const [temasRes, hallazgosRes]: any[] = await Promise.all([
+        firstValueFrom(this.planAuditoriaService.get(`tema?query=informe_id:${informeId}&limit=0`)),
+        firstValueFrom(this.planAuditoriaService.get(`hallazgo?query=informe_id:${informeId},activo:true&limit=0`)),
+      ]);
+
+      const numerados = numerarHallazgos(temasRes?.Data ?? [], hallazgosRes?.Data ?? []);
+      if (numerados.length === 0) return;
+
+      await Promise.all(
+        numerados.map((n) =>
+          firstValueFrom(
+            this.planAuditoriaService.put(`hallazgo/${n.hallazgoId}`, { no_hallazgo: n.numero })
+          )
+        )
       );
     } catch {
       // no bloquea el flujo de aprobación

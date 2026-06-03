@@ -226,7 +226,7 @@ export class TablaHallazgosComponent implements OnInit {
             .filter((h: any) => h.activo !== false)
             .map((h: any, i: number) => ({
               hallazgoId:  h._id,
-              indice:      String(i + 1),
+              indice:      h.no_hallazgo ?? String(i + 1),
               descripcion: h.descripcion ?? h.titulo ?? '',
               causa:       h.criterio ?? '',
               expandido:   estadoPrevio.get(h._id) ?? false,
