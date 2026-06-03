@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { PageEvent } from '@angular/material/paginator';
 import { ParametrosUtilsService } from 'src/app/shared/services/parametros.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
-import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 
 export interface FilaAccion {
   noAuditoria: string;
@@ -31,6 +31,12 @@ export class GestionAccionesComponent implements OnInit {
   dataSource = new MatTableDataSource<FilaAccion>([]);
   cargando = false;
 
+  // Paginación server-side
+  totalRegistros = 0;
+  pageSize = 10;
+  pageIndex = 0;
+  readonly pageSizeOptions = [5, 10, 25, 50];
+
   readonly columnas = [
     'noAuditoria', 'nombreAuditoria', 'noHallazgo', 'noAccion',
     'auditoresResponsablesPlan', 'dependenciaResponsable',
@@ -41,7 +47,6 @@ export class GestionAccionesComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly planAuditoriaService: PlanAnualAuditoriaService,
   ) {}
 
   ngOnInit(): void {
@@ -70,39 +75,14 @@ export class GestionAccionesComponent implements OnInit {
   }
 
   onVigenciaChange(): void {
-    const vigenciaId = this.filtrosForm.get('vigencia')?.value;
-    if (!vigenciaId) return;
-    this.cargarAcciones(vigenciaId);
-  }
-
-  private cargarAcciones(_vigenciaId: number): void {
-    this.cargando = true;
-    // TODO: llamar al MID para obtener acciones por vigencia
-    // Ejemplo de llamada esperada:
-    // this.planAuditoriaMid.get(`gestion-acciones?vigencia_id=${_vigenciaId}&limit=0`)
-    //   .subscribe({
-    //     next: (res) => { this.procesarAcciones(res.Data ?? []); this.cargando = false; },
-    //     error: () => { this.cargando = false; },
-    //   });
-    this.cargando = false;
+    // Al cambiar la vigencia se reinicia la paginación y se recarga
+    this.pageIndex = 0;
+    this.cargarAcciones();
   }
 
   aplicarFiltros(): void {
-    const v = this.filtrosForm.value;
-    this.dataSource.filterPredicate = (row: FilaAccion) => {
-      const matchNoAuditoria    = !v.noAuditoria         || row.noAuditoria.toLowerCase().includes(v.noAuditoria.toLowerCase());
-      const matchNombre         = !v.nombreAuditoria     || row.nombreAuditoria.toLowerCase().includes(v.nombreAuditoria.toLowerCase());
-      const matchNoHallazgo     = !v.noHallazgo          || row.noHallazgo.toLowerCase().includes(v.noHallazgo.toLowerCase());
-      const matchNoAccion       = !v.noAccion            || row.noAccion.toLowerCase().includes(v.noAccion.toLowerCase());
-      const matchAuditor        = !v.auditorResponsable  || row.auditoresResponsablesPlan.toLowerCase().includes(v.auditorResponsable.toLowerCase());
-      const matchDependencia    = !v.dependenciaResponsable || row.dependenciaResponsable.toLowerCase().includes(v.dependenciaResponsable.toLowerCase());
-      const fechaInicio         = row.fechaInicio ? new Date(row.fechaInicio) : null;
-      const matchDesde          = !v.desde || (fechaInicio !== null && fechaInicio >= new Date(v.desde));
-      const matchHasta          = !v.hasta || (fechaInicio !== null && fechaInicio <= new Date(v.hasta));
-      return matchNoAuditoria && matchNombre && matchNoHallazgo && matchNoAccion
-          && matchAuditor && matchDependencia && matchDesde && matchHasta;
-    };
-    this.dataSource.filter = Date.now().toString();
+    this.pageIndex = 0;
+    this.cargarAcciones();
   }
 
   limpiarFiltros(): void {
@@ -110,7 +90,77 @@ export class GestionAccionesComponent implements OnInit {
       noAuditoria: '', nombreAuditoria: '', noHallazgo: '', noAccion: '',
       auditorResponsable: '', dependenciaResponsable: '', desde: null, hasta: null,
     });
-    this.dataSource.filter = '';
+    this.pageIndex = 0;
+    this.cargarAcciones();
+  }
+
+  manejarCambioPaginado(evento: PageEvent): void {
+    this.pageIndex = evento.pageIndex;
+    this.pageSize = evento.pageSize;
+    this.cargarAcciones();
+  }
+
+  private cargarAcciones(): void {
+    const vigenciaId = this.filtrosForm.get('vigencia')?.value;
+    if (!vigenciaId) {
+      this.dataSource.data = [];
+      this.totalRegistros = 0;
+      return;
+    }
+
+    this.cargando = true;
+    this.planAuditoriaMid.get(`gestion-acciones?${this.construirQuery(vigenciaId)}`).subscribe({
+      next: (res) => {
+        this.dataSource.data = this.mapearFilas(res?.Data ?? []);
+        this.totalRegistros = res?.MetaData?.Count ?? this.dataSource.data.length;
+        this.cargando = false;
+      },
+      error: () => {
+        this.dataSource.data = [];
+        this.totalRegistros = 0;
+        this.cargando = false;
+      },
+    });
+  }
+
+  private construirQuery(vigenciaId: number): string {
+    const v = this.filtrosForm.value;
+    const params: Record<string, string> = {
+      vigencia_id: String(vigenciaId),
+      limit: String(this.pageSize),
+      offset: String(this.pageIndex * this.pageSize),
+    };
+
+    if (v.noAuditoria)            params['no_auditoria'] = v.noAuditoria.trim();
+    if (v.nombreAuditoria)        params['nombre_auditoria'] = v.nombreAuditoria.trim();
+    if (v.noHallazgo)             params['no_hallazgo'] = v.noHallazgo.trim();
+    if (v.noAccion)               params['no_accion'] = v.noAccion.trim();
+    if (v.auditorResponsable)     params['auditor'] = v.auditorResponsable.trim();
+    if (v.dependenciaResponsable) params['dependencia'] = v.dependenciaResponsable.trim();
+    if (v.desde)                  params['desde'] = new Date(v.desde).toISOString();
+    if (v.hasta)                  params['hasta'] = new Date(v.hasta).toISOString();
+
+    return new URLSearchParams(params).toString();
+  }
+
+  private mapearFilas(data: any[]): FilaAccion[] {
+    return data.map((item) => ({
+      accionId:                  item.accion_id ?? '',
+      planMejoramientoId:        item.plan_mejoramiento_id ?? '',
+      noAuditoria:               item.no_auditoria ?? '',
+      nombreAuditoria:           item.nombre_auditoria ?? '',
+      noHallazgo:                item.no_hallazgo ?? '',
+      noAccion:                  item.no_accion ?? '',
+      auditoresResponsablesPlan: item.auditores_responsables_plan ?? '',
+      dependenciaResponsable:    item.dependencia_responsable ?? '',
+      fechaInicio:               item.fecha_inicio
+                                   ? new Date(item.fecha_inicio).toLocaleDateString('es-CO')
+                                   : '',
+      fechaFin:                  item.fecha_fin
+                                   ? new Date(item.fecha_fin).toLocaleDateString('es-CO')
+                                   : '',
+      estado:                    item.estado_nombre ?? '',
+    }));
   }
 
   exportarTabla(): void {
