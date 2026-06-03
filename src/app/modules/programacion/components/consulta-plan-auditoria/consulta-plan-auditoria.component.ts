@@ -10,7 +10,7 @@ import { Plan } from "src/app/shared/data/models/plan-anual-auditoria/plan-anual
 import { environment } from "src/environments/environment";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { MatPaginator } from "@angular/material/paginator";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
@@ -492,13 +492,17 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       width: "1000px",
       data: {
         auditoriaId: plan.id,
-        estadoIds: [
+        estadoEndpoint: "plan-estado",
+        auditoriaIdReferencia: "plan_auditoria_id",
+        estadoRevisionIds: [
+          environment.PLAN_ESTADO.EN_REVISION_JEFE_ID,
+        ],
+        estadoRechazoIds: [
           environment.PLAN_ESTADO.RECHAZADO,
         ],
-        tipoEntidad: "plan",
         titulo: "Historial de observaciones",
         descripcion: `Historial de observaciones - Plan Anual de Auditoría ${plan.vigencia}`,
-      },
+      } as HistorialRechazosData,
       autoFocus: false,
     });
   }

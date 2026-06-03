@@ -43,16 +43,19 @@ export const accionesProgramacion: {
       "Historial de Observaciones",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
-      "Ver Plan",
+      "Ver Documentos",
       "Historial de Observaciones",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
-      "Ver Plan",
+      "Ver Documentos",
       "Historial de Observaciones",
       "Edición Extraordinaria de Auditorías",
       "Historial de Ediciones Extraordinarias",
     ],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Observaciones"],
+    [environment.PLAN_ESTADO.RECHAZADO]: [
+      "Ver Documentos",
+      "Historial de Observaciones"
+    ],
   },
 
   [environment.ROL.SECRETARIO]: {
@@ -63,10 +66,13 @@ export const accionesProgramacion: {
       "Historial de Observaciones",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
-      "Ver Plan",
+      "Ver Documentos",
       "Historial de Observaciones",
     ],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Observaciones"],
+    [environment.PLAN_ESTADO.RECHAZADO]: [
+      "Ver Documentos",
+      "Historial de Observaciones"
+    ],
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
@@ -154,6 +160,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Revisar Auditoría",
+      "Iniciar Ejecución",
       "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
