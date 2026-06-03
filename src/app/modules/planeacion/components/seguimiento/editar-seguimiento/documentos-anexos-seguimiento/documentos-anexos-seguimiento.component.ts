@@ -225,6 +225,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
           base64Document: this.base64CompromisoEtico,
           id: this.auditoriaId,
           soloLectura: this.soloLectura,
+          tipoAuditoria: 'seguimiento',
           onUpdated: (newBase64: string) => {
             this.base64CompromisoEtico = newBase64;
           },
