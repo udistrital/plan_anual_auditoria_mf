@@ -1,0 +1,33 @@
+.habilitado {
+    background-color: var(--success-main) !important;
+    border: 1px solid var(--success-accent) !important;
+}
+
+.deshabilitado {
+    background-color: var(--warning-main) !important;
+    border: 1px solid var(--warning-accent) !important;
+}
+
+.text-habilitado {
+    color: var(--success-accent) !important;
+}
+
+.text-deshabilitado {
+    color: var(--warning-accent) !important;
+}
+
+.slider {
+    width: 100%;
+}
+
+.registro-avances-form {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 12px 24px;
+    align-items: center;
+}
+
+.registro-avances-form mat-form-field {
+    flex: 1;
+    width: 100%;
+}

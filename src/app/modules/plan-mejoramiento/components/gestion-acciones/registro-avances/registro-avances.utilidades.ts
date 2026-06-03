@@ -100,7 +100,7 @@ export const formularioInformacionAccion: Formulario = {
     {
       nombre: "meta",
       etiqueta: "Meta %",
-      tipo: "number",
+      tipo: "text",
       deshabilitado: true,
       claseGrid: "col-lg-2 col-md-1 col-sm-12 col-xs-12",
     },
@@ -110,13 +110,6 @@ export const formularioInformacionAccion: Formulario = {
       tipo: "textarea",
       deshabilitado: true,
       claseGrid: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-    },
-    {
-      nombre: "auditor",
-      etiqueta: "Auditor Responsable Plan",
-      tipo: "text",
-      deshabilitado: true,
-      claseGrid: "col-lg-4 col-md-6 col-sm-12 col-xs-12",
     },
   ]
 }
@@ -142,16 +135,3 @@ export const formularioDependencias: Formulario = {
   ]
 }
 
-export const formularioDependencias2: Formulario = {
-  campos: [
-    ...formularioDependencias.campos || [],
-    {
-      nombre: "dependencia_apoyo",
-      etiqueta: "Dependencia de apoyo",
-      icono: "person",
-      tipo: "text",
-      deshabilitado: true,
-      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
-    },
-  ]
-}
