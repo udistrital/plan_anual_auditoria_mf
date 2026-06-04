@@ -152,6 +152,9 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Revisar Auditoría",
     ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
+      "Ver Auditoría",
+    ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
       "Revisar Auditoría",
@@ -174,6 +177,10 @@ export const accionesPlaneacion: {
       "Revisar Auditoría",
       "Historial de Observaciones",
     ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Ver Auditoría",
+    ],
+
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
