@@ -117,7 +117,10 @@ export class TablaSeguimientoComponent implements OnInit {
 
   private buildEstadoOptions(): void {
     this.parametrosUtilsService
-      .getEstadosAuditoria(7060, 7080)
+      .getEstadosAuditoria(
+        environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE
+      )
       .subscribe({
         next: (estados) => {
           this.estadoOptions = estados.map((estado) => ({
@@ -171,6 +174,13 @@ export class TablaSeguimientoComponent implements OnInit {
     }
 
     if (filterSuffix && url) {
+      // Si el filtro de estado está activo, reemplazamos cualquier criterio
+      // existente de estado_id__gte para no dejar la condición amplia y el exacto
+      // entrar en conflicto.
+      if (this.filtroEstado) {
+        url = url.replace(/,estado_id__gte:[^,&]*/g, '');
+      }
+
       const idx = url.indexOf('&limit=');
       if (idx !== -1) {
         url = url.slice(0, idx) + filterSuffix + url.slice(idx);
@@ -179,8 +189,9 @@ export class TablaSeguimientoComponent implements OnInit {
       }
     }
 
-    if (!url)
+    if (!url) {
       return;
+    }
 
     this.auditoriasPorVigencia = [];
     this.planAuditoriaMid
@@ -369,7 +380,7 @@ export class TablaSeguimientoComponent implements OnInit {
       new Set(
         this.roles.flatMap((rol) => accionesPlaneacion[rol]?.[estado] ?? [])
       )
-    );
+    ).filter((accion) => accion !== "Ver Cartas de representación");
   }
 
   // Obtener el icono dependiendo de la acción

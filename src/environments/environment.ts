@@ -135,6 +135,7 @@ export const environment = {
   },
 
   AUDITORIA_ESTADO: {
+    TIPO_PARAMETRO_ID: 159,
     PROGRAMACION: {
       BORRADOR_ID: 7060,
       POR_ASIGNAR: 7061,
