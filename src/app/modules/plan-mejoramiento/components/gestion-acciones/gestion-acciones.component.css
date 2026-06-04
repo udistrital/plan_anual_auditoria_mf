@@ -21,13 +21,11 @@
 }
 
 .texto-subtitulo {
-  font-size: 13px;
   color: #666;
 }
 
 /* ── Mensaje informativo de vigencia ─────────────────────── */
 .info-vigencia {
-  font-size: 13px;
   color: #555;
 }
 
@@ -59,63 +57,18 @@
 }
 
 /* ── Tabla ───────────────────────────────────────────────── */
-table.mat-table {
-  font-size: 12px;
-  width: 100%;
+/* Filas alternadas (mismo patrón que las demás tablas del módulo) */
+.even-row {
+  background-color: #f9f9f9;
 }
 
-table.mat-table th,
-table.mat-table td {
-  padding: 6px 10px !important;
-  vertical-align: middle;
-}
-
-table.mat-table td {
-  white-space: nowrap;
+/* Celdas de lista: clamp multilínea con tooltip */
+.celda-lista {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Anchos de columna */
-.mat-column-noAuditoria              { width: 80px;  min-width: 70px;  }
-.mat-column-nombreAuditoria          { width: 160px; min-width: 120px; }
-.mat-column-noHallazgo               { width: 80px;  min-width: 70px;  }
-.mat-column-noAccion                 { width: 70px;  min-width: 60px;  }
-.mat-column-auditoresResponsablesPlan{ width: 160px; min-width: 120px; }
-.mat-column-dependenciaResponsable   { width: 180px; min-width: 130px; }
-.mat-column-fechaInicio              { width: 90px;  min-width: 80px;  }
-.mat-column-fechaFin                 { width: 90px;  min-width: 80px;  }
-.mat-column-estado                   { width: 120px; min-width: 100px; }
-.mat-column-acciones                 { width: 60px;  min-width: 50px;  }
-
-/* Fila de datos con hover */
-.fila-accion {
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.fila-accion:hover td {
-  background-color: #f5f5f5;
-}
-
-/* Celda truncada con tooltip */
-.celda-truncada {
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Chip de estado */
-.chip-estado {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  background-color: #e8f0fe;
-  color: var(--primary, #1a237e);
-  white-space: nowrap;
+  max-width: 220px;
 }
 
 /* Estado vacío de la tabla */
@@ -141,7 +94,6 @@ table.mat-table td {
 }
 
 .estado-vacio p {
-  font-size: 14px;
   margin: 0;
   text-align: center;
 }

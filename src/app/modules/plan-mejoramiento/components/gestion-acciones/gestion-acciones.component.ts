@@ -109,7 +109,7 @@ export class GestionAccionesComponent implements OnInit {
     }
 
     this.cargando = true;
-    this.planAuditoriaMid.get(`gestion-acciones?${this.construirQuery(vigenciaId)}`).subscribe({
+    this.planAuditoriaMid.get(`gestion-accion?${this.construirQuery(vigenciaId)}`).subscribe({
       next: (res) => {
         this.dataSource.data = this.mapearFilas(res?.Data ?? []);
         this.totalRegistros = res?.MetaData?.Count ?? this.dataSource.data.length;

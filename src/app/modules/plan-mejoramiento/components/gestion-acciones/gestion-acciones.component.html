@@ -122,60 +122,58 @@
 
         <ng-container matColumnDef="noAuditoria">
           <th mat-header-cell *matHeaderCellDef><b>No Auditoría</b></th>
-          <td mat-cell *matCellDef="let row">{{ row.noAuditoria }}</td>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">{{ row.noAuditoria }}</td>
         </ng-container>
 
         <ng-container matColumnDef="nombreAuditoria">
           <th mat-header-cell *matHeaderCellDef><b>Nombre Auditoría</b></th>
-          <td mat-cell *matCellDef="let row">
-            <div class="celda-truncada" [title]="row.nombreAuditoria">{{ row.nombreAuditoria }}</div>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
+            <span class="celda-lista" [title]="row.nombreAuditoria">{{ row.nombreAuditoria }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="noHallazgo">
           <th mat-header-cell *matHeaderCellDef><b>No Hallazgo</b></th>
-          <td mat-cell *matCellDef="let row">{{ row.noHallazgo }}</td>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">{{ row.noHallazgo }}</td>
         </ng-container>
 
         <ng-container matColumnDef="noAccion">
           <th mat-header-cell *matHeaderCellDef><b>No Accion</b></th>
-          <td mat-cell *matCellDef="let row">{{ row.noAccion }}</td>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">{{ row.noAccion }}</td>
         </ng-container>
 
         <ng-container matColumnDef="auditoresResponsablesPlan">
           <th mat-header-cell *matHeaderCellDef><b>Auditor(es) Responsable(s) Plan</b></th>
-          <td mat-cell *matCellDef="let row">
-            <div class="celda-truncada" [title]="row.auditoresResponsablesPlan">{{ row.auditoresResponsablesPlan }}</div>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
+            <span class="celda-lista" [title]="row.auditoresResponsablesPlan">{{ row.auditoresResponsablesPlan }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="dependenciaResponsable">
           <th mat-header-cell *matHeaderCellDef><b>Dependencia Responsable de la Acción</b></th>
-          <td mat-cell *matCellDef="let row">
-            <div class="celda-truncada" [title]="row.dependenciaResponsable">{{ row.dependenciaResponsable }}</div>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
+            <span class="celda-lista" [title]="row.dependenciaResponsable">{{ row.dependenciaResponsable }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="fechaInicio">
           <th mat-header-cell *matHeaderCellDef><b>Fecha Inicio</b></th>
-          <td mat-cell *matCellDef="let row">{{ row.fechaInicio }}</td>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">{{ row.fechaInicio }}</td>
         </ng-container>
 
         <ng-container matColumnDef="fechaFin">
           <th mat-header-cell *matHeaderCellDef><b>Fecha Fin</b></th>
-          <td mat-cell *matCellDef="let row">{{ row.fechaFin }}</td>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">{{ row.fechaFin }}</td>
         </ng-container>
 
         <ng-container matColumnDef="estado">
           <th mat-header-cell *matHeaderCellDef><b>Estado</b></th>
-          <td mat-cell *matCellDef="let row">
-            <span class="chip-estado">{{ row.estado }}</span>
-          </td>
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">{{ row.estado }}</td>
         </ng-container>
 
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
-          <td mat-cell *matCellDef="let row">
+          <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
             <button mat-icon-button color="primary"
               [matMenuTriggerFor]="menuAccion"
               matTooltip="Ver opciones">
@@ -190,11 +188,8 @@
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="columnas; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: columnas"
-          class="fila-accion"
-          (click)="verActividades(row)">
-        </tr>
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas"></tr>
 
         <!-- Estado vacío -->
         <tr class="mat-row fila-vacia" *matNoDataRow>
