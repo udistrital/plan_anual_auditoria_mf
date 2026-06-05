@@ -7,6 +7,9 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 import { environment } from 'src/environments/environment';
+import { MatDialog } from '@angular/material/dialog';
+import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-registrar-plan',
@@ -46,6 +49,7 @@ export class RegistrarPlanComponent implements OnInit {
   private role: string | null = null;
 
   constructor(
+    private readonly dialog: MatDialog,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
@@ -53,6 +57,7 @@ export class RegistrarPlanComponent implements OnInit {
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
+    private readonly planAnualAuditoriaMid: PlanAnualAuditoriaMid
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -224,5 +229,25 @@ export class RegistrarPlanComponent implements OnInit {
 
   regresar(): void {
     this.router.navigate(['/plan-mejoramiento']);
+  }
+
+  async verDocumento() {
+    const documentoPlanMejoramiento = await this.obtenerDocumentoPlanMejoramiento();
+    const dialogRef =  this.dialog.open(ModalVerDocumentoComponent, {
+      width: "1000px",
+      data: documentoPlanMejoramiento.Data,
+      autoFocus: false
+    })
+  }
+
+  private async obtenerDocumentoPlanMejoramiento() {
+    try {
+      const data = await firstValueFrom(this.planAnualAuditoriaMid.get(`plantilla/plan-mejoramiento/${this.auditoriaId}`));
+      return data;
+    } catch (error) {
+      console.log("Error al cargar el documento de plan de mejoramiento.");
+      this.alertService.showErrorAlert("No fue obtener el plan de mejoramiento.")
+      return null;
+    }
   }
 }
