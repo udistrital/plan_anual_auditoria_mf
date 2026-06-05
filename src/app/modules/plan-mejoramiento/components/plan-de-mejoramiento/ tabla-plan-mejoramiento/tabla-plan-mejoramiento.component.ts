@@ -242,7 +242,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
 
   asignarAuditores(plan: any): void {
     const dialogRef = this.dialog.open(ModalAsignacionAuditoresComponent, {
-      width: "800px",
+      width: "1100px",
       data: { auditoria: plan, usuarioId: this.usuarioId, role: this.role },
     });
     dialogRef.afterClosed().subscribe((guardado: boolean) => {
