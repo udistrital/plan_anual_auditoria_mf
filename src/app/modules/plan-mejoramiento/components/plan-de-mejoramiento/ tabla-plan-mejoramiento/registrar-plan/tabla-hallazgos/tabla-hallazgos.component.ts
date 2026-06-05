@@ -4,6 +4,7 @@ import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
+import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
 
 export interface HallazgoTabla {
@@ -94,6 +95,7 @@ export class TablaHallazgosComponent implements OnInit {
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertService: AlertService,
     private readonly dialog: MatDialog,
+    private readonly descargaService: DescargaService,
   ) {}
 
   ngOnInit(): void {
@@ -359,6 +361,69 @@ export class TablaHallazgosComponent implements OnInit {
     );
 
     forkJoin(requests).subscribe({ next: () => callback(), error: () => callback() });
+  }
+
+  exportarTabla() {
+    const headers = [
+        "No. Hallazgo",
+        "Descripción del Hallazgo",
+        "Causa del Hallazgo",
+        "No. Acción",
+        "Tipo de Acción",
+        "Acción Planteada",
+        "Nombre del Indicador",
+        "Fórmula del Indicador",
+        "Meta",
+        "Responsable de la Acción",
+        "Fecha Inicio",
+        "Fecha Fin"
+      ];
+
+    const rows = this.hallazgos.map(
+        hallazgo => hallazgo.acciones.map(
+          accion => [
+            hallazgo.indice,
+            hallazgo.descripcion,
+            hallazgo.causa,
+            accion.numero,
+            accion.tipoAccion,
+            accion.accionPlanteada,
+            accion.nombreIndicador,
+            accion.formulaIndicador,
+            accion.meta,
+            accion.responsable,
+            accion.fechaInicio,
+            accion.fechaFin,
+          ]
+        ).concat()
+      );
+
+    const payload = {
+        worksheets: [{
+          name: "Acciones de mejora",
+          rows: [headers, ...rows.flat()]
+        }]
+      };
+
+    const consecutivoOCI = this.auditoria.consecutivo_OCI ?? 'sin_consecutivo';
+    const tipoEvaluacion = this.auditoria.tipo_evaluacion_nombre?.toLowerCase().replace(/\s+/g, '_') ?? 'sin_tipo';
+
+    this.planAuditoriaMid.post(
+        'cargue-masivo/exportar-excel',
+        payload
+      ).subscribe({
+        next: (res: any) => {
+          this.descargaService.descargarArchivo(
+            res.base64,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            `acciones_mejora_${tipoEvaluacion}_${consecutivoOCI}`
+          );
+        },
+        error: (err) => {
+          console.error('Error exportar tabla:', err);
+          this.alertService.showErrorAlert('Error al exportar la tabla.');
+        }
+      });
   }
 
   private sincronizarResponsables(

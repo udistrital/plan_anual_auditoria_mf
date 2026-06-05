@@ -9,7 +9,7 @@
     <!-- Cabecera exportar -->
     @if (!soloLectura) {
       <div class="d-flex justify-content-end mb-2">
-        <button mat-stroked-button color="primary">
+        <button mat-stroked-button (click)="exportarTabla()" color="primary">
           <mat-icon>upload</mat-icon> Exportar tabla
         </button>
       </div>
