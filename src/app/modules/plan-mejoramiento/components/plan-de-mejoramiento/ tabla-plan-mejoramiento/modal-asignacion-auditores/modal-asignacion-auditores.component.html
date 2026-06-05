@@ -118,23 +118,15 @@
         <!-- Selector: spinner solo aquí mientras carga, el resto del modal ya es visible -->
         <div class="row d-flex align-items-center mt-3">
           <div class="col-11 d-flex justify-content-start align-items-center">
-            <mat-form-field appearance="outline" class="flex-grow-1">
-              <mat-label>Seleccione un auditor</mat-label>
-              <mat-icon color="primary" matPrefix>person_search</mat-icon>
-              <mat-select [(ngModel)]="auditorSeleccionado" [disabled]="cargando">
-                @if (cargando) {
-                  <mat-option disabled>
-                    <mat-spinner diameter="20" class="spinner-inline"></mat-spinner>
-                    Cargando auditores...
-                  </mat-option>
-                }
-                @for (auditor of auditoresDisponibles; track auditor) {
-                  <mat-option [value]="auditor">
-                    {{ auditor.nombre }}
-                  </mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+            <app-search-selection
+              class="flex-grow-1"
+              label="Seleccione un auditor"
+              icon="person_search"
+              placeholder="Seleccione un auditor"
+              [items]="auditoresDisponibles"
+              labelKey="nombre"
+              [selectionControl]="auditorSeleccionado"
+            ></app-search-selection>
           </div>
 
           <div class="col-1 d-flex justify-content-center align-items-center">
