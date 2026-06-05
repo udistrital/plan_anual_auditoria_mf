@@ -177,7 +177,7 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
 
   /** Agrega el auditor seleccionado en el dropdown a la lista local */
   agregarAuditorPlan(): void {
-    if (!this.auditorSeleccionado) return;
+    if (!this.auditorSeleccionado.value) return;
 
     const yaExiste = this.auditoresPlan.some(
       (a) => a.id === this.auditorSeleccionado.value?.id
@@ -192,7 +192,7 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
 
     this.auditoresPlan = [
       ...this.auditoresPlan,
-      { ...this.auditorSeleccionado.value! },
+      { ...this.auditorSeleccionado.value },
     ];
     this.auditoresDisponibles = this.auditoresDisponibles.filter(
       (a) => a.id !== this.auditorSeleccionado.value?.id
