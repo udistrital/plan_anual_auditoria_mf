@@ -7,6 +7,7 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 import { environment } from 'src/environments/environment';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
     selector: 'app-registrar-plan',
@@ -16,10 +17,11 @@ import { environment } from 'src/environments/environment';
 })
 export class RegistrarPlanComponent implements OnInit {
   auditoriaId!: string;
-  auditoria: any = null;
+  auditoria: Auditoria | null = null;
   planMejoramientoId: string | null = null;
   cargando = true;
   enviando = false;
+  lideres = '';
 
   private usuarioId = 0;
   private role: string | null = null;
@@ -52,6 +54,7 @@ export class RegistrarPlanComponent implements OnInit {
     this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`).subscribe({
       next: (res) => {
         this.auditoria = res.Data;
+        this.lideres = this.auditoria?.datos_dependencias?.map(d => d.jefe_nombre).join(', ') ?? '';
         this.resolverPlanMejoramiento();
       },
       error: () => { this.cargando = false; }
