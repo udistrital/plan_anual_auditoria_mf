@@ -263,6 +263,11 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         await this.guardarFechaRevisionPreinforme();
       }
 
+      if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
+        await this.guardarFechaAprobacionInformeFinal();
+        await this.crearCascaronPlanMejoramiento();
+      }
+
       const mensaje = this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
         ? "Informe final enviado"
         : "Informe preliminar enviado";
@@ -270,6 +275,64 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       this.router.navigate([`/ejecucion/auditorias-internas/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
+    }
+  }
+
+  private async guardarFechaAprobacionInformeFinal(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(
+        this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
+      );
+      const informeId = res?.Data?.[0]?._id;
+      if (!informeId) return;
+      await firstValueFrom(
+        this.planAuditoriaService.put(`informe/${informeId}`, {
+          fecha_aprobacion_informe: new Date().toISOString(),
+        })
+      );
+    } catch {
+      // no bloquea el flujo de aprobación
+    }
+  }
+
+  private async crearCascaronPlanMejoramiento(): Promise<void> {
+    try {
+      const planExistente: any = await firstValueFrom(
+        this.planAuditoriaService.get(`plan-mejoramiento?query=auditoria_id:${this.auditoriaId},activo:true`)
+      );
+      if (planExistente?.Data?.length > 0) return;
+
+      const auditoriaRes: any = await firstValueFrom(
+        this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`)
+      );
+      const auditoria = auditoriaRes?.Data;
+
+      const planRes: any = await firstValueFrom(
+        this.planAuditoriaService.post('plan-mejoramiento', {
+          auditoria_id:       this.auditoriaId,
+          vigencia_id:        auditoria?.vigencia_id,
+          tipo_evaluacion_id: auditoria?.tipo_evaluacion_id,
+          estado_id:          environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO,
+          activo:             true,
+        })
+      );
+      const planId = planRes?.Data?._id;
+      if (!planId) return;
+
+      await firstValueFrom(
+        this.planAuditoriaService.post('plan-mejoramiento-estado', {
+          plan_mejoramiento_id:   planId,
+          usuario_id:             this.usuarioId,
+          usuario_rol:            this.role,
+          observacion:            '',
+          estado_id:              environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO,
+          fase_id:                environment.AUDITORIA_FASE.PLAN_MEJORAMIENTO,
+          fecha_ejecucion_estado: new Date().toISOString(),
+          activo:                 true,
+        })
+      );
+    } catch {
+      // no bloquea el flujo de aprobación del informe
     }
   }
 

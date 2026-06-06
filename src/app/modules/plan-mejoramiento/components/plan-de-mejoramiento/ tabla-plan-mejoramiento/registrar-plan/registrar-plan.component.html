@@ -27,21 +27,23 @@
       <input matInput [value]="auditoria?.proceso_nombre ?? ''" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-4 col-12">
-      <mat-label>Líder del Proceso</mat-label>
-      <input matInput [value]="auditoria?.jefe_nombre ?? ''" readonly />
+      <mat-label>Líder(es) del Proceso</mat-label>
+      <input matInput [value]="lideresDelProceso" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-4 col-12">
       <mat-label>Gestores del Proceso</mat-label>
-      <input matInput [value]="auditoria?.dependencia_nombre ?? ''" readonly />
+      <input matInput [value]="gestoresDelProceso" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-2 col-12">
       <mat-label>Fecha (DD/MM/AA)</mat-label>
       <input matInput [value]="auditoria?.fecha_inicio | date:'dd/MM/yy'" readonly />
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-2 col-12">
-      <mat-label>Seleccione una opción</mat-label>
-      <mat-select>
-        <!-- opciones dinámicas si aplica -->
+      <mat-label>Fuente <span class="text-danger">*</span></mat-label>
+      <mat-select [(ngModel)]="fuenteSeleccionada" (ngModelChange)="guardarFuente()">
+        @for (f of fuentes; track f.id) {
+          <mat-option [value]="f.id">{{ f.nombre }}</mat-option>
+        }
       </mat-select>
     </mat-form-field>
   </div>
@@ -67,6 +69,10 @@
 
   <!-- Footer -->
   <div class="d-flex justify-content-end mt-4" style="gap: 16px;">
+    <button mat-raised-button color="primary" (click)="verDocumento()">
+      <mat-icon>visibility</mat-icon>
+      Vista previa
+    </button>
     <button mat-raised-button color="primary" (click)="guardar()">
       <mat-icon>save</mat-icon>
       Guardar

@@ -347,6 +347,12 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+        dependenciasInfo.forEach((dep) => 
+          datosAuditoria.correo_complementario?.forEach((correo: any) => {
+            if (correo.dependencia_id === dep.dependencia_id)
+              dep.correo_complementario = correo.correo;
+          })
+        );
 
         console.log(
           "[notificarAceptacionAuditado - SEGUIMIENTO] auditoriaId:", auditoriaId,

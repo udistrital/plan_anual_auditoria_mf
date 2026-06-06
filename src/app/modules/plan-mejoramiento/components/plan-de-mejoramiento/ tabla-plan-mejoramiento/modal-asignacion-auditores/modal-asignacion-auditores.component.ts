@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { forkJoin, of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
 
@@ -54,6 +55,7 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: DatosModalAsignacionAuditores,
     private readonly dialogRef: MatDialogRef<ModalAsignacionAuditoresComponent>,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertService: AlertService,
     private readonly autenticacionMidService: AutenticacionMidService
   ) {}
@@ -93,13 +95,13 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
   }
 
   private cargarDatosEnParalelo(): void {
-    const auditoriaId = this.data.auditoria?._id;
+    const planId = this.data.auditoria?.planMejoramientoId;
     this.cargando = true;
 
-    const plan$ = auditoriaId
-      ? this.planAuditoriaService
+    const plan$ = planId
+      ? this.planAuditoriaMid
           .get(
-            `auditoria-auditor?query=auditoria_id:${auditoriaId},activo:true&limit=100`
+            `plan-mejoramiento-auditor?query=plan_mejoramiento_id:${planId},activo:true`
           )
           .pipe(
             catchError((err) => {
@@ -231,15 +233,64 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
       });
   }
 
-  private async ejecutarGuardado(): Promise<void> {
-    this.alertService.showSuccessAlert(
-      "Auditores del plan asignados correctamente.",
-      "Guardado exitoso"
-    );
-    this.dialogRef.close(true);
-  }
+  private ejecutarGuardado(): void {
+    const planId = this.data.auditoria?.planMejoramientoId;
 
-  private cambiarEstadoPlanMejoramiento(auditoriaId: string): Promise<any> {
-    return Promise.resolve();
+    if (!planId) {
+      this.alertService.showAlert(
+        "Plan no registrado",
+        "Primero debe registrar el plan desde la acción 'Registrar Plan'."
+      );
+      return;
+    }
+
+    const auditoresNuevos = this.auditoresPlan.filter(
+      (a) => !this.registrosAuditoresPlan.some((r) => r.auditorId === a.id)
+    );
+
+    const posts$ = auditoresNuevos.map((a) =>
+      this.planAuditoriaService
+        .post("plan-mejoramiento-auditor", {
+          plan_mejoramiento_id: planId,
+          auditor_id: Number(a.id),
+          asignado: true,
+          asignado_por_id: this.data.usuarioId,
+          auditor_lider: false,
+          activo: true,
+        })
+        .pipe(catchError(() => of(null)))
+    );
+
+    const deletes$ = this.auditoresAEliminar.map((registroId) =>
+      this.planAuditoriaService
+        .delete("plan-mejoramiento-auditor", { id: registroId })
+        .pipe(catchError(() => of(null)))
+    );
+
+    const operaciones$ = [...posts$, ...deletes$];
+
+    if (operaciones$.length === 0) {
+      this.alertService.showSuccessAlert(
+        "Sin cambios que guardar.",
+        "Sin cambios"
+      );
+      this.dialogRef.close(false);
+      return;
+    }
+
+    forkJoin(operaciones$).subscribe({
+      next: () => {
+        this.alertService.showSuccessAlert(
+          "Auditores del plan asignados correctamente.",
+          "Guardado exitoso"
+        );
+        this.dialogRef.close(true);
+      },
+      error: () => {
+        this.alertService.showErrorAlert(
+          "Error al guardar los auditores del plan."
+        );
+      },
+    });
   }
 }

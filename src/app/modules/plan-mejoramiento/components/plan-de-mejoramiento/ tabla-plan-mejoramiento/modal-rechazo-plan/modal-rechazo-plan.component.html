@@ -1,0 +1,26 @@
+<plantilla-modal [icono]="'block_flipped'" [titulo]="'Rechazar Plan de Mejoramiento'" [descripcion]="'Indique el motivo del rechazo'" [contenido]="contenidoDeModal" [footer]="footerDeModal"></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-3">
+    <div class="col-12">
+      <form [formGroup]="form">
+        <mat-form-field appearance="outline" class="col-12">
+          <mat-label>Motivo del rechazo</mat-label>
+          <mat-icon color="primary" matPrefix>format_list_bulleted</mat-icon>
+          <textarea style="height: 100px; resize: none" matInput formControlName="observacion"></textarea>
+        </mat-form-field>
+      </form>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="mb-3">
+    <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]>
+      <mat-icon>toll</mat-icon>No, regresar
+    </button>
+    <button mat-raised-button color="primary" (click)="confirmar()">
+      <mat-icon>disabled_by_default</mat-icon>Rechazar
+    </button>
+  </div>
+</ng-template>

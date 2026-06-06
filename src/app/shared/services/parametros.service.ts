@@ -52,11 +52,11 @@ export class ParametrosUtilsService {
    * @returns Observable con los estados encontrados
    */
   public getEstadosAuditoria(
-    desdeId?: number,
-    hastaId?: number
+    desdeId: number = environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+    hastaId: number = environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR
   ): Observable<Parametro[]> {
-
-    let query = "TipoParametroId:159,Activo:true";
+    const tipoParametroId = environment.AUDITORIA_ESTADO.TIPO_PARAMETRO_ID;
+    let query = `TipoParametroId:${tipoParametroId},Activo:true`;
 
     // Agregar filtros por rango si existen
     if (desdeId !== undefined) {

@@ -54,7 +54,10 @@
                       </div>
                     }
                     @default {
-                      <span>{{ columna.cell(row) }}</span>
+                      <span
+                        [title]="columna.cell(row)"
+                        [class.celda-lista]="['auditores_auditoria','dependencia','auditores_plan'].includes(columna.columnDef)"
+                      >{{ columna.cell(row) }}</span>
                     }
                   }
                 }

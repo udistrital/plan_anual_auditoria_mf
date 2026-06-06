@@ -80,13 +80,21 @@
       <td mat-cell *matCellDef="let element">{{ element.observaciones }}</td>
     </ng-container>
 
+    <!-- Completada Column -->
+    <ng-container matColumnDef="completada">
+      <th mat-header-cell *matHeaderCellDef class="header"><b>Completada</b></th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.completada ? 'Sí' : 'No' }}
+      </td>
+    </ng-container>
+
     <!-- Acciones -->
-    @if (!soloLectura) {
-      <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef class="header">
-          <b>Acciones</b>
-        </th>
-        <td mat-cell *matCellDef="let element">
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef class="header">
+        <b>Acciones</b>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @if (!soloLectura || !element.completada) {
           <button
             mat-icon-button
             [matMenuTriggerFor]="menu"
@@ -95,16 +103,26 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="editarActividad(element)">
-              <mat-icon color="primary">edit</mat-icon> Editar Actividad
-            </button>
-            <button mat-menu-item (click)="eliminarActividad(element)">
-              <mat-icon color="primary">delete</mat-icon> Eliminar Actividad
-            </button>
+            <!-- Mostrar opciones de editar y eliminar solo si no es solo lectura -->
+            @if (!soloLectura) {
+              <button mat-menu-item (click)="editarActividad(element)">
+                <mat-icon color="primary">edit</mat-icon> Editar Actividad
+              </button>
+              <button mat-menu-item (click)="eliminarActividad(element)">
+                <mat-icon color="primary">delete</mat-icon> Eliminar Actividad
+              </button>
+            }
+            <!-- Solo mostrar la opción de marcar como completada si la actividad no está completada y la auditoría está en ejecución -->
+            @if (mostrarMarcarCompletada && !element.completada) {
+              <button mat-menu-item (click)="marcarCompletada(element)">
+                <mat-icon color="primary">check_circle</mat-icon>
+                Marcar como Completada
+              </button>
+            }
           </mat-menu>
-        </td>
-      </ng-container>
-    }
+        }
+      </td>
+    </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
     <tr mat-row *matRowDef="let row; columns: columnsToDisplay"></tr>

@@ -2,7 +2,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
+import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
+import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
@@ -27,6 +29,8 @@ export interface AccionPlan {
   responsable: string;
   fechaInicio: string;
   fechaFin: string;
+  fechaInicioISO: string | null;
+  fechaFinISO: string | null;
 }
 
 export interface ResultadoModalAccion {
@@ -37,6 +41,8 @@ export interface ResultadoModalAccion {
     formulaIndicador: string;
     meta: string;
     accionId?: string;
+    fechaInicio?: string | null;
+    fechaFin?: string | null;
   };
   responsablesNuevos: { dependencia_id: number; dependencia_lider: boolean }[];
   responsablesAEliminar: string[];
@@ -63,24 +69,34 @@ export class TablaHallazgosComponent implements OnInit {
   @Input() auditoriaId!: string;
   @Input() planMejoramientoId!: string;
   @Input() auditoria!: Auditoria;
+  @Input() soloLectura = false;
 
+  fechaAprobacionInforme: string | null = null;
   hallazgos: HallazgoTabla[] = [];
   filas: FilaTabla[] = [];
   cargando = true;
 
-  columnas = [
+  private readonly columnasTodas = [
     'noHallazgo', 'descripcion', 'causa', 'numero', 'tipoAccion',
     'accionPlanteada', 'nombreIndicador', 'formulaIndicador',
     'meta', 'responsable', 'fechaInicio', 'fechaFin', 'acciones',
   ];
+
+  get columnas(): string[] {
+    return this.soloLectura
+      ? this.columnasTodas.filter(c => c !== 'acciones')
+      : this.columnasTodas;
+  }
 
   esFilaGrupo  = (_i: number, fila: FilaTabla) =>  fila.esGrupo;
   esFilaAccion = (_i: number, fila: FilaTabla) => !fila.esGrupo;
 
   constructor(
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertService: AlertService,
     private readonly dialog: MatDialog,
+    private readonly descargaService: DescargaService,
   ) {}
 
   ngOnInit(): void {
@@ -122,7 +138,8 @@ export class TablaHallazgosComponent implements OnInit {
     this.filas = filas;
   }
 
-  private mapearAccion(a: any, index: number): AccionPlan {
+  private mapearAccion(a: any, index: number, responsablesPorAccion?: Map<string, string[]>): AccionPlan {
+    const nombres = responsablesPorAccion?.get(a._id) ?? [];
     return {
       accionId:         a._id,
       numero:           String(index + 1),
@@ -132,10 +149,18 @@ export class TablaHallazgosComponent implements OnInit {
       nombreIndicador:  a.nombre_indicador ?? '',
       formulaIndicador: a.formula_indicador ?? '',
       meta:             a.meta ?? '',
-      responsable:      '',
-      fechaInicio:      a.fecha_inicio ?? '',
-      fechaFin:         a.fecha_fin ?? '',
+      responsable:      nombres.join(', '),
+      fechaInicio:      this.formatearFecha(a.fecha_inicio),
+      fechaFin:         this.formatearFecha(a.fecha_fin),
+      fechaInicioISO:   a.fecha_inicio ?? null,
+      fechaFinISO:      a.fecha_fin ?? null,
     };
+  }
+
+  private formatearFecha(fecha: string | null | undefined): string {
+    if (!fecha) return '';
+    const d = new Date(fecha);
+    return isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-CO');
   }
 
   // ─── Carga de datos ──────────────────────────────────────────────────────────
@@ -150,24 +175,47 @@ export class TablaHallazgosComponent implements OnInit {
       .pipe(
         switchMap((resInforme) => {
           if (!resInforme.Data?.length) {
-            return of({ hallazgos: { Data: [] }, acciones: { Data: [] } });
+            return of({ hallazgos: { Data: [] }, acciones: { Data: [] }, responsables: { Data: [] } });
           }
-          const informeId = resInforme.Data[0]._id;
+          const informe = resInforme.Data[0];
+          this.fechaAprobacionInforme = informe.fecha_aprobacion_informe ?? null;
+          const informeId = informe._id;
           return forkJoin({
             hallazgos: this.planAuditoriaService
               .get(`hallazgo?query=informe_id:${informeId},activo:true`),
             acciones: this.planAuditoriaService
               .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)
               .pipe(catchError(() => of({ Data: [] }))),
-          });
+          }).pipe(
+            switchMap(({ hallazgos, acciones }) => {
+              const accionIds: string[] = (acciones.Data ?? []).map((a: any) => a._id).filter(Boolean);
+              const responsables$ = accionIds.length
+                ? this.planAuditoriaMid
+                    .get(`responsable-accion?query=accion_mejora_id__in:${accionIds.join('|')},activo:true&limit=0`)
+                    .pipe(catchError(() => of({ Data: [] })))
+                : of({ Data: [] });
+              return forkJoin({ hallazgos: of(hallazgos), acciones: of(acciones), responsables: responsables$ });
+            })
+          );
         })
       )
       .subscribe({
-        next: ({ hallazgos, acciones }) => {
+        next: ({ hallazgos, acciones, responsables }) => {
           const accionesData: any[] = acciones.Data ?? [];
+
+          const responsablesPorAccion = new Map<string, string[]>();
+          (responsables.Data ?? []).forEach((r: any) => {
+            const accionId = typeof r.accion_mejora_id === 'object'
+              ? r.accion_mejora_id?._id
+              : r.accion_mejora_id;
+            if (!accionId || !r.dependencia_nombre) return;
+            const lista = responsablesPorAccion.get(accionId) ?? [];
+            lista.push(r.dependencia_nombre);
+            responsablesPorAccion.set(accionId, lista);
+          });
+
           const accionesPorHallazgo = new Map<string, any[]>();
           accionesData.forEach((a: any) => {
-            // hallazgo_id puede venir como string o como objeto populado { _id, ... }
             const key = typeof a.hallazgo_id === 'object'
               ? a.hallazgo_id?._id
               : a.hallazgo_id;
@@ -186,7 +234,7 @@ export class TablaHallazgosComponent implements OnInit {
               causa:       h.criterio ?? '',
               expandido:   estadoPrevio.get(h._id) ?? false,
               acciones:    (accionesPorHallazgo.get(h._id) ?? [])
-                             .map((a: any, j: number) => this.mapearAccion(a, j)),
+                             .map((a: any, j: number) => this.mapearAccion(a, j, responsablesPorAccion)),
             }));
 
           this.reconstruirFilas();
@@ -217,6 +265,7 @@ export class TablaHallazgosComponent implements OnInit {
         accion: accion ?? null,
         auditoria: this.auditoria,
         planMejoramientoId: this.planMejoramientoId,
+        fechaAprobacionInforme: this.fechaAprobacionInforme,
       },
     });
 
@@ -237,6 +286,8 @@ export class TablaHallazgosComponent implements OnInit {
       nombre_indicador:     resultado.accion.nombreIndicador,
       formula_indicador:    resultado.accion.formulaIndicador,
       meta:                 resultado.accion.meta,
+      fecha_inicio:         resultado.accion.fechaInicio,
+      fecha_fin:            resultado.accion.fechaFin,
       activo:               true,
     };
 
@@ -259,6 +310,8 @@ export class TablaHallazgosComponent implements OnInit {
       nombre_indicador:  resultado.accion.nombreIndicador,
       formula_indicador: resultado.accion.formulaIndicador,
       meta:              resultado.accion.meta,
+      fecha_inicio:      resultado.accion.fechaInicio,
+      fecha_fin:         resultado.accion.fechaFin,
     };
 
     this.planAuditoriaService
@@ -309,6 +362,69 @@ export class TablaHallazgosComponent implements OnInit {
     );
 
     forkJoin(requests).subscribe({ next: () => callback(), error: () => callback() });
+  }
+
+  exportarTabla() {
+    const headers = [
+        "No. Hallazgo",
+        "Descripción del Hallazgo",
+        "Causa del Hallazgo",
+        "No. Acción",
+        "Tipo de Acción",
+        "Acción Planteada",
+        "Nombre del Indicador",
+        "Fórmula del Indicador",
+        "Meta",
+        "Responsable de la Acción",
+        "Fecha Inicio",
+        "Fecha Fin"
+      ];
+
+    const rows = this.hallazgos.map(
+        hallazgo => hallazgo.acciones.map(
+          accion => [
+            hallazgo.indice,
+            hallazgo.descripcion,
+            hallazgo.causa,
+            accion.numero,
+            accion.tipoAccion,
+            accion.accionPlanteada,
+            accion.nombreIndicador,
+            accion.formulaIndicador,
+            accion.meta,
+            accion.responsable,
+            accion.fechaInicio,
+            accion.fechaFin,
+          ]
+        ).concat()
+      );
+
+    const payload = {
+        worksheets: [{
+          name: "Acciones de mejora",
+          rows: [headers, ...rows.flat()]
+        }]
+      };
+
+    const consecutivoOCI = this.auditoria.consecutivo_OCI ?? 'sin_consecutivo';
+    const tipoEvaluacion = this.auditoria.tipo_evaluacion_nombre?.toLowerCase().replace(/\s+/g, '_') ?? 'sin_tipo';
+
+    this.planAuditoriaMid.post(
+        'cargue-masivo/exportar-excel',
+        payload
+      ).subscribe({
+        next: (res: any) => {
+          this.descargaService.descargarArchivo(
+            res.base64,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            `acciones_mejora_${tipoEvaluacion}_${consecutivoOCI}`
+          );
+        },
+        error: (err) => {
+          console.error('Error exportar tabla:', err);
+          this.alertService.showErrorAlert('Error al exportar la tabla.');
+        }
+      });
   }
 
   private sincronizarResponsables(

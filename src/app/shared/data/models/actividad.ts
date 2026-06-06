@@ -4,6 +4,7 @@ export interface Actividad {
   titulo: string;
   fecha_inicio: string;
   fecha_fin: string;
+  completada: boolean;
   referencia?: string;
   descripcion?: string;
   observacion?: string;
