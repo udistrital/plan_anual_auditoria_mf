@@ -208,7 +208,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
       if (!conf.value) return;
 
       const v = this.form.getRawValue();
-      const liderDependenciaId: number = this.data.auditoria?.dependencia_id[0] ?? 0;
+      const liderDependenciaId: number[] = this.data.auditoria?.dependencia_id ?? [];
 
       // IDs de dependencias (no-lider) que ya estaban en DB
       const idsActualesNoLider = new Set(
@@ -227,7 +227,11 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
       // En creación: incluir la dependencia líder solo si tiene ID válido
       if (!this.modoEdicion && liderDependenciaId) {
-        responsablesNuevos.push({ dependencia_id: liderDependenciaId, dependencia_lider: true });
+        responsablesNuevos.push(
+          ...liderDependenciaId.map(id => {
+            return { dependencia_id: id, dependencia_lider: true } 
+          })
+        );
       }
 
       // Dependencias que el usuario agregó y no estaban en DB
