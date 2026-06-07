@@ -110,10 +110,10 @@ export class ModalRegistrarAccionComponent implements OnInit {
     if (!this.modoEdicion) {
       const depsLideres = this.todasDependencias.filter(
         d => this.data.auditoria.dependencia_id.includes(d.id)
-      ).map(d => ({ _id: '', dependencia_id: d.id, dependencia_lider: true }));
-      this.responsablesActuales.push(...depsLideres);
+      );
+      this.responsablesActuales.push(...depsLideres.map(d => ({ _id: '', dependencia_id: d.id, dependencia_lider: true })));
+      this.dependenciaLider = depsLideres.map(d => d.nombre).join(', ');
     }
-    
   }
 
   private cargarDependencias(): void {
@@ -146,10 +146,12 @@ export class ModalRegistrarAccionComponent implements OnInit {
           this.responsablesActuales = res.Data ?? [];
           // Mostrar en UI solo los que NO son líderes
           const dependenciasActuales = this.responsablesActuales.filter(r => !r.dependencia_lider);
+          const idsLideres = new Set(this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id));
           this.responsablesAgregados = dependenciasActuales.map(r => {
             const dep = this.todasDependencias.find(d => d.id === r.dependencia_id);
             return { id: r.dependencia_id, nombre: dep?.nombre ?? `Dependencia ${r.dependencia_id}` };
           });
+          this.dependenciaLider = this.todasDependencias.filter(d => idsLideres.has(d.id)).map(d => d.nombre).join(', ');
           this.actualizarDisponibles();
         },
         error: () => {}

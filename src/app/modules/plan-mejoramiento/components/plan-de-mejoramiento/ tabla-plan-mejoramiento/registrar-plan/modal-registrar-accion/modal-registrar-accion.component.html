@@ -150,7 +150,24 @@
     <!-- ── Responsables ───────────────────────────────────────────────── -->
     <div class="col-12 mb-2">
       <div class="fondo-acento-50 d-flex justify-content-center my-3">
-        <b>Responsables</b>
+        <b>Dependencias Líderes Acciones</b>
+      </div>
+      <div
+        class="d-flex align-items-center justify-content-between mb-2"
+        >
+        <div class="col-12">
+          <mat-form-field subscriptSizing="dynamic" appearance="outline" class="col-12">
+            <mat-icon color="primary" matIconPrefix>apartment</mat-icon>
+            <input matInput [value]="dependenciaLider || 'Sin dependencia líder'" readonly />
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col-12 mb-2">
+      <div class="fondo-acento-50 d-flex justify-content-center my-3">
+        <b>Dependencias responsables</b>
       </div>
 
       <!-- Lista de responsables ya agregados -->
@@ -160,7 +177,7 @@
           >
           <div class="col-9">
             <mat-form-field subscriptSizing="dynamic" appearance="outline" class="col-12">
-              <mat-label>Dependencia Responsable {{ i + 1 }}</mat-label>
+              <mat-label>Dependencia de apoyo {{ i + 1 }}</mat-label>
               <mat-icon color="primary" matIconPrefix>apartment</mat-icon>
               <input matInput [value]="resp.nombre" readonly />
             </mat-form-field>
