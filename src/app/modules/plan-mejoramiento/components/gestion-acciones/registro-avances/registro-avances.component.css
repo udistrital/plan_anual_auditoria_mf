@@ -31,3 +31,11 @@
     flex: 1;
     width: 100%;
 }
+
+.label {
+    display: inline-flex;
+}
+
+.label-content {
+    flex: 1;
+}

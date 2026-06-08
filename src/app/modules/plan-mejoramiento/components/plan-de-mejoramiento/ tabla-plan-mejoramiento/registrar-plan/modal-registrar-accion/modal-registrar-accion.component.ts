@@ -176,7 +176,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private actualizarDisponibles(): void {
     const idsAgregados = new Set(this.responsablesAgregados.map(r => r.id));
-    this.dependenciasDisponibles = this.todasDependencias.filter(d => !idsAgregados.has(d.id));
+    const idsLideres = new Set(this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id));
+    this.dependenciasDisponibles = this.todasDependencias.filter(d => !idsAgregados.has(d.id) && !idsLideres.has(d.id));
   }
 
   agregarResponsable(): void {

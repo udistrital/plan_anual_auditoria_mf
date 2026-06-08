@@ -143,7 +143,7 @@
                       </mat-expansion-panel-header>
                       <div class="p-3">
                         <app-formulario-dinamico
-                          #formularioDependenciasComp
+                          #formularioDependenciasComp2
                           [formulario]="formularioDependencias"
                           >
                         </app-formulario-dinamico>
@@ -313,7 +313,12 @@
     
     <!-- Fila 2 -->
     <label [htmlFor]="'calificacion'" class="label">
-      <strong>% Avance eficacia</strong>
+      <strong class="label-content">% Avance eficacia</strong>
+      <mat-icon color="primary" class="tip-suffix"
+        [matTooltip]="tooltips.avance"
+        matTooltipPosition="right"
+        matTooltipClass="tooltip-multilinea"
+      >help</mat-icon>
     </label>
     <mat-slider class="slider" discrete class="col-12">
       <input id="calificacion" matSliderThumb formControlName="calificacion" />
@@ -321,9 +326,18 @@
 
     <!-- Fila 3 -->
     <label [htmlFor]="'observaciones'" class="label">
-      <strong>Análisis de seguimiento</strong>
+      <strong class="label-content">Análisis de seguimiento</strong>
+      <mat-icon color="primary" class="tip-suffix"
+        [matTooltip]="tooltips.observaciones"
+        matTooltipPosition="right"
+        matTooltipClass="tooltip-multilinea"
+      >help</mat-icon>
     </label>
-    <app-editor-enriquecido id="observaciones" formControlName="observaciones" placeholder="Observaciones"></app-editor-enriquecido>
+    <app-editor-enriquecido
+      id="observaciones"
+      formControlName="observaciones"
+      placeholder="Observaciones"
+    ></app-editor-enriquecido>
   </form>
   <div class="d-flex justify-content-end align-items-center mt-4">
     <button

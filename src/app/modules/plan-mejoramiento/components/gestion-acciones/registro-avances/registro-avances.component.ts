@@ -6,7 +6,7 @@ import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/
 import { formularioDependencias, formularioInformacionAccion, formularioInformacionAuditoria } from './registro-avances.utilidades';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
-import { of, switchMap } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -29,7 +29,7 @@ export class RegistroAvancesComponent implements OnInit {
   formularioInformacionAccionComp!: FormularioDinamicoComponent;
   formularioInformacionAccion: Formulario | undefined;
 
-  @ViewChildren("formularioDependenciasComp")
+  @ViewChildren("formularioDependenciasComp, formularioDependenciasComp2")
   formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
   formularioDependencias: Formulario = formularioDependencias;
   
@@ -53,6 +53,11 @@ export class RegistroAvancesComponent implements OnInit {
   nombreAuditor = 'Juan Pablo Moreno';
   usuarioId = 0;
   fechaCalificacion = new Date();
+
+  tooltips = {
+    avance: "*De contar con un indicador que permita su medición, se realizará conforme a la evidencia entregada y enconcordancia con la acción formulada. *En caso que el indicador no sea coherente con la acción, el % de esta columna será el resultado del análisis de la evidencia que corresponda a la ejecución de la acción.",
+    observaciones: "El análisis debe realizarse de manera completa, suficiente y descriptiva con el fin de contar con un diagnóstico que evidencie el estado real de la acción, en qué momento de desarrollo se encuentra, que soportes se presentaron y evaluaron."
+  }
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -97,11 +102,15 @@ export class RegistroAvancesComponent implements OnInit {
       switchMap((res: any) => {
         this.accion = res?.Data[0];
         this.hallazgo = this.accion?.hallazgo_id;
-        return this.planAuditoriaMid.get(`auditoria/${this.hallazgo?.auditoria_id}`)
+        return forkJoin({
+          auditoria: this.planAuditoriaMid.get(`auditoria/${this.hallazgo?.auditoria_id}`),
+          responsables: this.planAuditoriaMid.get(`responsable-accion?query=activo:true,accion_mejora_id:${accionId}`),
+        })
       }),
 
       switchMap((res: any) => {
-        this.auditoria = res?.Data;
+        this.auditoria = res.auditoria?.Data;
+        this.dependenciasApoyo = res.responsables?.Data || [];
         return this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id}`);
       }),
 
