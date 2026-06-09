@@ -8,7 +8,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
-import { ModalHistorialRechazosComponent } from "../modal-historial-rechazos/modal-historial-rechazos.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { ModalAmpliarRevisionAuditadoComponent } from "../modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
@@ -215,9 +215,24 @@ export class TablaAuditoriasInternasComponent implements OnInit {
   }
 
   abrirHistorialObservaciones(auditoria: Auditoria) {
+    const data: HistorialRechazosData = {
+      auditoriaId: auditoria._id,
+      estadoEndpoint: "auditoria-estado",
+      auditoriaIdReferencia: "auditoria_id",
+      // Revisiones: (vacío aquí) — sólo mostramos rechazos para ejecución
+      estadoRevisionIds: [],
+      // Rechazos posibles (preinforme y final)
+      estadoRechazoIds: [
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE,
+      ],
+      titulo: "Historial de observaciones",
+      descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
+    };
+
     this.dialog.open(ModalHistorialRechazosComponent, {
-      data: { auditoriaId: auditoria._id },
       width: "1000px",
+      data,
     });
   }
 
