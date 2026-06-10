@@ -17,7 +17,7 @@ import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalHistorialRechazosSeguimientoComponent } from "../modal-historial-rechazos-seguimiento/modal-historial-rechazos-seguimiento.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEstado";
 import { environment } from "src/environments/environment";
 
@@ -193,11 +193,22 @@ export class TablaSeguimientosComponent implements OnInit {
   }
 
   abrirHistorialObservaciones(auditoria: any) {
-    this.dialog.open(ModalHistorialRechazosSeguimientoComponent, {
-      data: { auditoriaId: auditoria._id },
+    const data: HistorialRechazosData = {
+      auditoriaId: auditoria._id,
+      estadoEndpoint: "auditoria-estado",
+      auditoriaIdReferencia: "auditoria_id",
+      estadoRevisionIds: [],
+      estadoRechazoIds: [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE],
+      titulo: "Historial de observaciones",
+      descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo ?? ''}`,
+    } as HistorialRechazosData;
+
+    this.dialog.open(ModalHistorialRechazosComponent, {
       width: "1000px",
+      data,
     });
   }
+  
 
   editarInforme(auditoria: any) {
     this.obtenerOCrearInforme(auditoria._id, (informeId) => {
