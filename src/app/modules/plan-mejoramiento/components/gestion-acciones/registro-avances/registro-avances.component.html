@@ -1,0 +1,368 @@
+<plantilla-tarjeta-contenedora
+  [subtitle]="auditoria?.vigencia_nombre || ''"
+  [subtitleChild]="auditoria?.titulo + (auditoria?.subtitulo ? ' - ' + auditoria?.subtitulo : '') || ''"
+  [breadcrumb]="'<p>Gestión Auditoría / Plan de Mejoramiento / Gestión de acciones / <b>Registrar Avances</b></p>'"
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresar()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  <div class="row">
+    <div class="col-12">
+      <mat-stepper
+        [linear]="false"
+        #stepper
+        labelPosition="end"
+        color="primary"
+        [orientation]="'horizontal'"
+      >
+        <ng-template matStepperIcon="number">
+          <mat-icon>lens</mat-icon>
+        </ng-template>
+
+        <!-- Paso 1: Información auditoria -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 1</p>
+            <b style="color: var(--primary)">Información Auditoría</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Informacion general de la auditoría
+            </div>
+          </div>
+          @if (formularioInformacionAuditoria) {
+            <div class="mt-4">
+              <app-formulario-dinamico
+                #formularioInformacionAuditoriaComp
+                [formulario]="formularioInformacionAuditoria"
+              >
+              </app-formulario-dinamico>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>apartment</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Dependencias responsables</h2>
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of auditoria.datos_dependencias; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasComp
+                          [formulario]="formularioDependencias"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+            </div>
+          }
+          <div class="mt-4">
+            <div class="d-flex justify-content-end mt-4">
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="stepper.next()"
+                class="mx-2"
+              >Continuar</button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 2: Información acción -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 2</p>
+            <b style="color: var(--primary)">Información Acción</b>
+          </ng-template>
+          <div class="d-flex align-items-center fondo-acento-50 my-3">
+            <div>
+              <mat-icon>assignment</mat-icon>
+            </div>
+            <div class="mx-3">
+              <h2>Información</h2>
+              Informacion general de la acción
+            </div>
+          </div>
+          @if (formularioInformacionAccion) {
+            <div class="mt-4">
+              <app-formulario-dinamico
+                #formularioInformacionAccionComp
+                [formulario]="formularioInformacionAccion"
+              >
+              </app-formulario-dinamico>
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Auditores responsables del plan</h2>
+                </div>
+              </div>
+              @for(auditor of auditores; track auditor) {
+                <mat-expansion-panel hideToggle disabled>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{ auditor }}
+                    </mat-panel-title>
+                  </mat-expansion-panel-header>
+                </mat-expansion-panel>
+              }
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>apartment</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Dependencias responsables</h2>
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of auditoria.datos_dependencias; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasComp2
+                          [formulario]="formularioDependencias"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+              <div class="d-flex align-items-center fondo-acento-50 my-3">
+                <div>
+                  <mat-icon>apartment</mat-icon>
+                </div>
+                <div class="mx-3">
+                  <h2>Dependencias de apoyo</h2>
+                </div>
+              </div>
+              @if (auditoria) {
+                <mat-accordion multi="true">
+                  @for (dep of dependenciasApoyo; track dep) {
+                    <mat-expansion-panel>
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                          {{ dep.dependencia_nombre }}
+                        </mat-panel-title>
+                      </mat-expansion-panel-header>
+                      <div class="p-3">
+                        <app-formulario-dinamico
+                          #formularioDependenciasApoyoComp
+                          [formulario]="formularioDependenciasApoyo"
+                          >
+                        </app-formulario-dinamico>
+                      </div>
+                    </mat-expansion-panel>
+                  }
+                </mat-accordion>
+              }
+            </div>
+          }
+          <div class="mt-4">
+            <div class="d-flex justify-content-end mt-4">
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="stepper.next()"
+                class="mx-2"
+              >Continuar</button>
+            </div>
+          </div>
+        </mat-step>
+
+        <!-- Paso 3: Registro avances -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 3</p>
+            <b style="color: var(--primary)">Registro de avances</b>
+          </ng-template>
+          <plantilla-tarjeta-contenedora
+            [title]="'Registro de Avances'"
+            [contenido]="contenidoAvances"
+          ></plantilla-tarjeta-contenedora>
+
+        </mat-step>
+
+        <!-- Paso 4: Calificación -->
+        <mat-step>
+          <ng-template matStepLabel>
+            <p>Paso 4</p>
+            <b style="color: var(--primary)">Calificación</b>
+          </ng-template>
+          <plantilla-tarjeta-contenedora
+            [title]="'Calificación Auditor'"
+            [contenido]="contenidoCalificacion"
+          ></plantilla-tarjeta-contenedora>
+        </mat-step>
+      </mat-stepper>
+    </div>
+  </div>
+
+</ng-template>
+
+<!-- Contenido del paso 3: Registro de avances -->
+<ng-template #contenidoAvances>
+  <div class="d-flex justify-content-between">
+    <p>Cargar evidencias de la acción</p>
+    <div>
+      <button
+        matButton="filled"
+        disabled
+        class="{{ habilitado ? 'habilitado text-habilitado' : 'deshabilitado text-deshabilitado' }}"
+      ><mat-icon>{{ habilitado ? 'upload' : 'lock' }}</mat-icon>
+        <strong>{{ habilitado ? 'Cargue habilitado' : 'Cargue Bloqueado'}}</strong>
+      </button>
+      <button
+        mat-stroked-button
+        class="mx-2"
+        (click)="habilitado = !habilitado"
+        color="primary"
+      ><mat-icon>{{ habilitado ? 'lock' : 'lock_open' }}</mat-icon>
+        {{ habilitado ? 'Iniciar Revisión' : 'Habilitar cargue' }}
+      </button>
+    </div>
+  </div>
+  <br/>
+  <div class="d-flex justify-content-end">
+    @if(habilitado) {
+      <p class="text-habilitado">
+        <mat-icon>check_circle</mat-icon>
+        El cargue de evidencias ha sido <strong>habilitado</strong> nuevamente. El auditado puede subir documentos
+      </p>
+    }
+    @else {
+      <p class="text-deshabilitado">
+        <mat-icon>warning</mat-icon>
+        El cargue de evidencias ha sido <strong>bloqueado</strong>. El auditado no puede subir nuevos documentos hasta que el auditor habilite el cargue nuevamente.
+      </p>
+    }
+  </div>
+  <mat-divider class="my-4"></mat-divider>
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-start align-items-center">
+      <mat-icon>attach_file</mat-icon>
+      <h2>Documentos anexos</h2>
+    </div>
+    <div class="d-flex justify-content-end align-items-center">
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="agregarDocumento()"
+      >
+        <mat-icon>add_circle</mat-icon>Añadir Documento
+      </button>
+    </div>
+  </div>
+  
+
+
+</ng-template>
+
+<!-- Contenido del paso 4: Calificación -->
+<ng-template #contenidoCalificacion>
+  <div class="d-flex justify-content-between align-items-center">
+    <p>Diligenciar para finalizar la acción</p>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="agregarCalificacion()"
+    >
+      <mat-icon>add</mat-icon> Nueva calificación
+    </button>
+  </div>
+
+  <mat-divider class="my-4"></mat-divider>
+
+  <form [formGroup]="formularioCalificacion" class="registro-avances-form">
+    <!-- Fila 1 -->
+    <label [htmlFor]="'criterio'" class="label">
+      <strong>Criterio de Evaluación</strong>
+    </label>
+    <mat-form-field appearance="outline" class="col-12">
+      <mat-select id="criterio" formControlName="criterio" required>
+        <mat-option>Seleccione</mat-option>
+        <mat-option value="1">Crítico</mat-option>
+        <mat-option value="2">En Progreso</mat-option>
+        <mat-option value="3">Satisfactorio</mat-option>
+      </mat-select>
+    </mat-form-field>
+    
+    <!-- Fila 2 -->
+    <label [htmlFor]="'calificacion'" class="label">
+      <strong class="label-content">% Avance eficacia</strong>
+      <mat-icon color="primary" class="tip-suffix"
+        [matTooltip]="tooltips.avance"
+        matTooltipPosition="right"
+        matTooltipClass="tooltip-multilinea"
+      >help</mat-icon>
+    </label>
+    <mat-slider class="slider" discrete class="col-12">
+      <input id="calificacion" matSliderThumb formControlName="calificacion" />
+    </mat-slider>
+
+    <!-- Fila 3 -->
+    <label [htmlFor]="'observaciones'" class="label">
+      <strong class="label-content">Análisis de seguimiento</strong>
+      <mat-icon color="primary" class="tip-suffix"
+        [matTooltip]="tooltips.observaciones"
+        matTooltipPosition="right"
+        matTooltipClass="tooltip-multilinea"
+      >help</mat-icon>
+    </label>
+    <app-editor-enriquecido
+      id="observaciones"
+      formControlName="observaciones"
+      placeholder="Observaciones"
+    ></app-editor-enriquecido>
+  </form>
+  <div class="d-flex justify-content-end align-items-center mt-4">
+    <button
+      class="mx-2"
+      matButton="filled"
+      color="primary"
+      (click)="guardarCalificacion()"
+    >
+      <mat-icon>star</mat-icon>  
+      Calificar
+    </button>
+  </div>
+
+  <mat-divider class="my-4"></mat-divider>
+  
+  <div class="d-flex justify-content-end align-items-center">
+    @if (calificado) {
+      <mat-icon class="text-habilitado mx-2">check_circle</mat-icon>
+      <div>
+        <p>
+          <strong>{{ "Calificado por: " + nombreAuditor }}</strong>
+        </p>
+        <p>{{"Calificación registrada el " + fechaCalificacion.toLocaleDateString() + ". Auditor Control Interno"}}</p>
+      </div>
+    }
+  </div>
+
+</ng-template>

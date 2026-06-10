@@ -7,6 +7,7 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 import { environment } from 'src/environments/environment';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
 import { firstValueFrom } from 'rxjs';
@@ -19,7 +20,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class RegistrarPlanComponent implements OnInit {
   auditoriaId!: string;
-  auditoria: any = null;
+  auditoria: Auditoria | null = null;
   planMejoramientoId: string | null = null;
   cargando = true;
   enviando = false;

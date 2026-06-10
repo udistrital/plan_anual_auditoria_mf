@@ -16,6 +16,7 @@ import { ModalHistorialObservacionesComponent } from './components/plan-de-mejor
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
+import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { MaterialModule } from 'src/app/shared/modules/material.module';
     RegistrarPlanComponent,
     TablaHallazgosComponent,
     ModalRegistrarAccionComponent,
+    RegistroAvancesComponent,
     ModalRechazoPlanComponent,
     ModalHistorialObservacionesComponent,
     VerPlanComponent,

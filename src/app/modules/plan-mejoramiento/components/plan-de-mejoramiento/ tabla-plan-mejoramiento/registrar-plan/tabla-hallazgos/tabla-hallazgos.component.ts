@@ -6,6 +6,7 @@ import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditori
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 export interface HallazgoTabla {
   hallazgoId: string;
@@ -67,7 +68,7 @@ const TIPO_NOMBRES: Record<number, string> = { 1: 'Preventiva', 2: 'Correctiva' 
 export class TablaHallazgosComponent implements OnInit {
   @Input() auditoriaId!: string;
   @Input() planMejoramientoId!: string;
-  @Input() auditoria: any;
+  @Input() auditoria!: Auditoria;
   @Input() soloLectura = false;
 
   fechaAprobacionInforme: string | null = null;
@@ -258,7 +259,7 @@ export class TablaHallazgosComponent implements OnInit {
     if (!hallazgo) return;
 
     const dialogRef = this.dialog.open(ModalRegistrarAccionComponent, {
-      width: '900px',
+      width: '1000px',
       data: {
         hallazgo,
         accion: accion ?? null,
