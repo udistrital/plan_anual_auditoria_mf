@@ -14,6 +14,7 @@ import { ModalRegistrarAccionComponent } from './components/plan-de-mejoramiento
 import { ModalRechazoPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
 import { ModalHistorialObservacionesComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-historial-observaciones/modal-historial-observaciones.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
+import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 
 @NgModule({
@@ -27,6 +28,7 @@ import { MaterialModule } from 'src/app/shared/modules/material.module';
     ModalRechazoPlanComponent,
     ModalHistorialObservacionesComponent,
     VerPlanComponent,
+    GestionAccionesComponent,
   ],
   imports: [
     CommonModule,

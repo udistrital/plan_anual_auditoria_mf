@@ -263,15 +263,23 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         await this.guardarFechaRevisionPreinforme();
       }
 
+      let selladoConFallos = false;
       if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
         await this.guardarFechaAprobacionInformeFinal();
+        selladoConFallos = !(await this.sellarNumeracionHallazgos());
         await this.crearCascaronPlanMejoramiento();
       }
 
       const mensaje = this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_INFORME_FINAL_JEFE
         ? "Informe final enviado"
         : "Informe preliminar enviado";
-      this.alertService.showSuccessAlert(mensajeAprobacion, mensaje);
+      await this.alertService.showSuccessAlert(mensajeAprobacion, mensaje);
+      if (selladoConFallos) {
+        await this.alertService.showNotification(
+          "Aviso",
+          "La numeración de hallazgos no pudo completarse."
+        );
+      }
       this.router.navigate([`/ejecucion/auditorias-internas/`]);
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
@@ -292,6 +300,26 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       );
     } catch {
       // no bloquea el flujo de aprobación
+    }
+  }
+
+  /**
+   * Dispara el sellado de numeración de hallazgos en el MID
+   * Devuelve `true` si se selló todo correctamente, `false` si hubo
+   * fallos (parciales o de red). 
+   */
+  private async sellarNumeracionHallazgos(): Promise<boolean> {
+    try {
+      const res: any = await firstValueFrom(
+        this.planAuditoriaMid.put(
+          `informe/auditoria/${this.auditoriaId}/numeracion-hallazgo`,
+          {},
+        )
+      );
+      const fallidos = res?.Data?.fallidos ?? [];
+      return fallidos.length === 0;
+    } catch {
+      return false;
     }
   }
 
@@ -368,7 +396,6 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       this._festivosCache[startYear] = new Set(festivos);
     }
     const startKey = `${result.getFullYear()}-${String(result.getMonth() + 1).padStart(2, '0')}-${String(result.getDate()).padStart(2, '0')}`;
-    // El día de revisión cuenta (sábado/domingo incluidos), excepto si es festivo
     let count = this._festivosCache[startYear].has(startKey) ? 0 : 1;
 
     while (count < dias + 1) {

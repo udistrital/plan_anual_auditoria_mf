@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { PlanDeMejoramientoComponent } from './components/plan-de-mejoramiento/plan-mejoramiento.component';
 import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/registrar-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
+import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 
 const routes: Routes = [
   {
@@ -22,6 +23,10 @@ const routes: Routes = [
   {
     path: 'ver-plan/:id',
     component: VerPlanComponent,
+  },
+  {
+    path: 'gestion-acciones',
+    component: GestionAccionesComponent,
   },
 ];
 
