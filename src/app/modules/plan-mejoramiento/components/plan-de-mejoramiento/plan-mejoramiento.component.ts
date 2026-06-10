@@ -23,6 +23,7 @@ export class PlanDeMejoramientoComponent implements OnInit {
   vigenciaSeleccionada!: number;
   tipoEvaluacionSeleccionado!: number;
 
+  titulo: string = '';
   role: string | null = null;
   accionesPermitidas: string[] | null = null;
 
@@ -34,6 +35,7 @@ export class PlanDeMejoramientoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.titulo = this.route.snapshot.data['titulo'] ?? 'Plan de Mejoramiento';
     this.accionesPermitidas = this.route.snapshot.data['accionesPermitidas'] ?? null;
     this.iniciarForm();
     this.cargarVigencias();

@@ -9,12 +9,12 @@ const routes: Routes = [
   {
     path: '',
     component: PlanDeMejoramientoComponent,
-    data: { accionesPermitidas: ['Registrar Plan', 'Enviar a Revisión', 'Ver Plan', 'Aprobar Plan', 'Rechazar Plan', 'Ver Documentos Auditoría', 'Ver Observaciones'] },
+    data: { titulo: 'Formulación de planes', accionesPermitidas: ['Registrar Plan', 'Enviar a Revisión', 'Ver Plan', 'Aprobar Plan', 'Rechazar Plan', 'Ver Documentos Auditoría', 'Ver Observaciones'] },
   },
   {
     path: 'asignar-auditores',
     component: PlanDeMejoramientoComponent,
-    data: { accionesPermitidas: ['Asignar Auditor(es)'] },
+    data: { titulo: 'Asignar planes', accionesPermitidas: ['Asignar Auditor(es)'] },
   },
   {
     path: 'registrar-plan/:id',
