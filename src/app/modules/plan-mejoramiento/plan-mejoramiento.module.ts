@@ -12,10 +12,10 @@ import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla
 import { TablaHallazgosComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/tabla-hallazgos/tabla-hallazgos.component';
 import { ModalRegistrarAccionComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/modal-registrar-accion/modal-registrar-accion.component';
 import { ModalRechazoPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
-import { ModalHistorialObservacionesComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-historial-observaciones/modal-historial-observaciones.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
+import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
 
 @NgModule({
   declarations: [
@@ -25,8 +25,8 @@ import { MaterialModule } from 'src/app/shared/modules/material.module';
     RegistrarPlanComponent,
     TablaHallazgosComponent,
     ModalRegistrarAccionComponent,
+    RegistroAvancesComponent,
     ModalRechazoPlanComponent,
-    ModalHistorialObservacionesComponent,
     VerPlanComponent,
     GestionAccionesComponent,
   ],

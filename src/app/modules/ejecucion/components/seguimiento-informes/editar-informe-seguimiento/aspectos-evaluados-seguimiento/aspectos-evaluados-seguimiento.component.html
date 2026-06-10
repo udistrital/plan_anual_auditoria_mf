@@ -1,10 +1,12 @@
 <div class="tabla-container" [formGroup]="aspectosForm">
 
-  <div class="section-actions">
-    <button mat-raised-button color="primary" (click)="agregarTema()">
-      <mat-icon>add</mat-icon> Agregar Tema
-    </button>
-  </div>
+  @if (!soloLectura) {
+    <div class="section-actions">
+      <button mat-raised-button color="primary" (click)="agregarTema()">
+        <mat-icon>add</mat-icon> Agregar Tema
+      </button>
+    </div>
+  }
 
   <div class="tree" formArrayName="temas">
 
@@ -23,9 +25,39 @@
               <mat-error>El nombre es requerido</mat-error>
             }
           </mat-form-field>
-          <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (!soloLectura) {
+            <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </div>
+        <div class="node-row tema-row">
+          <span class="nivel-label">Descripción</span>
+          <div class="node-input editor-wrapper">
+            <label class="descripcion-label">Descripción del Tema</label>
+            <quill-editor formControlName="descripcion_titulo" [modules]="editorModules" [placeholder]="placeholder" class="quill-editor-custom">
+              <div quill-editor-toolbar class="toolbar">
+                <span class="ql-formats">
+                  <button class="ql-bold" [title]="'Bold'"></button>
+                  <button class="ql-italic" [title]="'Italic'"></button>
+                  <button class="ql-underline" [title]="'Underline'"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-list" value="ordered"></button>
+                  <button class="ql-list" value="bullet"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-align" value=""></button>
+                  <button class="ql-align" value="center"></button>
+                  <button class="ql-align" value="right"></button>
+                  <button class="ql-align" value="justify"></button>
+                </span>
+                <span class="ql-formats">
+                  <button class="ql-image" [title]="'Insert Image'"></button>
+                </span>
+              </div>
+            </quill-editor>
+          </div>
         </div>
         <!-- Hijos: Subtemas -->
         <div class="node-children" formArrayName="subtemas">
@@ -44,17 +76,21 @@
                     <mat-error>El nombre es requerido</mat-error>
                   }
                 </mat-form-field>
-                <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                @if (!soloLectura) {
+                  <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
               </div>
             </div>
           }
-          <div class="add-leaf-action">
-            <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
-              <mat-icon>add</mat-icon> Agregar Subtema
-            </button>
-          </div>
+          @if (!soloLectura) {
+            <div class="add-leaf-action">
+              <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
+                <mat-icon>add</mat-icon> Agregar Subtema
+              </button>
+            </div>
+          }
         </div>
       </div>
     }

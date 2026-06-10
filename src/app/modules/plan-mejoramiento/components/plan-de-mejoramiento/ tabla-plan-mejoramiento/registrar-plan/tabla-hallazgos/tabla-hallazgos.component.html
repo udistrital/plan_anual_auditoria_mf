@@ -9,7 +9,7 @@
     <!-- Cabecera exportar -->
     @if (!soloLectura) {
       <div class="d-flex justify-content-end mb-2">
-        <button mat-stroked-button color="primary">
+        <button mat-stroked-button (click)="exportarTabla()" color="primary">
           <mat-icon>upload</mat-icon> Exportar tabla
         </button>
       </div>
@@ -44,22 +44,22 @@
         <!-- Acción Planteada -->
         <ng-container matColumnDef="accionPlanteada">
           <th mat-header-cell *matHeaderCellDef><b>Acción Planteada</b></th>
-          <td mat-cell *matCellDef="let fila" [title]="fila.accion?.accionPlanteada ?? ''">
-            <div class="celda-truncada">{{ fila.accion?.accionPlanteada }}</div>
+          <td mat-cell *matCellDef="let fila" class="celda-justificada" [title]="fila.accion?.accionPlanteada ?? ''">
+            {{ fila.accion?.accionPlanteada }}
           </td>
         </ng-container>
         <!-- Nombre Indicador -->
         <ng-container matColumnDef="nombreIndicador">
           <th mat-header-cell *matHeaderCellDef><b>Nombre de Indicador</b></th>
-          <td mat-cell *matCellDef="let fila" [title]="fila.accion?.nombreIndicador ?? ''">
-            <div class="celda-truncada">{{ fila.accion?.nombreIndicador }}</div>
+          <td mat-cell *matCellDef="let fila" class="celda-justificada" [title]="fila.accion?.nombreIndicador ?? ''">
+            {{ fila.accion?.nombreIndicador }}
           </td>
         </ng-container>
         <!-- Fórmula Indicador -->
         <ng-container matColumnDef="formulaIndicador">
           <th mat-header-cell *matHeaderCellDef><b>Formula de Indicador</b></th>
-          <td mat-cell *matCellDef="let fila" [title]="fila.accion?.formulaIndicador ?? ''">
-            <div class="celda-truncada">{{ fila.accion?.formulaIndicador }}</div>
+          <td mat-cell *matCellDef="let fila" class="celda-justificada" [title]="fila.accion?.formulaIndicador ?? ''">
+            {{ fila.accion?.formulaIndicador }}
           </td>
         </ng-container>
         <!-- Meta -->

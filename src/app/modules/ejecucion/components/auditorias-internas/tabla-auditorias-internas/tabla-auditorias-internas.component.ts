@@ -8,7 +8,8 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
-import { ModalHistorialRechazosComponent } from "../modal-historial-rechazos/modal-historial-rechazos.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
+import { ModalAmpliarRevisionAuditadoComponent } from "../modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
@@ -48,7 +49,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
-    ["Historial de Rechazos", "history"],
+    ["Historial de Observaciones", "history"],
+    ["Ampliar tiempo de revisión auditado", "more_time"],
   ]);
 
   constructor(
@@ -86,8 +88,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       this.personaId = await this.userService.getPersonaId();
     } else if (
       this.rolService.tieneRol(environment.ROL.AUDITOR) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
+      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)
     ) {
       this.tipoConsulta = 'auditor';
       this.personaId = await this.userService.getPersonaId();
@@ -175,7 +176,6 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     const mostrarComoInforme = estado >= environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
 
     const acciones = this.roles.flatMap((rol) => {
-      // Usar solo las acciones correspondientes según la etapa
       if (mostrarComoInforme) {
         return accionesEjecucionFinal[rol]?.[estado] ?? [];
       } else {
@@ -183,7 +183,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       }
     });
 
-    return Array.from(new Set(acciones));
+    const accionesUnicas = Array.from(new Set(acciones));
+
+    // En REVISION_PREINFORME_AUDITADO el auditado entra únicamente por "Ver Documentos del informe"
+    const esAuditado = this.roles.some(r =>
+      r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA
+    );
+    if (esAuditado && estado === environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) {
+      return accionesUnicas.filter(a => a !== 'Editar Preinforme');
+    }
+
+    return accionesUnicas;
   }
 
   getIconoAccion(accion: string): string {
@@ -198,16 +208,57 @@ export class TablaAuditoriasInternasComponent implements OnInit {
       "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialObservaciones(auditoria),
+      "Ampliar tiempo de revisión auditado": () => this.abrirModalAmpliarRevision(auditoria),
     };
     acciones[accion]?.();
   }
 
-  abrirHistorialRechazos(auditoria: Auditoria) {
+  abrirHistorialObservaciones(auditoria: Auditoria) {
+    const data: HistorialRechazosData = {
+      auditoriaId: auditoria._id,
+      estadoEndpoint: "auditoria-estado",
+      auditoriaIdReferencia: "auditoria_id",
+      // Revisiones: (vacío aquí) — sólo mostramos rechazos para ejecución
+      estadoRevisionIds: [],
+      // Rechazos posibles (preinforme y final)
+      estadoRechazoIds: [
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_PREINFORME_JEFE,
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE,
+      ],
+      titulo: "Historial de observaciones",
+      descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo}`,
+    };
+
     this.dialog.open(ModalHistorialRechazosComponent, {
-      data: { auditoriaId: auditoria._id },
       width: "1000px",
+      data,
     });
+  }
+
+  async abrirModalAmpliarRevision(auditoria: Auditoria) {
+    const usuarioId = await this.userService.getPersonaId();
+    this.planAuditoriaService
+      .get(`informe?query=auditoria_id:${auditoria._id},activo:true`)
+      .subscribe({
+        next: (res: any) => {
+          const informe = res?.Data?.[0];
+          if (!informe || !informe.fecha_fin_revision) {
+            this.alertaService.showErrorAlert("No se encontró el informe o la fecha de revisión del auditado.");
+            return;
+          }
+          this.dialog.open(ModalAmpliarRevisionAuditadoComponent, {
+            width: "500px",
+            data: {
+              informeId: informe._id,
+              fechaFinRevision: informe.fecha_fin_revision,
+              diasRevision: informe.dias_revision ?? 3,
+              usuarioId,
+            },
+          });
+        },
+        error: () => this.alertaService.showErrorAlert("Error al buscar el informe."),
+      });
   }
 
   editarInforme(auditoria: Auditoria) {

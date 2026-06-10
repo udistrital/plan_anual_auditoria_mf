@@ -7,6 +7,31 @@
       </p>
     </div>
     <div class="col-12">
+      @if (mostrarFiltros) {
+        <div class="row mb-3">
+          <div class="col-12">
+            <form>
+              <div class="row">
+                <mat-form-field class="col-md-3 col-12" appearance="outline">
+                  <mat-label>Filtrar por estado</mat-label>
+                  <mat-select [(ngModel)]="filtroEstado" name="filtroEstado" (selectionChange)="listarAuditoriasPorVigencia(vigenciaId)">
+                    <mat-option [value]="">--Todos--</mat-option>
+                    @for (estado of estadoOptions; track estado) {
+                      <mat-option [value]="estado.id">{{ estado.nombre }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="col-md-6 col-12" appearance="outline">
+                  <mat-label>Filtrar por consecutivo OCI</mat-label>
+                  <input matInput [(ngModel)]="filtroConsecutivo" name="filtroConsecutivo" (ngModelChange)="listarAuditoriasPorVigencia(vigenciaId)" />
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+
       <div class="table-container table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           @for (columna of auditoriasContructorTabla; track columna) {

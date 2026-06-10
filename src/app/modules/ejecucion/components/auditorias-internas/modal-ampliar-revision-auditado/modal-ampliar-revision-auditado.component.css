@@ -1,0 +1,37 @@
+.fecha-actual-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--md-primary-500) 10%, white);
+  border-left: 4px solid var(--md-primary-500);
+}
+
+.fecha-icono {
+  color: var(--md-primary-500);
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.fecha-texto {
+  display: flex;
+  flex-direction: column;
+}
+
+.fecha-label {
+  font-size: 0.75rem;
+  color: var(--md-primary-700);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.fecha-valor {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--md-primary-900);
+  text-transform: capitalize;
+}

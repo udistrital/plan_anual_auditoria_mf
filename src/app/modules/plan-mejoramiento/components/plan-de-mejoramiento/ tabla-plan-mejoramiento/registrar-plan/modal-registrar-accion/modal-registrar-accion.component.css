@@ -114,6 +114,10 @@
   opacity: 1;
 }
 
+.center {
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .auditor-tag {
     font-size: 9.5px;

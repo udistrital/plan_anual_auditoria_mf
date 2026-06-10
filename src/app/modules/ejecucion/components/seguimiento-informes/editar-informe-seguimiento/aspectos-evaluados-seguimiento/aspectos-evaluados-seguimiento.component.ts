@@ -19,6 +19,7 @@ interface Tema {
   informe_id?: string;
   activo?: boolean;
   titulo: string;
+  descripcion_titulo?: string;
   subtema: Subtema[];
   isNew?: boolean;
   isModified?: boolean;
@@ -32,6 +33,8 @@ interface Tema {
 })
 export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges {
   @Input() informeId!: string;
+  @Input() soloLectura: boolean = false;
+  @Input() placeholder: string = 'Escribe aquí...';
   @Output() datosActualizados = new EventEmitter<void>();
 
   aspectosForm: UntypedFormGroup = this.fb.group({});
@@ -40,6 +43,37 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
+    }
+  };
+
+  editorModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'], // Botones de formato
+      ['blockquote', 'code-block'],
+      [{ list: 'ordered' }, { list: 'bullet' }], // Listas
+      [{ header: [1, 2, 3, false] }], // Encabezados
+      [{ align: [] }], // Alineación
+      [{ color: [] }, { background: [] }], // Colores
+      ['link', 'image'], // Enlace e imágenes
+      ['clean'], // Eliminar formato
+    ],
+    blotFormatter: {
+      align: {
+        allowAligning: false,
+      },
+      resize: {
+        allowResizing: true,
+      },
+      delete: {
+        allowKeyboardDelete: true,
+      },
+      image: {
+        allowAltTitleEdit: false,
+        allowCompressor: false,
+        linkOptions: {
+          allowLinkEdit: false,
+        }
+      }
     }
   };
 
@@ -54,6 +88,8 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       temas: this.fb.array([]),
     });
 
+    this.actualizarModoSoloLectura();
+
     if (this.informeId) {
       this.cargarTemas();
     }
@@ -62,6 +98,9 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['informeId'] && this.informeId) {
       this.cargarTemas();
+    }
+    if (changes['soloLectura']) {
+      this.actualizarModoSoloLectura();
     }
   }
 
@@ -73,6 +112,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       next: (response: any) => {
         this.temasData = response?.Data ?? [];
         this.construirFormulario();
+        this.actualizarModoSoloLectura();
         this.cargando = false;
       },
       error: (error) => {
@@ -80,6 +120,17 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
         this.cargando = false;
       }
     });
+  }
+
+  private actualizarModoSoloLectura(): void {
+    if (!this.aspectosForm) return;
+
+    if (this.soloLectura) {
+      this.aspectosForm.disable({ emitEvent: false });
+      return;
+    }
+
+    this.aspectosForm.enable({ emitEvent: false });
   }
 
   construirFormulario(): void {
@@ -104,6 +155,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       temasArray.push(this.fb.group({
         _id: [tema._id ?? null],
         nombre: [tema.titulo ?? '', Validators.required],
+        descripcion_titulo: [tema.descripcion_titulo ?? ''],
         subtemas: subtemasArray,
         isNew: [false],
         isModified: [false],
@@ -121,6 +173,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
     this.temas.push(this.fb.group({
       _id: [null],
       nombre: ['', Validators.required],
+      descripcion_titulo: [''],
       subtemas: this.fb.array([]),
       isNew: [true],
       isModified: [false],
@@ -205,12 +258,25 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
 
       if (!temaId) {
         try {
-          const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
-            informe_id: this.informeId,
-            titulo: temaForm.nombre
-          }));
-          temaId = response?.Data?._id || response?._id || response?.Id;
-          this.temas.at(i).patchValue({ _id: temaId, isNew: false });
+          if (this.contieneImagen(temaForm.descripcion_titulo)) {
+            let html = String(temaForm.descripcion_titulo);
+            html = html.replace(
+              /width="(\d+)px"/g,
+              'style="width:$1px;"'
+            );
+            html = html.replace(
+              /\sheight="auto"/g,
+              ''
+            );
+          } else {
+            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
+              informe_id: this.informeId,
+              titulo: temaForm.nombre,
+              descripcion_titulo: temaForm.descripcion_titulo
+            }));
+            temaId = response?.Data?._id || response?._id || response?.Id;
+            this.temas.at(i).patchValue({ _id: temaId, isNew: false });
+          }
         } catch (error) {
           console.error('Error al crear tema:', error);
           this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
@@ -218,9 +284,22 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
         }
       } else {
         try {
-          await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-            titulo: temaForm.nombre
-          }));
+          if (this.contieneImagen(temaForm.descripcion_titulo)) {
+            let html = String(temaForm.descripcion_titulo);
+            html = html.replace(
+              /width="(\d+)px"/g,
+              'style="width:$1px;"'
+            );
+            html = html.replace(
+              /\sheight="auto"/g,
+              ''
+            );
+          } else {
+            await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
+              titulo: temaForm.nombre,
+              descripcion_titulo: temaForm.descripcion_titulo
+            }));
+          }
         } catch (error) {
           console.error('Error al actualizar tema:', error);
           this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
@@ -260,5 +339,12 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
     this.alertaService.showAlert('Guardado exitoso', 'Los aspectos evaluados se han guardado correctamente');
     this.datosActualizados.emit();
     return true;
+  }
+
+  private contieneImagen(html: string): boolean {
+    if (!html) return false;
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.querySelector('img') !== null;
   }
 }

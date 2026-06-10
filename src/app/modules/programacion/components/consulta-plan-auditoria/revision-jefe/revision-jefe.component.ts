@@ -328,10 +328,10 @@ export class RevisionJefeComponent implements OnInit {
 
   async descargarTodo() {
     try {
-      const suffix = this.vigenciaNombre ? `-${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
+      const suffix = this.vigenciaNombre ? `${this.vigenciaNombre.replace(/\s+/g, '-')}` : '';
       await this.descargaService.descargarMultiplesArchivos(
         this.documentos,
-        `documentosPAA${suffix}.zip`,
+        `documentosPAA-${suffix}.zip`,
         suffix
       );
     } catch (error) {

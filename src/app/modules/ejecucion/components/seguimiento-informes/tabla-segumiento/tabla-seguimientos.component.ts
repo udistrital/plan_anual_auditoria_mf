@@ -17,7 +17,7 @@ import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { MatDialog } from "@angular/material/dialog";
-import { ModalHistorialRechazosSeguimientoComponent } from "../modal-historial-rechazos-seguimiento/modal-historial-rechazos-seguimiento.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEstado";
 import { environment } from "src/environments/environment";
 
@@ -45,9 +45,10 @@ export class TablaSeguimientosComponent implements OnInit {
   mostrarAcciones: boolean = false;
   iconosAccion = new Map<string, string>([
     ["Editar Informe", "edit"],
+    ["Ver Informe", "visibility"],
     ["Ver Documentos del informe", "description"],
     ["Enviar a Aprobación por Jefe", "send"],
-    ["Historial de Rechazos", "history"],
+    ["Historial de Observaciones", "history"],
   ]);
 
   constructor(
@@ -79,7 +80,18 @@ export class TablaSeguimientosComponent implements OnInit {
     offset: number = 0
   ) {
     this.auditoriasPorVigencia = [];
-    const url = `auditoria?query=vigencia_id:${vigenciaId},activo:true,tipo_evaluacion_id:${environment.TIPO_EVALUACION.SEGUIMIENTO_ID},estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}&limit=${limit}&offset=${offset}`;
+
+    const seguimiento_id = environment.TIPO_EVALUACION.SEGUIMIENTO_ID;
+    const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
+    
+    let queryParams = `query=vigencia_id:${vigenciaId}`;
+    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}`;
+    queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
+    queryParams += `,activo:true`;
+    queryParams += `&limit=${limit}`
+    queryParams += `&offset=${offset}`;
+
+    const url = `auditoria?${queryParams}`;
 
     this.planAuditoriaMid.get(url).subscribe((res) => {
       const auditorias: any[] = res.Data.map((auditoria: any) => {
@@ -156,19 +168,47 @@ export class TablaSeguimientosComponent implements OnInit {
   realizarAccion(auditoria: any, accion: string) {
     const acciones: Record<string, Function | null> = {
       "Editar Informe": () => this.editarInforme(auditoria),
+      "Ver Informe": () => this.verInformeSoloLectura(auditoria),
       "Ver Documentos del informe": () => this.verDocumentosInforme(auditoria),
       "Enviar a Aprobación por Jefe": () => this.enviarAprobacionPorJefe(auditoria),
-      "Historial de Rechazos": () => this.abrirHistorialRechazos(auditoria),
+      "Historial de Observaciones": () => this.abrirHistorialObservaciones(auditoria),
     };
     acciones[accion]?.();
   }
 
-  abrirHistorialRechazos(auditoria: any) {
-    this.dialog.open(ModalHistorialRechazosSeguimientoComponent, {
-      data: { auditoriaId: auditoria._id },
-      width: "1000px",
+  verInformeSoloLectura(auditoria: any) {
+    this.planAuditoriaService.get(`informe?query=auditoria_id:${auditoria._id},activo:true`).subscribe({
+      next: (res: any) => {
+        if (res?.Data?.length > 0) {
+          this.router.navigate(
+            [`/ejecucion/seguimiento-informes/editar-informe/${res.Data[0]._id}`],
+            { queryParams: { soloLectura: true } }
+          );
+        } else {
+          this.alertaService.showErrorAlert('No se encontró un informe para esta auditoría.');
+        }
+      },
+      error: () => this.alertaService.showErrorAlert('Error al buscar el informe.')
     });
   }
+
+  abrirHistorialObservaciones(auditoria: any) {
+    const data: HistorialRechazosData = {
+      auditoriaId: auditoria._id,
+      estadoEndpoint: "auditoria-estado",
+      auditoriaIdReferencia: "auditoria_id",
+      estadoRevisionIds: [],
+      estadoRechazoIds: [environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE],
+      titulo: "Historial de observaciones",
+      descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${auditoria.titulo ?? ''}`,
+    } as HistorialRechazosData;
+
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      width: "1000px",
+      data,
+    });
+  }
+  
 
   editarInforme(auditoria: any) {
     this.obtenerOCrearInforme(auditoria._id, (informeId) => {

@@ -132,6 +132,7 @@ export const environment = {
   },
 
   AUDITORIA_ESTADO: {
+    TIPO_PARAMETRO_ID: 159,
     PROGRAMACION: {
       BORRADOR_ID: 7060,
       POR_ASIGNAR: 7061,
@@ -257,4 +258,5 @@ export const environment = {
   },
 
   DIAS_REVISION_PREINFORME: 3,
+  DEPENDENCIA_OCI_ID: 32,
 };

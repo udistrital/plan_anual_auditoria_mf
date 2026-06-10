@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
+import { Subscription } from "rxjs";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -45,7 +46,7 @@ interface DocumentoAdjuntoInicial {
     styleUrls: ["./documentos-anexos-auditoria.component.css"],
     standalone: false
 })
-export class DocumentosAnexosAuditoriaComponent implements OnInit {
+export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
   @Output() guardarDocumentos = new EventEmitter<any>();
   @Input() soloLectura: boolean = false;
 
@@ -56,6 +57,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   documentosExistentes: { [tipoId: number]: string | null } = {};
   cartasRepresentacionEsperadas: CartaRepresentacionDocumento[] = [];
   cartasRepresentacionExistentes: CartaRepresentacionPersistida[] = [];
+  private routeSubscription: Subscription | null = null;
 
   documentos = [
     {
@@ -95,10 +97,30 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.auditoriaId = this.route.snapshot.paramMap.get("id")!;
-    await this.cargarCartasRepresentacionEsperadas();
-    await this.cargarEstadoDocumentos();
-    await this.cargarCompromisoEticoDesdeEstadoInicial();
+    this.routeSubscription = this.route.paramMap.subscribe(async (params) => {
+      const newAuditoriaId = params.get("id");
+      if (!newAuditoriaId || newAuditoriaId === this.auditoriaId) {
+        return;
+      }
+
+      this.auditoriaId = newAuditoriaId;
+      this.resetDocumentoState();
+      await this.cargarCartasRepresentacionEsperadas();
+      await this.cargarEstadoDocumentos();
+      await this.cargarCompromisoEticoDesdeEstadoInicial();
+    });
+  }
+
+  ngOnDestroy() {
+    this.routeSubscription?.unsubscribe();
+  }
+
+  private resetDocumentoState(): void {
+    this.idCompromisoEtico = null;
+    this.base64CompromisoEtico = null;
+    this.documentosExistentes = {};
+    this.cartasRepresentacionExistentes = [];
+    this.cartasRepresentacionEsperadas = [];
   }
 
   private async cargarCartasRepresentacionEsperadas(): Promise<void> {
@@ -317,9 +339,9 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
    */
   private async cargarCompromisoEtico(): Promise<void> {
     try {
-      if (this.idCompromisoEtico === null) {
-        this.idCompromisoEtico = await this.buscarCompromisoEtico();
-      }
+      // Limpiar estado visible inmediatamente para evitar mostrar el documento anterior
+      this.base64CompromisoEtico = null;
+      this.idCompromisoEtico = await this.buscarCompromisoEtico();
 
       if (this.idCompromisoEtico !== null) {
         await this.buscarBase64(this.idCompromisoEtico);
@@ -333,6 +355,9 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
 
   private async cargarCompromisoEticoDesdeEstadoInicial(): Promise<void> {
     try {
+      // Siempre consultar el nuxeo_enlace actual en la carga inicial
+      this.base64CompromisoEtico = null;
+      this.idCompromisoEtico = await this.buscarCompromisoEtico();
       if (this.idCompromisoEtico !== null) {
         await this.buscarBase64(this.idCompromisoEtico);
       } else {
@@ -393,20 +418,38 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit {
     this.base64CompromisoEtico = await this.nuxeoService.obtenerPorUUID(nuxeoId);
   }
 
-  verCompromisoEtico() {
+  private async asegurarCompromisoEticoCargado(): Promise<void> {
+    if (this.base64CompromisoEtico) {
+      return;
+    }
+
+    if (this.idCompromisoEtico) {
+      await this.buscarBase64(this.idCompromisoEtico);
+      return;
+    }
+
+    await this.cargarCompromisoEtico();
+  }
+
+  async verCompromisoEtico() {
+    await this.asegurarCompromisoEticoCargado();
+
     const dialogRef = this.dialog.open(ModalVisualizarRecargarCompromisoEticoComponent, {
-      data: { base64Document: this.base64CompromisoEtico, id: this.auditoriaId },
+      data: {
+        base64Document: this.base64CompromisoEtico,
+        id: this.auditoriaId,
+        soloLectura: this.soloLectura,
+        tipoAuditoria: 'interna',
+        onUpdated: (newBase64: string) => {
+          this.base64CompromisoEtico = newBase64;
+        },
+      },
       width: "1000px",
       autoFocus: false,
     });
 
-    dialogRef.afterClosed().subscribe((resultado: boolean | 'deleted') => {
-      if (resultado === 'deleted') {
-        this.base64CompromisoEtico = null;
-        this.idCompromisoEtico = null;
-      } else if (resultado === true) {
-        this.cargarCompromisoEtico();
-      }
+    dialogRef.afterClosed().subscribe(() => {
+      // No es necesario recargar si el modal ya actualizó el base64 vía onUpdated.
     });
   }
 

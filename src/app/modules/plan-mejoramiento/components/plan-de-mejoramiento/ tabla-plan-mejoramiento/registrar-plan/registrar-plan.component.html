@@ -78,18 +78,22 @@
 
   <!-- Footer -->
   @if (!soloLectura) {
-    <div class="d-flex justify-content-end mt-4" style="gap: 16px;">
-      <button mat-raised-button color="primary" (click)="guardar()">
-        <mat-icon>save</mat-icon>
-        Guardar
-      </button>
-      <button mat-stroked-button color="primary"
-        (click)="enviarAuditor()"
-        [disabled]="enviando || !planMejoramientoId">
-        <mat-icon>send</mat-icon>
-        Enviar a Auditor
-      </button>
-    </div>
-  }
-
+  <div class="d-flex justify-content-end mt-4" style="gap: 16px;">
+    <button mat-raised-button color="primary" (click)="verDocumento()">
+      <mat-icon>visibility</mat-icon>
+      Vista previa
+    </button>
+    <button mat-raised-button color="primary" (click)="guardar()">
+      <mat-icon>save</mat-icon>
+      Guardar
+    </button>
+    <button mat-stroked-button color="primary"
+      (click)="enviarAuditor()"
+      [disabled]="enviando || !planMejoramientoId">
+      <mat-icon>send</mat-icon>
+      Enviar a Auditor
+    </button>
+  </div>
+}
+  
 </ng-template>

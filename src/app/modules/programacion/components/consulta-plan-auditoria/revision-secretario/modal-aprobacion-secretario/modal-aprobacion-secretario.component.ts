@@ -83,7 +83,7 @@ export class ModalAprobacionSecretarioComponent {
           response[0],
           "Plan Auditoria",
           this.infoModal.planAuditoriaId,
-          6820
+          environment.TIPO_DOCUMENTO_PARAMETROS.ACTA_COMITE_COORDINADOR
         );
       },
       error: (error) => {
@@ -183,6 +183,7 @@ export class ModalAprobacionSecretarioComponent {
     return {
       plan_auditoria_id: planId,
       usuario_id: this.infoModal.usuarioId,
+      usuario_rol: this.infoModal.usuarioRol,
       observacion,
       estado_id: estadoId,
     };

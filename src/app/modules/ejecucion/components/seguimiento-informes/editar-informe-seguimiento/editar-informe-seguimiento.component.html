@@ -1,9 +1,19 @@
-<plantilla-tarjeta-contenedora [breadcrumb]="'<p>Gestión Auditoría / Ejecución / <b>Seguimiento e Informes</b></p>'"
-[contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
-</plantilla-tarjeta-contenedora>
+<plantilla-tarjeta-contenedora
+  [title]="soloLectura ? 'Ver Informe' : 'Editar Informe'"
+  [subtitle]="auditoria?.vigencia_nombre || ''"
+  [subtitleChild]="(auditoria?.titulo || '') + (auditoria?.subtitulo ? ' - ' + auditoria?.subtitulo : '')"
+  [breadcrumb]="
+    soloLectura
+      ? '<p>Gestión Auditoría / Ejecución / Seguimiento e Informes / <b>Ver Informe</b></p>'
+      : '<p>Gestión Auditoría / Ejecución / Seguimiento e Informes / <b>Editar Informe</b></p>'
+  "
+  [contenido]="contenidoDePlantilla"
+  (regresar)="regresarRuta()"
+  [mostrarBotonRegresar]="true"
+></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row">
+  <div class="row" [class.modo-lectura]="soloLectura">
     <div class="col-12">
       <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
         <ng-template matStepperIcon="number">
@@ -60,9 +70,15 @@
                 </mat-accordion>
               }
               <div class="d-flex justify-content-end mt-4">
-                <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
-                  Guardar y Continuar
-                </button>
+                @if (!soloLectura) {
+                  <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
+                    Guardar y Continuar
+                  </button>
+                } @else {
+                  <button mat-raised-button color="primary" matStepperNext>
+                    Continuar
+                  </button>
+                }
               </div>
             </div>
           }
@@ -91,9 +107,15 @@
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
                   Volver
                 </button>
-                <button mat-raised-button color="primary" type="submit">
-                  Guardar y Continuar
-                </button>
+                @if (!soloLectura) {
+                  <button mat-raised-button color="primary" type="submit">
+                    Guardar y Continuar
+                  </button>
+                } @else {
+                  <button mat-raised-button color="primary" type="button" matStepperNext>
+                    Continuar
+                  </button>
+                }
               </div>
             </form>
           </div>
@@ -115,14 +137,20 @@
             </div>
           </div>
           <div class="mt-4">
-            <app-aspectos-evaluados-seguimiento [informeId]="informeId"></app-aspectos-evaluados-seguimiento>
+            <app-aspectos-evaluados-seguimiento [informeId]="informeId" [soloLectura]="soloLectura"></app-aspectos-evaluados-seguimiento>
             <div class="d-flex justify-content-end mt-4">
               <button mat-stroked-button color="primary" matStepperPrevious class="me-2">
                 Volver
               </button>
-              <button mat-raised-button color="primary" (click)="guardarAspectosEvaluados()">
-                Guardar y Continuar
-              </button>
+              @if (!soloLectura) {
+                <button mat-raised-button color="primary" (click)="guardarAspectosEvaluados()">
+                  Guardar y Continuar
+                </button>
+              } @else {
+                <button mat-raised-button color="primary" matStepperNext>
+                  Continuar
+                </button>
+              }
             </div>
           </div>
         </mat-step>
@@ -154,13 +182,18 @@
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
                   Volver
                 </button>
-                <button mat-stroked-button color="primary" type="button" (click)="verInforme()" class="me-2">
-                  <mat-icon>visibility</mat-icon>
-                  Ver
+                <button mat-flat-button color="primary" type="button" (click)="verInforme()" class="me-2">
+                  Ver informe final
                 </button>
-                <button mat-raised-button color="primary" type="submit">
-                  Guardar y Cerrar
-                </button>
+                @if (!soloLectura) {
+                  <button mat-raised-button color="primary" type="submit">
+                    Guardar
+                  </button>
+                } @else {
+                  <button mat-raised-button color="primary" type="button" (click)="regresarRuta()">
+                    Cerrar
+                  </button>
+                }
               </div>
             </form>
           </div>

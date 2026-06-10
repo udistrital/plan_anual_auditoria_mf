@@ -6,6 +6,8 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
+import { FormControl } from "@angular/forms";
+import { Auditor } from "src/app/shared/data/models/auditoria-auditor";
 
 export interface DatosModalAsignacionAuditores {
   auditoria: any;
@@ -37,7 +39,7 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
   auditoresDisponibles: { id: string; nombre: string }[] = [];
 
   /** Auditor actualmente seleccionado en el dropdown */
-  auditorSeleccionado: { id: string; nombre: string } | null = null;
+  auditorSeleccionado: FormControl<{id: string; nombre: string} | null> = new FormControl(null);
 
   /** IDs de los registros auditoria-auditor del plan ya existentes (para DELETE) */
   private registrosAuditoresPlan: {
@@ -175,10 +177,10 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
 
   /** Agrega el auditor seleccionado en el dropdown a la lista local */
   agregarAuditorPlan(): void {
-    if (!this.auditorSeleccionado) return;
+    if (!this.auditorSeleccionado.value) return;
 
     const yaExiste = this.auditoresPlan.some(
-      (a) => a.id === this.auditorSeleccionado!.id
+      (a) => a.id === this.auditorSeleccionado.value?.id
     );
     if (yaExiste) {
       this.alertService.showAlert(
@@ -190,12 +192,12 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
 
     this.auditoresPlan = [
       ...this.auditoresPlan,
-      { ...this.auditorSeleccionado },
+      { ...this.auditorSeleccionado.value },
     ];
     this.auditoresDisponibles = this.auditoresDisponibles.filter(
-      (a) => a.id !== this.auditorSeleccionado!.id
+      (a) => a.id !== this.auditorSeleccionado.value?.id
     );
-    this.auditorSeleccionado = null;
+    this.auditorSeleccionado = new FormControl(null);
   }
 
   /** Elimina un auditor de la lista local y lo marca para eliminar al guardar */

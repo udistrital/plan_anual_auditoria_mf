@@ -1,3 +1,27 @@
+.historial-content {
+  min-width: 500px;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.descripcion {
+  margin-bottom: 16px;
+}
+
+.fecha {
+  margin-left: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.sin-rechazos {
+  padding: 16px 0;
+  color: rgba(0, 0, 0, 0.7);
+}
+
 .fondo-chip {
   padding: 15px;
   color: var(--md-accent-900);
@@ -14,7 +38,6 @@
   font-size: 12px;
   margin-left: 8px;
 }
-
 .icon-chip {
   width: 15px;
   height: 15px;
@@ -65,8 +88,15 @@
   0% {
     background-position: 200% 0;
   }
-
   100% {
     background-position: -200% 0;
   }
+}
+
+.fondo-chip--rechazo {
+  border-left-color: #c62828;
+}
+
+.fondo-chip--revision {
+  border-left-color: #7D7C7A;
 }

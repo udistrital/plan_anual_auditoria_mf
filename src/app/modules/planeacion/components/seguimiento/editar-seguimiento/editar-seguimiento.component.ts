@@ -29,6 +29,7 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
+import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 
 
 @Component({
@@ -181,7 +182,11 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
           );
           
         });
-        this.auditoria = res.Data;
+        const datosActualizados = res?.Data;
+        if (datosActualizados) {
+          this.auditoria = { ...this.auditoria, ...datosActualizados };
+        }
+
         this.paso1Guardado = true;
         this.stepper.next();
       });
@@ -222,14 +227,17 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       );
     }
 
-    this.alertaService
-      .showConfirmAlert("¿Está seguro(a) de enviar a aprobación por Jefe?")
-      .then((confirmado) => {
-        if (!confirmado.value) {
-          return;
-        }
-        this.validarDocumentosAnexados(this.auditoria._id);
-      });
+    const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
+      width: '500px',
+      autoFocus: false,
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (observacion === null || observacion === undefined) {
+        return;
+      }
+      this.validarDocumentosAnexados(this.auditoria._id, observacion);
+    });
   }
 
   manejarEnvioDocumentos(documentos: any) {
@@ -382,7 +390,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
     );
   }
 
-  validarDocumentosAnexados(auditoriaId: any) {
+  validarDocumentosAnexados(auditoriaId: any, observacion: string = "") {
     if (this.soloLectura) {
       return;
     }
@@ -408,7 +416,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
             return;
           }
         }
-        this.enviarAprobacionPorJefe(auditoriaId);
+        this.enviarAprobacionPorJefe(auditoriaId, observacion);
       },
       error: (error) => {
         console.error(error);
@@ -417,7 +425,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
     });
   }
 
-  enviarAprobacionPorJefe(auditoriaId: string) {
+  enviarAprobacionPorJefe(auditoriaId: string, observacion: string = "") {
     if (this.soloLectura) {
       return;
     }
@@ -426,7 +434,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
       auditoria_id: auditoriaId,
       usuario_id: this.usuarioId,
       usuario_rol: [environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR, environment.ROL.AUDITOR_ASISTENTE].find(rol => this.rolService.tieneRol(rol)),
-      observacion: "",
+      observacion,
       estado_id: this.auditoriaEstados.PLANEACION.REVISION_PROGRAMA_JEFE,
       fase_id: environment.AUDITORIA_FASE.PLANEACION,
     };
@@ -469,10 +477,11 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
           nombreRemitente: of(tercero.NombreCompleto),
+          jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),
 
-      exhaustMap(({ auditoria, vigencias, nombreRemitente }: any) => {
+      exhaustMap(({ auditoria, vigencias, nombreRemitente, jefeOCI }) => {
         const datosAuditoria: Auditoria = auditoria?.Data;
 
         const vigenciaId = datosAuditoria?.vigencia_id;
@@ -480,7 +489,7 @@ export class EditarSeguimientoComponent implements OnInit, AfterViewInit {
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
 
         const destinatarios: DestinatariosEmail = this.tercerosService.combinarDestinatarios(
-          [],
+          [jefeOCI.UsuarioWSO2],
           environment.NOTIFICACION_PROGRAMA_TRABAJO_ENVIO_JEFE_DESTINATARIOS
         );
 

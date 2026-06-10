@@ -1,4 +1,5 @@
 import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { emojiColorPorPrefijoEstado } from "src/app/shared/utils/colorPorPrefijoEstado";
 
 export interface AuditoriaEspecialTablaRow extends Partial<Auditoria> {
   numero: string;
@@ -23,6 +24,20 @@ function prepararCadenaAuditores(auditoria: AuditoriaEspecialTablaRow): string {
   return auditores.join(", ");
 }
 
+/**
+ * Elige el emoji de color correspondiente al estado de la auditoría.
+ * Se basa en los prefijos definidos en emojiColorPorPrefijoEstado.
+ * @param estado Nombre del estado
+ * @returns Emoji del color correspondiente al estado
+ */
+function escogerEmojiColorEstado(estado: string): string {
+  for (const prefijo in emojiColorPorPrefijoEstado)
+    if (estado.startsWith(prefijo))
+      return emojiColorPorPrefijoEstado[prefijo];
+
+  return "⚪";
+}
+
 export interface ColumnaTablaAuditoriaEspecial {
   columnDef: string;
   header: string;
@@ -43,6 +58,10 @@ export const tituloAuditoriaEspecial = (
 export const cronogramaAuditoriaEspecial = (
   auditoria: AuditoriaEspecialTablaRow,
 ): string => {
+  if (auditoria.esAuditoriaConcreta) {
+    return "";
+  }
+
   if (Array.isArray(auditoria.cronograma_nombre) && auditoria.cronograma_nombre.length > 0) {
     return auditoria.cronograma_nombre.join(", ");
   }
@@ -96,7 +115,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
     columnDef: "estado",
     header: "Estado",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
-      auditoria.estado_nombre ?? "Sin estado",
+      `${escogerEmojiColorEstado(auditoria.estado_nombre ?? "Borrador")} ${auditoria.estado_nombre ?? "Sin estado"}`,
     sortable: false,
   },
   {

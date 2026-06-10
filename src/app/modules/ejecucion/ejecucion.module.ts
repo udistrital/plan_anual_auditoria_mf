@@ -16,10 +16,13 @@ import { RevisionDocumentosEjecucionComponent } from './components/auditorias-in
 import { ModalRechazoAuditoriaEjecucionComponent } from './components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component';
 import { RevisionDocumentosSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/revision-documentos-seguimiento.component';
 import { ModalRechazoSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component';
-import { ModalHistorialRechazosComponent } from './components/auditorias-internas/modal-historial-rechazos/modal-historial-rechazos.component';
-import { ModalHistorialRechazosSeguimientoComponent } from './components/seguimiento-informes/modal-historial-rechazos-seguimiento/modal-historial-rechazos-seguimiento.component';
 import { RevisionPreinformeComponent } from './components/auditorias-internas/editar-informe/revision-preinforme/revision-preinforme.component';
+import { ModalAmpliarRevisionAuditadoComponent } from './components/auditorias-internas/modal-ampliar-revision-auditado/modal-ampliar-revision-auditado.component';
 import { ReactiveFormsModule } from '@angular/forms';
+
+import Quill from 'quill';
+import BlotFormatter from '@enzedonline/quill-blot-formatter2';
+Quill.register('modules/blotFormatter', BlotFormatter);
 
 @NgModule({
   declarations: [
@@ -36,9 +39,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     ModalRechazoAuditoriaEjecucionComponent,
     RevisionDocumentosSeguimientoComponent,
     ModalRechazoSeguimientoComponent,
-    ModalHistorialRechazosComponent,
-    ModalHistorialRechazosSeguimientoComponent,
     RevisionPreinformeComponent,
+    ModalAmpliarRevisionAuditadoComponent,
   ],
   imports: [
     CommonModule,

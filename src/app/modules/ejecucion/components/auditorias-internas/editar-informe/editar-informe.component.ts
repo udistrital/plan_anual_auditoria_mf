@@ -80,6 +80,17 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
    * - Auditados en estado REVISION_PREINFORME_AUDITADO (agregan sus observaciones)
    * - Auditores en estado CREANDO_INFORME_FINAL (agregan observaciones del auditor)
    */
+  get fechaFinRevisionFormateada(): string {
+    const fecha = this.informeData?.fecha_fin_revision;
+    if (!fecha) return '';
+    return new Date(fecha).toLocaleDateString('es-CO', {
+      timeZone: 'America/Bogota',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
   get esRevisionPreinformeAuditado(): boolean {
     const REVISION = environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO;
     const CREANDO_FINAL = environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL;
@@ -100,9 +111,10 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     return false;
   }
 
-  /** Auditado puede escribir su observación solo en REVISION_PREINFORME_AUDITADO */
+  /** Auditado puede escribir su observación solo en REVISION_PREINFORME_AUDITADO y si aún no decidió */
   get puedeEscribirObservacionAuditado(): boolean {
     if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) return false;
+    if (this.dependenciaYaDecidio) return false;
     const roles = this.rolService.getRoles();
     return roles.some(r =>
       r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA,
@@ -123,8 +135,23 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   /** Auditado puede terminar sus observaciones en REVISION_PREINFORME_AUDITADO */
   get puedeTerminarObservaciones(): boolean {
     if (this.estadoId !== environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO) return false;
+    if (this.dependenciaYaDecidio) return false;
     const roles = this.rolService.getRoles();
     return roles.some(r => r === environment.ROL.JEFE_DEPENDENCIA || r === environment.ROL.ASISTENTE_DEPENDENCIA);
+  }
+
+  /** La dependencia del usuario ya registró su decisión final */
+  get dependenciaYaDecidio(): boolean {
+    const decididas: number[] = this.informeData?.dependencias_decididas ?? [];
+    return this.dependenciaIdsEnAuditoria.some(id => decididas.includes(id));
+  }
+
+  /** Intersección entre las dependencias del usuario y las de esta auditoría */
+  get dependenciaIdsEnAuditoria(): number[] {
+    const depAuditoria: number[] = (this.auditoria?.datos_dependencias ?? [])
+      .map((d: any) => d.dependencia_id)
+      .filter((id: any) => id != null);
+    return this.dependenciaIds.filter(id => depAuditoria.includes(id));
   }
 
   /**
@@ -500,32 +527,100 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.planAnualAuditoriaService.post('auditoria-estado', {
+    // Agregar esta dependencia a dependencias_decididas
+    const decididas: number[] = [...(this.informeData?.dependencias_decididas ?? [])];
+    for (const depId of this.dependenciaIdsEnAuditoria) {
+      if (!decididas.includes(depId)) decididas.push(depId);
+    }
+
+    try {
+      await firstValueFrom(
+        this.planAnualAuditoriaService.put(`informe/${this.informeId}`, { ...this.informeData, dependencias_decididas: decididas })
+      );
+      this.informeData = { ...this.informeData, dependencias_decididas: decididas };
+    } catch {
+      this.alertaService.showErrorAlert("Error al registrar la decisión.");
+      return;
+    }
+
+    // Verificar si ya decidieron todas las dependencias
+    let totalDependencias = 0;
+    try {
+      const auditoriaRes: any = await firstValueFrom(this.planAuditoriaMid.get(`auditoria/${auditoriaId}`));
+      totalDependencias = (auditoriaRes?.Data?.datos_dependencias ?? []).length;
+    } catch {
+      this.alertaService.showErrorAlert("Error al verificar las dependencias.");
+      return;
+    }
+
+    const estadoBase = {
       auditoria_id: auditoriaId,
       fase_id: environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
-      estado_id: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
       usuario_id: this.usuarioId,
       usuario_rol: this.usuarioRol,
       observacion: "",
-    }).subscribe({
-      next: () => {
+    };
+
+    const todasDecidieron = decididas.length >= totalDependencias && totalDependencias > 0;
+
+    if (!todasDecidieron) {
+      // Registrar decisión individual + volver a esperar al resto
+      try {
+        await firstValueFrom(
+          this.planAnualAuditoriaService.post('auditoria-estado', {
+            ...estadoBase,
+            estado_id: environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO,
+          })
+        );
+        await firstValueFrom(
+          this.planAnualAuditoriaService.post('auditoria-estado', {
+            ...estadoBase,
+            estado_id: environment.AUDITORIA_ESTADO.EJECUCION.REVISION_PREINFORME_AUDITADO,
+          })
+        );
+      } catch {
+        this.alertaService.showErrorAlert("Error al registrar el estado.");
+        return;
+      }
+      this.alertaService.showSuccessAlert("Observaciones registradas. Esperando a las demás dependencias.", "Decisión registrada");
+      this.regresarRuta();
+      return;
+    }
+
+    // Todas decidieron: determinar estado agregado según si hay observaciones
+    const hallazgosIds = (this.hallazgosRaw ?? []).map((h: any) => h._id);
+    let tieneObservaciones = false;
+    if (hallazgosIds.length) {
+      try {
+        const obsRes: any = await firstValueFrom(
+          this.planAnualAuditoriaService.get(`observacion?query=hallazgo_id__in:${hallazgosIds.join('|')},activo:true&limit=1`)
+        );
+        tieneObservaciones = (obsRes?.Data?.length ?? 0) > 0;
+      } catch { }
+    }
+
+    const estadoAgregado = tieneObservaciones
+      ? environment.AUDITORIA_ESTADO.EJECUCION.OBSERVACIONES_PREINFORME_AUDITADO
+      : environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_PREINFORME_AUDITADO;
+
+    try {
+      await firstValueFrom(
+        this.planAnualAuditoriaService.post('auditoria-estado', { ...estadoBase, estado_id: estadoAgregado })
+      );
+      await firstValueFrom(
         this.planAnualAuditoriaService.post('auditoria-estado', {
-          auditoria_id: auditoriaId,
+          ...estadoBase,
           fase_id: environment.AUDITORIA_FASE.EJECUCION_FINAL,
           estado_id: environment.AUDITORIA_ESTADO.EJECUCION.CREANDO_INFORME_FINAL,
-          usuario_id: this.usuarioId,
-          usuario_rol: this.usuarioRol,
-          observacion: "",
-        }).subscribe({
-          next: () => {
-            this.alertaService.showSuccessAlert("Las observaciones han sido registradas y enviadas al auditor.", "Observaciones enviadas");
-            this.regresarRuta();
-          },
-          error: () => this.alertaService.showErrorAlert("Error al registrar el estado de informe final."),
-        });
-      },
-      error: () => this.alertaService.showErrorAlert("Error al registrar las observaciones."),
-    });
+        })
+      );
+    } catch {
+      this.alertaService.showErrorAlert("Error al registrar el estado de la auditoría.");
+      return;
+    }
+
+    this.alertaService.showSuccessAlert("Todas las dependencias han decidido. El informe pasa a la etapa final.", "Completado");
+    this.regresarRuta();
   }
 
   verPreinforme(): void {
