@@ -1,0 +1,31 @@
+.fondo-chip {
+  padding: 15px;
+  color: var(--md-accent-900);
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-left: 6px solid var(--md-primary-500);
+}
+
+.chip {
+  border: 1px solid var(--md-accent-600);
+  padding: 5px;
+  padding-right: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.icon-chip {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+  margin-right: 3px;
+  margin-bottom: -4px;
+  color: var(--md-accent-600);
+}
+
+@media (max-width: 768px) {
+  .chip {
+    font-size: 9.5px;
+  }
+}
