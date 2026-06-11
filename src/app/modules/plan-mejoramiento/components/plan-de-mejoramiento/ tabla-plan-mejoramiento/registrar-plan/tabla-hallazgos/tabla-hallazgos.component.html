@@ -82,6 +82,48 @@
           <th mat-header-cell *matHeaderCellDef><b>Fecha Fin</b></th>
           <td mat-cell *matCellDef="let fila">{{ fila.accion?.fechaFin }}</td>
         </ng-container>
+        <!-- Estado de la acción -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef><b>Estado</b></th>
+          <td mat-cell *matCellDef="let fila">
+            @if (fila.accion) {
+              <span class="estado-chip"
+                [class.estado-pendiente]="fila.accion.estadoId === ESTADO_ACCION.PENDIENTE_REVISION"
+                [class.estado-aprobada]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
+                [class.estado-rechazada]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA">
+                {{ fila.accion.estadoNombre }}
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Revisión del auditor -->
+        <ng-container matColumnDef="revision">
+          <th mat-header-cell *matHeaderCellDef><b>Revisión</b></th>
+          <td mat-cell *matCellDef="let fila">
+            @if (fila.accion) {
+              <button mat-icon-button color="primary" [matMenuTriggerFor]="menuRevision">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menuRevision="matMenu">
+                <button mat-menu-item
+                  [disabled]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
+                  (click)="aprobarAccion(fila.accion)">
+                  <mat-icon color="primary">check_circle</mat-icon> Aprobar
+                </button>
+                <button mat-menu-item
+                  [disabled]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA"
+                  (click)="rechazarAccion(fila.accion)">
+                  <mat-icon color="warn">cancel</mat-icon> Rechazar
+                </button>
+                <button mat-menu-item (click)="verHistorialAccion(fila.accion)">
+                  <mat-icon>history</mat-icon> Ver observaciones
+                </button>
+              </mat-menu>
+            }
+          </td>
+        </ng-container>
+        
         <!-- Acciones (menú) — oculto en modo lectura -->
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
@@ -98,6 +140,9 @@
                 <button mat-menu-item
                   (click)="eliminarAccion(getHallazgo(fila.hallazgoId), fila.accion)">
                   <mat-icon color="warn">delete</mat-icon> Eliminar Acción
+                </button>
+                <button mat-menu-item (click)="verHistorialAccion(fila.accion)">
+                  <mat-icon>history</mat-icon> Ver observaciones
                 </button>
               </mat-menu>
             }

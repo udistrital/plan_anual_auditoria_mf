@@ -174,6 +174,13 @@ export const environment = {
     },
   },
 
+  // TODO: confirmar/registrar los IDs reales de producción en parámetros
+  ACCION_MEJORA_ESTADOS: {
+    PENDIENTE_REVISION: 0,
+    APROBADA: 0,
+    RECHAZADA: 0,
+  },
+
   MESES: {
     TIPO_PARAMETRO_ID: 102,
   },
@@ -200,6 +207,7 @@ export const environment = {
     PLANTILLAS: 121,
     PLANES_AUDITORIA: 117,
     ACTA_MODIFICACION: 122,
+    INFORMES: 123,
   },
 
   TIPO_DOCUMENTO_PARAMETROS: {
