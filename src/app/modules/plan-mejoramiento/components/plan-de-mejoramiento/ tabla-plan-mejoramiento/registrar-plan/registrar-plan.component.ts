@@ -11,6 +11,8 @@ import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
 import { firstValueFrom } from 'rxjs';
+import { NuxeoService } from 'src/app/core/services/nuxeo.service';
+import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 
 @Component({
     selector: 'app-registrar-plan',
@@ -25,6 +27,7 @@ export class RegistrarPlanComponent implements OnInit {
   cargando = true;
   enviando = false;
   fuenteSeleccionada: number | null = null;
+  soloLectura: boolean = false;
 
   get lideresDelProceso(): string {
     return (this.auditoria?.datos_dependencias ?? [])
@@ -53,15 +56,19 @@ export class RegistrarPlanComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    private readonly alertaService: AlertService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
-    private readonly planAnualAuditoriaMid: PlanAnualAuditoriaMid
+    private readonly planAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly nuxeoService: NuxeoService,
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.soloLectura = this.route.snapshot.queryParamMap.get('soloLectura') === 'true';
     this.auditoriaId = this.route.snapshot.paramMap.get('id')!;
     this.role = this.rolService.getRolPrioritario([
       environment.ROL.JEFE,
@@ -232,23 +239,103 @@ export class RegistrarPlanComponent implements OnInit {
     this.router.navigate(['/plan-mejoramiento']);
   }
 
-  async verDocumento() {
-    const documentoPlanMejoramiento = await this.obtenerDocumentoPlanMejoramiento();
-    const dialogRef =  this.dialog.open(ModalVerDocumentoComponent, {
-      width: "1000px",
-      data: documentoPlanMejoramiento.Data,
-      autoFocus: false
+  verPlanMejoramiento(): void {
+    this.planAnualAuditoriaMid.get(`plantilla/plan-mejoramiento/${this.auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+
+        if (!documentoBase64) {
+          this.alertaService.showErrorAlert("No fue posible generar el plan de mejoramiento.");
+          return;
+        }
+
+        this.verDocumento(documentoBase64, {
+          nombre: "Plan de mejoramiento",
+          plantilla: "plan-mejoramiento",
+          parametro: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_MEJORAMIENTO
+        });
+      }
     })
   }
 
-  private async obtenerDocumentoPlanMejoramiento() {
-    try {
-      const data = await firstValueFrom(this.planAnualAuditoriaMid.get(`plantilla/plan-mejoramiento/${this.auditoriaId}`));
-      return data;
-    } catch (error) {
-      console.log("Error al cargar el documento de plan de mejoramiento.");
-      this.alertService.showErrorAlert("No fue obtener el plan de mejoramiento.")
-      return null;
+  verDocumento(documentoBase64: any, infoDocumento: any) {
+    const dialogRef =  this.dialog.open(ModalVerDocumentoComponent, {
+      width: "1000px",
+      data: documentoBase64,
+      autoFocus: false
+    })
+
+    const modalInstance = dialogRef.componentInstance;
+    if (!this.soloLectura) {
+      modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+    }
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (!res) return;
+
+      if (res.accion === "guardarDocumento") {
+        this.guardarDocumento(documentoBase64, infoDocumento);
+      }
+    });
+  }
+
+  guardarDocumento(documentoBase64: any, infoDocumento: any) {
+    if (documentoBase64 !== "") {
+      const payload = {
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.PLAN_MEJORAMIENTO,
+        nombre: infoDocumento.nombre,
+        descripcion:
+          "Documento pdf (" +
+          infoDocumento.plantilla +
+          ") de Auditoria " + this.auditoriaId,
+        metadatos: {},
+        file: documentoBase64,
+      };
+
+      this.nuxeoService.guardarArchivos([payload]).subscribe({
+        next: (response: any) => {
+          const documentoRefNuxeo = response[0];
+
+          this.guardarReferencia(
+            documentoRefNuxeo,
+            "Auditoria",
+            this.auditoriaId,
+            infoDocumento.parametro
+          );
+        },
+        error: (error: any) => {
+          console.error("Error al subir el documento", error);
+        },
+      });
+    }
+  }
+
+  guardarReferencia(
+    nuxeoResponse: any,
+    referencia_tipo: string,
+    referencia_id: string,
+    tipo_id: number,
+    metadatos?: Record<string, any>,
+    onSuccess?: () => void
+  ): void {
+    if (nuxeoResponse.res.Enlace) {
+      this.referenciaPdfService
+        .guardarReferencia(
+          nuxeoResponse.res,
+          referencia_tipo,
+          referencia_id,
+          tipo_id,
+          metadatos
+        )
+        .subscribe({
+          next: () => {
+            this.alertaService.showSuccessAlert("Archivo subido exitosamente.");
+            onSuccess?.();
+          },
+          error: (error: any) => {
+            console.error("Error al guardar la referencia", error);
+          },
+        });
     }
   }
 }
