@@ -5,7 +5,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/autenticacion_mid/v1/",
   NOTIFICACIONES_MID_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/notificacion_mid/v1/",
-  NOTIFICACIONES_HABILITADAS: true,
+  NOTIFICACIONES_HABILITADAS: false,
   ORIGEN_CORREO_NOTIFICACIONES:
     "sisifonotificaciones@udistrital.edu.co",
   GESTOR_DOCUMENTAL_SERVICE:
