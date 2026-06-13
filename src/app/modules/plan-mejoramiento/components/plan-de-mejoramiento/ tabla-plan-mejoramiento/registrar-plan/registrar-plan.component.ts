@@ -5,6 +5,7 @@ import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-audi
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
+import { ParametrosUtilsService, Parametro } from 'src/app/shared/services/parametros.service';
 import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 import { environment } from 'src/environments/environment';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
@@ -25,6 +26,7 @@ export class RegistrarPlanComponent implements OnInit {
   cargando = true;
   enviando = false;
   fuenteSeleccionada: number | null = null;
+  fuentes: Parametro[] = [];
 
   get lideresDelProceso(): string {
     return (this.auditoria?.datos_dependencias ?? [])
@@ -35,16 +37,6 @@ export class RegistrarPlanComponent implements OnInit {
     return (this.auditoria?.datos_dependencias ?? [])
       .map((d: any) => d.dependencia_nombre).filter(Boolean).join(', ') || '';
   }
-
-  readonly fuentes = [
-    { id: 1, nombre: 'Auditoría Interna' },
-    { id: 2, nombre: 'Auditoría Externa' },
-    { id: 3, nombre: 'Producto/Servicio No Conforme' },
-    { id: 4, nombre: 'Quejas, reclamos o sugerencias' },
-    { id: 5, nombre: 'Revisión por la Dirección' },
-    { id: 6, nombre: 'Evaluación del desempeño' },
-    { id: 7, nombre: 'Mejoramiento Continuo' },
-  ];
 
   private usuarioId = 0;
   private role: string | null = null;
@@ -58,7 +50,8 @@ export class RegistrarPlanComponent implements OnInit {
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
-    private readonly planAnualAuditoriaMid: PlanAnualAuditoriaMid
+    private readonly planAnualAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -72,6 +65,9 @@ export class RegistrarPlanComponent implements OnInit {
       environment.ROL.ASISTENTE_DEPENDENCIA,
     ]);
     this.usuarioId = await this.userService.getPersonaId();
+    this.parametrosUtilsService.getFuentesPlanMejoramiento().subscribe({
+      next: (data) => { this.fuentes = data; },
+    });
     this.cargarAuditoria();
   }
 
