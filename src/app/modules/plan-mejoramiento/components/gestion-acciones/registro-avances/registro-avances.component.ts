@@ -190,7 +190,7 @@ export class RegistroAvancesComponent implements OnInit {
   }
 
   regresar() {
-    this.router.navigate(['/plan-mejoramiento']);
+    this.router.navigate(['../../'], { relativeTo: this.route });
   }
 
 }

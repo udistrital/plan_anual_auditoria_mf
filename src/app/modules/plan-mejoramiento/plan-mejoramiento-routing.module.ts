@@ -4,6 +4,7 @@ import { PlanDeMejoramientoComponent } from './components/plan-de-mejoramiento/p
 import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/registrar-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
+import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
 
 const routes: Routes = [
   {
@@ -27,6 +28,15 @@ const routes: Routes = [
   {
     path: 'gestion-acciones',
     component: GestionAccionesComponent,
+  },
+  {
+    path: 'gestion-acciones',
+    children: [
+      {
+        path: 'registrar-avances/:id',
+        component: RegistroAvancesComponent,
+      }
+    ]
   },
 ];
 
