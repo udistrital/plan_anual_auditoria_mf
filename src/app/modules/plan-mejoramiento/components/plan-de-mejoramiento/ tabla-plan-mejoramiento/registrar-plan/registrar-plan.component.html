@@ -41,8 +41,8 @@
     <mat-form-field appearance="outline" class="col-md-2 col-12">
       <mat-label>Fuente <span class="text-danger">*</span></mat-label>
       <mat-select [(ngModel)]="fuenteSeleccionada" (ngModelChange)="guardarFuente()">
-        @for (f of fuentes; track f.id) {
-          <mat-option [value]="f.id">{{ f.nombre }}</mat-option>
+        @for (f of fuentes; track f.Id) {
+          <mat-option [value]="f.Id">{{ f.Nombre }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
