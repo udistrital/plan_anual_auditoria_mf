@@ -24,7 +24,15 @@ export class RegistrarPlanComponent implements OnInit {
   planMejoramientoId: string | null = null;
   cargando = true;
   enviando = false;
+  soloLectura = false;
   fuenteSeleccionada: number | null = null;
+
+  /** Estados en los que el plan aún puede editarse (registrar/editar acciones). */
+  private readonly estadosEditables: number[] = [
+    environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO,
+    environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO,
+    environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO,
+  ];
 
   get lideresDelProceso(): string {
     return (this.auditoria?.datos_dependencias ?? [])
@@ -108,6 +116,7 @@ export class RegistrarPlanComponent implements OnInit {
                   error: () => { this.cargando = false; }
                 });
             } else {
+              this.soloLectura = !this.estadosEditables.includes(plan.estado_id);
               this.cargando = false;
             }
           } else {
@@ -161,6 +170,7 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   guardarFuente(): void {
+    if (this.soloLectura) return;
     if (!this.planMejoramientoId || this.fuenteSeleccionada === null) return;
     this.planAuditoriaService
       .put(`plan-mejoramiento/${this.planMejoramientoId}`, { fuente: this.fuenteSeleccionada })
@@ -168,6 +178,7 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   guardar(): void {
+    if (this.soloLectura) return;
     this.guardarFuente();
     this.alertService.showSuccessAlert(
       'El plan de mejoramiento ha sido guardado.',
@@ -176,6 +187,7 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   enviarAuditor(): void {
+    if (this.soloLectura) return;
     if (!this.planMejoramientoId) return;
 
     this.planAuditoriaService

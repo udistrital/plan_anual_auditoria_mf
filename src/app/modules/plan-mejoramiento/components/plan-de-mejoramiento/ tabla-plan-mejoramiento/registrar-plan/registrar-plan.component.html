@@ -1,6 +1,8 @@
 <plantilla-tarjeta-contenedora
-  [title]="'Editar Plan de Mejoramiento'"
-  [breadcrumb]="'<p>Planes de Mejoramiento / Registrar Plan / <b>Editar Plan de Mejoramiento</b></p>'"
+  [title]="soloLectura ? 'Ver Plan de Mejoramiento' : 'Editar Plan de Mejoramiento'"
+  [breadcrumb]="soloLectura
+    ? '<p>Planes de Mejoramiento / <b>Ver Plan de Mejoramiento</b></p>'
+    : '<p>Planes de Mejoramiento / Registrar Plan / <b>Editar Plan de Mejoramiento</b></p>'"
   [contenido]="contenidoDePlantilla"
   [mostrarBotonRegresar]="true"
   (regresar)="regresar()"
@@ -40,7 +42,7 @@
     </mat-form-field>
     <mat-form-field appearance="outline" class="col-md-2 col-12">
       <mat-label>Fuente <span class="text-danger">*</span></mat-label>
-      <mat-select [(ngModel)]="fuenteSeleccionada" (ngModelChange)="guardarFuente()">
+      <mat-select [(ngModel)]="fuenteSeleccionada" (ngModelChange)="guardarFuente()" [disabled]="soloLectura">
         @for (f of fuentes; track f.id) {
           <mat-option [value]="f.id">{{ f.nombre }}</mat-option>
         }
@@ -54,7 +56,13 @@
   <div class="row mt-3">
     <div class="col-12 mb-2">
       <h5 class="seccion-titulo mb-1">Formulación Plan de Trabajo</h5>
-      <p class="text-muted small mb-0">Seleccione el hallazgo para agregar y/o editar plan de acción</p>
+      <p class="text-muted small mb-0">
+        @if (soloLectura) {
+          Este plan ya fue enviado/aprobado: solo puede consultarse.
+        } @else {
+          Seleccione el hallazgo para agregar y/o editar plan de acción
+        }
+      </p>
     </div>
     <div class="col-12">
       @if (auditoria && planMejoramientoId) {
@@ -62,12 +70,14 @@
           [auditoriaId]="auditoriaId"
           [planMejoramientoId]="planMejoramientoId"
           [auditoria]="auditoria"
+          [soloLectura]="soloLectura"
         ></app-tabla-hallazgos>
       }
     </div>
   </div>
 
   <!-- Footer -->
+  @if (!soloLectura) {
   <div class="d-flex justify-content-end mt-4" style="gap: 16px;">
     <button mat-raised-button color="primary" (click)="verDocumento()">
       <mat-icon>visibility</mat-icon>
@@ -84,5 +94,6 @@
       Enviar a Auditor
     </button>
   </div>
-
+}
+  
 </ng-template>
