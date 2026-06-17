@@ -329,6 +329,9 @@ export class TablaHallazgosComponent implements OnInit {
       });
   }
 
+  remitirHallazgo(_hallazgo: HallazgoTabla | undefined): void {
+  }
+
   eliminarAccion(hallazgo: HallazgoTabla | undefined, accion: AccionPlan | undefined): void {
     if (!hallazgo || !accion?.accionId) return;
 
