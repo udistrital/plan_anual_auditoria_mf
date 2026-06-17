@@ -1,0 +1,49 @@
+.info-hallazgo {
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  border-left: 6px solid var(--md-primary-500);
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--md-accent-900);
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.info-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--md-primary-500);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.info-valor {
+  color: var(--md-accent-700, #455a64);
+}
+
+.aviso-remision {
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #5d4037;
+}
+
+.aviso-icon {
+  color: #f9a825;
+  flex-shrink: 0;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
