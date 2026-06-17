@@ -1,13 +1,13 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ModalRechazoSeguimientoComponent } from "./modal-rechazo-seguimiento/modal-rechazo-seguimiento.component";
-import { MatDialog } from "@angular/material/dialog";
+import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud } from "src/app/shared/services/notificaciones.service";
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
-import { forkJoin, of, throwError } from "rxjs";
+import { forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { environment } from "src/environments/environment";
@@ -23,6 +23,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 
 @Component({
     selector: "app-revision-documentos-seguimiento",
@@ -49,6 +50,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   docCompromisoEstico: string = "";
   mostrarBotones: boolean = false;
   mostrarBotonRechazo: boolean = false;
+  cargueCartasDialogRef?: MatDialogRef<any>;
 
   constructor(
     public readonly dialog: MatDialog,
@@ -146,6 +148,111 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
           );
         }
       });
+  }
+
+  puedeCargarCartaFirmada(): boolean {
+    return this.role === environment.ROL.JEFE && 
+      this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE
+  }
+
+  async cargarCartasJefeOCI() {
+    const cartas = (await lastValueFrom(
+      this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {
+        deduplicarPorTipo: false,
+      })
+    )).filter((documento) =>
+      documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION
+    );
+
+    return cartas[0];
+  }
+
+  async abrirModalCargueCartaFirmada() {
+    try {
+      let carta = await this.cargarCartasJefeOCI();
+
+      if (!carta) {
+        this.alertService.showAlert(
+          "Sin oficios disponibles",
+          "No se encontraron oficios de solicitud de información para cargar firma."
+        );
+        return;
+      }
+
+      const tab: any = {
+        nombre: `Oficio Anuncio Solicitud de información`,
+        nombreDescarga: "oficio-solicitud-informacion",
+        tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
+        documentoId: carta._id,
+        botones: [{
+          nombre: "Descargar Carta",
+          color: "primary",
+          estilo: "border: 1px solid var(--md-primary-500);",
+          tipo: "stroked",
+          accion: async () => {
+            const base64 = await this.nuxeoService.obtenerPorUUID(carta.nuxeo_enlace);
+            this.descargaService.descargarArchivo(
+              base64, "application/pdf", `Oficio_Solicitud_Informacion`
+            );
+          }
+        }],
+        cargueAdjuntoConfig: {
+          nombreBoton: "Cargar Carta Firmada",
+          iconoBoton: "upload_file",
+          colorBoton: "primary",
+          tipoBoton: "stroked",
+          estiloBoton: "border: 1px solid var(--md-primary-500);",
+          idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+          descripcion: `Oficio Anuncio Solicitud de información firmado`,
+          referenciaTipoFallback: "Auditoria",
+          metadatosAdicionales: { firmado: true },
+          onSuccess: async () => {
+            carta = await this.cargarCartasJefeOCI();
+            this.cargarDocumentos();
+          },
+        },
+      };
+      
+      this.cargueCartasDialogRef = this.dialog.open(ModalVerDocumentosComponent, {
+        width: "1200px",
+        data: {
+          entityId: this.auditoriaId,
+          titulo: "Oficio Anuncio Solicitud de información",
+          descripcion:
+            "Revise y cargue el Oficio Anuncio Solicitud de información firmado.",
+          tabs: [tab],
+          sufijo: `oci-${this.consecutivoOci}`,
+          nombreArchivoDescarga: "oficio-solicitud-informacion",
+          tipo: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
+          textoBotonCerrar: "Cerrar",
+          accionesFooter: [
+            {
+              nombre: this.rolesAprobacion[this.role!].botonAprobacion,
+              icono: "fact_check",
+              color: "primary",
+              accion: async () => this.verificarFirmaCartaYPreguntarAprobacion(carta),
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("Error al abrir modal de cargue de cartas firmadas", error);
+      this.alertService.showErrorAlert(
+        "No fue posible abrir el modal de cargue de cartas firmadas."
+      );
+    }
+  }
+
+  verificarFirmaCartaYPreguntarAprobacion(carta: any) {
+    if (!carta?.metadatos?.["firmado"]) {
+      const mensaje = "El Oficio Anuncio Solicitud de información no ha sido cargado con firma. Por favor, cargue el oficio firmado antes de aprobar la auditoría.";
+      this.alertService.showAlert(
+        "Carta sin firmar",
+        mensaje
+      );
+      return;
+    }
+    this.preguntarAprobacionAuditoria();
   }
 
   //funcion para registrar estados de auditoria secuencialmente,

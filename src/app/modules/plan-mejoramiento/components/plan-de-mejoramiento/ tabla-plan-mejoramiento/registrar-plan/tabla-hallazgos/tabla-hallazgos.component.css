@@ -94,3 +94,8 @@ table.mat-table td {
   justify-content: center;
   border-radius: 50%;
 }
+
+/* Alinea verticalmente el botón de 3 puntos en la fila de grupo */
+.fila-grupo-row td {
+  vertical-align: middle;
+}
