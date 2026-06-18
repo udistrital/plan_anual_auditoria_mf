@@ -285,7 +285,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
       const modalInstance = dialogRef.componentInstance;
       modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
 
-      modalInstance.botonRegenerar = { icono: "refresh", texto: "Regenerar documento" };
+      modalInstance.botonRegenerar = { icono: "refresh", texto: "Aplicar cambios" };
       modalInstance.onRegenerarIndividual = async (indice: number): Promise<string> => {
         return await firstValueFrom(
           this.PlanAnualAuditoriaMid
@@ -293,12 +293,12 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
             .pipe(
               map((res) => {
                 documentoBase64 = res.Data;
-                this.alertService.showSuccessAlert(`Documento regenerado exitosamente. No olvide guardar para actualizar el documento guardado.`);
+                this.alertService.showSuccessAlert(`Documento generado exitosamente. No olvide guardar para actualizar el documento.`);
                 return documentoBase64;
               }),
               catchError((error) => {
-                console.error("Error al regenerar el documento", error);
-                this.alertService.showErrorAlert("No fue posible regenerar el documento.");
+                console.error("Error al generar el documento", error);
+                this.alertService.showErrorAlert("No fue posible generar el documento.");
                 return of(documentoBase64);
               })
             )
