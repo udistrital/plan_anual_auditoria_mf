@@ -69,6 +69,8 @@ export class RevisionDocumentosComponent implements OnInit {
   cartasRepresentacion: CartaRepresentacionRevision[] = [];
   docCompromisoEtico: string = "";
   cargueCartasDialogRef?: MatDialogRef<any>;
+  esJefeOCI: boolean = false;
+  esAuditado: boolean = false;
 
   constructor(
     public readonly dialog: MatDialog,
@@ -123,18 +125,12 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
-    const esAuditado =
-      this.role === environment.ROL.JEFE_DEPENDENCIA ||
-      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
-
-    const esJefeOCI = this.role === environment.ROL.JEFE;
-
     for (const carta of cartas) {
       if (!carta?.metadatos?.["firmado"]) {
         let mensaje = "";
-        if (esAuditado) {
+        if (this.esAuditado) {
           mensaje = `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
-        } else if (esJefeOCI) {
+        } else if (this.esJefeOCI) {
           mensaje = `El Oficio Anuncio Solicitud de información no ha sido cargado con firma. Por favor, cargue el oficio firmado antes de aprobar la auditoría.`
         }
         this.alertService.showAlert(
@@ -269,6 +265,11 @@ export class RevisionDocumentosComponent implements OnInit {
       environment.ROL.JEFE_DEPENDENCIA,
       environment.ROL.ASISTENTE_DEPENDENCIA,
     ]);
+    this.esAuditado =
+      this.role === environment.ROL.JEFE_DEPENDENCIA ||
+      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
+
+    this.esJefeOCI = this.role === environment.ROL.JEFE;
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
@@ -282,17 +283,11 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   puedeCargarCartaFirmada(): boolean {
-    const esAuditado =
-      this.role === environment.ROL.JEFE_DEPENDENCIA ||
-      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
-
-    const esJefeOCI = this.role === environment.ROL.JEFE;
-
     return (
-      (esAuditado &&
+      (this.esAuditado &&
       this.estadoAuditoriaId ===
         environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO) ||
-      (esJefeOCI && this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE)
+      (this.esJefeOCI && this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE)
     );
   }
 
@@ -344,15 +339,9 @@ export class RevisionDocumentosComponent implements OnInit {
   };
 
   async abrirModalCargueCartasFirmadas() {
-    const esAuditado =
-      this.role === environment.ROL.JEFE_DEPENDENCIA ||
-      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
-
-    const esJefeOCI = this.role === environment.ROL.JEFE;
-
-    if (esAuditado) {
+    if (this.esAuditado) {
       await this.abrirModalCargueCartasRepresentacionFirmadas()
-    } else if (esJefeOCI) {
+    } else if (this.esJefeOCI) {
       await this.abrirModalCargueSolicitudInfoFirmada()
     }
   }
