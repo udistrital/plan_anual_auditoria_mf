@@ -41,6 +41,7 @@ export class CargarArchivoComponent {
       metadatos?: Record<string, any>;
       nuevo?: boolean;
       documentoIdActualizar?: string;
+      soloSeleccionar?: boolean;
     }
   ) {}
 
@@ -78,6 +79,11 @@ export class CargarArchivoComponent {
   async cargarArchivo(): Promise<void> {
     if (!this.archivo) {
       this.alertService.showErrorAlert("No se ha seleccionado ningún archivo.");
+      return;
+    }
+
+    if (this.data.soloSeleccionar) {
+      this.retornarArchivo();
       return;
     }
 
@@ -401,5 +407,16 @@ export class CargarArchivoComponent {
     }
 
     this.modalService.mostrarModal(mensaje, icono, titulo);
+  }
+
+  retornarArchivo() {
+    const archivoConDatos = {
+      ...this.data,
+      nombre: this.archivo!.name,
+      archivo: this.archivo!,
+      fecha_creacion: (new Date()).toLocaleString()
+    };
+
+    this.dialogRef.close({ documento: archivoConDatos });
   }
 }
