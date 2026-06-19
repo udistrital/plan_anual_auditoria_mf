@@ -6,6 +6,9 @@ import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditori
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
+import { ModalRemitirHallazgoComponent, ResultadoModalRemitirHallazgo } from '../modal-remitir-hallazgo/modal-remitir-hallazgo.component';
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
+import { hallazgosConstructorTabla, iconosAccionHallazgo, iconosUtilidadHallazgo } from './tabla-hallazgos.utilidades';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 export interface HallazgoTabla {
@@ -76,20 +79,41 @@ export class TablaHallazgosComponent implements OnInit {
   filas: FilaTabla[] = [];
   cargando = true;
 
-  private readonly columnasTodas = [
-    'noHallazgo', 'descripcion', 'causa', 'numero', 'tipoAccion',
-    'accionPlanteada', 'nombreIndicador', 'formulaIndicador',
-    'meta', 'responsable', 'fechaInicio', 'fechaFin', 'acciones',
-  ];
+  constructorTabla = hallazgosConstructorTabla;
+  columnas: string[] = [];
 
-  get columnas(): string[] {
-    return this.soloLectura
-      ? this.columnasTodas.filter(c => c !== 'acciones')
-      : this.columnasTodas;
-  }
+  readonly iconosAccion = iconosAccionHallazgo;
+  readonly iconosUtilidad = iconosUtilidadHallazgo;
+  readonly utilidadesHallazgo = ['Agregar Acción', 'Remitir Hallazgo', 'Histórico de Remisiones'];
+  readonly accionesHallazgo = ['Editar Acción', 'Eliminar Acción'];
 
   esFilaGrupo  = (_i: number, fila: FilaTabla) =>  fila.esGrupo;
   esFilaAccion = (_i: number, fila: FilaTabla) => !fila.esGrupo;
+
+  getIconoAccion(accion: string): string {
+    return this.iconosAccion.get(accion) ?? 'help';
+  }
+
+  getIconoUtilidad(utilidad: string): string {
+    return this.iconosUtilidad.get(utilidad) ?? 'help';
+  }
+
+  realizarAccionHallazgo(hallazgoId: string, accion: string): void {
+    const hallazgo = this.getHallazgo(hallazgoId);
+    const acciones: Record<string, () => void> = {
+      'Agregar Acción': () => this.abrirModalRegistrarAccion(hallazgo),
+      'Remitir Hallazgo': () => this.remitirHallazgo(hallazgo),
+      'Histórico de Remisiones': () => this.verHistoricoRemisiones(hallazgo),
+    };
+    acciones[accion]?.();
+  }
+
+  private construirColumnas(): void {
+    this.constructorTabla = hallazgosConstructorTabla.filter(
+      c => c.columnDef !== 'acciones' || !this.soloLectura
+    );
+    this.columnas = this.constructorTabla.map(c => c.columnDef);
+  }
 
   constructor(
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
@@ -100,6 +124,7 @@ export class TablaHallazgosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.construirColumnas();
     this.cargarDatos();
   }
 
@@ -275,6 +300,33 @@ export class TablaHallazgosComponent implements OnInit {
     });
   }
 
+  private remitirHallazgo(hallazgo: HallazgoTabla | undefined): void {
+    if (!hallazgo) return;
+    const dialogRef = this.dialog.open(ModalRemitirHallazgoComponent, {
+      width: '600px',
+      data: { hallazgo, auditoria: this.auditoria },
+    });
+    dialogRef.afterClosed().subscribe((resultado: ResultadoModalRemitirHallazgo | null) => {
+      if (!resultado) return;
+      this.cargarDatos();
+    });
+  }
+
+  private verHistoricoRemisiones(hallazgo: HallazgoTabla | undefined): void {
+    if (!hallazgo) return;
+
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      width: '900px',
+      data: {
+        auditoriaId: hallazgo.hallazgoId,
+        estadoEndpoint: 'hallazgo-remision',
+        auditoriaIdReferencia: 'hallazgo_id',
+        titulo: 'Histórico de remisiones',
+        descripcion: `Histórico de remisiones para el hallazgo ${hallazgo.indice}`,
+      } as HistorialRechazosData,
+    });
+  }
+
   // ─── Persistencia ────────────────────────────────────────────────────────────
 
   private crearAccion(resultado: ResultadoModalAccion, hallazgo: HallazgoTabla): void {
@@ -327,9 +379,6 @@ export class TablaHallazgosComponent implements OnInit {
         },
         error: () => this.alertService.showErrorAlert('Error al actualizar la acción de mejora.'),
       });
-  }
-
-  remitirHallazgo(_hallazgo: HallazgoTabla | undefined): void {
   }
 
   eliminarAccion(hallazgo: HallazgoTabla | undefined, accion: AccionPlan | undefined): void {
