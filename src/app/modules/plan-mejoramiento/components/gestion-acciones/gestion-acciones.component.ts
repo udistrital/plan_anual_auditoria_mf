@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent } from '@angular/material/paginator';
 import { ParametrosUtilsService } from 'src/app/shared/services/parametros.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
+import { Router, ActivatedRoute } from '@angular/router';
 
 export interface FilaAccion {
   noAuditoria: string;
@@ -45,6 +46,8 @@ export class GestionAccionesComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
   ) {}
@@ -167,7 +170,7 @@ export class GestionAccionesComponent implements OnInit {
     // TODO: exportar a Excel/PDF
   }
 
-  verActividades(_fila: FilaAccion): void {
-    // TODO: navegar a la vista de seguimiento de la acción
+  registrarAvances(_fila: FilaAccion): void {
+    this.router.navigate([`registrar-avances/${_fila.accionId}`], { relativeTo: this.route })
   }
 }

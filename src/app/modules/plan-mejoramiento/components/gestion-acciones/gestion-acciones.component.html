@@ -1,6 +1,6 @@
 <plantilla-tarjeta-contenedora
   [title]="'Gestión de Acciones'"
-  [breadcrumb]="'<p>Plan de Mejoramiento / <b>Gestión de Acciones</b></p>'"
+  [breadcrumb]="'<p>Gestión Auditoría / Plan de Mejoramiento / <b>Gestión de Acciones</b></p>'"
   [contenido]="contenidoDePlantilla"
 >
 </plantilla-tarjeta-contenedora>
@@ -180,9 +180,9 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menuAccion="matMenu">
-              <button mat-menu-item (click)="verActividades(row)">
-                <mat-icon color="primary">visibility</mat-icon>
-                <span>Ver actividades</span>
+              <button mat-menu-item (click)="registrarAvances(row)">
+                <mat-icon color="primary">assignment</mat-icon>
+                <span>Registrar Avances</span>
               </button>
             </mat-menu>
           </td>

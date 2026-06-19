@@ -212,6 +212,7 @@ export const environment = {
     PLANES_AUDITORIA: 117,
     ACTA_MODIFICACION: 122,
     INFORMES: 123,
+    PLAN_MEJORAMIENTO: 0, //TODO: subir parametro a prod
   },
 
   TIPO_DOCUMENTO_PARAMETROS: {
@@ -226,6 +227,8 @@ export const environment = {
     INFORME_PRELIMINAR: 5279,
     INFORME_FINAL: 5280,
     ACTA_MODIFICACION_PLAN: 5274,
+    PLAN_MEJORAMIENTO: 0,
+    SOPORTE_AVANCE_ACCIONES: 0, //TODO: subir parametro a prod
   },
 
   INFO_AUDITORIA: {

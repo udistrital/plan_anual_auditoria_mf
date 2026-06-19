@@ -13,6 +13,7 @@ export interface DocumentoReferenciaPdf {
   fecha_creacion: string;
   nombre?: string;
   metadatos?: Record<string, any>;
+  activo: boolean;
 }
 
 export interface ConsultaDocumentosReferenciaOptions {
@@ -40,7 +41,7 @@ export class ReferenciaPdfService {
     nuevo: boolean = false,
     documentoIdActualizar?: string
   ): Observable<any> {
-    const payload = {
+    const payload: DocumentoReferenciaPdf = {
       referencia_tipo: referencia_tipo,
       referencia_id: referencia_id,
       nuxeo_id: nuxeoResponse.Id,
