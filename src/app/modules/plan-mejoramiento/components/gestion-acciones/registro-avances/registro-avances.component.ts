@@ -6,7 +6,7 @@ import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/
 import { formularioDependencias, formularioInformacionAccion, formularioInformacionAuditoria } from './registro-avances.utilidades';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
-import { catchError, forkJoin, of, switchMap } from 'rxjs';
+import { catchError, EMPTY, forkJoin, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -20,6 +20,7 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from 'src/app/core/services/referencia-pdf.service';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { DescargaService } from 'src/app/shared/services/descarga.service';
+import { TercerosService } from 'src/app/shared/services/terceros.service';
 
 interface DocumentoAvances extends DocumentoReferenciaPdf {
   tipoArchivo: string;
@@ -84,7 +85,7 @@ export class RegistroAvancesComponent implements OnInit {
   aprobado = false;
   calificado = false;
 
-  nombreAuditor = 'Juan Pablo Moreno';
+  nombreAuditor = '';
   usuarioId = 0;
   roles: string[] = [];
   fechaAprobacion = new Date();
@@ -112,7 +113,8 @@ export class RegistroAvancesComponent implements OnInit {
     private readonly dialog: MatDialog,
     private readonly referenciaService: ReferenciaPdfService,
     private readonly gestorDocumentalService: NuxeoService,
-    private readonly descargaService: DescargaService
+    private readonly descargaService: DescargaService,
+    private readonly tercerosService: TercerosService
   ) {
     this.formularioCalificacion = this.fb.group({
       criterio: ['', [Validators.required]],
@@ -151,12 +153,13 @@ export class RegistroAvancesComponent implements OnInit {
       calificacion: this.planAuditoriaCrud.get(`calificacion-accion?query=actual=true,accion_mejora_id:${accionId}`),
       documentos: this.referenciaService.consultarDocumentos(accionId, {
         tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.SOPORTE_AVANCE_ACCIONES,
-        referenciaTipo: 'Auditoria',
+        referenciaTipo: 'Accion Mejora',
         limit: 0
       }),
     }).pipe(
       switchMap(({accion, responsables, calificacion, documentos}) => {
         this.accion = accion?.Data[0];
+        this.habilitado = this.accion?.en_revision;
         this.dependenciasApoyo = responsables?.Data || [];
         this.calificacionActual = calificacion?.Data[0] || null;
         if (this.calificacionActual !== null) {
@@ -164,6 +167,7 @@ export class RegistroAvancesComponent implements OnInit {
         }
         this.documentos = documentos as DocumentoAvances[] || [];
         this.hallazgo = this.accion?.hallazgo_id;
+        this.completarDatosDocs();
         return forkJoin({
           auditoria: this.planAuditoriaMid.get(`auditoria/${this.hallazgo?.auditoria_id}`),
           auditores_plan: this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id}`)
@@ -183,6 +187,15 @@ export class RegistroAvancesComponent implements OnInit {
       this.changeDetector.detectChanges();
       this.cargarFormulariosConAuditoria();
     });
+  }
+
+  completarDatosDocs() {
+    for (const doc of this.documentos) {
+      const metadata = doc.metadatos;
+      doc.nombre = metadata?.['nombre'] || 'Sin nombre';
+      doc.rol = metadata?.['rol'] || '';
+      doc.usuario = metadata?.['creado_por'];
+    }
   }
 
   cargarFormularios() {
@@ -253,8 +266,17 @@ export class RegistroAvancesComponent implements OnInit {
       'Habilitar subida de documentos'
     ).then((resp) => {
       if (resp.isConfirmed) {
-        // Se debería ajustar una bandera en la acción
-        this.habilitado = true;
+        this.accion.en_revision = true;
+        const accionPayload = this.accion;
+        accionPayload.plan_mejoramiento_id = accionPayload?.plan_mejoramiento_id?._id;
+        accionPayload.hallazgo_id = accionPayload?.hallazgo_id?._id;
+        this.planAuditoriaCrud.put(`accion-mejora/${this.accionId}`, accionPayload).subscribe({
+          next: () => {
+            this.habilitado = true;
+            this.alertService.showConfirmAlert('Se ha habilitado el cargue de documentos para esta acción');
+          },
+          error: () => console.error('No se pudo actualizar la acción')
+        });
       }
     });
   }
@@ -265,8 +287,17 @@ export class RegistroAvancesComponent implements OnInit {
       'Iniciar revisión de documentos'
     ).then((resp) => {
       if (resp.isConfirmed) {
-        // Se debería ajustar una bandera en la acción
-        this.habilitado = false;
+        this.accion.en_revision = false;
+        const accionPayload = this.accion;
+        accionPayload.plan_mejoramiento_id = accionPayload?.plan_mejoramiento_id?._id;
+        accionPayload.hallazgo_id = accionPayload?.hallazgo_id?._id;
+        this.planAuditoriaCrud.put(`accion-mejora/${this.accionId}`, accionPayload).subscribe({
+          next: () => {
+            this.habilitado = false;
+            this.alertService.showConfirmAlert('Se ha deshabilitado el cargue de documentos para esta acción');
+          },
+          error: () => console.error('No se pudo actualizar la acción')
+        });
       }
     });
   }
@@ -283,6 +314,11 @@ export class RegistroAvancesComponent implements OnInit {
     });
     ref.afterClosed().subscribe((data) => {
       if (data) {
+        const doc = data?.documento as DocumentoAvances;
+        this.tercerosService.getTerceroById(this.usuarioId).subscribe(t => {
+          doc.usuario = t?.NombreCompleto;
+        })
+        doc.rol = this.roles.filter(r => r in environment.ROL)[0]
         this.documentos.push(data?.documento)
       }
     })
@@ -311,6 +347,11 @@ export class RegistroAvancesComponent implements OnInit {
       descripcion: "Soporte de avance de acciones del plan de mejoramiento",
       file: archivo.archivo,
     }
+    const metadata = {
+      creado_por: archivo.usuario,
+      nombre: archivo?.nombre,
+      rol: archivo.rol,
+    }
     this.alertService.showConfirmAlert(
       '¿Está seguro de guardar este documento? Si requiere modificarlo debe notificar al auditor',
       'Subir Documento'
@@ -322,24 +363,25 @@ export class RegistroAvancesComponent implements OnInit {
             const archivoGuardado = nuxeoResp[0]?.res;
             return this.referenciaService.guardarReferencia(
               archivoGuardado,
-              "Auditoria",
+              "Accion Mejora",
               this.accionId,
               environment.TIPO_DOCUMENTO_PARAMETROS.SOPORTE_AVANCE_ACCIONES,
-              undefined,
+              metadata,
               true,
             )
           }),
           switchMap((referencia: any) => {
             this.documentos[index] = referencia?.Data as DocumentoAvances;
-            return of(null)
+            this.completarDatosDocs();
+            return EMPTY;
           }),
           catchError((err) => {
-            console.error(err)
-            return of(null)
+            console.error(err);
+            return EMPTY;
           })
         ).subscribe({
           next: () => this.alertService.showSuccessAlert('El archivo ha sido guardado con éxito.'),
-          error: () => this.alertService.showErrorAlert('No se ha podido guardar el documento.')        
+          error: () => this.alertService.showErrorAlert('No se ha podido guardar el documento.'),
         });
       }
     });
