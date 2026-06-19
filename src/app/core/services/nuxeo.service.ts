@@ -47,6 +47,10 @@ export class NuxeoService {
     }
 
     return forkJoin(files.map((file) => from(this.obtenerArchivoEnBase64(file)))).pipe(
+      catchError((error) => {
+        console.error("Error al convertir archivos a base64:", error);
+        throw error;
+      }),
       mergeMap((fileDatas: string[]) => {
         const sendFileData = files.map((file, i) => ({
           IdTipoDocumento: file.IdTipoDocumento,
@@ -64,6 +68,10 @@ export class NuxeoService {
                 return response.res.map((item: any) => ({ ...response, res: item }));
               }
               return [response];
+            }),
+            catchError((error) => {
+              console.error("Error al guardar archivos:", error);
+              throw error;
             })
           );
       })
