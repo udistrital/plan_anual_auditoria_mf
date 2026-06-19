@@ -23,6 +23,15 @@
             <td mat-cell *matCellDef="let fila">
               @if (columna.columnDef === 'accionPlanteada' || columna.columnDef === 'nombreIndicador' || columna.columnDef === 'formulaIndicador') {
                 <span class="celda-justificada celda-truncada" [title]="columna.cell(fila) ?? ''">{{ columna.cell(fila) }}</span>
+              } @else if (columna.columnDef === 'estado') {
+                @if (fila.accion) {
+                  <span class="estado-chip"
+                    [class.estado-pendiente]="fila.accion.estadoId === ESTADO_ACCION.PENDIENTE_REVISION"
+                    [class.estado-aprobada]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
+                    [class.estado-rechazada]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA">
+                    {{ fila.accion.estadoNombre }}
+                  </span>
+                }
               } @else if (columna.columnDef === 'acciones') {
                 @if (!soloLectura && fila.accion) {
                   <button mat-icon-button color="primary" [matMenuTriggerFor]="menuAccion">
@@ -36,6 +45,9 @@
                         {{ accion }}
                       </button>
                     }
+                    <button mat-menu-item (click)="verHistorialAccion(fila.accion)">
+                      <mat-icon>history</mat-icon> Ver observaciones
+                    </button>
                   </mat-menu>
                 }
               } @else {
@@ -44,6 +56,33 @@
             </td>
           </ng-container>
         }
+
+        <!-- Revisión del auditor (fuera del loop: no está en constructorTabla) -->
+        <ng-container matColumnDef="revision">
+          <th mat-header-cell *matHeaderCellDef><b>Revisión</b></th>
+          <td mat-cell *matCellDef="let fila">
+            @if (fila.accion) {
+              <button mat-icon-button color="primary" [matMenuTriggerFor]="menuRevision">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menuRevision="matMenu">
+                <button mat-menu-item
+                  [disabled]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
+                  (click)="aprobarAccion(fila.accion)">
+                  <mat-icon color="primary">check_circle</mat-icon> Aprobar
+                </button>
+                <button mat-menu-item
+                  [disabled]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA"
+                  (click)="rechazarAccion(fila.accion)">
+                  <mat-icon color="warn">cancel</mat-icon> Rechazar
+                </button>
+                <button mat-menu-item (click)="verHistorialAccion(fila.accion)">
+                  <mat-icon>history</mat-icon> Ver observaciones
+                </button>
+              </mat-menu>
+            }
+          </td>
+        </ng-container>
 
         <!-- Columna de GRUPO (ocupa el ancho completo) -->
         <ng-container matColumnDef="grupo">
