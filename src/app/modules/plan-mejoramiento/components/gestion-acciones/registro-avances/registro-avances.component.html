@@ -1,6 +1,6 @@
 <plantilla-tarjeta-contenedora
   [subtitle]="auditoria?.vigencia_nombre || ''"
-  [subtitleChild]="auditoria?.titulo + (auditoria?.subtitulo ? ' - ' + auditoria?.subtitulo : '') || ''"
+  [subtitleChild]="(auditoria?.titulo || '') + (auditoria?.subtitulo ? ' - ' + auditoria?.subtitulo : '')"
   [breadcrumb]="'<p>Gestión Auditoría / Plan de Mejoramiento / Gestión de acciones / <b>Registrar Avances</b></p>'"
   [contenido]="contenidoDePlantilla"
   (regresar)="regresar()"
@@ -119,7 +119,7 @@
                 <mat-expansion-panel hideToggle disabled>
                   <mat-expansion-panel-header>
                     <mat-panel-title>
-                      {{ auditor }}
+                      {{ auditor.auditor_nombre }}
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                 </mat-expansion-panel>
@@ -236,63 +236,162 @@
       ><mat-icon>{{ habilitado ? 'upload' : 'lock' }}</mat-icon>
         <strong>{{ habilitado ? 'Cargue habilitado' : 'Cargue Bloqueado'}}</strong>
       </button>
-      <button
-        mat-stroked-button
-        class="mx-2"
-        (click)="habilitado = !habilitado"
-        color="primary"
-      ><mat-icon>{{ habilitado ? 'lock' : 'lock_open' }}</mat-icon>
-        {{ habilitado ? 'Iniciar Revisión' : 'Habilitar cargue' }}
-      </button>
+      @if (esAuditorAsignado()) {
+        @if (habilitado) {
+          <button
+            mat-stroked-button
+            class="mx-2"
+            (click)="deshabilitarCargue()"
+            color="primary"
+          ><mat-icon>lock</mat-icon>
+            Iniciar Revisión
+          </button>
+  
+        } @else {
+          <button
+            mat-stroked-button
+            class="mx-2"
+            (click)="habilitarCargue()"
+            color="primary"
+          ><mat-icon>lock_open</mat-icon>
+            Habilitar cargue
+          </button>
+        }
+      }
     </div>
   </div>
   <br/>
   <div class="d-flex justify-content-end">
-    @if(habilitado) {
-      <p class="text-habilitado">
-        <mat-icon>check_circle</mat-icon>
-        El cargue de evidencias ha sido <strong>habilitado</strong> nuevamente. El auditado puede subir documentos
+    @if(habilitado && !aprobado) {
+      <p class="text-habilitado d-flex align-items-center">
+        <mat-icon class="mx-2">check_circle</mat-icon>
+        <span>El cargue de evidencias ha sido <strong>habilitado</strong> nuevamente. El auditado puede subir documentos</span>
       </p>
     }
     @else {
-      <p class="text-deshabilitado">
-        <mat-icon>warning</mat-icon>
-        El cargue de evidencias ha sido <strong>bloqueado</strong>. El auditado no puede subir nuevos documentos hasta que el auditor habilite el cargue nuevamente.
+      <p class="text-deshabilitado d-flex align-items-center">
+        <mat-icon class="mx-2">warning</mat-icon>
+        <span>El cargue de evidencias ha sido <strong>bloqueado</strong>. El auditado no puede subir nuevos documentos hasta que el auditor habilite el cargue nuevamente.</span>
       </p>
     }
   </div>
   <mat-divider class="my-4"></mat-divider>
   <div class="d-flex justify-content-between align-items-center">
     <div class="d-flex justify-content-start align-items-center">
-      <mat-icon>attach_file</mat-icon>
+      <mat-icon class="mx-2" color="primary">attach_file</mat-icon>
       <h2>Documentos anexos</h2>
     </div>
-    <div class="d-flex justify-content-end align-items-center">
-      <button
-        mat-stroked-button
-        color="primary"
-        (click)="agregarDocumento()"
-      >
-        <mat-icon>add_circle</mat-icon>Añadir Documento
-      </button>
-    </div>
+    @if (habilitado) {
+      <div class="d-flex justify-content-end align-items-center">
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="agregarDocumento()"
+        >
+          <mat-icon>add_circle</mat-icon>Añadir Documento
+        </button>
+      </div>
+    }
   </div>
-  
+  <mat-divider class="my-4"></mat-divider>
+  @for (documento of documentos; track documento; let i = $index) {
+    <mat-card class="mb-2">
+      <mat-card-header>
+        <mat-card-title><strong>{{ documento.nombre }}</strong></mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="d-flex flex-row justify-content-between">
+        <div class="d-flex flex-row">
+          <mat-icon class="mx-2" color="primary">{{ documento.tipoArchivo }}</mat-icon>
+          <div class="mx-2">
+            <div>
+              <span>Cargado por : {{ documento.usuario }} </span>
+              <span>Rol: {{ documento.rol }} </span>
+            </div>
+            <div><span>{{ documento.fecha_creacion | date }}</span></div>
+          </div>
+        </div>
+        <div class="d-flex flex-row justify-content-around align-items-center">
+          <button
+            class="mx-2"
+            mat-stroked-button
+            (click)="verDocumento(i)"
+          ><mat-icon color="primary">picture_as_pdf</mat-icon>
+          Ver Documento</button>
 
+          @if(documento.nuxeo_enlace) {
+            <button
+              class="mx-2"
+              mat-stroked-button
+              (click)="descargarDocumento(i)"
+            ><mat-icon color="primary">download</mat-icon>
+            Descargar</button>
+          } @else {
+            <button
+              class="mx-2"
+              mat-stroked-button
+              (click)="subirDocumento(i)"
+            ><mat-icon>check_circle</mat-icon>
+            Cargar Documento</button>
+          }
 
+          @if(esAuditorAsignado() || !documento.nuxeo_enlace) {
+            <button
+              class="mx-2"
+              mat-icon-button
+              (click)="eliminarDocumento(i)"
+            ><mat-icon color="primary">delete</mat-icon>
+            </button>
+          }
+        
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+  <mat-divider class="my-4"></mat-divider>
+  <div class="d-flex {{ aprobado ? 'justify-content-between' : 'justify-content-end' }} align-items-center mt-4">
+    <div class="d-flex justify-content-end align-items-center">
+      @if (aprobado) {
+        <mat-icon class="text-habilitado mx-2">check_circle</mat-icon>
+        <div>
+          <p>
+            <strong>{{ "Aprobado por: " + nombreAuditor }}</strong>
+          </p>
+          <p>{{"Aprobación registrada el " + fechaAprobacion.toLocaleDateString() + ". Jefe de Dependencia"}}</p>
+        </div>
+      }
+    </div>
+    @if(esAuditorAsignado()) {
+      <button
+        class="mx-2"
+        matButton="filled"
+        color="primary"
+        (click)="aprobarAvances()"
+      >Aprobar Avances</button>
+    }
+  </div>
+  <div class="d-flex justify-content-center">
+    <button
+      mat-stroked-button
+      (click)="abrirForo()"
+    ><mat-icon>chat_bubble</mat-icon>
+      Comentar foro
+    </button>
+  </div>
 </ng-template>
 
 <!-- Contenido del paso 4: Calificación -->
 <ng-template #contenidoCalificacion>
   <div class="d-flex justify-content-between align-items-center">
     <p>Diligenciar para finalizar la acción</p>
-    <button
-      mat-stroked-button
-      color="primary"
-      (click)="agregarCalificacion()"
-    >
-      <mat-icon>add</mat-icon> Nueva calificación
-    </button>
+    @if (esAuditorAsignado() && calificacionActual) {
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="agregarCalificacion()"
+      >
+        <mat-icon>add</mat-icon> Nueva calificación
+      </button>
+    }
   </div>
 
   <mat-divider class="my-4"></mat-divider>
@@ -339,29 +438,28 @@
       placeholder="Observaciones"
     ></app-editor-enriquecido>
   </form>
-  <div class="d-flex justify-content-end align-items-center mt-4">
-    <button
-      class="mx-2"
-      matButton="filled"
-      color="primary"
-      (click)="guardarCalificacion()"
-    >
-      <mat-icon>star</mat-icon>  
-      Calificar
-    </button>
-  </div>
-
-  <mat-divider class="my-4"></mat-divider>
-  
-  <div class="d-flex justify-content-end align-items-center">
-    @if (calificado) {
-      <mat-icon class="text-habilitado mx-2">check_circle</mat-icon>
-      <div>
-        <p>
-          <strong>{{ "Calificado por: " + nombreAuditor }}</strong>
-        </p>
-        <p>{{"Calificación registrada el " + fechaCalificacion.toLocaleDateString() + ". Auditor Control Interno"}}</p>
-      </div>
+  <div class="d-flex {{ calificado ? 'justify-content-between' : 'justify-content-end' }} align-items-center mt-4">
+    <div class="d-flex justify-content-end align-items-center">
+      @if (calificado) {
+        <mat-icon class="text-habilitado mx-2">check_circle</mat-icon>
+        <div>
+          <p>
+            <strong>{{ "Calificado por: " + nombreAuditor }}</strong>
+          </p>
+          <p>{{"Calificación registrada el " + calificacionActual?.fecha_calificacion?.toLocaleDateString() + ". Auditor Control Interno"}}</p>
+        </div>
+      }
+    </div>
+    @if (formularioCalificacion.enabled) {
+      <button
+        class="mx-2"
+        matButton="filled"
+        color="primary"
+        (click)="guardarCalificacion()"
+      >
+        <mat-icon>star</mat-icon>  
+        Calificar
+      </button>
     }
   </div>
 
