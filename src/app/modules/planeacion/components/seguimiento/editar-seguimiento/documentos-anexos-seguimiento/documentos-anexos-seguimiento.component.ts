@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angu
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
-import { Subscription } from "rxjs";
+import { catchError, firstValueFrom, map, of, Subscription } from "rxjs";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -12,6 +12,14 @@ import { ModalVerDocumentoComponent } from "src/app/shared/elements/components/d
 import { AlertService } from "src/app/shared/services/alert.service";
 import { environment } from "src/environments/environment";
 import { ModalVisualizarRecargarCompromisoEticoComponent } from "../../../auditorias-internas/editar-auditoria/documentos-anexos-auditoria/modal-visualizar-recargar-compromiso-etico/modal-visualizar-recargar-compromiso-etico.component";
+
+interface DocumentoAdjunto {
+  _id: string;
+  tipo_id: number;
+  nuxeo_enlace?: string;
+  nombre?: string;
+  metadatos?: Record<string, any>;
+}
 
 @Component({
     selector: "app-documentos-anexos-seguimiento",
@@ -26,6 +34,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
   auditoriaId: string = "";
   formularioDocumentos: FormGroup;
   idCompromisoEtico: any = null;
+  registrosDocExistentes: DocumentoAdjunto[] = [];
   base64CompromisoEtico: any = null;
   documentosExistentes: { [tipoId: number]: string | null } = {};
   private routeSubscription: Subscription | null = null;
@@ -79,6 +88,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
     this.idCompromisoEtico = null;
     this.base64CompromisoEtico = null;
     this.documentosExistentes = {};
+    this.registrosDocExistentes = [];
   }
 
   private async cargarEstadoDocumentos(): Promise<void> {
@@ -100,6 +110,7 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
         .subscribe(
           (res) => {
             if (res?.Data?.length > 0) {
+              this.registrosDocExistentes = res.Data;
               resolve(res.Data[0].nuxeo_enlace);
             } else {
               resolve(null);
@@ -259,6 +270,10 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
     });
   }
 
+  private encontrarRegistroDocExistente(tipo_id: number): DocumentoAdjunto | undefined {
+    return this.registrosDocExistentes.find(doc => doc.tipo_id === tipo_id);
+  }
+
   verDocumento(documentoBase64: any, infoDocumento: any) {
     const dialogRef = this.dialog.open(ModalVerDocumentoComponent, {
       width: "1000px",
@@ -269,6 +284,26 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
     if (!this.soloLectura) {
       const modalInstance = dialogRef.componentInstance;
       modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+
+      modalInstance.botonRegenerar = { icono: "refresh", texto: "Aplicar cambios" };
+      modalInstance.onRegenerarIndividual = async (indice: number): Promise<string> => {
+        return await firstValueFrom(
+          this.PlanAnualAuditoriaMid
+            .get(`plantilla/${infoDocumento.plantilla}/${this.auditoriaId}`)
+            .pipe(
+              map((res) => {
+                documentoBase64 = res.Data;
+                this.alertService.showSuccessAlert(`Documento generado exitosamente. No olvide guardar para actualizar el documento.`);
+                return documentoBase64;
+              }),
+              catchError((error) => {
+                console.error("Error al generar el documento", error);
+                this.alertService.showErrorAlert("No fue posible generar el documento.");
+                return of(documentoBase64);
+              })
+            )
+        );
+      }
     }
 
     dialogRef.afterClosed().subscribe((res) => {
@@ -304,7 +339,8 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
             documentoRefNuxeo,
             "Auditoria",
             this.auditoriaId,
-            infoDocumento.parametro
+            infoDocumento.parametro,
+            this.encontrarRegistroDocExistente(infoDocumento.parametro)?._id
           );
           this.documentosExistentes[infoDocumento.parametro] = documentoRefNuxeo?.res?.Enlace ?? null;
         },
@@ -319,7 +355,8 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
     nuxeoResponse: any,
     referencia_tipo: string,
     referencia_id: string,
-    tipo_id: number
+    tipo_id: number,
+    documentoIdActualizar?: string,
   ): void {
     if (nuxeoResponse.res.Enlace) {
       this.referenciaPdfService
@@ -327,10 +364,20 @@ export class DocumentosAnexosSeguimientoComponent implements OnInit, OnDestroy {
           nuxeoResponse.res,
           referencia_tipo,
           referencia_id,
-          tipo_id
+          tipo_id,
+          {},
+          documentoIdActualizar ? true : false,
+          documentoIdActualizar
         )
         .subscribe({
           next: (response) => {
+            const registroDocExistente = this.encontrarRegistroDocExistente(tipo_id);
+
+            if (!registroDocExistente)
+              this.registrosDocExistentes.push(response);
+            else
+              registroDocExistente.nuxeo_enlace = response.nuxeo_enlace;
+
             this.alertService.showSuccessAlert("Archivo subido exitosamente.");
           },
           error: (error) => {

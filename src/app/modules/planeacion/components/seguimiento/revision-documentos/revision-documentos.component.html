@@ -76,15 +76,29 @@
                     Rechazar {{ tipoEvaluacion }}
                   </button>
                 }
-                <button
-                  class="mx-2 width-100-md mt-md"
-                  mat-raised-button
-                  color="primary"
-                  (click)="preguntarAprobacionAuditoria()"
-                  >
-                  <mat-icon>fact_check</mat-icon>
-                  {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
-                </button>
+                @if (!puedeCargarCartaFirmada()) {
+                  <button
+                    class="mx-2 width-100-md mt-md"
+                    mat-raised-button
+                    color="primary"
+                    (click)="preguntarAprobacionAuditoria()"
+                    >
+                    <mat-icon>fact_check</mat-icon>
+                    {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
+                  </button>
+                }
+                @if (puedeCargarCartaFirmada()) {
+                  <button
+                    mat-flat-button
+                    color="accent"
+                    class="mx-2 width-100-md mt-md"
+                    (click)="abrirModalCargueCartaFirmada()"
+                    [matTooltip]="rolesAprobacion[role]?.tooltipFirmar"
+                    >
+                    <mat-icon>upload_file</mat-icon>
+                    {{ rolesAprobacion[role]?.botonFirmar ?? '' }}
+                  </button>
+                }
               </div>
             </div>
           }

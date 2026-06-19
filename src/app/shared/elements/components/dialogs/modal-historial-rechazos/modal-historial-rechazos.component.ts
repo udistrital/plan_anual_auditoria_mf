@@ -6,8 +6,8 @@ export interface HistorialRechazosData {
   auditoriaId: string;
   estadoEndpoint: string;
   auditoriaIdReferencia: string;
-  estadoRevisionIds: number[];
-  estadoRechazoIds: number[];
+  estadoRevisionIds?: number[];
+  estadoRechazoIds?: number[];
   titulo?: string;
   descripcion?: string;
 }
@@ -37,28 +37,35 @@ export class ModalHistorialRechazosComponent implements OnInit {
   }
 
   cargarRechazos() {
-    const estadoQuery = [
-          ...this.data.estadoRevisionIds,
-          ...this.data.estadoRechazoIds
-        ].join("|");
+    const queryParts = [`${this.data.auditoriaIdReferencia}:${this.data.auditoriaId}`];
 
-    // Construyendo url para solicitud
-    let url = `${this.data.estadoEndpoint}`;
-    // Filtros para obtener tanto rechazos como revisiones del jefe activos
-    url += `?query=${this.data.auditoriaIdReferencia}:${this.data.auditoriaId}` +
-        `,estado_id__in:${estadoQuery}` +
-        ",activo:true";
-    // Obtener todos en una sola página, ordenados por fecha de ejecución descendente
-    url += "&limit=0&sortby=fecha_ejecucion_estado&order=desc";
+    const estados = [
+      ...(this.data.estadoRevisionIds ?? []),
+      ...(this.data.estadoRechazoIds ?? []),
+    ];
+
+    if (estados.length > 0) {
+      queryParts.push(`estado_id__in:${estados.join("|")}`);
+    }
+
+    queryParts.push("activo:true");
+
+    const url = `${this.data.estadoEndpoint}?query=${queryParts.join(",")}` +
+      "&limit=0&sortby=fecha_ejecucion_estado&order=desc";
 
     this.planAuditoriaMid.get(url).subscribe({
       next: (res) => {
         const data = res?.Data ?? [];
-        // Sólo mostrar rechazos o revisiones que tengan observación no vacía
-        this.observaciones = data.filter((item: any) =>
-          this.data.estadoRechazoIds.includes(item.estado_id)
-          || item.observacion && item.observacion.trim() !== ""
-        )
+
+        if (estados.length > 0) {
+          this.observaciones = data.filter((item: any) =>
+            this.data.estadoRechazoIds?.includes(item.estado_id)
+            || item.observacion && item.observacion.trim() !== ""
+          );
+        } else {
+          this.observaciones = data;
+        }
+
         this.cargando = false;
       },
       error: (err) => {
@@ -69,6 +76,7 @@ export class ModalHistorialRechazosComponent implements OnInit {
   }
 
   isRechazo(observacion: any): boolean {
-    return this.data.estadoRechazoIds.includes(observacion.estado.id);
+    const estadoId = observacion.estado?.id ?? observacion.estado_id;
+    return Boolean(this.data.estadoRechazoIds?.includes(estadoId));
   }
 }

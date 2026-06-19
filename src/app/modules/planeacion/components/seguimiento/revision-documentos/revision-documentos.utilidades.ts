@@ -27,6 +27,8 @@ const configJefe = {
     informe: "El informe de auditoría fue enviado al auditado (a) responsable",
   },
   botonAprobacion: "Aprobar y enviar",
+  botonFirmar: "Cargar Oficio Firmado",
+  tooltipFirmar: "Cargar Oficio Anuncio Solicitud de Información firmado por el Jefe de la Oficina de Control Interno"
 };
 
 export const rolesAprobacion: { [key: string]: any } = {

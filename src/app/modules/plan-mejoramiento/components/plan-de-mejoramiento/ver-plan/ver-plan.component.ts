@@ -12,6 +12,7 @@ import { ModalRechazoPlanComponent } from '../ tabla-plan-mejoramiento/modal-rec
 @Component({
   selector: 'app-ver-plan',
   templateUrl: './ver-plan.component.html',
+  styleUrls: ['./ver-plan.component.css'],
   standalone: false,
 })
 export class VerPlanComponent implements OnInit {
@@ -19,6 +20,7 @@ export class VerPlanComponent implements OnInit {
   planMejoramientoId!: string;
   auditoria: any = null;
   cargando = true;
+  estadoPlanId: number | null = null;
 
   planEstadoId: number | null = null;
   /** estado_id de cada acción de mejora del plan (para validar la decisión) */
@@ -76,6 +78,10 @@ export class VerPlanComponent implements OnInit {
   }
 
   mostrarAccionesRevision(): boolean {
+    // Aprobar/Rechazar solo cuando el plan está pendiente de revisión del auditor.
+    if (this.estadoPlanId !== environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR) {
+      return false;
+    }
     return this.rolService.permisoCreacion([
       environment.ROL.JEFE,
       environment.ROL.AUDITOR_EXPERTO,
@@ -125,6 +131,7 @@ export class VerPlanComponent implements OnInit {
           if (plan) {
             this.planMejoramientoId = plan._id;
             this.planEstadoId = plan.estado_id ?? null;
+            this.estadoPlanId = plan.estado_id ?? null;
             this.fuenteNombre = this.fuentes[plan.fuente] ?? '';
             this.cargarEstadosAcciones();
           }
