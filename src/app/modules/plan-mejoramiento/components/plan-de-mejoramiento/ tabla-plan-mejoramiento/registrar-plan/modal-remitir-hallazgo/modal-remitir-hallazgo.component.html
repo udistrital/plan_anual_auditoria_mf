@@ -1,0 +1,81 @@
+<plantilla-modal
+  [icono]="'send'"
+  [titulo]="'Remitir Hallazgo'"
+  [descripcion]="data.auditoria?.titulo + ' - Hallazgo No. ' + data.hallazgo.indice + ' - Vigencia ' + (data.auditoria?.vigencia_nombre ?? '')"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <!-- Info del hallazgo -->
+  <div class="info-hallazgo mb-4">
+    <div class="info-row">
+      <mat-icon class="info-icon">description</mat-icon>
+      <span class="info-label">Hallazgo:</span>
+      <span class="info-valor">{{ data.hallazgo.descripcion }}</span>
+    </div>
+    <div class="info-row mt-2">
+      <mat-icon class="info-icon">apartment</mat-icon>
+      <span class="info-label">Dependencia actual:</span>
+      <span class="info-valor">{{ dependenciaActual }}</span>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="row">
+    <!-- Dependencia destino -->
+    <div class="col-12 mb-3">
+      <mat-form-field appearance="outline" class="w-100 col-12">
+        <mat-label>Dependencia destino <span class="text-danger">*</span></mat-label>
+        @if (cargandoDependencias) {
+          <mat-spinner matPrefix diameter="18" class="me-2"></mat-spinner>
+        } @else {
+          <mat-icon matPrefix color="primary">business</mat-icon>
+        }
+        <mat-select formControlName="dependenciaDestino">
+          @for (dep of dependencias; track dep.id) {
+            <mat-option [value]="dep">{{ dep.nombre }}</mat-option>
+          }
+        </mat-select>
+        @if (form.get('dependenciaDestino')?.hasError('required') && form.get('dependenciaDestino')?.touched) {
+          <mat-error>Campo requerido</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Observación / justificación -->
+    <div class="col-12 mb-3">
+      <mat-form-field appearance="outline" class="w-100 col-12">
+        <mat-label>Observación / justificación <span class="text-danger">*</span></mat-label>
+        <mat-icon matPrefix color="warn">note</mat-icon>
+        <textarea matInput formControlName="observacion" rows="4"
+          placeholder="Observaciones"></textarea>
+        @if (form.get('observacion')?.hasError('required') && form.get('observacion')?.touched) {
+          <mat-error>Campo requerido</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Aviso -->
+    <div class="col-12">
+      <div class="aviso-remision d-flex align-items-start gap-2 p-3">
+        <mat-icon class="aviso-icon">warning_amber</mat-icon>
+        <p class="mb-0">
+          Una vez remitido, el hallazgo quedará registrado en el historial y la
+          dependencia destino recibirá una notificación. Esta acción no se puede
+          deshacer.
+        </p>
+      </div>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="d-flex justify-content-end gap-2 mb-3">
+    <button mat-stroked-button color="warn" [mat-dialog-close]>
+      <mat-icon>close</mat-icon> Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="remitir()">
+      <mat-icon>send</mat-icon> Remitir hallazgo
+    </button>
+  </div>
+</ng-template>

@@ -11,6 +11,7 @@ import { ModalAsignacionAuditoresComponent } from './components/plan-de-mejorami
 import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/registrar-plan.component';
 import { TablaHallazgosComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/tabla-hallazgos/tabla-hallazgos.component';
 import { ModalRegistrarAccionComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/modal-registrar-accion/modal-registrar-accion.component';
+import { ModalRemitirHallazgoComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/modal-remitir-hallazgo/modal-remitir-hallazgo.component';
 import { ModalRechazoPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
@@ -25,6 +26,7 @@ import { RegistroAvancesComponent } from './components/gestion-acciones/registro
     RegistrarPlanComponent,
     TablaHallazgosComponent,
     ModalRegistrarAccionComponent,
+    ModalRemitirHallazgoComponent,
     RegistroAvancesComponent,
     ModalRechazoPlanComponent,
     VerPlanComponent,

@@ -27,7 +27,6 @@ export class RegistrarPlanComponent implements OnInit {
   planMejoramientoId: string | null = null;
   cargando = true;
   enviando = false;
-  soloLectura = false;
   fuenteSeleccionada: number | null = null;
   fuentes: Parametro[] = [];
 

@@ -81,6 +81,20 @@ table.mat-table td {
   text-overflow: ellipsis;
 }
 
+/* Botón agregar acción compacto - asegurar botón cuadrado para ripple */
+.fila-grupo-row button {
+  height: 50px;
+  width: 50px;
+  min-width: 50px;
+  padding: 0;
+  line-height: 50px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
 /* Alinea verticalmente el botón de 3 puntos en la fila de grupo */
 .fila-grupo-row td {
   vertical-align: middle;
