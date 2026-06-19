@@ -93,13 +93,12 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     } else if (
       this.rolService.tieneRol(environment.ROL.AUDITOR) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
+      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)
     ) {
       this.tipoConsulta = "auditor";
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     } else {
-      // JEFE y otros roles usan endpoint general; igual necesitan usuarioId para registrar estados
+      // JEFE, AUDITOR_EXPERTO y otros roles usan endpoint general
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     }
   }

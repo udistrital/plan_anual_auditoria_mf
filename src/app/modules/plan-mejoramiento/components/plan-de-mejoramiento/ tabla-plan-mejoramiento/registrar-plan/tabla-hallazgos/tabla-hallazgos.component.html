@@ -115,10 +115,21 @@
                 <b>{{ fila.hallazgoIndice }}</b>&nbsp;&nbsp;{{ fila.hallazgoDescripcion }}
               </span>
               @if (!soloLectura) {
-                <button mat-stroked-button color="primary"
-                  (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId))">
-                  <mat-icon>add</mat-icon> Agregar Acción
+                <button mat-icon-button color="primary" [matMenuTriggerFor]="menuHallazgo">
+                  <mat-icon>more_vert</mat-icon>
                 </button>
+                <mat-menu #menuHallazgo="matMenu">
+                  <button mat-menu-item
+                    (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId))">
+                    <mat-icon color="primary">add_circle</mat-icon>
+                    <span>Agregar acción</span>
+                  </button>
+                  <button mat-menu-item
+                    (click)="remitirHallazgo(getHallazgo(fila.hallazgoId))">
+                    <mat-icon color="primary">send</mat-icon>
+                    <span>Remitir hallazgo</span>
+                  </button>
+                </mat-menu>
               }
             </div>
           </td>

@@ -81,9 +81,7 @@ table.mat-table td {
   text-overflow: ellipsis;
 }
 
-/* Botón agregar acción compacto */
-.fila-grupo-row button {
-  height: 30px;
-  line-height: 30px;
-  font-size: 12px;
+/* Alinea verticalmente el botón de 3 puntos en la fila de grupo */
+.fila-grupo-row td {
+  vertical-align: middle;
 }
