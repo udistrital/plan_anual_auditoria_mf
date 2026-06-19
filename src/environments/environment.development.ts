@@ -174,6 +174,12 @@ export const environment = {
     },
   },
 
+  ACCION_MEJORA_ESTADOS: {
+    PENDIENTE_REVISION: 7160,
+    APROBADA: 7161,
+    RECHAZADA: 7163,
+  },
+
   MESES: {
     TIPO_PARAMETRO_ID: 139,
   },
@@ -204,6 +210,7 @@ export const environment = {
     PLANTILLAS: 182,
     PLANES_AUDITORIA: 178,
     ACTA_MODIFICACION: 194,
+    INFORMES: 195,
     PLAN_MEJORAMIENTO: 201
   },
 

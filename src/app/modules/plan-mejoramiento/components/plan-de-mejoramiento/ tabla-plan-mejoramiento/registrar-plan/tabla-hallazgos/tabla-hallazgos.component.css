@@ -44,7 +44,23 @@ table.mat-table td {
 .mat-column-responsable     { width: 120px; }
 .mat-column-fechaInicio     { width: 80px;  }
 .mat-column-fechaFin        { width: 80px;  }
+.mat-column-estado          { width: 110px; }
+.mat-column-revision        { width: 45px;  }
 .mat-column-acciones        { width: 45px;  }
+
+/* Chip de estado de la acción */
+.estado-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.estado-pendiente { background-color: #fff8e1; color: #8d6e00; border-color: #ffe082; }
+.estado-aprobada  { background-color: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; }
+.estado-rechazada { background-color: #ffebee; color: #b71c1c; border-color: #ef9a9a; }
 
 /* Fila de cabecera de hallazgo */
 .fila-grupo-row td {

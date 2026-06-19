@@ -25,10 +25,10 @@ import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/d
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 
 @Component({
-    selector: 'app-editar-informe',
-    templateUrl: './editar-informe.component.html',
-    styleUrls: ['./editar-informe.component.css'],
-    standalone: false
+  selector: 'app-editar-informe',
+  templateUrl: './editar-informe.component.html',
+  styleUrls: ['./editar-informe.component.css'],
+  standalone: false
 })
 
 export class EditarInformeComponent implements OnInit, AfterViewInit {
@@ -707,7 +707,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   guardarDocumento(documentoBase64: any, infoDocumento: any) {
     if (documentoBase64 !== "") {
       const payload = {
-        IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+        IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
         nombre: infoDocumento.nombre,
         descripcion:
           "Documento pdf (" +
