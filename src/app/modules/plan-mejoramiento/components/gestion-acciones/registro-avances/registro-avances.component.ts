@@ -16,6 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CargarArchivoComponent } from 'src/app/shared/elements/components/cargar-archivo/cargar-archivo.component';
 import { environment } from 'src/environments/environment';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
 import { RolService } from 'src/app/core/services/rol.service';
 import { ReferenciaPdfService, DocumentoReferenciaPdf } from 'src/app/core/services/referencia-pdf.service';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
@@ -435,7 +436,18 @@ export class RegistroAvancesComponent implements OnInit {
   }
 
   abrirForo() {
-
+    console.log(this.accion);
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      width: '1000px',
+      data: {
+        auditoriaId: this.accionId,           // directo de la URL, se agrega momentaneamente como ejemplo
+        estadoEndpoint: 'calificacion-accion', // Se debe ajustar a la ruta del endpoint de calificaciones
+        auditoriaIdReferencia: 'accion_mejora_id', // Se debe ajustar a la referencia de la acción de mejora
+        titulo: 'Foro de discusión',
+        descripcion: `Historial del foro`,
+      } as HistorialRechazosData,
+      autoFocus: false,
+    });
   }
 
 }
