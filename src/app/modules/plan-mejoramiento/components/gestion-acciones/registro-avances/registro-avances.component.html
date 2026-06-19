@@ -15,7 +15,7 @@
         #stepper
         labelPosition="end"
         color="primary"
-        [orientation]="'horizontal'"
+        [orientation]="orientation"
       >
         <ng-template matStepperIcon="number">
           <mat-icon>lens</mat-icon>
@@ -301,7 +301,7 @@
       </mat-card-header>
       <mat-card-content class="d-flex flex-row justify-content-between">
         <div class="d-flex flex-row">
-          <mat-icon class="mx-2" color="primary">{{ documento.tipoArchivo }}</mat-icon>
+          <mat-icon class="mx-2" color="primary">{{ documento.nuxeo_enlace ? 'file_present' : 'draft' }}</mat-icon>
           <div class="mx-2">
             <div>
               <span>Cargado por : {{ documento.usuario }} </span>
