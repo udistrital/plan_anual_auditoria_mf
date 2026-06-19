@@ -30,7 +30,6 @@ export class RegistrarPlanComponent implements OnInit {
   soloLectura = false;
   fuenteSeleccionada: number | null = null;
   fuentes: Parametro[] = [];
-  soloLectura: boolean = false;
 
   /** Estados en los que el plan aún puede editarse (registrar/editar acciones). */
   private readonly estadosEditables: number[] = [
