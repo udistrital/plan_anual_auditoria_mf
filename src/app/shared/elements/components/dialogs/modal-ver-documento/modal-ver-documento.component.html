@@ -72,39 +72,50 @@
     >
     <mat-icon>toll</mat-icon>Regresar
   </button>
+  @if (botonRegenerar.texto) {
+    <button
+      mat-raised-button
+      color="primary"
+      class="my-3"
+      (click)="regenerar()"
+    >
+      <mat-icon>{{ botonRegenerar.icono }}</mat-icon>
+      {{ botonRegenerar.texto }}
+    </button>
+  }
   @if (botonGuardar.texto) {
     <button
       mat-raised-button
       color="primary"
       class="my-3"
       (click)="modoMultiple ? guardarIndividual() : guardar()"
-      >
-      <mat-icon>{{ botonGuardar.icono }}</mat-icon
-        >{{ botonGuardar.texto }}
-      </button>
-    }
+    >
+      <mat-icon>{{ botonGuardar.icono }}</mat-icon>
+      {{ botonGuardar.texto }}
+    </button>
+  }
 
-    @if (modoMultiple && botonGuardarTodos.texto) {
-      <button
-        mat-raised-button
-        color="primary"
-        class="my-3"
-        (click)="guardarTodas()"
-        >
-        <mat-icon>{{ botonGuardarTodos.icono }}</mat-icon
-          >{{ botonGuardarTodos.texto }}
-        </button>
-      }
+  @if (modoMultiple && botonGuardarTodos.texto) {
+    <button
+      mat-raised-button
+      color="primary"
+      class="my-3"
+      (click)="guardarTodas()"
+    >
+    <mat-icon>{{ botonGuardarTodos.icono }}</mat-icon>
+    {{ botonGuardarTodos.texto }}
+    </button>
+  }
 
-      @if (botonDescargarDOCX.texto && validarDescargaDOCX()) {
-        <button
-          mat-raised-button
-          color="primary"
-          class="my-3"
-          (click)="descargarDocumentoDOCX()"
-          >
-          <mat-icon>{{ botonDescargarDOCX.icono }}</mat-icon
-            >{{ botonDescargarDOCX.texto }}
-          </button>
-        }
-      </ng-template>
+  @if (botonDescargarDOCX.texto && validarDescargaDOCX()) {
+    <button
+      mat-raised-button
+      color="primary"
+      class="my-3"
+      (click)="descargarDocumentoDOCX()"
+    >
+    <mat-icon>{{ botonDescargarDOCX.icono }}</mat-icon>
+    {{ botonDescargarDOCX.texto }}
+    </button>
+  }
+</ng-template>

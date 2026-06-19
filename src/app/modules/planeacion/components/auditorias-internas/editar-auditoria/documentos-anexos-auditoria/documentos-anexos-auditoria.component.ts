@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angu
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
 import { ActivatedRoute } from "@angular/router";
-import { Subscription } from "rxjs";
+import { catchError, firstValueFrom, map, of, Subscription } from "rxjs";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -34,6 +34,7 @@ interface CartaRepresentacionPersistida {
 }
 
 interface DocumentoAdjuntoInicial {
+  _id: string;
   tipo_id: number;
   nuxeo_enlace?: string;
   nombre?: string;
@@ -55,6 +56,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
   idCompromisoEtico: any = null;
   base64CompromisoEtico: any = null;
   documentosExistentes: { [tipoId: number]: string | null } = {};
+  registrosDocExistentes: DocumentoAdjuntoInicial[] = [];
   cartasRepresentacionEsperadas: CartaRepresentacionDocumento[] = [];
   cartasRepresentacionExistentes: CartaRepresentacionPersistida[] = [];
   private routeSubscription: Subscription | null = null;
@@ -150,7 +152,8 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
 
   private async cargarEstadoDocumentos(): Promise<void> {
     try {
-      const documentosAdjuntos = await this.buscarDocumentosAdjuntosIniciales();
+      this.registrosDocExistentes = await this.buscarDocumentosAdjuntosIniciales();
+      const documentosAdjuntos = this.registrosDocExistentes.filter(doc => !!doc.nuxeo_enlace);
       const documentosPorTipo = this.agruparDocumentosPorTipo(documentosAdjuntos);
 
       this.cartasRepresentacionExistentes = [];
@@ -509,8 +512,35 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
     }
 
     const modalInstance = dialogRef.componentInstance;
-    modalInstance.botonGuardar = { icono: "save", texto: "Guardar carta actual" };
-    modalInstance.botonGuardarTodos = { icono: "save", texto: "Guardar todas" };
+    modalInstance.botonRegenerar = { icono: "refresh", texto: "Aplicar cambios" };
+    modalInstance.onRegenerarIndividual = async (indice: number): Promise<string> => {
+      return await firstValueFrom(
+        this.PlanAnualAuditoriaMid
+          .get(`plantilla/${infoDocumento.plantilla}/${this.auditoriaId}`)
+          .pipe(
+            map((res) => {
+              const carta = res.Data.find((carta: any) => carta.dependencia_id === documentos[indice].dependenciaId);
+              documentos[indice].base64 = carta.base64;
+              this.alertService.showSuccessAlert(`Carta de ${documentos[indice].dependenciaNombre} generada exitosamente. No olvide guardar los cambios para actualizar la carta.`);
+              return documentos[indice].base64;
+            }),
+            catchError((error) => {
+              console.error("Error al generar el documento", error);
+              this.alertService.showErrorAlert("No fue posible generar el documento.");
+              return of(documentos[indice].base64);
+            })
+          )
+      );
+    }
+
+    if (documentos.length > 1) {
+      modalInstance.botonGuardar = { icono: "save", texto: "Guardar carta actual" };
+      modalInstance.botonGuardarTodos = { icono: "save", texto: "Guardar todas" };
+    }
+    else {
+      modalInstance.botonGuardar = { icono: "save", texto: "Guardar carta" };
+    }
+
     modalInstance.botonDescargarDOCX = { icono: "download", texto: "Descargar DOCX"};
     modalInstance.onGuardarIndividual = (indice: number) => {
       this.guardarDocumento(
@@ -569,6 +599,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
               this.auditoriaId,
               info.parametro,
               this.esCartaRepresentacion(info) ? { dependencia_id: info.dependenciaId } : undefined,
+              this.encontrarRegistroDocExistente(info.parametro, info.dependenciaId)?._id,
               () => {
                 if (this.esCartaRepresentacion(info)) {
                   const nombreDependencia = this.normalizarNombreDependencia(
@@ -627,6 +658,16 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
     }
   }
 
+  private encontrarRegistroDocExistente(tipo_id: number, dependencia_id?: number): DocumentoAdjuntoInicial | undefined {
+    if (tipo_id !== environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION)
+      return this.registrosDocExistentes.find(doc => doc.tipo_id === tipo_id);
+
+    return this.registrosDocExistentes.find(doc =>
+      doc.tipo_id === tipo_id &&
+      doc.metadatos?.["dependencia_id"] === dependencia_id
+    );
+  }
+
   private descargarDocumentoDOCX(base64String: any, nombreDocumento: string) {
 
     const byteCharacters = atob(base64String);
@@ -669,6 +710,26 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
     if (!this.soloLectura) {
       const modalInstance = dialogRef.componentInstance;
       modalInstance.botonGuardar = { icono: "save", texto: "Guardar documento" };
+
+      modalInstance.botonRegenerar = { icono: "refresh", texto: "Aplicar cambios" };
+      modalInstance.onRegenerarIndividual = async (indice: number): Promise<string> => {
+        return await firstValueFrom(
+          this.PlanAnualAuditoriaMid
+            .get(`plantilla/${infoDocumento.plantilla}/${this.auditoriaId}`)
+            .pipe(
+              map((res) => {
+                documentoBase64 = res.Data;
+                this.alertService.showSuccessAlert(`Documento generado exitosamente. No olvide guardar para actualizar el documento.`);
+                return documentoBase64;
+              }),
+              catchError((error) => {
+                console.error("Error al generar el documento", error);
+                this.alertService.showErrorAlert("No fue posible generar el documento.");
+                return of(documentoBase64);
+              })
+            )
+        );
+      }
     }
 
     dialogRef.afterClosed().subscribe((res) => {
@@ -717,6 +778,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
             this.esCartaRepresentacion(infoDocumento)
               ? { dependencia_id: infoDocumento.dependenciaId, firmado: false }
               : undefined,
+            this.encontrarRegistroDocExistente(infoDocumento.parametro, infoDocumento.dependenciaId)?._id,
             () => {
               if (this.esCartaRepresentacion(infoDocumento)) {
                 const nombreDependencia = this.normalizarNombreDependencia(
@@ -771,6 +833,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
     referencia_id: string,
     tipo_id: number,
     metadatos?: Record<string, any>,
+    documentoIdActualizar?: string,
     onSuccess?: () => void,
     onError?: () => void
   ): void {
@@ -781,10 +844,19 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
           referencia_tipo,
           referencia_id,
           tipo_id,
-          metadatos
+          metadatos,
+          documentoIdActualizar ? true : false,
+          documentoIdActualizar
         )
         .subscribe({
           next: (response) => {
+            const registroDocExistente = this.encontrarRegistroDocExistente(tipo_id, metadatos?.["dependencia_id"]);
+
+            if (!registroDocExistente)
+              this.registrosDocExistentes.push(response);
+            else
+              registroDocExistente.nuxeo_enlace = response.nuxeo_enlace;
+
             onSuccess?.();
           },
           error: (error) => {
