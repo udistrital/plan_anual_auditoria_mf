@@ -5,15 +5,18 @@ Microcliente para la gestión de las fases programación y planeación de la aud
 
 ### Tecnologías Implementadas y Versiones
 
-- [Angular](https://angular.io/docs) 20.3.21
+- [Angular](https://angular.io/docs) 21.2.23
   - Incluye Animations, Common, Compiler, Core, Forms, Platform-Browser, Platform-Browser-Dynamic, Router
-- [Angular Material](https://material.angular.io/) 20.2.14
+- [Angular Material](https://material.angular.io/) 21.2.14
 - [RxJS](https://rxjs.dev/guide/overview) ~7.8.0
 - [Single-spa](https://single-spa.js.org/) >=4.0.0
-  - Incluye single-spa-angular
-- [SweetAlert2](https://sweetalert2.github.io/) 11.26.24
-- [tslib](https://github.com/Microsoft/tslib) 2.3.0
+  - Incluye single-spa-angular 21.0.2
+- [SweetAlert2](https://sweetalert2.github.io/) ^11.26.24
+- [tslib](https://github.com/Microsoft/tslib) ^2.8.1
 - [Zone.js](https://github.com/angular/angular/tree/master/packages/zone.js) ~0.15.1
+- [TypeScript](https://www.typescriptlang.org/) ~5.9.2
+- [ngx-quill](https://github.com/KillerCodeMonkey/ngx-quill) ^30.1.3
+- [ng2-pdf-viewer](https://github.com/VadimDez/ng2-pdf-viewer) ^10.4.0
 
 
 ### Variables de Entorno
@@ -21,11 +24,11 @@ Microcliente para la gestión de las fases programación y planeación de la aud
 
 ## Ejecución del Proyecto
 
-Este proyecto es parte de una infraestructura de microfrontend implementada con la librería Single-SPA. Para ejecutarlo correctamente, es necesario levantar una aplicacion independiente: el **Root**.
+Este proyecto es parte de una infraestructura de microfrontend implementada con la librería Single-SPA. Para ejecutarlo correctamente, es necesario levantar una aplicación independiente: el **Root**.
 
 ### Root
 
-El Root contiene la lógica de Sísifo
+El Root contiene la lógica de Sísifo y gestiona Sel enrutamiento de todos los microfrontends.
 
 ### Pasos para la Ejecución del Root
 
@@ -44,18 +47,19 @@ El Root contiene la lógica de Sísifo
 3. Instalar las dependencias:
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 4. Iniciar el Root:
+
    ```bash
-   npm start
+   pnpm start
    ```
 
 
 ### plan_anual_auditoria_mf
 
-Microcliente de gestion de usuarios
+Microcliente para la gestión de las fases de programación y planeación de la auditoría.
 
 ### Pasos para la Ejecución del mf
 
@@ -77,10 +81,10 @@ Microcliente de gestion de usuarios
    pnpm install
    ```
 
-4. Iniciar usuario_mf:
+4. Iniciar el microfrontend:
 
    ```bash
-   pnpm run start
+   pnpm start
    ```
 
 Con estos pasos, se tendrán las partes mínimas necesarias para ejecutar el proyecto en un entorno local.
@@ -120,4 +124,3 @@ plan_anual_auditoria_mf is free software: you can redistribute it and/or modify 
 plan_anual_auditoria_mf is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with plan_anual_auditoria_mf. If not, see https://www.gnu.org/licenses/.
-

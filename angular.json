@@ -41,7 +41,8 @@
               "deepmerge",
               "file-saver",
               "jszip",
-              "crypto-js"
+              "crypto-js",
+              "style-loader"
             ]
           },
           "configurations": {
