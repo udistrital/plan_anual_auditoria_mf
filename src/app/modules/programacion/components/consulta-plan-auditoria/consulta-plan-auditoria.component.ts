@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { UserService } from "src/app/core/services/user.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
@@ -15,7 +15,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
-import { catchError, exhaustMap, forkJoin, Observable, of, tap, throwError } from "rxjs";
+import { catchError, exhaustMap, forkJoin, Observable, of, Subject, takeUntil, tap, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
@@ -27,8 +27,11 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
+import { TourService } from "src/app/shared/services/tour.service";
+import { crearPasosTour } from "./consulta-plan-auditoria.tour";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
+const TOUR_RETORNO_LISTA_KEY = "paa-tour-retorno-lista";
 
 @Component({
     selector: "app-consulta-plan-auditoria",
@@ -36,7 +39,7 @@ const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
     styleUrls: ["./consulta-plan-auditoria.component.css"],
     standalone: false
 })
-export class ConsultaPlanAuditoriaComponent implements OnInit {
+export class ConsultaPlanAuditoriaComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   total!: number;
   opcionesPagina: number[] = [5, 10, 25];
@@ -46,6 +49,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
   years: Parametro[] = [];
   selectedYearId: number | null = null;
   dataSource = new MatTableDataSource<Plan>([]);
+  private planesReales: Plan[] = [];
+  private mostrarFilaTour = false;
+  private readonly destroy$ = new Subject<void>();
   permisoCreacion: boolean = false;
   displayedColumns: string[] = [
     "no",
@@ -81,15 +87,25 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     private readonly tercerosService: TercerosService,
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly documentoUtils: DocumentoUtils,
+    private readonly tourService: TourService
   ) { }
 
   ngOnInit(): void {
+    this.tourService.tourFinalizado$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.finalizarTour());
+    this.mostrarFilaTour = sessionStorage.getItem(TOUR_RETORNO_LISTA_KEY) !== null;
     this.roles = this.rolService.getRoles();
     this.setPermisos();
     this.cargarPlanesAuditoria(this.opcionesPagina[0], this.offset);
     this.userService.getPersonaId().then((usuarioId) => {
       this.usuarioId = usuarioId;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   setPermisos() {
@@ -144,7 +160,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       (res) => {
         if (!res?.Data) return;
         this.total = res.MetaData?.Count;
-        this.dataSource.data = res.Data.filter(
+        this.planesReales = res.Data.filter(
           (item: any) => item.activo
         ).map((item: any) => {
           const estadoId = item.estado?.estado_id;
@@ -172,6 +188,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             acciones,
           };
         });
+        this.actualizarDatosTabla();
+        this.continuarTourEnListaSiCorresponde();
       },
       (error: any) => {
         console.error("Error al cargar los planes de auditoría:", error);
@@ -266,6 +284,55 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  private actualizarDatosTabla(): void {
+    this.dataSource.data = this.mostrarFilaTour
+    ? [this.crearFilaTour(), ...this.planesReales]
+    : this.planesReales;
+  }
+
+  private continuarTourEnListaSiCorresponde(): void {
+    const direccionTour = sessionStorage.getItem(TOUR_RETORNO_LISTA_KEY);
+    if (!direccionTour) return;
+
+    setTimeout(() => {
+      const botonAcciones = document.querySelector(
+        '[data-tour="nuevo-paa"] tbody tr:nth-child(1) td:last-child button'
+      ) as HTMLButtonElement;
+
+      if (!botonAcciones) return;
+
+      botonAcciones.click();
+      sessionStorage.removeItem(TOUR_RETORNO_LISTA_KEY);
+      if (direccionTour === "previous") {
+        this.tourService.getDriverObj()?.movePrevious();
+      } else {
+        this.tourService.getDriverObj()?.moveNext();
+      }
+    }, 300);
+  }
+
+  private finalizarTour(): void {
+    this.mostrarFilaTour = false;
+    sessionStorage.removeItem(TOUR_RETORNO_LISTA_KEY);
+    this.actualizarDatosTabla();
+  }
+
+  private crearFilaTour(): Plan {
+    return {
+      id: -1,
+      creadoPor: "Usuario de demostracion",
+      vigencia: "2026",
+      fechaCreacion: "2026-01-01",
+      colorEstado: this.escogerEmojiColorEstado("Borrador"),
+      estado: "Borrador",
+      estadoId: environment.PLAN_ESTADO.EN_BORRADOR_ID,
+      vigenciaId: 0,
+      acciones: this.getAccionesPorRolYEstado(
+        environment.PLAN_ESTADO.EN_BORRADOR_ID
+      ),
+    } as Plan;
   }
 
   realizarAccion(plan: any, accion: string) {
@@ -525,4 +592,34 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
     });
   }
 
+  iniciarTourGuiado(): void {
+    this.mostrarFilaTour = true;
+    this.actualizarDatosTabla();
+
+    const hacerClick = (selector: string): void => {
+      (document.querySelector(selector) as HTMLElement | null)?.click();
+    };
+
+    const pasosTour = crearPasosTour(
+      {
+        abrirMenuAcciones: () => hacerClick('[data-tour="nuevo-paa"] tbody tr:nth-child(1) td:last-child button'),
+        editarMarcoGeneral: () => hacerClick('div[role="menu"] button:nth-child(1)'),
+        registrarAuditorias: () => hacerClick('div[role="menu"] button:nth-child(2)'),
+        agregarAuditoria: () => hacerClick('[data-tour="add-auditoria"]'),
+        cancelarAuditoria: () => hacerClick('[data-tour="cancelar-auditoria"]'),
+        abrirCargueMasivo: () => hacerClick('[data-tour="cargue-masivo"]'),
+        cancelarCargueMasivo: () => hacerClick('[data-tour="boton-cancelar-archivo"]'),
+        volverALista: (direccion) => {
+          sessionStorage.setItem(TOUR_RETORNO_LISTA_KEY, direccion);
+          this.router.navigate([`/programacion/plan-auditoria`]);
+        },
+      },
+      () => this.tourService.getDriverObj()?.moveNext()
+    );
+
+    this.tourService.iniciarTour(pasosTour, () => {
+      this.finalizarTour();
+      this.router.navigate([`/programacion/plan-auditoria`]);
+    });
+  }
 }

@@ -9,9 +9,24 @@
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
+      <div class="tour-actions">
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          class="tour-button"
+          aria-label="Iniciar recorrido guiado del Plan Anual de Auditorías"
+          matTooltip="Conoce las opciones principales de esta vista"
+          (click)="iniciarTourGuiado()"
+        >
+          <mat-icon>tour</mat-icon>
+          <span>Iniciar recorrido</span>
+        </button>
+      </div>
+
       <!-- Selector -->
       @if (permisoCreacion) {
-        <div class="section">
+        <div class="section" data-tour="crear-paa">
           <div class="filter-section">
             <mat-form-field appearance="outline" style="width: 320px">
               <mat-label>Seleccione el año del PAA:</mat-label>
@@ -46,7 +61,7 @@
 
           <!-- Tabla -->
           <div class="table-container rounded-table table-scroll mt-3">
-            <table mat-table [dataSource]="dataSource">
+            <table mat-table [dataSource]="dataSource" data-tour="nuevo-paa">
               <!-- Número -->
               <ng-container matColumnDef="no">
                 <th mat-header-cell *matHeaderCellDef class="header">
