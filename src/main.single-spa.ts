@@ -3,8 +3,7 @@ import { enableProdMode, NgZone } from '@angular/core';
 import { platformBrowser } from '@angular/platform-browser';
 import { Router, NavigationStart } from '@angular/router';
 
-import { singleSpaAngular, getSingleSpaExtraProviders } from 'single-spa-angular';
-
+import { singleSpaAngular, provideSingleSpaPlatform } from 'single-spa-angular';
 
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
@@ -17,7 +16,7 @@ if (environment.production) {
 const lifecycles = singleSpaAngular({
   bootstrapFunction: singleSpaProps => {
     singleSpaPropsSubject.next(singleSpaProps);
-    return platformBrowser(getSingleSpaExtraProviders()).bootstrapModule(AppModule);
+    return platformBrowser(provideSingleSpaPlatform()).bootstrapModule(AppModule);
   },
   template: '<plan-anual-auditoria-mf />',
   Router,

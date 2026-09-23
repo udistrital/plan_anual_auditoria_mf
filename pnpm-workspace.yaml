@@ -1,7 +1,21 @@
-allowBuilds:
-  '@enzedonline/quill-blot-formatter2': true
-  '@parcel/watcher': false
-  canvas: false
-  esbuild: false
-  lmdb: false
-  msgpackr-extract: false
+packages:
+  - "."
+
+# Versiones parcheadas de dependencias transitivas detectadas por pnpm audit.
+# pnpm lee overrides desde este archivo para forzarlos en toda la cadena de dependencias.
+overrides:
+  baseline-browser-mapping: "^2.11.25"
+  body-parser: "^2.3.0"
+  brace-expansion@^1: "^1.1.18"
+  brace-expansion@^2: "^2.1.4"
+  browserslist: "^4.29.0"
+  fast-uri: "^3.1.6"
+  form-data: "^4.0.6"
+  immutable: "^5.1.9"
+  js-yaml@^3: "^3.15.2"
+  js-yaml@^4: "^4.3.2"
+  minimatch@^3: "3.1.5"
+  postcss-selector-parser: "^7.1.6"
+  tar: "^7.5.22"
+  tmp: "^0.2.7"
+  uuid@^8: "8.3.2"
