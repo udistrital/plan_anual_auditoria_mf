@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 import { driver, type Driver, type DriveStep } from 'driver.js';
+import { Subject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class TourService {
   driverObj: Driver | null = null;
+  private readonly tourFinalizadoSubject = new Subject<void>();
+  readonly tourFinalizado$ = this.tourFinalizadoSubject.asObservable();
 
   /** Iniciar tour */
   iniciarTour(pasosTour: DriveStep[], alFinalizar?: () => void): void {
@@ -20,6 +23,7 @@ export class TourService {
       onCloseClick: () => this.driverObj?.destroy(),
       onDestroyed: () => {
         alFinalizar?.();
+        this.tourFinalizadoSubject.next();
       },
     });
 
