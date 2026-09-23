@@ -35,6 +35,7 @@
                 mat-raised-button
                 color="primary"
                 (click)="descargarPlantilla()"
+                data-tour="descargar-plantilla"
                 >
                 <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
               </button>
@@ -44,6 +45,7 @@
                 color="primary"
                 style="border: 1px solid var(--md-primary-500) !important"
                 (click)="exportarTabla()"
+                data-tour="exportar-auditorias"
                 >
                 <mat-icon>file_download</mat-icon> Exportar Tabla
               </button>
@@ -54,6 +56,7 @@
                   color="primary"
                   style="border: 1px solid var(--md-primary-500) !important"
                   (click)="eliminarAuditorias()"
+                  data-tour="eliminar-auditorias-masiva"
                   >
                   <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
                 </button>
@@ -236,6 +239,7 @@
                 mat-raised-button
                 color="primary"
                 (click)="agregarAuditoria()"
+                data-tour="add-auditoria"
                 >
                 <mat-icon>add_circle</mat-icon>
                 Añadir Auditoría
@@ -247,6 +251,7 @@
                 mat-raised-button
                 color="primary"
                 (click)="subirArchivoCargueMasivo()"
+                data-tour="cargue-masivo"
                 >
                 <mat-icon>file_upload</mat-icon> Cargue Masivo
               </button>
@@ -266,6 +271,7 @@
               mat-raised-button
               color="primary"
               (click)="renderizar()"
+              data-tour="ver-paa-pdf"
               >
               <mat-icon>visibility</mat-icon>Ver
             </button>
@@ -279,7 +285,7 @@
                 <mat-icon>visibility</mat-icon>Ver Matriz
               </button>
             }
-            <button class="mx-2" mat-raised-button color="primary" (click)="guardarPaa()">
+            <button class="mx-2" mat-raised-button color="primary" (click)="guardarPaa()" data-tour="guardar-auditorias">
               <mat-icon>save</mat-icon>
               Guardar
             </button>
