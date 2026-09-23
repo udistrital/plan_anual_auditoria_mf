@@ -45,6 +45,11 @@ export class RegistrarPlanComponent implements OnInit {
       this.vigenciaNombre = localStorage.getItem('vigencia') ?? '';
       this.inicializarFormulario();
 
+      if (this.planId === '-1') {
+        this.datosCargados = true;
+        return;
+      }
+
       try {
         const planData = await this.obtenerPlanAuditoria();
         await this.obtenerEstadoActual();
@@ -142,6 +147,8 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   guardarInformacion() {
+    if (this.planId === '-1') return
+    
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de guardar la información?")
       .then((result) => {

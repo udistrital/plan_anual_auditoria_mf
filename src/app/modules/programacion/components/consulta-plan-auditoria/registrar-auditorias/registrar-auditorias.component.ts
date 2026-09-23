@@ -87,7 +87,9 @@ export class RegistrarAuditoriasComponent implements OnInit {
     localStorage.removeItem('vigencia');
     localStorage.removeItem('extra-edit');
     await this.obtenerEstadoActual();
-    this.cargarAuditorias();
+
+    if (this.route.snapshot.paramMap.get("id") !== '-1') this.cargarAuditorias();
+
     try {
       this.idMatriz = await this.buscarMatriz();
       if (this.idMatriz !== null) {
@@ -109,6 +111,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
     if (this.ordenSeleccionado) {
       url += `&orderBy=${this.ordenSeleccionado}&orderDirection=ASC`;
     }
+
+    if (this.route.snapshot.paramMap.get("id") === '-1') return;
 
     this.PlanAnualAuditoriaMid.get(url).subscribe(
       (res) => {
