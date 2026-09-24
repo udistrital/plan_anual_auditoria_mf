@@ -3,7 +3,7 @@ import { Observable, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
 
-export interface DocumentoReferenciaPdf {
+export type DocumentoReferenciaPdf = {
   _id?: string;
   referencia_id?: string;
   referencia_tipo?: string;
@@ -14,7 +14,7 @@ export interface DocumentoReferenciaPdf {
   nombre?: string;
   metadatos?: Record<string, any>;
   activo: boolean;
-}
+};
 
 export interface ConsultaDocumentosReferenciaOptions {
   referenciaTipo?: string;
