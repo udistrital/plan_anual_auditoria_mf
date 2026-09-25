@@ -3,6 +3,15 @@ packages:
 
 # Versiones parcheadas de dependencias transitivas detectadas por pnpm audit.
 # pnpm lee overrides desde este archivo para forzarlos en toda la cadena de dependencias.
+allowBuilds:
+  '@enzedonline/quill-blot-formatter2': true
+  '@parcel/watcher': true
+  canvas: true
+  esbuild: true
+  lmdb: true
+  msgpackr-extract: true
+  unrs-resolver: true
+
 overrides:
   baseline-browser-mapping: "^2.11.25"
   body-parser: "^2.3.0"

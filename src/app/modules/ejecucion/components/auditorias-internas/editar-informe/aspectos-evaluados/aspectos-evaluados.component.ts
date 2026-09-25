@@ -4,6 +4,9 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { NuxeoService } from 'src/app/core/services/nuxeo.service';
+import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 
 interface Hallazgo {
   _id?: string;
@@ -89,7 +92,9 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   constructor(
     private readonly fb: UntypedFormBuilder,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private readonly alertaService: AlertService
+    private readonly alertaService: AlertService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
   ) { }
 
   ngOnInit(): void {
@@ -180,12 +185,10 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   }
 
   // Construye el formulario reactivo con los datos cargados
-  construirFormulario(): void {
-    const temasArray = this.fb.array([]);
+  async construirFormulario(): Promise<void> {
+    const temasActivos = this.temasData.filter(tema => tema.activo);
 
-    this.temasData.forEach((tema) => {
-      if (!tema.activo) return;
-
+    const gruposTemas = await Promise.all(temasActivos.map(async (tema) => {
       const subtemasArray = this.fb.array([]);
 
       (tema.subtema ?? []).forEach((subtema: any) => {
@@ -211,13 +214,19 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         }));
       });
 
-      temasArray.push(this.fb.group({
+      if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
+        tema.descripcion_titulo = await this.obtenerDocumentoHTML(tema.descripcion_titulo);
+      }
+
+      return this.fb.group({
         _id: [tema._id ?? null],
         nombre: [tema.titulo ?? '', Validators.required],
         descripcion_titulo: [tema.descripcion_titulo ?? ''],
         subtemas: subtemasArray,
-      }));
-    });
+      });
+    }));
+
+    const temasArray = this.fb.array(gruposTemas);
 
     this.aspectosForm = this.fb.group({
       temas: temasArray,
@@ -391,6 +400,32 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
               /\sheight="auto"/g,
               ''
             );
+            const blob = new Blob([html], { type: 'text/html' });
+            const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
+            const base64 = await this.nuxeoService.fileABase64(htmlFile) as string;
+
+            const payload = {
+              IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
+              nombre: `Tema ${i + 1} de informe ${this.informeId}.html`,
+              descripcion: "Documento HTML (Aspectos Evaluados) de un tema",
+              metadatos: {},
+              file: JSON.stringify(base64)
+            }
+
+            this.nuxeoService.guardarArchivos([payload]).subscribe({
+              next: async (response: any) => {
+                const documentoRefNuxeo = response[0];
+
+                const responseTema: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
+                  informe_id: this.informeId,
+                  titulo: temaForm.nombre,
+                  descripcion_titulo: `NuxeoEnlace:${documentoRefNuxeo?.res?.Enlace}`
+                }));
+            
+              temaId = responseTema?.Data?._id || responseTema?._id;
+              }
+            });
+            this.temas.at(i).patchValue({ _id: temaId, isNew: false });
           } else {
             const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
               informe_id: this.informeId,
@@ -417,6 +452,29 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
               /\sheight="auto"/g,
               ''
             );
+
+            const blob = new Blob([html], { type: 'text/html' });
+            const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
+            const base64 = await this.nuxeoService.fileABase64(htmlFile) as string;
+
+            const payload = {
+              IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
+              nombre: `Tema ${i + 1} de informe ${this.informeId}.html`,
+              descripcion: "Documento HTML (Aspectos Evaluados) de un tema",
+              metadatos: {},
+              file: JSON.stringify(base64)
+            }
+
+            this.nuxeoService.guardarArchivos([payload]).subscribe({
+              next: async (response: any) => {
+                const documentoRefNuxeo = response[0];
+
+                await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
+                  titulo: temaForm.nombre,
+                  descripcion_titulo: `NuxeoEnlace:${documentoRefNuxeo?.res?.Enlace}`
+                }));
+              }
+            });
           } else {
             await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
               titulo: temaForm.nombre,
@@ -509,5 +567,23 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     const div = document.createElement('div');
     div.innerHTML = html;
     return div.querySelector('img') !== null;
+  }
+
+  private comprobarNuxeoEnlace(descripcion: any): boolean {
+    return descripcion?.startsWith("NuxeoEnlace") ?? false;
+  }
+
+  private async obtenerDocumentoHTML(descripcion: any) {
+    const indice = descripcion.indexOf(":");
+    const uuid = descripcion.substring(indice + 1); 
+    const documento = await this.nuxeoService.obtenerPorUUID(uuid);
+
+    const binario = atob(documento);
+    const bytes = new Uint8Array(binario.length);
+
+    for (let i = 0; i < binario.length; i++) {
+      bytes[i] = binario.charCodeAt(i);
+    }
+    return new TextDecoder("utf-8").decode(bytes);
   }
 }
