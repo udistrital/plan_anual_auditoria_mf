@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -14,8 +14,10 @@ import { CargarArchivoComponent } from "src/app/shared/elements/components/carga
 import { environment } from "src/environments/environment";
 import { RolService } from "src/app/core/services/rol.service";
 import { DocumentoUtils } from "../consulta-plan.auditoria.utils";
-import { firstValueFrom, map, catchError } from "rxjs";
+import { firstValueFrom, map, catchError, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import { Auditoria as AuditoriaModel } from "src/app/shared/data/models/auditoria";
+import { TourService } from "src/app/shared/services/tour.service";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
@@ -31,7 +33,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
     styleUrls: ["./registrar-auditorias.component.css"],
     standalone: false
 })
-export class RegistrarAuditoriasComponent implements OnInit {
+export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
     "no",
     "auditoria",
@@ -62,6 +64,8 @@ export class RegistrarAuditoriasComponent implements OnInit {
   roles: string[] = [];
   vigenciaNombre: string = "";
 
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private readonly alertaService: AlertService,
     private readonly route: ActivatedRoute,
@@ -76,9 +80,17 @@ export class RegistrarAuditoriasComponent implements OnInit {
     private readonly userService: UserService,
     private readonly documentoUtils: DocumentoUtils,
     private readonly referenciaPdfService: ReferenciaPdfService,
+    private readonly tourService: TourService,
   ) { }
 
   async ngOnInit(): Promise<void> {
+    // El tour abre los modales de "Añadir auditoría" y "Cargar archivo" sobre
+    // esta vista, así que al cancelarlo hay que cerrarlos: si no quedan flotando
+    // sobre una página que el tour ya abandonó.
+    this.tourService.tourFinalizado$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.dialog.closeAll());
+
     this.id = this.route.snapshot.paramMap.get("id") ?? "1";
     this.modoEditarExtraordinario = Boolean(localStorage.getItem('extra-edit'));
     const vigencia = JSON.parse(localStorage.getItem('vigencia') ?? '{}');
@@ -103,6 +115,12 @@ export class RegistrarAuditoriasComponent implements OnInit {
     });
     this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar || this.modoEditarExtraordinario ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
     this.title = `${this.modoEditar || this.modoEditarExtraordinario ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
+    this.tourService.continuarTourSiCorresponde();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   cargarAuditorias(): void {
