@@ -8,6 +8,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
 import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 
 @NgModule({
     declarations: [AppComponent, SpinnerComponent],
@@ -28,7 +29,13 @@ import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@an
                 parse: { dateInput: 'dd/MM/yyyy' }, 
                 display: { dateInput: 'dd/MM/yyyy' } 
             }
-        }
+        },
+        // A partir de Angular/CDK 21 los overlays (dialogs, menus, selects, tooltips)
+        // se inmediatan en el "top layer" del navegador mediante la Popover API, lo que
+        // los pinta por encima de cualquier z-index (incluido el tour guiado de driver.js).
+        // usePopover: false los devuelve a .cdk-overlay-container, donde el z-index vuelve
+        // a ser controlable.
+        { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } }
     ]
 })
 export class AppModule {}
