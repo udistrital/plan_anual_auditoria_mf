@@ -28,10 +28,9 @@ import { DocumentoUtils } from "./consulta-plan.auditoria.utils";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 import { TourService } from "src/app/shared/services/tour.service";
-import { crearPasosTour } from "./consulta-plan-auditoria.tour";
+import { crearPasosTour, TOUR_RETORNO_LISTA_KEY, type PaginaTour } from "./consulta-plan-auditoria.tour";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
-const TOUR_RETORNO_LISTA_KEY = "paa-tour-retorno-lista";
 
 @Component({
     selector: "app-consulta-plan-auditoria",
@@ -596,30 +595,33 @@ export class ConsultaPlanAuditoriaComponent implements OnInit, OnDestroy {
     this.mostrarFilaTour = true;
     this.actualizarDatosTabla();
 
-    const hacerClick = (selector: string): void => {
-      (document.querySelector(selector) as HTMLElement | null)?.click();
-    };
-
     const pasosTour = crearPasosTour(
-      {
-        abrirMenuAcciones: () => hacerClick('[data-tour="nuevo-paa"] tbody tr:nth-child(1) td:last-child button'),
-        editarMarcoGeneral: () => hacerClick('div[role="menu"] button:nth-child(1)'),
-        registrarAuditorias: () => hacerClick('div[role="menu"] button:nth-child(2)'),
-        agregarAuditoria: () => hacerClick('[data-tour="add-auditoria"]'),
-        cancelarAuditoria: () => hacerClick('[data-tour="cancelar-auditoria"]'),
-        abrirCargueMasivo: () => hacerClick('[data-tour="cargue-masivo"]'),
-        cancelarCargueMasivo: () => hacerClick('[data-tour="boton-cancelar-archivo"]'),
-        volverALista: (direccion) => {
-          sessionStorage.setItem(TOUR_RETORNO_LISTA_KEY, direccion);
-          this.router.navigate([`/programacion/plan-auditoria`]);
-        },
-      },
-      () => this.tourService.getDriverObj()?.moveNext()
+      (commands) => this.router.navigate(commands),
+      () => this.tourService.getDriverObj()?.moveNext(),
+      (pagina, selector) => this.retrocederEnElTour(pagina, selector),
+      () => this.tourService.getDriverObj()?.movePrevious()
     );
 
     this.tourService.iniciarTour(pasosTour, () => {
       this.finalizarTour();
       this.router.navigate([`/programacion/plan-auditoria`]);
     });
+  }
+
+  /**
+   * Devuelve el tour a la página del paso anterior. El paso anterior siempre está
+   * en otra ruta, así que se navega usando la fila de demostración y se deja
+   * marcada la continuación para que la página de destino retome el tour.
+   */
+  private retrocederEnElTour(pagina: PaginaTour, selector: string): void {
+    const plan = this.crearFilaTour();
+    this.tourService.marcarContinuacionTrasNavegar("previous", selector);
+
+    if (pagina === "marco-general") {
+      this.editarReporte(plan);
+      return;
+    }
+
+    this.editarActividades(plan);
   }
 }
