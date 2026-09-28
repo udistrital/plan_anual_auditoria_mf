@@ -52,6 +52,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   aspectosForm: UntypedFormGroup = this.fb.group({});
   temasData: Tema[] = [];
   cargando = false;
+  // Guarda por tema el enlace de Nuxeo original y el HTML que se descargó de él
+  private readonly documentosNuxeoTema = new Map<string, { enlace: string; html: string }>();
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
@@ -113,7 +115,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     }
   }
 
-  private usarDatosProporcionados(): void {
+  private async usarDatosProporcionados(): Promise<void> {
     const temas: Tema[] = JSON.parse(JSON.stringify(this.temasRaw));
     for (const tema of temas) {
       for (const subtema of (tema.subtema ?? [])) {
@@ -123,7 +125,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       }
     }
     this.temasData = temas;
-    this.construirFormulario();
+    await this.construirFormulario();
     this.actualizarModoSoloLectura();
   }
 
@@ -151,7 +153,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         await this.asignarHallazgosASubtemas(temas);
 
         this.temasData = temas;
-        this.construirFormulario();
+        await this.construirFormulario();
         this.actualizarModoSoloLectura();
         this.cargando = false;
       },
@@ -186,6 +188,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   // Construye el formulario reactivo con los datos cargados
   async construirFormulario(): Promise<void> {
+    this.documentosNuxeoTema.clear();
     const temasActivos = this.temasData.filter(tema => tema.activo);
 
     const gruposTemas = await Promise.all(temasActivos.map(async (tema) => {
@@ -215,7 +218,13 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       });
 
       if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
-        tema.descripcion_titulo = await this.obtenerDocumentoHTML(tema.descripcion_titulo);
+        const enlaceOriginal = tema.descripcion_titulo;
+        let html = await this.obtenerDocumentoHTML(enlaceOriginal);
+        html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+        tema.descripcion_titulo = html;
+        if (tema._id) {
+          this.documentosNuxeoTema.set(tema._id.toString(), { enlace: enlaceOriginal, html });
+        }
       }
 
       return this.fb.group({
@@ -390,51 +399,18 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       // Crear o actualizar tema
       if (!temaId) {
         try {
-          if(this.contieneImagen(temaForm.descripcion_titulo)) {
-            let html = String(temaForm.descripcion_titulo);
-            html = html.replace(
-              /width="(\d+)px"/g,
-              'style="width:$1px;"'
-            );
-            html = html.replace(
-              /\sheight="auto"/g,
-              ''
-            );
-            const blob = new Blob([html], { type: 'text/html' });
-            const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
-            const base64 = await this.nuxeoService.fileABase64(htmlFile) as string;
-
-            const payload = {
-              IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
-              nombre: `Tema ${i + 1} de informe ${this.informeId}.html`,
-              descripcion: "Documento HTML (Aspectos Evaluados) de un tema",
-              metadatos: {},
-              file: JSON.stringify(base64)
-            }
-
-            this.nuxeoService.guardarArchivos([payload]).subscribe({
-              next: async (response: any) => {
-                const documentoRefNuxeo = response[0];
-
-                const responseTema: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
-                  informe_id: this.informeId,
-                  titulo: temaForm.nombre,
-                  descripcion_titulo: `NuxeoEnlace:${documentoRefNuxeo?.res?.Enlace}`
-                }));
-            
-              temaId = responseTema?.Data?._id || responseTema?._id;
-              }
-            });
-            this.temas.at(i).patchValue({ _id: temaId, isNew: false });
-          } else {
-            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
-              informe_id: this.informeId,
-              titulo: temaForm.nombre,
-              descripcion_titulo: temaForm.descripcion_titulo
-            }));
-            temaId = response?.Data?._id || response?._id;
-            this.temas.at(i).patchValue({ _id: temaId, isNew: false });
+          let descripcion = temaForm.descripcion_titulo;
+          if (this.contieneImagen(descripcion)) {
+            descripcion = await this.subirHtmlTemaANuxeo(descripcion, i);
           }
+
+          const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
+            informe_id: this.informeId,
+            titulo: temaForm.nombre,
+            descripcion_titulo: descripcion
+          }));
+          temaId = response?.Data?._id || response?._id;
+          this.temas.at(i).patchValue({ _id: temaId, isNew: false });
         } catch (error) {
           console.error('Error al crear tema:', error);
           this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
@@ -442,45 +418,22 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         }
       } else {
         try {
-          if (this.contieneImagen(temaForm.descripcion_titulo)) {
-            let html = String(temaForm.descripcion_titulo);
-            html = html.replace(
-              /width="(\d+)px"/g,
-              'style="width:$1px;"'
-            );
-            html = html.replace(
-              /\sheight="auto"/g,
-              ''
-            );
+          let descripcion = temaForm.descripcion_titulo;
+          const original = this.documentosNuxeoTema.get(String(temaId));
 
-            const blob = new Blob([html], { type: 'text/html' });
-            const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
-            const base64 = await this.nuxeoService.fileABase64(htmlFile) as string;
-
-            const payload = {
-              IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
-              nombre: `Tema ${i + 1} de informe ${this.informeId}.html`,
-              descripcion: "Documento HTML (Aspectos Evaluados) de un tema",
-              metadatos: {},
-              file: JSON.stringify(base64)
-            }
-
-            this.nuxeoService.guardarArchivos([payload]).subscribe({
-              next: async (response: any) => {
-                const documentoRefNuxeo = response[0];
-
-                await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-                  titulo: temaForm.nombre,
-                  descripcion_titulo: `NuxeoEnlace:${documentoRefNuxeo?.res?.Enlace}`
-                }));
-              }
-            });
-          } else {
-            await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-              titulo: temaForm.nombre,
-              descripcion_titulo: temaForm.descripcion_titulo
-            }));
+          if (original && descripcion === original.html) {
+            // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
+            descripcion = original.enlace;
+          } else if (this.contieneImagen(descripcion)) {
+            const htmlGuardado = descripcion;
+            descripcion = await this.subirHtmlTemaANuxeo(htmlGuardado, i);
+            this.documentosNuxeoTema.set(String(temaId), { enlace: descripcion, html: htmlGuardado });
           }
+
+          await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
+            titulo: temaForm.nombre,
+            descripcion_titulo: descripcion
+          }));
         } catch (error) {
           console.error('Error al actualizar tema:', error);
           this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
@@ -562,6 +515,31 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     return true;
   }
 
+  // Sube el HTML del tema (con imágenes) a Nuxeo y devuelve el valor a guardar en descripcion_titulo
+  private async subirHtmlTemaANuxeo(htmlOriginal: string, indice: number): Promise<string> {
+    let html = String(htmlOriginal);
+    html = html.replace(/width="(\d+)px"/g, 'style="width:$1px;"');
+    html = html.replace(/\sheight="auto"/g, '');
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
+    const base64 = await this.nuxeoService.fileABase64(htmlFile) as string;
+
+    const payload = {
+      IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
+      nombre: `Tema ${indice + 1} de informe ${this.informeId}.html`,
+      descripcion: 'Documento HTML (Aspectos Evaluados) de un tema',
+      metadatos: {},
+      file: JSON.stringify(base64)
+    };
+
+    const response: any = await firstValueFrom(this.nuxeoService.guardarArchivos([payload]));
+    const enlace = response?.[0]?.res?.Enlace;
+    if (!enlace) throw new Error('Nuxeo no devolvió el enlace del documento');
+
+    return `NuxeoEnlace:${enlace}`;
+  }
+
   private contieneImagen(html: string): boolean {
     if (!html) return false;
     const div = document.createElement('div');
@@ -575,7 +553,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
   private async obtenerDocumentoHTML(descripcion: any) {
     const indice = descripcion.indexOf(":");
-    const uuid = descripcion.substring(indice + 1); 
+    const uuid = descripcion.substring(indice + 1);
     const documento = await this.nuxeoService.obtenerPorUUID(uuid);
 
     const binario = atob(documento);
