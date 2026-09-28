@@ -5,7 +5,8 @@ import { environment } from "src/environments/environment";
 
 //servicios
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
-import { DocumentoReferenciaPdf, ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import type { DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
