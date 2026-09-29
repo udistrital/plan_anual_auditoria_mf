@@ -8,6 +8,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
 import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 
 @NgModule({
     declarations: [AppComponent, SpinnerComponent],
@@ -24,6 +25,9 @@ import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@an
         provideHttpClient(withInterceptors([SpinnerInterceptor])),
         provideHttpClient(withInterceptorsFromDi()),
         provideNativeDateAdapter(),
+        // Desde Angular CDK 21 los overlays (MatDialog, menús, selects) se renderizan en el "top layer" del navegador
+        // mediante popover, quedando por encima de cualquier z-index; así las alertas de SweetAlert quedarían detrás.
+        { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },
         { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },
         { provide: MAT_DATE_FORMATS,
             useValue: {
