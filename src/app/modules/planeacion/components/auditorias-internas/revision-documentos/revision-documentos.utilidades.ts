@@ -14,7 +14,7 @@ const configJefe = {
     environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE,
     environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO,
   ],
-  preguntaAprobacion: "¿Está seguro(a) de aprobar y enviar auditoría?",
+  preguntaAprobacion: "Al aprobar, el Programa de trabajo será firmado electrónicamente y enviado al auditado (a) responsable. ¿Está seguro(a) de aprobar y enviar auditoría?",
   mensajeAprobacion: "La auditoría fue enviada al auditado (a) responsable",
   botonAprobacion: "Aprobar y enviar a Auditado",
   botonFirmar: "Cargar Oficio Firmado",

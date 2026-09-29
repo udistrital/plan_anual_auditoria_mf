@@ -21,8 +21,9 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, Variable
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
-import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
+import { FirmaElectronicaService, SolicitudFirmaElectronica } from "src/app/core/services/firma-electronica.service";
+import { firstValueFrom, forkJoin, from, lastValueFrom, Observable, of, throwError } from "rxjs";
+import { catchError, exhaustMap, switchMap, tap, throwIfEmpty } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface DocumentoAdjuntoRevision {
@@ -89,6 +90,7 @@ export class RevisionDocumentosComponent implements OnInit {
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly firmaElectronicaService: FirmaElectronicaService,
   ) { }
 
   ngOnInit(): void {
@@ -176,6 +178,17 @@ export class RevisionDocumentosComponent implements OnInit {
     estadoAprobacion: number[],
     mensajeAprobacion: string
   ) {
+    // La firma se hace antes del cambio de estado para que la auditoría no quede aprobada sin firmar
+    try {
+      await lastValueFrom(this.firmarProgramaTrabajo());
+    } catch (error) {
+      console.error(error);
+      this.alertService.showErrorAlert(
+        `Error al firmar electrónicamente el Programa de trabajo. ${this.obtenerMensajeErrorFirma(error)}`
+      );
+      return;
+    }
+
     try {
       for (let i = 0; i < estadoAprobacion.length; i++) {
         const esUltimoEstado = i === estadoAprobacion.length - 1;
@@ -190,6 +203,93 @@ export class RevisionDocumentosComponent implements OnInit {
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el plan.");
     }
+  }
+
+  /**
+   * Firma electrónicamente el Programa de trabajo con los datos del Jefe OCI autenticado
+   * y reemplaza la referencia del documento de la auditoría por el PDF firmado.
+   */
+  private firmarProgramaTrabajo(): Observable<any> {
+    const tipoProgramaTrabajo = environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO;
+
+    return forkJoin({
+      documentos: this.referenciaPdfService.consultarDocumentos(this.auditoriaId, { tipo_id: tipoProgramaTrabajo }),
+      jefe: this.tercerosService.getAuthenticatedUserTerceroResponse().pipe(
+        throwIfEmpty(() => new Error("No se encontró la información del firmante."))
+      ),
+      auditoria: this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`),
+      vigencias: this.parametrosUtilsService.getVigencias(),
+    }).pipe(
+      switchMap(({ documentos, jefe, auditoria, vigencias }: any) => {
+        const [documentoPrograma] = this.referenciaPdfService.filtrarValidos(documentos);
+        if (!documentoPrograma)
+          return throwError(() => new Error("No se encontró el Programa de trabajo de la auditoría."));
+
+        // Si el programa ya fue firmado en una aprobación anterior se firma el original para no duplicar firmas
+        const enlaceSinFirma = documentoPrograma.metadatos?.["firmado"]
+          ? documentoPrograma.metadatos?.["nuxeo_enlace_sin_firma"] ?? documentoPrograma.nuxeo_enlace
+          : documentoPrograma.nuxeo_enlace;
+
+        const vigenciaId = auditoria?.Data?.vigencia_id;
+        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre ?? "";
+
+        return from(this.nuxeoService.obtenerPorUUID(enlaceSinFirma)).pipe(
+          switchMap((base64: string) => {
+            if (!base64)
+              return throwError(() => new Error("No se pudo obtener el Programa de trabajo."));
+
+            const solicitud: SolicitudFirmaElectronica = {
+              IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+              nombre: `Programa_Trabajo_Firmado_${this.consecutivoOci || this.auditoriaId}`,
+              descripcion: "Programa de trabajo de auditoría firmado electrónicamente por el Jefe OCI",
+              metadatos: {
+                auditoria_id: this.auditoriaId,
+                consecutivo_oci: this.consecutivoOci,
+                vigencia: vigenciaNombre,
+              },
+              firmantes: [
+                {
+                  nombre: jefe.Tercero.NombreCompleto,
+                  cargo: "Jefe Oficina de Control Interno",
+                  oficina: "Oficina de Control Interno",
+                  tipoId: jefe.Identificacion?.TipoDocumentoId?.CodigoAbreviacion ?? "CC",
+                  identificacion: jefe.Identificacion?.Numero,
+                },
+              ],
+              representantes: [],
+              file: base64,
+            };
+            return this.firmaElectronicaService.firmar([solicitud]);
+          }),
+          switchMap((respuesta: any) => {
+            const documentoFirmado = Array.isArray(respuesta?.res) ? respuesta.res[0] : respuesta?.res;
+            if (!documentoFirmado?.Id || !documentoFirmado?.Enlace)
+              return throwError(() => new Error("Respuesta inválida del servicio de firma electrónica."));
+
+            // Se actualiza el mismo registro para que todas las vistas del programa muestren el documento firmado
+            return this.referenciaPdfService.guardarReferencia(
+              documentoFirmado,
+              "Auditoria",
+              this.auditoriaId,
+              tipoProgramaTrabajo,
+              {
+                ...documentoPrograma.metadatos,
+                firmado: true,
+                nuxeo_enlace_sin_firma: enlaceSinFirma,
+              },
+              false,
+              documentoPrograma._id
+            );
+          })
+        );
+      })
+    );
+  }
+
+  private obtenerMensajeErrorFirma(error: any): string {
+    // Los errores HTTP traen el detalle en error.error; los errores propios del flujo son instancias de Error
+    const detalle = error instanceof Error ? error.message : error?.error?.Error ?? error?.error?.Status;
+    return typeof detalle === "string" ? detalle : "";
   }
 
   aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string, mostrarMensaje: boolean = true): Promise<void> {
