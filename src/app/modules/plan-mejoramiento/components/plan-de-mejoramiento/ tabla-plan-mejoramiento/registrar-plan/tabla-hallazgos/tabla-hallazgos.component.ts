@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { catchError, forkJoin, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -245,10 +245,13 @@ export class TablaHallazgosComponent implements OnInit {
           const informeId = informe._id;
           return forkJoin({
             hallazgos: this.planAuditoriaService
-              .get(`hallazgo?query=informe_id:${informeId},activo:true`),
+              .get(`hallazgo?query=informe_id:${informeId},activo:true&limit=0`),
             acciones: this.planAuditoriaMid
-              .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)
-              .pipe(catchError(() => of({ Data: [] }))),
+              .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0`)
+              .pipe(catchError(() => {
+                this.alertService.showErrorAlert('Error al consultar las acciones de mejora.');
+                return of({ Data: [] });
+              })),
           }).pipe(
             switchMap(({ hallazgos, acciones }) => {
               const accionIds: string[] = (acciones.Data ?? []).map((a: any) => a._id).filter(Boolean);
@@ -387,11 +390,23 @@ export class TablaHallazgosComponent implements OnInit {
     this.planAuditoriaService.post('accion-mejora', body).subscribe({
       next: (res: any) => {
         const accionId = res.Data._id;
-        this.guardarResponsables(accionId, resultado.responsablesNuevos, () => {
+        this.guardarResponsables(accionId, resultado.responsablesNuevos, (fallidos) => {
           this.registrarEstadoAccion(
             accionId,
             ESTADO_ACCION.PENDIENTE_REVISION,
             null,
+            () => {
+              hallazgo.expandido = true;
+              this.cargarDatos();
+              if (fallidos > 0) {
+                this.alertService.showAlert(
+                  'Acción guardada con observaciones',
+                  `La acción se guardó, pero no se pudieron registrar ${fallidos} responsable(s). Verifique los responsables de la acción.`
+                );
+              } else {
+                this.alertService.showSuccessAlert('Acción guardada correctamente.', 'Guardado');
+              }
+            },
             () => {
               hallazgo.expandido = true;
               this.cargarDatos();
@@ -428,15 +443,20 @@ export class TablaHallazgosComponent implements OnInit {
             resultado.responsablesNuevos,
             resultado.responsablesAEliminar,
             () => {
+              const finalizar = () => {
+                this.cargarDatos();
+                this.alertService.showSuccessAlert('Acción guardada correctamente.', 'Guardado');
+              };
               if (veniaRechazada) {
                 this.registrarEstadoAccion(
                   accionAnterior.accionId!,
                   ESTADO_ACCION.PENDIENTE_REVISION,
                   null,
+                  finalizar,
                   () => this.cargarDatos()
                 );
               } else {
-                this.cargarDatos();
+                finalizar();
               }
             }
           );
@@ -511,7 +531,8 @@ export class TablaHallazgosComponent implements OnInit {
     accionId: string,
     estadoId: number,
     observacion: string | null,
-    callback: () => void
+    callback: () => void,
+    alFallar?: () => void
   ): void {
     const body = {
       accion_mejora_id:       accionId,
@@ -525,7 +546,10 @@ export class TablaHallazgosComponent implements OnInit {
 
     this.planAuditoriaService.post('accion-mejora-estado', body).subscribe({
       next: () => callback(),
-      error: () => this.alertService.showErrorAlert('Error al registrar el estado de la acción.'),
+      error: () => {
+        this.alertService.showErrorAlert('Error al registrar el estado de la acción.');
+        alFallar?.();
+      },
     });
   }
 
@@ -547,9 +571,9 @@ export class TablaHallazgosComponent implements OnInit {
   private guardarResponsables(
     accionId: string,
     responsables: { dependencia_id: number; dependencia_lider: boolean }[],
-    callback: () => void
+    callback: (fallidos: number) => void
   ): void {
-    if (!responsables.length) { callback(); return; }
+    if (!responsables.length) { callback(0); return; }
 
     // catchError individual: un fallo no cancela el resto del forkJoin
     const requests = responsables.map(r =>
@@ -561,10 +585,18 @@ export class TablaHallazgosComponent implements OnInit {
       }).pipe(catchError(err => { console.error('Error responsable:', err); return of(null); }))
     );
 
-    forkJoin(requests).subscribe({ next: () => callback(), error: () => callback() });
+    forkJoin(requests).subscribe({
+      next: (respuestas) => callback(respuestas.filter(r => r === null).length),
+      error: () => callback(responsables.length),
+    });
   }
 
-  exportarTabla() {
+  async exportarTabla(): Promise<void> {
+    if (!this.hallazgos.length) {
+      this.alertService.showAlert('Sin registros', 'No hay hallazgos para exportar.');
+      return;
+    }
+
     const headers = [
         "No. Hallazgo",
         "Descripción del Hallazgo",
@@ -580,51 +612,57 @@ export class TablaHallazgosComponent implements OnInit {
         "Fecha Fin"
       ];
 
-    const rows = this.hallazgos.map(
-        hallazgo => hallazgo.acciones.map(
-          accion => [
-            hallazgo.indice,
-            hallazgo.descripcion,
-            hallazgo.causa,
-            accion.numero,
-            accion.tipoAccion,
-            accion.accionPlanteada,
-            accion.nombreIndicador,
-            accion.formulaIndicador,
-            accion.meta,
-            accion.responsable,
-            accion.fechaInicio,
-            accion.fechaFin,
-          ]
-        ).concat()
-      );
+    // Una fila por acción; los hallazgos sin acciones también se exportan con las columnas de acción vacías
+    const rows = this.hallazgos.flatMap(hallazgo => {
+      const datosHallazgo = [hallazgo.indice, hallazgo.descripcion, hallazgo.causa];
+      if (!hallazgo.acciones.length) {
+        return [[...datosHallazgo, '', '', '', '', '', '', '', '', '']];
+      }
+      return hallazgo.acciones.map(accion => [
+        ...datosHallazgo,
+        accion.numero,
+        accion.tipoAccion,
+        accion.accionPlanteada,
+        accion.nombreIndicador,
+        accion.formulaIndicador,
+        accion.meta,
+        accion.responsable,
+        accion.fechaInicio,
+        accion.fechaFin,
+      ]);
+    });
 
     const payload = {
         worksheets: [{
           name: "Acciones de mejora",
-          rows: [headers, ...rows.flat()]
+          rows: [headers, ...rows]
         }]
       };
 
     const consecutivoOCI = this.auditoria.consecutivo_OCI ?? 'sin_consecutivo';
     const tipoEvaluacion = this.auditoria.tipo_evaluacion_nombre?.toLowerCase().replace(/\s+/g, '_') ?? 'sin_tipo';
 
-    this.planAuditoriaMid.post(
-        'cargue-masivo/exportar-excel',
-        payload
-      ).subscribe({
-        next: (res: any) => {
-          this.descargaService.descargarArchivo(
-            res.base64,
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            `acciones_mejora_${tipoEvaluacion}_${consecutivoOCI}`
-          );
-        },
-        error: (err) => {
-          console.error('Error exportar tabla:', err);
-          this.alertService.showErrorAlert('Error al exportar la tabla.');
-        }
-      });
+    try {
+      const excel = await firstValueFrom(
+        this.planAuditoriaMid.post('cargue-masivo/exportar-excel', payload).pipe(
+          map((res: any) => {
+            if (!res?.base64)
+              throw new Error("Respuesta inválida del servidor: base64 no encontrado");
+
+            return res.base64;
+          })
+        )
+      );
+
+      await this.descargaService.descargarArchivo(
+        excel,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        `acciones_mejora_${tipoEvaluacion}_${consecutivoOCI}`
+      );
+    } catch (error) {
+      console.error('Error exportar tabla:', error);
+      this.alertService.showErrorAlert('Error al exportar la tabla.');
+    }
   }
 
   private sincronizarResponsables(
