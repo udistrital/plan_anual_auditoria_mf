@@ -556,12 +556,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     const uuid = descripcion.substring(indice + 1);
     const documento = await this.nuxeoService.obtenerPorUUID(uuid);
 
-    const binario = atob(documento);
-    const bytes = new Uint8Array(binario.length);
-
-    for (let i = 0; i < binario.length; i++) {
-      bytes[i] = binario.charCodeAt(i);
-    }
-    return new TextDecoder("utf-8").decode(bytes);
+    const bytes = Uint8Array.from(atob(documento), c => c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
   }
 }
