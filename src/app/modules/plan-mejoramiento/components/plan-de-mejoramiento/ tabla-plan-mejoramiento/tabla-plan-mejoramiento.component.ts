@@ -10,7 +10,7 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
-import { forkJoin, of } from "rxjs";
+import { forkJoin, lastValueFrom, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
 import { accionesPlanMejoramiento } from "src/app/shared/utils/accionesPorRolYEstado";
@@ -22,6 +22,9 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
+import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import { tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
 
 @Component({
     selector: "app-tabla-plan-mejoramiento",
@@ -74,7 +77,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly referenciaPdfService: ReferenciaPdfService
   ) {}
 
   ngOnInit(): void {
@@ -330,8 +334,35 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     });
   }
 
-  verDocumentosAuditoria(_plan: any): void {
-    // pendiente
+  async verDocumentosAuditoria(plan: any): Promise<void> {
+    const tipos = environment.TIPO_DOCUMENTO_PARAMETROS;
+    const tabs: TabDocumento[] = [
+      { nombre: "Informe final",        tipoId: tipos.INFORME_FINAL },
+      { nombre: "Plan de mejoramiento", tipoId: tipos.PLAN_MEJORAMIENTO },
+    ];
+
+    // Verifica que exista al menos un documento antes de abrir el modal
+    const documentos = await lastValueFrom(
+      this.referenciaPdfService.consultarDocumentos(plan._id)
+    );
+    const hayDocumentos = documentos.some((doc) => tabs.some((tab) => tab.tipoId === doc.tipo_id));
+    if (!hayDocumentos) {
+      this.alertaService.showAlert("Sin documentos", "No se encontraron documentos asociados a esta auditoría.");
+      return;
+    }
+
+    this.dialog.open(ModalVerDocumentosComponent, {
+      width: "1200px",
+      data: {
+        entityId: plan._id,
+        inferTabs: false,
+        tabs,
+        titulo: tituloYSubtituloAuditoria(plan),
+        descripcion: "Documentos asociados a la auditoría",
+        sufijo: `oci-${plan.consecutivo_OCI ?? ""}`,
+      },
+      autoFocus: false,
+    });
   }
 
   private resetTabla(): void {
