@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, OnDestroy, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
@@ -40,7 +40,7 @@ interface Tema {
     styleUrls: ['./aspectos-evaluados.component.css'],
     standalone: false
 })
-export class AspectosEvaluadosComponent implements OnInit, OnChanges {
+export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy {
   @Input() informeId!: string;
   @Input() auditoriaId!: string;
   @Input() soloLectura: boolean = false;
@@ -58,6 +58,18 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
     }
+  };
+
+  private readonly ANCHO_MAX_IMG = 500;
+  private observadores: MutationObserver[] = [];
+  private botonPresionado = false;
+  private revisores: Array<() => void> = [];
+
+  private readonly alPresionar = () => { this.botonPresionado = true; };
+  private readonly alSoltar = () => {
+    this.botonPresionado = false;
+    // Se espera un instante para no interferir con el cierre del arrastre de blotFormatter
+    setTimeout(() => this.revisores.forEach(revisar => revisar()), 0);
   };
 
   editorModules = {
@@ -113,6 +125,14 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     if (changes['soloLectura']) {
       this.actualizarModoSoloLectura();
     }
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('mousedown', this.alPresionar, true);
+    document.removeEventListener('mouseup', this.alSoltar, true);
+    this.observadores.forEach(o => o.disconnect());
+    this.observadores = [];
+    this.revisores = [];
   }
 
   private async usarDatosProporcionados(): Promise<void> {
@@ -189,6 +209,11 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   // Construye el formulario reactivo con los datos cargados
   async construirFormulario(): Promise<void> {
     this.documentosNuxeoTema.clear();
+
+    this.observadores.forEach(o => o.disconnect());
+    this.observadores = [];
+    this.revisores = [];
+
     const temasActivos = this.temasData.filter(tema => tema.activo);
 
     const gruposTemas = await Promise.all(temasActivos.map(async (tema) => {
@@ -558,5 +583,56 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
 
     const bytes = Uint8Array.from(atob(documento), c => c.charCodeAt(0));
     return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  onEditorCreated(quill: any): void {
+    const root: HTMLElement = quill.root;
+
+    const limitar = (img: HTMLImageElement) => {
+      const aplicar = () => {
+        const explicito = parseInt(img.getAttribute('width') || img.style.width || '', 10);
+        // Si no tiene ancho definido, se usa el tamaño natural de la imagen
+        const ancho = explicito > 0 ? explicito : img.naturalWidth;
+        if (ancho > this.ANCHO_MAX_IMG) {
+          img.style.removeProperty('width');
+          img.setAttribute('width', `${this.ANCHO_MAX_IMG}px`);
+        }
+      };
+
+      // Si todavía no cargó, se espera a que cargue para conocer su tamaño real
+      if (img.complete && img.naturalWidth > 0) {
+        aplicar();
+      } else {
+        img.addEventListener('load', aplicar, { once: true });
+      }
+    };
+
+    // Imágenes que ya existen al cargar el contenido
+    root.querySelectorAll('img').forEach(limitar);
+
+    this.revisores.push(() => root.querySelectorAll('img').forEach(limitar));
+
+    // Cada vez que cambie el ancho (arrastrando) o se agregue una imagen, se corrige
+    const observador = new MutationObserver((mutaciones) => {
+      if (this.botonPresionado) return;
+
+      for (const m of mutaciones) {
+        if (m.type === 'attributes' && m.target instanceof HTMLImageElement) {
+          limitar(m.target);
+        } else if (m.type === 'childList') {
+          m.addedNodes.forEach((n) => {
+            if (n instanceof HTMLImageElement) limitar(n);
+            else if (n instanceof HTMLElement) n.querySelectorAll('img').forEach(limitar);
+          });
+        }
+      }
+    });
+    observador.observe(root, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['width', 'style'],
+    });
+    this.observadores.push(observador);
   }
 }
