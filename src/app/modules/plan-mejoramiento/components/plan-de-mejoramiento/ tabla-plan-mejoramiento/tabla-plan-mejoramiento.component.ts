@@ -336,17 +336,35 @@ export class TablaPlanMejoramientoComponent implements OnInit {
 
   async verDocumentosAuditoria(plan: any): Promise<void> {
     const tipos = environment.TIPO_DOCUMENTO_PARAMETROS;
+
+    // Última versión de cada tipo de documento (consulta deduplicada) y cartas visibles según el rol
+    const [documentos, cartas] = await Promise.all([
+      lastValueFrom(this.referenciaPdfService.consultarDocumentos(plan._id)),
+      this.obtenerCartasVisibles(plan._id),
+    ]);
+    const dependencias = this.obtenerMapaDependencias(plan);
+
+    const tabDocumento = (nombre: string, tipoId: number): TabDocumento[] => {
+      const documento = documentos.find((doc) => doc.tipo_id === tipoId);
+      return documento ? [{ nombre, tipoId, documentoId: documento._id }] : [];
+    };
+
+    // Informe final y plan de mejoramiento primero; luego el orden del proceso de auditoría
     const tabs: TabDocumento[] = [
-      { nombre: "Informe final",        tipoId: tipos.INFORME_FINAL },
-      { nombre: "Plan de mejoramiento", tipoId: tipos.PLAN_MEJORAMIENTO },
+      ...tabDocumento("Informe final", tipos.INFORME_FINAL),
+      ...tabDocumento("Plan de mejoramiento", tipos.PLAN_MEJORAMIENTO),
+      ...tabDocumento("Informe preliminar", tipos.INFORME_PRELIMINAR),
+      ...tabDocumento("Programa de auditoría", tipos.PROGRAMA_TRABAJO),
+      ...tabDocumento("Solicitud de información", tipos.SOLICITUD_INFORMACION),
+      ...cartas.map((carta) => ({
+        nombre: "Carta de representación - " + (dependencias.get(carta.metadatos?.dependencia_id) ?? "Dependencia desconocida"),
+        tipoId: tipos.CARTA_PRESENTACION,
+        documentoId: carta._id,
+      })),
+      ...tabDocumento("Compromiso ético", tipos.COMPROMISO_ETICO),
     ];
 
-    // Verifica que exista al menos un documento antes de abrir el modal
-    const documentos = await lastValueFrom(
-      this.referenciaPdfService.consultarDocumentos(plan._id)
-    );
-    const hayDocumentos = documentos.some((doc) => tabs.some((tab) => tab.tipoId === doc.tipo_id));
-    if (!hayDocumentos) {
+    if (!tabs.length) {
       this.alertaService.showAlert("Sin documentos", "No se encontraron documentos asociados a esta auditoría.");
       return;
     }
@@ -363,6 +381,52 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       },
       autoFocus: false,
     });
+  }
+
+  // Cartas de representación: el auditado solo ve las de su dependencia (mismo criterio de Planeación)
+  private async obtenerCartasVisibles(auditoriaId: string): Promise<any[]> {
+    if (this.tipoConsulta !== "auditado") {
+      return await lastValueFrom(
+        this.referenciaPdfService
+          .consultarDocumentos(auditoriaId, { tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION })
+          .pipe(
+            catchError((error) => {
+              console.error("Error consultando cartas de presentación:", error);
+              return of([]);
+            })
+          )
+      );
+    }
+
+    const personaIdAuditado = this.usuarioId || await this.userService.getPersonaId();
+    const documentosVisiblesAuditado: any[] = await lastValueFrom(
+      this.planAuditoriaMid
+        .get(`auditado/${personaIdAuditado}/documento?auditoria_id=${auditoriaId}&cargo_id=${this.cargoId}`)
+        .pipe(
+          catchError((error) => {
+            console.error("Error consultando documentos visibles para auditado:", error);
+            return of([]);
+          })
+        )
+    );
+
+    return (documentosVisiblesAuditado ?? []).filter(
+      (documento: any) => documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
+    );
+  }
+
+  private obtenerMapaDependencias(plan: any): Map<number, string> {
+    const mapa = new Map<number, string>();
+    const ids: number[] = Array.isArray(plan.dependencia_id) ? plan.dependencia_id : [];
+    const nombres: string[] = Array.isArray(plan.dependencia_nombre) ? plan.dependencia_nombre : [];
+    ids.forEach((id, idx) => {
+      const nombre = nombres[idx]?.toLowerCase()
+          .split(" ")
+          .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+          .join(" ");
+      mapa.set(id, nombre ?? "Dependencia desconocida");
+    });
+    return mapa;
   }
 
   private resetTabla(): void {
