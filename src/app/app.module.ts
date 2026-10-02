@@ -25,8 +25,7 @@ import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
         provideHttpClient(withInterceptors([SpinnerInterceptor])),
         provideHttpClient(withInterceptorsFromDi()),
         provideNativeDateAdapter(),
-        // Desde Angular CDK 21 los overlays (MatDialog, menús, selects) se renderizan en el "top layer" del navegador
-        // mediante popover, quedando por encima de cualquier z-index; así las alertas de SweetAlert quedarían detrás.
+        // CDK 21 abre los overlays como popover (top layer) y quedan encima del spinner y de SweetAlert
         { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },
         { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },
         { provide: MAT_DATE_FORMATS,
