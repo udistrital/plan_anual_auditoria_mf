@@ -9,7 +9,7 @@
   <!-- Selector de archivo -->
   <div class="row">
     <div class="col-12">
-      <div class="row d-flex align-items-center">
+      <div class="row d-flex align-items-center" data-tour="form-cargue-archivo">
         <mat-form-field
           class="full-width"
           appearance="outline"
@@ -57,6 +57,7 @@
       color="primary"
       [mat-dialog-close]
       class="mb-sm"
+      data-tour="boton-cancelar-archivo"
     >
       <mat-icon>close</mat-icon>
       No, cerrar
@@ -67,6 +68,7 @@
       (click)="cargarArchivo()"
       class="mb-sm"
       [disabled]="!archivo"
+      data-tour="boton-subir-archivo"
     >
       <mat-icon>cloud_upload</mat-icon>
       Sí, subir
