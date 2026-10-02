@@ -3,43 +3,6 @@ name: oas_cliente_ci
 
 steps:
 
-- name: check_readme
-  image: jjvargass/qa_develoment:latest
-  commands:
-  - python /app/check_readme.py
-  when:
-    branch:
-    - develop
-    - feature/*
-    - release/*
-    event:
-    - push
-
-- name: check_branch
-  image: jjvargass/qa_develoment:latest
-  commands:
-  - python /app/check_branch.py -H ${DRONE_GIT_HTTP_URL}
-  when:
-    branch:
-    - develop
-    - feature/*
-    - release/*
-    event:
-    - push
-
-- name: check_commits
-  image: jjvargass/qa_develoment:latest
-  failure: ignore
-  commands:
-  - python /app/check_commits.py
-  when:
-    branch:
-    - develop
-    - feature/*
-    - release/*
-    event:
-    - push
-
 # - name: prueba_unitarias
 #   image: node:12.22.7
 #   commands:
@@ -81,9 +44,9 @@ steps:
 - name: nodejs_develop
   image: node:24-alpine
   commands:
-  - npm install -g pnpm
-  - pnpm install
-  - pnpm run build
+  - npm install -g pnpm@12.6.0
+  - pnpm install --frozen-lockfile
+  - pnpm run build:test
   when:
     branch:
     - develop
@@ -93,8 +56,8 @@ steps:
 - name: nodejs_release
   image: node:24-alpine
   commands:
-  - npm install -g pnpm
-  - pnpm install
+  - npm install -g pnpm@12.6.0
+  - pnpm install --frozen-lockfile
   - pnpm run build:test
   when:
     branch:
@@ -105,8 +68,8 @@ steps:
 - name: nodejs_master
   image: node:24-alpine
   commands:
-  - npm install -g pnpm
-  - pnpm install
+  - npm install -g pnpm@12.6.0
+  - pnpm install --frozen-lockfile
   - pnpm run build:prod
   when:
     branch:

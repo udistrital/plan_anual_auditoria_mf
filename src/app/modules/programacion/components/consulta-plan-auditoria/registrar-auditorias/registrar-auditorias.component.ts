@@ -285,7 +285,7 @@ export class RegistrarAuditoriasComponent implements OnInit {
   private async obtenerAuditoriasHijas(auditoriaId: string, tituloPadre: string): Promise<AuditoriaHija[]> {
     try {
       const res = await this.PlanAnualAuditoriaMid
-        .get(`auditoria?query=activo:true,_id:${auditoriaId}&limit=0`)
+        .get(`auditoria?query=activo:true,auditoria_padre_id:${auditoriaId}&limit=0`)
         .toPromise();
       if (!res?.Data?.length) return [];
       return res.Data.map((h: any) => ({

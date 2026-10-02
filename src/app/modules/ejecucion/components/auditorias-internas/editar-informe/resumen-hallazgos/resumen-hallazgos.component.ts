@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { numerarHallazgos } from 'src/app/shared/utils/numeracion-hallazgos.util';
 
 interface HallazgoResumen {
   numero: string;
@@ -28,31 +29,10 @@ export class ResumenHallazgosComponent implements OnChanges {
   }
 
   private computarHallazgos(temas: any[], hallazgos: any[]): void {
-    const lista: HallazgoResumen[] = [];
-    let temaCount = 0;
-
-    for (const tema of temas) {
-      if (!tema.activo) continue;
-      temaCount++;
-      let subtemaCount = 0;
-
-      for (const subtema of (tema.subtema ?? [])) {
-        if (!subtema.activo) continue;
-        subtemaCount++;
-        let hallazgoCount = 0;
-
-        const subtemaIdStr = subtema._id?.toString();
-        for (const h of hallazgos.filter(h => h.subtema_id?.toString() === subtemaIdStr && h.activo !== false)) {
-          hallazgoCount++;
-          lista.push({
-            numero: `${temaCount + 1}.${subtemaCount}.${hallazgoCount}`,
-            criterio: h.criterio ?? '',
-            descripcion: h.descripcion ?? ''
-          });
-        }
-      }
-    }
-
-    this.hallazgos = lista;
+    this.hallazgos = numerarHallazgos(temas, hallazgos).map((n) => ({
+      numero: n.numero,
+      criterio: n.hallazgo.criterio ?? '',
+      descripcion: n.hallazgo.descripcion ?? '',
+    }));
   }
 }

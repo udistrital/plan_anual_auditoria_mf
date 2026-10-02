@@ -3,7 +3,7 @@ import { Observable, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "./plan-anual-auditoria.service";
 
-export interface DocumentoReferenciaPdf {
+export type DocumentoReferenciaPdf = {
   _id?: string;
   referencia_id?: string;
   referencia_tipo?: string;
@@ -13,7 +13,8 @@ export interface DocumentoReferenciaPdf {
   fecha_creacion: string;
   nombre?: string;
   metadatos?: Record<string, any>;
-}
+  activo: boolean;
+};
 
 export interface ConsultaDocumentosReferenciaOptions {
   referenciaTipo?: string;
@@ -40,7 +41,7 @@ export class ReferenciaPdfService {
     nuevo: boolean = false,
     documentoIdActualizar?: string
   ): Observable<any> {
-    const payload = {
+    const payload: DocumentoReferenciaPdf = {
       referencia_tipo: referencia_tipo,
       referencia_id: referencia_id,
       nuxeo_id: nuxeoResponse.Id,

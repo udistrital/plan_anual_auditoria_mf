@@ -21,7 +21,7 @@ import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
-import { ModalHistorialObservacionesComponent } from "./modal-historial-observaciones/modal-historial-observaciones.component";
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 
 @Component({
     selector: "app-tabla-plan-mejoramiento",
@@ -93,13 +93,12 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     } else if (
       this.rolService.tieneRol(environment.ROL.AUDITOR) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE) ||
-      this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO)
+      this.rolService.tieneRol(environment.ROL.AUDITOR_ASISTENTE)
     ) {
       this.tipoConsulta = "auditor";
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     } else {
-      // JEFE y otros roles usan endpoint general; igual necesitan usuarioId para registrar estados
+      // JEFE, AUDITOR_EXPERTO y otros roles usan endpoint general
       this.userService.getPersonaId().then((id) => { this.usuarioId = id; });
     }
   }
@@ -242,7 +241,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
 
   asignarAuditores(plan: any): void {
     const dialogRef = this.dialog.open(ModalAsignacionAuditoresComponent, {
-      width: "800px",
+      width: "1100px",
       data: { auditoria: plan, usuarioId: this.usuarioId, role: this.role },
     });
     dialogRef.afterClosed().subscribe((guardado: boolean) => {
@@ -314,9 +313,20 @@ export class TablaPlanMejoramientoComponent implements OnInit {
       this.alertaService.showAlert('Sin plan', 'No hay plan de mejoramiento registrado para esta auditoría.');
       return;
     }
-    this.dialog.open(ModalHistorialObservacionesComponent, {
+
+    const data: HistorialRechazosData = {
+      auditoriaId: plan.planMejoramientoId,
+      estadoEndpoint: "plan-mejoramiento-estado",
+      auditoriaIdReferencia: "plan_mejoramiento_id",
+      estadoRevisionIds: [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR],
+      estadoRechazoIds: [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO],
+      titulo: "Historial de observaciones",
+      descripcion: `Lista de motivos de rechazo y observaciones - Auditoría ${plan.titulo ?? ''}`,
+    } as HistorialRechazosData;
+
+    this.dialog.open(ModalHistorialRechazosComponent, {
       width: '1000px',
-      data: { planMejoramientoId: plan.planMejoramientoId },
+      data: data,
     });
   }
 

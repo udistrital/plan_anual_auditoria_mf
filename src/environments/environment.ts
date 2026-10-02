@@ -135,6 +135,7 @@ export const environment = {
   },
 
   AUDITORIA_ESTADO: {
+    TIPO_PARAMETRO_ID: 159,
     PROGRAMACION: {
       BORRADOR_ID: 7060,
       POR_ASIGNAR: 7061,
@@ -176,8 +177,18 @@ export const environment = {
     },
   },
 
+  ACCION_MEJORA_ESTADOS: {
+    PENDIENTE_REVISION: 7160,
+    APROBADA: 7161,
+    RECHAZADA: 7163,
+  },
+
   MESES: {
     TIPO_PARAMETRO_ID: 139,
+  },
+
+  PLAN_MEJORAMIENTO: {
+    FUENTES_TIPO_PARAMETRO_ID: 170,
   },
 
   TIPO_EVALUACION: {
@@ -202,6 +213,8 @@ export const environment = {
     PLANTILLAS: 182,
     PLANES_AUDITORIA: 178,
     ACTA_MODIFICACION: 194,
+    INFORMES: 195,
+    PLAN_MEJORAMIENTO: 201
   },
 
   TIPO_DOCUMENTO_PARAMETROS: {
@@ -216,6 +229,8 @@ export const environment = {
     INFORME_PRELIMINAR: 7092,
     INFORME_FINAL: 7093,
     ACTA_MODIFICACION_PLAN: 7095,
+    PLAN_MEJORAMIENTO: 7169,
+    SOPORTE_AVANCE_ACCIONES: 7170,
   },
 
   INFO_AUDITORIA: {

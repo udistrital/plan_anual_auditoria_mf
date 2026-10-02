@@ -65,19 +65,31 @@
             [planMejoramientoId]="planMejoramientoId"
             [auditoria]="auditoria"
             [soloLectura]="true"
+            [modoRevision]="modoRevision"
+            (estadoAccionCambiado)="cargarEstadosAcciones()"
           ></app-tabla-hallazgos>
         }
       </div>
     </div>
 
     @if (mostrarAccionesRevision()) {
-      <div class="d-flex justify-content-end mt-4" style="gap: 12px;">
-        <button mat-stroked-button color="warn" (click)="rechazar()" [disabled]="!planMejoramientoId">
-          <mat-icon>cancel</mat-icon> Rechazar Plan
-        </button>
-        <button mat-raised-button color="primary" (click)="aprobar()" [disabled]="!planMejoramientoId">
-          <mat-icon>check_circle</mat-icon> Aprobar Plan
-        </button>
+      <div class="d-flex flex-column align-items-end mt-4">
+        @if (!todasRevisadas) {
+          <small class="text-muted mb-2">
+            Revise todas las acciones: luego podrá aprobar el plan (si todas quedan aprobadas) o rechazarlo (si al menos una queda rechazada).
+          </small>
+        }
+        <div class="d-flex justify-content-end" style="gap: 12px;">
+          <button mat-stroked-button color="primary" (click)="rechazar()"
+            [disabled]="!planMejoramientoId || !algunaRechazada">
+            <mat-icon>cancel</mat-icon> Rechazar Plan
+          </button>
+
+          <button mat-raised-button color="primary" (click)="aprobar()"
+            [disabled]="!planMejoramientoId || !todasAprobadas">
+            <mat-icon>check_circle</mat-icon> Aprobar Plan
+          </button>
+        </div>
       </div>
     }
   }

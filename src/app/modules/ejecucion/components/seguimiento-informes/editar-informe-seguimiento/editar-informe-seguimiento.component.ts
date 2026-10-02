@@ -328,7 +328,7 @@ export class EditarInformeSeguimientoComponent implements OnInit, AfterViewInit 
 
   private guardarDocumento(documentoBase64: any): void {
     const payload = {
-      IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+      IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
       nombre: "Informe Final",
       descripcion: "Documento pdf (informe-seguimiento) de seguimiento de plan de auditoría",
       metadatos: {},

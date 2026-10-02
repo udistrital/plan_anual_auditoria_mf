@@ -12,6 +12,7 @@ import { ModalRechazoPlanComponent } from '../ tabla-plan-mejoramiento/modal-rec
 @Component({
   selector: 'app-ver-plan',
   templateUrl: './ver-plan.component.html',
+  styleUrls: ['./ver-plan.component.css'],
   standalone: false,
 })
 export class VerPlanComponent implements OnInit {
@@ -19,9 +20,40 @@ export class VerPlanComponent implements OnInit {
   planMejoramientoId!: string;
   auditoria: any = null;
   cargando = true;
+  estadoPlanId: number | null = null;
+
+  planEstadoId: number | null = null;
+  /** estado_id de cada acción de mejora del plan (para validar la decisión) */
+  estadosAcciones: number[] = [];
 
   private role: string | null = null;
   private usuarioId = 0;
+
+  readonly ESTADO_ACCION = environment.ACCION_MEJORA_ESTADOS;
+
+  // El auditor está revisando y el plan está en revisión
+  get modoRevision(): boolean {
+    return this.mostrarAccionesRevision()
+      && this.planEstadoId === environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR;
+  }
+
+  // Plan aprobable solo si hay acciones y todas están APROBADA
+  get todasAprobadas(): boolean {
+    return this.estadosAcciones.length > 0
+      && this.estadosAcciones.every(e => e === this.ESTADO_ACCION.APROBADA);
+  }
+
+  // Todas las acciones fueron revisadas (ninguna en PENDIENTE_REVISION)
+  get todasRevisadas(): boolean {
+    return this.estadosAcciones.length > 0
+      && this.estadosAcciones.every(e => e !== this.ESTADO_ACCION.PENDIENTE_REVISION);
+  }
+
+  // Plan rechazable solo tras revisar todas y con al menos una RECHAZADA
+  get algunaRechazada(): boolean {
+    return this.todasRevisadas
+      && this.estadosAcciones.some(e => e === this.ESTADO_ACCION.RECHAZADA);
+  }
 
   readonly fuentes: Record<number, string> = {
     1: 'Auditoría Interna',
@@ -46,6 +78,10 @@ export class VerPlanComponent implements OnInit {
   }
 
   mostrarAccionesRevision(): boolean {
+    // Aprobar/Rechazar solo cuando el plan está pendiente de revisión del auditor.
+    if (this.estadoPlanId !== environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR) {
+      return false;
+    }
     return this.rolService.permisoCreacion([
       environment.ROL.JEFE,
       environment.ROL.AUDITOR_EXPERTO,
@@ -94,7 +130,10 @@ export class VerPlanComponent implements OnInit {
           const plan = res?.Data?.[0];
           if (plan) {
             this.planMejoramientoId = plan._id;
+            this.planEstadoId = plan.estado_id ?? null;
+            this.estadoPlanId = plan.estado_id ?? null;
             this.fuenteNombre = this.fuentes[plan.fuente] ?? '';
+            this.cargarEstadosAcciones();
           }
           this.cargando = false;
         },
@@ -102,7 +141,30 @@ export class VerPlanComponent implements OnInit {
       });
   }
 
+  // Carga los estado_id de las acciones del plan para validar la decisión del plan
+  cargarEstadosAcciones(): void {
+    if (!this.planMejoramientoId) return;
+    this.planAuditoriaService
+      .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0`)
+      .subscribe({
+        next: (res) => {
+          this.estadosAcciones = (res?.Data ?? []).map(
+            (a: any) => a.estado_id ?? this.ESTADO_ACCION.PENDIENTE_REVISION
+          );
+        },
+        error: () => { this.estadosAcciones = []; }
+      });
+  }
+
   aprobar(): void {
+    if (!this.todasAprobadas) {
+      this.alertService.showAlert(
+        'No se puede aprobar el plan',
+        'Para aprobar el plan, todas las acciones de mejora deben estar aprobadas.'
+      );
+      return;
+    }
+
     this.alertService.showConfirmAlert('¿Aprobar el plan de mejoramiento?').then(conf => {
       if (!conf.value) return;
 
@@ -130,6 +192,21 @@ export class VerPlanComponent implements OnInit {
   }
 
   rechazar(): void {
+    if (!this.todasRevisadas) {
+      this.alertService.showAlert(
+        'No se puede rechazar el plan',
+        'Debe revisar todas las acciones de mejora antes de rechazar el plan.'
+      );
+      return;
+    }
+    if (!this.algunaRechazada) {
+      this.alertService.showAlert(
+        'No se puede rechazar el plan',
+        'Para rechazar el plan, al menos una acción de mejora debe estar rechazada.'
+      );
+      return;
+    }
+
     const dialogRef = this.dialog.open(ModalRechazoPlanComponent, {
       width: '600px',
       data: { planMejoramientoId: this.planMejoramientoId, usuarioId: this.usuarioId, role: this.role },

@@ -1,10 +1,20 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
+import { DescargaService } from 'src/app/shared/services/descarga.service';
+import { RolService } from 'src/app/core/services/rol.service';
+import { UserService } from 'src/app/core/services/user.service';
+import { environment } from 'src/environments/environment';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
+import { ModalRemitirHallazgoComponent, ResultadoModalRemitirHallazgo } from '../modal-remitir-hallazgo/modal-remitir-hallazgo.component';
+import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
+import { hallazgosConstructorTabla, iconosAccionHallazgo, iconosUtilidadHallazgo } from './tabla-hallazgos.utilidades';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
+import { ModalObservacionAccionComponent } from '../modal-observacion-accion/modal-observacion-accion.component';
+import { ModalHistorialObservacionesAccionComponent } from '../modal-historial-observaciones-accion/modal-historial-observaciones-accion.component';
 
 export interface HallazgoTabla {
   hallazgoId: string;
@@ -29,6 +39,8 @@ export interface AccionPlan {
   fechaFin: string;
   fechaInicioISO: string | null;
   fechaFinISO: string | null;
+  estadoId: number;
+  estadoNombre: string;
 }
 
 export interface ResultadoModalAccion {
@@ -57,6 +69,8 @@ export interface FilaTabla {
 
 const TIPO_NOMBRES: Record<number, string> = { 1: 'Preventiva', 2: 'Correctiva' };
 
+const ESTADO_ACCION = environment.ACCION_MEJORA_ESTADOS;
+
 @Component({
     selector: 'app-tabla-hallazgos',
     templateUrl: './tabla-hallazgos.component.html',
@@ -66,37 +80,86 @@ const TIPO_NOMBRES: Record<number, string> = { 1: 'Preventiva', 2: 'Correctiva' 
 export class TablaHallazgosComponent implements OnInit {
   @Input() auditoriaId!: string;
   @Input() planMejoramientoId!: string;
-  @Input() auditoria: any;
+  @Input() auditoria!: Auditoria;
   @Input() soloLectura = false;
+  // Modo revisión del auditor: habilita aprobar/rechazar cada acción
+  @Input() modoRevision = false;
+
+  // Notifica al contenedor (VerPlan) que cambió el estado de alguna acción
+  @Output() estadoAccionCambiado = new EventEmitter<void>();
+
+  readonly ESTADO_ACCION = ESTADO_ACCION;
+
+  usuarioId = 0;
+  role: string | null = null;
 
   fechaAprobacionInforme: string | null = null;
   hallazgos: HallazgoTabla[] = [];
   filas: FilaTabla[] = [];
   cargando = true;
 
-  private readonly columnasTodas = [
-    'noHallazgo', 'descripcion', 'causa', 'numero', 'tipoAccion',
-    'accionPlanteada', 'nombreIndicador', 'formulaIndicador',
-    'meta', 'responsable', 'fechaInicio', 'fechaFin', 'acciones',
-  ];
+  constructorTabla = hallazgosConstructorTabla;
+  columnas: string[] = [];
 
-  get columnas(): string[] {
-    return this.soloLectura
-      ? this.columnasTodas.filter(c => c !== 'acciones')
-      : this.columnasTodas;
-  }
+  readonly iconosAccion = iconosAccionHallazgo;
+  readonly iconosUtilidad = iconosUtilidadHallazgo;
+  readonly utilidadesHallazgo = ['Agregar Acción', 'Remitir Hallazgo', 'Histórico de Remisiones'];
+  readonly accionesHallazgo = ['Editar Acción', 'Eliminar Acción'];
 
   esFilaGrupo  = (_i: number, fila: FilaTabla) =>  fila.esGrupo;
   esFilaAccion = (_i: number, fila: FilaTabla) => !fila.esGrupo;
+
+  getIconoAccion(accion: string): string {
+    return this.iconosAccion.get(accion) ?? 'help';
+  }
+
+  getIconoUtilidad(utilidad: string): string {
+    return this.iconosUtilidad.get(utilidad) ?? 'help';
+  }
+
+  realizarAccionHallazgo(hallazgoId: string, accion: string): void {
+    const hallazgo = this.getHallazgo(hallazgoId);
+    const acciones: Record<string, () => void> = {
+      'Agregar Acción': () => this.abrirModalRegistrarAccion(hallazgo),
+      'Remitir Hallazgo': () => this.remitirHallazgo(hallazgo),
+      'Histórico de Remisiones': () => this.verHistoricoRemisiones(hallazgo),
+    };
+    acciones[accion]?.();
+  }
+
+  private construirColumnas(): void {
+    if (this.modoRevision) {
+      this.constructorTabla = hallazgosConstructorTabla.filter(c => c.columnDef !== 'acciones');
+      this.columnas = [...this.constructorTabla.map(c => c.columnDef), 'revision'];
+    } else {
+      this.constructorTabla = hallazgosConstructorTabla.filter(
+        c => c.columnDef !== 'acciones' || !this.soloLectura
+      );
+      this.columnas = this.constructorTabla.map(c => c.columnDef);
+    }
+  }
 
   constructor(
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertService: AlertService,
     private readonly dialog: MatDialog,
+    private readonly descargaService: DescargaService,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.construirColumnas();
+    this.role = this.rolService.getRolPrioritario([
+      environment.ROL.JEFE,
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+      environment.ROL.JEFE_DEPENDENCIA,
+      environment.ROL.ASISTENTE_DEPENDENCIA,
+    ]);
+    this.usuarioId = await this.userService.getPersonaId();
     this.cargarDatos();
   }
 
@@ -137,6 +200,7 @@ export class TablaHallazgosComponent implements OnInit {
 
   private mapearAccion(a: any, index: number, responsablesPorAccion?: Map<string, string[]>): AccionPlan {
     const nombres = responsablesPorAccion?.get(a._id) ?? [];
+    const estadoId = a.estado_id ?? ESTADO_ACCION.PENDIENTE_REVISION;
     return {
       accionId:         a._id,
       numero:           String(index + 1),
@@ -151,6 +215,8 @@ export class TablaHallazgosComponent implements OnInit {
       fechaFin:         this.formatearFecha(a.fecha_fin),
       fechaInicioISO:   a.fecha_inicio ?? null,
       fechaFinISO:      a.fecha_fin ?? null,
+      estadoId,
+      estadoNombre:     a.estado_nombre ?? '',
     };
   }
 
@@ -180,7 +246,7 @@ export class TablaHallazgosComponent implements OnInit {
           return forkJoin({
             hallazgos: this.planAuditoriaService
               .get(`hallazgo?query=informe_id:${informeId},activo:true`),
-            acciones: this.planAuditoriaService
+            acciones: this.planAuditoriaMid
               .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)
               .pipe(catchError(() => of({ Data: [] }))),
           }).pipe(
@@ -226,7 +292,7 @@ export class TablaHallazgosComponent implements OnInit {
             .filter((h: any) => h.activo !== false)
             .map((h: any, i: number) => ({
               hallazgoId:  h._id,
-              indice:      String(i + 1),
+              indice:      h.no_hallazgo ?? String(i + 1),
               descripcion: h.descripcion ?? h.titulo ?? '',
               causa:       h.criterio ?? '',
               expandido:   estadoPrevio.get(h._id) ?? false,
@@ -256,7 +322,7 @@ export class TablaHallazgosComponent implements OnInit {
     if (!hallazgo) return;
 
     const dialogRef = this.dialog.open(ModalRegistrarAccionComponent, {
-      width: '900px',
+      width: '1000px',
       data: {
         hallazgo,
         accion: accion ?? null,
@@ -269,6 +335,33 @@ export class TablaHallazgosComponent implements OnInit {
     dialogRef.afterClosed().subscribe((resultado: ResultadoModalAccion | null) => {
       if (!resultado) return;
       accion ? this.actualizarAccion(resultado, accion) : this.crearAccion(resultado, hallazgo);
+    });
+  }
+
+  private remitirHallazgo(hallazgo: HallazgoTabla | undefined): void {
+    if (!hallazgo) return;
+    const dialogRef = this.dialog.open(ModalRemitirHallazgoComponent, {
+      width: '600px',
+      data: { hallazgo, auditoria: this.auditoria },
+    });
+    dialogRef.afterClosed().subscribe((resultado: ResultadoModalRemitirHallazgo | null) => {
+      if (!resultado) return;
+      this.cargarDatos();
+    });
+  }
+
+  private verHistoricoRemisiones(hallazgo: HallazgoTabla | undefined): void {
+    if (!hallazgo) return;
+
+    this.dialog.open(ModalHistorialRechazosComponent, {
+      width: '900px',
+      data: {
+        auditoriaId: hallazgo.hallazgoId,
+        estadoEndpoint: 'hallazgo-remision',
+        auditoriaIdReferencia: 'hallazgo_id',
+        titulo: 'Histórico de remisiones',
+        descripcion: `Histórico de remisiones para el hallazgo ${hallazgo.indice}`,
+      } as HistorialRechazosData,
     });
   }
 
@@ -285,6 +378,9 @@ export class TablaHallazgosComponent implements OnInit {
       meta:                 resultado.accion.meta,
       fecha_inicio:         resultado.accion.fechaInicio,
       fecha_fin:            resultado.accion.fechaFin,
+      estado_id:            ESTADO_ACCION.PENDIENTE_REVISION,
+      creado_por_id:        this.usuarioId,
+      creado_por_rol:       this.role,
       activo:               true,
     };
 
@@ -292,8 +388,15 @@ export class TablaHallazgosComponent implements OnInit {
       next: (res: any) => {
         const accionId = res.Data._id;
         this.guardarResponsables(accionId, resultado.responsablesNuevos, () => {
-          hallazgo.expandido = true;
-          this.cargarDatos();
+          this.registrarEstadoAccion(
+            accionId,
+            ESTADO_ACCION.PENDIENTE_REVISION,
+            null,
+            () => {
+              hallazgo.expandido = true;
+              this.cargarDatos();
+            }
+          );
         });
       },
       error: () => this.alertService.showErrorAlert('Error al guardar la acción de mejora.'),
@@ -309,7 +412,12 @@ export class TablaHallazgosComponent implements OnInit {
       meta:              resultado.accion.meta,
       fecha_inicio:      resultado.accion.fechaInicio,
       fecha_fin:         resultado.accion.fechaFin,
+      modificado_por_id:  this.usuarioId,
+      modificado_por_rol: this.role,
     };
+
+    // Si la acción venía RECHAZADA, al corregirla vuelve a PENDIENTE_REVISION
+    const veniaRechazada = accionAnterior.estadoId === ESTADO_ACCION.RECHAZADA;
 
     this.planAuditoriaService
       .put(`accion-mejora/${accionAnterior.accionId}`, body as any)
@@ -319,11 +427,106 @@ export class TablaHallazgosComponent implements OnInit {
             accionAnterior.accionId!,
             resultado.responsablesNuevos,
             resultado.responsablesAEliminar,
-            () => this.cargarDatos()
+            () => {
+              if (veniaRechazada) {
+                this.registrarEstadoAccion(
+                  accionAnterior.accionId!,
+                  ESTADO_ACCION.PENDIENTE_REVISION,
+                  null,
+                  () => this.cargarDatos()
+                );
+              } else {
+                this.cargarDatos();
+              }
+            }
           );
         },
         error: () => this.alertService.showErrorAlert('Error al actualizar la acción de mejora.'),
       });
+  }
+
+  // ─── Revisión del auditor (aprobar / rechazar por acción) ─────────────────────
+
+  aprobarAccion(accion: AccionPlan | undefined): void {
+    if (!accion?.accionId) return;
+    const dialogRef = this.dialog.open(ModalObservacionAccionComponent, {
+      width: '600px',
+      data: {
+        accionPlanteada: accion.accionPlanteada,
+        titulo:      'Aprobar Acción de Mejora',
+        descripcion: 'Registre la observación de la aprobación',
+        etiqueta:    'Observación de la aprobación',
+        textoBoton:  'Aprobar',
+        icono:       'check_circle',
+        confirmMsg:  '¿Aprobar esta acción de mejora?',
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (!observacion) return;
+      this.registrarEstadoAccion(
+        accion.accionId!,
+        ESTADO_ACCION.APROBADA,
+        observacion,
+        () => {
+          this.alertService.showSuccessAlert('Acción aprobada con observación.', 'Aprobada');
+          this.estadoAccionCambiado.emit();
+          this.cargarDatos();
+        }
+      );
+    });
+  }
+
+  rechazarAccion(accion: AccionPlan | undefined): void {
+    if (!accion?.accionId) return;
+    const dialogRef = this.dialog.open(ModalObservacionAccionComponent, {
+      width: '600px',
+      data: { accionPlanteada: accion.accionPlanteada },
+    });
+
+    dialogRef.afterClosed().subscribe((observacion: string | null) => {
+      if (!observacion) return;
+      this.registrarEstadoAccion(
+        accion.accionId!,
+        ESTADO_ACCION.RECHAZADA,
+        observacion,
+        () => {
+          this.alertService.showSuccessAlert('Acción rechazada con observación.', 'Rechazada');
+          this.estadoAccionCambiado.emit();
+          this.cargarDatos();
+        }
+      );
+    });
+  }
+
+  verHistorialAccion(accion: AccionPlan | undefined): void {
+    if (!accion?.accionId) return;
+    this.dialog.open(ModalHistorialObservacionesAccionComponent, {
+      width: '900px',
+      data: { accionMejoraId: accion.accionId, accionPlanteada: accion.accionPlanteada },
+    });
+  }
+
+  private registrarEstadoAccion(
+    accionId: string,
+    estadoId: number,
+    observacion: string | null,
+    callback: () => void
+  ): void {
+    const body = {
+      accion_mejora_id:       accionId,
+      usuario_id:             this.usuarioId,
+      usuario_rol:            this.role,
+      observacion,
+      estado_id:              estadoId,
+      fecha_ejecucion_estado: new Date().toISOString(),
+      activo:                 true,
+    };
+
+    this.planAuditoriaService.post('accion-mejora-estado', body).subscribe({
+      next: () => callback(),
+      error: () => this.alertService.showErrorAlert('Error al registrar el estado de la acción.'),
+    });
   }
 
   eliminarAccion(hallazgo: HallazgoTabla | undefined, accion: AccionPlan | undefined): void {
@@ -359,6 +562,69 @@ export class TablaHallazgosComponent implements OnInit {
     );
 
     forkJoin(requests).subscribe({ next: () => callback(), error: () => callback() });
+  }
+
+  exportarTabla() {
+    const headers = [
+        "No. Hallazgo",
+        "Descripción del Hallazgo",
+        "Causa del Hallazgo",
+        "No. Acción",
+        "Tipo de Acción",
+        "Acción Planteada",
+        "Nombre del Indicador",
+        "Fórmula del Indicador",
+        "Meta",
+        "Responsable de la Acción",
+        "Fecha Inicio",
+        "Fecha Fin"
+      ];
+
+    const rows = this.hallazgos.map(
+        hallazgo => hallazgo.acciones.map(
+          accion => [
+            hallazgo.indice,
+            hallazgo.descripcion,
+            hallazgo.causa,
+            accion.numero,
+            accion.tipoAccion,
+            accion.accionPlanteada,
+            accion.nombreIndicador,
+            accion.formulaIndicador,
+            accion.meta,
+            accion.responsable,
+            accion.fechaInicio,
+            accion.fechaFin,
+          ]
+        ).concat()
+      );
+
+    const payload = {
+        worksheets: [{
+          name: "Acciones de mejora",
+          rows: [headers, ...rows.flat()]
+        }]
+      };
+
+    const consecutivoOCI = this.auditoria.consecutivo_OCI ?? 'sin_consecutivo';
+    const tipoEvaluacion = this.auditoria.tipo_evaluacion_nombre?.toLowerCase().replace(/\s+/g, '_') ?? 'sin_tipo';
+
+    this.planAuditoriaMid.post(
+        'cargue-masivo/exportar-excel',
+        payload
+      ).subscribe({
+        next: (res: any) => {
+          this.descargaService.descargarArchivo(
+            res.base64,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            `acciones_mejora_${tipoEvaluacion}_${consecutivoOCI}`
+          );
+        },
+        error: (err) => {
+          console.error('Error exportar tabla:', err);
+          this.alertService.showErrorAlert('Error al exportar la tabla.');
+        }
+      });
   }
 
   private sincronizarResponsables(

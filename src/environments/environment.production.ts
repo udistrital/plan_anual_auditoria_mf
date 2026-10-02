@@ -132,6 +132,7 @@ export const environment = {
   },
 
   AUDITORIA_ESTADO: {
+    TIPO_PARAMETRO_ID: 110,
     PROGRAMACION: {
       BORRADOR_ID: 5310,
       POR_ASIGNAR: 5311,
@@ -173,8 +174,19 @@ export const environment = {
     },
   },
 
+  // TODO: confirmar/registrar los IDs reales de producción en parámetros
+  ACCION_MEJORA_ESTADOS: {
+    PENDIENTE_REVISION: 0,
+    APROBADA: 0,
+    RECHAZADA: 0,
+  },
+
   MESES: {
     TIPO_PARAMETRO_ID: 102,
+  },
+
+  PLAN_MEJORAMIENTO: {
+    FUENTES_TIPO_PARAMETRO_ID: 170,
   },
 
   TIPO_EVALUACION: {
@@ -199,6 +211,8 @@ export const environment = {
     PLANTILLAS: 121,
     PLANES_AUDITORIA: 117,
     ACTA_MODIFICACION: 122,
+    INFORMES: 123,
+    PLAN_MEJORAMIENTO: 0, //TODO: subir parametro a prod
   },
 
   TIPO_DOCUMENTO_PARAMETROS: {
@@ -213,6 +227,8 @@ export const environment = {
     INFORME_PRELIMINAR: 5279,
     INFORME_FINAL: 5280,
     ACTA_MODIFICACION_PLAN: 5274,
+    PLAN_MEJORAMIENTO: 0,
+    SOPORTE_AVANCE_ACCIONES: 0, //TODO: subir parametro a prod
   },
 
   INFO_AUDITORIA: {

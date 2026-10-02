@@ -41,7 +41,8 @@
               "deepmerge",
               "file-saver",
               "jszip",
-              "crypto-js"
+              "crypto-js",
+              "style-loader"
             ]
           },
           "configurations": {
@@ -88,7 +89,7 @@
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": true,
               "outputHashing": "none",
               "deployUrl": "http://localhost:4203/"

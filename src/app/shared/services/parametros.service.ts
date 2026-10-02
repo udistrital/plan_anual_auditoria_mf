@@ -51,12 +51,23 @@ export class ParametrosUtilsService {
    * @param hastaId ID final del rango
    * @returns Observable con los estados encontrados
    */
-  public getEstadosAuditoria(
-    desdeId?: number,
-    hastaId?: number
-  ): Observable<Parametro[]> {
+  public getFuentesPlanMejoramiento(): Observable<Parametro[]> {
+    const endpoint = `parametro?query=TipoParametroId:${environment.PLAN_MEJORAMIENTO.FUENTES_TIPO_PARAMETRO_ID},Activo:true&fields=Id,Nombre&limit=0&sortby=Id&order=asc`;
+    return this.parametrosService.get(endpoint).pipe(
+      map((res: any) => res?.Data ?? []),
+      catchError(err => {
+        console.error('Error cargando fuentes del plan de mejoramiento:', err);
+        return throwError(() => new Error('No se pudieron cargar las fuentes'));
+      })
+    );
+  }
 
-    let query = "TipoParametroId:159,Activo:true";
+  public getEstadosAuditoria(
+    desdeId: number = environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID,
+    hastaId: number = environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR
+  ): Observable<Parametro[]> {
+    const tipoParametroId = environment.AUDITORIA_ESTADO.TIPO_PARAMETRO_ID;
+    let query = `TipoParametroId:${tipoParametroId},Activo:true`;
 
     // Agregar filtros por rango si existen
     if (desdeId !== undefined) {

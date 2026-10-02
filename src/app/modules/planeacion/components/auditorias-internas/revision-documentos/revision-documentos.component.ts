@@ -13,7 +13,8 @@ import { UserService } from "src/app/core/services/user.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
-import { ReferenciaPdfService, DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
+import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import type { DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
 import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { TercerosService, VinculacionResponse } from "src/app/shared/services/terceros.service";
 import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, VariablesCartaRepresentacion } from "src/app/shared/services/notificaciones.service";
@@ -69,6 +70,8 @@ export class RevisionDocumentosComponent implements OnInit {
   cartasRepresentacion: CartaRepresentacionRevision[] = [];
   docCompromisoEtico: string = "";
   cargueCartasDialogRef?: MatDialogRef<any>;
+  esJefeOCI: boolean = false;
+  esAuditado: boolean = false;
 
   constructor(
     public readonly dialog: MatDialog,
@@ -124,10 +127,16 @@ export class RevisionDocumentosComponent implements OnInit {
 
   verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
     for (const carta of cartas) {
-      if (!carta.metadatos!["firmado"]) {
+      if (!carta?.metadatos?.["firmado"]) {
+        let mensaje = "";
+        if (this.esAuditado) {
+          mensaje = `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
+        } else if (this.esJefeOCI) {
+          mensaje = `El Oficio Anuncio Solicitud de información no ha sido cargado con firma. Por favor, cargue el oficio firmado antes de aprobar la auditoría.`
+        }
         this.alertService.showAlert(
           "Carta sin firmar",
-          `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
+          mensaje
         );
         return;
       }
@@ -257,6 +266,11 @@ export class RevisionDocumentosComponent implements OnInit {
       environment.ROL.JEFE_DEPENDENCIA,
       environment.ROL.ASISTENTE_DEPENDENCIA,
     ]);
+    this.esAuditado =
+      this.role === environment.ROL.JEFE_DEPENDENCIA ||
+      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
+
+    this.esJefeOCI = this.role === environment.ROL.JEFE;
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
@@ -270,14 +284,11 @@ export class RevisionDocumentosComponent implements OnInit {
   }
 
   puedeCargarCartaFirmada(): boolean {
-    const esAuditado =
-      this.role === environment.ROL.JEFE_DEPENDENCIA ||
-      this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
-
     return (
-      esAuditado &&
+      (this.esAuditado &&
       this.estadoAuditoriaId ===
-        environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO
+        environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO) ||
+      (this.esJefeOCI && this.estadoAuditoriaId === environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE)
     );
   }
 
@@ -295,6 +306,18 @@ export class RevisionDocumentosComponent implements OnInit {
         this.deberiaMostrarCarta(carta, dependenciasAuditado)
       );
       return cartas;
+  }
+
+  async cargarCartasJefeOCI() {
+    const cartas = (await lastValueFrom(
+      this.referenciaPdfService.consultarDocumentos(this.auditoriaId, {
+        deduplicarPorTipo: false,
+      })
+    )).filter((documento) =>
+      documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION
+    ) as DocumentoAdjuntoRevision[];
+
+    return cartas;
   }
 
   async obtenerDependenciasIdAuditado(): Promise<number[]> {
@@ -316,7 +339,15 @@ export class RevisionDocumentosComponent implements OnInit {
     ));
   };
 
-  async abrirModalCargueCartasFirmadas(): Promise<void> {
+  async abrirModalCargueCartasFirmadas() {
+    if (this.esAuditado) {
+      await this.abrirModalCargueCartasRepresentacionFirmadas()
+    } else if (this.esJefeOCI) {
+      await this.abrirModalCargueSolicitudInfoFirmada()
+    }
+  }
+
+  async abrirModalCargueCartasRepresentacionFirmadas(): Promise<void> {
     try {
       let cartasAuditado = await this.cargarCartasAuditado();
       console.debug("Cartas de representación visibles para modal:", cartasAuditado);
@@ -386,6 +417,86 @@ export class RevisionDocumentosComponent implements OnInit {
               icono: "fact_check",
               color: "primary",
               accion: async () => this.verificarFirmaCartaYPreguntarAprobacion(cartasAuditado),
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("Error al abrir modal de cargue de cartas firmadas", error);
+      this.alertService.showErrorAlert(
+        "No fue posible abrir el modal de cargue de cartas firmadas."
+      );
+    }
+  }
+
+  async abrirModalCargueSolicitudInfoFirmada(): Promise<void> {
+    try {
+      let cartas = await this.cargarCartasJefeOCI();
+      console.debug("Cartas de representación visibles para modal:", cartas);
+
+      if (!Array.isArray(cartas) || cartas.length === 0) {
+        this.alertService.showAlert(
+          "Sin oficios disponibles",
+          "No se encontraron oficios de solicitud de información para cargar firma."
+        );
+        return;
+      }
+
+      const tabs: TabDocumento[] = cartas.map((documento, index): TabDocumento => {
+
+        return {
+          nombre: `Oficio Anuncio Solicitud de información`,
+          nombreDescarga: "oficio-solicitud-informacion",
+          tipoId: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
+          documentoId: documento._id,
+          botones: [{
+            nombre: "Descargar Carta",
+            color: "primary",
+            estilo: "border: 1px solid var(--md-primary-500);",
+            tipo: "stroked",
+            accion: async () => {
+              const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+              this.descargaService.descargarArchivo(
+                base64, "application/pdf", `Oficio_Solicitud_Informacion`
+              );
+            }
+          }],
+          cargueAdjuntoConfig: {
+            nombreBoton: "Cargar Carta Firmada",
+            iconoBoton: "upload_file",
+            colorBoton: "primary",
+            tipoBoton: "stroked",
+            estiloBoton: "border: 1px solid var(--md-primary-500);",
+            idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+            descripcion: `Oficio Anuncio Solicitud de información firmado`,
+            referenciaTipoFallback: "Auditoria",
+            metadatosAdicionales: { firmado: true },
+            onSuccess: async () => {
+              cartas = await this.cargarCartasJefeOCI();
+              this.cargarDocumentos();
+            },
+          },
+        };
+      });
+
+      this.cargueCartasDialogRef = this.dialog.open(ModalVerDocumentosComponent, {
+        width: "1200px",
+        data: {
+          entityId: this.auditoriaId,
+          titulo: "Oficio Anuncio Solicitud de información",
+          descripcion:
+            "Revise y cargue el Oficio Anuncio Solicitud de información firmado.",
+          tabs,
+          sufijo: `oci-${this.consecutivoOci}`,
+          nombreArchivoDescarga: "oficio-solicitud-informacion",
+          tipo: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
+          textoBotonCerrar: "Cerrar",
+          accionesFooter: [
+            {
+              nombre: this.rolesAprobacion[this.role!].botonAprobacion,
+              icono: "fact_check",
+              color: "primary",
+              accion: async () => this.verificarFirmaCartaYPreguntarAprobacion(cartas),
             },
           ],
         },
@@ -779,6 +890,12 @@ export class RevisionDocumentosComponent implements OnInit {
         const vigenciaId = datosAuditoria?.vigencia_id;
         const vigenciaObj = vigencias.find((v: any) => v.Id === vigenciaId);
         const vigenciaNombre = vigenciaObj?.Nombre || (vigenciaId ? String(vigenciaId) : "");
+        dependenciasInfo.forEach((dep) => 
+          datosAuditoria.correo_complementario?.forEach((correo: any) => {
+            if (correo.dependencia_id === dep.dependencia_id)
+              dep.correo_complementario = correo.correo;
+          })
+        );
 
         const correosAuditores$ = listaAuditores.length > 0
           ? forkJoin(

@@ -381,13 +381,25 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       // Crear o actualizar tema
       if (!temaId) {
         try {
-          const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
-            informe_id: this.informeId,
-            titulo: temaForm.nombre,
-            descripcion_titulo: temaForm.descripcion_titulo
-          }));
-          temaId = response?.Data?._id || response?._id;
-          this.temas.at(i).patchValue({ _id: temaId, isNew: false });
+          if(this.contieneImagen(temaForm.descripcion_titulo)) {
+            let html = String(temaForm.descripcion_titulo);
+            html = html.replace(
+              /width="(\d+)px"/g,
+              'style="width:$1px;"'
+            );
+            html = html.replace(
+              /\sheight="auto"/g,
+              ''
+            );
+          } else {
+            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
+              informe_id: this.informeId,
+              titulo: temaForm.nombre,
+              descripcion_titulo: temaForm.descripcion_titulo
+            }));
+            temaId = response?.Data?._id || response?._id;
+            this.temas.at(i).patchValue({ _id: temaId, isNew: false });
+          }
         } catch (error) {
           console.error('Error al crear tema:', error);
           this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
@@ -395,10 +407,22 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         }
       } else {
         try {
-          await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-            titulo: temaForm.nombre,
-            descripcion_titulo: temaForm.descripcion_titulo
-          }));
+          if (this.contieneImagen(temaForm.descripcion_titulo)) {
+            let html = String(temaForm.descripcion_titulo);
+            html = html.replace(
+              /width="(\d+)px"/g,
+              'style="width:$1px;"'
+            );
+            html = html.replace(
+              /\sheight="auto"/g,
+              ''
+            );
+          } else {
+            await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
+              titulo: temaForm.nombre,
+              descripcion_titulo: temaForm.descripcion_titulo
+            }));
+          }
         } catch (error) {
           console.error('Error al actualizar tema:', error);
           this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
@@ -478,5 +502,12 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     this.alertaService.showAlert('Guardado exitoso', 'Los aspectos evaluados se han guardado correctamente');
     this.datosActualizados.emit();
     return true;
+  }
+
+  private contieneImagen(html: string): boolean {
+    if (!html) return false;
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.querySelector('img') !== null;
   }
 }

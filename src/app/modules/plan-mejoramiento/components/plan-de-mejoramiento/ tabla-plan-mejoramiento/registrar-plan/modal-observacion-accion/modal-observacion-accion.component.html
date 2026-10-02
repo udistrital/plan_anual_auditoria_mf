@@ -1,0 +1,34 @@
+<plantilla-modal [icono]="icono" [titulo]="titulo"
+  [descripcion]="descripcion" [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-3">
+    @if (data.accionPlanteada) {
+      <div class="col-12 mb-2">
+        <p class="mb-1"><b style="color: var(--md-accent-800)">Acción: </b>{{ data.accionPlanteada }}</p>
+      </div>
+    }
+    
+    <div class="col-12">
+      <form [formGroup]="form">
+        <mat-form-field appearance="outline" class="col-12">
+          <mat-label>{{ etiqueta }}</mat-label>
+          <mat-icon color="primary" matPrefix>format_list_bulleted</mat-icon>
+          <textarea style="height: 100px; resize: none" matInput formControlName="observacion"></textarea>
+        </mat-form-field>
+      </form>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="mb-3">
+    <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]>
+      <mat-icon>toll</mat-icon>No, regresar
+    </button>
+    <button mat-raised-button color="primary" (click)="confirmar()">
+      <mat-icon>{{ icono }}</mat-icon>{{ textoBoton }}
+    </button>
+  </div>
+</ng-template>

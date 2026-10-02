@@ -1,0 +1,99 @@
+/* ── Contenedor raíz ─────────────────────────────────────── */
+:host ::ng-deep .container {
+  max-width: 100% !important;
+  padding-left: 60px !important;
+  padding-right: 60px !important;
+}
+
+:host ::ng-deep mat-card {
+  min-height: calc(100vh - 280px);
+}
+
+:host {
+  display: block;
+  transition: width ease-in-out 400ms;
+}
+
+/* ── Tipografía de secciones ─────────────────────────────── */
+.seccion-titulo {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.texto-subtitulo {
+  color: #666;
+}
+
+/* ── Mensaje informativo de vigencia ─────────────────────── */
+.info-vigencia {
+  color: #555;
+}
+
+.icono-info {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* ── Ícono de búsqueda en inputs ─────────────────────────── */
+.icono-busqueda {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  color: #888;
+  cursor: default;
+}
+
+/* ── Grid de filtros ─────────────────────────────────────── */
+.filtros-grid {
+  row-gap: 0;
+}
+
+/* ── Botón exportar ──────────────────────────────────────── */
+.btn-exportar {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Tabla ───────────────────────────────────────────────── */
+/* Filas alternadas (mismo patrón que las demás tablas del módulo) */
+.even-row {
+  background-color: #f9f9f9;
+}
+
+/* Celdas de lista: clamp multilínea con tooltip */
+.celda-lista {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 220px;
+}
+
+/* Estado vacío de la tabla */
+.fila-vacia td {
+  border: none !important;
+}
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #9e9e9e;
+}
+
+.icono-vacio {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.estado-vacio p {
+  margin: 0;
+  text-align: center;
+}

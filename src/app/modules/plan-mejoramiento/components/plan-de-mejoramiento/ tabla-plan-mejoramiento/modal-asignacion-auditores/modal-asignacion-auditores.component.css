@@ -88,30 +88,31 @@
   }
 }
 
-.tabla-auditores-readonly {
-  border-collapse: collapse;
-  font-size: 13px;
-  width: 100%;
-  table-layout: fixed;
+.auditores-lista {
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 0; 
 }
 
-.tabla-auditores-readonly td {
-  padding: 8px 12px;
-  text-align: left;
-  border: 1px solid #e8e8e8;
-  width: 100%;
-  word-break: break-word;
+.auditor-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px; 
+  margin: 0; 
 }
 
-.tabla-auditores-readonly tbody tr:nth-child(even) {
-  background-color: var(--md-accent-50);
+.even-row {
+  background-color: #f4f4f4;
 }
 
-.tabla-auditores-readonly .icon-chip {
-  width: 16px;
-  height: 16px;
-  font-size: 16px;
-  vertical-align: middle;
-  margin-right: 4px;
-  color: var(--md-primary-500);
+.auditor-info {
+  display: flex;
+  align-items: center;
+}
+
+.auditor-nombre {
+  font-size: 14px;
+  color: #555;
 }

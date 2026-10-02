@@ -1,13 +1,13 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
-import { environment } from "src/environments/environment";
-import { forkJoin } from "rxjs";
 
-interface HistorialRechazosData {
+export interface HistorialRechazosData {
   auditoriaId: string;
-  estadoIds: number[];
-  tipoEntidad?: "auditoria" | "plan";
+  estadoEndpoint: string;
+  auditoriaIdReferencia: string;
+  estadoRevisionIds?: number[];
+  estadoRechazoIds?: number[];
   titulo?: string;
   descripcion?: string;
 }
@@ -19,8 +19,7 @@ interface HistorialRechazosData {
   standalone: false,
 })
 export class ModalHistorialRechazosComponent implements OnInit {
-  rechazos: any[] = [];
-  revisionesJefe: any[] = [];
+  observaciones: any[] = [];
   cargando = true;
   titulo: string;
   descripcion: string = "";
@@ -38,38 +37,46 @@ export class ModalHistorialRechazosComponent implements OnInit {
   }
 
   cargarRechazos() {
-    const { auditoriaId, estadoIds, tipoEntidad = "auditoria" } = this.data;
-    const estadoQuery = estadoIds.join("|");
-    const isPlan = tipoEntidad === "plan";
-    const baseUrl = isPlan ? "plan-estado" : "auditoria-estado";
-    const estadoRevisionJefeId = isPlan
-      ? environment.PLAN_ESTADO.EN_REVISION_JEFE_ID
-      : environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE;
+    const queryParts = [`${this.data.auditoriaIdReferencia}:${this.data.auditoriaId}`];
 
-    const entityIdQueryName = isPlan ? "plan_auditoria_id" : "auditoria_id";
+    const estados = [
+      ...(this.data.estadoRevisionIds ?? []),
+      ...(this.data.estadoRechazoIds ?? []),
+    ];
 
-    const rechazos$ = this.planAuditoriaMid.get(
-      `${baseUrl}?query=${entityIdQueryName}:${auditoriaId},estado_id__in:${estadoQuery},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
-    );
+    if (estados.length > 0) {
+      queryParts.push(`estado_id__in:${estados.join("|")}`);
+    }
 
-    const revisionesJefe$ = this.planAuditoriaMid.get(
-      `${baseUrl}?query=${entityIdQueryName}:${auditoriaId},estado_id:${estadoRevisionJefeId},activo:true&limit=0&sortby=fecha_ejecucion_estado&order=desc`
-    );
+    queryParts.push("activo:true");
 
-    forkJoin([rechazos$, revisionesJefe$]).subscribe({
-      next: ([resRechazos, resRevisiones]) => {
-        this.rechazos = resRechazos?.Data ?? [];
-        // Solo mostrar revisiones del jefe que tengan observación no vacía
-        this.revisionesJefe = (resRevisiones?.Data ?? []).filter(
-          (r: any) => r.observacion && r.observacion.trim() !== ""
-        );
+    const url = `${this.data.estadoEndpoint}?query=${queryParts.join(",")}` +
+      "&limit=0&sortby=fecha_ejecucion_estado&order=desc";
+
+    this.planAuditoriaMid.get(url).subscribe({
+      next: (res) => {
+        const data = res?.Data ?? [];
+
+        if (estados.length > 0) {
+          this.observaciones = data.filter((item: any) =>
+            this.data.estadoRechazoIds?.includes(item.estado_id)
+            || item.observacion && item.observacion.trim() !== ""
+          );
+        } else {
+          this.observaciones = data;
+        }
+
         this.cargando = false;
       },
-      error: () => {
-        this.rechazos = [];
-        this.revisionesJefe = [];
+      error: (err) => {
+        console.error("Error al cargar historial de rechazos:", err);
         this.cargando = false;
-      },
+      }
     });
+  }
+
+  isRechazo(observacion: any): boolean {
+    const estadoId = observacion.estado?.id ?? observacion.estado_id;
+    return Boolean(this.data.estadoRechazoIds?.includes(estadoId));
   }
 }

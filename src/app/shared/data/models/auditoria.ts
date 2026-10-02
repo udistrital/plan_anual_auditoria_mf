@@ -38,8 +38,6 @@ export interface Auditoria {
   macroproceso_id: number[];
   proceso_id: number[];
   dependencia_id: number[];
-  jefe_nombre: number;
-  asistente_nombre: number;
   fecha_inicio: string;
   fecha_fin: string;
   objetivo: string;

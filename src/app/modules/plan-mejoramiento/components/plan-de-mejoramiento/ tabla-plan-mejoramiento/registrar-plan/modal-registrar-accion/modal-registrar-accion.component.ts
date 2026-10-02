@@ -1,16 +1,17 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { OikosService } from 'src/app/core/services/oikos.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { AccionPlan, ResultadoModalAccion } from '../tabla-hallazgos/tabla-hallazgos.component';
+import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
 
 export interface DatosModalAccion {
   hallazgo: any;
   accion: AccionPlan | null;
-  auditoria: any;
+  auditoria: Auditoria;
   planMejoramientoId: string;
   fechaAprobacionInforme: string | null;
 }
@@ -33,7 +34,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   todasDependencias: Dependencia[] = [];
   dependenciasDisponibles: Dependencia[] = [];
-  responsableSeleccionado: Dependencia | null = null;
+  responsableSeleccionado: FormControl<Dependencia | null>;
   responsablesAgregados: Dependencia[] = [];
 
   private responsablesActuales: { _id: string; dependencia_id: number; dependencia_lider: boolean }[] = [];
@@ -69,12 +70,13 @@ export class ModalRegistrarAccionComponent implements OnInit {
     private readonly alertService: AlertService,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly oikosService: OikosService,
-  ) {}
+  ) {
+    this.responsableSeleccionado = new FormControl<Dependencia | null>(null, Validators.required);
+  }
 
   ngOnInit(): void {
     this.modoEdicion = !!this.data.accion;
     this.iniciarForm();
-    this.iniciarDependenciaLider();
     this.cargarDependencias();
     if (this.modoEdicion) this.poblarForm();
   }
@@ -105,10 +107,13 @@ export class ModalRegistrarAccionComponent implements OnInit {
   }
 
   private iniciarDependenciaLider(): void {
-    this.dependenciaLider =
-      this.data.auditoria?.jefe_nombre ??
-      this.data.auditoria?.dependencia_nombre ??
-      '';
+    if (!this.modoEdicion) {
+      const depsLideres = this.todasDependencias.filter(
+        d => this.data.auditoria.dependencia_id.includes(d.id)
+      );
+      this.responsablesActuales.push(...depsLideres.map(d => ({ _id: '', dependencia_id: d.id, dependencia_lider: true })));
+      this.dependenciaLider = depsLideres.map(d => d.nombre).join(', ');
+    }
   }
 
   private cargarDependencias(): void {
@@ -120,6 +125,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
           id:     d.Id ?? d.id,
           nombre: d.Nombre ?? d.nombre,
         }));
+        this.iniciarDependenciaLider();
         this.actualizarDisponibles();
         this.cargandoDependencias = false;
 
@@ -140,10 +146,12 @@ export class ModalRegistrarAccionComponent implements OnInit {
           this.responsablesActuales = res.Data ?? [];
           // Mostrar en UI solo los que NO son líderes
           const dependenciasActuales = this.responsablesActuales.filter(r => !r.dependencia_lider);
+          const idsLideres = new Set(this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id));
           this.responsablesAgregados = dependenciasActuales.map(r => {
             const dep = this.todasDependencias.find(d => d.id === r.dependencia_id);
             return { id: r.dependencia_id, nombre: dep?.nombre ?? `Dependencia ${r.dependencia_id}` };
           });
+          this.dependenciaLider = this.todasDependencias.filter(d => idsLideres.has(d.id)).map(d => d.nombre).join(', ');
           this.actualizarDisponibles();
         },
         error: () => {}
@@ -168,13 +176,15 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private actualizarDisponibles(): void {
     const idsAgregados = new Set(this.responsablesAgregados.map(r => r.id));
-    this.dependenciasDisponibles = this.todasDependencias.filter(d => !idsAgregados.has(d.id));
+    const idsLideres = new Set(this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id));
+    this.dependenciasDisponibles = this.todasDependencias.filter(d => !idsAgregados.has(d.id) && !idsLideres.has(d.id));
   }
 
   agregarResponsable(): void {
-    if (!this.responsableSeleccionado) return;
-    this.responsablesAgregados = [...this.responsablesAgregados, { ...this.responsableSeleccionado }];
-    this.responsableSeleccionado = null;
+    if (!this.responsableSeleccionado.value) return;
+    const seleccionado = this.responsableSeleccionado.value!;
+    this.responsablesAgregados = [...this.responsablesAgregados, { ...seleccionado }];
+    this.responsableSeleccionado.patchValue(null);
     this.actualizarDisponibles();
   }
 
@@ -199,7 +209,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
       if (!conf.value) return;
 
       const v = this.form.getRawValue();
-      const liderDependenciaId: number = this.data.auditoria?.dependencia_id ?? 0;
+      const liderDependenciaId: number[] = this.data.auditoria?.dependencia_id ?? [];
 
       // IDs de dependencias (no-lider) que ya estaban en DB
       const idsActualesNoLider = new Set(
@@ -218,7 +228,11 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
       // En creación: incluir la dependencia líder solo si tiene ID válido
       if (!this.modoEdicion && liderDependenciaId) {
-        responsablesNuevos.push({ dependencia_id: liderDependenciaId, dependencia_lider: true });
+        responsablesNuevos.push(
+          ...liderDependenciaId.map(id => {
+            return { dependencia_id: id, dependencia_lider: true } 
+          })
+        );
       }
 
       // Dependencias que el usuario agregó y no estaban en DB

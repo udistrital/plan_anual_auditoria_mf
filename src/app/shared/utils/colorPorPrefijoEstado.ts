@@ -11,6 +11,7 @@ export const emojiColorPorPrefijoEstado: { [prefijo: string]: string } = {
   "Borrador": "🟡",
   "En Revisión": "🔵",
   "Aprobado": "🟢",
+  "Aprobada": "🟢",
   "Rechazado": "🔴",
 };
 

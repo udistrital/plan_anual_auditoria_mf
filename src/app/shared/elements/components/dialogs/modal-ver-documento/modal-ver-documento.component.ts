@@ -21,6 +21,8 @@ interface ModalDocumentoMultipleData {
     standalone: false
 })
 export class ModalVerDocumentoComponent implements OnInit {
+  @Input() botonRegenerar = { icono: "", texto: "" };
+  @Input() onRegenerarIndividual?: (indice: number) => Promise<string>;
   @Input() botonGuardar = { icono: "", texto: "" };
   @Input() botonGuardarTodos = { icono: "", texto: "" };
   @Input() botonDescargarDOCX = { icono: "", texto: "" };
@@ -101,6 +103,24 @@ export class ModalVerDocumentoComponent implements OnInit {
       accion: "guardarDocumento",
       indice,
     });
+  }
+
+  async regenerar(indice: number = this.indiceSeleccionado): Promise<void> {
+    if (!this.onRegenerarIndividual
+        || (this.modoMultiple && (indice < 0 || indice >= this.documentosMultiples.length)))
+      return;
+
+    const newBase64 = await this.onRegenerarIndividual(indice);
+
+    if (!this.modoMultiple) {
+      this.documentoSrc = new Uint8Array(this.base64ToArrayBuffer(newBase64));
+      console.log("Documento regenerado");
+      return;
+    }
+
+    this.documentosMultiples[indice].base64 = newBase64;
+    this.documentosMultiples[indice].guardado = false;
+    this.seleccionarDocumento(indice);
   }
 
   guardarTodas(): void {

@@ -43,16 +43,19 @@ export const accionesProgramacion: {
       "Historial de Observaciones",
     ],
     [environment.PLAN_ESTADO.EN_REVISION_SECRETARIO_ID]: [
-      "Ver Plan",
+      "Ver Documentos",
       "Historial de Observaciones",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
-      "Ver Plan",
+      "Ver Documentos",
       "Historial de Observaciones",
       "Edición Extraordinaria de Auditorías",
       "Historial de Ediciones Extraordinarias",
     ],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Observaciones"],
+    [environment.PLAN_ESTADO.RECHAZADO]: [
+      "Ver Documentos",
+      "Historial de Observaciones"
+    ],
   },
 
   [environment.ROL.SECRETARIO]: {
@@ -63,10 +66,13 @@ export const accionesProgramacion: {
       "Historial de Observaciones",
     ],
     [environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID]: [
-      "Ver Plan",
+      "Ver Documentos",
       "Historial de Observaciones",
     ],
-    [environment.PLAN_ESTADO.RECHAZADO]: ["Ver Plan", "Historial de Observaciones"],
+    [environment.PLAN_ESTADO.RECHAZADO]: [
+      "Ver Documentos",
+      "Historial de Observaciones"
+    ],
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
@@ -146,6 +152,9 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PROGRAMACION.BORRADOR_ID]: [
       "Revisar Auditoría",
     ],
+    [environment.AUDITORIA_ESTADO.PLANEACION.CREANDO_PROGRAMA]: [
+      "Ver Auditoría",
+    ],
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_JEFE]: [
       "Ver Auditoría",
       "Revisar Auditoría",
@@ -154,6 +163,7 @@ export const accionesPlaneacion: {
     [environment.AUDITORIA_ESTADO.PLANEACION.REVISION_PROGRAMA_AUDITADO]: [
       "Ver Auditoría",
       "Revisar Auditoría",
+      "Iniciar Ejecución",
       "Historial de Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_AUDITADO]: [
@@ -167,6 +177,10 @@ export const accionesPlaneacion: {
       "Revisar Auditoría",
       "Historial de Observaciones",
     ],
+    [environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR]: [
+      "Ver Auditoría",
+    ],
+
   },
 
   [environment.ROL.AUDITOR_EXPERTO]: {
@@ -703,7 +717,7 @@ export const accionesPlanMejoramiento: {
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
       "Asignar Auditor(es)",
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -712,7 +726,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -732,7 +746,7 @@ export const accionesPlanMejoramiento: {
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
       "Asignar Auditor(es)",
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -741,7 +755,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -761,7 +775,7 @@ export const accionesPlanMejoramiento: {
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
       "Asignar Auditor(es)",
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -770,7 +784,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -790,7 +804,7 @@ export const accionesPlanMejoramiento: {
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
       "Asignar Auditor(es)",
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -799,7 +813,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -817,7 +831,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -827,7 +841,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -845,7 +859,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
@@ -855,7 +869,7 @@ export const accionesPlanMejoramiento: {
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
-      "Registrar Plan",
+      "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
