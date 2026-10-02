@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core";
+import { NgModule, provideZoneChangeDetection } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -19,6 +19,8 @@ import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
         BrowserAnimationsModule
     ], 
     providers: [
+        // Angular 21 es zoneless por defecto; la app depende de zone.js para detectar cambios asíncronos
+        provideZoneChangeDetection(),
         PlanAnualAuditoriaService,
         provideHttpClient(withInterceptors([SpinnerInterceptor])),
         provideHttpClient(withInterceptorsFromDi()),

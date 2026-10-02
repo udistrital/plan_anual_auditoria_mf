@@ -71,6 +71,8 @@ export interface ModalVerDocumentosData {
   tipo?: number;
   textoBotonCerrar?: string;
   accionesFooter?: AccionFooterModal[];
+  /** Oculta el botón "Descargar Todo" */
+  ocultarDescargarTodo?: boolean;
 }
 
 export interface AccionFooterModal {
@@ -101,6 +103,7 @@ export class ModalVerDocumentosComponent implements OnInit {
   consultarPorTipo: boolean = false;
   tabs: TabDocumento[] = [];
   accionesFooter: AccionFooterModal[] = [];
+  ocultarDescargarTodo: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ModalVerDocumentosData,
@@ -116,6 +119,7 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (data.tabs) this.tabs = data.tabs;
     if (data.textoBotonCerrar) this.textoBotonCerrar = data.textoBotonCerrar;
     if (data.accionesFooter) this.accionesFooter = data.accionesFooter;
+    if (data.ocultarDescargarTodo) this.ocultarDescargarTodo = true;
     if (data.tipo) this.consultarPorTipo = true;
     if (data.nombreArchivoDescarga) {
       this.nombreArchivoDescarga = data.nombreArchivoDescarga;

@@ -20,6 +20,8 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
   OIKOS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/oikos_crud_api/v2/",
+  FIRMA_SERVICE:
+    "https://autenticacion.portaloas.udistrital.edu.co/apioas/firma_electronica_mid/v1/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
   PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "f5703026-3fc8-48d1-bb41-fd2479656c23",
