@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { EMPTY, Observable, from, of, throwError } from "rxjs";
-import { switchMap, catchError } from "rxjs/operators";
+import { switchMap, catchError, map } from "rxjs/operators";
 import { ImplicitAutenticationService } from "src/app/core/services/implicit_autentication.service";
 import {
   TercerosCrudService,
@@ -15,11 +15,11 @@ export interface TerceroIdentification {
   UsuarioWSO2: string;
 }
 
-interface TerceroResponse {
+export interface TerceroResponse {
   Identificacion: {
     Numero: string;
     DigitoVerificacion: number;
-    TipoDocumentoId: Object;
+    TipoDocumentoId: { Id?: number; Nombre?: string; CodigoAbreviacion?: string };
   },
   Tercero: TerceroIdentification;
 };
@@ -55,6 +55,19 @@ export class TercerosService {
    * @throws Will throw an error if the server response is malformed.
    */
   public getAuthenticatedUserTerceroIdentification(): Observable<TerceroIdentification> {
+    return this.getAuthenticatedUserTerceroResponse().pipe(
+      map((response: TerceroResponse) => response.Tercero)
+    );
+  }
+
+  /**
+   * Retrieve the full {@link TerceroResponse} of the currently authenticated user,
+   * including the identification document (number and type) along with the Tercero data.
+   * @returns {Observable<TerceroResponse>} An Observable containing the Tercero response or {@link EMPTY} if not found.
+   * @throws Will throw an error if the user is not authenticated.
+   * @throws Will throw an error if the server response is malformed.
+   */
+  public getAuthenticatedUserTerceroResponse(): Observable<TerceroResponse> {
     return from(this.implicitAutenticationService.getDocument()).pipe(
 
       // Fetch the tercero ID using the user's document
@@ -67,7 +80,7 @@ export class TercerosService {
         return this.tercerosCrudService.get(idEndpoint);
       }),
 
-      // Extract the TerceroIdentification from the response.
+      // Extract the TerceroResponse from the response.
       // Expecting the first Tercero to be the correct one.
       switchMap((response: Array<TerceroResponse>) => {
         console.debug("Tercero data retrieved:", response);
@@ -83,7 +96,7 @@ export class TercerosService {
         if (!response[0].Tercero)
           return throwError(() => new Error("Respuesta del servidor malformada"));
 
-        return of(response[0].Tercero);
+        return of(response[0]);
       }),
 
       catchError(err => throwError(() => err))

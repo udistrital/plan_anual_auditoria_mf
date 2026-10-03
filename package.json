@@ -1,10 +1,11 @@
 {
   "name": "plan-anual-auditoria-mf",
   "version": "0.0.0",
+  "packageManager": "pnpm@12.6.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4203",
-    "build": "ng build",
+    "build": "ng build --progress --configuration=development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:prod": "ng build --progress --configuration=production",
@@ -41,7 +42,7 @@
     "single-spa-angular": "^21.0.2",
     "sweetalert2": "^11.26.24",
     "tslib": "^2.8.1",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz#sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==",
     "zone.js": "~0.15.1"
   },
   "devDependencies": {
@@ -80,61 +81,5 @@
     "typescript": "~5.9.2",
     "typescript-eslint": "8.46.4",
     "webpack": "^5.104.1"
-  },
-  "overrides": {
-    "ajv": "^8.18.0",
-    "baseline-browser-mapping": "^2.11.25",
-    "body-parser": "^2.3.0",
-    "brace-expansion": "^2.1.4",
-    "browserslist": "^4.29.0",
-    "esbuild": "^0.25.0",
-    "form-data": "^4.0.6",
-    "hono": "^4.13.8",
-    "@hono/node-server": "^2.1.1",
-    "http-proxy-middleware": "^3.0.7",
-    "image-size": "^2.0.4",
-    "immutable": "^5.1.9",
-    "ip-address": "^10.7.2",
-    "jsdom": "^26.0.0",
-    "js-yaml": "^4.3.2",
-    "launch-editor": "^2.14.1",
-    "less": "^4.9.1",
-    "nanoid": "^3.3.19",
-    "picomatch": "^4.0.4",
-    "piscina": "^5.3.2",
-    "postcss": "^8.5.28",
-    "postcss-selector-parser": "^7.1.6",
-    "qs": "^6.16.0",
-    "rollup": "$rollup",
-    "serialize-javascript": "^7.0.5",
-    "@sigstore/core": "^4.0.1",
-    "@sigstore/verify": "^4.1.2",
-    "sigstore": "^5.0.0",
-    "tar": "^7.5.22",
-    "tmp": "^0.2.7",
-    "undici": "^6.28.1",
-    "uuid": "^11.1.1",
-    "vite": "^7.3.6",
-    "webpack": "^5.104.1",
-    "webpack-dev-server": "^5.2.5",
-    "ws": "^8.21.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "baseline-browser-mapping": "^2.11.25",
-      "body-parser": "^2.3.0",
-      "brace-expansion": "^2.1.4",
-      "browserslist": "^4.29.0",
-      "fast-uri": "^3.1.6",
-      "form-data": "^4.0.6",
-      "immutable": "^5.1.9",
-      "js-yaml@^3": "^3.15.2",
-      "js-yaml@^4": "^4.3.2",
-      "minimatch@^3": "3.1.5",
-      "postcss-selector-parser": "^7.1.6",
-      "tar": "^7.5.22",
-      "tmp": "^0.2.7",
-      "uuid@^8": "8.3.2"
-    }
   }
 }

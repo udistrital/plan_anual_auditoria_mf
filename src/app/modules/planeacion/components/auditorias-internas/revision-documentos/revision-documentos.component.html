@@ -74,7 +74,7 @@
                     (click)="abrirModalCargueCartasFirmadas()"
                     [matTooltip]="rolesAprobacion[role]?.tooltipFirmar ?? ''"
                     >
-                    <mat-icon>upload_file</mat-icon>
+                    <mat-icon>{{ rolesAprobacion[role]?.iconoFirmar ?? 'upload_file' }}</mat-icon>
                     {{ rolesAprobacion[role]?.botonFirmar ?? '' }}
                   </button>
                 }
