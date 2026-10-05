@@ -3,13 +3,15 @@
 
 <ng-template #contenidoDeModal>
   <div class="d-flex flex-row-reverse my-2">
-    <button
-      class="modal-btn"
-      mat-flat-button color="primary"
-      (click)="descargarTodo()"
-      >
-      Descargar Todo <mat-icon>insert_drive_file</mat-icon>
-    </button>
+    @if (!ocultarDescargarTodo) {
+      <button
+        class="modal-btn"
+        mat-flat-button color="primary"
+        (click)="descargarTodo()"
+        >
+        Descargar Todo <mat-icon>insert_drive_file</mat-icon>
+      </button>
+    }
     @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
       @for (boton of tabs[selectedTab].botones; track boton) {
         @switch (boton.tipo || 'flat') {

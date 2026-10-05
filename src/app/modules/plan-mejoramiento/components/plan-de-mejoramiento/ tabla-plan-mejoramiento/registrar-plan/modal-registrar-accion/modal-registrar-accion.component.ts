@@ -106,10 +106,17 @@ export class ModalRegistrarAccionComponent implements OnInit {
     return { fechaInicio, fechaFin };
   }
 
+  // dependencia_id puede llegar como número o como arreglo
+  private get idsDependenciasLider(): number[] {
+    const ids: any = this.data.auditoria?.dependencia_id;
+    if (ids === null || ids === undefined) return [];
+    return Array.isArray(ids) ? ids : [ids];
+  }
+
   private iniciarDependenciaLider(): void {
     if (!this.modoEdicion) {
       const depsLideres = this.todasDependencias.filter(
-        d => this.data.auditoria.dependencia_id.includes(d.id)
+        d => this.idsDependenciasLider.includes(d.id)
       );
       this.responsablesActuales.push(...depsLideres.map(d => ({ _id: '', dependencia_id: d.id, dependencia_lider: true })));
       this.dependenciaLider = depsLideres.map(d => d.nombre).join(', ');
@@ -209,7 +216,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
       if (!conf.value) return;
 
       const v = this.form.getRawValue();
-      const liderDependenciaId: number[] = this.data.auditoria?.dependencia_id ?? [];
+      const liderDependenciaId: number[] = this.idsDependenciasLider;
 
       // IDs de dependencias (no-lider) que ya estaban en DB
       const idsActualesNoLider = new Set(
@@ -257,7 +264,6 @@ export class ModalRegistrarAccionComponent implements OnInit {
         responsablesAEliminar,
       };
 
-      this.alertService.showSuccessAlert('Acción guardada correctamente.', 'Guardado');
       this.dialogRef.close(resultado);
     });
   }
