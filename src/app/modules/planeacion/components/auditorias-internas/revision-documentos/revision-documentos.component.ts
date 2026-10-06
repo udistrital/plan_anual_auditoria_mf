@@ -21,9 +21,9 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, Variable
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { FirmaElectronicaService, SolicitudFirmaElectronica } from "src/app/core/services/firma-electronica.service";
-import { firstValueFrom, forkJoin, from, lastValueFrom, Observable, of, throwError } from "rxjs";
-import { catchError, exhaustMap, switchMap, tap, throwIfEmpty } from "rxjs/operators";
+import { CARGO_JEFE_OCI, DOCUMENTOS_AUDITORIA_FIRMA, FirmaDocumentoService } from "src/app/shared/services/firma-documento.service";
+import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
+import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 
 interface DocumentoAdjuntoRevision {
@@ -90,7 +90,7 @@ export class RevisionDocumentosComponent implements OnInit {
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
-    private readonly firmaElectronicaService: FirmaElectronicaService,
+    private readonly firmaDocumentoService: FirmaDocumentoService,
   ) { }
 
   ngOnInit(): void {
@@ -186,27 +186,11 @@ export class RevisionDocumentosComponent implements OnInit {
     firmarOficio: boolean = false
   ) {
     // La firma se hace antes del cambio de estado para que la auditoría no quede aprobada sin firmar
-    if (firmarOficio) {
-      try {
-        await lastValueFrom(this.firmarOficioSolicitudInformacion());
-      } catch (error) {
-        console.error(error);
-        this.alertService.showErrorAlert(
-          `Error al firmar electrónicamente el Oficio Anuncio Solicitud de información. ${this.obtenerMensajeErrorFirma(error)}`
-        );
-        return;
-      }
-    }
-
-    try {
-      await lastValueFrom(this.firmarProgramaTrabajo());
-    } catch (error) {
-      console.error(error);
-      this.alertService.showErrorAlert(
-        `Error al firmar electrónicamente el Programa de trabajo. ${this.obtenerMensajeErrorFirma(error)}`
-      );
+    const { OFICIO_SOLICITUD_INFORMACION, PROGRAMA_TRABAJO } = DOCUMENTOS_AUDITORIA_FIRMA;
+    if (firmarOficio && !(await this.firmaDocumentoService.firmarDocumentoAuditoriaConAlerta(this.auditoriaId, OFICIO_SOLICITUD_INFORMACION, CARGO_JEFE_OCI)))
       return;
-    }
+    if (!(await this.firmaDocumentoService.firmarDocumentoAuditoriaConAlerta(this.auditoriaId, PROGRAMA_TRABAJO, CARGO_JEFE_OCI)))
+      return;
 
     try {
       for (let i = 0; i < estadoAprobacion.length; i++) {
@@ -222,116 +206,6 @@ export class RevisionDocumentosComponent implements OnInit {
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el plan.");
     }
-  }
-
-  private firmarProgramaTrabajo(): Observable<any> {
-    return this.firmarDocumentoJefeOCI({
-      tipoDocumento: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
-      etiqueta: "el Programa de trabajo",
-      nombre: `Programa_Trabajo_Firmado_${this.consecutivoOci || this.auditoriaId}`,
-      descripcion: "Programa de trabajo de auditoría firmado electrónicamente por el Jefe OCI",
-    });
-  }
-
-  private firmarOficioSolicitudInformacion(): Observable<any> {
-    return this.firmarDocumentoJefeOCI({
-      tipoDocumento: environment.TIPO_DOCUMENTO_PARAMETROS.SOLICITUD_INFORMACION,
-      etiqueta: "el Oficio Anuncio Solicitud de información",
-      nombre: `Oficio_Solicitud_Informacion_Firmado_${this.consecutivoOci || this.auditoriaId}`,
-      descripcion: "Oficio Anuncio Solicitud de información firmado electrónicamente por el Jefe OCI",
-    });
-  }
-
-  /**
-   * Firma electrónicamente un documento de la auditoría con los datos del Jefe OCI autenticado
-   * y reemplaza la referencia del documento por el PDF firmado.
-   */
-  private firmarDocumentoJefeOCI(config: {
-    tipoDocumento: number;
-    etiqueta: string;
-    nombre: string;
-    descripcion: string;
-  }): Observable<any> {
-    const { tipoDocumento, etiqueta, nombre, descripcion } = config;
-
-    return forkJoin({
-      documentos: this.referenciaPdfService.consultarDocumentos(this.auditoriaId, { tipo_id: tipoDocumento }),
-      jefe: this.tercerosService.getAuthenticatedUserTerceroResponse().pipe(
-        throwIfEmpty(() => new Error("No se encontró la información del firmante."))
-      ),
-      auditoria: this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`),
-      vigencias: this.parametrosUtilsService.getVigencias(),
-    }).pipe(
-      switchMap(({ documentos, jefe, auditoria, vigencias }: any) => {
-        const [documentoOriginal] = this.referenciaPdfService.filtrarValidos(documentos);
-        if (!documentoOriginal)
-          return throwError(() => new Error(`No se encontró ${etiqueta} de la auditoría.`));
-
-        // Si el documento ya fue firmado anteriormente se firma el original para no duplicar firmas
-        const enlaceSinFirma = documentoOriginal.metadatos?.["firmado"]
-          ? documentoOriginal.metadatos?.["nuxeo_enlace_sin_firma"] ?? documentoOriginal.nuxeo_enlace
-          : documentoOriginal.nuxeo_enlace;
-
-        const vigenciaId = auditoria?.Data?.vigencia_id;
-        const vigenciaNombre = vigencias?.find((v: any) => v.Id === vigenciaId)?.Nombre ?? "";
-
-        return from(this.nuxeoService.obtenerPorUUID(enlaceSinFirma)).pipe(
-          switchMap((base64: string) => {
-            if (!base64)
-              return throwError(() => new Error(`No se pudo obtener ${etiqueta}.`));
-
-            const solicitud: SolicitudFirmaElectronica = {
-              IdTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
-              nombre,
-              descripcion,
-              metadatos: {
-                auditoria_id: this.auditoriaId,
-                consecutivo_oci: this.consecutivoOci,
-                vigencia: vigenciaNombre,
-              },
-              firmantes: [
-                {
-                  nombre: jefe.Tercero.NombreCompleto,
-                  cargo: "Jefe Oficina de Control Interno",
-                  oficina: "Oficina de Control Interno",
-                  tipoId: jefe.Identificacion?.TipoDocumentoId?.CodigoAbreviacion ?? "CC",
-                  identificacion: jefe.Identificacion?.Numero,
-                },
-              ],
-              representantes: [],
-              file: base64,
-            };
-            return this.firmaElectronicaService.firmar([solicitud]);
-          }),
-          switchMap((respuesta: any) => {
-            const documentoFirmado = Array.isArray(respuesta?.res) ? respuesta.res[0] : respuesta?.res;
-            if (!documentoFirmado?.Id || !documentoFirmado?.Enlace)
-              return throwError(() => new Error("Respuesta inválida del servicio de firma electrónica."));
-
-            // Se actualiza el mismo registro para que todas las vistas muestren el documento firmado
-            return this.referenciaPdfService.guardarReferencia(
-              documentoFirmado,
-              "Auditoria",
-              this.auditoriaId,
-              tipoDocumento,
-              {
-                ...documentoOriginal.metadatos,
-                firmado: true,
-                nuxeo_enlace_sin_firma: enlaceSinFirma,
-              },
-              false,
-              documentoOriginal._id
-            );
-          })
-        );
-      })
-    );
-  }
-
-  private obtenerMensajeErrorFirma(error: any): string {
-    // Los errores HTTP traen el detalle en error.error; los errores propios del flujo son instancias de Error
-    const detalle = error instanceof Error ? error.message : error?.error?.Error ?? error?.error?.Status;
-    return typeof detalle === "string" ? detalle : "";
   }
 
   aprobarAuditoria(estadoAprobacion: number, mensajeAprobacion: string, mostrarMensaje: boolean = true): Promise<void> {
@@ -597,7 +471,9 @@ export class RevisionDocumentosComponent implements OnInit {
             color: "primary",
             tipo: "flat",
             accion: async (contexto) => {
-              const firmado = await this.aplicarFirmaOficio(cartas);
+              const firmado = await this.firmaDocumentoService.aplicarFirmaDocumentoAuditoria(
+                this.auditoriaId, DOCUMENTOS_AUDITORIA_FIRMA.OFICIO_SOLICITUD_INFORMACION, CARGO_JEFE_OCI
+              );
               if (!firmado) return;
               cartas = await this.cargarCartasJefeOCI();
               this.cargarDocumentos();
@@ -636,38 +512,6 @@ export class RevisionDocumentosComponent implements OnInit {
         "No fue posible abrir el modal de cargue de cartas firmadas."
       );
     }
-  }
-
-  /**
-   * Aplica la firma electrónica del Jefe OCI al Oficio Anuncio Solicitud de información.
-   * @returns true si el oficio quedó firmado
-   */
-  async aplicarFirmaOficio(oficios: DocumentoAdjuntoRevision[]): Promise<boolean> {
-    if (oficios.length > 0 && oficios.every((oficio) => oficio?.metadatos?.["firmado"])) {
-      this.alertService.showAlert(
-        "Oficio firmado",
-        "El Oficio Anuncio Solicitud de información ya fue firmado electrónicamente."
-      );
-      return false;
-    }
-
-    const confirmado = await this.alertService.showConfirmAlert(
-      "Se aplicará la firma electrónica del Jefe de la Oficina de Control Interno al Oficio Anuncio Solicitud de información. ¿Desea continuar?"
-    );
-    if (!confirmado.value) return false;
-
-    try {
-      await lastValueFrom(this.firmarOficioSolicitudInformacion());
-    } catch (error) {
-      console.error(error);
-      this.alertService.showErrorAlert(
-        `Error al firmar electrónicamente el Oficio Anuncio Solicitud de información. ${this.obtenerMensajeErrorFirma(error)}`
-      );
-      return false;
-    }
-
-    this.alertService.showSuccessAlert("El Oficio Anuncio Solicitud de información fue firmado electrónicamente.");
-    return true;
   }
 
   cargarDocumentos() {

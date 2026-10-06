@@ -12,6 +12,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
+import { CARGO_JEFE_OCI, DOCUMENTOS_AUDITORIA_FIRMA, FirmaDocumentoService } from "src/app/shared/services/firma-documento.service";
 
 @Component({
     selector: "app-revision-documentos-seguimiento",
@@ -31,7 +32,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     [environment.ROL.JEFE]: {
       estadoAprobacion: [environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE],
       estadoRechazo: environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE,
-      preguntaAprobacion: "¿Está seguro(a) de aprobar y enviar el informe final?",
+      preguntaAprobacion: "Al aprobar, el Informe final será firmado electrónicamente. ¿Está seguro(a) de aprobar y enviar el informe final?",
       mensajeAprobacion: "El informe fue aprobado y enviado",
       botonAprobacion: "Aprobar y Enviar informe",
       botonRechazo: "Rechazar Informe",
@@ -48,7 +49,8 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
     private readonly userService: UserService,
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly nuxeoService: NuxeoService,
-    private readonly descargaService: DescargaService
+    private readonly descargaService: DescargaService,
+    private readonly firmaDocumentoService: FirmaDocumentoService,
   ) { }
 
   ngOnInit(): void {
@@ -134,6 +136,15 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
   }
 
   async aprobarSeguimiento(estados: number[], mensajeAprobacion: string) {
+    // La firma se hace antes del cambio de estado para que el informe final no quede aprobado sin firmar
+    if (
+      estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE) &&
+      !(await this.firmaDocumentoService.firmarDocumentoAuditoriaConAlerta(
+        this.auditoriaId, DOCUMENTOS_AUDITORIA_FIRMA.INFORME_FINAL, CARGO_JEFE_OCI
+      ))
+    )
+      return;
+
     try {
       for (const estado of estados) {
         const seguimientoEstado = this.construirObjetoSeguimientoEstado(estado);

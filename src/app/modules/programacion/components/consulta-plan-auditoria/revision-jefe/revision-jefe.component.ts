@@ -3,13 +3,13 @@ import { MatDialog } from "@angular/material/dialog";
 import { ModalMotivosRechazoComponent } from "./modal-motivos-rechazo/modal-motivos-rechazo.component";
 import { environment } from "src/environments/environment";
 import { ActivatedRoute, Router } from "@angular/router";
-import { lastValueFrom, throwError, forkJoin, from, Observable } from 'rxjs';
-import { switchMap, catchError, exhaustMap, tap, throwIfEmpty } from 'rxjs/operators';
+import { lastValueFrom, throwError, forkJoin, Observable } from 'rxjs';
+import { switchMap, catchError, exhaustMap, tap } from 'rxjs/operators';
 import { AlertService } from "src/app/shared/services/alert.service";
 import { UserService } from "src/app/core/services/user.service";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
-import { FirmaElectronicaService, SolicitudFirmaElectronica } from "src/app/core/services/firma-electronica.service";
+import { CARGO_JEFE_OCI, FirmaDocumentoService, obtenerMensajeErrorFirma } from "src/app/shared/services/firma-documento.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
@@ -56,7 +56,7 @@ export class RevisionJefeComponent implements OnInit {
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly rolService: RolService,
     private readonly documentoUtils: DocumentoUtils,
-    private readonly firmaElectronicaService: FirmaElectronicaService,
+    private readonly firmaDocumentoService: FirmaDocumentoService,
   ) {}
 
   async ngOnInit() {
@@ -199,7 +199,7 @@ export class RevisionJefeComponent implements OnInit {
           console.error(error);
           if (!firmaCompletada) {
             this.alertService.showErrorAlert(
-              `Error al firmar electrónicamente el PAA. ${this.obtenerMensajeErrorFirma(error)}`
+              `Error al firmar electrónicamente el PAA. ${obtenerMensajeErrorFirma(error)}`
             );
             return;
           }
@@ -215,75 +215,20 @@ export class RevisionJefeComponent implements OnInit {
    * y reemplaza la referencia del documento del plan por el PDF firmado.
    */
   private firmarPaaOriginal(): Observable<any> {
-    const tipoPaaOriginal = environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL;
-
-    return forkJoin({
-      documentos: this.referenciaPdfService.consultarDocumentos(this.planAuditoriaId, { tipo_id: tipoPaaOriginal }),
-      jefe: this.tercerosService.getAuthenticatedUserTerceroResponse().pipe(
-        throwIfEmpty(() => new Error("No se encontró la información del firmante."))
-      ),
-    }).pipe(
-      switchMap(({ documentos, jefe }) => {
-        const [documentoOriginal] = this.referenciaPdfService.filtrarValidos(documentos);
-        if (!documentoOriginal)
-          return throwError(() => new Error("No se encontró el Formato PAA Original del plan."));
-
-        return from(this.nuxeoService.obtenerPorUUID(documentoOriginal.nuxeo_enlace)).pipe(
-          switchMap((base64: string) => {
-            if (!base64)
-              return throwError(() => new Error("No se pudo obtener el Formato PAA Original."));
-
-            const solicitud: SolicitudFirmaElectronica = {
-              IdTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
-              nombre: `PAA_Original_Firmado_${this.planAuditoriaId}`,
-              descripcion: "Formato Plan Anual de Auditoría original firmado electrónicamente por el Jefe OCI",
-              metadatos: {
-                plan_auditoria_id: this.planAuditoriaId,
-                vigencia: this.vigenciaNombre,
-              },
-              firmantes: [
-                {
-                  nombre: jefe.Tercero.NombreCompleto,
-                  cargo: "Jefe Oficina de Control Interno",
-                  oficina: "Oficina de Control Interno",
-                  tipoId: jefe.Identificacion?.TipoDocumentoId?.CodigoAbreviacion ?? "CC",
-                  identificacion: jefe.Identificacion?.Numero,
-                },
-              ],
-              representantes: [],
-              file: base64,
-            };
-            return this.firmaElectronicaService.firmar([solicitud]);
-          }),
-          switchMap((respuesta: any) => {
-            const documentoFirmado = Array.isArray(respuesta?.res) ? respuesta.res[0] : respuesta?.res;
-            if (!documentoFirmado?.Id || !documentoFirmado?.Enlace)
-              return throwError(() => new Error("Respuesta inválida del servicio de firma electrónica."));
-
-            // Se actualiza el mismo registro para que todas las vistas del PAA Original muestren el documento firmado
-            return this.referenciaPdfService.guardarReferencia(
-              documentoFirmado,
-              "Plan Auditoria",
-              this.planAuditoriaId,
-              tipoPaaOriginal,
-              {
-                ...documentoOriginal.metadatos,
-                firmado: true,
-                nuxeo_enlace_sin_firma: documentoOriginal.nuxeo_enlace,
-              },
-              false,
-              documentoOriginal._id
-            );
-          })
-        );
-      })
-    );
-  }
-
-  private obtenerMensajeErrorFirma(error: any): string {
-    // Los errores HTTP traen el detalle en error.error; los errores propios del flujo son instancias de Error
-    const detalle = error instanceof Error ? error.message : error?.error?.Error ?? error?.error?.Status;
-    return typeof detalle === "string" ? detalle : "";
+    return this.firmaDocumentoService.firmarDocumento({
+      referenciaId: this.planAuditoriaId,
+      referenciaTipo: "Plan Auditoria",
+      tipoDocumento: environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL,
+      idTipoDocumento: environment.TIPO_DOCUMENTO.PLANES_AUDITORIA,
+      etiqueta: "el Formato PAA Original",
+      nombre: `PAA_Original_Firmado_${this.planAuditoriaId}`,
+      descripcion: "Formato Plan Anual de Auditoría original firmado electrónicamente",
+      metadatos: {
+        plan_auditoria_id: this.planAuditoriaId,
+        vigencia: this.vigenciaNombre,
+      },
+      cargoFirmante: CARGO_JEFE_OCI,
+    });
   }
 
   private notificarEnvioAComite(): void {
