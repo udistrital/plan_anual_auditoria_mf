@@ -79,6 +79,19 @@ export const hallazgosConstructorTabla = [
   },
 ];
 
+// Columnas de la matriz en Ver Plan (vista de dictamen del auditor); fórmula y fechas se consultan en el modal
+export const columnasVistaDictamen = [
+  'noHallazgo',
+  'descripcion',
+  'causa',
+  'numero',
+  'tipoAccion',
+  'accionPlanteada',
+  'nombreIndicador',
+  'meta',
+  'responsable',
+];
+
 export const iconosAccionHallazgo = new Map<string, string>([
   ['Editar Acción', 'edit'],
   ['Eliminar Acción', 'delete'],

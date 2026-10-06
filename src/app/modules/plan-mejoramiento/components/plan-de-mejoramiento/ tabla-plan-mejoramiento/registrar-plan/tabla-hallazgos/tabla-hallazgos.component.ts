@@ -11,9 +11,9 @@ import { environment } from 'src/environments/environment';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
 import { ModalRemitirHallazgoComponent, ResultadoModalRemitirHallazgo } from '../modal-remitir-hallazgo/modal-remitir-hallazgo.component';
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
-import { hallazgosConstructorTabla, iconosAccionHallazgo, iconosUtilidadHallazgo } from './tabla-hallazgos.utilidades';
+import { columnasVistaDictamen, hallazgosConstructorTabla, iconosAccionHallazgo, iconosUtilidadHallazgo } from './tabla-hallazgos.utilidades';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
-import { ModalObservacionAccionComponent } from '../modal-observacion-accion/modal-observacion-accion.component';
+import { DatosModalObservacionAccion, ModalObservacionAccionComponent, ResultadoDictamenAccion } from '../modal-observacion-accion/modal-observacion-accion.component';
 import { ModalHistorialObservacionesAccionComponent } from '../modal-historial-observaciones-accion/modal-historial-observaciones-accion.component';
 
 export interface HallazgoTabla {
@@ -35,6 +35,8 @@ export interface AccionPlan {
   formulaIndicador: string;
   meta: string;
   responsable: string;
+  /** Responsables con su rol (líder / apoyo); se usa en el modal de dictamen */
+  responsables?: { nombre: string; lider: boolean }[];
   fechaInicio: string;
   fechaFin: string;
   fechaInicioISO: string | null;
@@ -82,8 +84,10 @@ export class TablaHallazgosComponent implements OnInit {
   @Input() planMejoramientoId!: string;
   @Input() auditoria!: Auditoria;
   @Input() soloLectura = false;
-  // Modo revisión del auditor: habilita aprobar/rechazar cada acción
+  // Modo revisión del auditor: habilita dictaminar (aprobar/rechazar) cada acción
   @Input() modoRevision = false;
+  // Vista de Ver Plan: columnas de dictamen y resumen por hallazgo (con o sin modoRevision)
+  @Input() vistaDictamen = false;
 
   // Notifica al contenedor (VerPlan) que cambió el estado de alguna acción
   @Output() estadoAccionCambiado = new EventEmitter<void>();
@@ -128,9 +132,9 @@ export class TablaHallazgosComponent implements OnInit {
   }
 
   private construirColumnas(): void {
-    if (this.modoRevision) {
-      this.constructorTabla = hallazgosConstructorTabla.filter(c => c.columnDef !== 'acciones');
-      this.columnas = [...this.constructorTabla.map(c => c.columnDef), 'revision'];
+    if (this.vistaDictamen) {
+      this.constructorTabla = hallazgosConstructorTabla.filter(c => columnasVistaDictamen.includes(c.columnDef));
+      this.columnas = [...this.constructorTabla.map(c => c.columnDef), 'estadoDictamen', 'accionOci'];
     } else {
       this.constructorTabla = hallazgosConstructorTabla.filter(
         c => c.columnDef !== 'acciones' || !this.soloLectura
@@ -198,8 +202,13 @@ export class TablaHallazgosComponent implements OnInit {
     this.filas = filas;
   }
 
-  private mapearAccion(a: any, index: number, responsablesPorAccion?: Map<string, string[]>): AccionPlan {
-    const nombres = responsablesPorAccion?.get(a._id) ?? [];
+  private mapearAccion(
+    a: any,
+    index: number,
+    responsablesPorAccion?: Map<string, { nombre: string; lider: boolean }[]>
+  ): AccionPlan {
+    const responsables = responsablesPorAccion?.get(a._id) ?? [];
+    const nombres = responsables.map(r => r.nombre);
     const estadoId = a.estado_id ?? ESTADO_ACCION.PENDIENTE_REVISION;
     return {
       accionId:         a._id,
@@ -211,6 +220,7 @@ export class TablaHallazgosComponent implements OnInit {
       formulaIndicador: a.formula_indicador ?? '',
       meta:             a.meta ?? '',
       responsable:      nombres.join(', '),
+      responsables,
       fechaInicio:      this.formatearFecha(a.fecha_inicio),
       fechaFin:         this.formatearFecha(a.fecha_fin),
       fechaInicioISO:   a.fecha_inicio ?? null,
@@ -269,14 +279,14 @@ export class TablaHallazgosComponent implements OnInit {
         next: ({ hallazgos, acciones, responsables }) => {
           const accionesData: any[] = acciones.Data ?? [];
 
-          const responsablesPorAccion = new Map<string, string[]>();
+          const responsablesPorAccion = new Map<string, { nombre: string; lider: boolean }[]>();
           (responsables.Data ?? []).forEach((r: any) => {
             const accionId = typeof r.accion_mejora_id === 'object'
               ? r.accion_mejora_id?._id
               : r.accion_mejora_id;
             if (!accionId || !r.dependencia_nombre) return;
             const lista = responsablesPorAccion.get(accionId) ?? [];
-            lista.push(r.dependencia_nombre);
+            lista.push({ nombre: r.dependencia_nombre, lider: !!r.dependencia_lider });
             responsablesPorAccion.set(accionId, lista);
           });
 
@@ -298,7 +308,8 @@ export class TablaHallazgosComponent implements OnInit {
               indice:      h.no_hallazgo ?? String(i + 1),
               descripcion: h.descripcion ?? h.titulo ?? '',
               causa:       h.criterio ?? '',
-              expandido:   estadoPrevio.get(h._id) ?? false,
+              // En Ver Plan los hallazgos inician expandidos para ver el estado de cada acción
+              expandido:   estadoPrevio.get(h._id) ?? this.vistaDictamen,
               acciones:    (accionesPorHallazgo.get(h._id) ?? [])
                              .map((a: any, j: number) => this.mapearAccion(a, j, responsablesPorAccion)),
             }));
@@ -465,53 +476,62 @@ export class TablaHallazgosComponent implements OnInit {
       });
   }
 
-  // ─── Revisión del auditor (aprobar / rechazar por acción) ─────────────────────
+  // ─── Revisión del auditor (dictamen por acción) ───────────────────────────────
 
-  aprobarAccion(accion: AccionPlan | undefined): void {
-    if (!accion?.accionId) return;
-    const dialogRef = this.dialog.open(ModalObservacionAccionComponent, {
-      width: '600px',
-      data: {
-        accionPlanteada: accion.accionPlanteada,
-        titulo:      'Aprobar Acción de Mejora',
-        descripcion: 'Registre la observación de la aprobación',
-        etiqueta:    'Observación de la aprobación',
-        textoBoton:  'Aprobar',
-        icono:       'check_circle',
-        confirmMsg:  '¿Aprobar esta acción de mejora?',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((observacion: string | null) => {
-      if (!observacion) return;
-      this.registrarEstadoAccion(
-        accion.accionId!,
-        ESTADO_ACCION.APROBADA,
-        observacion,
-        () => {
-          this.alertService.showSuccessAlert('Acción aprobada con observación.', 'Aprobada');
-          this.estadoAccionCambiado.emit();
-          this.cargarDatos();
-        }
-      );
-    });
+  /** Etiqueta del dictamen según el estado de la acción */
+  etiquetaDictamen(estadoId: number): string {
+    if (estadoId === ESTADO_ACCION.APROBADA) return 'Conforme';
+    if (estadoId === ESTADO_ACCION.RECHAZADA) return 'No conforme';
+    return 'Pendiente';
   }
 
-  rechazarAccion(accion: AccionPlan | undefined): void {
+  /** Resumen del dictamen de las acciones de un hallazgo (fila de grupo) */
+  resumenHallazgo(hallazgoId: string): { texto: string; clase: string } {
+    const acciones = this.getHallazgo(hallazgoId)?.acciones ?? [];
+    if (!acciones.length) return { texto: 'Sin acciones', clase: 'estado-sin-acciones' };
+
+    const total = acciones.length;
+    const aprobadas = acciones.filter(a => a.estadoId === ESTADO_ACCION.APROBADA).length;
+    const rechazadas = acciones.filter(a => a.estadoId === ESTADO_ACCION.RECHAZADA).length;
+
+    if (rechazadas > 0) return { texto: `No conforme (${rechazadas}/${total})`, clase: 'estado-rechazada' };
+    if (aprobadas === total) return { texto: `Conforme (${aprobadas}/${total})`, clase: 'estado-aprobada' };
+    return { texto: `Pendiente dictamen (${total - aprobadas}/${total})`, clase: 'estado-pendiente' };
+  }
+
+  /** Abre el modal de dictamen; fuera de revisión solo permite consultarlo */
+  dictaminarAccion(fila: FilaTabla): void {
+    const accion = fila.accion;
     if (!accion?.accionId) return;
+
+    const data: DatosModalObservacionAccion = {
+      hallazgo: {
+        indice:      fila.hallazgoIndice,
+        descripcion: fila.hallazgoDescripcion,
+        causa:       fila.hallazgoCausa,
+      },
+      accion,
+      soloLectura: !this.modoRevision,
+    };
+
     const dialogRef = this.dialog.open(ModalObservacionAccionComponent, {
-      width: '600px',
-      data: { accionPlanteada: accion.accionPlanteada },
+      width: '1000px',
+      data,
+      autoFocus: false,
     });
 
-    dialogRef.afterClosed().subscribe((observacion: string | null) => {
-      if (!observacion) return;
+    dialogRef.afterClosed().subscribe((resultado: ResultadoDictamenAccion | null) => {
+      if (!resultado) return;
+      const aprobada = resultado.estadoId === ESTADO_ACCION.APROBADA;
       this.registrarEstadoAccion(
         accion.accionId!,
-        ESTADO_ACCION.RECHAZADA,
-        observacion,
+        resultado.estadoId,
+        resultado.observacion,
         () => {
-          this.alertService.showSuccessAlert('Acción rechazada con observación.', 'Rechazada');
+          this.alertService.showSuccessAlert(
+            `La acción ${fila.hallazgoIndice}.${accion.numero} fue dictaminada como ${aprobada ? 'conforme' : 'no conforme'}.`,
+            'Dictamen registrado'
+          );
           this.estadoAccionCambiado.emit();
           this.cargarDatos();
         }

@@ -7,7 +7,22 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { environment } from 'src/environments/environment';
-import { ModalRechazoPlanComponent } from '../ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
+import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
+import { DatosModalRechazoPlan, ModalRechazoPlanComponent } from '../ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
+import { DatosModalAprobacionPlan, ModalAprobacionPlanComponent } from './modal-aprobacion-plan/modal-aprobacion-plan.component';
+import { DocumentosAuditoriaPlanService } from '../../../services/documentos-auditoria-plan.service';
+
+const ESTADO_PLAN = environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO;
+
+// Nombre del estado del plan para el chip del encabezado
+const NOMBRES_ESTADO_PLAN: Record<number, string> = {
+  [ESTADO_PLAN.SIN_PLAN_MEJORAMIENTO]:              'Sin plan de mejoramiento',
+  [ESTADO_PLAN.CREANDO_PLAN_MEJORAMIENTO]:          'En formulación',
+  [ESTADO_PLAN.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: 'En revisión del auditor',
+  [ESTADO_PLAN.APROBADO_PLAN_MEJORAMIENTO]:         'Aprobado',
+  [ESTADO_PLAN.RECHAZADO_PLAN_MEJORAMIENTO]:        'Devuelto con observaciones',
+  [ESTADO_PLAN.FIN_PLAN_MEJORAMIENTO]:              'Finalizado',
+};
 
 @Component({
   selector: 'app-ver-plan',
@@ -23,8 +38,15 @@ export class VerPlanComponent implements OnInit {
   estadoPlanId: number | null = null;
 
   planEstadoId: number | null = null;
-  /** estado_id de cada acción de mejora del plan (para validar la decisión) */
-  estadosAcciones: number[] = [];
+  /** Estado y hallazgo de cada acción de mejora del plan (para validar la decisión y el avance) */
+  accionesPlan: { estadoId: number; hallazgoId: string }[] = [];
+  /** Auditor(es) asignados al plan */
+  auditoresPlan = '';
+  mostrarInformacion = true;
+
+  get estadosAcciones(): number[] {
+    return this.accionesPlan.map(a => a.estadoId);
+  }
 
   private role: string | null = null;
   private usuarioId = 0;
@@ -67,6 +89,58 @@ export class VerPlanComponent implements OnInit {
 
   fuenteNombre = '';
 
+  // ─── Encabezado y avance del dictamen ────────────────────────────────────────
+
+  get titulo(): string {
+    return this.modoRevision ? 'Revisión y Evaluación del Plan de Mejoramiento' : 'Ver Plan de Mejoramiento';
+  }
+
+  get breadcrumb(): string {
+    return `<p>Planes de Mejoramiento / <b>${this.titulo}</b></p>`;
+  }
+
+  get estadoPlanNombre(): string {
+    return this.planEstadoId === null ? '' : (NOMBRES_ESTADO_PLAN[this.planEstadoId] ?? '');
+  }
+
+  get expediente(): string {
+    return this.auditoria?.consecutivo_OCI || String(this.auditoria?.consecutivo_no_auditoria ?? '');
+  }
+
+  get dependenciasAuditadas(): string {
+    return (this.auditoria?.dependencia_nombre ?? []).filter(Boolean).join(', ');
+  }
+
+  get procesoResponsable(): string {
+    const proceso = this.auditoria?.proceso_nombre;
+    return Array.isArray(proceso) ? proceso.filter(Boolean).join(', ') : (proceso ?? '');
+  }
+
+  get totalAcciones(): number {
+    return this.accionesPlan.length;
+  }
+
+  get accionesAprobadas(): number {
+    return this.estadosAcciones.filter(e => e === this.ESTADO_ACCION.APROBADA).length;
+  }
+
+  get accionesRechazadas(): number {
+    return this.estadosAcciones.filter(e => e === this.ESTADO_ACCION.RECHAZADA).length;
+  }
+
+  get accionesPendientes(): number {
+    return this.totalAcciones - this.accionesAprobadas - this.accionesRechazadas;
+  }
+
+  get porcentajeDictamen(): number {
+    if (!this.totalAcciones) return 0;
+    return Math.round(((this.totalAcciones - this.accionesPendientes) / this.totalAcciones) * 100);
+  }
+
+  get totalHallazgosConAcciones(): number {
+    return new Set(this.accionesPlan.map(a => a.hallazgoId)).size;
+  }
+
   get lideresDelProceso(): string {
     return (this.auditoria?.datos_dependencias ?? [])
       .map((d: any) => d.jefe_nombre).filter(Boolean).join(', ') || '';
@@ -98,6 +172,7 @@ export class VerPlanComponent implements OnInit {
     private readonly alertService: AlertService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
+    private readonly documentosAuditoriaPlan: DocumentosAuditoriaPlanService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -134,6 +209,7 @@ export class VerPlanComponent implements OnInit {
             this.estadoPlanId = plan.estado_id ?? null;
             this.fuenteNombre = this.fuentes[plan.fuente] ?? '';
             this.cargarEstadosAcciones();
+            this.cargarAuditoresPlan();
           }
           this.cargando = false;
         },
@@ -148,12 +224,53 @@ export class VerPlanComponent implements OnInit {
       .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0`)
       .subscribe({
         next: (res) => {
-          this.estadosAcciones = (res?.Data ?? []).map(
-            (a: any) => a.estado_id ?? this.ESTADO_ACCION.PENDIENTE_REVISION
-          );
+          this.accionesPlan = (res?.Data ?? []).map((a: any) => ({
+            estadoId:   a.estado_id ?? this.ESTADO_ACCION.PENDIENTE_REVISION,
+            hallazgoId: typeof a.hallazgo_id === 'object' ? a.hallazgo_id?._id : a.hallazgo_id,
+          }));
         },
-        error: () => { this.estadosAcciones = []; }
+        error: () => { this.accionesPlan = []; }
       });
+  }
+
+  private cargarAuditoresPlan(): void {
+    this.planAuditoriaMid
+      .get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)
+      .subscribe({
+        next: (res) => {
+          this.auditoresPlan = (res?.Data ?? [])
+            .map((a: any) => a.auditor_nombre)
+            .filter(Boolean)
+            .join(', ');
+        },
+        error: () => { this.auditoresPlan = ''; }
+      });
+  }
+
+  verExpediente(): void {
+    if (!this.auditoria) return;
+    this.documentosAuditoriaPlan.verDocumentosAuditoria(this.auditoria);
+  }
+
+  // Formato del plan de mejoramiento (PDF) en solo lectura
+  verFormato(): void {
+    this.planAuditoriaMid.get(`plantilla/plan-mejoramiento/${this.auditoriaId}`).subscribe({
+      next: (res: any) => {
+        const documentoBase64 = res?.Data;
+        if (!documentoBase64) {
+          this.alertService.showErrorAlert('No fue posible generar el formato del plan de mejoramiento.');
+          return;
+        }
+        this.dialog.open(ModalVerDocumentoComponent, {
+          width: '1000px',
+          data: documentoBase64,
+          autoFocus: false,
+        });
+      },
+      error: () => {
+        this.alertService.showErrorAlert('No fue posible generar el formato del plan de mejoramiento.');
+      }
+    });
   }
 
   aprobar(): void {
@@ -165,8 +282,14 @@ export class VerPlanComponent implements OnInit {
       return;
     }
 
-    this.alertService.showConfirmAlert('¿Aprobar el plan de mejoramiento?').then(conf => {
-      if (!conf.value) return;
+    const data: DatosModalAprobacionPlan = {
+      expediente:     this.expediente,
+      totalAcciones:  this.totalAcciones,
+      totalHallazgos: this.totalHallazgosConAcciones,
+    };
+
+    this.dialog.open(ModalAprobacionPlanComponent, { width: '700px', data }).afterClosed().subscribe((confirmado: boolean) => {
+      if (!confirmado) return;
 
       const body = {
         plan_mejoramiento_id:   this.planMejoramientoId,
@@ -207,10 +330,16 @@ export class VerPlanComponent implements OnInit {
       return;
     }
 
-    const dialogRef = this.dialog.open(ModalRechazoPlanComponent, {
-      width: '600px',
-      data: { planMejoramientoId: this.planMejoramientoId, usuarioId: this.usuarioId, role: this.role },
-    });
+    const data: DatosModalRechazoPlan = {
+      planMejoramientoId: this.planMejoramientoId,
+      usuarioId:          this.usuarioId,
+      role:               this.role,
+      expediente:         this.expediente,
+      dependencias:       this.dependenciasAuditadas,
+      accionesRechazadas: this.accionesRechazadas,
+    };
+
+    const dialogRef = this.dialog.open(ModalRechazoPlanComponent, { width: '700px', data });
 
     dialogRef.afterClosed().subscribe((rechazado: boolean) => {
       if (rechazado) {
