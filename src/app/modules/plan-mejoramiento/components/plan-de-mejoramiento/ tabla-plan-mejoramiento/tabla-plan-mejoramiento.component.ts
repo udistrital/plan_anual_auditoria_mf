@@ -435,6 +435,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     this.banderaTablePlanes = false;
     this.planesDataSource.data = [];
     if (this.paginator) this.paginator.length = 0;
+    // Refresco al limpiar la tabla 
+    this.changeDetector.detectChanges();
   }
 
   private construirTabla(): void {

@@ -206,6 +206,8 @@ export class TablaSeguimientoComponent implements OnInit {
         if (auditorias.length === 0) {
           this.banderaTablaSeguimiento = false;
           this.auditoriasDataSource.data = [];
+          // Refresco al limpiar la tabla 
+          this.changeDetector.detectChanges();
 
           // Detectar si la búsqueda tenía filtros activos
           const huboFiltroEstado = !!this.filtroEstado;
