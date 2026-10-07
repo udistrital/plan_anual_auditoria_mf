@@ -14,7 +14,7 @@
       </div>
     }
     <div class="table-container rounded-table table-scroll" style="overflow-x: auto; width: 100%;">
-      <table mat-table [dataSource]="filas" class="w-100" [class.tabla-dictamen]="vistaDictamen">
+      <table mat-table [dataSource]="filas" class="w-100" [class.tabla-dictamen]="vistaDictamen" [class.tabla-edicion]="!vistaDictamen">
 
         <!-- Columnas dinámicas -->
         @for (columna of constructorTabla; track columna.columnDef) {

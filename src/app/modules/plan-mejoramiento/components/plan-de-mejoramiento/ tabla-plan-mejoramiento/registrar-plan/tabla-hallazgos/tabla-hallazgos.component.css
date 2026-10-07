@@ -106,6 +106,9 @@ table.mat-table td {
 }
 
 .celda-truncada {
+  /* inline-block: en un span en línea max-width no aplica y un texto largo sin espacios estiraba la columna */
+  display: inline-block;
+  vertical-align: middle;
   max-width: 130px;
   white-space: nowrap;
   overflow: hidden;
@@ -221,6 +224,61 @@ table.tabla-dictamen .boton-dictamen {
   padding: 0 8px;
   min-width: 0;
   letter-spacing: normal;
+}
+
+/* Registrar Plan (14 columnas): layout fijo; cabe completo desde ~1900px y por debajo hace scroll horizontal
+   sin deformar columnas. "Acción planteada" toma el ancho restante. */
+table.tabla-edicion {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 1380px;
+}
+
+table.tabla-edicion th,
+table.tabla-edicion td {
+  padding: 4px !important;
+}
+
+table.tabla-edicion th.mat-mdc-header-cell,
+table.tabla-edicion td.mat-mdc-cell {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+table.tabla-edicion th.mat-mdc-header-cell {
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.2;
+}
+
+/* Textos largos (acción, indicador, fórmula): una línea con "…" dentro del ancho de su columna */
+table.tabla-edicion .celda-truncada {
+  max-width: 100%;
+}
+
+table.tabla-edicion .mat-column-noHallazgo      { width: 72px;  }
+table.tabla-edicion .mat-column-descripcion     { width: 100px; }
+table.tabla-edicion .mat-column-causa           { width: 100px; }
+table.tabla-edicion .mat-column-numero          { width: 58px;  }
+table.tabla-edicion .mat-column-tipoAccion      { width: 82px;  }
+table.tabla-edicion .mat-column-accionPlanteada { width: auto;  }
+table.tabla-edicion .mat-column-nombreIndicador { width: 100px; }
+table.tabla-edicion .mat-column-formulaIndicador{ width: 100px; }
+table.tabla-edicion .mat-column-meta            { width: 70px;  }
+table.tabla-edicion .mat-column-responsable     { width: 120px; }
+table.tabla-edicion .mat-column-fechaInicio     { width: 88px;  }
+table.tabla-edicion .mat-column-fechaFin        { width: 88px;  }
+table.tabla-edicion .mat-column-estado          { width: 100px; }
+table.tabla-edicion .mat-column-acciones        { width: 68px;  }
+
+table.tabla-edicion .mat-column-fechaInicio td,
+table.tabla-edicion td.mat-column-fechaInicio,
+table.tabla-edicion td.mat-column-fechaFin,
+table.tabla-edicion td.mat-column-noHallazgo,
+table.tabla-edicion td.mat-column-numero {
+  white-space: nowrap;
 }
 
 /* El encabezado fijo de la tabla no debe quedar por encima de la barra superior del Root (z-index 1) */
