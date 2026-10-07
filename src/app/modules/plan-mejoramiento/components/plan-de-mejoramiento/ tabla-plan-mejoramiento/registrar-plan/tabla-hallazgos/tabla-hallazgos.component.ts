@@ -594,7 +594,7 @@ export class TablaHallazgosComponent implements OnInit {
         resultado.observacion,
         () => {
           this.alertService.showSuccessAlert(
-            `La acción ${fila.hallazgoIndice}.${accion.numero} fue dictaminada como ${aprobada ? 'conforme' : 'no conforme'}.`,
+            `La acción ${accion.numero} del hallazgo ${fila.hallazgoIndice} fue dictaminada como ${aprobada ? 'conforme' : 'no conforme'}.`,
             'Dictamen registrado'
           );
           this.recargarTrasCambio();

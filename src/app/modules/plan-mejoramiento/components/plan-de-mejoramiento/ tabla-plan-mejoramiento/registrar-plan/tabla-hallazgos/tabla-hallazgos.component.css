@@ -164,3 +164,57 @@ table.mat-table td {
 
 /* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
 .espacio-2 { gap: 0.5rem; }
+
+/* Vista de dictamen (Ver Plan): layout fijo para que la tabla no supere el contenedor;
+   "Acción planteada" toma el ancho restante. (El selector table.mat-table no aplica en Material MDC.) */
+table.tabla-dictamen {
+  table-layout: fixed;
+  width: 100%;
+}
+
+table.tabla-dictamen th,
+table.tabla-dictamen td {
+  padding: 4px 6px !important;
+}
+
+/* Sin recortes con "…": el texto hace salto de línea */
+table.tabla-dictamen td.mat-mdc-cell {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Acción planteada e indicador: máximo 3 líneas (el detalle completo está en "Ver Dictamen") */
+table.tabla-dictamen .celda-truncada {
+  max-width: none;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+table.tabla-dictamen .mat-column-noHallazgo     { width: 60px;  }
+table.tabla-dictamen .mat-column-descripcion    { width: 120px; }
+table.tabla-dictamen .mat-column-causa          { width: 120px; }
+table.tabla-dictamen .mat-column-numero         { width: 50px;  }
+table.tabla-dictamen .mat-column-tipoAccion     { width: 85px;  }
+table.tabla-dictamen .mat-column-accionPlanteada{ width: auto;  }
+table.tabla-dictamen .mat-column-nombreIndicador{ width: 110px; }
+table.tabla-dictamen .mat-column-meta           { width: 75px;  }
+table.tabla-dictamen .mat-column-responsable    { width: 130px; }
+table.tabla-dictamen .mat-column-estadoDictamen { width: 110px; }
+table.tabla-dictamen .mat-column-accionOci      { width: 125px; }
+
+table.tabla-dictamen .boton-dictamen {
+  padding: 0 8px;
+  min-width: 0;
+  letter-spacing: normal;
+}
+
+/* El encabezado fijo de la tabla no debe quedar por encima de la barra superior del Root (z-index 1) */
+:host ::ng-deep .mat-mdc-table-sticky {
+  z-index: 0 !important;
+}

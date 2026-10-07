@@ -65,8 +65,9 @@ export class ModalObservacionAccionComponent implements OnInit {
     return this.data.accion;
   }
 
+  /** Número de la acción dentro de su hallazgo */
   get codigoAccion(): string {
-    return `${this.data.hallazgo.indice}.${this.accion.numero}`;
+    return this.accion.numero;
   }
 
   get descripcionModal(): string {
@@ -152,7 +153,7 @@ export class ModalObservacionAccionComponent implements OnInit {
     const { estadoId } = this.form.value;
     const conforme = estadoId === ESTADO_ACCION.APROBADA;
     this.alertService
-      .showConfirmAlert(`¿Registrar el dictamen de la acción ${this.codigoAccion} como ${conforme ? 'conforme' : 'no conforme'}?`)
+      .showConfirmAlert(`¿Registrar el dictamen de la acción ${this.codigoAccion} del hallazgo ${this.data.hallazgo.indice} como ${conforme ? 'conforme' : 'no conforme'}?`)
       .then(conf => {
         if (!conf.value) return;
         // El componente padre registra el estado correspondiente
