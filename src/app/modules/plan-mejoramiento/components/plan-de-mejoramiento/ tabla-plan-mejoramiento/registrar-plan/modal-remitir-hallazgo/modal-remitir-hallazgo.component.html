@@ -4,10 +4,14 @@
   [descripcion]="data.auditoria?.titulo + ' - Hallazgo No. ' + data.hallazgo.indice + ' - Vigencia ' + (data.auditoria?.vigencia_nombre ?? '')"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
+  [alignFooter]="'end'"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   <!-- Info del hallazgo -->
+  <p class="intro mt-3">
+    Remitiendo el <b>hallazgo No. {{ data.hallazgo.indice }}</b> a otra dependencia responsable por competencia temática.
+  </p>
   <div class="info-hallazgo mb-4">
     <div class="info-row">
       <mat-icon class="info-icon">description</mat-icon>
@@ -24,8 +28,8 @@
   <form [formGroup]="form" class="row">
     <!-- Dependencia destino -->
     <div class="col-12 mb-3">
-      <mat-form-field appearance="outline" class="w-100 col-12">
-        <mat-label>Dependencia destino <span class="text-danger">*</span></mat-label>
+      <mat-form-field appearance="outline" class="ancho-completo">
+        <mat-label>Dependencia destino <span class="texto-requerido">*</span></mat-label>
         @if (cargandoDependencias) {
           <mat-spinner matPrefix diameter="18" class="me-2"></mat-spinner>
         } @else {
@@ -44,8 +48,8 @@
 
     <!-- Observación / justificación -->
     <div class="col-12 mb-3">
-      <mat-form-field appearance="outline" class="w-100 col-12">
-        <mat-label>Observación / justificación <span class="text-danger">*</span></mat-label>
+      <mat-form-field appearance="outline" class="ancho-completo">
+        <mat-label>Justificación técnica de la remisión <span class="texto-requerido">*</span></mat-label>
         <mat-icon matPrefix color="warn">note</mat-icon>
         <textarea matInput formControlName="observacion" rows="4"
           placeholder="Observaciones"></textarea>
@@ -57,7 +61,7 @@
 
     <!-- Aviso -->
     <div class="col-12">
-      <div class="aviso-remision d-flex align-items-start gap-2 p-3">
+      <div class="aviso-remision d-flex align-items-start espacio-2 p-3">
         <mat-icon class="aviso-icon">warning_amber</mat-icon>
         <p class="mb-0">
           Una vez remitido, el hallazgo quedará registrado en el historial y la
@@ -70,12 +74,12 @@
 </ng-template>
 
 <ng-template #footerDeModal>
-  <div class="d-flex justify-content-end gap-2 mb-3">
-    <button mat-stroked-button color="warn" [mat-dialog-close]>
+  <div class="d-flex justify-content-end espacio-2 mb-3 me-3">
+    <button mat-stroked-button color="primary" class="boton-secundario" [mat-dialog-close]>
       <mat-icon>close</mat-icon> Cancelar
     </button>
     <button mat-raised-button color="primary" (click)="remitir()">
-      <mat-icon>send</mat-icon> Remitir hallazgo
+      <mat-icon>send</mat-icon> Confirmar remisión
     </button>
   </div>
 </ng-template>

@@ -27,7 +27,7 @@ const NOMBRES_ESTADO_PLAN: Record<number, string> = {
 @Component({
   selector: 'app-ver-plan',
   templateUrl: './ver-plan.component.html',
-  styleUrls: ['./ver-plan.component.css'],
+  styleUrls: ['../vista-plan.css', './ver-plan.component.css'],
   standalone: false,
 })
 export class VerPlanComponent implements OnInit {
@@ -221,7 +221,8 @@ export class VerPlanComponent implements OnInit {
   cargarEstadosAcciones(): void {
     if (!this.planMejoramientoId) return;
     this.planAuditoriaService
-      .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0`)
+      // Consulta liviana de todo el plan (la tabla está paginada): solo estado y hallazgo
+      .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0&fields=estado_id,hallazgo_id`)
       .subscribe({
         next: (res) => {
           this.accionesPlan = (res?.Data ?? []).map((a: any) => ({

@@ -42,8 +42,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
   cargandoDependencias = false;
 
   tiposAccion = [
-    { id: 1, nombre: 'Preventiva' },
-    { id: 2, nombre: 'Correctiva' },
+    { id: 1, nombre: 'Preventiva', descripcion: 'Previene la ocurrencia potencial' },
+    { id: 2, nombre: 'Correctiva', descripcion: 'Elimina la causa del problema' },
   ];
 
   readonly tooltips = {
@@ -83,8 +83,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private iniciarForm(): void {
     const { fechaInicio, fechaFin } = this.calcularFechas();
+    // La causa del hallazgo se muestra en solo lectura (proviene del informe y no se guarda desde aquí)
     this.form = this.fb.group({
-      causa:            [this.data.hallazgo?.causa ?? '', Validators.required],
       tipoAccion:       ['', Validators.required],
       accionPlanteada:  ['', Validators.required],
       nombreIndicador:  [''],
@@ -170,7 +170,6 @@ export class ModalRegistrarAccionComponent implements OnInit {
     const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : this.form.getRawValue().fechaInicio;
     const fechaFin    = a.fechaFinISO    ? new Date(a.fechaFinISO)    : this.form.getRawValue().fechaFin;
     this.form.patchValue({
-      causa:            this.data.hallazgo?.causa ?? '',
       tipoAccion:       a.tipoAccionId ?? '',
       accionPlanteada:  a.accionPlanteada,
       nombreIndicador:  a.nombreIndicador,
@@ -179,6 +178,38 @@ export class ModalRegistrarAccionComponent implements OnInit {
       fechaInicio,
       fechaFin,
     });
+  }
+
+  get titulo(): string {
+    return `${this.modoEdicion ? 'Editar acción del' : 'Añadir acción al'} hallazgo No. ${this.data.hallazgo?.indice ?? ''}`;
+  }
+
+  get descripcionModal(): string {
+    const vigencia = this.data.auditoria?.vigencia_nombre;
+    return `Formulación del plan de mejoramiento${vigencia ? ' • Vigencia ' + vigencia : ''}`;
+  }
+
+  get causaHallazgo(): string {
+    return this.data.hallazgo?.causa || 'Sin causa registrada';
+  }
+
+  longitud(campo: string): number {
+    return this.form.get(campo)?.value?.length ?? 0;
+  }
+
+  /** Duración entre las fechas calculadas de la acción */
+  get duracionEstimada(): string {
+    const { fechaInicio, fechaFin } = this.form.getRawValue();
+    if (!fechaInicio || !fechaFin) return '';
+    const dias = Math.round((new Date(fechaFin).getTime() - new Date(fechaInicio).getTime()) / 86400000);
+    if (isNaN(dias) || dias < 0) return '';
+    const meses = Math.round(dias / 30);
+    return `${meses} mes(es) (${dias} días)`;
+  }
+
+  /** Obligatorios del formulario completos y al menos un responsable de apoyo */
+  get formularioCompleto(): boolean {
+    return this.form.valid && this.responsablesAgregados.length > 0;
   }
 
   private actualizarDisponibles(): void {

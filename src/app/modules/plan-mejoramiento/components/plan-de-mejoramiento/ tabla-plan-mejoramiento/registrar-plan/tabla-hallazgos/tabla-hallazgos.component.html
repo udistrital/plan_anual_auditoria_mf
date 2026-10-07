@@ -1,15 +1,15 @@
-@if (cargando) {
+@if (cargando && !hallazgos.length) {
   <div class="text-center py-4">
     <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
   </div>
 }
 
-@if (!cargando) {
-  <div>
+@if (!cargando || hallazgos.length) {
+  <div class="contenedor-tabla" [class.recargando]="cargando">
     @if (!soloLectura) {
       <div class="d-flex justify-content-end mb-2">
-        <button mat-stroked-button (click)="exportarTabla()" color="primary">
-          <mat-icon>upload</mat-icon> Exportar tabla
+        <button mat-stroked-button (click)="exportarTabla()" color="primary" class="boton-exportar">
+          <mat-icon>file_download</mat-icon> Exportar matriz
         </button>
       </div>
     }
@@ -26,10 +26,10 @@
               } @else if (columna.columnDef === 'estado') {
                 @if (fila.accion) {
                   <span class="estado-chip"
-                    [class.estado-pendiente]="fila.accion.estadoId === ESTADO_ACCION.PENDIENTE_REVISION"
+                    [class.estado-pendiente]="fila.accion.estadoId !== ESTADO_ACCION.APROBADA && fila.accion.estadoId !== ESTADO_ACCION.RECHAZADA"
                     [class.estado-aprobada]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
                     [class.estado-rechazada]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA">
-                    {{ fila.accion.estadoNombre }}
+                    {{ etiquetaDictamen(fila.accion.estadoId) }}
                   </span>
                 }
               } @else if (columna.columnDef === 'acciones') {
@@ -104,6 +104,22 @@
                 <span class="estado-chip" [ngClass]="resumenHallazgo(fila.hallazgoId).clase">
                   {{ resumenHallazgo(fila.hallazgoId).texto }}
                 </span>
+              } @else {
+                <span class="d-flex align-items-center ms-auto me-2 espacio-2">
+                  @if (getHallazgo(fila.hallazgoId)?.acciones?.length) {
+                    <span class="estado-chip estado-formulado">
+                      {{ getHallazgo(fila.hallazgoId)?.acciones?.length }} acción(es) formulada(s)
+                    </span>
+                  } @else {
+                    <span class="estado-chip estado-pendiente">Pendiente de formulación</span>
+                    @if (!soloLectura) {
+                      <button mat-stroked-button color="primary" class="boton-formular"
+                        (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId))">
+                        <mat-icon>add_circle</mat-icon> Formular primera acción
+                      </button>
+                    }
+                  }
+                </span>
               }
               @if (!soloLectura) {
                 <button mat-icon-button color="primary" [matMenuTriggerFor]="menuUtilidad">
@@ -133,5 +149,16 @@
         </tr>
       </table>
     </div>
+
+    <mat-paginator
+      [length]="totalHallazgos"
+      [pageSize]="tamanoPagina"
+      [pageIndex]="indicePagina"
+      [pageSizeOptions]="opcionesTamanoPagina"
+      [disabled]="cargando"
+      (page)="cambiarPagina($event)"
+      showFirstLastButtons
+      aria-label="Paginación de hallazgos">
+    </mat-paginator>
   </div>
 }

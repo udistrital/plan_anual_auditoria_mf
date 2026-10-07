@@ -1,238 +1,233 @@
 <plantilla-modal
-  [icono]="'edit'"
-  [titulo]="modoEdicion ? 'Editar Acción' : 'Registrar Acción'"
-  [descripcion]="'Hallazgo ' + data.hallazgo.indice + ' ' + data.hallazgo.descripcion"
+  [icono]="'edit_note'"
+  [titulo]="titulo"
+  [descripcion]="descripcionModal"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
+  [alignFooter]="'end'"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <form [formGroup]="form" class="row mt-3">
+  <form [formGroup]="form" class="mt-3">
 
-    <div class="col-12 mb-3">
-      <div class="fondo-acento-50 d-flex justify-content-center my-3">
-        <b>Hallazgo Vinculado</b>
-      </div>
-      <mat-form-field appearance="outline" class="col-12">
-        <mat-label>Hallazgo Vinculado</mat-label>
-        <input matInput [value]="data.hallazgo.descripcion" readonly />
-      </mat-form-field>
-    </div>
-
-    <div class="col-12 mb-3">
-      <div class="fondo-acento-50 d-flex justify-content-center my-3">
-        <b>Causa del Hallazgo</b>
-      </div>
-      <mat-form-field appearance="outline" class="col-12">
-        <mat-label>Causa del Hallazgo</mat-label>
-        <textarea matInput formControlName="causa"
-        rows="3" placeholder="Descripción de la causa del hallazgo"></textarea>
-        <mat-icon matSuffix color="primary" class="tip-suffix"
-          [matTooltip]="tooltips.causa"
-          matTooltipPosition="right"
-        matTooltipClass="tooltip-multilinea">help</mat-icon>
-        @if (form.get('causa')?.hasError('required')) {
-          <mat-error>Campo requerido</mat-error>
+    <!-- 1. Contexto del hallazgo y causa -->
+    <section class="seccion">
+      <div class="seccion-encabezado">
+        <mat-icon>assignment_late</mat-icon>
+        <span>1. Contexto del hallazgo y causa</span>
+        @if (data.auditoria.consecutivo_OCI) {
+          <span class="codigo ms-auto">Auditoría {{ data.auditoria.consecutivo_OCI }}</span>
         }
-      </mat-form-field>
-    </div>
-
-    <div class="col-12 mb-3">
-      <div class="fondo-acento-50 d-flex justify-content-center my-3">
-        <b>Descripción de la Acción</b>
       </div>
-
-      <div class="row mb-3 mt-2">
-        <div class="col-md-3 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>No. Acción</mat-label>
-            <input matInput [value]="data.accion?.numero || 'Autogenerado'" readonly />
-          </mat-form-field>
+      <div class="seccion-cuerpo">
+        <div class="hallazgo">
+          <span class="chip-hallazgo">Hallazgo {{ data.hallazgo.indice }}</span>
+          <p class="valor mb-0">{{ data.hallazgo.descripcion }}</p>
         </div>
-        <div class="col-md-9 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Tipo de Acción</mat-label>
-            <mat-select formControlName="tipoAccion" required>
-              @for (tipo of tiposAccion; track tipo) {
-                <mat-option [value]="tipo.id">
-                  {{ tipo.nombre }}
-                </mat-option>
-              }
-            </mat-select>
-            <mat-icon matSuffix color="primary" class="tip-suffix"
-              [matTooltip]="form.get('tipoAccion')?.value === 1 ? tooltips.accionPreventiva : tooltips.accionCorrectiva"
-              matTooltipPosition="right"
+        <span class="etiqueta d-flex align-items-center espacio-1">
+          Causa del hallazgo
+          <mat-icon class="tip-suffix" [matTooltip]="tooltips.causa" matTooltipPosition="right"
             matTooltipClass="tooltip-multilinea">help</mat-icon>
-            @if (form.get('tipoAccion')?.hasError('required')) {
-              <mat-error>Campo requerido</mat-error>
-            }
-          </mat-form-field>
-        </div>
+        </span>
+        <div class="cita">“{{ causaHallazgo }}”</div>
       </div>
+    </section>
 
-      <mat-form-field appearance="outline" class="col-12 mb-3">
-        <mat-label>Acción Planteada</mat-label>
-        <textarea matInput formControlName="accionPlanteada" required
-        rows="3" placeholder="Descripción de la acción planteada"></textarea>
-        <mat-icon matSuffix color="primary" class="tip-suffix"
-          [matTooltip]="tooltips.accionPlanteada"
-          matTooltipPosition="right"
-        matTooltipClass="tooltip-multilinea">help</mat-icon>
-        @if (form.get('accionPlanteada')?.hasError('required')) {
-          <mat-error>Campo requerido</mat-error>
+    <!-- 2. Formulación y detalle de la acción -->
+    <section class="seccion">
+      <div class="seccion-encabezado">
+        <mat-icon>task_alt</mat-icon>
+        <span>2. Formulación y detalle de la acción</span>
+        <span class="codigo ms-auto">No. acción: {{ data.accion?.numero || 'Autogenerado' }}</span>
+      </div>
+      <div class="seccion-cuerpo">
+        <span class="etiqueta d-flex align-items-center espacio-1">
+          Tipo de acción planteada *
+          <mat-icon class="tip-suffix"
+            [matTooltip]="form.get('tipoAccion')?.value === 1 ? tooltips.accionPreventiva : tooltips.accionCorrectiva"
+            matTooltipPosition="right" matTooltipClass="tooltip-multilinea">help</mat-icon>
+        </span>
+        <mat-radio-group formControlName="tipoAccion" class="opciones mb-2">
+          @for (tipo of tiposAccion; track tipo.id) {
+            <mat-radio-button class="opcion" color="primary" [value]="tipo.id"
+              [class.opcion-seleccionada]="form.value.tipoAccion === tipo.id">
+              <span class="opcion-titulo">{{ tipo.nombre }}</span>
+              <small class="d-block texto-secundario">{{ tipo.descripcion }}</small>
+            </mat-radio-button>
+          }
+        </mat-radio-group>
+        @if (form.get('tipoAccion')?.touched && form.get('tipoAccion')?.hasError('required')) {
+          <mat-error class="mb-2">Seleccione el tipo de acción.</mat-error>
         }
-      </mat-form-field>
 
-      <!-- Indicadores: Nombre | Fórmula | Meta -->
-      <div class="row">
-        <div class="col-md-4 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Nombre Indicador</mat-label>
-            <mat-icon matPrefix color="primary">show_chart</mat-icon>
-            <input matInput formControlName="nombreIndicador" />
-            <mat-icon matSuffix color="primary" class="tip-suffix"
-              [matTooltip]="tooltips.nombreIndicador"
-              matTooltipPosition="above"
+        <mat-form-field appearance="outline" class="ancho-completo mt-2">
+          <mat-label>Descripción concreta de la acción planteada</mat-label>
+          <textarea matInput formControlName="accionPlanteada" required rows="3" class="sin-redimension"
+            placeholder="Descripción de la acción planteada"></textarea>
+          <mat-icon matSuffix color="primary" class="tip-suffix"
+            [matTooltip]="tooltips.accionPlanteada"
+            matTooltipPosition="right"
             matTooltipClass="tooltip-multilinea">help</mat-icon>
-          </mat-form-field>
-        </div>
-        <div class="col-md-4 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Fórmula Indicador</mat-label>
-            <mat-icon matPrefix color="primary">functions</mat-icon>
-            <input matInput formControlName="formulaIndicador" />
-            <mat-icon matSuffix color="primary" class="tip-suffix"
-              [matTooltip]="tooltips.formulaIndicador"
-              matTooltipPosition="above"
-            matTooltipClass="tooltip-multilinea">help</mat-icon>
-          </mat-form-field>
-        </div>
-        <div class="col-md-4 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Meta</mat-label>
-            <mat-icon matPrefix color="primary">flag</mat-icon>
-            <input matInput formControlName="meta" />
-            <mat-icon matSuffix color="primary" class="tip-suffix"
-              [matTooltip]="tooltips.meta"
-              matTooltipPosition="above"
-            matTooltipClass="tooltip-multilinea">help</mat-icon>
-          </mat-form-field>
-        </div>
+          <mat-hint>Redacte en infinitivo indicando qué se hará y el resultado verificable esperado.</mat-hint>
+          <mat-hint align="end">{{ longitud('accionPlanteada') }} caracteres</mat-hint>
+          @if (form.get('accionPlanteada')?.hasError('required')) {
+            <mat-error>Campo requerido</mat-error>
+          }
+        </mat-form-field>
       </div>
+    </section>
 
-      <!-- Fechas: Inicio | Fin (autocalculadas, solo lectura) -->
-      <div class="row">
-        <div class="col-md-6 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Fecha Inicio</mat-label>
-            <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" readonly />
-            <mat-datepicker-toggle matSuffix [for]="pickerInicio" disabled></mat-datepicker-toggle>
-            <mat-datepicker #pickerInicio disabled></mat-datepicker>
-            @if (!form.getRawValue().fechaInicio) {
-              <mat-hint>Se calculará al registrar el informe final</mat-hint>
-            }
-          </mat-form-field>
-        </div>
-        <div class="col-md-6 col-12">
-          <mat-form-field appearance="outline" class="col-12">
-            <mat-label>Fecha Fin</mat-label>
-            <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" readonly />
-            <mat-datepicker-toggle matSuffix [for]="pickerFin" disabled></mat-datepicker-toggle>
-            <mat-datepicker #pickerFin disabled></mat-datepicker>
-            @if (!form.getRawValue().fechaFin) {
-              <mat-hint>Se calculará al registrar el informe final</mat-hint>
-            }
-          </mat-form-field>
-        </div>
+    <!-- 3. Indicador, meta y periodo de ejecución -->
+    <section class="seccion">
+      <div class="seccion-encabezado">
+        <mat-icon>monitoring</mat-icon>
+        <span>3. Indicador, meta y periodo de ejecución</span>
       </div>
-    </div>
-
-    <!-- ── Responsables ───────────────────────────────────────────────── -->
-    <div class="col-12 mb-2">
-      <div class="fondo-acento-50 d-flex justify-content-center my-3">
-        <b>Dependencias Líderes Acciones</b>
-      </div>
-      <div
-        class="d-flex align-items-center justify-content-between mb-2"
-        >
-        <div class="col-12">
-          <mat-form-field subscriptSizing="dynamic" appearance="outline" class="col-12">
-            <mat-icon color="primary" matIconPrefix>apartment</mat-icon>
-            <input matInput [value]="dependenciaLider || 'Sin dependencia líder'" readonly />
-          </mat-form-field>
-        </div>
-      </div>
-    </div>
-
-
-    <div class="col-12 mb-2">
-      <div class="fondo-acento-50 d-flex justify-content-center my-3">
-        <b>Dependencias responsables</b>
-      </div>
-
-      <!-- Lista de responsables ya agregados -->
-      @for (resp of responsablesAgregados; track resp; let i = $index) {
-        <div
-          class="d-flex align-items-center justify-content-between mb-2"
-          >
-          <div class="col-9">
-            <mat-form-field subscriptSizing="dynamic" appearance="outline" class="col-12">
-              <mat-label>Dependencia de apoyo {{ i + 1 }}</mat-label>
-              <mat-icon color="primary" matIconPrefix>apartment</mat-icon>
-              <input matInput [value]="resp.nombre" readonly />
+      <div class="seccion-cuerpo">
+        <div class="row">
+          <div class="col-md-5 col-12">
+            <mat-form-field appearance="outline" class="ancho-completo">
+              <mat-label>Nombre del indicador</mat-label>
+              <mat-icon matPrefix color="primary">analytics</mat-icon>
+              <input matInput formControlName="nombreIndicador" />
+              <mat-icon matSuffix color="primary" class="tip-suffix"
+                [matTooltip]="tooltips.nombreIndicador"
+                matTooltipPosition="above"
+                matTooltipClass="tooltip-multilinea">help</mat-icon>
             </mat-form-field>
           </div>
-          <div class="col-3 center">
-            <button mat-icon-button color="primary"
-              (click)="eliminarResponsable(i)"
-              matTooltip="Eliminar responsable"
-              type="button">
-              <mat-icon>delete</mat-icon>
-            </button>
+          <div class="col-md-4 col-12">
+            <mat-form-field appearance="outline" class="ancho-completo">
+              <mat-label>Fórmula de cálculo</mat-label>
+              <mat-icon matPrefix color="primary">functions</mat-icon>
+              <input matInput formControlName="formulaIndicador" />
+              <mat-icon matSuffix color="primary" class="tip-suffix"
+                [matTooltip]="tooltips.formulaIndicador"
+                matTooltipPosition="above"
+                matTooltipClass="tooltip-multilinea">help</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3 col-12">
+            <mat-form-field appearance="outline" class="ancho-completo">
+              <mat-label>Meta esperada</mat-label>
+              <mat-icon matPrefix color="primary">flag</mat-icon>
+              <input matInput formControlName="meta" />
+              <mat-icon matSuffix color="primary" class="tip-suffix"
+                [matTooltip]="tooltips.meta"
+                matTooltipPosition="above"
+                matTooltipClass="tooltip-multilinea">help</mat-icon>
+            </mat-form-field>
           </div>
         </div>
-      }
 
-      <!-- Selector + botón Agregar -->
-      <div class="col-12 d-flex align-items-center mt-3">
-        <div class="col-9 p-0">
-          <app-search-selection
-            label="Dependencia Responsable"
-            icon="group_search"
-            placeholder="Seleccione una dependencia responsable"
-            [items]="dependenciasDisponibles"
-            [labelKey]="'nombre'"
-            [selectionControl]="responsableSeleccionado"
-            ></app-search-selection>
+        <!-- Fechas autocalculadas (solo lectura) -->
+        <div class="row align-items-start">
+          <div class="col-md-4 col-12">
+            <mat-form-field appearance="outline" class="ancho-completo">
+              <mat-label>Fecha inicio</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" readonly />
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio" disabled></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio disabled></mat-datepicker>
+              @if (!form.getRawValue().fechaInicio) {
+                <mat-hint>Se calculará al registrar el informe final</mat-hint>
+              }
+            </mat-form-field>
+          </div>
+          <div class="col-md-4 col-12">
+            <mat-form-field appearance="outline" class="ancho-completo">
+              <mat-label>Fecha fin</mat-label>
+              <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" readonly />
+              <mat-datepicker-toggle matSuffix [for]="pickerFin" disabled></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin disabled></mat-datepicker>
+              @if (!form.getRawValue().fechaFin) {
+                <mat-hint>Se calculará al registrar el informe final</mat-hint>
+              }
+            </mat-form-field>
+          </div>
+          <div class="col-md-4 col-12">
+            <div class="dato duracion">
+              <mat-icon color="primary">timelapse</mat-icon>
+              <div>
+                <span class="etiqueta">Duración estimada</span>
+                <span class="valor">{{ duracionEstimada || 'Sin calcular' }}</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-3 mx-2">
-          <button mat-raised-button color="primary"
-            class="btn-agregar mb-4"
+        <small class="texto-secundario">Las fechas se calculan a partir de la aprobación del informe final.</small>
+      </div>
+    </section>
+
+    <!-- 4. Asignación de dependencias -->
+    <section class="seccion">
+      <div class="seccion-encabezado">
+        <mat-icon>corporate_fare</mat-icon>
+        <span>4. Asignación de dependencias</span>
+      </div>
+      <div class="seccion-cuerpo">
+        <span class="etiqueta">Dependencia líder de la acción (responsable principal de ejecución)</span>
+        <div class="tarjeta-lider mb-3">
+          <mat-icon>stars</mat-icon>
+          <span class="valor">{{ dependenciaLider || 'Sin dependencia líder' }}</span>
+          <span class="chip-lider ms-auto">Líder</span>
+        </div>
+
+        <span class="etiqueta">Dependencias corresponsables / apoyo *</span>
+        <div class="chips-dependencias mb-2">
+          @for (resp of responsablesAgregados; track resp.id; let i = $index) {
+            <span class="chip-dependencia">
+              <mat-icon>domain</mat-icon>
+              {{ resp.nombre }}
+              <button mat-icon-button type="button" class="quitar-dependencia"
+                (click)="eliminarResponsable(i)"
+                [attr.aria-label]="'Quitar ' + resp.nombre"
+                matTooltip="Quitar dependencia">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </span>
+          } @empty {
+            <small class="texto-secundario">Aún no se han vinculado dependencias de apoyo.</small>
+          }
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center espacio-2">
+          <div class="selector-dependencia">
+            <app-search-selection
+              label="Dependencia corresponsable"
+              icon="group_search"
+              placeholder="Seleccione una dependencia para vincular"
+              [items]="dependenciasDisponibles"
+              [labelKey]="'nombre'"
+              [selectionControl]="responsableSeleccionado"
+            ></app-search-selection>
+          </div>
+          <button mat-stroked-button color="primary"
+            class="boton-secundario btn-agregar mb-4"
             type="button"
             [disabled]="!responsableSeleccionado.value"
             (click)="agregarResponsable()">
-            <mat-icon>add</mat-icon> Agregar Responsable
+            <mat-icon>add_circle</mat-icon> Vincular dependencia
           </button>
         </div>
       </div>
-
-      <!-- Info guardar -->
-      <div class="d-flex justify-content-center align-items-center my-2">
-        <mat-icon color="primary">info</mat-icon>
-        <p class="mx-2">¿Guardar cambios?</p>
-      </div>
-    </div>
+    </section>
 
   </form>
 </ng-template>
 
 <ng-template #footerDeModal>
-  <div class="d-flex justify-content-end gap-2 mb-3">
-    <button mat-stroked-button color="warn" class="btn-cerrar" [mat-dialog-close]>
-      <mat-icon>close</mat-icon> No, cerrar
-    </button>
-    <button mat-raised-button color="primary" (click)="guardarYCerrar()">
-      <mat-icon>save</mat-icon> Sí, guardar y cerrar
-    </button>
+  <div class="pie mb-3">
+    <span class="estado-formulario" [class.completo]="formularioCompleto">
+      <mat-icon>{{ formularioCompleto ? 'check_circle' : 'error_outline' }}</mat-icon>
+      {{ formularioCompleto ? 'Campos obligatorios completos' : 'Faltan campos obligatorios' }}
+    </span>
+    <div class="d-flex espacio-2">
+      <button mat-stroked-button color="primary" class="boton-secundario" [mat-dialog-close]>
+        <mat-icon>close</mat-icon> Descartar
+      </button>
+      <button mat-raised-button color="primary" (click)="guardarYCerrar()">
+        <mat-icon>save</mat-icon> Guardar acción
+      </button>
+    </div>
   </div>
 </ng-template>

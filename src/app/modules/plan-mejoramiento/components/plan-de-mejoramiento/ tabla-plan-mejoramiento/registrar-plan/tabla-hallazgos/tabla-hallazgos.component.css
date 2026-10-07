@@ -130,3 +130,37 @@ table.mat-table td {
 .fila-grupo-row td {
   vertical-align: middle;
 }
+/* Estado de formulación del hallazgo (Registrar Plan) */
+.estado-formulado { background-color: #e3f2fd; color: #0d47a1; border-color: #90caf9; }
+
+/* Botón "Formular primera acción" (anula el estilo de botón circular de la fila de grupo) */
+.fila-grupo-row button.boton-formular {
+  width: auto;
+  min-width: 0;
+  height: 30px;
+  line-height: 28px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid var(--md-primary-500);
+  white-space: nowrap;
+}
+
+.boton-formular mat-icon,
+.boton-exportar mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.boton-exportar {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* Recarga al cambiar de página: se conserva la tabla atenuada */
+.contenedor-tabla.recargando {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }

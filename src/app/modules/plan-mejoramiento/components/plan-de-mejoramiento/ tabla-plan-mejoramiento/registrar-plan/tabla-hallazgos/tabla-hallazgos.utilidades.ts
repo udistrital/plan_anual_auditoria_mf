@@ -72,6 +72,12 @@ export const hallazgosConstructorTabla = [
     cell: (fila: any) => fila.accion?.fechaFin,
   },
   {
+    columnDef: 'estado',
+    header: 'Estado',
+    sortable: false,
+    cell: () => '',
+  },
+  {
     columnDef: 'acciones',
     header: 'Acciones',
     sortable: false,

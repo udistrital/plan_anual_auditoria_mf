@@ -55,7 +55,7 @@
               <small>({{ totalAcciones - accionesPendientes }} de {{ totalAcciones }} acciones)</small>
             </span>
           </div>
-          <div class="barra" role="progressbar" [attr.aria-valuenow]="porcentajeDictamen" aria-valuemin="0" aria-valuemax="100">
+          <div class="barra" aria-hidden="true">
             <div class="barra-relleno" [style.width.%]="porcentajeDictamen"></div>
           </div>
         </div>
