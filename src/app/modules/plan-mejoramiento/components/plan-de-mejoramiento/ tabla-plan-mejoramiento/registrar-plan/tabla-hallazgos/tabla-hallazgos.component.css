@@ -170,19 +170,28 @@ table.mat-table td {
 table.tabla-dictamen {
   table-layout: fixed;
   width: 100%;
+  /* Por debajo de este ancho la tabla hace scroll horizontal en vez de aplastar "Acción planteada" */
+  min-width: 1080px;
 }
 
 table.tabla-dictamen th,
 table.tabla-dictamen td {
-  padding: 4px 6px !important;
+  padding: 4px !important;
 }
 
-/* Sin recortes con "…": el texto hace salto de línea */
+/* Sin recortes con "…": encabezados y celdas hacen salto de línea */
+table.tabla-dictamen th.mat-mdc-header-cell,
 table.tabla-dictamen td.mat-mdc-cell {
   overflow: visible;
   text-overflow: clip;
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+table.tabla-dictamen th.mat-mdc-header-cell {
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.2;
 }
 
 /* Acción planteada e indicador: máximo 3 líneas (el detalle completo está en "Ver Dictamen") */
@@ -196,17 +205,17 @@ table.tabla-dictamen .celda-truncada {
   overflow: hidden;
 }
 
-table.tabla-dictamen .mat-column-noHallazgo     { width: 60px;  }
-table.tabla-dictamen .mat-column-descripcion    { width: 120px; }
-table.tabla-dictamen .mat-column-causa          { width: 120px; }
-table.tabla-dictamen .mat-column-numero         { width: 50px;  }
-table.tabla-dictamen .mat-column-tipoAccion     { width: 85px;  }
+table.tabla-dictamen .mat-column-noHallazgo     { width: 72px;  }
+table.tabla-dictamen .mat-column-descripcion    { width: 95px;  }
+table.tabla-dictamen .mat-column-causa          { width: 100px; }
+table.tabla-dictamen .mat-column-numero         { width: 58px;  }
+table.tabla-dictamen .mat-column-tipoAccion     { width: 82px;  }
 table.tabla-dictamen .mat-column-accionPlanteada{ width: auto;  }
-table.tabla-dictamen .mat-column-nombreIndicador{ width: 110px; }
-table.tabla-dictamen .mat-column-meta           { width: 75px;  }
-table.tabla-dictamen .mat-column-responsable    { width: 130px; }
-table.tabla-dictamen .mat-column-estadoDictamen { width: 110px; }
-table.tabla-dictamen .mat-column-accionOci      { width: 125px; }
+table.tabla-dictamen .mat-column-nombreIndicador{ width: 100px; }
+table.tabla-dictamen .mat-column-meta           { width: 70px;  }
+table.tabla-dictamen .mat-column-responsable    { width: 110px; }
+table.tabla-dictamen .mat-column-estadoDictamen { width: 96px;  }
+table.tabla-dictamen .mat-column-accionOci      { width: 110px; }
 
 table.tabla-dictamen .boton-dictamen {
   padding: 0 8px;

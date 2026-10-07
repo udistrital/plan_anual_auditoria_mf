@@ -250,3 +250,16 @@
 .espacio-2 { gap: 0.5rem; }
 .texto-secundario { color: #757575; }
 .ancho-completo { width: 100%; }
+
+.seccion-encabezado mat-icon {
+  flex-shrink: 0;
+}
+
+/* En pantallas angostas el código de la sección baja de línea en vez de cortarse */
+.seccion-encabezado {
+  flex-wrap: wrap;
+}
+
+.seccion-encabezado .codigo {
+  margin-left: auto;
+}

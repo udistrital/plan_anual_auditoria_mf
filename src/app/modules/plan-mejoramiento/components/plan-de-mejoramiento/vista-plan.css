@@ -243,3 +243,20 @@
 .espacio-2 { gap: 0.5rem; }
 .texto-secundario { color: #757575; }
 .ancho-completo { width: 100%; }
+
+/* En pantallas angostas los botones se apilan: la barra deja de ser fija para no tapar el contenido */
+@media (max-width: 768px) {
+  .barra-acciones {
+    position: static;
+    box-shadow: none;
+  }
+
+  .botones {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .botones button {
+    flex: 1 1 100%;
+  }
+}

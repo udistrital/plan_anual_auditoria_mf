@@ -141,3 +141,16 @@
 .opcion-deshabilitada {
   opacity: 0.55;
 }
+
+.seccion-encabezado mat-icon {
+  flex-shrink: 0;
+}
+
+/* En pantallas angostas el código de la sección baja de línea en vez de cortarse */
+.seccion-encabezado {
+  flex-wrap: wrap;
+}
+
+.seccion-encabezado .codigo {
+  margin-left: auto;
+}

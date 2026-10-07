@@ -21,7 +21,7 @@
 
     <form [formGroup]="form">
       <mat-form-field appearance="outline" class="ancho-completo">
-        <mat-label>Observación o motivo de devolución a la dependencia</mat-label>
+        <mat-label>Motivo de la devolución</mat-label>
         <textarea matInput formControlName="observacion" rows="4" class="observacion"
           [maxlength]="MAX_OBSERVACION" required></textarea>
         <mat-hint align="end">{{ longitudObservacion }} / {{ MAX_OBSERVACION }} caracteres</mat-hint>
