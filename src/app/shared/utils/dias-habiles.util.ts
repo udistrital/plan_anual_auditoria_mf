@@ -61,3 +61,22 @@ export function calcularFechaFinHabiles(desde: Date, dias: number): Date {
 
   return result;
 }
+
+/**
+ * Cuenta los días hábiles después de `desde` hasta `hasta` inclusive (el día `desde` NO cuenta).
+ * Devuelve un número negativo si `hasta` es anterior a `desde`.
+ */
+export function contarDiasHabiles(desde: Date, hasta: Date): number {
+  const inicio = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate());
+  const fin = new Date(hasta.getFullYear(), hasta.getMonth(), hasta.getDate());
+  const signo = fin < inicio ? -1 : 1;
+  const [menor, mayor] = signo === 1 ? [inicio, fin] : [fin, inicio];
+
+  let dias = 0;
+  const actual = new Date(menor);
+  while (actual < mayor) {
+    actual.setDate(actual.getDate() + 1);
+    if (esDiaHabil(actual)) dias++;
+  }
+  return signo * dias;
+}

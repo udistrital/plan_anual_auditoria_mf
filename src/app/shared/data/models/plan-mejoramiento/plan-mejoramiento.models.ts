@@ -117,3 +117,27 @@ export interface AuditoriaFormulacionPlan {
   total_hallazgos: number;
   total_observaciones: number;
 }
+
+// Respuesta de plan-mejoramiento/formulacion/auditor/{persona_id}/resumen (MID)
+export interface ResumenFormulacionAuditor {
+  total_auditorias: number;
+  sin_formular: number;
+  en_formulacion: number;
+  en_revision: number;
+  con_observaciones: number;
+  aprobados: number;
+  /** Totales del selector "Mis asignadas / Todas", sin importar el alcance pedido. */
+  total_asignadas: number;
+  total_institucion: number;
+}
+
+// Elemento de plan-mejoramiento/formulacion/auditor/{persona_id} (MID)
+export interface AuditoriaFormulacionAuditor extends AuditoriaFormulacionPlan {
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  /** Fecha del estado actual del plan (radicación, devolución o aprobación). */
+  fecha_estado: string | null;
+  total_acciones: number;
+  acciones_aprobadas: number;
+  asignada: boolean;
+}

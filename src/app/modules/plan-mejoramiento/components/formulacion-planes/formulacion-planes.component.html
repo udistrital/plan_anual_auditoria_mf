@@ -1,4 +1,7 @@
 @switch (vista) {
+  @case ('auditor') {
+    <app-formulacion-vista-auditor [rol]="rol!"></app-formulacion-vista-auditor>
+  }
   @case ('auditado') {
     <app-formulacion-vista-auditado [rol]="rol!"></app-formulacion-vista-auditado>
   }

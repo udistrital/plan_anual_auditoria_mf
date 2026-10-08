@@ -42,12 +42,35 @@ describe('FormulacionPlanesComponent', () => {
     expect(component.vista).toBe('auditado');
   });
 
+  it.each([
+    environment.ROL.JEFE,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_ASISTENTE,
+  ])('muestra la vista del auditor para %s', async (rol) => {
+    rolesUsuario = [rol];
+    await component.ngOnInit();
+    fixture.detectChanges();
+
+    expect(component.vista).toBe('auditor');
+    expect(component.rol).toBe(rol);
+    expect(fixture.nativeElement.querySelector('app-formulacion-vista-auditor')).not.toBeNull();
+  });
+
+  it('prioriza el rol de mayor jerarquía cuando el usuario tiene varios', async () => {
+    rolesUsuario = [environment.ROL.AUDITOR, environment.ROL.AUDITOR_EXPERTO];
+    await component.ngOnInit();
+
+    expect(component.rol).toBe(environment.ROL.AUDITOR_EXPERTO);
+  });
+
   it('deja la página en blanco para roles sin vista', async () => {
-    rolesUsuario = [environment.ROL.JEFE];
+    rolesUsuario = [environment.ROL.ADMIN];
     await component.ngOnInit();
     fixture.detectChanges();
 
     expect(component.vista).toBeNull();
     expect(fixture.nativeElement.querySelector('app-formulacion-vista-auditado')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-formulacion-vista-auditor')).toBeNull();
   });
 });
