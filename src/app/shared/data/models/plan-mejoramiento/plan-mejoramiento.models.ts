@@ -91,3 +91,29 @@ export interface EficaciaAccion {
   fecha_creacion: string;
   fecha_modificacion: string;
 }
+
+// Respuesta de plan-mejoramiento/formulacion/auditado/{persona_id}/{cargo_id}/resumen (MID)
+export interface ResumenFormulacionPlanes {
+  auditorias_finalizadas: number;
+  sin_formular: number;
+  en_formulacion: number;
+  en_revision: number;
+  aprobados: number;
+}
+
+// Elemento de plan-mejoramiento/formulacion/auditado/{persona_id}/{cargo_id} (MID)
+export interface AuditoriaFormulacionPlan {
+  auditoria_id: string;
+  no_auditoria: string;
+  vigencia_nombre: string;
+  titulo: string;
+  tipo_evaluacion_nombre: string;
+  auditores_auditoria: string[];
+  auditores_plan: string[];
+  dependencia_nombre: string;
+  plan_mejoramiento_id: string | null;
+  estado_plan_id: number;
+  estado_plan_nombre: string;
+  total_hallazgos: number;
+  total_observaciones: number;
+}

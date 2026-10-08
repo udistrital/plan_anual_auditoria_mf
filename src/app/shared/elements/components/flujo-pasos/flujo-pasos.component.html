@@ -1,0 +1,24 @@
+<div class="flujo-pasos">
+  @if (titulo) {
+    <div class="encabezado">
+      <mat-icon color="primary">{{ icono }}</mat-icon>
+      <span class="titulo">{{ titulo }}</span>
+    </div>
+  }
+  @if (descripcion) {
+    <p class="descripcion">{{ descripcion }}</p>
+  }
+  <div class="row g-3" role="list">
+    @for (paso of pasos; track paso.titulo; let i = $index) {
+      <div class="col-md col-12" role="listitem">
+        <div class="paso">
+          <div class="encabezado-paso">
+            <span class="numero">{{ i + 1 }}</span>
+            <span class="titulo-paso">{{ paso.titulo }}</span>
+          </div>
+          <span class="descripcion-paso">{{ paso.descripcion }}</span>
+        </div>
+      </div>
+    }
+  </div>
+</div>

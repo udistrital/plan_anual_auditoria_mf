@@ -19,6 +19,8 @@ import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
+import { FormulacionPlanesComponent } from './components/formulacion-planes/formulacion-planes.component';
+import { VistaAuditadoComponent } from './components/formulacion-planes/vista-auditado/vista-auditado.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +37,8 @@ import { RegistroAvancesComponent } from './components/gestion-acciones/registro
     ModalRechazoPlanComponent,
     VerPlanComponent,
     GestionAccionesComponent,
+    FormulacionPlanesComponent,
+    VistaAuditadoComponent,
   ],
   imports: [
     CommonModule,

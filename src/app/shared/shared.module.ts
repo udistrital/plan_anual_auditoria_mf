@@ -22,6 +22,8 @@ import { QuillModule } from "ngx-quill";
 import { NgxMatSelectSearchModule } from "ngx-mat-select-search";
 import { MatOption } from "@angular/material/core";
 import { SearchSelectionComponent } from "./elements/components/search-selection/search-selection.component";
+import { TarjetaIndicadorComponent } from "./elements/components/tarjeta-indicador/tarjeta-indicador.component";
+import { FlujoPasosComponent } from "./elements/components/flujo-pasos/flujo-pasos.component";
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
     PdfVisualizadorComponent,
     EditorEnriquecidoComponent,
     SearchSelectionComponent,
+    TarjetaIndicadorComponent,
+    FlujoPasosComponent,
   ],
   imports: [
     CommonModule,
@@ -61,6 +65,8 @@ import { SearchSelectionComponent } from "./elements/components/search-selection
     PdfVisualizadorComponent,
     EditorEnriquecidoComponent,
     SearchSelectionComponent,
+    TarjetaIndicadorComponent,
+    FlujoPasosComponent,
     //modulos
     FormsModule,
     IconosModule,
