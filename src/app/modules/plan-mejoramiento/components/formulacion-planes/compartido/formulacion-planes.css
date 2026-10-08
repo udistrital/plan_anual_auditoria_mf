@@ -108,6 +108,41 @@
   margin: 0 8px 0 12px;
 }
 
+/* ── Selector de alcance (Mis asignadas / Todas) ──────────── */
+.acciones-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.selector-alcance {
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 3px;
+  border: 1px solid var(--md-primary-100);
+  border-radius: 8px;
+  background-color: var(--md-primary-50);
+}
+
+.opcion-alcance {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms;
+}
+
+.opcion-alcance.activo {
+  background-color: #fff;
+  color: var(--md-primary-700);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
 /* ── Chips de acceso rápido ──────────────────────────────── */
 .acceso-rapido {
   display: flex;
@@ -166,6 +201,7 @@
 .estado-formulacion  { background-color: #fff8e1; color: #8d6e00; border-color: #ffe082; }
 .estado-revision     { background-color: var(--md-primary-100); color: var(--md-primary-900); border-color: var(--md-primary-200); }
 .estado-aprobado     { background-color: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; }
+.estado-rechazado    { background-color: #ffebee; color: #b71c1c; border-color: #ef9a9a; }
 
 /* ── Tabla ───────────────────────────────────────────────── */
 .tabla-auditorias {
@@ -251,6 +287,39 @@
 .texto-observaciones {
   color: #c62828;
 }
+
+/* ── Columna fecha y plazo ───────────────────────────────── */
+.celda-plazo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.fecha-plazo {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.detalle-plazo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+}
+
+.detalle-plazo mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.plazo-vigente  { color: var(--md-primary-700); }
+.plazo-vencido  { color: #c62828; }
+.plazo-cumplido { color: #2e7d32; }
 
 .fila-vacia td {
   border: none !important;
