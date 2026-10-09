@@ -72,6 +72,7 @@
         class="mt-3"
         [length]="totalRegistros"
         [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
         (page)="manejarCambioPaginado($event)"
         [pageSizeOptions]="itemsPerPage"
         showFirstLastButtons
