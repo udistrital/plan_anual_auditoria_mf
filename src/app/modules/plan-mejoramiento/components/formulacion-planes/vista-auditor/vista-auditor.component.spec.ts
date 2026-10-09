@@ -21,7 +21,8 @@ const fila = (no: string, estadoId: number, extra: object = {}) => ({
   tipo_evaluacion_nombre: 'Auditoría Interna', auditores_auditoria: ['Pepito Pérez'], auditores_plan: [],
   dependencia_nombre: 'Dependencia', plan_mejoramiento_id: `p${no}`, estado_plan_id: estadoId,
   estado_plan_nombre: '', total_hallazgos: 0, total_observaciones: 0,
-  fecha_inicio: '2025-01-10', fecha_fin: '2025-01-30', fecha_estado: null,
+  fecha_inicio: '2025-01-10', fecha_fin: '2025-01-30', fecha_aprobacion_informe: '2025-01-31T10:00:00',
+  fecha_limite: null, fecha_estado: null,
   total_acciones: 0, acciones_aprobadas: 0, asignada: true, ...extra,
 });
 
@@ -38,7 +39,7 @@ const midGet = jest.fn((endpoint: string) => {
   if (endpoint.includes('/resumen?')) {
     return of({ Data: {
       total_auditorias: visibles.length, sin_formular: 0, en_formulacion: 0, en_revision: 1,
-      con_observaciones: 1, aprobados: visibles.length - 2, total_asignadas: 2, total_institucion: 3,
+      con_observaciones: 1, aprobados: visibles.length - 2,
     } });
   }
   const estados = (params.get('estado_ids') ?? '').split(',').filter(Boolean).map(Number);
@@ -80,24 +81,10 @@ describe('VistaAuditorComponent', () => {
   describe('como JEFE_CONTROL_INTERNO', () => {
     beforeEach(() => crear(environment.ROL.JEFE));
 
-    it('consulta resumen y tabla del auditor con sus auditorías asignadas', () => {
-      expect(llamadas()).toContain(`${RUTA}/resumen?vigencia_id=1&tipo_evaluacion_id=${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}&alcance=asignadas`);
-      expect(llamadas().some((e) => e.startsWith(`${RUTA}?`) && e.includes('limit=10&offset=0') && e.includes('alcance=asignadas'))).toBe(true);
-      expect(component.dataSource.data.map((f) => f.auditoria_id)).toEqual(['a1', 'a2']);
-    });
-
-    it('muestra el selector de alcance con los totales del resumen', () => {
-      expect(component.opcionesAlcance.map((o) => o.valor)).toEqual(['asignadas', 'todas']);
-      expect(component.resumen?.total_asignadas).toBe(2);
-      expect(component.resumen?.total_institucion).toBe(3);
-    });
-
-    it('al cambiar el alcance recarga indicadores y tabla con todas las auditorías', () => {
-      midGet.mockClear();
-      component.cambiarAlcance('todas');
-
-      expect(llamadas().filter((e) => e.includes('alcance=todas'))).toHaveLength(2);
-      expect(component.dataSource.data).toHaveLength(3);
+    it('consulta resumen y tabla con todas las auditorías de la vigencia', () => {
+      expect(llamadas()).toContain(`${RUTA}/resumen?vigencia_id=1&tipo_evaluacion_id=${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID}&alcance=todas`);
+      expect(llamadas().some((e) => e.startsWith(`${RUTA}?`) && e.includes('limit=10&offset=0') && e.includes('alcance=todas'))).toBe(true);
+      expect(component.dataSource.data.map((f) => f.auditoria_id)).toEqual(['a1', 'a2', 'a3']);
       expect(component.resumen?.total_auditorias).toBe(3);
     });
 
@@ -125,7 +112,7 @@ describe('VistaAuditorComponent', () => {
     it('ofrece dictaminar el plan en revisión y marca el chip de rechazado', () => {
       const [enRevision, rechazado] = component.dataSource.data;
 
-      expect(enRevision.acciones).toEqual(['Asignar Auditor(es)', 'Dictaminar Plan', 'Ver Observaciones']);
+      expect(enRevision.acciones).toEqual(['Asignar Auditor(es)', 'Dictaminar causas y acciones', 'Ver Observaciones']);
       expect(rechazado.claseEstado).toBe('estado-rechazado');
       expect(rechazado.mostrarObservaciones).toBe(true);
     });
@@ -133,13 +120,14 @@ describe('VistaAuditorComponent', () => {
     it('calcula la fecha y el plazo de cada fila', () => {
       const [enRevision, rechazado] = component.dataSource.data as any[];
 
-      expect(enRevision.plazo.fecha).toBe('Rad: 12/02/2025');
-      expect(rechazado.plazo.fecha).toBe('Devuelto: 10/02/2025');
+      expect(enRevision.plazo.fecha).toBe('Rad: 31/01/2025');
+      expect(enRevision.plazo.detalle).toMatch(/^Revisión: /);
+      expect(rechazado.plazo.detalle).toMatch(/^Ajustes: /);
     });
 
-    it('Dictaminar Plan abre ver-plan', () => {
+    it('Dictaminar causas y acciones abre ver-plan', () => {
       const fila = component.dataSource.data[0];
-      component.realizarAccion(fila as any, 'Dictaminar Plan');
+      component.realizarAccion(fila as any, 'Dictaminar causas y acciones');
 
       expect(router.navigate).toHaveBeenCalledWith([`/plan-mejoramiento/ver-plan/${fila.auditoria_id}`]);
     });
@@ -153,6 +141,7 @@ describe('VistaAuditorComponent', () => {
         data: {
           auditoria: expect.objectContaining({
             titulo: 'Auditoría 1',
+            tipo_evaluacion_nombre: 'Auditoría Interna',
             planMejoramientoId: 'p1',
             auditores: [{ auditor_nombre: 'Pepito Pérez' }],
           }),
@@ -171,17 +160,34 @@ describe('VistaAuditorComponent', () => {
     });
   });
 
+  describe('como AUDITOR_EXPERTO', () => {
+    beforeEach(() => crear(environment.ROL.AUDITOR_EXPERTO));
+
+    it('consulta todas las auditorías de la vigencia', () => {
+      expect(llamadas().every((e) => e.includes('alcance=todas'))).toBe(true);
+      expect(component.dataSource.data).toHaveLength(3);
+    });
+  });
+
+  describe('como AUDITOR', () => {
+    beforeEach(() => crear(environment.ROL.AUDITOR));
+
+    it('dictamina el plan en revisión pero no asigna auditores', () => {
+      expect(component.dataSource.data[0].acciones).toEqual(['Dictaminar causas y acciones', 'Ver Observaciones']);
+      expect(component.dataSource.data.every((f) => !f.acciones.includes('Asignar Auditor(es)'))).toBe(true);
+    });
+  });
+
   describe('como AUDITOR_ASISTENTE', () => {
     beforeEach(() => crear(environment.ROL.AUDITOR_ASISTENTE));
 
-    it('no muestra el selector de alcance y consulta solo sus asignadas', () => {
-      expect(component.opcionesAlcance).toEqual([]);
+    it('consulta solo sus auditorías asignadas', () => {
       expect(llamadas().every((e) => e.includes('alcance=asignadas'))).toBe(true);
+      expect(component.dataSource.data.map((f) => f.auditoria_id)).toEqual(['a1', 'a2']);
     });
 
-    it('solo puede ver el plan en revisión, no dictaminarlo', () => {
-      expect(component.dataSource.data[0].acciones).toContain('Ver Plan');
-      expect(component.dataSource.data[0].acciones).not.toContain('Dictaminar Plan');
+    it('solo puede ver el plan en revisión, sin dictaminarlo ni asignar auditores', () => {
+      expect(component.dataSource.data[0].acciones).toEqual(['Ver Plan', 'Ver Observaciones']);
     });
   });
 

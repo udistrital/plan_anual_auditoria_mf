@@ -9,7 +9,6 @@ import {
   ConfigFlujo,
   ConTodos,
   IndicadorFormulacion,
-  OpcionAlcance,
   OpcionEstadoPlan,
   TextosVistaFormulacion,
   columnasComunes,
@@ -52,16 +51,9 @@ export const opcionesEstadoAuditor: OpcionEstadoPlan<GrupoAuditor, ResumenFormul
   { grupo: "APROBADOS",         opcion: "Aprobados",              chip: "Aprobados",         campoResumen: "aprobados" },
 ];
 
-// ── Selector de alcance ─────────────────────────────────────
-export type AlcanceAuditor = "asignadas" | "todas";
-
-/** Solo estos roles pueden consultar todas las auditorías de la institución. */
+// ── Alcance de la consulta ──────────────────────────────────
+/** Estos roles ven todas las auditorías de la vigencia; los demás, solo las asignadas. */
 export const rolesVenTodas: string[] = [environment.ROL.JEFE, environment.ROL.AUDITOR_EXPERTO];
-
-export const opcionesAlcanceAuditor: OpcionAlcance<ResumenFormulacionAuditor>[] = [
-  { valor: "asignadas", etiqueta: "Mis auditorías asignadas",    campoResumen: "total_asignadas" },
-  { valor: "todas",     etiqueta: "Todas las de la institución", campoResumen: "total_institucion" },
-];
 
 // ── Tarjetas KPI ────────────────────────────────────────────
 export const indicadoresAuditor: IndicadorFormulacion<ResumenFormulacionAuditor>[] = [
@@ -139,11 +131,14 @@ export const flujoAuditor: ConfigFlujo = {
 
 // ── Fecha y plazo ───────────────────────────────────────────
 export interface PlazoPlan {
-  fecha: string;
+  /** Radicación: aprobación del informe final. null si aún no tiene fecha. */
+  fecha: string | null;
   detalle: string;
   icono: string;
   clase: string;
 }
+
+type DetallePlazo = Omit<PlazoPlan, "fecha">;
 
 function formatearFecha(fecha: Date): string {
   const dd = String(fecha.getDate()).padStart(2, "0");
@@ -155,43 +150,59 @@ function textoDias(dias: number): string {
   return dias === 1 ? "1 día hábil" : `${dias} días hábiles`;
 }
 
-/** Días hábiles que le quedan al plazo que empezó en `desde`. */
-function plazoRestante(desde: Date, dias: number, hoy: Date, vigente: (restantes: number) => string): Omit<PlazoPlan, "fecha"> {
-  const restantes = contarDiasHabiles(hoy, calcularFechaFinHabiles(desde, dias));
+/** Días hábiles que le quedan al plazo que vence en `fin`, con el texto precedido de `prefijo`. */
+function estadoPlazo(prefijo: string, fin: Date, hoy: Date): DetallePlazo {
+  const restantes = contarDiasHabiles(hoy, fin);
   if (restantes < 0) {
-    return { detalle: `Vencido hace ${textoDias(-restantes)}`, icono: "notification_important", clase: "plazo-vencido" };
+    return { detalle: `${prefijo}: vencido hace ${textoDias(-restantes)}`, icono: "notification_important", clase: "plazo-vencido" };
   }
   if (restantes === 0) {
-    return { detalle: "Vence hoy", icono: "notification_important", clase: "plazo-vencido" };
+    return { detalle: `${prefijo}: vence hoy`, icono: "notification_important", clase: "plazo-vencido" };
   }
-  return { detalle: vigente(restantes), icono: "timer", clase: "plazo-vigente" };
+  const sufijo = restantes === 1 ? "restante" : "restantes";
+  return { detalle: `${prefijo}: ${textoDias(restantes)} ${sufijo}`, icono: "timer", clase: "plazo-vigente" };
 }
 
+const sinPlazo = (detalle: string): DetallePlazo => ({ detalle, icono: "radio_button_unchecked", clase: "plazo-pendiente" });
+
 /**
- * Fecha del estado actual del plan y su plazo: revisión del auditor, ajustes de la
- * dependencia tras un rechazo o el dictamen ya emitido. null si el estado no tiene plazo.
+ * Plazo según el estado del plan: formulación hasta fecha_limite, revisión del auditor
+ * y ajustes tras un rechazo desde la fecha del estado actual, o el dictamen ya emitido.
  */
-export function calcularPlazo(fila: AuditoriaFormulacionAuditor, hoy: Date = new Date()): PlazoPlan | null {
-  if (!fila.fecha_estado) return null;
-  const fechaEstado = new Date(fila.fecha_estado);
-  const fecha = formatearFecha(fechaEstado);
+function detallePlazo(fila: AuditoriaFormulacionAuditor, hoy: Date): DetallePlazo | null {
+  const fechaEstado = fila.fecha_estado ? new Date(fila.fecha_estado) : null;
 
   switch (grupoDeEstado(fila.estado_plan_id)) {
+    case "SIN_FORMULAR":
+      return sinPlazo("Sin plan registrado");
+    case "EN_FORMULACION": {
+      if (!fila.fecha_limite) return sinPlazo("Sin plazo registrado");
+      const limite = new Date(fila.fecha_limite);
+      return estadoPlazo(`Límite ${formatearFecha(limite)}`, limite, hoy);
+    }
     case "EN_REVISION":
-      return {
-        fecha: `Rad: ${fecha}`,
-        ...plazoRestante(fechaEstado, environment.DIAS_REVISION_PLAN_AUDITOR, hoy, (n) => `${textoDias(n)} ${n === 1 ? "restante" : "restantes"}`),
-      };
+      return fechaEstado
+        ? estadoPlazo("Revisión", calcularFechaFinHabiles(fechaEstado, environment.DIAS_REVISION_PLAN_AUDITOR), hoy)
+        : null;
     case "CON_OBSERVACIONES":
-      return {
-        fecha: `Devuelto: ${fecha}`,
-        ...plazoRestante(fechaEstado, environment.DIAS_FORMULACION_PLAN, hoy, (n) => `Vence: ${textoDias(n)} (ajustes)`),
-      };
+      return fechaEstado
+        ? estadoPlazo("Ajustes", calcularFechaFinHabiles(fechaEstado, environment.DIAS_FORMULACION_PLAN), hoy)
+        : null;
     case "APROBADOS":
-      return { fecha: `Aprobado: ${fecha}`, detalle: "Dictamen formal emitido", icono: "verified", clase: "plazo-cumplido" };
-    default:
-      return null;
+      return {
+        detalle: fechaEstado ? `Aprobado ${formatearFecha(fechaEstado)}` : "Plan aprobado",
+        icono: "verified",
+        clase: "plazo-cumplido",
+      };
   }
+}
+
+/** Fecha de radicación (aprobación del informe final) y plazo del plan. null si no hay ninguno. */
+export function calcularPlazo(fila: AuditoriaFormulacionAuditor, hoy: Date = new Date()): PlazoPlan | null {
+  const fecha = fila.fecha_aprobacion_informe ? `Rad: ${formatearFecha(new Date(fila.fecha_aprobacion_informe))}` : null;
+  const detalle = detallePlazo(fila, hoy);
+  if (!fecha && !detalle) return null;
+  return { fecha, ...(detalle ?? { detalle: "", icono: "", clase: "" }) };
 }
 
 // ── Tabla ───────────────────────────────────────────────────
@@ -214,7 +225,7 @@ export const columnasAuditor: ColumnaFormulacion<AuditoriaFormulacionAuditor>[] 
     header: "Fecha Radicación y Plazo",
     cell: (f) => {
       const plazo = calcularPlazo(f);
-      return plazo ? `${plazo.fecha} · ${plazo.detalle}` : "";
+      return plazo ? [plazo.fecha, plazo.detalle].filter(Boolean).join(" · ") : "";
     },
   },
   columnasComunes.estado,

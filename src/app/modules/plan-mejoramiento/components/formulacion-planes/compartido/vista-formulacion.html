@@ -48,26 +48,9 @@
       <h6 class="seccion-titulo">
         <mat-icon>filter_alt</mat-icon> Filtros de Búsqueda
       </h6>
-      <div class="acciones-filtros">
-        @if (opcionesAlcance.length) {
-          <div class="selector-alcance" role="group" aria-label="Alcance de las auditorías">
-            @for (op of opcionesAlcance; track op.valor) {
-              <button
-                type="button"
-                class="opcion-alcance"
-                [class.activo]="alcance === op.valor"
-                [attr.aria-pressed]="alcance === op.valor"
-                (click)="cambiarAlcance(op.valor)"
-              >
-                {{ op.etiqueta }}@if (resumen) { ({{ resumen[op.campoResumen] }}) }
-              </button>
-            }
-          </div>
-        }
-        <button mat-button color="primary" type="button" (click)="limpiarFiltros()">
-          <mat-icon>restart_alt</mat-icon> Limpiar filtros
-        </button>
-      </div>
+      <button mat-button color="primary" type="button" (click)="limpiarFiltros()">
+        <mat-icon>restart_alt</mat-icon> Limpiar filtros
+      </button>
     </div>
 
     <div class="row g-3">
@@ -174,10 +157,14 @@
                 @case ('plazo') {
                   @if (row.plazo) {
                     <div class="celda-plazo">
-                      <span class="fecha-plazo">{{ row.plazo.fecha }}</span>
-                      <small class="detalle-plazo" [ngClass]="row.plazo.clase">
-                        <mat-icon>{{ row.plazo.icono }}</mat-icon> {{ row.plazo.detalle }}
-                      </small>
+                      @if (row.plazo.fecha) {
+                        <span class="fecha-plazo">{{ row.plazo.fecha }}</span>
+                      }
+                      @if (row.plazo.detalle) {
+                        <small class="detalle-plazo" [ngClass]="row.plazo.clase">
+                          {{ row.plazo.detalle }}
+                        </small>
+                      }
                     </div>
                   } @else {
                     <span class="texto-subtitulo">—</span>

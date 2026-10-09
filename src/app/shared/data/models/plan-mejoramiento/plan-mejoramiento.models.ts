@@ -126,15 +126,16 @@ export interface ResumenFormulacionAuditor {
   en_revision: number;
   con_observaciones: number;
   aprobados: number;
-  /** Totales del selector "Mis asignadas / Todas", sin importar el alcance pedido. */
-  total_asignadas: number;
-  total_institucion: number;
 }
 
 // Elemento de plan-mejoramiento/formulacion/auditor/{persona_id} (MID)
 export interface AuditoriaFormulacionAuditor extends AuditoriaFormulacionPlan {
   fecha_inicio: string | null;
   fecha_fin: string | null;
+  /** Aprobación del informe final: desde ahí corre la formulación del plan. */
+  fecha_aprobacion_informe: string | null;
+  /** Plazo de formulación del plan (apertura + 8 días hábiles). */
+  fecha_limite: string | null;
   /** Fecha del estado actual del plan (radicación, devolución o aprobación). */
   fecha_estado: string | null;
   total_acciones: number;

@@ -26,7 +26,6 @@ import {
   ConfigFlujo,
   DatosFilaVista,
   IndicadorFormulacion,
-  OpcionAlcance,
   OpcionEstadoPlan,
   TextosVistaFormulacion,
   iconosAccion,
@@ -75,8 +74,6 @@ export abstract class VistaFormulacionBase<
   abstract readonly opcionesEstadoPlan: OpcionEstadoPlan<G, R>[];
   abstract readonly columnas: ColumnaFormulacion<A>[];
   abstract readonly columnasIds: string[];
-  /** Selector de alcance; vacío si la vista no lo usa. */
-  opcionesAlcance: OpcionAlcance<R>[] = [];
 
   /** Ruta del MID sin parámetros; la del resumen agrega /resumen. */
   protected abstract get rutaBase(): string;
@@ -96,7 +93,6 @@ export abstract class VistaFormulacionBase<
     { Id: environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID, Nombre: "Auditoría Interna" },
   ];
 
-  alcance = "";
   resumen: R | null = null;
   dataSource = new MatTableDataSource<A & DatosFilaVista>([]);
 
@@ -180,7 +176,7 @@ export abstract class VistaFormulacionBase<
   }
 
   // ── Filtros ───────────────────────────────────────────────
-  /** Cambio de vigencia, tipo de evaluación o alcance: recarga indicadores y tabla. */
+  /** Cambio de vigencia o tipo de evaluación: recarga indicadores y tabla. */
   recargar(): void {
     this.pageIndex = 0;
     this.cargarResumen();
@@ -195,12 +191,6 @@ export abstract class VistaFormulacionBase<
   seleccionarGrupo(grupo: ConTodos<G>): void {
     this.filtrosForm.patchValue({ grupoEstado: grupo });
     this.aplicarFiltros();
-  }
-
-  cambiarAlcance(alcance: string): void {
-    if (alcance === this.alcance) return;
-    this.alcance = alcance;
-    this.recargar();
   }
 
   limpiarFiltros(): void {

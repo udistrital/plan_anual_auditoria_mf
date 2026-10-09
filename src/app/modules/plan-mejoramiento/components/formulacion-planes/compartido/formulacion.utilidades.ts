@@ -34,13 +34,6 @@ export interface IndicadorFormulacion<R> {
   variante: VarianteTarjetaIndicador;
 }
 
-/** Opción del selector de alcance (p. ej. "Mis asignadas" / "Todas"). */
-export interface OpcionAlcance<R> {
-  valor: string;
-  etiqueta: string;
-  campoResumen: keyof R;
-}
-
 export interface ColumnaFormulacion<F> {
   columnDef: string;
   header: string;
@@ -83,11 +76,11 @@ export const pluralObservaciones: Record<string, string> = {
 };
 
 export const iconosAccion = new Map<string, string>([
-  ["Registrar Plan",      "edit"],
-  ["Ver Plan",            "visibility"],
-  ["Dictaminar Plan",     "rate_review"],
-  ["Ver Observaciones",   "history"],
-  ["Asignar Auditor(es)", "manage_accounts"],
+  ["Registrar Plan",               "edit"],
+  ["Ver Plan",                     "visibility"],
+  ["Dictaminar causas y acciones", "rate_review"],
+  ["Ver Observaciones",            "history"],
+  ["Asignar Auditor(es)",          "manage_accounts"],
 ]);
 
 export function unirNombres(nombres: string[] | null | undefined): string {

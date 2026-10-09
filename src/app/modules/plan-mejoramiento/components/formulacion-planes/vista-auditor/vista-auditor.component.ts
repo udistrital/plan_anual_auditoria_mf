@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "../../plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-asignacion-auditores/modal-asignacion-auditores.component";
 import type {
@@ -8,7 +8,6 @@ import type {
 import { DatosFilaVista } from "../compartido/formulacion.utilidades";
 import { VistaFormulacionBase } from "../compartido/vista-formulacion.base";
 import {
-  AlcanceAuditor,
   GrupoAuditor,
   GrupoEstadoAuditor,
   PlazoPlan,
@@ -20,7 +19,6 @@ import {
   flujoAuditor,
   grupoDeEstado,
   indicadoresAuditor,
-  opcionesAlcanceAuditor,
   opcionesEstadoAuditor,
   rolesDictamen,
   rolesVenTodas,
@@ -37,7 +35,6 @@ export type FilaAuditor = AuditoriaFormulacionAuditor & DatosFilaVista & { plazo
 })
 export class VistaAuditorComponent
   extends VistaFormulacionBase<AuditoriaFormulacionAuditor, ResumenFormulacionAuditor, GrupoAuditor>
-  implements OnInit
 {
   readonly textos = textosAuditor;
   readonly flujo = flujoAuditor;
@@ -47,20 +44,12 @@ export class VistaAuditorComponent
   readonly columnasIds = columnasAuditor.map((c) => c.columnDef);
   protected readonly accionesHabilitadas = accionesHabilitadasAuditor;
 
-  override alcance: AlcanceAuditor = "asignadas";
-
-  override async ngOnInit(): Promise<void> {
-    // AUDITOR y AUDITOR_ASISTENTE solo ven sus auditorías: sin selector
-    this.opcionesAlcance = rolesVenTodas.includes(this.rol) ? opcionesAlcanceAuditor : [];
-    await super.ngOnInit();
-  }
-
   protected get rutaBase(): string {
     return `plan-mejoramiento/formulacion/auditor/${this.personaId}`;
   }
 
   protected override paramsExtra(): Record<string, string> {
-    return { alcance: this.alcance };
+    return { alcance: rolesVenTodas.includes(this.rol) ? "todas" : "asignadas" };
   }
 
   protected estadosDeGrupo(grupo: GrupoEstadoAuditor): number[] {
@@ -81,7 +70,7 @@ export class VistaAuditorComponent
     return {
       ...auditoria,
       ...datos,
-      acciones: dictamina ? datos.acciones.map((a) => (a === "Ver Plan" ? "Dictaminar Plan" : a)) : datos.acciones,
+      acciones: dictamina ? datos.acciones.map((a) => (a === "Ver Plan" ? "Dictaminar causas y acciones" : a)) : datos.acciones,
       plazo: calcularPlazo(auditoria),
     };
   }
@@ -98,10 +87,10 @@ export class VistaAuditorComponent
   realizarAccion(fila: FilaAuditor, accion: string): void {
     const verPlan = () => this.router.navigate([`/plan-mejoramiento/ver-plan/${fila.auditoria_id}`]);
     const acciones: Record<string, () => void> = {
-      "Ver Plan":            verPlan,
-      "Dictaminar Plan":     verPlan,
-      "Ver Observaciones":   () => this.verObservaciones(fila),
-      "Asignar Auditor(es)": () => this.asignarAuditores(fila),
+      "Ver Plan":                     verPlan,
+      "Dictaminar causas y acciones": verPlan,
+      "Ver Observaciones":            () => this.verObservaciones(fila),
+      "Asignar Auditor(es)":          () => this.asignarAuditores(fila),
     };
     acciones[accion]?.();
   }
@@ -114,6 +103,7 @@ export class VistaAuditorComponent
         auditoria: {
           _id: fila.auditoria_id,
           titulo: fila.titulo,
+          tipo_evaluacion_nombre: fila.tipo_evaluacion_nombre,
           fecha_inicio: fila.fecha_inicio,
           fecha_fin: fila.fecha_fin,
           auditores: fila.auditores_auditoria.map((auditor_nombre) => ({ auditor_nombre })),

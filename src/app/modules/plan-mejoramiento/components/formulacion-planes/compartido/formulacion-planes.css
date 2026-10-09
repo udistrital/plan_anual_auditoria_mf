@@ -108,41 +108,6 @@
   margin: 0 8px 0 12px;
 }
 
-/* ── Selector de alcance (Mis asignadas / Todas) ──────────── */
-.acciones-filtros {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.selector-alcance {
-  display: inline-flex;
-  flex-wrap: wrap;
-  padding: 3px;
-  border: 1px solid var(--md-primary-100);
-  border-radius: 8px;
-  background-color: var(--md-primary-50);
-}
-
-.opcion-alcance {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  background-color: transparent;
-  font-size: 12px;
-  font-weight: 600;
-  color: #555;
-  cursor: pointer;
-  transition: background-color 150ms, color 150ms;
-}
-
-.opcion-alcance.activo {
-  background-color: #fff;
-  color: var(--md-primary-700);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
-}
-
 /* ── Chips de acceso rápido ──────────────────────────────── */
 .acceso-rapido {
   display: flex;
@@ -209,26 +174,60 @@
 }
 
 .tabla-auditorias th.mat-mdc-header-cell {
-  padding: 12px;
+  padding: 12px 8px;
   font-size: 12px;
   line-height: 1.3;
-  min-width: 96px;
+  min-width: 72px;
   vertical-align: middle;
 }
 
 .tabla-auditorias td.mat-mdc-cell {
-  padding: 12px;
+  padding: 12px 8px;
   vertical-align: middle;
 }
 
 .tabla-auditorias th.mat-mdc-header-cell:first-child,
 .tabla-auditorias td.mat-mdc-cell:first-child {
-  padding-left: 20px;
+  padding-left: 16px;
+}
+
+/*
+ * Vigencia y Tipo de Evaluación repiten los filtros obligatorios (mismo valor en todas las filas):
+ * se ocultan cuando la tabla completa (~1240px) no cabe, p. ej. a 1366px o con el menú abierto.
+ * Se mide el contenedor y no la pantalla para que también responda al menú lateral.
+ */
+.table-scroll {
+  container-type: inline-size;
+}
+
+@container (max-width: 1239px) {
+  .tabla-auditorias .mat-column-vigencia,
+  .tabla-auditorias .mat-column-tipo {
+    display: none;
+  }
 }
 
 /* Acciones fija a la derecha cuando la tabla hace scroll horizontal */
 .tabla-auditorias .mat-mdc-table-sticky-border-elem-right {
   border-left: 1px solid #e0e0e0;
+}
+
+/* Sombra sobre Acciones mientras quede tabla por ver a la derecha: indica que hay scroll */
+@supports (animation-timeline: scroll()) {
+  .table-scroll {
+    scroll-timeline: --scroll-tabla x;
+  }
+
+  .tabla-auditorias .mat-mdc-table-sticky-border-elem-right {
+    animation: sombra-acciones linear both;
+    animation-timeline: --scroll-tabla;
+  }
+
+  @keyframes sombra-acciones {
+    from { box-shadow: -8px 0 8px -6px rgba(0, 0, 0, 0.25); }
+    99%  { box-shadow: -8px 0 8px -6px rgba(0, 0, 0, 0.25); }
+    to   { box-shadow: none; }
+  }
 }
 
 .tabla-auditorias th.mat-column-acciones,
@@ -263,7 +262,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 240px;
+  min-width: 200px;
 }
 
 .titulo-auditoria {
@@ -304,7 +303,8 @@
 
 .detalle-plazo {
   display: flex;
-  align-items: center;
+  /* El detalle puede ocupar 2-3 líneas: el ícono queda junto a la primera */
+  align-items: flex-start;
   gap: 4px;
   font-size: 11px;
   font-weight: 600;
@@ -320,6 +320,7 @@
 .plazo-vigente  { color: var(--md-primary-700); }
 .plazo-vencido  { color: #c62828; }
 .plazo-cumplido { color: #2e7d32; }
+.plazo-pendiente { color: #888; }
 
 .fila-vacia td {
   border: none !important;
