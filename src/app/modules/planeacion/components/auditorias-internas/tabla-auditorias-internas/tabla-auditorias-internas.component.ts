@@ -229,6 +229,8 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         if (auditorias.length === 0) {
           this.banderaTablaAuditoriasInternas = false;
           this.auditoriasDataSource.data = [];
+          // Refresco al limpiar la tabla 
+          this.changeDetector.detectChanges();
 
           // Determinar si la búsqueda estaba filtrada por el usuario
           const estadoFiltro = estadoId ?? this.filtroEstado;
