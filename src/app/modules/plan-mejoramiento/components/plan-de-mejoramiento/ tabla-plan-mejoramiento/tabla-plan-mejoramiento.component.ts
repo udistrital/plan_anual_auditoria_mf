@@ -10,7 +10,7 @@ import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
-import { forkJoin, lastValueFrom, of } from "rxjs";
+import { forkJoin, of } from "rxjs";
 import { catchError, map, switchMap } from "rxjs/operators";
 import { planMejoramientoConstructorTabla } from "./tabla-plan-mejoramiento.utilidades";
 import { accionesPlanMejoramiento } from "src/app/shared/utils/accionesPorRolYEstado";
@@ -22,9 +22,7 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
-import { ModalVerDocumentosComponent, TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
-import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
-import { tituloYSubtituloAuditoria } from "src/app/shared/data/models/auditoria";
+import { DocumentosAuditoriaPlanService } from "../../../services/documentos-auditoria-plan.service";
 
 @Component({
     selector: "app-tabla-plan-mejoramiento",
@@ -78,7 +76,7 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     private readonly rolService: RolService,
     private readonly userService: UserService,
     private readonly router: Router,
-    private readonly referenciaPdfService: ReferenciaPdfService
+    private readonly documentosAuditoriaPlan: DocumentosAuditoriaPlanService
   ) {}
 
   ngOnInit(): void {
@@ -334,99 +332,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     });
   }
 
-  async verDocumentosAuditoria(plan: any): Promise<void> {
-    const tipos = environment.TIPO_DOCUMENTO_PARAMETROS;
-
-    // Última versión de cada tipo de documento (consulta deduplicada) y cartas visibles según el rol
-    const [documentos, cartas] = await Promise.all([
-      lastValueFrom(this.referenciaPdfService.consultarDocumentos(plan._id)),
-      this.obtenerCartasVisibles(plan._id),
-    ]);
-    const dependencias = this.obtenerMapaDependencias(plan);
-
-    const tabDocumento = (nombre: string, tipoId: number): TabDocumento[] => {
-      const documento = documentos.find((doc) => doc.tipo_id === tipoId);
-      return documento ? [{ nombre, tipoId, documentoId: documento._id }] : [];
-    };
-
-    // Informe final y plan de mejoramiento primero; luego el orden del proceso de auditoría
-    const tabs: TabDocumento[] = [
-      ...tabDocumento("Informe final", tipos.INFORME_FINAL),
-      ...tabDocumento("Plan de mejoramiento", tipos.PLAN_MEJORAMIENTO),
-      ...tabDocumento("Informe preliminar", tipos.INFORME_PRELIMINAR),
-      ...tabDocumento("Programa de auditoría", tipos.PROGRAMA_TRABAJO),
-      ...tabDocumento("Solicitud de información", tipos.SOLICITUD_INFORMACION),
-      ...cartas.map((carta) => ({
-        nombre: "Carta de representación - " + (dependencias.get(carta.metadatos?.dependencia_id) ?? "Dependencia desconocida"),
-        tipoId: tipos.CARTA_PRESENTACION,
-        documentoId: carta._id,
-      })),
-      ...tabDocumento("Compromiso ético", tipos.COMPROMISO_ETICO),
-    ];
-
-    if (!tabs.length) {
-      this.alertaService.showAlert("Sin documentos", "No se encontraron documentos asociados a esta auditoría.");
-      return;
-    }
-
-    this.dialog.open(ModalVerDocumentosComponent, {
-      width: "1200px",
-      data: {
-        entityId: plan._id,
-        inferTabs: false,
-        tabs,
-        titulo: tituloYSubtituloAuditoria(plan),
-        descripcion: "Documentos asociados a la auditoría",
-        sufijo: `oci-${plan.consecutivo_OCI ?? ""}`,
-      },
-      autoFocus: false,
-    });
-  }
-
-  // Cartas de representación: el auditado solo ve las de su dependencia (mismo criterio de Planeación)
-  private async obtenerCartasVisibles(auditoriaId: string): Promise<any[]> {
-    if (this.tipoConsulta !== "auditado") {
-      return await lastValueFrom(
-        this.referenciaPdfService
-          .consultarDocumentos(auditoriaId, { tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION })
-          .pipe(
-            catchError((error) => {
-              console.error("Error consultando cartas de presentación:", error);
-              return of([]);
-            })
-          )
-      );
-    }
-
-    const personaIdAuditado = this.usuarioId || await this.userService.getPersonaId();
-    const documentosVisiblesAuditado: any[] = await lastValueFrom(
-      this.planAuditoriaMid
-        .get(`auditado/${personaIdAuditado}/documento?auditoria_id=${auditoriaId}&cargo_id=${this.cargoId}`)
-        .pipe(
-          catchError((error) => {
-            console.error("Error consultando documentos visibles para auditado:", error);
-            return of([]);
-          })
-        )
-    );
-
-    return (documentosVisiblesAuditado ?? []).filter(
-      (documento: any) => documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION
-    );
-  }
-
-  private obtenerMapaDependencias(plan: any): Map<number, string> {
-    const mapa = new Map<number, string>();
-    const ids: number[] = Array.isArray(plan.dependencia_id) ? plan.dependencia_id : [];
-    const nombres: string[] = Array.isArray(plan.dependencia_nombre) ? plan.dependencia_nombre : [];
-    ids.forEach((id, idx) => {
-      const nombre = nombres[idx]?.toLowerCase()
-          .split(" ")
-          .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
-          .join(" ");
-      mapa.set(id, nombre ?? "Dependencia desconocida");
-    });
-    return mapa;
+  verDocumentosAuditoria(plan: any): void {
+    this.documentosAuditoriaPlan.verDocumentosAuditoria(plan);
   }
 
   private resetTabla(): void {

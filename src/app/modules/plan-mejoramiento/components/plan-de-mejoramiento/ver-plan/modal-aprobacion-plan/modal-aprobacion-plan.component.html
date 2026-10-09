@@ -1,0 +1,29 @@
+<plantilla-modal [icono]="'verified'" [titulo]="'Confirmar aprobación del plan de mejoramiento'"
+  [descripcion]="data.expediente ? 'Expediente ' + data.expediente : 'Dictamen OCI'"
+  [contenido]="contenidoDeModal" [footer]="footerDeModal" [alignFooter]="'end'"></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="resumen mt-3">
+    <mat-icon class="resumen-icono">task_alt</mat-icon>
+    <span class="resumen-texto">
+      Todas las acciones formuladas fueron dictaminadas como conformes. Al confirmar, el plan de
+      mejoramiento quedará aprobado y no podrá modificarse.
+    </span>
+    <div class="resumen-conteo">
+      <span class="etiqueta">Acciones</span>
+      <b>{{ data.totalAcciones }} de {{ data.totalAcciones }} conformes</b>
+      <small class="texto-secundario">{{ data.totalHallazgos }} hallazgo(s)</small>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="mb-3 me-3 d-flex espacio-2">
+    <button mat-stroked-button color="primary" class="boton-secundario" [mat-dialog-close]>
+      <mat-icon>toll</mat-icon> Regresar a la revisión
+    </button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="true">
+      <mat-icon>verified_user</mat-icon> Confirmar y aprobar plan
+    </button>
+  </div>
+</ng-template>

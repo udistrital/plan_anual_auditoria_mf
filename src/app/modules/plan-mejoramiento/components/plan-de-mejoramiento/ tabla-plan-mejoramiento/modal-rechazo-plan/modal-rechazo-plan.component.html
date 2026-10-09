@@ -1,26 +1,45 @@
-<plantilla-modal [icono]="'block_flipped'" [titulo]="'Rechazar Plan de Mejoramiento'" [descripcion]="'Indique el motivo del rechazo'" [contenido]="contenidoDeModal" [footer]="footerDeModal"></plantilla-modal>
+<plantilla-modal [icono]="'assignment_return'" [titulo]="'Devolver plan con observaciones'"
+  [descripcion]="data.expediente ? 'Expediente ' + data.expediente : 'Subsanación requerida'"
+  [contenido]="contenidoDeModal" [footer]="footerDeModal" [alignFooter]="'end'"></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <div class="row mt-3">
-    <div class="col-12">
-      <form [formGroup]="form">
-        <mat-form-field appearance="outline" class="col-12">
-          <mat-label>Motivo del rechazo</mat-label>
-          <mat-icon color="primary" matPrefix>format_list_bulleted</mat-icon>
-          <textarea style="height: 100px; resize: none" matInput formControlName="observacion"></textarea>
-        </mat-form-field>
-      </form>
+  <div class="mt-3">
+    <div class="aviso mb-3">
+      <mat-icon>info</mat-icon>
+      <span>
+        El plan retornará a la dependencia
+        <b>{{ data.dependencias || 'auditada' }}</b>
+        para la subsanación de
+        @if (data.accionesRechazadas) {
+          <b>{{ data.accionesRechazadas }} acción(es) dictaminada(s) como no conforme(s)</b>.
+        } @else {
+          las acciones dictaminadas como no conformes.
+        }
+        Las acciones conformes conservan su estado.
+      </span>
     </div>
+
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline" class="ancho-completo">
+        <mat-label>Motivo de la devolución</mat-label>
+        <textarea matInput formControlName="observacion" rows="4" class="observacion"
+          [maxlength]="MAX_OBSERVACION" required></textarea>
+        <mat-hint align="end">{{ longitudObservacion }} / {{ MAX_OBSERVACION }} caracteres</mat-hint>
+        @if (form.get('observacion')?.hasError('required')) {
+          <mat-error>La observación de devolución es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+    </form>
   </div>
 </ng-template>
 
 <ng-template #footerDeModal>
-  <div class="mb-3">
-    <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)" [mat-dialog-close]>
-      <mat-icon>toll</mat-icon>No, regresar
+  <div class="mb-3 me-3 d-flex espacio-2">
+    <button mat-stroked-button color="primary" class="boton-secundario" [mat-dialog-close]>
+      <mat-icon>toll</mat-icon> Cancelar
     </button>
     <button mat-raised-button color="primary" (click)="confirmar()">
-      <mat-icon>disabled_by_default</mat-icon>Rechazar
+      <mat-icon>assignment_return</mat-icon> Confirmar devolución
     </button>
   </div>
 </ng-template>

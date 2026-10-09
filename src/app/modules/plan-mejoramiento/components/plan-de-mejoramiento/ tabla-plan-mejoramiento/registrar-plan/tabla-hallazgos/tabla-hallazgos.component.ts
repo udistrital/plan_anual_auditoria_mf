@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { catchError, firstValueFrom, forkJoin, map, of, switchMap } from 'rxjs';
+import { PageEvent } from '@angular/material/paginator';
+import { catchError, firstValueFrom, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -11,9 +12,9 @@ import { environment } from 'src/environments/environment';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
 import { ModalRemitirHallazgoComponent, ResultadoModalRemitirHallazgo } from '../modal-remitir-hallazgo/modal-remitir-hallazgo.component';
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
-import { hallazgosConstructorTabla, iconosAccionHallazgo, iconosUtilidadHallazgo } from './tabla-hallazgos.utilidades';
+import { columnasVistaDictamen, hallazgosConstructorTabla, iconosAccionHallazgo, iconosUtilidadHallazgo } from './tabla-hallazgos.utilidades';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
-import { ModalObservacionAccionComponent } from '../modal-observacion-accion/modal-observacion-accion.component';
+import { DatosModalObservacionAccion, ModalObservacionAccionComponent, ResultadoDictamenAccion } from '../modal-observacion-accion/modal-observacion-accion.component';
 import { ModalHistorialObservacionesAccionComponent } from '../modal-historial-observaciones-accion/modal-historial-observaciones-accion.component';
 
 export interface HallazgoTabla {
@@ -35,6 +36,8 @@ export interface AccionPlan {
   formulaIndicador: string;
   meta: string;
   responsable: string;
+  /** Responsables con su rol (líder / apoyo); se usa en el modal de dictamen */
+  responsables?: { nombre: string; lider: boolean }[];
   fechaInicio: string;
   fechaFin: string;
   fechaInicioISO: string | null;
@@ -82,10 +85,12 @@ export class TablaHallazgosComponent implements OnInit {
   @Input() planMejoramientoId!: string;
   @Input() auditoria!: Auditoria;
   @Input() soloLectura = false;
-  // Modo revisión del auditor: habilita aprobar/rechazar cada acción
+  // Modo revisión del auditor: habilita dictaminar (aprobar/rechazar) cada acción
   @Input() modoRevision = false;
+  // Vista de Ver Plan: columnas de dictamen y resumen por hallazgo (con o sin modoRevision)
+  @Input() vistaDictamen = false;
 
-  // Notifica al contenedor (VerPlan) que cambió el estado de alguna acción
+  // Notifica al contenedor que cambiaron las acciones del plan (para refrescar sus totales)
   @Output() estadoAccionCambiado = new EventEmitter<void>();
 
   readonly ESTADO_ACCION = ESTADO_ACCION;
@@ -97,6 +102,15 @@ export class TablaHallazgosComponent implements OnInit {
   hallazgos: HallazgoTabla[] = [];
   filas: FilaTabla[] = [];
   cargando = true;
+
+  // Paginación server-side por hallazgo (cada página trae los hallazgos completos con sus acciones)
+  readonly opcionesTamanoPagina = [5, 10, 20];
+  tamanoPagina = 10;
+  indicePagina = 0;
+  totalHallazgos = 0;
+  private informeId: string | null = null;
+  /** Hallazgos expandidos/colapsados por el usuario; se conserva al cambiar de página */
+  private readonly expansion = new Map<string, boolean>();
 
   constructorTabla = hallazgosConstructorTabla;
   columnas: string[] = [];
@@ -128,9 +142,9 @@ export class TablaHallazgosComponent implements OnInit {
   }
 
   private construirColumnas(): void {
-    if (this.modoRevision) {
-      this.constructorTabla = hallazgosConstructorTabla.filter(c => c.columnDef !== 'acciones');
-      this.columnas = [...this.constructorTabla.map(c => c.columnDef), 'revision'];
+    if (this.vistaDictamen) {
+      this.constructorTabla = hallazgosConstructorTabla.filter(c => columnasVistaDictamen.includes(c.columnDef));
+      this.columnas = [...this.constructorTabla.map(c => c.columnDef), 'estadoDictamen', 'accionOci'];
     } else {
       this.constructorTabla = hallazgosConstructorTabla.filter(
         c => c.columnDef !== 'acciones' || !this.soloLectura
@@ -201,8 +215,13 @@ export class TablaHallazgosComponent implements OnInit {
     this.changeDetector.markForCheck();
   }
 
-  private mapearAccion(a: any, index: number, responsablesPorAccion?: Map<string, string[]>): AccionPlan {
-    const nombres = responsablesPorAccion?.get(a._id) ?? [];
+  private mapearAccion(
+    a: any,
+    index: number,
+    responsablesPorAccion?: Map<string, { nombre: string; lider: boolean }[]>
+  ): AccionPlan {
+    const responsables = responsablesPorAccion?.get(a._id) ?? [];
+    const nombres = responsables.map(r => r.nombre);
     const estadoId = a.estado_id ?? ESTADO_ACCION.PENDIENTE_REVISION;
     return {
       accionId:         a._id,
@@ -214,6 +233,7 @@ export class TablaHallazgosComponent implements OnInit {
       formulaIndicador: a.formula_indicador ?? '',
       meta:             a.meta ?? '',
       responsable:      nombres.join(', '),
+      responsables,
       fechaInicio:      this.formatearFecha(a.fecha_inicio),
       fechaFin:         this.formatearFecha(a.fecha_fin),
       fechaInicioISO:   a.fecha_inicio ?? null,
@@ -231,86 +251,141 @@ export class TablaHallazgosComponent implements OnInit {
 
   // ─── Carga de datos ──────────────────────────────────────────────────────────
 
+  /** Carga la página actual de hallazgos con sus acciones y responsables */
   cargarDatos(): void {
     this.cargando = true;
-    const estadoPrevio = new Map<string, boolean>();
-    this.hallazgos.forEach(h => estadoPrevio.set(h.hallazgoId, h.expandido));
 
-    this.planAuditoriaService
-      .get(`informe?query=auditoria_id:${this.auditoriaId},activo:true`)
-      .pipe(
-        switchMap((resInforme) => {
-          if (!resInforme.Data?.length) {
-            return of({ hallazgos: { Data: [] }, acciones: { Data: [] }, responsables: { Data: [] } });
-          }
-          const informe = resInforme.Data[0];
-          this.fechaAprobacionInforme = informe.fecha_aprobacion_informe ?? null;
-          const informeId = informe._id;
-          return forkJoin({
-            hallazgos: this.planAuditoriaService
-              .get(`hallazgo?query=informe_id:${informeId},activo:true&limit=0`),
-            acciones: this.planAuditoriaMid
-              .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0`)
-              .pipe(catchError(() => {
-                this.alertService.showErrorAlert('Error al consultar las acciones de mejora.');
-                return of({ Data: [] });
-              })),
-          }).pipe(
-            switchMap(({ hallazgos, acciones }) => {
-              const accionIds: string[] = (acciones.Data ?? []).map((a: any) => a._id).filter(Boolean);
-              const responsables$ = accionIds.length
-                ? this.planAuditoriaMid
-                    .get(`responsable-accion?query=accion_mejora_id__in:${accionIds.join('|')},activo:true&limit=0`)
-                    .pipe(catchError(() => of({ Data: [] })))
-                : of({ Data: [] });
-              return forkJoin({ hallazgos: of(hallazgos), acciones: of(acciones), responsables: responsables$ });
-            })
-          );
-        })
-      )
+    this.obtenerInforme()
+      .pipe(switchMap(informeId => informeId
+        ? this.consultarHallazgos(informeId, this.tamanoPagina, this.indicePagina * this.tamanoPagina)
+        : of({ hallazgos: [] as HallazgoTabla[], total: 0 })))
       .subscribe({
-        next: ({ hallazgos, acciones, responsables }) => {
-          const accionesData: any[] = acciones.Data ?? [];
-
-          const responsablesPorAccion = new Map<string, string[]>();
-          (responsables.Data ?? []).forEach((r: any) => {
-            const accionId = typeof r.accion_mejora_id === 'object'
-              ? r.accion_mejora_id?._id
-              : r.accion_mejora_id;
-            if (!accionId || !r.dependencia_nombre) return;
-            const lista = responsablesPorAccion.get(accionId) ?? [];
-            lista.push(r.dependencia_nombre);
-            responsablesPorAccion.set(accionId, lista);
-          });
-
-          const accionesPorHallazgo = new Map<string, any[]>();
-          accionesData.forEach((a: any) => {
-            const key = typeof a.hallazgo_id === 'object'
-              ? a.hallazgo_id?._id
-              : a.hallazgo_id;
-            if (!key) return;
-            const lista = accionesPorHallazgo.get(key) ?? [];
-            lista.push(a);
-            accionesPorHallazgo.set(key, lista);
-          });
-
-          this.hallazgos = (hallazgos.Data ?? [])
-            .filter((h: any) => h.activo !== false)
-            .map((h: any, i: number) => ({
-              hallazgoId:  h._id,
-              indice:      h.no_hallazgo ?? String(i + 1),
-              descripcion: h.descripcion ?? h.titulo ?? '',
-              causa:       h.criterio ?? '',
-              expandido:   estadoPrevio.get(h._id) ?? false,
-              acciones:    (accionesPorHallazgo.get(h._id) ?? [])
-                             .map((a: any, j: number) => this.mapearAccion(a, j, responsablesPorAccion)),
-            }));
-
+        next: ({ hallazgos, total }) => {
+          // Si la página quedó vacía (p. ej. tras remitir el último hallazgo), va a la última página con datos
+          const ultimaPagina = Math.max(0, Math.ceil(total / this.tamanoPagina) - 1);
+          if (!hallazgos.length && total > 0 && ultimaPagina < this.indicePagina) {
+            this.indicePagina = ultimaPagina;
+            this.cargarDatos();
+            return;
+          }
+          this.totalHallazgos = total;
+          this.hallazgos = hallazgos;
           this.reconstruirFilas();
           this.cargando = false;
         },
         error: () => { this.cargando = false; this.changeDetector.markForCheck(); }
       });
+  }
+
+  cambiarPagina(evento: PageEvent): void {
+    this.tamanoPagina = evento.pageSize;
+    this.indicePagina = evento.pageIndex;
+    this.cargarDatos();
+  }
+
+  /** Recarga la página tras una modificación y avisa al contenedor */
+  private recargarTrasCambio(): void {
+    this.cargarDatos();
+    this.estadoAccionCambiado.emit();
+  }
+
+  // Informe del que salen los hallazgos (se consulta una sola vez)
+  private obtenerInforme(): Observable<string | null> {
+    if (this.informeId) return of(this.informeId);
+    return this.planAuditoriaService
+      .get(`informe?query=auditoria_id:${this.auditoriaId},activo:true`)
+      .pipe(map((resInforme) => {
+        const informe = resInforme.Data?.[0];
+        if (!informe) return null;
+        this.fechaAprobacionInforme = informe.fecha_aprobacion_informe ?? null;
+        this.informeId = informe._id;
+        return this.informeId;
+      }));
+  }
+
+  /**
+   * Consulta hallazgos (limit = 0 → todos) y, solo para ellos, sus acciones y responsables.
+   * El orden por _id mantiene estable la paginación.
+   */
+  private consultarHallazgos(
+    informeId: string,
+    limit: number,
+    offset: number
+  ): Observable<{ hallazgos: HallazgoTabla[]; total: number }> {
+    return this.planAuditoriaService
+      .get(`hallazgo?query=informe_id:${informeId},activo:true&limit=${limit}&offset=${offset}&sortby=_id&order=asc`)
+      .pipe(
+        switchMap((resHallazgos) => {
+          const hallazgosData: any[] = resHallazgos.Data ?? [];
+          const total: number = resHallazgos.MetaData?.Count ?? hallazgosData.length;
+          if (!hallazgosData.length) {
+            return of({ hallazgosData, total, acciones: [] as any[], responsables: [] as any[] });
+          }
+
+          const filtroHallazgos = limit > 0
+            ? `,hallazgo_id__in:${hallazgosData.map(h => h._id).join('|')}`
+            : '';
+          return this.planAuditoriaMid
+            .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId}${filtroHallazgos},activo:true&limit=0`)
+            .pipe(
+              catchError(() => {
+                this.alertService.showErrorAlert('Error al consultar las acciones de mejora.');
+                return of({ Data: [] });
+              }),
+              switchMap((resAcciones) => {
+                const acciones: any[] = resAcciones.Data ?? [];
+                const accionIds: string[] = acciones.map((a: any) => a._id).filter(Boolean);
+                const responsables$ = accionIds.length
+                  ? this.planAuditoriaMid
+                      .get(`responsable-accion?query=accion_mejora_id__in:${accionIds.join('|')},activo:true&limit=0`)
+                      .pipe(map((r: any) => r.Data ?? []), catchError(() => of([])))
+                  : of([]);
+                return responsables$.pipe(map((responsables: any[]) => ({ hallazgosData, total, acciones, responsables })));
+              })
+            );
+        }),
+        map(({ hallazgosData, total, acciones, responsables }) => ({
+          total,
+          hallazgos: this.mapearHallazgos(hallazgosData, acciones, responsables, offset),
+        }))
+      );
+  }
+
+  private mapearHallazgos(hallazgosData: any[], accionesData: any[], responsablesData: any[], offset: number): HallazgoTabla[] {
+    const responsablesPorAccion = new Map<string, { nombre: string; lider: boolean }[]>();
+    responsablesData.forEach((r: any) => {
+      const accionId = typeof r.accion_mejora_id === 'object'
+        ? r.accion_mejora_id?._id
+        : r.accion_mejora_id;
+      if (!accionId || !r.dependencia_nombre) return;
+      const lista = responsablesPorAccion.get(accionId) ?? [];
+      lista.push({ nombre: r.dependencia_nombre, lider: !!r.dependencia_lider });
+      responsablesPorAccion.set(accionId, lista);
+    });
+
+    const accionesPorHallazgo = new Map<string, any[]>();
+    accionesData.forEach((a: any) => {
+      const key = typeof a.hallazgo_id === 'object'
+        ? a.hallazgo_id?._id
+        : a.hallazgo_id;
+      if (!key) return;
+      const lista = accionesPorHallazgo.get(key) ?? [];
+      lista.push(a);
+      accionesPorHallazgo.set(key, lista);
+    });
+
+    return hallazgosData
+      .filter((h: any) => h.activo !== false)
+      .map((h: any, i: number) => ({
+        hallazgoId:  h._id,
+        indice:      h.no_hallazgo ?? String(offset + i + 1),
+        descripcion: h.descripcion ?? h.titulo ?? '',
+        causa:       h.criterio ?? '',
+        // En Ver Plan los hallazgos inician expandidos para ver el estado de cada acción
+        expandido:   this.expansion.get(h._id) ?? this.vistaDictamen,
+        acciones:    (accionesPorHallazgo.get(h._id) ?? [])
+                       .map((a: any, j: number) => this.mapearAccion(a, j, responsablesPorAccion)),
+      }));
   }
 
   // ─── Expansión ───────────────────────────────────────────────────────────────
@@ -319,6 +394,7 @@ export class TablaHallazgosComponent implements OnInit {
     const h = this.getHallazgo(hallazgoId);
     if (!h) return;
     h.expandido = !h.expandido;
+    this.expansion.set(hallazgoId, h.expandido);
     this.reconstruirFilas();
   }
 
@@ -352,7 +428,7 @@ export class TablaHallazgosComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe((resultado: ResultadoModalRemitirHallazgo | null) => {
       if (!resultado) return;
-      this.cargarDatos();
+      this.recargarTrasCambio();
     });
   }
 
@@ -399,8 +475,8 @@ export class TablaHallazgosComponent implements OnInit {
             ESTADO_ACCION.PENDIENTE_REVISION,
             null,
             () => {
-              hallazgo.expandido = true;
-              this.cargarDatos();
+              this.expansion.set(hallazgo.hallazgoId, true);
+              this.recargarTrasCambio();
               if (fallidos > 0) {
                 this.alertService.showAlert(
                   'Acción guardada con observaciones',
@@ -411,8 +487,8 @@ export class TablaHallazgosComponent implements OnInit {
               }
             },
             () => {
-              hallazgo.expandido = true;
-              this.cargarDatos();
+              this.expansion.set(hallazgo.hallazgoId, true);
+              this.recargarTrasCambio();
             }
           );
         });
@@ -447,7 +523,7 @@ export class TablaHallazgosComponent implements OnInit {
             resultado.responsablesAEliminar,
             () => {
               const finalizar = () => {
-                this.cargarDatos();
+                this.recargarTrasCambio();
                 this.alertService.showSuccessAlert('Acción guardada correctamente.', 'Guardado');
               };
               if (veniaRechazada) {
@@ -456,7 +532,7 @@ export class TablaHallazgosComponent implements OnInit {
                   ESTADO_ACCION.PENDIENTE_REVISION,
                   null,
                   finalizar,
-                  () => this.cargarDatos()
+                  () => this.recargarTrasCambio()
                 );
               } else {
                 finalizar();
@@ -468,55 +544,63 @@ export class TablaHallazgosComponent implements OnInit {
       });
   }
 
-  // ─── Revisión del auditor (aprobar / rechazar por acción) ─────────────────────
+  // ─── Revisión del auditor (dictamen por acción) ───────────────────────────────
 
-  aprobarAccion(accion: AccionPlan | undefined): void {
-    if (!accion?.accionId) return;
-    const dialogRef = this.dialog.open(ModalObservacionAccionComponent, {
-      width: '600px',
-      data: {
-        accionPlanteada: accion.accionPlanteada,
-        titulo:      'Aprobar Acción de Mejora',
-        descripcion: 'Registre la observación de la aprobación',
-        etiqueta:    'Observación de la aprobación',
-        textoBoton:  'Aprobar',
-        icono:       'check_circle',
-        confirmMsg:  '¿Aprobar esta acción de mejora?',
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((observacion: string | null) => {
-      if (!observacion) return;
-      this.registrarEstadoAccion(
-        accion.accionId!,
-        ESTADO_ACCION.APROBADA,
-        observacion,
-        () => {
-          this.alertService.showSuccessAlert('Acción aprobada con observación.', 'Aprobada');
-          this.estadoAccionCambiado.emit();
-          this.cargarDatos();
-        }
-      );
-    });
+  /** Etiqueta del dictamen según el estado de la acción */
+  etiquetaDictamen(estadoId: number): string {
+    if (estadoId === ESTADO_ACCION.APROBADA) return 'Conforme';
+    if (estadoId === ESTADO_ACCION.RECHAZADA) return 'No conforme';
+    return 'Pendiente';
   }
 
-  rechazarAccion(accion: AccionPlan | undefined): void {
+  /** Resumen del dictamen de las acciones de un hallazgo (fila de grupo) */
+  resumenHallazgo(hallazgoId: string): { texto: string; clase: string } {
+    const acciones = this.getHallazgo(hallazgoId)?.acciones ?? [];
+    if (!acciones.length) return { texto: 'Sin acciones', clase: 'estado-sin-acciones' };
+
+    const total = acciones.length;
+    const aprobadas = acciones.filter(a => a.estadoId === ESTADO_ACCION.APROBADA).length;
+    const rechazadas = acciones.filter(a => a.estadoId === ESTADO_ACCION.RECHAZADA).length;
+
+    if (rechazadas > 0) return { texto: `No conforme (${rechazadas}/${total})`, clase: 'estado-rechazada' };
+    if (aprobadas === total) return { texto: `Conforme (${aprobadas}/${total})`, clase: 'estado-aprobada' };
+    return { texto: `Pendiente dictamen (${total - aprobadas}/${total})`, clase: 'estado-pendiente' };
+  }
+
+  /** Abre el modal de dictamen; fuera de revisión solo permite consultarlo */
+  dictaminarAccion(fila: FilaTabla): void {
+    const accion = fila.accion;
     if (!accion?.accionId) return;
+
+    const data: DatosModalObservacionAccion = {
+      hallazgo: {
+        indice:      fila.hallazgoIndice,
+        descripcion: fila.hallazgoDescripcion,
+        causa:       fila.hallazgoCausa,
+      },
+      accion,
+      soloLectura: !this.modoRevision,
+    };
+
     const dialogRef = this.dialog.open(ModalObservacionAccionComponent, {
-      width: '600px',
-      data: { accionPlanteada: accion.accionPlanteada },
+      width: '1000px',
+      data,
+      autoFocus: false,
     });
 
-    dialogRef.afterClosed().subscribe((observacion: string | null) => {
-      if (!observacion) return;
+    dialogRef.afterClosed().subscribe((resultado: ResultadoDictamenAccion | null) => {
+      if (!resultado) return;
+      const aprobada = resultado.estadoId === ESTADO_ACCION.APROBADA;
       this.registrarEstadoAccion(
         accion.accionId!,
-        ESTADO_ACCION.RECHAZADA,
-        observacion,
+        resultado.estadoId,
+        resultado.observacion,
         () => {
-          this.alertService.showSuccessAlert('Acción rechazada con observación.', 'Rechazada');
-          this.estadoAccionCambiado.emit();
-          this.cargarDatos();
+          this.alertService.showSuccessAlert(
+            `La acción ${accion.numero} del hallazgo ${fila.hallazgoIndice} fue dictaminada como ${aprobada ? 'conforme' : 'no conforme'}.`,
+            'Dictamen registrado'
+          );
+          this.recargarTrasCambio();
         }
       );
     });
@@ -563,7 +647,7 @@ export class TablaHallazgosComponent implements OnInit {
       if (!conf.value) return;
 
       this.planAuditoriaService.delete('accion-mejora', { id: accion.accionId }).subscribe({
-        next: () => this.cargarDatos(),
+        next: () => this.recargarTrasCambio(),
         error: () => this.alertService.showErrorAlert('Error al eliminar la acción.'),
       });
     });
@@ -595,8 +679,18 @@ export class TablaHallazgosComponent implements OnInit {
   }
 
   async exportarTabla(): Promise<void> {
-    if (!this.hallazgos.length) {
+    if (!this.informeId || !this.totalHallazgos) {
       this.alertService.showAlert('Sin registros', 'No hay hallazgos para exportar.');
+      return;
+    }
+
+    // Con paginación la tabla solo tiene la página actual: se consulta el plan completo
+    let todos: HallazgoTabla[];
+    try {
+      todos = (await firstValueFrom(this.consultarHallazgos(this.informeId, 0, 0))).hallazgos;
+    } catch (error) {
+      console.error('Error consultando hallazgos para exportar:', error);
+      this.alertService.showErrorAlert('Error al exportar la tabla.');
       return;
     }
 
@@ -616,7 +710,7 @@ export class TablaHallazgosComponent implements OnInit {
       ];
 
     // Una fila por acción; los hallazgos sin acciones también se exportan con las columnas de acción vacías
-    const rows = this.hallazgos.flatMap(hallazgo => {
+    const rows = todos.flatMap(hallazgo => {
       const datosHallazgo = [hallazgo.indice, hallazgo.descripcion, hallazgo.causa];
       if (!hallazgo.acciones.length) {
         return [[...datosHallazgo, '', '', '', '', '', '', '', '', '']];

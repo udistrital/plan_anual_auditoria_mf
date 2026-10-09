@@ -1,20 +1,20 @@
-@if (cargando) {
+@if (cargando && !hallazgos.length) {
   <div class="text-center py-4">
     <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
   </div>
 }
 
-@if (!cargando) {
-  <div>
+@if (!cargando || hallazgos.length) {
+  <div class="contenedor-tabla" [class.recargando]="cargando">
     @if (!soloLectura) {
       <div class="d-flex justify-content-end mb-2">
-        <button mat-stroked-button (click)="exportarTabla()" color="primary">
-          <mat-icon>upload</mat-icon> Exportar tabla
+        <button mat-stroked-button (click)="exportarTabla()" color="primary" class="boton-exportar">
+          <mat-icon>file_download</mat-icon> Exportar matriz
         </button>
       </div>
     }
     <div class="table-container rounded-table table-scroll" style="overflow-x: auto; width: 100%;">
-      <table mat-table [dataSource]="filas" class="w-100">
+      <table mat-table [dataSource]="filas" class="w-100" [class.tabla-dictamen]="vistaDictamen" [class.tabla-edicion]="!vistaDictamen">
 
         <!-- Columnas dinámicas -->
         @for (columna of constructorTabla; track columna.columnDef) {
@@ -26,10 +26,10 @@
               } @else if (columna.columnDef === 'estado') {
                 @if (fila.accion) {
                   <span class="estado-chip"
-                    [class.estado-pendiente]="fila.accion.estadoId === ESTADO_ACCION.PENDIENTE_REVISION"
+                    [class.estado-pendiente]="fila.accion.estadoId !== ESTADO_ACCION.APROBADA && fila.accion.estadoId !== ESTADO_ACCION.RECHAZADA"
                     [class.estado-aprobada]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
                     [class.estado-rechazada]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA">
-                    {{ fila.accion.estadoNombre }}
+                    {{ etiquetaDictamen(fila.accion.estadoId) }}
                   </span>
                 }
               } @else if (columna.columnDef === 'acciones') {
@@ -57,36 +57,41 @@
           </ng-container>
         }
 
-        <!-- Revisión del auditor (fuera del loop: no está en constructorTabla) -->
-        <ng-container matColumnDef="revision">
-          <th mat-header-cell *matHeaderCellDef><b>Revisión</b></th>
+        <!-- Vista de dictamen (Ver Plan): fuera del loop, no están en constructorTabla -->
+        <ng-container matColumnDef="estadoDictamen">
+          <th mat-header-cell *matHeaderCellDef><b>Estado Dictamen</b></th>
           <td mat-cell *matCellDef="let fila">
             @if (fila.accion) {
-              <button mat-icon-button color="primary" [matMenuTriggerFor]="menuRevision">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #menuRevision="matMenu">
-                <button mat-menu-item
-                  [disabled]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
-                  (click)="aprobarAccion(fila.accion)">
-                  <mat-icon color="primary">check_circle</mat-icon> Aprobar
+              <span class="estado-chip"
+                [class.estado-pendiente]="fila.accion.estadoId !== ESTADO_ACCION.APROBADA && fila.accion.estadoId !== ESTADO_ACCION.RECHAZADA"
+                [class.estado-aprobada]="fila.accion.estadoId === ESTADO_ACCION.APROBADA"
+                [class.estado-rechazada]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA">
+                {{ etiquetaDictamen(fila.accion.estadoId) }}
+              </span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="accionOci">
+          <th mat-header-cell *matHeaderCellDef><b>Acción OCI</b></th>
+          <td mat-cell *matCellDef="let fila">
+            @if (fila.accion) {
+              @if (modoRevision && fila.accion.estadoId !== ESTADO_ACCION.APROBADA && fila.accion.estadoId !== ESTADO_ACCION.RECHAZADA) {
+                <button mat-raised-button color="primary" class="boton-dictamen" (click)="dictaminarAccion(fila)">
+                  Dictaminar
                 </button>
-                <button mat-menu-item
-                  [disabled]="fila.accion.estadoId === ESTADO_ACCION.RECHAZADA"
-                  (click)="rechazarAccion(fila.accion)">
-                  <mat-icon color="warn">cancel</mat-icon> Rechazar
+              } @else {
+                <button mat-stroked-button color="primary" class="boton-dictamen boton-dictamen-secundario" (click)="dictaminarAccion(fila)">
+                  Ver Dictamen
                 </button>
-                <button mat-menu-item (click)="verHistorialAccion(fila.accion)">
-                  <mat-icon>history</mat-icon> Ver observaciones
-                </button>
-              </mat-menu>
+              }
             }
           </td>
         </ng-container>
 
         <!-- Columna de GRUPO (ocupa el ancho completo) -->
         <ng-container matColumnDef="grupo">
-          <td mat-cell *matCellDef="let fila" [attr.colspan]="columnas.length + 1">
+          <td mat-cell *matCellDef="let fila" [attr.colspan]="columnas.length">
             <div class="d-flex align-items-center justify-content-between px-1 py-1">
               <span class="d-flex align-items-center gap-1" style="cursor:pointer"
                 (click)="toggleHallazgo(fila.hallazgoId)" (keyup)="toggleHallazgo(fila.hallazgoId)">
@@ -95,6 +100,27 @@
                 </mat-icon>
                 <b>{{ fila.hallazgoIndice }}</b>&nbsp;&nbsp;{{ fila.hallazgoDescripcion }}
               </span>
+              @if (vistaDictamen) {
+                <span class="estado-chip" [ngClass]="resumenHallazgo(fila.hallazgoId).clase">
+                  {{ resumenHallazgo(fila.hallazgoId).texto }}
+                </span>
+              } @else {
+                <span class="d-flex align-items-center ms-auto me-2 espacio-2">
+                  @if (getHallazgo(fila.hallazgoId)?.acciones?.length) {
+                    <span class="estado-chip estado-formulado">
+                      {{ getHallazgo(fila.hallazgoId)?.acciones?.length }} acción(es) formulada(s)
+                    </span>
+                  } @else {
+                    <span class="estado-chip estado-pendiente">Pendiente de formulación</span>
+                    @if (!soloLectura) {
+                      <button mat-stroked-button color="primary" class="boton-formular"
+                        (click)="abrirModalRegistrarAccion(getHallazgo(fila.hallazgoId))">
+                        <mat-icon>add_circle</mat-icon> Formular primera acción
+                      </button>
+                    }
+                  }
+                </span>
+              }
               @if (!soloLectura) {
                 <button mat-icon-button color="primary" [matMenuTriggerFor]="menuUtilidad">
                   <mat-icon>more_vert</mat-icon>
@@ -123,5 +149,16 @@
         </tr>
       </table>
     </div>
+
+    <mat-paginator
+      [length]="totalHallazgos"
+      [pageSize]="tamanoPagina"
+      [pageIndex]="indicePagina"
+      [pageSizeOptions]="opcionesTamanoPagina"
+      [disabled]="cargando"
+      (page)="cambiarPagina($event)"
+      showFirstLastButtons
+      aria-label="Paginación de hallazgos">
+    </mat-paginator>
   </div>
 }

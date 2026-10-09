@@ -1,0 +1,262 @@
+/*
+ * Estilos comunes de las vistas del plan de mejoramiento (Ver Plan y Registrar Plan):
+ * encabezado con chips, avance, tarjetas de datos y barra inferior de acciones.
+ */
+
+.seccion-titulo {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+:host ::ng-deep .container {
+  max-width: 1600px !important;
+}
+
+/* ─── Encabezado ─────────────────────────────────────────────────────────── */
+
+.encabezado-plan {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.metadatos {
+  font-size: 13px;
+  color: #616161;
+}
+
+.separador-punto {
+  margin: 0 6px;
+  color: #bdbdbd;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.chip mat-icon {
+  font-size: 14px;
+  height: 14px;
+  width: 14px;
+}
+
+.chip-estado   { background-color: #fff8e1; color: #8d6e00; border-color: #ffe082; }
+.chip-vigencia { color: var(--md-primary-700); border-color: var(--md-primary-500); }
+.chip-fuente   { background-color: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; white-space: normal; }
+
+.punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* ─── Avance del dictamen ────────────────────────────────────────────────── */
+
+.avance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.avance-progreso {
+  flex: 1 1 280px;
+}
+
+.etiqueta-avance {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-primary-700);
+}
+
+.etiqueta-avance mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.valor-avance {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+.valor-avance small {
+  font-weight: 400;
+  color: #757575;
+}
+
+.barra {
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 3px;
+  background-color: #e0e0e0;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  background-color: var(--md-primary-500);
+  transition: width 0.3s ease;
+}
+
+.contadores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.contador {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  font-size: 12px;
+}
+
+.contador-aprobadas  .punto { color: #2e7d32; }
+.contador-rechazadas .punto { color: #c62828; }
+.contador-pendientes .punto { color: #9e9e9e; }
+
+/* ─── Tarjetas ───────────────────────────────────────────────────────────── */
+
+.tarjeta {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.tarjeta-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tarjeta-cuerpo {
+  padding: 12px 16px;
+}
+
+.row.tarjeta-cuerpo {
+  margin: 0;
+}
+
+.dato {
+  height: 100%;
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.etiqueta {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 2px;
+}
+
+.valor {
+  font-size: 13px;
+  word-break: break-word;
+}
+
+/* ─── Barra de acciones ──────────────────────────────────────────────────── */
+
+.barra-acciones {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.mensaje-revision {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 320px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  font-size: 12px;
+  color: #616161;
+}
+
+.mensaje-revision mat-icon {
+  color: var(--md-primary-500);
+  flex-shrink: 0;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }
+.texto-secundario { color: #757575; }
+.ancho-completo { width: 100%; }
+
+/* En pantallas angostas los botones se apilan: la barra deja de ser fija para no tapar el contenido */
+@media (max-width: 768px) {
+  .barra-acciones {
+    position: static;
+    box-shadow: none;
+  }
+
+  .botones {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .botones button {
+    flex: 1 1 100%;
+  }
+}

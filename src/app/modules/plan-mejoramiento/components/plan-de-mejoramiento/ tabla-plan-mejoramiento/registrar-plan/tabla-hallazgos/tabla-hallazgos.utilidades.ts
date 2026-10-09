@@ -72,11 +72,30 @@ export const hallazgosConstructorTabla = [
     cell: (fila: any) => fila.accion?.fechaFin,
   },
   {
+    columnDef: 'estado',
+    header: 'Estado',
+    sortable: false,
+    cell: () => '',
+  },
+  {
     columnDef: 'acciones',
     header: 'Acciones',
     sortable: false,
     cell: () => '',
   },
+];
+
+// Columnas de la matriz en Ver Plan (vista de dictamen del auditor); fórmula y fechas se consultan en el modal
+export const columnasVistaDictamen = [
+  'noHallazgo',
+  'descripcion',
+  'causa',
+  'numero',
+  'tipoAccion',
+  'accionPlanteada',
+  'nombreIndicador',
+  'meta',
+  'responsable',
 ];
 
 export const iconosAccionHallazgo = new Map<string, string>([
