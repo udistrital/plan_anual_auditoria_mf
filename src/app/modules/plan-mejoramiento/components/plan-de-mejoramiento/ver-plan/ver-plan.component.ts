@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -40,6 +41,8 @@ export class VerPlanComponent implements OnInit {
   planEstadoId: number | null = null;
   /** Estado y hallazgo de cada acción de mejora del plan (para validar la decisión y el avance) */
   accionesPlan: { estadoId: number; hallazgoId: string }[] = [];
+  /** Consulta de estados en curso: se cancela si empieza otra, para que una respuesta vieja no pise la nueva */
+  private estadosSub?: Subscription;
   /** Auditor(es) asignados al plan */
   auditoresPlan = '';
   mostrarInformacion = true;
@@ -220,7 +223,8 @@ export class VerPlanComponent implements OnInit {
   // Carga los estado_id de las acciones del plan para validar la decisión del plan
   cargarEstadosAcciones(): void {
     if (!this.planMejoramientoId) return;
-    this.planAuditoriaService
+    this.estadosSub?.unsubscribe();
+    this.estadosSub = this.planAuditoriaService
       // Consulta liviana de todo el plan (la tabla está paginada): solo estado y hallazgo
       .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0&fields=estado_id,hallazgo_id`)
       .subscribe({
@@ -246,6 +250,10 @@ export class VerPlanComponent implements OnInit {
         },
         error: () => { this.auditoresPlan = ''; }
       });
+  }
+
+  get cargandoExpediente(): boolean {
+    return this.documentosAuditoriaPlan.cargando;
   }
 
   verExpediente(): void {

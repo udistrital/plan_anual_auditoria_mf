@@ -81,8 +81,9 @@
                   Dictaminar
                 </button>
               } @else {
+                <!-- En revisión el modal permite cambiar el dictamen; fuera de revisión solo se consulta -->
                 <button mat-stroked-button color="primary" class="boton-dictamen boton-dictamen-secundario" (click)="dictaminarAccion(fila)">
-                  Ver Dictamen
+                  {{ modoRevision ? 'Cambiar dictamen' : 'Ver dictamen' }}
                 </button>
               }
             }

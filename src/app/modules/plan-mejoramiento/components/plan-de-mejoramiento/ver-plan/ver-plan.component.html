@@ -39,7 +39,7 @@
           <span><b>Auditor(es) del plan:</b> {{ auditoresPlan || 'Sin asignar' }}</span>
         </p>
       </div>
-      <button mat-stroked-button color="primary" class="boton-secundario" (click)="verExpediente()">
+      <button mat-stroked-button color="primary" class="boton-secundario" (click)="verExpediente()" [disabled]="cargandoExpediente">
         <mat-icon>folder_open</mat-icon> Ver expediente completo
       </button>
     </div>

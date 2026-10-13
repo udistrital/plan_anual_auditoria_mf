@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
-import { catchError, firstValueFrom, forkJoin, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, map, Observable, of, Subscription, switchMap, throwError } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -109,6 +109,10 @@ export class TablaHallazgosComponent implements OnInit {
   indicePagina = 0;
   totalHallazgos = 0;
   private informeId: string | null = null;
+  /** Carga en curso: se cancela si empieza otra, para que una respuesta vieja no pise la nueva */
+  private cargaSub?: Subscription;
+  /** Última página cargada con éxito: si falla el cambio de página, el paginador vuelve a ella */
+  private paginaCargada = { indice: 0, tamano: 10 };
   /** Hallazgos expandidos/colapsados por el usuario; se conserva al cambiar de página */
   private readonly expansion = new Map<string, boolean>();
 
@@ -252,7 +256,8 @@ export class TablaHallazgosComponent implements OnInit {
   cargarDatos(): void {
     this.cargando = true;
 
-    this.obtenerInforme()
+    this.cargaSub?.unsubscribe();
+    this.cargaSub = this.obtenerInforme()
       .pipe(switchMap(informeId => informeId
         ? this.consultarHallazgos(informeId, this.tamanoPagina, this.indicePagina * this.tamanoPagina)
         : of({ hallazgos: [] as HallazgoTabla[], total: 0 })))
@@ -267,10 +272,17 @@ export class TablaHallazgosComponent implements OnInit {
           }
           this.totalHallazgos = total;
           this.hallazgos = hallazgos;
+          this.paginaCargada = { indice: this.indicePagina, tamano: this.tamanoPagina };
           this.reconstruirFilas();
           this.cargando = false;
         },
-        error: () => { this.cargando = false; }
+        error: () => {
+          // El paginador vuelve a la página que sí se muestra en la tabla
+          this.indicePagina = this.paginaCargada.indice;
+          this.tamanoPagina = this.paginaCargada.tamano;
+          this.cargando = false;
+          this.alertService.showErrorAlert('Error al consultar los hallazgos del plan.');
+        }
       });
   }
 
@@ -303,11 +315,14 @@ export class TablaHallazgosComponent implements OnInit {
   /**
    * Consulta hallazgos (limit = 0 → todos) y, solo para ellos, sus acciones y responsables.
    * El orden por _id mantiene estable la paginación.
+   * Con `tolerarErrores = false` (exportación) un fallo en acciones o responsables se propaga
+   * en vez de continuar con listas vacías.
    */
   private consultarHallazgos(
     informeId: string,
     limit: number,
-    offset: number
+    offset: number,
+    tolerarErrores = true
   ): Observable<{ hallazgos: HallazgoTabla[]; total: number }> {
     return this.planAuditoriaService
       .get(`hallazgo?query=informe_id:${informeId},activo:true&limit=${limit}&offset=${offset}&sortby=_id&order=asc`)
@@ -325,7 +340,8 @@ export class TablaHallazgosComponent implements OnInit {
           return this.planAuditoriaMid
             .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId}${filtroHallazgos},activo:true&limit=0`)
             .pipe(
-              catchError(() => {
+              catchError((error) => {
+                if (!tolerarErrores) return throwError(() => error);
                 this.alertService.showErrorAlert('Error al consultar las acciones de mejora.');
                 return of({ Data: [] });
               }),
@@ -335,7 +351,7 @@ export class TablaHallazgosComponent implements OnInit {
                 const responsables$ = accionIds.length
                   ? this.planAuditoriaMid
                       .get(`responsable-accion?query=accion_mejora_id__in:${accionIds.join('|')},activo:true&limit=0`)
-                      .pipe(map((r: any) => r.Data ?? []), catchError(() => of([])))
+                      .pipe(map((r: any) => r.Data ?? []), catchError((error) => tolerarErrores ? of([]) : throwError(() => error)))
                   : of([]);
                 return responsables$.pipe(map((responsables: any[]) => ({ hallazgosData, total, acciones, responsables })));
               })
@@ -684,7 +700,8 @@ export class TablaHallazgosComponent implements OnInit {
     // Con paginación la tabla solo tiene la página actual: se consulta el plan completo
     let todos: HallazgoTabla[];
     try {
-      todos = (await firstValueFrom(this.consultarHallazgos(this.informeId, 0, 0))).hallazgos;
+      // Sin tolerar errores: si falla una consulta no se descarga una matriz incompleta
+      todos = (await firstValueFrom(this.consultarHallazgos(this.informeId, 0, 0, false))).hallazgos;
     } catch (error) {
       console.error('Error consultando hallazgos para exportar:', error);
       this.alertService.showErrorAlert('Error al exportar la tabla.');

@@ -26,7 +26,23 @@ export class DocumentosAuditoriaPlanService {
     private readonly userService: UserService,
   ) {}
 
+  /** Consulta en curso: evita abrir dos modales con clics repetidos (la usa la vista para deshabilitar el botón) */
+  cargando = false;
+
   async verDocumentosAuditoria(auditoria: any): Promise<void> {
+    if (this.cargando) return;
+    this.cargando = true;
+    try {
+      await this.abrirDocumentos(auditoria);
+    } catch (error) {
+      console.error("Error consultando los documentos de la auditoría:", error);
+      this.alertaService.showErrorAlert("No fue posible consultar los documentos de la auditoría.");
+    } finally {
+      this.cargando = false;
+    }
+  }
+
+  private async abrirDocumentos(auditoria: any): Promise<void> {
     const tipos = environment.TIPO_DOCUMENTO_PARAMETROS;
 
     // Última versión de cada tipo de documento (consulta deduplicada) y cartas visibles según el rol

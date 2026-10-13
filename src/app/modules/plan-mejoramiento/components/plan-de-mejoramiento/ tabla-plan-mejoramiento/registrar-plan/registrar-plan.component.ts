@@ -11,7 +11,7 @@ import { environment } from 'src/environments/environment';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
-import { catchError, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, of, Subscription, switchMap } from 'rxjs';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 
@@ -40,6 +40,8 @@ export class RegistrarPlanComponent implements OnInit {
   hallazgosFormulados = 0;
   /** Número de los hallazgos que aún no tienen acciones */
   hallazgosPendientes: string[] = [];
+  /** Consulta del resumen en curso: se cancela si empieza otra, para que una respuesta vieja no pise la nueva */
+  private resumenSub?: Subscription;
 
   /** Estados en los que el plan aún puede editarse (registrar/editar acciones). */
   private readonly estadosEditables: number[] = [
@@ -283,7 +285,8 @@ export class RegistrarPlanComponent implements OnInit {
    */
   cargarResumenFormulacion(): void {
     if (!this.planMejoramientoId) return;
-    this.planAuditoriaService
+    this.resumenSub?.unsubscribe();
+    this.resumenSub = this.planAuditoriaService
       .get(`informe?query=auditoria_id:${this.auditoriaId},activo:true&fields=_id`)
       .pipe(
         switchMap((resInforme) => {
