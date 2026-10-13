@@ -19,11 +19,14 @@ import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
         BrowserAnimationsModule
     ], 
     providers: [
-        // Angular 21 es zoneless por defecto; la app depende de zone.js para detectar cambios asíncronos
+        
         provideZoneChangeDetection(),
         PlanAnualAuditoriaService,
-        provideHttpClient(withInterceptors([SpinnerInterceptor])),
-        provideHttpClient(withInterceptorsFromDi()),
+        
+        provideHttpClient(
+            withInterceptors([SpinnerInterceptor]),
+            withInterceptorsFromDi()
+        ),
         provideNativeDateAdapter(),
         // CDK 21 abre los overlays como popover (top layer) y quedan encima del spinner y de SweetAlert
         { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },

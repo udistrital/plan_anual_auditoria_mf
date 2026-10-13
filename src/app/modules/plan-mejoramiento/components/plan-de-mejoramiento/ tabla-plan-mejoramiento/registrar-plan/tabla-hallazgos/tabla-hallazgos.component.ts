@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { catchError, firstValueFrom, forkJoin, map, Observable, of, Subscription, switchMap, throwError } from 'rxjs';
@@ -159,6 +159,7 @@ export class TablaHallazgosComponent implements OnInit {
 
   constructor(
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertService: AlertService,
     private readonly dialog: MatDialog,
@@ -214,6 +215,8 @@ export class TablaHallazgosComponent implements OnInit {
     });
 
     this.filas = filas;
+    // Refresco de la tabla (array plano, red de seguridad post-migracion A21)
+    this.changeDetector.markForCheck();
   }
 
   private mapearAccion(

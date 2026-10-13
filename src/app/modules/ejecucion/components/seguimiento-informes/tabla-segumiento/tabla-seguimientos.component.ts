@@ -103,6 +103,8 @@ export class TablaSeguimientosComponent implements OnInit {
       if (auditorias.length === 0) {
         this.banderaTablaAuditorias = false;
         this.auditoriasDataSource.data = [];
+        // Refresco al limpiar la tabla
+        this.changeDetector.detectChanges();
         return this.alertaService.showAlert(
           "No hay auditorías registradas",
           "Actualmente no hay auditorías registradas para la vigencia seleccionada."
