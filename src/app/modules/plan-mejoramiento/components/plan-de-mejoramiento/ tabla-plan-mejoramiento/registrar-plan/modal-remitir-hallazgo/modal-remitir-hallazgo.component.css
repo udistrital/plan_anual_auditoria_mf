@@ -47,3 +47,28 @@
   height: 20px;
   margin-top: 1px;
 }
+
+.intro {
+  font-size: 13px;
+  color: #616161;
+}
+
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+.texto-requerido { color: #b71c1c; }
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }
+.ancho-completo { width: 100%; }
+
+/* En pantallas angostas el valor hace salto de línea en vez de salirse de la caja */
+.info-row {
+  flex-wrap: wrap;
+}
+
+.info-valor {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

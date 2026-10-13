@@ -1,0 +1,47 @@
+.resumen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #a5d6a7;
+  background-color: #f1f8f1;
+}
+
+.resumen-icono {
+  color: #1b5e20;
+  flex-shrink: 0;
+}
+
+.resumen-texto {
+  flex: 1 1 280px;
+  font-size: 13px;
+}
+
+.resumen-conteo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #a5d6a7;
+  background-color: #ffffff;
+  color: #1b5e20;
+}
+
+.etiqueta {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #757575;
+}
+
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }
+.texto-secundario { color: #757575; }
+.ancho-completo { width: 100%; }
