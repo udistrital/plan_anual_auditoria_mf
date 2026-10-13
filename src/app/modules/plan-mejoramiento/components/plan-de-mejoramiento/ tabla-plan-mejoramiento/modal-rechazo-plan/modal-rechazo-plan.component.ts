@@ -5,20 +5,29 @@ import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-audi
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { environment } from 'src/environments/environment';
 
+export interface DatosModalRechazoPlan {
+  planMejoramientoId: string;
+  usuarioId: number;
+  role: string | null;
+  /** Datos informativos del aviso de devolución */
+  expediente?: string;
+  dependencias?: string;
+  accionesRechazadas?: number;
+}
+
+/** Devolución del plan de mejoramiento a la dependencia con observaciones */
 @Component({
   selector: 'app-modal-rechazo-plan',
   templateUrl: './modal-rechazo-plan.component.html',
+  styleUrls: ['./modal-rechazo-plan.component.css'],
   standalone: false,
 })
 export class ModalRechazoPlanComponent implements OnInit {
+  readonly MAX_OBSERVACION = 1000;
   form!: FormGroup;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {
-      planMejoramientoId: string;
-      usuarioId: number;
-      role: string;
-    },
+    @Inject(MAT_DIALOG_DATA) public data: DatosModalRechazoPlan,
     private readonly dialogRef: MatDialogRef<ModalRechazoPlanComponent>,
     private readonly fb: FormBuilder,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
@@ -27,17 +36,25 @@ export class ModalRechazoPlanComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      observacion: ['', Validators.required],
+      observacion: ['', [Validators.required, Validators.maxLength(this.MAX_OBSERVACION)]],
     });
   }
 
+  get longitudObservacion(): number {
+    return this.form.get('observacion')?.value?.length ?? 0;
+  }
+
   confirmar(): void {
+    const observacion = this.form.get('observacion');
+    if (observacion?.value && !observacion.value.trim()) {
+      observacion.setErrors({ required: true });
+    }
     if (this.form.invalid) {
-      this.alertService.showErrorAlert('Debe ingresar una observación.');
+      this.form.markAllAsTouched();
       return;
     }
 
-    this.alertService.showConfirmAlert('¿Está seguro(a) de rechazar el plan de mejoramiento?').then(conf => {
+    this.alertService.showConfirmAlert('¿Está seguro(a) de devolver el plan de mejoramiento con observaciones?').then(conf => {
       if (!conf.value) return;
       this.rechazar();
     });
@@ -48,7 +65,7 @@ export class ModalRechazoPlanComponent implements OnInit {
       plan_mejoramiento_id:   this.data.planMejoramientoId,
       usuario_id:             this.data.usuarioId,
       usuario_rol:            this.data.role,
-      observacion:            this.form.value.observacion,
+      observacion:            this.form.value.observacion.trim(),
       estado_id:              environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO,
       fase_id:                environment.AUDITORIA_FASE.PLAN_MEJORAMIENTO,
       fecha_ejecucion_estado: new Date().toISOString(),
@@ -57,11 +74,11 @@ export class ModalRechazoPlanComponent implements OnInit {
 
     this.planAuditoriaService.post('plan-mejoramiento-estado', body).subscribe({
       next: () => {
-        this.alertService.showSuccessAlert('El plan fue devuelto al auditado para corrección.', 'Plan rechazado');
+        this.alertService.showSuccessAlert('El plan fue devuelto a la dependencia para su subsanación.', 'Plan devuelto');
         this.dialogRef.close(true);
       },
       error: () => {
-        this.alertService.showErrorAlert('Error al rechazar el plan de mejoramiento.');
+        this.alertService.showErrorAlert('Error al devolver el plan de mejoramiento.');
       },
     });
   }

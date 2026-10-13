@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent } from '@angular/material/paginator';
@@ -46,6 +46,7 @@ export class GestionAccionesComponent implements OnInit {
 
   constructor(
     private readonly fb: FormBuilder,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly parametrosUtilsService: ParametrosUtilsService,
@@ -108,6 +109,7 @@ export class GestionAccionesComponent implements OnInit {
     if (!vigenciaId) {
       this.dataSource.data = [];
       this.totalRegistros = 0;
+      this.changeDetector.markForCheck();
       return;
     }
 
@@ -116,11 +118,13 @@ export class GestionAccionesComponent implements OnInit {
       next: (res) => {
         this.dataSource.data = this.mapearFilas(res?.Data ?? []);
         this.totalRegistros = res?.MetaData?.Count ?? this.dataSource.data.length;
+        this.changeDetector.markForCheck();
         this.cargando = false;
       },
       error: () => {
         this.dataSource.data = [];
         this.totalRegistros = 0;
+        this.changeDetector.markForCheck();
         this.cargando = false;
       },
     });

@@ -22,6 +22,7 @@ import { UserService } from "src/app/core/services/user.service";
 import { environment } from "src/environments/environment";
 import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
+import { DocumentosAuditoriaPlanService } from "../../../services/documentos-auditoria-plan.service";
 
 @Component({
     selector: "app-tabla-plan-mejoramiento",
@@ -74,7 +75,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly documentosAuditoriaPlan: DocumentosAuditoriaPlanService
   ) {}
 
   ngOnInit(): void {
@@ -330,8 +332,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     });
   }
 
-  verDocumentosAuditoria(_plan: any): void {
-    // pendiente
+  verDocumentosAuditoria(plan: any): void {
+    this.documentosAuditoriaPlan.verDocumentosAuditoria(plan);
   }
 
   private resetTabla(): void {
@@ -340,6 +342,8 @@ export class TablaPlanMejoramientoComponent implements OnInit {
     this.banderaTablePlanes = false;
     this.planesDataSource.data = [];
     if (this.paginator) this.paginator.length = 0;
+    // Refresco al limpiar la tabla 
+    this.changeDetector.detectChanges();
   }
 
   private construirTabla(): void {

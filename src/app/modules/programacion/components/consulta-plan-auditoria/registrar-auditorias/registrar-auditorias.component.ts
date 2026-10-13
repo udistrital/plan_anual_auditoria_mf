@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -68,6 +68,7 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly alertaService: AlertService,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
@@ -155,6 +156,8 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
             };
           });
           this.actualizarColumnas();
+          // Refresco explicito de la vista tras recargar datos (red de seguridad post-migracion A21)
+          this.changeDetector.markForCheck();
         }
       },
       (error) => {
@@ -368,6 +371,7 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
           if (response) {
             this.alertaService.showSuccessAlert("Registro eliminado");
             this.dataSource.data = this.dataSource.data.filter((e) => e.id !== element.id);
+            this.changeDetector.markForCheck();
           } else {
             this.alertaService.showErrorAlert("Error al eliminar el registro");
           }
@@ -717,6 +721,7 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
                 console.log('Respuesta del servidor:', response);
                 this.alertaService.showSuccessAlert("Auditorías eliminadas exitosamente");
                 this.dataSource.data = [];
+                this.changeDetector.markForCheck();
               },
               (error) => {
                 console.error('Error al eliminar auditorías:', error);

@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, Input, ViewChild } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
@@ -37,6 +37,7 @@ export class TablaConsultaAuditoriasComponent {
 
   constructor(
     private readonly alertaService: AlertService,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly rolService: RolService
@@ -128,6 +129,8 @@ export class TablaConsultaAuditoriasComponent {
             this.auditoriasDataSource.data = this.auditoriasPorVigencia;
             this.banderaTabla = true;
             this.construirTabla();
+            // Refresco explicito de la tabla tras cargar auditorias
+            this.changeDetector.markForCheck();
           },
           error: (error) => {
             console.error("Error al cargar auditorías:", error);

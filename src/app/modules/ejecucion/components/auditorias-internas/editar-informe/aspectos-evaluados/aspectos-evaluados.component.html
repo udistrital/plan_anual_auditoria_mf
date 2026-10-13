@@ -35,7 +35,7 @@
           <span class="nivel-label">Descripción</span>
           <div class="node-input editor-wrapper">
             <label class="descripcion-label">Descripción del Tema</label>
-            <quill-editor formControlName="descripcion_titulo" [modules]="editorModules" [placeholder]="placeholder" class="quill-editor-custom">
+            <quill-editor formControlName="descripcion_titulo" [modules]="editorModules" [placeholder]="placeholder" (onEditorCreated)="onEditorCreated($event)" class="quill-editor-custom">
               <div quill-editor-toolbar class="toolbar">
                 <span class="ql-formats">
                   <button class="ql-bold" [title]="'Bold'"></button>
