@@ -62,7 +62,7 @@ export class TablaConsultaAuditoriasComponent {
           next: (res) => {
             const plan = res?.Data?.[0];
             const tienePAAAprobado = plan?.estado?.estado_id === environment.PLAN_ESTADO.APROBADO_SECRETARIO_ID;
-            this.planAuditoriaId = tienePAAAprobado ? plan._id : "";
+            this.planAuditoriaId = tienePAAAprobado ? (plan?._id ?? "") : "";
             resolve(tienePAAAprobado);
           },
           error: (error: Error) => {
@@ -90,7 +90,7 @@ export class TablaConsultaAuditoriasComponent {
           this.banderaTabla = false;
           // No hay PAA aprobado, mostrar modal
           this.alertaService.showAlert(
-            "Sin plan de auditorias aprobado",
+            "Sin plan de auditorías aprobado",
             "No se ha encontrado un plan de auditorías aprobado para la vigencia seleccionada."
           );
           return;
@@ -114,7 +114,7 @@ export class TablaConsultaAuditoriasComponent {
               this.banderaTabla = false;
               // Hay PAA aprobado pero no hay auditorías en estado válido
               this.alertaService.showAlert(
-                "Sin auditorias por asignar",
+                "Sin auditorías por asignar",
                 "No se han encontrado auditorías para asignación de auditores en la vigencia seleccionada."
               );
               return;
@@ -166,10 +166,6 @@ export class TablaConsultaAuditoriasComponent {
 
     const offset = this.pageIndex * this.pageSize;
     this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, offset);
-    // Actualizar el paginador después de realizar la consulta
-    this.paginator.length = this.totalRegistros;
-    this.paginator.pageSize = this.pageSize;
-    this.paginator.pageIndex = this.pageIndex;
   }
 
   agregarAuditor(auditoria?: Auditoria) {
