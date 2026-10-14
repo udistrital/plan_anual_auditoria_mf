@@ -31,3 +31,10 @@
   overflow: auto !important;
   text-align: left !important;
 }
+
+
+// SweetAlert por detras de los MatDialog. Se eleva el contenedor de SweetAlert por
+// encima del overlay del CDK. Respalda el ajuste aplicado en AlertService (didOpen).
+.swal2-container {
+  z-index: 20000 !important;
+}

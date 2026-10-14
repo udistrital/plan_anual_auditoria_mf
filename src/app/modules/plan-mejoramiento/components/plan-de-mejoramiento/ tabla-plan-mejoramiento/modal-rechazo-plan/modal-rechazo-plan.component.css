@@ -1,0 +1,29 @@
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ffe082;
+  background-color: #fff8e1;
+  color: #5d4a00;
+  font-size: 13px;
+}
+
+.aviso mat-icon {
+  color: #8d6e00;
+  flex-shrink: 0;
+}
+
+.observacion {
+  resize: none;
+}
+
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }
+.texto-secundario { color: #757575; }
+.ancho-completo { width: 100%; }
