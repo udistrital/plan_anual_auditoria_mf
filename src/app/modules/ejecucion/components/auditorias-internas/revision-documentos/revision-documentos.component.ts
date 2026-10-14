@@ -2,7 +2,6 @@ import Holidays from 'date-holidays';
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
-import { throwIfEmpty } from "rxjs/operators";
 import { ModalRechazoAuditoriaEjecucionComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
 import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
@@ -21,7 +20,7 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import { TercerosCrudService } from "src/app/core/services/terceros-crud.service";
-import { FirmaElectronicaService, SolicitudFirmaElectronica } from "src/app/core/services/firma-electronica.service";
+import { CARGO_JEFE_OCI, DOCUMENTOS_AUDITORIA_FIRMA, FirmaDocumentoService } from "src/app/shared/services/firma-documento.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 
 const configAuditado = {
@@ -110,7 +109,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     private readonly notificacionRegistroCrudService: NotificacionRegistroCrudService,
     private readonly tercerosService: TercerosService,
     private readonly tercerosCrudService: TercerosCrudService,
-    private readonly firmaElectronicaService: FirmaElectronicaService,
+    private readonly firmaDocumentoService: FirmaDocumentoService,
   ) { }
 
   ngOnInit(): void {
@@ -257,17 +256,13 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
 
   async aprobarAuditoria(estados: number[], mensajeAprobacion: string) {
     // La firma se hace antes del cambio de estado para que el informe final no quede aprobado sin firmar
-    if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
-      try {
-        await this.firmarInformeFinal();
-      } catch (error) {
-        console.error(error);
-        this.alertService.showErrorAlert(
-          `Error al firmar electrónicamente el Informe final. ${this.obtenerMensajeErrorFirma(error)}`
-        );
-        return;
-      }
-    }
+    if (
+      estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE) &&
+      !(await this.firmaDocumentoService.firmarDocumentoAuditoriaConAlerta(
+        this.auditoriaId, DOCUMENTOS_AUDITORIA_FIRMA.INFORME_FINAL, CARGO_JEFE_OCI
+      ))
+    )
+      return;
 
     try {
       for (const estado of estados) {
@@ -300,86 +295,6 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
     } catch (error) {
       this.alertService.showErrorAlert("Error al aprobar el informe.");
     }
-  }
-
-  /**
-   * Firma electrónicamente el Informe final con los datos del Jefe OCI autenticado
-   * y reemplaza la referencia del documento de la auditoría por el PDF firmado.
-   */
-  private async firmarInformeFinal(): Promise<void> {
-    const tipoInformeFinal = environment.TIPO_DOCUMENTO_PARAMETROS.INFORME_FINAL;
-
-    const [documentos, jefe, auditoriaRes]: [any[], any, any] = await Promise.all([
-      firstValueFrom(this.referenciaPdfService.consultarDocumentos(this.auditoriaId, { tipo_id: tipoInformeFinal })),
-      firstValueFrom(this.tercerosService.getAuthenticatedUserTerceroResponse().pipe(
-        throwIfEmpty(() => new Error("No se encontró la información del firmante."))
-      )),
-      firstValueFrom(this.planAuditoriaMid.get(`auditoria/${this.auditoriaId}`)),
-    ]);
-
-    const [documentoInforme] = this.referenciaPdfService.filtrarValidos(documentos);
-    if (!documentoInforme)
-      throw new Error("No se encontró el Informe final de la auditoría.");
-
-    // Si el informe ya fue firmado en una aprobación anterior se firma el original para no duplicar firmas
-    const enlaceSinFirma = documentoInforme.metadatos?.["firmado"]
-      ? documentoInforme.metadatos?.["nuxeo_enlace_sin_firma"] ?? documentoInforme.nuxeo_enlace
-      : documentoInforme.nuxeo_enlace;
-
-    const base64 = await this.nuxeoService.obtenerPorUUID(enlaceSinFirma);
-    if (!base64)
-      throw new Error("No se pudo obtener el Informe final.");
-
-    const auditoria = auditoriaRes?.Data;
-    const consecutivoOci = auditoria?.consecutivo_OCI ?? "";
-
-    const solicitud: SolicitudFirmaElectronica = {
-      IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
-      nombre: `Informe_Final_Firmado_${consecutivoOci || this.auditoriaId}`,
-      descripcion: "Informe final de auditoría firmado electrónicamente por el Jefe OCI",
-      metadatos: {
-        auditoria_id: this.auditoriaId,
-        consecutivo_oci: consecutivoOci,
-        vigencia: auditoria?.vigencia_nombre ?? String(auditoria?.vigencia_id ?? ""),
-      },
-      firmantes: [
-        {
-          nombre: jefe.Tercero.NombreCompleto,
-          cargo: "Jefe Oficina de Control Interno",
-          oficina: "Oficina de Control Interno",
-          tipoId: jefe.Identificacion?.TipoDocumentoId?.CodigoAbreviacion ?? "CC",
-          identificacion: jefe.Identificacion?.Numero,
-        },
-      ],
-      representantes: [],
-      file: base64,
-    };
-
-    const respuesta: any = await firstValueFrom(this.firmaElectronicaService.firmar([solicitud]));
-    const documentoFirmado = Array.isArray(respuesta?.res) ? respuesta.res[0] : respuesta?.res;
-    if (!documentoFirmado?.Id || !documentoFirmado?.Enlace)
-      throw new Error("Respuesta inválida del servicio de firma electrónica.");
-
-    // Se actualiza el mismo registro para que todas las vistas del informe muestren el documento firmado
-    await firstValueFrom(this.referenciaPdfService.guardarReferencia(
-      documentoFirmado,
-      "Auditoria",
-      this.auditoriaId,
-      tipoInformeFinal,
-      {
-        ...documentoInforme.metadatos,
-        firmado: true,
-        nuxeo_enlace_sin_firma: enlaceSinFirma,
-      },
-      false,
-      documentoInforme._id
-    ));
-  }
-
-  private obtenerMensajeErrorFirma(error: any): string {
-    // Los errores HTTP traen el detalle en error.error; los errores propios del flujo son instancias de Error
-    const detalle = error instanceof Error ? error.message : error?.error?.Error ?? error?.error?.Status;
-    return typeof detalle === "string" ? detalle : "";
   }
 
   private async guardarFechaAprobacionInformeFinal(): Promise<void> {

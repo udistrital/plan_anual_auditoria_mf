@@ -1,0 +1,156 @@
+.seccion {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.seccion-encabezado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #e0e0e0;
+  color: var(--md-primary-700);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.seccion-cuerpo {
+  padding: 12px;
+}
+
+.etiqueta {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 4px;
+}
+
+.valor {
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.dato {
+  height: 100%;
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.dato .etiqueta {
+  margin-bottom: 2px;
+}
+
+.hallazgo {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.chip-hallazgo,
+.codigo {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--md-primary-700);
+}
+
+.chip-hallazgo {
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--md-primary-500);
+}
+
+.cita {
+  background-color: #fafafa;
+  border-left: 3px solid var(--md-primary-500);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-style: italic;
+  white-space: pre-line;
+}
+
+/* Chip de estado de la acción */
+.chip-estado {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #fff8e1;
+  color: #8d6e00;
+  border: 1px solid #ffe082;
+}
+.chip-aprobada  { background-color: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; }
+.chip-rechazada { background-color: #ffebee; color: #b71c1c; border-color: #ef9a9a; }
+
+/* Opciones del dictamen */
+.opciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.opcion {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 6px 8px 8px 0;
+}
+
+.opcion-titulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.opcion-titulo mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.opcion-conforme .opcion-titulo    { color: #1b5e20; }
+.opcion-no-conforme .opcion-titulo { color: #b71c1c; }
+
+.opcion-conforme.opcion-seleccionada    { border-color: #a5d6a7; background-color: #f1f8f1; }
+.opcion-no-conforme.opcion-seleccionada { border-color: #ef9a9a; background-color: #fdf3f3; }
+
+.concepto {
+  resize: none;
+}
+
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }
+.texto-secundario { color: #757575; }
+.ancho-completo { width: 100%; }
+
+.opcion-deshabilitada {
+  opacity: 0.55;
+}
+
+.seccion-encabezado mat-icon {
+  flex-shrink: 0;
+}
+
+/* En pantallas angostas el código de la sección baja de línea en vez de cortarse */
+.seccion-encabezado {
+  flex-wrap: wrap;
+}
+
+.seccion-encabezado .codigo {
+  margin-left: auto;
+}
