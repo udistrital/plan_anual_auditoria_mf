@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core";
+import { NgModule, provideZoneChangeDetection } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
@@ -8,6 +8,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
 import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 
 @NgModule({
     declarations: [AppComponent, SpinnerComponent],
@@ -18,10 +19,14 @@ import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@an
         BrowserAnimationsModule
     ], 
     providers: [
+        // Angular 21 es zoneless por defecto; la app depende de zone.js para detectar cambios asíncronos
+        provideZoneChangeDetection(),
         PlanAnualAuditoriaService,
         provideHttpClient(withInterceptors([SpinnerInterceptor])),
         provideHttpClient(withInterceptorsFromDi()),
         provideNativeDateAdapter(),
+        // CDK 21 abre los overlays como popover (top layer) y quedan encima del spinner y de SweetAlert
+        { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },
         { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },
         { provide: MAT_DATE_FORMATS,
             useValue: {

@@ -1,4 +1,4 @@
-import { enableProdMode, NgZone } from '@angular/core';
+import { enableProdMode, NgZone, provideZoneChangeDetection } from '@angular/core';
 
 import { platformBrowser } from '@angular/platform-browser';
 import { Router, NavigationStart } from '@angular/router';
@@ -16,7 +16,10 @@ if (environment.production) {
 const lifecycles = singleSpaAngular({
   bootstrapFunction: singleSpaProps => {
     singleSpaPropsSubject.next(singleSpaProps);
-    return platformBrowser(provideSingleSpaPlatform()).bootstrapModule(AppModule);
+    // Angular 21 arranca sin Zone.js por defecto; la app depende de Zone para refrescar la vista
+    return platformBrowser(provideSingleSpaPlatform()).bootstrapModule(AppModule, {
+      applicationProviders: [provideZoneChangeDetection()],
+    });
   },
   template: '<plan-anual-auditoria-mf />',
   Router,

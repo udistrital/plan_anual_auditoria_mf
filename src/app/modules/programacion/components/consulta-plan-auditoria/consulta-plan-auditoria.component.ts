@@ -15,7 +15,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesProgramacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
-import { catchError, exhaustMap, forkJoin, Observable, of, tap, throwError } from "rxjs";
+import { catchError, exhaustMap, forkJoin, from, Observable, of, switchMap, tap, throwError } from "rxjs";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
 import { TercerosService } from "src/app/shared/services/terceros.service";
 import {
@@ -314,8 +314,22 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
       // null = canceló con botón, undefined = cerró con X o backdrop
       if (observacion === null || observacion === undefined) return;
 
-      this.planAnualAuditoriaService
-        .get(`documento?query=referencia_id:${element.id},tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL},activo:true`)
+      // Se regenera el PAA Original para que el Jefe revise los datos actuales y no un documento
+      // de una revisión anterior (por ejemplo, el firmado antes de un rechazo del secretario)
+      from(this.documentoUtils.actualizarDocumento(
+        element.id,
+        `plantilla/${element.id}?auditoria-padre=true`,
+        environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL
+      ))
+        .pipe(
+          catchError((error) => {
+            console.error("Error al regenerar el PDF del PAA:", error);
+            return throwError(() => ({ regeneracionFallida: true }));
+          }),
+          switchMap(() => this.planAnualAuditoriaService
+            .get(`documento?query=referencia_id:${element.id},tipo_id:${environment.TIPO_DOCUMENTO_PARAMETROS.PLAN_ANUAL_AUDITORIA_ORIGINAL},activo:true`)
+          )
+        )
         .subscribe({
           next: (documentos) => {
             if (documentos && documentos.Data.length > 0) {
@@ -365,7 +379,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
           },
           error: (error) => {
             this.alertaService.showErrorAlert(
-              'Error al verificar la existencia del documento asociado.'
+              error?.regeneracionFallida
+                ? 'Error al generar el PDF del Plan Anual de Auditoría, el plan no fue enviado.'
+                : 'Error al verificar la existencia del documento asociado.'
             );
             console.error(error);
           },

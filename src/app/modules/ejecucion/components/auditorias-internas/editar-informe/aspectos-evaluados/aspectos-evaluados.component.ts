@@ -1,9 +1,12 @@
-import { Component, OnInit, OnChanges, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, OnDestroy, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { NuxeoService } from 'src/app/core/services/nuxeo.service';
+import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 
 interface Hallazgo {
   _id?: string;
@@ -37,7 +40,7 @@ interface Tema {
     styleUrls: ['./aspectos-evaluados.component.css'],
     standalone: false
 })
-export class AspectosEvaluadosComponent implements OnInit, OnChanges {
+export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy {
   @Input() informeId!: string;
   @Input() auditoriaId!: string;
   @Input() soloLectura: boolean = false;
@@ -49,10 +52,24 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   aspectosForm: UntypedFormGroup = this.fb.group({});
   temasData: Tema[] = [];
   cargando = false;
+  // Guarda por tema el enlace de Nuxeo original y el HTML que se descargó de él
+  private readonly documentosNuxeoTema = new Map<string, { enlace: string; html: string }>();
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
     }
+  };
+
+  private readonly ANCHO_MAX_IMG = 500;
+  private observadores: MutationObserver[] = [];
+  private botonPresionado = false;
+  private revisores: Array<() => void> = [];
+
+  private readonly alPresionar = () => { this.botonPresionado = true; };
+  private readonly alSoltar = () => {
+    this.botonPresionado = false;
+    // Se espera un instante para no interferir con el cierre del arrastre de blotFormatter
+    setTimeout(() => this.revisores.forEach(revisar => revisar()), 0);
   };
 
   editorModules = {
@@ -89,7 +106,9 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   constructor(
     private readonly fb: UntypedFormBuilder,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
-    private readonly alertaService: AlertService
+    private readonly alertaService: AlertService,
+    private readonly nuxeoService: NuxeoService,
+    private readonly referenciaPdfService: ReferenciaPdfService,
   ) { }
 
   ngOnInit(): void {
@@ -108,7 +127,15 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     }
   }
 
-  private usarDatosProporcionados(): void {
+  ngOnDestroy(): void {
+    document.removeEventListener('mousedown', this.alPresionar, true);
+    document.removeEventListener('mouseup', this.alSoltar, true);
+    this.observadores.forEach(o => o.disconnect());
+    this.observadores = [];
+    this.revisores = [];
+  }
+
+  private async usarDatosProporcionados(): Promise<void> {
     const temas: Tema[] = JSON.parse(JSON.stringify(this.temasRaw));
     for (const tema of temas) {
       for (const subtema of (tema.subtema ?? [])) {
@@ -118,7 +145,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       }
     }
     this.temasData = temas;
-    this.construirFormulario();
+    await this.construirFormulario();
     this.actualizarModoSoloLectura();
   }
 
@@ -146,7 +173,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         await this.asignarHallazgosASubtemas(temas);
 
         this.temasData = temas;
-        this.construirFormulario();
+        await this.construirFormulario();
         this.actualizarModoSoloLectura();
         this.cargando = false;
       },
@@ -180,12 +207,16 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
   }
 
   // Construye el formulario reactivo con los datos cargados
-  construirFormulario(): void {
-    const temasArray = this.fb.array([]);
+  async construirFormulario(): Promise<void> {
+    this.documentosNuxeoTema.clear();
 
-    this.temasData.forEach((tema) => {
-      if (!tema.activo) return;
+    this.observadores.forEach(o => o.disconnect());
+    this.observadores = [];
+    this.revisores = [];
 
+    const temasActivos = this.temasData.filter(tema => tema.activo);
+
+    const gruposTemas = await Promise.all(temasActivos.map(async (tema) => {
       const subtemasArray = this.fb.array([]);
 
       (tema.subtema ?? []).forEach((subtema: any) => {
@@ -211,13 +242,25 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         }));
       });
 
-      temasArray.push(this.fb.group({
+      if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
+        const enlaceOriginal = tema.descripcion_titulo;
+        let html = await this.obtenerDocumentoHTML(enlaceOriginal);
+        html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+        tema.descripcion_titulo = html;
+        if (tema._id) {
+          this.documentosNuxeoTema.set(tema._id.toString(), { enlace: enlaceOriginal, html });
+        }
+      }
+
+      return this.fb.group({
         _id: [tema._id ?? null],
         nombre: [tema.titulo ?? '', Validators.required],
         descripcion_titulo: [tema.descripcion_titulo ?? ''],
         subtemas: subtemasArray,
-      }));
-    });
+      });
+    }));
+
+    const temasArray = this.fb.array(gruposTemas);
 
     this.aspectosForm = this.fb.group({
       temas: temasArray,
@@ -381,25 +424,18 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
       // Crear o actualizar tema
       if (!temaId) {
         try {
-          if(this.contieneImagen(temaForm.descripcion_titulo)) {
-            let html = String(temaForm.descripcion_titulo);
-            html = html.replace(
-              /width="(\d+)px"/g,
-              'style="width:$1px;"'
-            );
-            html = html.replace(
-              /\sheight="auto"/g,
-              ''
-            );
-          } else {
-            const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
-              informe_id: this.informeId,
-              titulo: temaForm.nombre,
-              descripcion_titulo: temaForm.descripcion_titulo
-            }));
-            temaId = response?.Data?._id || response?._id;
-            this.temas.at(i).patchValue({ _id: temaId, isNew: false });
+          let descripcion = temaForm.descripcion_titulo;
+          if (this.contieneImagen(descripcion)) {
+            descripcion = await this.subirHtmlTemaANuxeo(descripcion, i);
           }
+
+          const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
+            informe_id: this.informeId,
+            titulo: temaForm.nombre,
+            descripcion_titulo: descripcion
+          }));
+          temaId = response?.Data?._id || response?._id;
+          this.temas.at(i).patchValue({ _id: temaId, isNew: false });
         } catch (error) {
           console.error('Error al crear tema:', error);
           this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
@@ -407,22 +443,22 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
         }
       } else {
         try {
-          if (this.contieneImagen(temaForm.descripcion_titulo)) {
-            let html = String(temaForm.descripcion_titulo);
-            html = html.replace(
-              /width="(\d+)px"/g,
-              'style="width:$1px;"'
-            );
-            html = html.replace(
-              /\sheight="auto"/g,
-              ''
-            );
-          } else {
-            await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-              titulo: temaForm.nombre,
-              descripcion_titulo: temaForm.descripcion_titulo
-            }));
+          let descripcion = temaForm.descripcion_titulo;
+          const original = this.documentosNuxeoTema.get(String(temaId));
+
+          if (original && descripcion === original.html) {
+            // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
+            descripcion = original.enlace;
+          } else if (this.contieneImagen(descripcion)) {
+            const htmlGuardado = descripcion;
+            descripcion = await this.subirHtmlTemaANuxeo(htmlGuardado, i);
+            this.documentosNuxeoTema.set(String(temaId), { enlace: descripcion, html: htmlGuardado });
           }
+
+          await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
+            titulo: temaForm.nombre,
+            descripcion_titulo: descripcion
+          }));
         } catch (error) {
           console.error('Error al actualizar tema:', error);
           this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
@@ -504,10 +540,99 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges {
     return true;
   }
 
+  // Sube el HTML del tema (con imágenes) a Nuxeo y devuelve el valor a guardar en descripcion_titulo
+  private async subirHtmlTemaANuxeo(htmlOriginal: string, indice: number): Promise<string> {
+    let html = String(htmlOriginal);
+    html = html.replace(/width="(\d+)px"/g, 'style="width:$1px;"');
+    html = html.replace(/\sheight="auto"/g, '');
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
+    const base64 = await this.nuxeoService.fileABase64(htmlFile) as string;
+
+    const payload = {
+      IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
+      nombre: `Tema ${indice + 1} de informe ${this.informeId}.html`,
+      descripcion: 'Documento HTML (Aspectos Evaluados) de un tema',
+      metadatos: {},
+      file: JSON.stringify(base64)
+    };
+
+    const response: any = await firstValueFrom(this.nuxeoService.guardarArchivos([payload]));
+    const enlace = response?.[0]?.res?.Enlace;
+    if (!enlace) throw new Error('Nuxeo no devolvió el enlace del documento');
+
+    return `NuxeoEnlace:${enlace}`;
+  }
+
   private contieneImagen(html: string): boolean {
     if (!html) return false;
     const div = document.createElement('div');
     div.innerHTML = html;
     return div.querySelector('img') !== null;
+  }
+
+  private comprobarNuxeoEnlace(descripcion: any): boolean {
+    return descripcion?.startsWith("NuxeoEnlace") ?? false;
+  }
+
+  private async obtenerDocumentoHTML(descripcion: any) {
+    const indice = descripcion.indexOf(":");
+    const uuid = descripcion.substring(indice + 1);
+    const documento = await this.nuxeoService.obtenerPorUUID(uuid);
+
+    const bytes = Uint8Array.from(atob(documento), c => c.charCodeAt(0));
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  onEditorCreated(quill: any): void {
+    const root: HTMLElement = quill.root;
+
+    const limitar = (img: HTMLImageElement) => {
+      const aplicar = () => {
+        const explicito = parseInt(img.getAttribute('width') || img.style.width || '', 10);
+        // Si no tiene ancho definido, se usa el tamaño natural de la imagen
+        const ancho = explicito > 0 ? explicito : img.naturalWidth;
+        if (ancho > this.ANCHO_MAX_IMG) {
+          img.style.removeProperty('width');
+          img.setAttribute('width', `${this.ANCHO_MAX_IMG}px`);
+        }
+      };
+
+      // Si todavía no cargó, se espera a que cargue para conocer su tamaño real
+      if (img.complete && img.naturalWidth > 0) {
+        aplicar();
+      } else {
+        img.addEventListener('load', aplicar, { once: true });
+      }
+    };
+
+    // Imágenes que ya existen al cargar el contenido
+    root.querySelectorAll('img').forEach(limitar);
+
+    this.revisores.push(() => root.querySelectorAll('img').forEach(limitar));
+
+    // Cada vez que cambie el ancho (arrastrando) o se agregue una imagen, se corrige
+    const observador = new MutationObserver((mutaciones) => {
+      if (this.botonPresionado) return;
+
+      for (const m of mutaciones) {
+        if (m.type === 'attributes' && m.target instanceof HTMLImageElement) {
+          limitar(m.target);
+        } else if (m.type === 'childList') {
+          m.addedNodes.forEach((n) => {
+            if (n instanceof HTMLImageElement) limitar(n);
+            else if (n instanceof HTMLElement) n.querySelectorAll('img').forEach(limitar);
+          });
+        }
+      }
+    });
+    observador.observe(root, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['width', 'style'],
+    });
+    this.observadores.push(observador);
   }
 }
