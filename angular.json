@@ -25,7 +25,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/assets/styles/theme.scss"
+              "src/assets/styles/theme.scss",
+              "node_modules/driver.js/dist/driver.css"
             ],
             "scripts": [],
             "customWebpackConfig": {

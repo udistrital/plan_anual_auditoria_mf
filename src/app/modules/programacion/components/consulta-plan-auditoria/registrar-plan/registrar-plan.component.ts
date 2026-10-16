@@ -5,6 +5,7 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { PlanAnualAuditoriaMid } from "src/app/core/services/plan-anual-auditoria-mid.service";
 import { FormularioDinamicoComponent } from "src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { TourService } from "src/app/shared/services/tour.service";
 import { environment } from "src/environments/environment";
 import { formularioPAA } from "./registrar-plan.utilidades";
 
@@ -36,7 +37,8 @@ export class RegistrarPlanComponent implements OnInit {
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
     private readonly PlanAnualAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly tourService: TourService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -44,6 +46,12 @@ export class RegistrarPlanComponent implements OnInit {
       this.planId = params["id"];
       this.vigenciaNombre = localStorage.getItem('vigencia') ?? '';
       this.inicializarFormulario();
+
+      if (this.planId === '-1') {
+        this.datosCargados = true;
+        this.tourService.continuarTourSiCorresponde();
+        return;
+      }
 
       try {
         const planData = await this.obtenerPlanAuditoria();
@@ -60,6 +68,8 @@ export class RegistrarPlanComponent implements OnInit {
       } catch (error) {
         console.error("Error inicializando el componente:", error);
       }
+
+      this.tourService.continuarTourSiCorresponde();
     });
   }
 
@@ -142,6 +152,8 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   guardarInformacion() {
+    if (this.planId === '-1') return
+    
     this.alertaService
       .showConfirmAlert("¿Está seguro(a) de guardar la información?")
       .then((result) => {

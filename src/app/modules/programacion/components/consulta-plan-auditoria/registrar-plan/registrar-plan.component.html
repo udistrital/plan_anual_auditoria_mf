@@ -9,7 +9,7 @@
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
-    <div class="col-12">
+    <div class="col-12" data-tour="formulario-marco-general">
       @if (modoEditar) {
         @if (datosCargados) {
           <app-formulario-dinamico
@@ -18,7 +18,7 @@
             />
         }
         <div class="d-flex justify-content-end">
-          <div class="button-container">
+          <div class="button-container" data-tour="guardar-marco-general">
             <button
               mat-raised-button
               color="primary"
