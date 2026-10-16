@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { UserService } from "src/app/core/services/user.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
@@ -70,6 +70,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
 
   constructor(
     private readonly alertaService: AlertService,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
     private readonly router: Router,
     private readonly parametrosUtilsService: ParametrosUtilsService,
@@ -172,6 +173,8 @@ export class ConsultaPlanAuditoriaComponent implements OnInit {
             acciones,
           };
         });
+        // Refresco explicito de la tabla tras recargar planes (red de seguridad post-migracion A21)
+        this.changeDetector.markForCheck();
       },
       (error: any) => {
         console.error("Error al cargar los planes de auditoría:", error);

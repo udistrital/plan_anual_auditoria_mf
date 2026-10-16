@@ -1,4 +1,4 @@
-import { Component, Inject, Input, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
@@ -45,6 +45,7 @@ export class TablaAuditoriasEspecialesComponent {
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly alertaService: AlertService,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly dialog: MatDialog,
   ) {
     this.construirTabla();
@@ -80,6 +81,7 @@ export class TablaAuditoriasEspecialesComponent {
           if (!res?.Data) {
             this.totalRegistros = 0;
             this.dataSource.data = [];
+            this.changeDetector.markForCheck();
             this.banderaTabla = false;
             return;
           }
@@ -110,6 +112,7 @@ export class TablaAuditoriasEspecialesComponent {
           );
 
           this.dataSource.data = auditoriasPadre;
+          this.changeDetector.markForCheck();
           this.banderaTabla = auditoriasPadre.length > 0;
           this.totalRegistros = res.MetaData?.Count || auditoriasPadre.length;
           this.construirTabla();
@@ -285,6 +288,7 @@ export class TablaAuditoriasEspecialesComponent {
       auditoriasActuales.splice(indicePadre + 1, 0, ...auditoriasConcretas);
       auditoriaPadre.cantidadConcretasCargadas = auditoriasConcretas.length;
       this.dataSource.data = auditoriasActuales;
+      this.changeDetector.markForCheck();
     }
     else {
       auditoriasConcretas = auditoriasActuales.splice(

@@ -16,6 +16,7 @@ import { ModalHistorialObservacionesAccionComponent } from './components/plan-de
 import { ModalRemitirHallazgoComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/modal-remitir-hallazgo/modal-remitir-hallazgo.component';
 import { ModalRechazoPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
+import { ModalAprobacionPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-aprobacion-plan/modal-aprobacion-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
@@ -34,6 +35,7 @@ import { RegistroAvancesComponent } from './components/gestion-acciones/registro
     ModalHistorialObservacionesAccionComponent,
     ModalRechazoPlanComponent,
     VerPlanComponent,
+    ModalAprobacionPlanComponent,
     GestionAccionesComponent,
   ],
   imports: [

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, Input } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
@@ -47,6 +47,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
 
   constructor(
     public readonly dialog: MatDialog,
+    private readonly changeDetector: ChangeDetectorRef,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly alertaService: AlertService,
     private readonly planAnualAuditoriaService: PlanAnualAuditoriaService,
@@ -155,6 +156,9 @@ export class ActividadesAuditoriaComponent implements OnInit {
         const actividades: any[] = res.Data;
 
         if (actividades.length === 0) {
+          // Limpiar y refrescar la tabla si ya no quedan actividades
+          this.datos.data = [];
+          this.changeDetector.markForCheck();
           return this.alertaService.showAlert(
             "No hay actividades registradas",
             "Actualmente no hay actividades registradas para la vigencia seleccionada."
@@ -176,6 +180,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
             papelTrabajoCarpeta: item.carpeta
           })
         ));
+        this.changeDetector.markForCheck();
       });
   }
 
@@ -197,6 +202,7 @@ export class ActividadesAuditoriaComponent implements OnInit {
                   this.datos.data = this.datos.data.filter(
                     (e: any) => e.id !== actividad.id
                   );
+                  this.changeDetector.markForCheck();
                 } else {
                   this.alertaService.showErrorAlert(
                     "Error al eliminar el registro"

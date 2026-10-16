@@ -26,9 +26,14 @@ const configJefe = {
     auditoria: "La auditoría fue enviada al auditado (a) responsable",
     informe: "El informe de auditoría fue enviado al auditado (a) responsable",
   },
+  /** Se usa cuando el Oficio Anuncio Solicitud de información aún no ha sido firmado */
+  preguntaAprobacionConFirma: {
+    auditoria: "El Oficio Anuncio Solicitud de información no ha sido firmado. Al aprobar, será firmado electrónicamente y la auditoría será enviada al auditado (a) responsable. ¿Está seguro(a) de firmar y enviar la auditoría?",
+    informe: "El Oficio Anuncio Solicitud de información no ha sido firmado. Al aprobar, será firmado electrónicamente y el informe de auditoría será enviado al auditado (a) responsable. ¿Está seguro(a) de firmar y enviar el informe de auditoría?",
+  },
   botonAprobacion: "Aprobar y enviar",
-  botonFirmar: "Cargar Oficio Firmado",
-  tooltipFirmar: "Cargar Oficio Anuncio Solicitud de Información firmado por el Jefe de la Oficina de Control Interno"
+  botonFirmar: "Firmar Oficio",
+  tooltipFirmar: "Aplicar la firma electrónica del Jefe de la Oficina de Control Interno al Oficio Anuncio Solicitud de Información"
 };
 
 export const rolesAprobacion: { [key: string]: any } = {
