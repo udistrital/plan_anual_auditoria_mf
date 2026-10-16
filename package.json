@@ -31,6 +31,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "date-holidays": "^3.28.0",
+    "driver.js": "^1.8.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "ng2-pdf-viewer": "^10.4.0",

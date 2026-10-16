@@ -1,0 +1,60 @@
+// ===========================================================================
+// Tour guiado (driver.js) vs. overlays de Angular Material
+// ===========================================================================
+// Mientras el tour está activo driver.js pone la clase `driver-active` en
+// <body> y dibuja dos capas propias como hijas de <body>:
+//
+//   .driver-overlay  -> overlay SVG con el "hueco" (spotlight) sobre el elemento
+//                       z-index inline 10000
+//   .driver-popover  -> tarjeta del paso actual
+//                       z-index 1000000000
+//
+// Los overlays de Material viven en `.cdk-overlay-container` (z-index 1000),
+// es decir POR DEBAJO del overlay del tour. Eso es justo lo que hace que el
+// "spotlight" se vea bien: el hueco del SVG se dibuja por encima del menú o
+// del modal, así que el elemento enfocado queda iluminado y el resto del
+// modal (y el resto de la página) queda opaco.
+//
+// El problema es que ese mismo orden hacía el contenido de los overlays
+// inservible: el SVG capturaba todos los clics y los botones del popover
+// quedaban debajo del menú. Las reglas de abajo resuelven las tres cosas a
+// la vez sin tocar el orden de capas:
+//
+//   1. el velo del tour deja de capturar clics (sólo queda como capa visual),
+//   2. el contenido de menús / dialogs / selects vuelve a ser interactivo,
+//   3. los backdrops de CDK también se vuelven transparentes al clic, para que
+//      un clic por fuera no cierre el menú ni el modal: el clic por fuera
+//      finaliza el tour, y eso lo decide TourService.
+//
+// Orden de capas resultante:
+//
+//   página (auto) < .cdk-overlay-container (1000) < .driver-overlay (10000) < .driver-popover (1e9)
+//                   (menus, selects, dialogs)          (spotlight)             (tarjeta del paso)
+// ===========================================================================
+
+body.driver-active {
+  // 1. El overlay del tour queda como capa visual únicamente. Necesita
+  //    `!important` porque driver.js asigna el `pointerEvents` del <path> con
+  //    estilos inline, y sólo un `!important` en una hoja de estilos gana.
+  .driver-overlay,
+  .driver-overlay * {
+    pointer-events: none !important;
+  }
+
+  // 2. El contenido de los overlays de Material debe seguir siendo usable
+  //    durante el tour (abrir selects, escribir en los campos del modal...).
+  //    Sólo se reactiva el `.cdk-overlay-pane`: los contenedores
+  //    (`.cdk-overlay-container`, `.cdk-global-overlay-wrapper`) cubren todo el
+  //    viewport y, si capturasen el clic, el resto de la página dejaría de ser
+  //    clicable.
+  .cdk-overlay-pane,
+  .cdk-overlay-pane * {
+    pointer-events: auto;
+  }
+
+  // 3. Los backdrops no deben cerrar el menú o el modal al hacer clic por
+  //    fuera; el tour se encarga de finalizarlo.
+  .cdk-overlay-backdrop {
+    pointer-events: none;
+  }
+}

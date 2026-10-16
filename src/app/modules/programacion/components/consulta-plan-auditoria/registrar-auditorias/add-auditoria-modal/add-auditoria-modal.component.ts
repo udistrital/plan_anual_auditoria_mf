@@ -218,7 +218,9 @@ export class AddAuditoriaModalComponent implements OnInit {
     }
   }
 
-  guardarAuditoria(): void {
+  guardarAuditoria(): void {  
+    if (this.data.planAuditoriaId === '-1') return;
+
     if (this.auditoriaForm.valid) {
       this.alertaService
         .showConfirmAlert(
