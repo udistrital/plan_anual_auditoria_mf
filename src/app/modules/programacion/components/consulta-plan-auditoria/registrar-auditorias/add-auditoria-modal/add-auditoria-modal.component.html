@@ -7,7 +7,7 @@
 
 <ng-template #contenidoDeModal>
   <div class="row">
-    <div class="col-12">
+    <div class="col-12" data-tour="form-add-auditoria">
       <form [formGroup]="auditoriaForm" class="form-container">
         <div class="row mt-2">
 
@@ -40,7 +40,7 @@
 
 
             <!-- Tipo de Evaluación -->
-            <div class="col-12 col-md-6 col-xl-4">
+            <div class="col-12 col-md-6 col-xl-4" data-tour="form-tipo-evaluacion-auditoria">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Tipo de evaluación</b>
               </div>
@@ -70,7 +70,7 @@
 
 
             <!-- Macroprocesos -->
-            <div class="col-12 col-md-4 col-xl-4">
+            <div class="col-12 col-md-4 col-xl-4" data-tour="form-macroprocesos-auditoria">
               <div class="fondo-acento-50 d-flex justify-content-center my-3">
                 <b>Macroprocesos</b>
               </div>
@@ -231,6 +231,7 @@
             style="border: 1px solid var(--md-primary-500)"
             [mat-dialog-close]
             class="mb-sm"
+            data-tour="cancelar-auditoria"
             >
             <mat-icon>close</mat-icon>No, cerrar
           </button>
@@ -239,6 +240,7 @@
             color="primary"
             (click)="guardarAuditoria()"
             class="mb-sm"
+            data-tour="guardar-auditoria"
             >
             <mat-icon>save</mat-icon>
             Si, guardar y cerrar
