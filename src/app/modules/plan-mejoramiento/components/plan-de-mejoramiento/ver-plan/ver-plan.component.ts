@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
@@ -169,6 +170,7 @@ export class VerPlanComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
+    private readonly location: Location,
     private readonly dialog: MatDialog,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
@@ -314,7 +316,7 @@ export class VerPlanComponent implements OnInit {
       this.planAuditoriaService.post('plan-mejoramiento-estado', body).subscribe({
         next: () => {
           this.alertService.showSuccessAlert('El plan de mejoramiento ha sido aprobado.', 'Aprobado')
-            .then(() => this.router.navigate(['/plan-mejoramiento']));
+            .then(() => this.regresar());
         },
         error: () => {
           this.alertService.showErrorAlert('Error al aprobar el plan de mejoramiento.');
@@ -352,12 +354,17 @@ export class VerPlanComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((rechazado: boolean) => {
       if (rechazado) {
-        this.router.navigate(['/plan-mejoramiento']);
+        this.regresar();
       }
     });
   }
 
+  /** Vuelve a la vista desde la que se abrió el plan; si se entró directo por URL, a la bandeja de planes. */
   regresar(): void {
-    this.router.navigate(['/plan-mejoramiento']);
+    if (history.state?.navigationId > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/plan-mejoramiento']);
+    }
   }
 }
