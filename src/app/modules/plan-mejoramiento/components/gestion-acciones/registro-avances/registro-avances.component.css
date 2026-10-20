@@ -1,41 +1,385 @@
-.habilitado {
-    background-color: var(--success-main) !important;
-    border: 1px solid var(--success-accent) !important;
+/*
+ * Registro de avances (Gestión de acciones): misma línea visual de vista-plan.css
+ * (chips, tarjetas de datos, barra de acciones) con los estilos propios de evidencias y calificación.
+ */
+
+:host ::ng-deep .container {
+  max-width: 1600px !important;
 }
 
-.deshabilitado {
-    background-color: var(--warning-main) !important;
-    border: 1px solid var(--warning-accent) !important;
+.seccion-titulo {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1rem;
 }
 
-.text-habilitado {
-    color: var(--success-accent) !important;
+.etiqueta {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #6b6b6b;
+  margin-bottom: 2px;
 }
 
-.text-deshabilitado {
-    color: var(--warning-accent) !important;
+.valor {
+  font-size: 13px;
+  word-break: break-word;
 }
 
-.slider {
-    width: 100%;
+.valor-destacado {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.registro-avances-form {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    gap: 12px 24px;
-    align-items: center;
+.texto-secundario {
+  color: #6b6b6b;
+  font-size: 12px;
 }
 
-.registro-avances-form mat-form-field {
-    flex: 1;
-    width: 100%;
+.enlace {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--md-primary-500);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--md-primary-100);
 }
 
-.label {
-    display: inline-flex;
+.enlace:hover {
+  text-decoration-color: currentColor;
 }
 
-.label-content {
-    flex: 1;
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* ─── Chips ──────────────────────────────────────────────────────────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.chip mat-icon {
+  font-size: 14px;
+  height: 14px;
+  width: 14px;
+}
+
+.chip-vigencia { color: var(--md-primary-700); border-color: var(--md-primary-500); }
+.chip-ok       { background-color: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; }
+.chip-alerta   { background-color: #fff8e1; color: #8d6e00; border-color: #ffe082; }
+.chip-error    { background-color: #ffebee; color: #b71c1c; border-color: #ef9a9a; }
+.chip-neutro   { background-color: #f5f5f5; color: #616161; border-color: #e0e0e0; }
+
+.punto {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* ─── Encabezado ─────────────────────────────────────────────────────────── */
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.metadatos {
+  font-size: 13px;
+  color: #616161;
+}
+
+.metadatos b {
+  color: #212121;
+  font-weight: 600;
+}
+
+.separador-punto {
+  margin: 0 6px;
+  color: #bdbdbd;
+}
+
+.acciones-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ─── Resumen (reemplaza los desplegables de auditoría y acción) ─────────── */
+
+.resumen {
+  padding: 16px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.resumen-textos {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.linea-contexto {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.recorte {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  max-width: 110ch;
+}
+
+.recorte-dos {
+  -webkit-line-clamp: 2;
+}
+
+.datos-clave {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dato {
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.barra {
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 3px;
+  background-color: #e0e0e0;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  border-radius: 3px;
+  background-color: var(--md-primary-500);
+  transition: width 0.3s ease-out;
+}
+
+/* ─── Secciones ──────────────────────────────────────────────────────────── */
+
+.seccion {
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.seccion:last-of-type {
+  border-bottom: 0;
+}
+
+.seccion-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.titulo-icono {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.aviso mat-icon { flex-shrink: 0; }
+.aviso-ok     { background-color: #e8f5e9; color: #1b5e20; border-color: #a5d6a7; }
+.aviso-alerta { background-color: #fff8e1; color: #8d6e00; border-color: #ffe082; }
+.aviso-neutro { background-color: #fafafa; color: #616161; border-color: #e0e0e0; }
+.aviso-neutro mat-icon { color: var(--md-primary-500); }
+
+/* ─── Evidencias ─────────────────────────────────────────────────────────── */
+
+.evidencias {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.evidencia {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.evidencia:last-child { border-bottom: 0; }
+.evidencia:hover { background-color: #fafafa; }
+.evidencia-pendiente { background-color: #fffdf5; }
+
+.icono-archivo {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background-color: var(--md-primary-50);
+  color: var(--md-primary-500);
+}
+
+.evidencia-pendiente .icono-archivo {
+  background-color: #fff8e1;
+  color: #8d6e00;
+}
+
+.evidencia-nombre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.evidencia-meta {
+  font-size: 12px;
+  color: #6b6b6b;
+}
+
+.evidencia-acciones {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pie-lista {
+  margin-top: 8px;
+}
+
+.vacio {
+  text-align: center;
+  padding: 28px 16px;
+  border: 1px dashed #bdbdbd;
+  border-radius: 8px;
+  color: #616161;
+  font-size: 13px;
+}
+
+.vacio mat-icon {
+  font-size: 36px;
+  height: 36px;
+  width: 36px;
+  color: #bdbdbd;
+  margin-bottom: 6px;
+}
+
+/* ─── Calificación vigente ───────────────────────────────────────────────── */
+
+.calificacion-vigente {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.cifra {
+  text-align: center;
+  min-width: 96px;
+}
+
+.cifra-numero {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--md-primary-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.concepto {
+  max-width: 90ch;
+  white-space: pre-line;
+}
+
+.firma {
+  font-size: 12px;
+  color: #6b6b6b;
+  margin-top: 6px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .datos-clave { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  /* Título largo de plantilla-tarjeta-contenedora: el botón Regresar baja de línea en vez de cortarse */
+  :host ::ng-deep mat-card-content > .d-flex.justify-content-between {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .linea-contexto { grid-template-columns: minmax(0, 1fr) auto; }
+  .linea-contexto .etiqueta { grid-column: 1 / -1; }
+  .datos-clave { grid-template-columns: 1fr; }
+  .evidencia { grid-template-columns: 36px minmax(0, 1fr); }
+  .evidencia-acciones { grid-column: 1 / -1; justify-content: flex-end; }
+  .calificacion-vigente { grid-template-columns: 1fr; }
+  .cifra { text-align: left; }
+  .acciones-encabezado,
+  .acciones-encabezado button,
+  .seccion-cabecera > button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra-relleno { transition: none; }
 }

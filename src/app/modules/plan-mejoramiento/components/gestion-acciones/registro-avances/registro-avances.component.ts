@@ -1,28 +1,26 @@
-import { ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { MatStepper } from '@angular/material/stepper';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Formulario } from 'src/app/shared/data/models/formulario.model';
-import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
-import { formularioDependencias, formularioInformacionAccion, formularioInformacionAuditoria } from './registro-avances.utilidades';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { catchError, EMPTY, forkJoin, Observable, of, switchMap } from 'rxjs';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
-import { catchError, EMPTY, forkJoin, of, switchMap } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { UserService } from 'src/app/core/services/user.service';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { MatDialog } from '@angular/material/dialog';
 import { CargarArchivoComponent } from 'src/app/shared/elements/components/cargar-archivo/cargar-archivo.component';
 import { environment } from 'src/environments/environment';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
-import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
 import { RolService } from 'src/app/core/services/rol.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import type { DocumentoReferenciaPdf } from 'src/app/core/services/referencia-pdf.service';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { TercerosService } from 'src/app/shared/services/terceros.service';
+import { CriterioEvaluacion, TIPOS_ACCION, criterioPorId, nombreRol } from './registro-avances.utilidades';
+import { ValoresCalificacion } from './formulario-calificacion/formulario-calificacion.component';
+import { DatosFichaAccion, PanelFichaAccionComponent, PestanaFicha } from './panel-ficha-accion/panel-ficha-accion.component';
+import { CalificacionHistorial, PanelHistorialCalificacionesComponent } from './panel-historial-calificaciones/panel-historial-calificaciones.component';
+import { PanelForoAccionComponent } from './panel-foro-accion/panel-foro-accion.component';
 
 interface DocumentoAvances extends DocumentoReferenciaPdf {
   tipoArchivo: string;
@@ -43,6 +41,17 @@ interface Calificacion {
   activo?: boolean;
 }
 
+/** Configuración común de los paneles laterales (ficha, historial y foro). */
+const CONFIG_PANEL_LATERAL: MatDialogConfig = {
+  position: { right: '0', top: '0' },
+  height: '100vh',
+  width: '520px',
+  maxWidth: '100vw',
+  maxHeight: '100vh',
+  panelClass: 'panel-lateral',
+  autoFocus: 'dialog',
+};
+
 @Component({
   selector: 'app-registro-avances',
   templateUrl: './registro-avances.component.html',
@@ -50,65 +59,32 @@ interface Calificacion {
   standalone: false,
 })
 export class RegistroAvancesComponent implements OnInit {
-  @ViewChild("stepper") stepper!: MatStepper;
-
-  @ViewChild("formularioInformacionAuditoriaComp")
-  formularioInformacionAuditoriaComp!: FormularioDinamicoComponent;
-  formularioInformacionAuditoria: Formulario | undefined;
-  
-  @ViewChild("formularioInformacionAccionComp")
-  formularioInformacionAccionComp!: FormularioDinamicoComponent;
-  formularioInformacionAccion: Formulario | undefined;
-
-  @ViewChildren("formularioDependenciasComp")
-  formularioDependenciasComponent!: QueryList<FormularioDinamicoComponent>;
-
-  @ViewChildren("formularioDependenciasComp2")
-  formularioDependenciasComponent2!: QueryList<FormularioDinamicoComponent>;
-  formularioDependencias: Formulario = formularioDependencias;
-  
-  @ViewChildren("formularioDependenciasApoyoComp")
-  formularioDependenciasApoyoComponent!: QueryList<FormularioDinamicoComponent>;
-  formularioDependenciasApoyo: Formulario = formularioDependencias;
-
-  formularioCalificacion: FormGroup;
+  readonly nombreRol = nombreRol;
 
   accionId!: string;
-  
   accion: any = null;
   hallazgo: any = null;
   auditoria: Auditoria | null = null;
-  dependenciasApoyo: any[] = [];
+  responsables: any[] = [];
   auditores: any[] = [];
   documentos: DocumentoAvances[] = [];
+  calificaciones: Calificacion[] = [];
   calificacionActual: Calificacion | null = null;
 
+  cargando = true;
   habilitado = true;
-  aprobado = false;
-  calificado = false;
+  editandoCalificacion = false;
+  guardandoCalificacion = false;
 
-  nombreAuditor = '';
   usuarioId = 0;
   roles: string[] = [];
-  fechaAprobacion = new Date();
-  fechaCalificacion = new Date();
-
-  tooltips = {
-    avance: "*De contar con un indicador que permita su medición, se realizará conforme a la evidencia entregada y enconcordancia con la acción formulada. *En caso que el indicador no sea coherente con la acción, el % de esta columna será el resultado del análisis de la evidencia que corresponda a la ejecución de la acción.",
-    observaciones: "El análisis debe realizarse de manera completa, suficiente y descriptiva con el fin de contar con un diagnóstico que evidencie el estado real de la acción, en qué momento de desarrollo se encuentra, que soportes se presentaron y evaluaron."
-  }
-
-  esLineal = false;
-  orientation: "horizontal" | "vertical" = "horizontal";
 
   constructor(
-    private readonly breakpointObserver: BreakpointObserver,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
     private readonly planAuditoriaCrud: PlanAnualAuditoriaService,
     private readonly changeDetector: ChangeDetectorRef,
-    private readonly fb: FormBuilder,
     private readonly alertService: AlertService,
     private readonly userService: UserService,
     private readonly rolService: RolService,
@@ -117,77 +93,60 @@ export class RegistroAvancesComponent implements OnInit {
     private readonly gestorDocumentalService: NuxeoService,
     private readonly descargaService: DescargaService,
     private readonly tercerosService: TercerosService
-  ) {
-    this.formularioCalificacion = this.fb.group({
-      criterio: ['', [Validators.required]],
-      calificacion: [0, [Validators.required]],
-      observaciones: ['', [Validators.required]],
-    })
-  }
-
-  get criterio() {
-    return this.formularioCalificacion.get('criterio');
-  }
-
-  get calificacion() {
-    return this.formularioCalificacion.get('calificacion');
-  }
-
-  get observaciones() {
-    return this.formularioCalificacion.get('observaciones');
-  }
+  ) { }
 
   ngOnInit(): void {
-    this.cargarFormularios();
-    this.manejarResponsiveStepper();
     this.accionId = this.route.snapshot.paramMap.get("id")!;
-    this.obtenerDatos(this.accionId);
+    this.roles = this.rolService.getRoles();
     this.userService.getPersonaId().then(id => {
       this.usuarioId = id;
+      this.obtenerDatos(this.accionId);
     });
-    this.roles = this.rolService.getRoles();
   }
 
+  // ─── Carga de datos ─────────────────────────────────────────────────────────
+
   obtenerDatos(accionId: string) {
+    this.cargando = true;
     forkJoin({
       accion: this.planAuditoriaCrud.get(`accion-mejora?query=_id:${accionId}&populate=true`),
       responsables: this.planAuditoriaMid.get(`responsable-accion?query=activo:true,accion_mejora_id:${accionId}`),
-      calificacion: this.planAuditoriaCrud.get(`calificacion-accion?query=actual=true,accion_mejora_id:${accionId}`),
+      calificaciones: this.planAuditoriaCrud.get(`calificacion-accion?query=activo:true,accion_mejora_id:${accionId}&sortby=fecha_calificacion&order=desc&limit=0`),
       documentos: this.referenciaService.consultarDocumentos(accionId, {
         tipo_id: environment.TIPO_DOCUMENTO_PARAMETROS.SOPORTE_AVANCE_ACCIONES,
         referenciaTipo: 'Accion Mejora',
         limit: 0
       }),
     }).pipe(
-      switchMap(({accion, responsables, calificacion, documentos}) => {
-        this.accion = accion?.Data[0];
-        this.habilitado = this.accion?.en_revision;
-        this.dependenciasApoyo = responsables?.Data || [];
-        this.calificacionActual = calificacion?.Data[0] || null;
-        if (this.calificacionActual !== null) {
-          this.calificacionActual.fecha_calificacion = new Date(this.calificacionActual.fecha_calificacion)
-        }
-        this.documentos = documentos as DocumentoAvances[] || [];
+      switchMap(({ accion, responsables, calificaciones, documentos }) => {
+        this.accion = accion?.Data?.[0] ?? null;
+        this.habilitado = Boolean(this.accion?.en_revision);
         this.hallazgo = this.accion?.hallazgo_id;
+        this.responsables = responsables?.Data || [];
+        this.calificaciones = (calificaciones?.Data || []).map((c: Calificacion) => ({
+          ...c,
+          fecha_calificacion: new Date(c.fecha_calificacion),
+        }));
+        this.calificacionActual = this.calificaciones.find(c => c.actual) ?? null;
+        this.documentos = (documentos as DocumentoAvances[]) || [];
         this.completarDatosDocs();
         return forkJoin({
           auditoria: this.planAuditoriaMid.get(`auditoria/${this.hallazgo?.auditoria_id}`),
           auditores_plan: this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id}`)
-        })
+        });
       }),
-
-      switchMap(({ auditoria, auditores_plan}) => {
-        this.auditoria = auditoria?.Data;
-        this.auditores = auditores_plan?.Data || [];
-        if (this.esAuditorAsignado() && !this.calificacionActual) {
-          this.formularioCalificacion.enable();
-        }
-        return of([]);
+      catchError((err) => {
+        console.error(err);
+        this.alertService.showErrorAlert('No se pudo cargar la información de la acción.');
+        return of({ auditoria: null, auditores_plan: null });
       }),
-
-    ).subscribe(() => {
+    ).subscribe(({ auditoria, auditores_plan }) => {
+      this.auditoria = auditoria?.Data ?? null;
+      this.auditores = auditores_plan?.Data || [];
+      // Solo el auditor asignado al plan califica, y el formulario se abre si aún no hay calificación (G-03)
+      this.editandoCalificacion = this.esAuditorAsignado() && !this.calificacionActual;
+      this.cargando = false;
       this.changeDetector.detectChanges();
-      this.cargarFormulariosConAuditoria();
     });
   }
 
@@ -200,109 +159,75 @@ export class RegistroAvancesComponent implements OnInit {
     }
   }
 
-  cargarFormularios() {
-    this.formularioInformacionAuditoria = formularioInformacionAuditoria;
-    this.formularioInformacionAccion = formularioInformacionAccion;
-    this.formularioDependencias = formularioDependencias;
-    this.formularioDependenciasApoyo = formularioDependencias;
+  // ─── Datos derivados para la vista ──────────────────────────────────────────
+
+  get tipoAccionNombre(): string {
+    return TIPOS_ACCION[this.accion?.tipo_id] ?? '—';
   }
 
-  cargarFormulariosConAuditoria() {
-    this.formularioInformacionAuditoriaComp.form.patchValue({
-      consecutivo_no_auditoria: this.auditoria?.consecutivo_no_auditoria,
-      tipo_evaluacion: this.auditoria?.tipo_evaluacion_nombre,
-      titulo: this.auditoria?.titulo,
-      numero_hallazgo: this.hallazgo?.no_hallazgo,
-      descripcion_hallazgo: this.hallazgo?.descripcion,
-      causa_hallazgo: 'this.hallazgo?.criterio no es',
-    });
+  get dependenciasLideres(): any[] {
+    const lideres = this.responsables.filter(r => r.dependencia_lider);
+    return lideres.length ? lideres : (this.auditoria?.datos_dependencias ?? []);
+  }
 
-    this.formularioInformacionAccionComp.form.patchValue({
-      no_accion: this.accion?.no_accion,
-      tipo_accion: this.accion?.tipo_id,
-      fecha_inicio: this.accion?.fecha_inicio,
-      fecha_fin: this.accion?.fecha_fin,
-      nombre_indicador: this.accion?.nombre_indicador,
-      formula_indicador: this.accion?.formula_indicador,
-      meta: this.accion?.meta,
-      descripcion: this.accion?.descripcion,
-    });
+  get dependenciasApoyo(): any[] {
+    return this.responsables.filter(r => !r.dependencia_lider);
+  }
 
-    this.formularioDependenciasComponent.forEach((comp, i) => {
-      const dep = this.auditoria?.datos_dependencias[i];
-      comp.form.patchValue({
-        jefe_nombre: dep?.jefe_nombre,
-        asistente_nombre: dep?.asistente_nombre,
+  get nombreDependencia(): string {
+    return this.dependenciasLideres.map(d => d.dependencia_nombre).filter(Boolean).join(', ') || '—';
+  }
+
+  get nombreAuditoria(): string {
+    if (!this.auditoria) return '';
+    return this.auditoria.subtitulo ? `${this.auditoria.titulo} - ${this.auditoria.subtitulo}` : this.auditoria.titulo;
+  }
+
+  get documentosGuardados(): number {
+    return this.documentos.filter(d => d.nuxeo_enlace).length;
+  }
+
+  get criterioActual(): CriterioEvaluacion | undefined {
+    return criterioPorId(this.calificacionActual?.criterio_evaluacion);
+  }
+
+  nombreAuditor(auditorId: number): string {
+    return this.auditores.find(a => a.auditor_id === auditorId)?.auditor_nombre ?? 'Auditor de Control Interno';
+  }
+
+  esAuditorAsignado(): boolean {
+    return this.auditores.some(auditor => auditor.auditor_id === this.usuarioId);
+  }
+
+  // ─── Cargue de evidencias (auditor) ─────────────────────────────────────────
+
+  alternarCargue() {
+    const habilitar = !this.habilitado;
+    const [mensaje, titulo] = habilitar
+      ? ['¿Está seguro de habilitar la subida de documentos al auditado?', 'Habilitar cargue']
+      : ['¿Está seguro de bloquear el cargue para revisar? La dependencia no podrá subir documentos hasta que lo habilite de nuevo.', 'Bloquear cargue'];
+    this.alertService.showConfirmAlert(mensaje, titulo).then((resp) => {
+      if (!resp.isConfirmed) return;
+      const accionPayload = {
+        ...this.accion,
+        en_revision: habilitar,
+        plan_mejoramiento_id: this.accion?.plan_mejoramiento_id?._id ?? this.accion?.plan_mejoramiento_id,
+        hallazgo_id: this.accion?.hallazgo_id?._id ?? this.accion?.hallazgo_id,
+      };
+      this.planAuditoriaCrud.put(`accion-mejora/${this.accionId}`, accionPayload).subscribe({
+        next: () => {
+          this.accion.en_revision = habilitar;
+          this.habilitado = habilitar;
+          this.alertService.showSuccessAlert(habilitar
+            ? 'Se ha habilitado el cargue de documentos para esta acción.'
+            : 'Se ha bloqueado el cargue de documentos para esta acción.');
+        },
+        error: () => this.alertService.showErrorAlert('No se pudo actualizar el estado del cargue.'),
       });
     });
-
-    this.formularioDependenciasComponent2.forEach((comp, i) => {
-      const dep = this.auditoria?.datos_dependencias[i];
-      comp.form.patchValue({
-        jefe_nombre: dep?.jefe_nombre,
-        asistente_nombre: dep?.asistente_nombre,
-      });
-    });
-
-    this.formularioDependenciasApoyoComponent.forEach((comp, i) => {
-      const dep = this.dependenciasApoyo[i];
-      comp.form.patchValue({
-        jefe_nombre: dep?.jefe_nombre,
-        asistente_nombre: dep?.asistente_nombre,
-      });
-    });
-
-    this.formularioCalificacion.patchValue({
-      criterio: this.calificacionActual?.criterio_evaluacion,
-      calificacion: this.calificacionActual?.calificacion,
-      observaciones: this.calificacionActual?.observacion,
-    });
-    if (this.calificacionActual) {
-      this.formularioCalificacion.disable();
-    }
   }
 
-  habilitarCargue() {
-    this.alertService.showConfirmAlert(
-      '¿Está seguro de habilitar la subida de documentos al auditado?',
-      'Habilitar subida de documentos'
-    ).then((resp) => {
-      if (resp.isConfirmed) {
-        this.accion.en_revision = true;
-        const accionPayload = this.accion;
-        accionPayload.plan_mejoramiento_id = accionPayload?.plan_mejoramiento_id?._id;
-        accionPayload.hallazgo_id = accionPayload?.hallazgo_id?._id;
-        this.planAuditoriaCrud.put(`accion-mejora/${this.accionId}`, accionPayload).subscribe({
-          next: () => {
-            this.habilitado = true;
-            this.alertService.showConfirmAlert('Se ha habilitado el cargue de documentos para esta acción');
-          },
-          error: () => console.error('No se pudo actualizar la acción')
-        });
-      }
-    });
-  }
-
-  deshabilitarCargue() {
-    this.alertService.showConfirmAlert(
-      '¿Está seguro de iniciar la revisión y deshabilitar la subida de documentos al auditado?',
-      'Iniciar revisión de documentos'
-    ).then((resp) => {
-      if (resp.isConfirmed) {
-        this.accion.en_revision = false;
-        const accionPayload = this.accion;
-        accionPayload.plan_mejoramiento_id = accionPayload?.plan_mejoramiento_id?._id;
-        accionPayload.hallazgo_id = accionPayload?.hallazgo_id?._id;
-        this.planAuditoriaCrud.put(`accion-mejora/${this.accionId}`, accionPayload).subscribe({
-          next: () => {
-            this.habilitado = false;
-            this.alertService.showConfirmAlert('Se ha deshabilitado el cargue de documentos para esta acción');
-          },
-          error: () => console.error('No se pudo actualizar la acción')
-        });
-      }
-    });
-  }
+  // ─── Evidencias ─────────────────────────────────────────────────────────────
 
   agregarDocumento() {
     const ref = this.dialog.open(CargarArchivoComponent, {
@@ -319,26 +244,26 @@ export class RegistroAvancesComponent implements OnInit {
         const doc = data?.documento as DocumentoAvances;
         this.tercerosService.getTerceroById(this.usuarioId).subscribe(t => {
           doc.usuario = t?.NombreCompleto;
-        })
-        doc.rol = this.roles.filter(r => r in environment.ROL)[0]
-        this.documentos.push(data?.documento)
+        });
+        doc.rol = this.roles.filter(r => r in environment.ROL)[0];
+        this.documentos.unshift(doc);
       }
-    })
+    });
   }
 
   async verDocumento(index: number) {
-    const docSeleccionado = this.documentos[index]
+    const docSeleccionado = this.documentos[index];
     let base64Doc: string;
     if (docSeleccionado.nuxeo_enlace) {
-      base64Doc = await this.gestorDocumentalService.obtenerPorUUID(docSeleccionado.nuxeo_enlace)
+      base64Doc = await this.gestorDocumentalService.obtenerPorUUID(docSeleccionado.nuxeo_enlace);
     } else {
-      base64Doc = await this.gestorDocumentalService.fileABase64(docSeleccionado.archivo) as string
+      base64Doc = await this.gestorDocumentalService.fileABase64(docSeleccionado.archivo) as string;
     }
     this.dialog.open(ModalVerDocumentoComponent, {
       width: "1000px",
       data: base64Doc,
       autoFocus: false,
-    })
+    });
   }
 
   subirDocumento(index: number) {
@@ -348,149 +273,167 @@ export class RegistroAvancesComponent implements OnInit {
       nombre: archivo?.nombre,
       descripcion: "Soporte de avance de acciones del plan de mejoramiento",
       file: archivo.archivo,
-    }
+    };
     const metadata = {
       creado_por: archivo.usuario,
       nombre: archivo?.nombre,
       rol: archivo.rol,
-    }
+    };
     this.alertService.showConfirmAlert(
       '¿Está seguro de guardar este documento? Si requiere modificarlo debe notificar al auditor',
-      'Subir Documento'
+      'Guardar documento'
     ).then((resp) => {
-      if (resp.isConfirmed) {
-        this.gestorDocumentalService.guardarArchivos([archivoSubir]).pipe(
-          switchMap((nuxeoResp: any[]) => {
-            console.log(nuxeoResp)
-            const archivoGuardado = nuxeoResp[0]?.res;
-            return this.referenciaService.guardarReferencia(
-              archivoGuardado,
-              "Accion Mejora",
-              this.accionId,
-              environment.TIPO_DOCUMENTO_PARAMETROS.SOPORTE_AVANCE_ACCIONES,
-              metadata,
-              true,
-            )
-          }),
-          switchMap((referencia: any) => {
-            this.documentos[index] = referencia?.Data as DocumentoAvances;
-            this.completarDatosDocs();
-            return EMPTY;
-          }),
-          catchError((err) => {
-            console.error(err);
-            return EMPTY;
-          })
-        ).subscribe({
-          next: () => this.alertService.showSuccessAlert('El archivo ha sido guardado con éxito.'),
-          error: () => this.alertService.showErrorAlert('No se ha podido guardar el documento.'),
-        });
-      }
+      if (!resp.isConfirmed) return;
+      this.gestorDocumentalService.guardarArchivos([archivoSubir]).pipe(
+        switchMap((nuxeoResp: any[]) => {
+          const archivoGuardado = nuxeoResp[0]?.res;
+          return this.referenciaService.guardarReferencia(
+            archivoGuardado,
+            "Accion Mejora",
+            this.accionId,
+            environment.TIPO_DOCUMENTO_PARAMETROS.SOPORTE_AVANCE_ACCIONES,
+            metadata,
+            true,
+          );
+        }),
+      ).subscribe({
+        next: (referencia: any) => {
+          this.documentos[index] = referencia?.Data as DocumentoAvances;
+          this.completarDatosDocs();
+          this.alertService.showSuccessAlert('El archivo ha sido guardado con éxito.');
+        },
+        error: (err) => {
+          console.error(err);
+          this.alertService.showErrorAlert('No se ha podido guardar el documento.');
+        },
+      });
     });
   }
 
   async descargarDocumento(index: number) {
     const doc = this.documentos[index];
     const archivo = await this.gestorDocumentalService.obtenerPorUUID(doc.nuxeo_enlace);
-    this.descargaService.descargarArchivo(archivo, doc.tipoArchivo ?? 'application/pdf', doc.nombre!)
+    this.descargaService.descargarArchivo(archivo, doc.tipoArchivo ?? 'application/pdf', doc.nombre!);
   }
 
   eliminarDocumento(index: number) {
+    const doc = this.documentos[index];
+    if (!doc.nuxeo_enlace) {
+      this.documentos.splice(index, 1);
+      return;
+    }
+    this.alertService.showConfirmAlert('¿Está seguro de eliminar este documento?', 'Eliminar documento').then((resp) => {
+      if (!resp.isConfirmed) return;
+      this.planAuditoriaCrud.put(`documento/${doc._id}`, { ...doc, activo: false }).subscribe({
+        next: (res: any) => {
+          if (res?.Success) {
+            this.documentos = this.documentos.filter(d => d !== doc);
+            this.alertService.showSuccessAlert('Documento eliminado con éxito.');
+          }
+        },
+        error: () => this.alertService.showErrorAlert('No se pudo eliminar el documento.'),
+      });
+    });
+  }
+
+  // ─── Calificación (auditor asignado) ────────────────────────────────────────
+
+  guardarCalificacion({ calificacion, criterio, observaciones }: ValoresCalificacion) {
+    const criterioNombre = criterioPorId(criterio)?.nombre ?? '';
     this.alertService.showConfirmAlert(
-      '¿Está seguro de eliminar este documento?',
-      'Eliminar documento'
-    ).then((resp) => {
-      if (resp.isConfirmed) {
-        const doc = this.documentos.splice(index, 1)[0];
-        if (doc.nuxeo_enlace) {
-          doc.activo = false;
-          this.planAuditoriaCrud.put(`documento/${doc._id}`, doc).subscribe((res: any) => {
-            if (res?.Success) this.alertService.showSuccessAlert('Documento eliminado con éxito.');
-          });
-        }
-      }
+      `Calificación: ${calificacion}% · ${criterioNombre}. Para corregirla después deberá emitir una nueva calificación.`,
+      '¿Está seguro de calificar la acción?'
+    ).then(res => {
+      if (!res.isConfirmed) return;
+      const nuevaCalificacion: Calificacion = {
+        accion_mejora_id: this.accionId,
+        auditor_id: this.usuarioId,
+        calificacion,
+        criterio_evaluacion: criterio,
+        observacion: observaciones,
+        fecha_calificacion: new Date(),
+        actual: true,
+      };
+      this.guardandoCalificacion = true;
+      const anterior = this.calificacionActual;
+      const desmarcarAnterior$: Observable<unknown> = anterior?._id
+        ? this.planAuditoriaCrud.put(`calificacion-accion/${anterior._id}`, { ...anterior, actual: false })
+        : of(null);
+
+      desmarcarAnterior$.pipe(
+        switchMap(() => this.planAuditoriaCrud.post('calificacion-accion', nuevaCalificacion) as Observable<any>),
+        catchError((err) => {
+          console.error(err);
+          this.guardandoCalificacion = false;
+          this.alertService.showErrorAlert('No se pudo registrar la calificación.');
+          return EMPTY;
+        }),
+      ).subscribe((res: any) => {
+        const guardada: Calificacion = { ...res?.Data, fecha_calificacion: new Date(res?.Data?.fecha_calificacion) };
+        this.calificaciones = [guardada, ...this.calificaciones.map(c => ({ ...c, actual: false }))];
+        this.calificacionActual = guardada;
+        this.guardandoCalificacion = false;
+        this.editandoCalificacion = false;
+        this.alertService.showSuccessAlert('La calificación ha sido registrada.');
+      });
     });
   }
 
-  aprobarAvances() {
-    this.alertService.showConfirmAlert('¿Está seguro de aprobar los avances de la acción?').then(res => {
-      if (res.isConfirmed) {
-        this.aprobado = true;
-        this.habilitado = false;
-        this.alertService.showSuccessAlert('La aprobación ha sido registrada.');
-      }
-    });
+  // ─── Paneles laterales ──────────────────────────────────────────────────────
+
+  abrirFicha(pestana: PestanaFicha = 'accion') {
+    const datos: DatosFichaAccion = {
+      pestana,
+      accion: {
+        noAccion: this.accion?.no_accion,
+        tipo: this.tipoAccionNombre,
+        descripcion: this.accion?.descripcion,
+        nombreIndicador: this.accion?.nombre_indicador,
+        formulaIndicador: this.accion?.formula_indicador,
+        meta: this.accion?.meta,
+        fechaInicio: this.accion?.fecha_inicio,
+        fechaFin: this.accion?.fecha_fin,
+      },
+      hallazgo: {
+        numero: this.hallazgo?.no_hallazgo,
+        descripcion: this.hallazgo?.descripcion,
+        causa: this.hallazgo?.criterio,
+      },
+      auditoria: {
+        numero: this.auditoria?.consecutivo_no_auditoria,
+        nombre: this.nombreAuditoria,
+        tipoEvaluacion: this.auditoria?.tipo_evaluacion_nombre,
+        vigencia: this.auditoria?.vigencia_nombre,
+      },
+      dependenciasLideres: this.dependenciasLideres,
+      dependenciasApoyo: this.dependenciasApoyo,
+      // plan-mejoramiento-auditor puede traer al mismo auditor repetido
+      auditores: this.auditores.filter((a, i, lista) => lista.findIndex(b => b.auditor_id === a.auditor_id) === i),
+    };
+    this.dialog.open(PanelFichaAccionComponent, { ...CONFIG_PANEL_LATERAL, ariaLabelledBy: 'tituloPanelFicha', data: datos });
   }
 
-  agregarCalificacion() {
-    this.formularioCalificacion.enable();
-    this.formularioCalificacion.patchValue({
-      calificacion: 0,
-      criterio: 0,
-      observaciones: '',
-    });
+  abrirHistorial() {
+    const calificaciones: CalificacionHistorial[] = this.calificaciones.map(c => ({
+      porcentaje: c.calificacion,
+      criterio: criterioPorId(c.criterio_evaluacion),
+      observacion: c.observacion,
+      fecha: c.fecha_calificacion,
+      auditor: this.nombreAuditor(c.auditor_id),
+      vigente: c.actual,
+    }));
+    this.dialog.open(PanelHistorialCalificacionesComponent, { ...CONFIG_PANEL_LATERAL, ariaLabelledBy: 'tituloPanelHistorial', data: { calificaciones } });
   }
 
-  guardarCalificacion() {
-    this.alertService.showConfirmAlert('¿Está seguro de calificar la acción?').then(res => {
-      if (res.isConfirmed) {
-        const calificacionForm = this.formularioCalificacion.value;
-        const nuevaCalificacion: Calificacion = {
-          accion_mejora_id: this.accionId,
-          auditor_id: this.usuarioId,
-          calificacion: calificacionForm.calificacion,
-          observacion: calificacionForm.observaciones,
-          criterio_evaluacion: calificacionForm.criterio, //TODO falta en el CRUD
-          fecha_calificacion: new Date(),
-          actual: true,
-        }
-
-        if (this.calificacionActual !== null) {
-          this.calificacionActual.actual = false;
-          this.planAuditoriaCrud.put(`calificacion-accion/${this.calificacionActual?._id}`, this.calificacionActual).subscribe(() => {})
-        }
-
-        this.planAuditoriaCrud.post('calificacion-accion', nuevaCalificacion).subscribe((res: any) => {
-          this.calificacionActual = res?.Data;
-          this.calificacionActual!.fecha_calificacion = new Date(this.calificacionActual!.fecha_calificacion)
-          this.nombreAuditor = this.auditores.find(aud => aud.auditor_id === this.usuarioId).auditor_nombre;
-          this.calificado = true;
-          this.formularioCalificacion.disable();
-          this.alertService.showSuccessAlert('La calificación ha sido registrada.');
-        });
-      }
+  abrirForo() {
+    this.dialog.open(PanelForoAccionComponent, {
+      ...CONFIG_PANEL_LATERAL,
+      ariaLabelledBy: 'tituloPanelForo',
+      data: { esAuditor: this.esAuditorAsignado() },
     });
-  }
-
-  esAuditorAsignado(): boolean {
-    return this.auditores.some(auditor => auditor.auditor_id === this.usuarioId);
   }
 
   regresar() {
     this.router.navigate(['../../'], { relativeTo: this.route });
   }
-
-  manejarResponsiveStepper() {
-    this.breakpointObserver
-      .observe(["(max-width: 992px)"])
-      .subscribe((result) => {
-        this.orientation = result.matches ? "vertical" : "horizontal";
-      });
-  }
-
-  abrirForo() {
-    console.log(this.accion);
-    this.dialog.open(ModalHistorialRechazosComponent, {
-      width: '1000px',
-      data: {
-        auditoriaId: this.accionId,           // directo de la URL, se agrega momentaneamente como ejemplo
-        estadoEndpoint: 'calificacion-accion', // Se debe ajustar a la ruta del endpoint de calificaciones
-        auditoriaIdReferencia: 'accion_mejora_id', // Se debe ajustar a la referencia de la acción de mejora
-        titulo: 'Foro de discusión',
-        descripcion: `Historial del foro`,
-      } as HistorialRechazosData,
-      autoFocus: false,
-    });
-  }
-
 }
