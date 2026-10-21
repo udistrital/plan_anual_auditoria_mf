@@ -135,8 +135,11 @@ export class GestionAccionesComponent implements OnInit {
 
   private construirQuery(vigenciaId: number): string {
     const v = this.filtrosForm.value;
+    const ESTADO_PLAN = environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO;
     const params: Record<string, string> = {
       vigencia_id: String(vigenciaId),
+      // El seguimiento de las acciones empieza cuando el plan está aprobado (y sigue visible al finalizar)
+      estado_plan_id: `${ESTADO_PLAN.APROBADO_PLAN_MEJORAMIENTO}|${ESTADO_PLAN.FIN_PLAN_MEJORAMIENTO}`,
       limit: String(this.pageSize),
       offset: String(this.pageIndex * this.pageSize),
     };
