@@ -24,7 +24,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/firma_electronica_mid/v1/",
 
   PLANTILLA_CARGUE_MASIVO: "e29463ce-f900-425e-bda0-600afad90afd",
-  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "ffcd463a-7c83-4f94-9578-b932c62a699f",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "f14b3939-835a-4d6e-89e0-aac08dfd7b1f",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
