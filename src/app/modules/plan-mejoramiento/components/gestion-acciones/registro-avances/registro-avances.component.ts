@@ -72,6 +72,7 @@ export class RegistroAvancesComponent implements OnInit {
   calificacionActual: Calificacion | null = null;
 
   cargando = true;
+  errorCarga = false;
   habilitado = true;
   editandoCalificacion = false;
   guardandoCalificacion = false;
@@ -108,6 +109,7 @@ export class RegistroAvancesComponent implements OnInit {
 
   obtenerDatos(accionId: string) {
     this.cargando = true;
+    this.errorCarga = false;
     forkJoin({
       accion: this.planAuditoriaCrud.get(`accion-mejora?query=_id:${accionId}&populate=true`),
       responsables: this.planAuditoriaMid.get(`responsable-accion?query=activo:true,accion_mejora_id:${accionId}`),
@@ -132,15 +134,20 @@ export class RegistroAvancesComponent implements OnInit {
         this.completarDatosDocs();
         return forkJoin({
           auditoria: this.planAuditoriaMid.get(`auditoria/${this.hallazgo?.auditoria_id}`),
-          auditores_plan: this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id}`)
+          // Solo los auditores vigentes: los retirados del plan quedan con activo:false y no deben calificar
+          auditores_plan: this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id},activo:true`)
         });
       }),
       catchError((err) => {
+        // Sin los auditores del plan no se sabe qué variante mostrar: se ofrece reintentar en lugar de una vista incompleta
         console.error(err);
-        this.alertService.showErrorAlert('No se pudo cargar la información de la acción.');
-        return of({ auditoria: null, auditores_plan: null });
+        this.errorCarga = true;
+        this.cargando = false;
+        this.changeDetector.detectChanges();
+        return EMPTY;
       }),
     ).subscribe(({ auditoria, auditores_plan }) => {
+      this.errorCarga = false;
       this.auditoria = auditoria?.Data ?? null;
       this.auditores = auditores_plan?.Data || [];
       // Solo el auditor asignado al plan califica, y el formulario se abre si aún no hay calificación (G-03)

@@ -11,6 +11,15 @@
     <div class="text-center py-4">
       <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
     </div>
+  } @else if (errorCarga) {
+    <div class="vacio">
+      <mat-icon>cloud_off</mat-icon>
+      <p class="mb-1"><b>No se pudo cargar la información de la acción.</b></p>
+      <p class="mb-3 texto-secundario">Revise la conexión e intente de nuevo.</p>
+      <button mat-stroked-button color="primary" class="boton-secundario" (click)="obtenerDatos(accionId)">
+        <mat-icon>refresh</mat-icon> Reintentar
+      </button>
+    </div>
   } @else {
     <!-- Encabezado: identifica la acción y abre la información secundaria -->
     <div class="encabezado">
