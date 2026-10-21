@@ -1,6 +1,6 @@
 <plantilla-tarjeta-contenedora
   [title]="esAuditorAsignado() ? 'Revisión de evidencias y calificación' : 'Registro de avances y evidencias'"
-  [breadcrumb]="'<p>Gestión Auditoría / Plan de Mejoramiento / Gestión de acciones / <b>Registrar Avances</b></p>'"
+  [breadcrumb]="'<p>Gestión Auditoría / Plan de Mejoramiento / Gestión de acciones / <b>' + (esAuditorAsignado() ? 'Revisar y calificar' : 'Registrar Avances') + '</b></p>'"
   [contenido]="contenidoDePlantilla"
   (regresar)="regresar()"
   [mostrarBotonRegresar]="true"

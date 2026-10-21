@@ -5,6 +5,8 @@ import { PageEvent } from '@angular/material/paginator';
 import { ParametrosUtilsService } from 'src/app/shared/services/parametros.service';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { RolService } from 'src/app/core/services/rol.service';
+import { environment } from 'src/environments/environment';
 
 export interface FilaAccion {
   noAuditoria: string;
@@ -51,6 +53,7 @@ export class GestionAccionesComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly planAuditoriaMid: PlanAnualAuditoriaMid,
+    private readonly rolService: RolService,
   ) {}
 
   ngOnInit(): void {
@@ -174,7 +177,13 @@ export class GestionAccionesComponent implements OnInit {
     // TODO: exportar a Excel/PDF
   }
 
-  registrarAvances(_fila: FilaAccion): void {
-    this.router.navigate([`registrar-avances/${_fila.accionId}`], { relativeTo: this.route })
+  /** El auditor revisa y califica; el resto registra avances (la vista valida además la asignación al plan). */
+  get esAuditor(): boolean {
+    return this.rolService.permisoCreacion([environment.ROL.AUDITOR, environment.ROL.AUDITOR_EXPERTO]);
+  }
+
+  abrirAccion(fila: FilaAccion): void {
+    const ruta = this.esAuditor ? 'revisar' : 'registrar-avances';
+    this.router.navigate([`${ruta}/${fila.accionId}`], { relativeTo: this.route });
   }
 }
