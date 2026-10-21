@@ -213,6 +213,7 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documentos",
       "Historial de Observaciones",
+      "Iniciar Ejecución",
       "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
@@ -251,6 +252,7 @@ export const accionesPlaneacion: {
       "Ver Auditoría",
       "Ver Documentos",
       "Historial de Observaciones",
+      "Iniciar Ejecución",
       "Ver Cartas de representación",
     ],
     [environment.AUDITORIA_ESTADO.PLANEACION.RECHAZADO_PROGRAMA_JEFE]: [
