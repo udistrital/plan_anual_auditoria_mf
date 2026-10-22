@@ -1,0 +1,36 @@
+<div class="panel-cabecera">
+  <div>
+    <h2 class="panel-titulo" id="tituloPanelForo">Foro de seguimiento</h2>
+    <p class="pista">Conversación entre la dependencia y los auditores sobre esta acción.</p>
+  </div>
+  <button mat-icon-button mat-dialog-close aria-label="Cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="panel-cuerpo">
+  <p class="aviso-construccion">
+    <mat-icon>construction</mat-icon>
+    <span><b>Foro en construcción:</b> los mensajes son de ejemplo y no se guardan.</span>
+  </p>
+  @for (mensaje of mensajes; track $index) {
+    <div class="mensaje">
+      <div class="mensaje-cabecera">
+        <span class="iniciales" aria-hidden="true">{{ iniciales(mensaje.autor) }}</span>
+        <div><b>{{ mensaje.autor }}</b> · {{ mensaje.rol }}<br>{{ mensaje.fecha | date: 'dd/MM/yyyy hh:mm a' }}</div>
+      </div>
+      <p class="texto-largo mensaje-texto">{{ mensaje.texto }}</p>
+    </div>
+  }
+</div>
+
+<div class="redactar">
+  <label class="etiqueta" for="nuevoMensajeForo">Nuevo mensaje</label>
+  <textarea id="nuevoMensajeForo" class="campo" rows="3" maxlength="1000" [(ngModel)]="nuevoMensaje"
+    [placeholder]="datos.esAuditor ? 'Escriba su comentario para la dependencia' : 'Escriba su comentario para el auditor'"></textarea>
+  <div class="redactar-pie">
+    <button mat-flat-button color="primary" type="button" [disabled]="!nuevoMensaje.trim()" (click)="enviar()">
+      <mat-icon>send</mat-icon> Enviar
+    </button>
+  </div>
+</div>

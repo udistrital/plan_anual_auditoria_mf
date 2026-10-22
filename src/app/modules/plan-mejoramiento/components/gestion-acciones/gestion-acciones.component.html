@@ -180,9 +180,9 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menuAccion="matMenu">
-              <button mat-menu-item (click)="registrarAvances(row)">
-                <mat-icon color="primary">assignment</mat-icon>
-                <span>Registrar Avances</span>
+              <button mat-menu-item (click)="abrirAccion(row)">
+                <mat-icon color="primary">{{ esAuditor ? 'grading' : 'assignment' }}</mat-icon>
+                <span>{{ esAuditor ? 'Revisar y calificar' : 'Registrar Avances' }}</span>
               </button>
             </mat-menu>
           </td>
