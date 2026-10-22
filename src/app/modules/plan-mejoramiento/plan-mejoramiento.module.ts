@@ -23,6 +23,8 @@ import { RegistroAvancesComponent } from './components/gestion-acciones/registro
 import { FormulacionPlanesComponent } from './components/formulacion-planes/formulacion-planes.component';
 import { VistaAuditadoComponent } from './components/formulacion-planes/vista-auditado/vista-auditado.component';
 import { VistaAuditorComponent } from './components/formulacion-planes/vista-auditor/vista-auditor.component';
+import { VistaAuditadoAccionesComponent } from './components/gestion-acciones/vista-auditado/vista-auditado-acciones.component';
+import { VistaAuditorAccionesComponent } from './components/gestion-acciones/vista-auditor/vista-auditor-acciones.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +45,8 @@ import { VistaAuditorComponent } from './components/formulacion-planes/vista-aud
     FormulacionPlanesComponent,
     VistaAuditadoComponent,
     VistaAuditorComponent,
+    VistaAuditadoAccionesComponent,
+    VistaAuditorAccionesComponent,
   ],
   imports: [
     CommonModule,
