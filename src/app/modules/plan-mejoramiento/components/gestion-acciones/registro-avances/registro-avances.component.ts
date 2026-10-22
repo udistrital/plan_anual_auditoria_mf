@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { catchError, EMPTY, forkJoin, Observable, of, switchMap } from 'rxjs';
+import { catchError, EMPTY, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
@@ -66,7 +66,10 @@ export class RegistroAvancesComponent implements OnInit {
   hallazgo: any = null;
   auditoria: Auditoria | null = null;
   responsables: any[] = [];
+  /** Auditores vigentes del plan: deciden quién revisa y califica. */
   auditores: any[] = [];
+  /** Todos los auditores que ha tenido el plan: nombran al autor de calificaciones antiguas. */
+  auditoresHistorial: any[] = [];
   documentos: DocumentoAvances[] = [];
   calificaciones: Calificacion[] = [];
   calificacionActual: Calificacion | null = null;
@@ -99,10 +102,17 @@ export class RegistroAvancesComponent implements OnInit {
   ngOnInit(): void {
     this.accionId = this.route.snapshot.paramMap.get("id")!;
     this.roles = this.rolService.getRoles();
-    this.userService.getPersonaId().then(id => {
-      this.usuarioId = id;
-      this.obtenerDatos(this.accionId);
-    });
+    this.userService.getPersonaId()
+      .then(id => {
+        this.usuarioId = id;
+        this.obtenerDatos(this.accionId);
+      })
+      .catch((err) => {
+        // Sin persona_id (sesión vencida o borrada) no se puede decidir la variante: se ofrece reintentar
+        console.error(err);
+        this.errorCarga = true;
+        this.cargando = false;
+      });
   }
 
   // ─── Carga de datos ─────────────────────────────────────────────────────────
@@ -134,8 +144,8 @@ export class RegistroAvancesComponent implements OnInit {
         this.completarDatosDocs();
         return forkJoin({
           auditoria: this.planAuditoriaMid.get(`auditoria/${this.hallazgo?.auditoria_id}`),
-          // Solo los auditores vigentes: los retirados del plan quedan con activo:false y no deben calificar
-          auditores_plan: this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id},activo:true`)
+          // Todos los auditores del plan (también los retirados) para mostrar quién emitió cada calificación
+          auditores_plan: this.planAuditoriaMid.get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.accion?.plan_mejoramiento_id?._id}&limit=0`)
         });
       }),
       catchError((err) => {
@@ -149,7 +159,9 @@ export class RegistroAvancesComponent implements OnInit {
     ).subscribe(({ auditoria, auditores_plan }) => {
       this.errorCarga = false;
       this.auditoria = auditoria?.Data ?? null;
-      this.auditores = auditores_plan?.Data || [];
+      this.auditoresHistorial = auditores_plan?.Data || [];
+      // Solo los auditores vigentes califican: los retirados del plan quedan con activo:false
+      this.auditores = this.auditoresHistorial.filter(a => a.activo);
       // Solo el auditor asignado al plan califica, y el formulario se abre si aún no hay calificación (G-03)
       this.editandoCalificacion = this.esAuditorAsignado() && !this.calificacionActual;
       this.cargando = false;
@@ -199,7 +211,7 @@ export class RegistroAvancesComponent implements OnInit {
   }
 
   nombreAuditor(auditorId: number): string {
-    return this.auditores.find(a => a.auditor_id === auditorId)?.auditor_nombre ?? 'Auditor de Control Interno';
+    return this.auditoresHistorial.find(a => a.auditor_id === auditorId)?.auditor_nombre ?? 'Auditor de Control Interno';
   }
 
   esAuditorAsignado(): boolean {
@@ -305,7 +317,11 @@ export class RegistroAvancesComponent implements OnInit {
         }),
       ).subscribe({
         next: (referencia: any) => {
-          this.documentos[index] = referencia?.Data as DocumentoAvances;
+          // Se ubica por referencia: si mientras se subía se añadió otro archivo, el índice ya no es el mismo
+          const posicion = this.documentos.indexOf(archivo);
+          if (posicion >= 0) {
+            this.documentos[posicion] = referencia?.Data as DocumentoAvances;
+          }
           this.completarDatosDocs();
           this.alertService.showSuccessAlert('El archivo ha sido guardado con éxito.');
         },
@@ -363,12 +379,20 @@ export class RegistroAvancesComponent implements OnInit {
       };
       this.guardandoCalificacion = true;
       const anterior = this.calificacionActual;
-      const desmarcarAnterior$: Observable<unknown> = anterior?._id
-        ? this.planAuditoriaCrud.put(`calificacion-accion/${anterior._id}`, { ...anterior, actual: false })
-        : of(null);
-
-      desmarcarAnterior$.pipe(
-        switchMap(() => this.planAuditoriaCrud.post('calificacion-accion', nuevaCalificacion) as Observable<any>),
+      // Primero se crea la nueva y luego se desmarca la anterior: si algo falla, la acción nunca queda sin calificación vigente
+      // (la vigente es la más reciente con actual:true, así que dos marcadas no confunden la vista).
+      (this.planAuditoriaCrud.post('calificacion-accion', nuevaCalificacion) as Observable<any>).pipe(
+        switchMap((res: any) => {
+          const desmarcar$: Observable<unknown> = anterior?._id
+            ? this.planAuditoriaCrud.put(`calificacion-accion/${anterior._id}`, { ...anterior, actual: false }).pipe(
+                catchError((err) => {
+                  console.error('No se pudo desmarcar la calificación anterior', err);
+                  return of(null);
+                }),
+              )
+            : of(null);
+          return desmarcar$.pipe(map(() => res));
+        }),
         catchError((err) => {
           console.error(err);
           this.guardandoCalificacion = false;

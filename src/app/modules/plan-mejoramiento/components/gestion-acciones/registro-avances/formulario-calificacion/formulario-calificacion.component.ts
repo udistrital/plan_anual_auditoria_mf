@@ -94,6 +94,11 @@ export class FormularioCalificacionComponent implements AfterViewInit {
     const numero = valor === '' || valor === null ? null : Math.round(Number(valor));
     const acotado = numero === null || Number.isNaN(numero) ? null : Math.max(0, Math.min(100, numero));
     this.formulario.patchValue({ calificacion: acotado });
+    // [value] no reescribe el campo si el valor acotado no cambió (p. ej. de 100 a "1000"): se corrige a mano
+    const campo = this.campoPorcentaje?.nativeElement;
+    if (campo && acotado !== null && campo.value !== String(acotado)) {
+      campo.value = String(acotado);
+    }
     const sugerido = criterioSugerido(acotado ?? Number.NaN);
     if (sugerido && !this.criterioElegido) {
       this.formulario.patchValue({ criterio: sugerido.id });
