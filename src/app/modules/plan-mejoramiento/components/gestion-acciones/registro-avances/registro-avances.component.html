@@ -89,7 +89,13 @@
         </div>
         <div class="dato">
           <span class="etiqueta">Periodo de ejecución</span>
-          <span class="valor">{{ (accion?.fecha_inicio | date: 'dd/MM/yyyy') || '—' }} – {{ (accion?.fecha_fin | date: 'dd/MM/yyyy') || '—' }}</span>
+          <span class="valor">
+            @if (accion?.fecha_inicio || accion?.fecha_fin) {
+              {{ (accion?.fecha_inicio | date: 'dd/MM/yyyy') || '—' }} – {{ (accion?.fecha_fin | date: 'dd/MM/yyyy') || '—' }}
+            } @else {
+              Sin definir
+            }
+          </span>
         </div>
         <div class="dato">
           <span class="etiqueta">{{ esAuditorAsignado() ? 'Avance vigente' : 'Avance según OCI' }}</span>

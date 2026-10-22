@@ -97,13 +97,13 @@
 
 /* ─── Encabezado ─────────────────────────────────────────────────────────── */
 
+/* Dos columnas fijas: los metadatos largos bajan de línea y los botones siguen alineados a la derecha, como Regresar */
 .encabezado {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  padding-bottom: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 24px;
+  padding-bottom: 16px;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -111,7 +111,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .metadatos {
@@ -132,20 +132,21 @@
 .acciones-encabezado {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 8px;
 }
 
 /* ─── Resumen (reemplaza los desplegables de auditoría y acción) ─────────── */
 
 .resumen {
-  padding: 16px 0;
+  padding: 20px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .resumen-textos {
   display: grid;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .linea-contexto {
@@ -212,7 +213,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .titulo-icono {
@@ -221,12 +222,18 @@
   gap: 8px;
 }
 
+/* El subtítulo arranca bajo el texto del título, no bajo el ícono (24 px + 8 px de separación) */
+.titulo-icono + small {
+  display: block;
+  padding-left: 32px;
+}
+
 .aviso {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  margin-bottom: 14px;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
   border: 1px solid;
   border-radius: 6px;
   font-size: 13px;
@@ -294,7 +301,7 @@
 .evidencia-acciones {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .pie-lista {
@@ -323,9 +330,9 @@
 .calificacion-vigente {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-  padding: 14px 16px;
+  gap: 24px;
+  align-items: center;
+  padding: 16px 20px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background-color: #fafafa;
@@ -368,13 +375,18 @@
     gap: 8px;
   }
 
+  /* Regresar ocupa el ancho completo, igual que el resto de botones en celular */
+  :host ::ng-deep mat-card-content > .d-flex.justify-content-between > button { width: 100%; }
+
+  .encabezado { grid-template-columns: minmax(0, 1fr); }
   .linea-contexto { grid-template-columns: minmax(0, 1fr) auto; }
   .linea-contexto .etiqueta { grid-column: 1 / -1; }
   .datos-clave { grid-template-columns: 1fr; }
   .evidencia { grid-template-columns: 36px minmax(0, 1fr); }
   .evidencia-acciones { grid-column: 1 / -1; justify-content: flex-end; }
-  .calificacion-vigente { grid-template-columns: 1fr; }
+  .calificacion-vigente { grid-template-columns: 1fr; gap: 12px; }
   .cifra { text-align: left; }
+  .titulo-icono + small { padding-left: 0; }
   .acciones-encabezado,
   .acciones-encabezado button,
   .seccion-cabecera > button { width: 100%; }

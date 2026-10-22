@@ -38,7 +38,6 @@ legend label { margin: 0; }
   grid-template-columns: 132px minmax(0, 1fr);
   gap: 20px;
   align-items: center;
-  max-width: 720px;
 }
 
 .porcentaje {
@@ -91,10 +90,11 @@ legend label { margin: 0; }
   margin: 0;
 }
 
+/* Las marcas se ubican sobre la pista (mismo ancho que el deslizador); los extremos se alinean al borde */
 .escala {
   position: relative;
   height: 16px;
-  margin: 0 8px;
+  margin-top: 4px;
   font-size: 11px;
   color: #6b6b6b;
   font-variant-numeric: tabular-nums;
@@ -105,6 +105,9 @@ legend label { margin: 0; }
   top: 0;
   transform: translateX(-50%);
 }
+
+.escala span:first-child { transform: none; }
+.escala span:last-child { transform: translateX(-100%); }
 
 /* Criterio */
 .criterios {
