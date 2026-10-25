@@ -24,6 +24,9 @@ import { FormularioCalificacionComponent } from './components/gestion-acciones/r
 import { PanelFichaAccionComponent } from './components/gestion-acciones/registro-avances/panel-ficha-accion/panel-ficha-accion.component';
 import { PanelHistorialCalificacionesComponent } from './components/gestion-acciones/registro-avances/panel-historial-calificaciones/panel-historial-calificaciones.component';
 import { PanelForoAccionComponent } from './components/gestion-acciones/registro-avances/panel-foro-accion/panel-foro-accion.component';
+import { FormulacionPlanesComponent } from './components/formulacion-planes/formulacion-planes.component';
+import { VistaAuditadoComponent } from './components/formulacion-planes/vista-auditado/vista-auditado.component';
+import { VistaAuditorComponent } from './components/formulacion-planes/vista-auditor/vista-auditor.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +48,9 @@ import { PanelForoAccionComponent } from './components/gestion-acciones/registro
     VerPlanComponent,
     ModalAprobacionPlanComponent,
     GestionAccionesComponent,
+    FormulacionPlanesComponent,
+    VistaAuditadoComponent,
+    VistaAuditorComponent,
   ],
   imports: [
     CommonModule,

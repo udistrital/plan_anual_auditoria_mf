@@ -762,25 +762,18 @@ export const accionesPlanMejoramiento: {
   },
 
   [environment.ROL.AUDITOR]: {
-    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
-    ],
-    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
-    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
-      "Asignar Auditor(es)",
       "Ver Plan",
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
       "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
@@ -791,25 +784,18 @@ export const accionesPlanMejoramiento: {
   },
 
   [environment.ROL.AUDITOR_ASISTENTE]: {
-    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
-    ],
-    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
-    ],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.SIN_PLAN_MEJORAMIENTO]: [],
+    [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.CREANDO_PLAN_MEJORAMIENTO]: [],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR]: [
-      "Asignar Auditor(es)",
       "Ver Plan",
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
       "Ver Plan",
       "Ver Documentos Auditoría",
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.RECHAZADO_PLAN_MEJORAMIENTO]: [
-      "Asignar Auditor(es)",
       "Ver Observaciones",
     ],
     [environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.FIN_PLAN_MEJORAMIENTO]: [
