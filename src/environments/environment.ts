@@ -12,10 +12,14 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/gestor_documental_mid/v1/",
   PARAMETROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/parametros/v1/",
+  // PLAN_ANUAL_AUDITORIA_SERVICE:
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
   PLAN_ANUAL_AUDITORIA_SERVICE:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_crud/v1/",
+    "http://localhost:8080/",
+  // PLAN_ANUAL_AUDITORIA_MID:
+  //   "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
   PLAN_ANUAL_AUDITORIA_MID:
-    "https://autenticacion.portaloas.udistrital.edu.co/apioas/plan_anual_auditoria_mid/v1/",
+    "http://localhost:8081/",
   TERCEROS_SERVICE:
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/terceros_crud/v1/",
   OIKOS_SERVICE:
@@ -24,7 +28,7 @@ export const environment = {
     "https://autenticacion.portaloas.udistrital.edu.co/apioas/firma_electronica_mid/v1/",
 
   PLANTILLA_CARGUE_MASIVO: "d3094258-3039-4990-9f5c-a3b1c41eb4d2",
-  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "f5703026-3fc8-48d1-bb41-fd2479656c23",
+  PLANTILLA_CARGUE_MASIVO_ACTIVIDADES: "4594d4ca-7315-4dc8-b471-959edd26e1ed",
 
   /** Name for the bulk download file of audits. Excludes file extension. */
   NOMBRE_ARCHIVO_DESCARGA_AUDITORIAS: "Auditorias_PAA",
