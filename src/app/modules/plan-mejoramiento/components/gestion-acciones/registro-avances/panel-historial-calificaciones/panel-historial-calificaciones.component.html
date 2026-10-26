@@ -1,0 +1,33 @@
+<div class="panel-cabecera">
+  <div>
+    <h2 class="panel-titulo" id="tituloPanelHistorial">Historial de calificaciones</h2>
+    <p class="pista">La más reciente es la calificación vigente de la acción.</p>
+  </div>
+  <button mat-icon-button mat-dialog-close aria-label="Cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="panel-cuerpo">
+  @if (datos.calificaciones.length) {
+    <ol class="linea-tiempo">
+      @for (item of datos.calificaciones; track $index) {
+        <li class="hito" [class.vigente]="item.vigente">
+          <div class="hito-cabecera">
+            <b>{{ item.porcentaje }}%</b>
+            @if (item.criterio) {
+              <span class="chip {{ item.criterio.claseChip }}">{{ item.criterio.nombre }}</span>
+            }
+            @if (item.vigente) {
+              <span class="chip chip-neutro">Vigente</span>
+            }
+          </div>
+          <p class="pista">{{ item.fecha | date: 'dd/MM/yyyy hh:mm a' }} · {{ item.auditor }}</p>
+          <div class="texto-largo concepto" [innerHTML]="item.observacion"></div>
+        </li>
+      }
+    </ol>
+  } @else {
+    <p class="vacio">La acción aún no tiene calificaciones.</p>
+  }
+</div>
