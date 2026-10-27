@@ -36,6 +36,11 @@ const routes: Routes = [
       {
         path: 'registrar-avances/:id',
         component: RegistroAvancesComponent,
+      },
+      {
+        // Misma vista: el auditor asignado al plan revisa las evidencias y califica
+        path: 'revisar/:id',
+        component: RegistroAvancesComponent,
       }
     ]
   },
