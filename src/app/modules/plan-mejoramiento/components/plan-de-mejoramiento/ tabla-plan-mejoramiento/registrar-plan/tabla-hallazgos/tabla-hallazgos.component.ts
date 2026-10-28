@@ -229,7 +229,8 @@ export class TablaHallazgosComponent implements OnInit {
     const estadoId = a.estado_id ?? ESTADO_ACCION.PENDIENTE_REVISION;
     return {
       accionId:         a._id,
-      numero:           String(index + 1),
+      // no_accion solo existe desde la aprobación del plan; antes se usa la posición en el hallazgo
+      numero:           a.no_accion || String(index + 1),
       tipoAccionId:     a.tipo_id ?? 1,
       tipoAccion:       TIPO_NOMBRES[a.tipo_id] ?? '',
       accionPlanteada:  a.descripcion ?? '',
