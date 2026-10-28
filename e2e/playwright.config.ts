@@ -2,8 +2,12 @@ import { defineConfig } from '@playwright/test';
 import { BASE_URL, proyectosPorRol } from './core/config';
 import type { MetadatosE2E } from './core/global-setup';
 
-/** Roles de plan_anual_auditoria_mf con usuario de prueba (RolService / environment.ROL). */
-const ROLES = ['auditor', 'jefe-dependencia'];
+/**
+ * Roles de plan_anual_auditoria_mf con usuario de prueba (RolService / environment.ROL):
+ * auditor → AUDITOR, jefe-dependencia → JEFE_DEPENDENCIA, auditor-experto → AUDITOR_EXPERTO,
+ * jefe-oci → JEFE_CONTROL_INTERNO, secretario → SECRETARIO_AUDITOR, admin → ADMIN_SISIFO.
+ */
+const ROLES = ['auditor', 'jefe-dependencia', 'auditor-experto', 'jefe-oci', 'secretario', 'admin'];
 
 const metadatos: MetadatosE2E = {
   roles: ROLES,
@@ -26,6 +30,8 @@ export default defineConfig({
     viewport: { width: 1440, height: 1000 },
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // E2E_VIDEO=on graba cada escenario (ensayos de la demo). El login no aparece: corre en un proceso aparte.
+    video: process.env['E2E_VIDEO'] === 'on' ? 'on' : 'off',
     navigationTimeout: 90_000,
   },
   projects: proyectosPorRol(ROLES),

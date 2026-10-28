@@ -49,3 +49,36 @@ export const GESTION_ACCIONES: OpcionFase = {
 export const FASES_AUDITOR = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES, FORMULACION_PLANES, GESTION_ACCIONES];
 export const FASES_JEFE_DEPENDENCIA = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES, GESTION_ACCIONES];
 export const MENU_PRINCIPAL = ['Gestión de Auditoría', 'Planes de Mejoramiento'];
+
+// ── Programación (fase 1) ────────────────────────────────────────────────────────────────────
+
+export const PLAN_ANUAL: OpcionFase = {
+  menu: ['Gestión de Auditoría', 'Programación', 'Plan Anual de Auditoría'],
+  url: '/gestion-auditoria/programacion/plan-auditoria',
+  titulo: 'Plan Anual de Auditorías (PAA)',
+};
+
+export const ASIGNAR_AUDITORIAS: OpcionFase = {
+  menu: ['Gestión de Auditoría', 'Programación', 'Asignar Auditorías'],
+  url: '/gestion-auditoria/programacion/asignar-auditorias',
+  titulo: 'Asignar Auditorías del Plan Anual de Auditorías (PAA)',
+};
+
+export const AUDITORIAS_ESPECIALES: OpcionFase = {
+  menu: ['Gestión de Auditoría', 'Programación', 'Registro Auditorías Especiales'],
+  url: '/gestion-auditoria/programacion/auditorias-especiales',
+  titulo: 'Registro Auditorías Especiales',
+};
+
+/** Programación completa: crea y asigna (ROLES_CREACION.PROGRAMACION = ADMIN_SISIFO, AUDITOR_EXPERTO). */
+export const PROGRAMACION_COMPLETA = [PLAN_ANUAL, ASIGNAR_AUDITORIAS, AUDITORIAS_ESPECIALES];
+/** Programación de quien solo revisa el PAA (Jefe OCI, Secretario). */
+export const PROGRAMACION_REVISION = [PLAN_ANUAL];
+
+/** Primer nivel del menú por rol (sondeo del 2026-10-28, ver specs/navegacion-por-fases.plan.md). */
+export const MENU_PRINCIPAL_POR_ROL: Record<string, string[]> = {
+  'auditor-experto': ['Gestión de Auditoría', 'Gestión de Usuarios', 'Planes de Mejoramiento'],
+  'jefe-oci': ['Gestión de Auditoría', 'Gestión de Usuarios'],
+  secretario: ['Gestión de Auditoría', 'Planes de Mejoramiento'],
+  admin: ['Gestión de Auditoría', 'Gestión de Usuarios', 'Planes de Mejoramiento'],
+};

@@ -38,7 +38,34 @@ Igual que el escenario 1, con las opciones del auditado: Planeación y Ejecució
 
 Permiso: en **Planes de Mejoramiento** no aparece **Formulación de planes**.
 
+### 3–6. Programación por rol (`@auditor-experto`, `@jefe-oci`, `@secretario`, `@admin`)
+
+Archivos: `tests/navegacion/fases-{auditor-experto,jefe-oci,secretario,admin}.spec.ts`
+
+1. Abrir el root con la sesión del rol.
+2. El menú de primer nivel es el del rol:
+
+| Rol | Menú de primer nivel | Gestión de Auditoría › Programación |
+|---|---|---|
+| Auditor experto (AUDITOR_EXPERTO) | Gestión de Auditoría, Gestión de Usuarios, Planes de Mejoramiento | Plan Anual de Auditoría, Asignar Auditorías, Registro Auditorías Especiales |
+| Jefe OCI (JEFE_CONTROL_INTERNO) | Gestión de Auditoría, Gestión de Usuarios | Plan Anual de Auditoría |
+| Secretario (SECRETARIO_AUDITOR + AUDITOR) | Gestión de Auditoría, Planes de Mejoramiento | Plan Anual de Auditoría |
+| Administrador (ADMIN_SISIFO) | Gestión de Auditoría, Gestión de Usuarios, Planes de Mejoramiento | Plan Anual de Auditoría, Asignar Auditorías, Registro Auditorías Especiales |
+
+Las cuentas de prueba de cada rol solo están en `e2e/.env.e2e` (no versionado): se piden a quien las administra.
+
+3. Navegar a cada opción de Programación del rol y verificar la URL y el título:
+
+| Menú | URL | Título |
+|---|---|---|
+| Gestión de Auditoría › Programación › Plan Anual de Auditoría | `/gestion-auditoria/programacion/plan-auditoria` | Plan Anual de Auditorías (PAA) |
+| Gestión de Auditoría › Programación › Asignar Auditorías | `/gestion-auditoria/programacion/asignar-auditorias` | Asignar Auditorías del Plan Anual de Auditorías (PAA) |
+| Gestión de Auditoría › Programación › Registro Auditorías Especiales | `/gestion-auditoria/programacion/auditorias-especiales` | Registro Auditorías Especiales |
+
+Permiso: el Jefe OCI y el Secretario **no** ven Asignar Auditorías ni Registro Auditorías Especiales (crear y asignar es de `ROLES_CREACION.PROGRAMACION` = ADMIN_SISIFO y AUDITOR_EXPERTO).
+
 ## Fuera de este plan
 
 - "Ejecución › Por definir" (auditor): apunta a otro MF (`/ejecucion-auditoria/...`).
-- Jefe OCI y demás roles: sin usuario de prueba todavía.
+- Planeación, Ejecución y Planes de Mejoramiento con los roles de Programación: fuera del alcance de la fase 1 (sisifo_documentacion#939, etapa 2).
+- Gestión de Usuarios: es de `usuario_rol_mf`.
