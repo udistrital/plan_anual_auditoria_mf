@@ -36,6 +36,10 @@ export class ShellPage extends BasePage {
   }
 
   async abrirMenu() {
+    // Una alerta de error de la pantalla anterior tapa el menú: se falla con su texto en vez de esperar el clic.
+    if (await this.alerta.locator('.swal2-icon-error').isVisible()) {
+      throw new Error(`la pantalla mostró un error antes de seguir por el menú: "${await this.textoAlerta()}"`);
+    }
     if (await this.botonAbrirMenu.isVisible()) await this.botonAbrirMenu.click();
     await expect(this.menuLateral.locator('mat-list-item').first()).toBeVisible();
   }

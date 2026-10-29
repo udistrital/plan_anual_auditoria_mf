@@ -43,4 +43,9 @@ export class MarcoGeneralPage extends BasePage {
   async regresar() {
     await this.botonRegresar.click();
   }
+
+  /** En edición, el campo de la sección (formulario dinámico: textarea con la etiqueta de la sección). */
+  campo(nombre: SeccionMarco): Locator {
+    return this.page.getByRole('textbox', { name: nombre, exact: true });
+  }
 }

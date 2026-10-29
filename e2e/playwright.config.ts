@@ -33,6 +33,9 @@ export default defineConfig({
     // E2E_VIDEO=on graba cada escenario (ensayos de la demo). El login no aparece: corre en un proceso aparte.
     video: process.env['E2E_VIDEO'] === 'on' ? 'on' : 'off',
     navigationTimeout: 90_000,
+    // Ninguna acción (clic, fill) espera más de 60 s: sin esto, un control que nunca se habilita cuelga
+    // el escenario hasta su timeout total (20 min en los @escritura).
+    actionTimeout: 60_000,
   },
   projects: proyectosPorRol(ROLES),
 });

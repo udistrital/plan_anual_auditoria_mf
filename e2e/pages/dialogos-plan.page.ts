@@ -46,6 +46,22 @@ export class DocumentosDialog extends BasePage {
   }
 }
 
+/** "Enviar Aprobación" del listado: observación opcional para el Jefe y confirmación. */
+export class EnviarAprobacionDialog extends BasePage {
+  readonly dialogo: Locator;
+  readonly observacion: Locator;
+  readonly botonEnviar: Locator;
+  readonly botonCancelar: Locator;
+
+  constructor(page: Page) {
+    super(page);
+    this.dialogo = page.getByRole('dialog').filter({ hasText: 'Enviar a Aprobación' });
+    this.observacion = this.dialogo.getByRole('textbox', { name: 'Observación (opcional)' });
+    this.botonEnviar = this.dialogo.getByRole('button', { name: 'Sí, enviar' });
+    this.botonCancelar = this.dialogo.getByRole('button', { name: 'Cancelar' });
+  }
+}
+
 export interface ObservacionPlan {
   rechazo: boolean;
   revisadoPor: string;
