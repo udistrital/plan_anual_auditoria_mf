@@ -54,3 +54,5 @@ Thumbs.db
 /e2e/test-results/
 /e2e/blob-report/
 .playwright-cli/
+/docs
+/.claude

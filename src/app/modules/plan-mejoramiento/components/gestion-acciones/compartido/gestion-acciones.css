@@ -1,0 +1,41 @@
+/* Estilos propios de Gestión de Acciones; el resto viene de formulacion-planes.css */
+
+/* Los chips de grupo van en la cabecera de la sección, sin el separador de Formulación */
+.encabezado-seccion .acceso-rapido {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.acciones-filtros { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.chip-acceso.chip-riesgo { color: #c62828; border-color: #ef9a9a; }
+.chip-acceso.chip-riesgo.activo { background-color: #c62828; border-color: #c62828; color: #fff; }
+.chip-compacto { font-size: 10px; padding: 1px 6px; margin-top: 2px; }
+.numero-hallazgo { display: inline-flex; align-items: center; gap: 2px; font-weight: 600; color: var(--primary); white-space: nowrap; }
+.numero-hallazgo mat-icon { font-size: 14px; width: 14px; height: 14px; }
+.texto-truncado { display: block; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #757575; }
+.numero-accion { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; color: var(--primary); white-space: nowrap; }
+.sintesis-accion { margin: 0; max-width: 260px; min-width: 200px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.celda-avance { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.valor-eficacia { font-size: 12px; }
+.valor-eficacia.eficaz { color: #2e7d32; }
+.acciones-fila { display: flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; }
+
+/* ── Tabla: contenido centrado en su columna ─────────────────
+   Las columnas pueden crecer un poco más cuando el contenido no cabe. */
+.tabla-auditorias th.mat-mdc-header-cell,
+.tabla-auditorias td.mat-mdc-cell { text-align: center; }
+.tabla-auditorias .numero-hallazgo { justify-content: center; }
+.tabla-auditorias .detalle-auditoria { justify-content: center; }
+.tabla-auditorias .celda-lista { max-width: 260px; margin: 0 auto; }
+.tabla-auditorias .texto-truncado { max-width: 170px; margin: 0 auto; }
+.tabla-auditorias .sintesis-accion { max-width: 320px; min-width: 200px; margin: 0 auto; }
+.tabla-auditorias .celda-plazo { align-items: center; text-align: center; }
+
+/* Reloj y texto del vencimiento en una misma línea, alineados por el centro */
+.tabla-auditorias .detalle-plazo { align-items: center; justify-content: center; line-height: 14px; text-align: left; }
+.tabla-auditorias .detalle-plazo mat-icon { flex: none; }
+
+/* En riesgo: aviso discreto en vez de un segundo chip */
+.alerta-riesgo { display: inline-flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 600; color: #c62828; }
+.alerta-riesgo mat-icon { font-size: 14px; width: 14px; height: 14px; }
