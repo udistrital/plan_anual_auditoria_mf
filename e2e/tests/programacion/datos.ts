@@ -14,6 +14,10 @@ export const VIGENCIA_E2E = process.env['E2E_PROG_VIGENCIA_E2E'] || '2010';
 
 /** IDs de estado del PAA del ambiente de pruebas (los mismos de environment.development). */
 export const PLAN_ESTADO = environment.PLAN_ESTADO;
+/** IDs de tipo de documento del PAA (Formato Original/Actualizado, actas). */
+export const TIPO_DOCUMENTO = environment.TIPO_DOCUMENTO_PARAMETROS;
+/** IDs de estado de las auditorías concretas en Programación (por asignar, auditor asignado). */
+export const AUDITORIA_ESTADO_PROGRAMACION = environment.AUDITORIA_ESTADO.PROGRAMACION;
 
 /** Acciones del menú de un PAA aprobado (accionesPorRolYEstado, rol auditor experto). */
 export const ACCIONES_PLAN_APROBADO = ['Ver Marco General', 'Ver Auditorias', 'Ver Documentos', 'Historial de Observaciones'];

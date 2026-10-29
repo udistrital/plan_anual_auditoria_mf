@@ -14,9 +14,10 @@ export class DocumentosDialog extends BasePage {
   /** Visor del documento seleccionado. */
   readonly visor: Locator;
 
-  constructor(page: Page) {
+  /** `titulo`: "Ver documentos", o "Actas de Modificación extraordinaria" (Historial de Ediciones Extraordinarias). */
+  constructor(page: Page, titulo = 'Ver documentos') {
     super(page);
-    this.dialogo = page.getByRole('dialog').filter({ hasText: 'Ver documentos' });
+    this.dialogo = page.getByRole('dialog').filter({ hasText: titulo });
     this.descripcion = this.dialogo.getByText(/Documentos asociados al Plan Anual de Auditoría/);
     this.botonDescargarTodo = this.dialogo.getByRole('button', { name: 'Descargar Todo' });
     this.botonActualizar = this.dialogo.getByRole('button', { name: 'Actualizar Documento' });
@@ -63,6 +64,7 @@ export class EnviarAprobacionDialog extends BasePage {
 }
 
 export interface ObservacionPlan {
+  observacion: string;
   rechazo: boolean;
   revisadoPor: string;
   rol: string;
@@ -96,6 +98,8 @@ export class HistorialObservacionesDialog extends BasePage {
       const texto = (await item.innerText()).replace(/\s+/g, ' ');
       const fecha = texto.match(/Fecha:\s*(\d{2})\/(\d{2})\/(\d{4})/);
       lista.push({
+        // El ícono del chip (cancel / rate_review) se lee como texto antes de "Revisado por".
+        observacion: texto.match(/Observaciones:\s*(.*?)\s*(?:cancel|rate_review)?\s*Revisado por:/)?.[1]?.trim() ?? '',
         rechazo: ((await item.getAttribute('class')) ?? '').includes('fondo-chip--rechazo'),
         revisadoPor: texto.match(/Revisado por:\s*(.+?)\s+(?:person|Rol:)/)?.[1]?.trim() ?? '',
         rol: texto.match(/Rol:\s*(\S+)/)?.[1] ?? '',

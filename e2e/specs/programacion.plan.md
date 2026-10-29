@@ -89,4 +89,59 @@ Estos escenarios automatizan las pruebas manuales de #800, #845, #820, #871 y #8
 
 ## Escenarios de escritura (`@escritura`)
 
-Ver `programacion-cobertura.md` y el plan de tareas T23 de la especificación. Corren sobre la vigencia de E2E, con limpieza al final, y los correos se interceptan.
+Escriben en el ambiente de pruebas compartido, solo sobre la vigencia de E2E (2010), y solo se corren con autorización (`npm run test:escritura`).
+
+- **Antes:** si la vigencia tiene un PAA activo de E2E (marcador `E2E-AAAAMMDD-HHmm` en el objetivo), se borra. Si es de otra persona, el escenario falla sin tocarlo.
+- **Después, aunque el escenario falle:** borrado lógico por API de todo lo que creó (plan, auditorías padre e hijas, asignaciones, especiales). Lo limpiado queda en el adjunto "limpieza" del reporte. No se borran los archivos de Nuxeo (Formato PAA firmado, actas).
+- **Firma y gestor documental reales.** Los correos se interceptan: se responden como enviados y su contenido queda en el reporte.
+- El listado de planes también trae los planes borrados lógicamente. En estos escenarios se ocultan solo en el navegador de la prueba (hallazgo reportado en la issue).
+- Los pasos comunes (crear, enviar, aprobar con firma, aprobar con acta, rechazar) están en `tests/programacion/ciclo.ts`.
+
+### 11. Ciclo de aprobación — `ciclo-paa-aprobacion.spec.ts` (auditor experto → jefe OCI → secretario)
+1. No se puede crear un PAA en una vigencia que ya tiene uno (la aprobada).
+2. El auditor experto crea el PAA de la vigencia de E2E: queda en Borrador.
+3. El marco general de un PAA nuevo trae los textos por defecto.
+4. Con un campo del marco vacío, Guardar no envía nada: "Objetivo es requerido" e "Información no guardada".
+5. Llena y guarda el marco general.
+6. Registra una auditoría con todos los campos: Informe de Ley, Marzo y Junio, cantidad 2.
+7. Al editarla, quitar un macroproceso quita sus procesos, y cerrar sin guardar no la cambia.
+8. Cargue masivo con `fixtures/cargue-masivo-e2e.xlsx`: dos auditorías más.
+9. Ordena por "Nombre de auditoría A-Z", previsualiza el Formato PAA y guarda. Al volver, el orden se mantiene.
+10. Envía el PAA al jefe: estado "En Revisión por Jefe" (sin aviso de éxito por las notificaciones deshabilitadas, #888 H-07).
+11. El jefe usa "Editar Auditorías": cambia el cronograma de una auditoría y guarda el PAA.
+12. El jefe descarga todos los documentos (`documentosPAA-<vigencia>.zip`) y aprueba con su firma: pasa al Comité.
+13. El secretario adjunta `fixtures/acta-e2e.pdf` y aprueba: "Aprobado por Comité Coordinador".
+14. Se generan 5 auditorías (2 + 1 + 2), y las dos del Informe de Ley llevan su mes como subtítulo (MARZO, JUNIO).
+15. Ver Documentos incluye el Acta de Comité.
+16. En Asignar, la auditoría generada aparece como "título – subtítulo"; se asigna un auditor líder y pasa a "Auditor asignado".
+17. Edición extraordinaria: solo edita (no añade), pide confirmar con el estado de la auditoría y no deja salir sin el acta de modificación. Con el acta, Guardar genera el Formato PAA Actualizado.
+18. El PAA muestra el Formato PAA Actualizado y el historial de ediciones extraordinarias.
+19. Cada estado del PAA tiene `usuario_id`. Tienen `usuario_rol` los que la aplicación lo envía: creación, envío y aprobación del secretario. La aprobación del jefe no lo envía (hallazgo); los estados quedan adjuntos al reporte.
+
+No automatizado: "Eliminar Auditoría". En pruebas el CRUD no recibe el cuerpo del DELETE y responde 400 (hallazgo en la issue).
+
+### 12. Ciclo con rechazos — `ciclo-paa-rechazos.spec.ts` (auditor experto → jefe OCI → secretario)
+1. El auditor experto crea el PAA, llena el marco, registra una auditoría, guarda y envía.
+2. El jefe lo rechaza con su observación: pasa a Rechazado.
+3. El auditor experto ve el rechazo del jefe en el historial de observaciones (el más reciente, en rojo, con quién lo hizo).
+4. El PAA rechazado vuelve a tener Editar Marco General, Registrar Auditorías y Enviar Aprobación, y se reenvía.
+5. El jefe aprueba con su firma y el secretario lo rechaza con su observación.
+6. El historial muestra los dos rechazos, el más reciente primero.
+7. Los rechazos quedan registrados con usuario, rol y observación.
+
+### 13. Asignar auditores — `asignar-completo.spec.ts` (auditor experto)
+1. Prepara un PAA aprobado con una auditoría usando la aplicación (escenario 11 abreviado: también firma y acta).
+2. Asigna dos auditores, uno líder: la auditoría pasa a "Auditor asignado".
+3. Al volver a abrir, el modal muestra a los dos asignados y al líder.
+4. Desasignar uno lo pasa a "Auditores Desasignados" y deja de ofrecerse en los selectores.
+5. No deja desasignar al único auditor asignado.
+6. "Reasignar" lo devuelve a los asignados.
+7. La tabla de Asignar muestra a los dos auditores.
+
+### 14. Auditorías especiales — `especiales-ciclo.spec.ts` (auditor experto)
+1. Antes: borra las especiales de E2E de la vigencia (las de otras personas no se tocan).
+2. Crea una auditoría especial (queda "Sin Titulo").
+3. Al editarla con cantidad 1 se genera su auditoría concreta y se abre la asignación de auditores.
+4. Expandir la padre muestra su concreta.
+5. La concreta se elimina.
+6. "Generar una Auditoría" la crea de nuevo; al llegar a la cantidad registrada, avisa "Ya tiene el número máximo de auditorías".

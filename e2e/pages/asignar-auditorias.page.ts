@@ -34,6 +34,11 @@ export class AsignarAuditoriasPage extends BasePage {
     await this.page.getByRole('option', { name: vigencia, exact: true }).click();
   }
 
+  /** Fila de la auditoría por su texto ("título – subtítulo"). */
+  filaAuditoria(texto: string | RegExp): Locator {
+    return this.filas.filter({ hasText: texto }).first();
+  }
+
   /** Celdas de la columna (por nombre del encabezado) en las filas visibles. */
   async columna(nombre: string): Promise<string[]> {
     const encabezados = (await this.encabezados.allInnerTexts()).map((t) => t.trim());
@@ -101,6 +106,41 @@ export class AsignarAuditorModal extends BasePage {
   async elegirAuditor(indice: number, nombre: string) {
     await this.selectorAuditor(indice).click();
     await this.page.getByRole('option', { name: nombre, exact: true }).click();
+  }
+
+  /** Nombre del auditor elegido en la fila. */
+  async auditorElegido(indice: number): Promise<string> {
+    return (await this.selectorAuditor(indice).innerText()).trim();
+  }
+
+  /** Nombres de los auditores de las filas, en orden. */
+  async auditoresAsignados(): Promise<string[]> {
+    const nombres: string[] = [];
+    for (let i = 0; i < (await this.filasAuditor.count()); i++) nombres.push(await this.auditorElegido(i));
+    return nombres;
+  }
+
+  /** Fila del auditor por su nombre. */
+  filaDe(nombre: string): Locator {
+    return this.filasAuditor.filter({ hasText: nombre }).first();
+  }
+
+  /** "Desasignar auditor" de la fila (pide confirmación). */
+  async desasignar(nombre: string) {
+    await this.filaDe(nombre).getByRole('button', { name: 'Desasignar auditor' }).click();
+  }
+
+  /** Lista "Auditores Desasignados": cada uno con su botón "Reasignar auditor". */
+  get desasignados(): Locator {
+    return this.dialogo.locator('.auditores-lista .auditor-item');
+  }
+
+  async nombresDesasignados(): Promise<string[]> {
+    return (await this.desasignados.locator('.auditor-nombre').allInnerTexts()).map((t) => t.trim()).filter(Boolean);
+  }
+
+  async reasignar(nombre: string) {
+    await this.desasignados.filter({ hasText: nombre }).getByRole('button', { name: 'Reasignar auditor' }).click();
   }
 
   async cerrar() {

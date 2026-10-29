@@ -24,7 +24,9 @@ export class AuditoriasEspecialesPage extends BasePage {
     this.tituloListado = page.getByRole('heading', { name: 'Listado de Auditorías Especiales Registradas' });
     this.tabla = page.locator('plantilla-tarjeta-contenedora table').first();
     this.encabezados = this.tabla.getByRole('columnheader');
-    this.filasPadre = this.tabla.getByRole('row').filter({ has: page.getByRole('button', { name: /auditorías concretas/ }) });
+    // Por CSS y no por rol: tras cerrar un modal y su alerta, el <main> del root queda con aria-hidden
+    // (hallazgo reportado en sisifo_documentacion#939) y getByRole deja de encontrar las filas.
+    this.filasPadre = this.tabla.locator('tr[mat-row]:not(.fila-auditoria-concreta)');
     this.menuAcciones = page.getByRole('menu');
   }
 
@@ -46,13 +48,44 @@ export class AuditoriasEspecialesPage extends BasePage {
 
   /** Expande la fila padre: el botón pasa a "Colapsar auditorías concretas". */
   async expandir(fila: Locator) {
-    await fila.getByRole('button', { name: 'Expandir auditorías concretas' }).click();
-    await expect(fila.getByRole('button', { name: 'Colapsar auditorías concretas' })).toBeVisible({ timeout: 60_000 });
+    const boton = fila.locator('button.btn-expandir');
+    await expect(boton).toHaveAttribute('aria-label', 'Expandir auditorías concretas');
+    await boton.click();
+    await expect(boton).toHaveAttribute('aria-label', 'Colapsar auditorías concretas', { timeout: 60_000 });
   }
 
   async abrirAcciones(fila: Locator): Promise<string[]> {
     await fila.locator('td:last-child button').click();
     await expect(this.menuAcciones).toBeVisible();
     return (await this.menuAcciones.getByRole('menuitem').allInnerTexts()).map((t) => t.split('\n').pop()!.trim());
+  }
+
+  /** Abre el menú de la fila y elige la acción ("Editar Auditoría Especial", "Generar una Auditoría", …). */
+  async accion(fila: Locator, nombre: string) {
+    await this.abrirAcciones(fila);
+    await this.menuAcciones.getByRole('menuitem', { name: new RegExp(`${nombre}$`) }).click();
+  }
+
+  /**
+   * "Crear Auditoría Especial" en la vigencia elegida: crea una auditoría padre vacía ("Sin Titulo") y
+   * devuelve su `_id` (POST auditoria-gestion responde con su estado inicial). Las alertas las atiende quien llama.
+   */
+  async crear(): Promise<string> {
+    const creada = this.page.waitForResponse(
+      (r) => r.request().method() === 'POST' && /\/plan_anual_auditoria_crud\/v1\/auditoria-gestion$/.test(new URL(r.url()).pathname),
+      { timeout: 90_000 },
+    );
+    await this.botonCrear.click();
+    await expect(this.alerta).toBeVisible();
+    await this.confirmarAlerta();
+    const cuerpo = await (await creada).json().catch(() => ({}));
+    const id = cuerpo?.Data?.auditoria_padre_id;
+    if (!id) throw new Error(`no se creó la auditoría especial: ${cuerpo?.Message ?? JSON.stringify(cuerpo?.Data)}`);
+    return id;
+  }
+
+  /** Filas de auditorías concretas desplegadas. */
+  get concretasVisibles(): Locator {
+    return this.filasConcretas.filter({ visible: true });
   }
 }

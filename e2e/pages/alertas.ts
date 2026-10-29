@@ -19,7 +19,9 @@ export async function resolverAlertas(
 ): Promise<string[]> {
   const alerta = page.locator('.swal2-popup');
   const textos: string[] = [];
-  for (let i = 0; i <= maxPreguntas + 3; i++) {
+  const limite = Date.now() + timeout;
+  while (textos.length <= maxPreguntas + 3) {
+    if (Date.now() > limite) break;
     await expect(alerta).toBeVisible({ timeout });
     // Las alertas de carga muestran "Aceptar" deshabilitado (o sin botones) hasta que la operación
     // termina y se reemplazan solas: se espera a un botón visible y habilitado.
@@ -27,12 +29,16 @@ export async function resolverAlertas(
     await expect(boton).toBeVisible({ timeout });
     await expect(alerta.locator('.swal2-loader')).toBeHidden({ timeout });
     const texto = (await alerta.innerText()).replace(/\s+/g, ' ').trim();
-    textos.push(texto);
-    if (await alerta.locator('.swal2-icon-error').isVisible()) {
+    // SweetAlert2 v11 marca el tipo en el propio popup (swal2-icon-error); el ícono es .swal2-icon.swal2-error.
+    if (/\bswal2-icon-error\b/.test((await alerta.getAttribute('class')) ?? '')) {
       throw new Error(`la aplicación respondió con un error: "${texto}"`);
     }
     const esPregunta = await alerta.locator('.swal2-cancel').isVisible();
-    await alerta.locator('.swal2-confirm').click();
+    // La aplicación puede reemplazar la alerta (p. ej. por una de carga) entre la lectura y el clic: si
+    // "Aceptar" ya no se puede pulsar, se vuelve a leer la alerta que quedó en pantalla.
+    const pulsado = await alerta.locator('.swal2-confirm').click({ timeout: 5_000 }).then(() => true, () => false);
+    if (!pulsado) continue;
+    textos.push(texto);
     if (!esPregunta && (!hasta || hasta.test(texto))) {
       await expect(alerta).toBeHidden();
       return textos;

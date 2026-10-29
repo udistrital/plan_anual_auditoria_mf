@@ -28,7 +28,6 @@ export class RegistrarAuditoriasPage extends BasePage {
     this.tabla = page.locator('plantilla-tarjeta-contenedora table').first();
     this.encabezados = this.tabla.getByRole('columnheader');
     this.filas = this.tabla.locator('tbody tr, tr[mat-row]');
-    this.botonRegresar = page.getByRole('button', { name: 'Regresar' });
     this.botonVerDocumentos = page.getByRole('button', { name: 'Ver Documentos' });
     this.botonExportar = page.getByRole('button', { name: /Exportar tabla/i });
     // Botones de edición por texto visible, no por rol: tras cerrar el modal de auditoría y su alerta,
@@ -39,6 +38,7 @@ export class RegistrarAuditoriasPage extends BasePage {
     this.botonVer = this.botonEdicion('Ver');
     this.botonGuardar = this.botonEdicion('Guardar');
     this.botonDescargarPlantilla = this.botonEdicion('Descargar Plantilla');
+    this.botonRegresar = this.botonEdicion('Regresar');
   }
 
   /** Botón de la pantalla cuyo texto (sin el ícono) es exactamente `texto`. */
@@ -87,9 +87,42 @@ export class RegistrarAuditoriasPage extends BasePage {
     return this.filas.filter({ hasText: titulo }).first();
   }
 
-  async editarAuditoria(titulo: string): Promise<AuditoriaModal> {
+  /** Títulos de las auditorías en el orden en que se muestran. */
+  async titulos(): Promise<string[]> {
+    return (await this.filas.locator('td:nth-child(2)').allInnerTexts()).map((t) => t.trim());
+  }
+
+  /**
+   * "Ordenado por:" + el botón de ordenar: la tabla se recarga del MID con el orden elegido (solo en
+   * pantalla; el orden queda guardado al pulsar Guardar).
+   */
+  async ordenarPor(opcion: 'Tipo de evaluación A-Z' | 'Nombre de auditoría A-Z' | 'Revertir') {
+    await this.page.locator('.filter-section mat-form-field').click();
+    await this.page.getByRole('option', { name: opcion, exact: true }).click();
+    const recarga = this.page.waitForResponse((r) => /auditoria-padre\/ordenadas\?/.test(r.url()), { timeout: 90_000 });
+    // El botón de ordenar solo tiene el ícono "sort" (sin nombre accesible).
+    await this.page.locator('.filter-section button').click();
+    await recarga;
+  }
+
+  /**
+   * En la edición extraordinaria, editar o eliminar muestra antes las auditorías hijas activas
+   * ("Auditorías hijas activas") y pide continuar.
+   */
+  readonly dialogoHijas = this.page.getByRole('dialog').filter({ hasText: 'Auditorías hijas activas' });
+
+  async eliminarAuditoria(titulo: string) {
+    await this.filaAuditoria(titulo).locator('td:last-child button').click();
+    await this.page.getByRole('menuitem', { name: /Eliminar Auditoría$/ }).click();
+  }
+
+  async editarAuditoria(titulo: string, { extraordinaria = false } = {}): Promise<AuditoriaModal> {
     await this.filaAuditoria(titulo).locator('td:last-child button').click();
     await this.page.getByRole('menuitem', { name: /Editar Auditoría$/ }).click();
+    if (extraordinaria) {
+      await expect(this.dialogoHijas).toBeVisible({ timeout: 60_000 });
+      await this.dialogoHijas.getByRole('button', { name: /Sí, continuar/ }).click();
+    }
     const modal = new AuditoriaModal(this.page);
     await expect(modal.dialogo).toBeVisible();
     await expect(modal.nombre).toHaveValue(titulo);
