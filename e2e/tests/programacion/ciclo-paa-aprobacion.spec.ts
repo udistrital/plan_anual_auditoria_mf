@@ -151,16 +151,16 @@ test('ciclo completo del PAA: el auditor experto lo arma, el jefe lo aprueba con
     expect(meses, 'subtítulos de las auditorías generadas del Informe de Ley').toEqual(['JUNIO', 'MARZO']);
   });
 
-  await test.step('el Acta de Comité queda registrada en los documentos del PAA aprobado', async () => {
-    // Se verifica por API: Ver Documentos no muestra la pestaña "Acta de Comité" aunque el acta exista
-    // (D38 de la especificación, hallazgo en la issue). La captura deja ver lo que muestra hoy.
+  await test.step('Ver Documentos del PAA aprobado incluye el Acta de Comité', async () => {
     const actas = (await api.documentosDelPlan(ciclo.planId)).filter((d: any) => d.tipo_id === TIPO_DOCUMENTO.ACTA_COMITE_COORDINADOR);
     expect(actas, 'el acta del secretario quedó registrada para el plan').toHaveLength(1);
     await planes.accionDePlanDeHoy(VIGENCIA_E2E, 'Ver Documentos');
     const documentos = new DocumentosDialog(page);
     await documentos.esperarCarga();
-    await testInfo.attach('pestañas de Ver Documentos', { body: (await documentos.pestanas()).join('\n'), contentType: 'text/plain' });
-    await ciclo.captura('Ver Documentos del PAA aprobado');
+    await documentos.esperarPestana('Acta de Comité');
+    await documentos.elegirPestana('Acta de Comité');
+    await expect(documentos.visor).toBeVisible({ timeout: 60_000 });
+    await ciclo.captura('Acta de Comité');
     await documentos.cerrar();
   });
 
@@ -219,7 +219,7 @@ test('ciclo completo del PAA: el auditor experto lo arma, el jefe lo aprueba con
     await actas.esperarCarga();
     const registradas = (await api.documentosDelPlan(ciclo.planId)).filter((d: any) => d.tipo_id === TIPO_DOCUMENTO.ACTA_MODIFICACION_PLAN);
     expect(registradas, 'el acta de modificación quedó registrada para el plan').toHaveLength(1);
-    // Las pestañas de este diálogo salen de los documentos cargados: aparecen cuando termina la carga.
+    // Las pestañas de este diálogo salen de los documentos descargados: aparecen cuando termina la descarga.
     await expect.poll(() => actas.pestanas().then((p) => p.length), { message: 'el historial muestra el acta de la edición', timeout: 60_000 }).toBeGreaterThan(0);
     await expect(actas.visor).toBeVisible({ timeout: 60_000 });
     await ciclo.captura('historial de ediciones extraordinarias');

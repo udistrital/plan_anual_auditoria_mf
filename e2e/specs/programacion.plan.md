@@ -41,8 +41,9 @@ Estos escenarios automatizan las pruebas manuales de #800, #845, #820, #871 y #8
 ### 3. Documentos del PAA — `ver-documentos.spec.ts` (`@auditor-experto`)
 1. Ver Documentos del PAA aprobado abre el diálogo de la vigencia.
 2. Hay pestañas "Formato PAA Original" y "Formato PAA Actualizado".
-3. Cada pestaña muestra su documento.
-4. No se pulsa "Actualizar Documento", porque reemplaza el documento.
+3. Al terminar la descarga de los documentos aparece "Acta de Comité". Las pestañas opcionales solo se muestran cuando su documento ya llegó del gestor documental.
+4. Cada pestaña muestra su documento.
+5. No se pulsa "Actualizar Documento", porque reemplaza el documento.
 
 ### 4. Historial de observaciones — `historial-observaciones.spec.ts` (`@auditor-experto`)
 1. Historial de Observaciones del PAA aprobado muestra al menos una observación.

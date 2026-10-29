@@ -19,7 +19,11 @@ test('el auditor experto revisa los documentos de un PAA aprobado', { tag: ['@pr
     expect(await documentos.pestanas()).toEqual(expect.arrayContaining(['Formato PAA Original', 'Formato PAA Actualizado']));
   });
 
-  for (const pestana of ['Formato PAA Original', 'Formato PAA Actualizado']) {
+  await test.step('al terminar la descarga de los documentos aparece el Acta de Comité', async () => {
+    await documentos.esperarPestana('Acta de Comité');
+  });
+
+  for (const pestana of ['Formato PAA Original', 'Formato PAA Actualizado', 'Acta de Comité']) {
     await test.step(`${pestana} muestra su documento`, async () => {
       await documentos.elegirPestana(pestana);
       await expect(documentos.visor).toBeVisible({ timeout: 60_000 });

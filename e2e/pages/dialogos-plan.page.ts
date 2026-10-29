@@ -37,6 +37,15 @@ export class DocumentosDialog extends BasePage {
     return textos.map((t) => t.split('\n').pop()!.trim()).filter((t) => t && !acciones.includes(t));
   }
 
+  /**
+   * Las pestañas obligatorias (Formato PAA) se ven al abrir; las demás (Matriz, Acta de Comité, Acta de
+   * actualización, y todas en el historial de ediciones) solo cuando termina la descarga de su documento
+   * desde el gestor documental. Leerlas antes da un falso "no está".
+   */
+  async esperarPestana(nombre: string, timeout = 60_000) {
+    await expect.poll(() => this.pestanas(), { message: `el diálogo muestra la pestaña "${nombre}"`, timeout }).toContain(nombre);
+  }
+
   async elegirPestana(nombre: string) {
     await this.dialogo.getByRole('button', { name: nombre, exact: true }).click();
   }
