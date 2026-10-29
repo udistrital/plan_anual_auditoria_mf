@@ -9,9 +9,12 @@ import { expect, type Page } from '@playwright/test';
  * tienen botón de cancelar), falla de inmediato si la aplicación muestra un error y cierra el aviso
  * final. Devuelve el texto de cada alerta, en orden.
  *
- * `hasta`: texto del aviso final cuando la aplicación encadena varios avisos de éxito (p. ej. el
- * secretario: "Archivo subido exitosamente." y, al cerrarlo, genera las auditorías y avisa "Plan
- * aprobado exitosamente."). Sin `hasta`, termina en el primer aviso que no es pregunta.
+ * `hasta`: texto del aviso final cuando la aplicación encadena varios avisos de éxito (p. ej.
+ * "Archivo subido exitosamente." y, al cerrarlo, sigue el proceso y avisa "Plan aprobado
+ * exitosamente."). Sin `hasta`, termina en el primer aviso que no es pregunta.
+ *
+ * Errores: SweetAlert2 v11 marca el tipo en el propio popup (`.swal2-popup.swal2-icon-error`); el
+ * ícono es `.swal2-icon.swal2-error`. Buscar `.swal2-icon-error` dentro del popup no encuentra nada.
  */
 export async function resolverAlertas(
   page: Page,

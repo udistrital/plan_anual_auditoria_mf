@@ -94,6 +94,8 @@ Cada escenario lleva:
 
 **Garantía de lectura:** en los escenarios `@lectura`, el marco aborta cualquier `POST/PUT/PATCH/DELETE` a las APIs y lo deja en el reporte. Por eso se pueden correr contra el ambiente de pruebas compartido sin modificar datos (`tests/plan-mejoramiento/bloqueo-escrituras.spec.ts` lo demuestra).
 
+**Seguro de escritura:** los escenarios `@escritura` solo corren si se piden de forma explícita: `npm run test:escritura` (`--grep @escritura`), o un archivo con `--grep @escritura` (`npx playwright test tests/programacion/ciclo-paa-aprobacion.spec.ts --grep @escritura`), o `E2E_ESCRITURA=1`. `npm test` y `npx playwright test <archivo>` no los incluyen, así que nunca escriben por descuido. Córrelos solo con autorización, de a uno (comparten la vigencia de pruebas), y verifica la limpieza al terminar.
+
 ## Agregar un escenario (equipo)
 
 1. Plan propio en `specs/<funcionalidad>.plan.md` (no se edita el plan de otra funcionalidad).
