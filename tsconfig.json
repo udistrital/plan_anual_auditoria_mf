@@ -27,6 +27,7 @@
     ],
     "skipLibCheck": true
   },
+  "exclude": ["node_modules", "e2e"],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
