@@ -5,6 +5,7 @@ import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
+import { FormulacionPlanesComponent } from './components/formulacion-planes/formulacion-planes.component';
 
 const routes: Routes = [
   {
@@ -35,8 +36,17 @@ const routes: Routes = [
       {
         path: 'registrar-avances/:id',
         component: RegistroAvancesComponent,
+      },
+      {
+        // Misma vista: el auditor asignado al plan revisa las evidencias y califica
+        path: 'revisar/:id',
+        component: RegistroAvancesComponent,
       }
     ]
+  },
+  {
+    path: 'formulacion-planes',
+    component: FormulacionPlanesComponent,
   },
 ];
 

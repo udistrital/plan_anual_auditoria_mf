@@ -1,0 +1,95 @@
+<form class="formulario" [formGroup]="formulario" novalidate (ngSubmit)="enviar()">
+  <!-- Porcentaje -->
+  <fieldset [class.invalido]="campoInvalido('calificacion')">
+    <legend>Porcentaje de avance <span class="requerido" aria-hidden="true">*</span></legend>
+    <p class="ayuda" id="ayudaAvance">{{ ayudas.avance }}</p>
+    <div class="avance-fila">
+      <label class="porcentaje">
+        <input #campoPorcentaje type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="0"
+          aria-label="Porcentaje de avance" aria-describedby="ayudaAvance"
+          [value]="porcentaje ?? ''"
+          (input)="cambiarPorcentaje($any($event.target).value)"
+          (blur)="formulario.get('calificacion')?.markAsTouched()">
+        <span aria-hidden="true">%</span>
+      </label>
+      <div>
+        <mat-slider class="deslizador" min="0" max="100" step="1" discrete>
+          <input matSliderThumb aria-label="Porcentaje de avance" [value]="porcentaje ?? 0"
+            (valueChange)="cambiarPorcentaje($event)">
+        </mat-slider>
+        <div class="escala" aria-hidden="true">
+          <span style="left: 0%">0%</span>
+          <span style="left: 20%">20%</span>
+          <span style="left: 80%">80%</span>
+          <span style="left: 100%">100%</span>
+        </div>
+      </div>
+    </div>
+    @if (campoInvalido('calificacion')) {
+      <p class="error-campo"><mat-icon>error</mat-icon> Indique un porcentaje entre 0 y 100.</p>
+    }
+  </fieldset>
+
+  <!-- Criterio -->
+  <fieldset [class.invalido]="campoInvalido('criterio')">
+    <legend>Criterio de evaluación <span class="requerido" aria-hidden="true">*</span></legend>
+    <p class="ayuda">{{ ayudas.criterio }}</p>
+    <div class="criterios" #grupoCriterios>
+      @for (criterio of criterios; track criterio.id) {
+        <label class="criterio" [class.criterio-seleccionado]="criterioSeleccionado === criterio.id">
+          <input type="radio" name="criterio" [value]="criterio.id"
+            [checked]="criterioSeleccionado === criterio.id"
+            (change)="elegirCriterio(criterio.id)">
+          <span>
+            <span class="criterio-nombre">{{ criterio.nombre }}</span><br>
+            <span class="criterio-rango">{{ criterio.min }}% a {{ criterio.max }}%</span>
+          </span>
+          @if (criterioSugeridoActual?.id === criterio.id) {
+            <span class="sugerido">Sugerido</span>
+          }
+        </label>
+      }
+    </div>
+    @if (mensajeCoherencia) {
+      <p class="coherencia"><mat-icon>info</mat-icon> {{ mensajeCoherencia }}</p>
+    }
+    @if (campoInvalido('criterio')) {
+      <p class="error-campo"><mat-icon>error</mat-icon> Seleccione un criterio de evaluación.</p>
+    }
+  </fieldset>
+
+  <!-- Análisis -->
+  <fieldset [class.invalido]="campoInvalido('observaciones')">
+    <legend><label for="analisisSeguimiento">Análisis de seguimiento <span class="requerido" aria-hidden="true">*</span></label></legend>
+    <p class="ayuda" id="ayudaAnalisis">{{ ayudas.analisis }}</p>
+    <textarea #campoAnalisis id="analisisSeguimiento" class="campo" rows="6" formControlName="observaciones"
+      [attr.maxlength]="maxCaracteresAnalisis" aria-describedby="ayudaAnalisis"
+      placeholder="Ej.: Se revisaron el acta de la mesa de trabajo y el informe de resultados del periodo…"></textarea>
+    <div class="pie-campo">
+      <span>La dependencia verá este análisis junto a la calificación.</span>
+      <span>{{ longitudAnalisis }} / {{ maxCaracteresAnalisis }}</span>
+    </div>
+    @if (campoInvalido('observaciones')) {
+      <p class="error-campo"><mat-icon>error</mat-icon> Escriba el análisis de seguimiento.</p>
+    }
+  </fieldset>
+</form>
+
+<div class="barra-acciones">
+  <p class="mensaje-revision">
+    <mat-icon>info</mat-icon>
+    <span>
+      {{ hayVigente
+        ? 'Al calificar, esta pasa a ser la calificación vigente y la anterior queda en el historial.'
+        : 'La calificación quedará como la vigente de la acción y la dependencia podrá consultarla.' }}
+    </span>
+  </p>
+  <div class="botones">
+    @if (hayVigente) {
+      <button mat-stroked-button color="primary" class="boton-secundario" type="button" (click)="cancelar.emit()">Cancelar</button>
+    }
+    <button mat-flat-button color="primary" type="button" [disabled]="guardando" (click)="enviar()">
+      <mat-icon>star</mat-icon> Calificar
+    </button>
+  </div>
+</div>

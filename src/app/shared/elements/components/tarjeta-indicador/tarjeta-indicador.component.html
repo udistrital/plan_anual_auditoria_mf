@@ -1,0 +1,22 @@
+<div class="tarjeta-indicador" [ngClass]="'variante-' + variante">
+  <div class="encabezado">
+    <span class="titulo">{{ titulo }}</span>
+    @if (icono) {
+      <span class="contenedor-icono">
+        <mat-icon>{{ icono }}</mat-icon>
+      </span>
+    }
+  </div>
+  <div class="cifra">
+    <span class="valor">{{ valor ?? 0 }}</span>
+    <span class="subtitulo">{{ subtitulo }}</span>
+  </div>
+  @if (nota) {
+    <div class="nota">
+      @if (notaIcono) {
+        <mat-icon>{{ notaIcono }}</mat-icon>
+      }
+      <span>{{ nota }}</span>
+    </div>
+  }
+</div>

@@ -1,0 +1,93 @@
+.pestanas {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid #e0e0e0;
+  overflow-x: auto;
+}
+
+.pestana {
+  margin-bottom: -1px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #616161;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pestana:hover,
+.pestana[aria-selected="true"] {
+  color: var(--md-primary-500);
+}
+
+.pestana[aria-selected="true"] {
+  border-bottom-color: var(--md-primary-500);
+}
+
+.pestana:focus-visible {
+  outline: 2px solid var(--md-primary-500);
+  outline-offset: -2px;
+}
+
+.sin-borde {
+  border-top: 0;
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ancho {
+  grid-column: 1 / -1;
+}
+
+.dato {
+  padding: 8px 10px;
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.bloque + .bloque {
+  margin-top: 18px;
+}
+
+.bloque h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--md-primary-700);
+}
+
+.dependencia {
+  margin: 10px 0 2px;
+  font-weight: 600;
+}
+
+.bloque h3 + .dependencia {
+  margin-top: 0;
+}
+
+.persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.persona:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 480px) {
+  .ficha { grid-template-columns: 1fr; }
+}

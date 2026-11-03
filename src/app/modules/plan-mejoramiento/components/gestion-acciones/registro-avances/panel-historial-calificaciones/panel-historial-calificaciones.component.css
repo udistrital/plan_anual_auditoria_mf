@@ -1,0 +1,59 @@
+.linea-tiempo {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hito {
+  position: relative;
+  padding: 0 0 18px 26px;
+}
+
+/* Línea que une los hitos */
+.hito::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: -6px;
+  width: 1px;
+  background-color: #e0e0e0;
+}
+
+.hito:last-child::before {
+  display: none;
+}
+
+/* Punto del hito */
+.hito::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  top: 4px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid #bdbdbd;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+
+.hito.vigente::after {
+  border-color: var(--md-primary-500);
+  background-color: var(--md-primary-500);
+}
+
+.hito-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.hito-cabecera b {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.concepto {
+  margin-top: 6px;
+}

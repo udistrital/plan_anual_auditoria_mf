@@ -1,0 +1,102 @@
+<div class="panel-cabecera">
+  <div>
+    <h2 class="panel-titulo" id="tituloPanelFicha">Ficha de la acción {{ datos.accion.noAccion || '' }}</h2>
+    <p class="pista">Información de consulta. No se modifica desde esta vista.</p>
+  </div>
+  <button mat-icon-button mat-dialog-close aria-label="Cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="pestanas" role="tablist" aria-label="Secciones de la ficha">
+  @for (pestana of pestanas; track pestana.id; let i = $index) {
+    <button #pestanaBoton type="button" class="pestana" role="tab"
+      [id]="'pestana-' + pestana.id"
+      [attr.aria-controls]="'contenido-' + pestana.id"
+      [attr.aria-selected]="pestanaActiva === pestana.id"
+      [tabIndex]="pestanaActiva === pestana.id ? 0 : -1"
+      (click)="pestanaActiva = pestana.id"
+      (keydown)="moverPestana($event, i)">
+      {{ pestana.nombre }}
+    </button>
+  }
+</div>
+
+<div class="panel-cuerpo sin-borde" role="tabpanel"
+  [id]="'contenido-' + pestanaActiva" [attr.aria-labelledby]="'pestana-' + pestanaActiva">
+  @switch (pestanaActiva) {
+    @case ('accion') {
+      <div class="ficha">
+        <div class="dato"><span class="etiqueta">No. acción</span>{{ datos.accion.noAccion || '—' }}</div>
+        <div class="dato"><span class="etiqueta">Tipo de acción</span>{{ datos.accion.tipo || '—' }}</div>
+        <div class="dato ancho"><span class="etiqueta">Acción planteada</span><p class="texto-largo">{{ datos.accion.descripcion || '—' }}</p></div>
+        <div class="dato ancho"><span class="etiqueta">Nombre del indicador</span>{{ datos.accion.nombreIndicador || '—' }}</div>
+        <div class="dato ancho"><span class="etiqueta">Fórmula del indicador</span>{{ datos.accion.formulaIndicador || '—' }}</div>
+        <div class="dato ancho"><span class="etiqueta">Meta</span>{{ datos.accion.meta || '—' }}</div>
+        <div class="dato"><span class="etiqueta">Fecha de inicio</span>{{ (datos.accion.fechaInicio | date: 'dd/MM/yyyy') || '—' }}</div>
+        <div class="dato"><span class="etiqueta">Fecha de fin</span>{{ (datos.accion.fechaFin | date: 'dd/MM/yyyy') || '—' }}</div>
+      </div>
+    }
+    @case ('hallazgo') {
+      <div class="ficha">
+        <div class="dato"><span class="etiqueta">No. hallazgo</span>{{ datos.hallazgo.numero || '—' }}</div>
+        <div class="dato"><span class="etiqueta">No. auditoría</span>{{ datos.auditoria.numero ?? '—' }}</div>
+        <div class="dato ancho"><span class="etiqueta">Descripción del hallazgo</span><p class="texto-largo">{{ datos.hallazgo.descripcion || '—' }}</p></div>
+        <div class="dato ancho"><span class="etiqueta">Causa</span><p class="texto-largo">{{ datos.hallazgo.causa || '—' }}</p></div>
+      </div>
+    }
+    @case ('auditoria') {
+      <div class="ficha">
+        <div class="dato"><span class="etiqueta">No. auditoría</span>{{ datos.auditoria.numero ?? '—' }}</div>
+        <div class="dato"><span class="etiqueta">Vigencia</span>{{ datos.auditoria.vigencia || '—' }}</div>
+        <div class="dato ancho"><span class="etiqueta">Nombre de la auditoría</span>{{ datos.auditoria.nombre || '—' }}</div>
+        <div class="dato ancho"><span class="etiqueta">Tipo de evaluación</span>{{ datos.auditoria.tipoEvaluacion || '—' }}</div>
+      </div>
+    }
+    @case ('responsables') {
+      <section class="bloque">
+        <h3>Dependencia responsable</h3>
+        @for (dep of datos.dependenciasLideres; track $index) {
+          <ng-container *ngTemplateOutlet="dependencia; context: { $implicit: dep }"></ng-container>
+        } @empty {
+          <p class="pista">Sin información.</p>
+        }
+      </section>
+      <section class="bloque">
+        <h3>Dependencias de apoyo</h3>
+        @for (dep of datos.dependenciasApoyo; track $index) {
+          <ng-container *ngTemplateOutlet="dependencia; context: { $implicit: dep }"></ng-container>
+        } @empty {
+          <p class="pista">La acción no tiene dependencias de apoyo.</p>
+        }
+      </section>
+      <section class="bloque">
+        <h3>Auditores del plan</h3>
+        @for (auditor of datos.auditores; track auditor.auditor_id) {
+          <div class="persona">
+            <span class="iniciales" aria-hidden="true">{{ iniciales(auditor.auditor_nombre) }}</span>
+            <div>{{ auditor.auditor_nombre }}<div class="pista">{{ auditor.auditor_lider ? 'Auditor líder' : 'Auditor' }}</div></div>
+          </div>
+        } @empty {
+          <p class="pista">Sin auditores asignados.</p>
+        }
+      </section>
+    }
+  }
+</div>
+
+<ng-template #dependencia let-dep>
+  <p class="dependencia">{{ dep.dependencia_nombre || 'Dependencia' }}</p>
+  @if (dep.jefe_nombre) {
+    <div class="persona">
+      <span class="iniciales" aria-hidden="true">{{ iniciales(dep.jefe_nombre) }}</span>
+      <div>{{ dep.jefe_nombre }}<div class="pista">Jefe de dependencia</div></div>
+    </div>
+  }
+  @if (dep.asistente_nombre) {
+    <div class="persona">
+      <span class="iniciales" aria-hidden="true">{{ iniciales(dep.asistente_nombre) }}</span>
+      <div>{{ dep.asistente_nombre }}<div class="pista">Asistente de dependencia</div></div>
+    </div>
+  }
+</ng-template>
