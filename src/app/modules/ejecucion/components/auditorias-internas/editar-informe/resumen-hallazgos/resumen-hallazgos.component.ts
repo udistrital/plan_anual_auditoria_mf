@@ -32,7 +32,8 @@ export class ResumenHallazgosComponent implements OnChanges {
     this.hallazgos = numerarHallazgos(temas, hallazgos).map((n) => ({
       numero: n.numero,
       criterio: n.hallazgo.criterio ?? '',
-      descripcion: n.hallazgo.descripcion ?? '',
+      // Se muestra el texto corto del hallazgo (campo "Hallazgo"), no su descripción.
+      descripcion: n.hallazgo.titulo ?? '',
     }));
   }
 }
