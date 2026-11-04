@@ -13,10 +13,14 @@ import { test, expect } from '../../core/fixtures';
 import { environment } from '../../../src/environments/environment.development';
 import { VIGENCIA_E2E } from '../programacion/datos';
 import { ApiProgramacion, personaDe, tokenDe } from '../programacion/limpieza';
-import { SEMILLA_INICIAR_EJECUCION, SEMILLA_RESUMEN_HALLAZGOS } from '../ejecucion/datos';
+import { SEMILLA_EDICION_INFORME, SEMILLA_INICIAR_EJECUCION, SEMILLA_RESUMEN_HALLAZGOS, SEMILLA_SEGUIMIENTO } from '../ejecucion/datos';
 
 const CRUD = environment.PLAN_ANUAL_AUDITORIA_SERVICE.replace(/\/$/, '');
 const { PLANEACION, EJECUCION } = environment.AUDITORIA_ESTADO;
+const { AUDITORIA_INTERNA_ID, SEGUIMIENTO_ID } = environment.TIPO_EVALUACION;
+
+type HallazgoSemilla = { criterio: string; titulo: string; descripcion: string };
+type ContenidoInforme = { tema: string; descripcionTema?: string; subtema: string; hallazgos: HallazgoSemilla[] };
 
 class ApiSemilla {
   constructor(private readonly request: APIRequestContext, private readonly token: string) {}
@@ -50,15 +54,15 @@ test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución 
   const creado: string[] = [];
 
   /** Padre + concreta + auditor asignado + historial de estados; devuelve la concreta. */
-  async function auditoria(semilla: { titulo: string; consecutivo: string }, estados: number[]) {
+  async function auditoria(semilla: { titulo: string; consecutivo: string }, estados: number[], tipoEvaluacion = AUDITORIA_INTERNA_ID) {
     const [padre] = await api.listar(`auditoria-padre?query=vigencia_id:${vigenciaId},titulo:${encodeURIComponent(semilla.titulo)},activo:true&limit=1`);
     let padreId = padre?._id;
     if (!padreId) {
       // Dependencia, macroproceso y proceso reales, para que las tablas los muestren con nombre.
-      const [referencia] = await api.listar(`auditoria-padre?query=tipo_evaluacion_id:${environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID},activo:true&limit=1`);
+      const [referencia] = await api.listar(`auditoria-padre?query=tipo_evaluacion_id:${AUDITORIA_INTERNA_ID},activo:true&limit=1`);
       padreId = (await api.crear('auditoria-padre', {
         titulo: semilla.titulo,
-        tipo_evaluacion_id: environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID,
+        tipo_evaluacion_id: tipoEvaluacion,
         vigencia_id: vigenciaId,
         dependencia_id: referencia?.dependencia_id ?? [],
         macroproceso_id: referencia?.macroproceso_id ?? [],
@@ -89,8 +93,10 @@ test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución 
 
     const historial = await api.listar(`auditoria-estado?query=auditoria_id:${hijaId}&limit=0`);
     if (!historial.length) {
+      // El seguimiento pasa directo al informe final (como iniciarEjecucion en Planeación)
+      const faseEjecucion = tipoEvaluacion === SEGUIMIENTO_ID ? environment.AUDITORIA_FASE.EJECUCION_FINAL : environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR;
       for (const estado_id of estados) {
-        const fase_id = estado_id >= EJECUCION.POR_EJECUTAR ? environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR : environment.AUDITORIA_FASE.PLANEACION;
+        const fase_id = estado_id >= EJECUCION.POR_EJECUTAR ? faseEjecucion : environment.AUDITORIA_FASE.PLANEACION;
         await api.crear('auditoria-estado', { auditoria_id: hijaId, estado_id, fase_id, usuario_id: asignadoPor, usuario_rol: environment.ROL.AUDITOR_EXPERTO, observacion: 'Semilla E2E' });
       }
       creado.push(`historial de ${semilla.consecutivo} hasta ${estados.at(-1)}`);
@@ -98,31 +104,53 @@ test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución 
     return hijaId as string;
   }
 
-  await test.step('auditoría con preinforme en revisión del Jefe, con hallazgos (resumen de hallazgos)', async () => {
-    const s = SEMILLA_RESUMEN_HALLAZGOS;
-    const auditoriaId = await auditoria(s, [PLANEACION.APROBADO_PROGRAMA_AUDITADO, EJECUCION.POR_EJECUTAR, EJECUCION.CREANDO_PREINFORME, EJECUCION.REVISION_PREINFORME_JEFE]);
+  /** Informe de la auditoría (existente o nuevo); devuelve su _id. */
+  async function informe(auditoriaId: string, consecutivo: string): Promise<string> {
+    const [existente] = await api.listar(`informe?query=auditoria_id:${auditoriaId},activo:true&limit=1`);
+    if (existente) return existente._id;
+    creado.push(`informe de ${consecutivo}`);
+    return (await api.crear('informe', { auditoria_id: auditoriaId }))._id;
+  }
 
-    const [informe] = await api.listar(`informe?query=auditoria_id:${auditoriaId},activo:true&limit=1`);
-    const informeId = informe?._id ?? (await api.crear('informe', { auditoria_id: auditoriaId }))._id;
-    if (!informe) creado.push('informe');
-
+  /** Un tema (con descripción opcional), un subtema y sus hallazgos dentro del informe. */
+  async function contenidoInforme(auditoriaId: string, informeId: string, c: ContenidoInforme) {
     let [tema] = await api.listar(`tema?query=informe_id:${informeId},activo:true&limit=1`);
     if (!tema) {
-      tema = await api.crear('tema', { informe_id: informeId, titulo: s.tema });
-      creado.push('tema');
+      tema = await api.crear('tema', { informe_id: informeId, titulo: c.tema, ...(c.descripcionTema ? { descripcion_titulo: c.descripcionTema } : {}) });
+      creado.push(`tema "${c.tema}"`);
     }
     let subtema = (tema.subtema ?? []).find((sub: any) => sub.activo !== false);
     if (!subtema) {
-      const conSubtema = await api.crear('subtema', { tema_id: tema._id, titulo: s.subtema });
+      const conSubtema = await api.crear('subtema', { tema_id: tema._id, titulo: c.subtema });
       subtema = (conSubtema?.subtema ?? []).at(-1);
-      creado.push('subtema');
+      creado.push(`subtema "${c.subtema}"`);
     }
 
     const existentes = await api.listar(`hallazgo?query=informe_id:${informeId},activo:true&limit=0`);
-    for (const h of s.hallazgos.filter((h) => !existentes.some((e) => e.titulo === h.titulo))) {
+    for (const h of c.hallazgos.filter((h) => !existentes.some((e) => e.titulo === h.titulo))) {
       await api.crear('hallazgo', { auditoria_id: auditoriaId, informe_id: informeId, subtema_id: subtema._id, ...h });
       creado.push(`hallazgo "${h.titulo}"`);
     }
+  }
+
+  await test.step('auditoría con preinforme en revisión del Jefe, con hallazgos (resumen de hallazgos)', async () => {
+    const s = SEMILLA_RESUMEN_HALLAZGOS;
+    const auditoriaId = await auditoria(s, [PLANEACION.APROBADO_PROGRAMA_AUDITADO, EJECUCION.POR_EJECUTAR, EJECUCION.CREANDO_PREINFORME, EJECUCION.REVISION_PREINFORME_JEFE]);
+    await contenidoInforme(auditoriaId, await informe(auditoriaId, s.consecutivo), s);
+  });
+
+  await test.step('auditoría con el preinforme en creación y un tema con descripción en Nuxeo (edición del informe)', async () => {
+    const s = SEMILLA_EDICION_INFORME;
+    const auditoriaId = await auditoria(s, [PLANEACION.APROBADO_PROGRAMA_AUDITADO, EJECUCION.POR_EJECUTAR, EJECUCION.CREANDO_PREINFORME]);
+    await contenidoInforme(auditoriaId, await informe(auditoriaId, s.consecutivo), {
+      tema: s.tema, descripcionTema: s.enlaceDescripcion, subtema: s.subtema, hallazgos: [s.hallazgo],
+    });
+  });
+
+  await test.step('seguimiento con el informe final en creación y sin temas (edición del seguimiento)', async () => {
+    const s = SEMILLA_SEGUIMIENTO;
+    const auditoriaId = await auditoria(s, [PLANEACION.APROBADO_PROGRAMA_AUDITADO, EJECUCION.POR_EJECUTAR, EJECUCION.CREANDO_INFORME_FINAL], SEGUIMIENTO_ID);
+    await informe(auditoriaId, s.consecutivo);
   });
 
   await test.step('auditoría con el programa aprobado por el auditado (iniciar ejecución)', async () => {

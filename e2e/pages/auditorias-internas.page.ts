@@ -59,6 +59,10 @@ export class AuditoriasInternasPage extends BasePage {
 
 export class InformeAuditoriaPage extends BasePage {
   readonly stepper: Locator;
+  readonly pasoAspectos: Locator;
+  readonly aspectos: Locator;
+  readonly temas: Locator;
+  readonly botonGuardarAspectos: Locator;
   readonly pasoResumen: Locator;
   readonly tablaResumen: Locator;
   readonly encabezadosResumen: Locator;
@@ -67,6 +71,11 @@ export class InformeAuditoriaPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.stepper = page.locator('mat-stepper, mat-horizontal-stepper, mat-vertical-stepper').first();
+    this.pasoAspectos = page.getByRole('tab', { name: /Aspectos Evaluados/ });
+    this.aspectos = page.locator('app-aspectos-evaluados');
+    // Cada tema es un nodo del árbol de aspecto-evaluados (no tiene nombre accesible propio)
+    this.temas = this.aspectos.locator('.tree > .tree-node');
+    this.botonGuardarAspectos = page.getByRole('button', { name: 'Guardar', exact: true });
     this.pasoResumen = page.getByRole('tab', { name: /Resumen de Hallazgos/ });
     this.tablaResumen = page.locator('app-resumen-hallazgos table');
     this.encabezadosResumen = this.tablaResumen.getByRole('columnheader');
@@ -76,6 +85,42 @@ export class InformeAuditoriaPage extends BasePage {
   async esperarCarga() {
     await expect(this.page).toHaveURL(/\/ejecucion\/auditorias-internas\/editar-informe\//, { timeout: 60_000 });
     await expect(this.pasoResumen).toBeVisible({ timeout: 60_000 });
+  }
+
+  async irAAspectos() {
+    await this.pasoAspectos.click();
+    await expect(this.aspectos).toBeVisible({ timeout: 60_000 });
+  }
+
+  /** "Guardar" del paso 3, aceptando la confirmación ("¿Está seguro(a) de guardar la información?"). */
+  async guardarAspectos() {
+    await this.botonGuardarAspectos.click();
+    expect(await this.textoAlerta()).toContain('¿Está seguro(a) de guardar la información?');
+    await this.confirmarAlerta();
+  }
+
+  /** Nombre del tema (campo "Nombre del Tema") del nodo indicado. */
+  async nombreTema(indice: number): Promise<string> {
+    return this.temas.nth(indice).getByLabel('Nombre del Tema').inputValue();
+  }
+
+  /** Aviso de que la descripción del tema no se pudo cargar desde el gestor documental. */
+  avisoDescripcionNoDisponible(indice: number): Locator {
+    return this.temas.nth(indice).getByRole('alert').filter({ hasText: 'No se pudo cargar la descripción' });
+  }
+
+  /** Editor de texto enriquecido de la descripción del tema. */
+  editorDescripcion(indice: number): Locator {
+    return this.temas.nth(indice).locator('quill-editor .ql-editor').first();
+  }
+
+  /** Subtemas y hallazgos del tema (cantidad de campos "Nombre del Subtema" y "Hallazgo"). */
+  async conteoTema(indice: number): Promise<{ subtemas: number; hallazgos: number }> {
+    const tema = this.temas.nth(indice);
+    return {
+      subtemas: await tema.getByLabel('Nombre del Subtema').count(),
+      hallazgos: await tema.getByLabel('Hallazgo', { exact: true }).count(),
+    };
   }
 
   async irAlResumen() {

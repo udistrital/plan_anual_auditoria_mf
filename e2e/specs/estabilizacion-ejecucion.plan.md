@@ -9,12 +9,14 @@ Issue: udistrital/sisifo_documentacion#940 · MF: plan_anual_auditoria_mf · Eti
 
 ## Datos semilla
 
-Los crea, por la API del CRUD, el escenario `tests/semillas/ejecucion-2010.spec.ts` (`@semilla @auditor-experto @escritura`). Son dos auditorías especiales de la vigencia `2010` (`E2E_PROG_VIGENCIA_E2E`), sin PAA, con el auditor de pruebas asignado como líder. **No se limpian**: son datos fijos de los escenarios de lectura.
+Los crea, por la API del CRUD, el escenario `tests/semillas/ejecucion-2010.spec.ts` (`@semilla @auditor-experto @escritura`). Son cuatro auditorías especiales de la vigencia `2010` (`E2E_PROG_VIGENCIA_E2E`), sin PAA, con el auditor de pruebas asignado como líder. **No se limpian**: son datos fijos de los escenarios de lectura.
 
 | Semilla | Título | Consecutivo OCI | Estado | Contenido |
 |---|---|---|---|---|
 | A | `SEMILLA-E2E Resumen de hallazgos` | `SEMILLA-E2E-01` | `REVISION_PREINFORME_JEFE` | Informe con 1 tema, 1 subtema y 2 hallazgos, cada uno con título corto ≠ descripción larga |
 | B | `SEMILLA-E2E Iniciar ejecución` | `SEMILLA-E2E-02` | `APROBADO_PROGRAMA_AUDITADO` | — |
+| C | `SEMILLA-E2E Edición de informe` | `SEMILLA-E2E-03` | `CREANDO_PREINFORME` | Informe con 1 tema cuya descripción es `NuxeoEnlace:<uuid ficticio>`, 1 subtema y 1 hallazgo. El gestor se simula en los escenarios |
+| D | `SEMILLA-E2E Seguimiento` | `SEMILLA-E2E-04` | `CREANDO_INFORME_FINAL` (seguimiento) | Informe sin temas |
 
 - La semilla es idempotente: lo que ya existe no se vuelve a crear. Se corre solo cuando falta: `E2E_ESCRITURA=1 npx playwright test tests/semillas --grep @semilla`.
 - El prefijo `SEMILLA-E2E` no lo borra la pre-limpieza de Programación (`liberarEspeciales` solo borra `E2E-…`). Al no tener PAA, tampoco choca con `liberarVigencia`.
@@ -47,7 +49,23 @@ Archivo: `tests/planeacion/iniciar-ejecucion-sin-permiso.spec.ts`
 
 1. En la misma pantalla, la semilla A (preinforme en revisión) no ofrece **Iniciar Ejecución**: no tiene menú, o el menú no la incluye.
 
-### 4. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
+### 4. Con el gestor documental caído, el paso 3 muestra los temas y conserva la descripción (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/descripcion-gestor-caido.spec.ts`. El gestor responde como WSO2 el 03/11 (404 "No matching resource", sin CORS); ver `tests/ejecucion/gestor.ts`.
+
+1. Se abre la semilla C con **Editar Preinforme**.
+2. Aparece el aviso "No se pudo cargar desde el gestor documental la descripción de 1 tema(s)", y el MF intentó una sola descarga.
+3. El paso 3 muestra el tema, con su subtema y su hallazgo. En lugar del editor de la descripción hay un aviso (`role="alert"`).
+4. Al **Guardar** (y confirmar), el `PUT tema/:id`, que está bloqueado, lleva el `NuxeoEnlace` original. No hay ningún intento de subir al gestor.
+
+### 5. El editor muestra la imagen del tema y guardar sin cambios no la vuelve a subir (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/descripcion-con-imagen.spec.ts`. El gestor responde un HTML con texto y un PNG embebido.
+
+1. Se abre la semilla C. El editor del tema muestra el texto y la imagen (`img[src^="data:image/png"]`), sin aviso, y el MF hizo una sola descarga.
+2. Al guardar sin cambios, el `PUT tema/:id` reutiliza el `NuxeoEnlace`, sin volver a subir el documento.
+
+### 6. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
 
 Archivo: `tests/semillas/ejecucion-2010.spec.ts`
 

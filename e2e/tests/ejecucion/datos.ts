@@ -30,6 +30,29 @@ export const SEMILLA_RESUMEN_HALLAZGOS = {
   ],
 };
 
+/**
+ * Auditoría interna con el preinforme en creación: el auditor la edita ("Editar Preinforme"). Su tema
+ * guarda la descripción en Nuxeo con un enlace ficticio: los escenarios simulan la respuesta del gestor.
+ */
+export const SEMILLA_EDICION_INFORME = {
+  titulo: 'SEMILLA-E2E Edición de informe',
+  consecutivo: 'SEMILLA-E2E-03',
+  tema: 'TEMA CON IMAGEN SEMILLA E2E',
+  enlaceDescripcion: 'NuxeoEnlace:00000000-0000-4000-8000-00000000e2e1',
+  subtema: 'SUBTEMA SEMILLA E2E',
+  hallazgo: {
+    criterio: 'Resolución No. 129 de 2022 de la Rectoría',
+    titulo: 'Hallazgo de la semilla de edición',
+    descripcion: 'Descripción del hallazgo de la semilla de edición E2E.',
+  },
+};
+
+/** Seguimiento con el informe final en creación y sin temas: el auditor lo edita ("Editar Informe"). */
+export const SEMILLA_SEGUIMIENTO = {
+  titulo: 'SEMILLA-E2E Seguimiento',
+  consecutivo: 'SEMILLA-E2E-04',
+};
+
 /** Auditoría con el programa de trabajo aprobado por el auditado: lista para "Iniciar Ejecución". */
 export const SEMILLA_INICIAR_EJECUCION = {
   titulo: 'SEMILLA-E2E Iniciar ejecución',
