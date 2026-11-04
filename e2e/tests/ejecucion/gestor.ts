@@ -31,6 +31,30 @@ export async function simularGestorCaido(page: Page): Promise<string[]> {
   return atendidas;
 }
 
+/**
+ * Responde la subida al gestor (POST document/uploadAnyFormat) con el enlace indicado, sin escribir en el
+ * ambiente. Se registra en la página, así que tiene prioridad sobre el bloqueo de escrituras del contexto.
+ * Devuelve los documentos recibidos (decodificados) para verificar qué se subió.
+ */
+export async function simularSubidaGestor(page: Page, enlace: string): Promise<{ nombre: string; html: string }[]> {
+  const recibidos: { nombre: string; html: string }[] = [];
+  await page.route((url) => /\/gestor_documental_mid\/v1\/document\/uploadAnyFormat$/.test(url.pathname), (route) => {
+    if (route.request().method() !== 'POST') return route.fallback();
+    for (const doc of route.request().postDataJSON() ?? []) {
+      // El MF envía el HTML en base64 y, además, serializado como JSON (JSON.stringify del base64)
+      const base64 = String(doc.file).replace(/^"|"$/g, '');
+      recibidos.push({ nombre: doc.nombre, html: Buffer.from(base64, 'base64').toString('utf8') });
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ Status: '200', res: { Enlace: enlace } }),
+    });
+  });
+  return recibidos;
+}
+
 /** Responde la descarga con el HTML indicado (en base64, campo `file`, como el gestor). */
 export async function simularGestorConDocumento(page: Page, html: string): Promise<string[]> {
   const atendidas: string[] = [];

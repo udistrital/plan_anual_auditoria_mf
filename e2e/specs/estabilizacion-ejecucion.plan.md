@@ -65,7 +65,16 @@ Archivo: `tests/ejecucion/descripcion-con-imagen.spec.ts`. El gestor responde un
 1. Se abre la semilla C. El editor del tema muestra el texto y la imagen (`img[src^="data:image/png"]`), sin aviso, y el MF hizo una sola descarga.
 2. Al guardar sin cambios, el `PUT tema/:id` reutiliza el `NuxeoEnlace`, sin volver a subir el documento.
 
-### 6. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
+### 6. En seguimiento, un tema nuevo con imagen se guarda con su enlace de Nuxeo (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/seguimiento-tema-con-imagen.spec.ts`. La subida al gestor (`POST document/uploadAnyFormat`) se simula en la página y responde un enlace ficticio; el `POST tema` lo bloquea el marco.
+
+1. En **Ejecución › Seguimiento e Informes**, vigencia `2010`, la semilla D ofrece **Editar Informe**.
+2. En el paso 3 se agrega un tema y se le inserta una imagen PNG con el botón de imagen del editor (selector de archivos real).
+3. Al **Guardar y Continuar**, se sube un HTML con `<img>` al gestor y el `POST tema` lleva `descripcion_titulo: NuxeoEnlace:<enlace>`.
+4. Antes de #940 (C5), el tema con imagen nunca se creaba: el escenario falla por tiempo esperando el `POST tema`.
+
+### 7. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
 
 Archivo: `tests/semillas/ejecucion-2010.spec.ts`
 
