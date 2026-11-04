@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, OnDestroy, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
+import { AbstractControl, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -54,6 +54,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   cargando = false;
   // Guarda por tema el enlace de Nuxeo original y el HTML que se descargó de él
   private readonly documentosNuxeoTema = new Map<string, { enlace: string; html: string }>();
+  // Temas cuya descripción no se pudo descargar del gestor documental: al guardar se conserva su enlace original
+  private readonly descripcionesNoCargadas = new Map<string, string>();
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
@@ -209,6 +211,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   // Construye el formulario reactivo con los datos cargados
   async construirFormulario(): Promise<void> {
     this.documentosNuxeoTema.clear();
+    this.descripcionesNoCargadas.clear();
 
     this.observadores.forEach(o => o.disconnect());
     this.observadores = [];
@@ -244,11 +247,19 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
       if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
         const enlaceOriginal = tema.descripcion_titulo;
-        let html = await this.obtenerDocumentoHTML(enlaceOriginal);
-        html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
-        tema.descripcion_titulo = html;
-        if (tema._id) {
-          this.documentosNuxeoTema.set(tema._id.toString(), { enlace: enlaceOriginal, html });
+        try {
+          let html = await this.obtenerDocumentoHTML(enlaceOriginal);
+          html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+          tema.descripcion_titulo = html;
+          if (tema._id) {
+            this.documentosNuxeoTema.set(tema._id.toString(), { enlace: enlaceOriginal, html });
+          }
+        } catch (error) {
+          // Si el gestor documental falla, el tema se muestra igual (sin su descripción) en vez de dejar vacío el paso
+          console.error(`No se pudo cargar la descripción del tema "${tema.titulo}":`, error);
+          if (tema._id) {
+            this.descripcionesNoCargadas.set(tema._id.toString(), enlaceOriginal);
+          }
         }
       }
 
@@ -267,6 +278,20 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     });
 
     this.actualizarModoSoloLectura();
+
+    if (this.descripcionesNoCargadas.size > 0) {
+      this.alertaService.showAlert(
+        'Descripción no disponible',
+        `No se pudo cargar desde el gestor documental la descripción de ${this.descripcionesNoCargadas.size} tema(s). ` +
+        'Se conserva sin cambios al guardar; intente de nuevo más tarde para editarla.'
+      );
+    }
+  }
+
+  // Indica si la descripción del tema no se pudo descargar del gestor documental
+  descripcionNoDisponible(tema: AbstractControl): boolean {
+    const temaId = tema.get('_id')?.value;
+    return !!temaId && this.descripcionesNoCargadas.has(String(temaId));
   }
 
   get temas(): UntypedFormArray {
@@ -445,8 +470,12 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
         try {
           let descripcion = temaForm.descripcion_titulo;
           const original = this.documentosNuxeoTema.get(String(temaId));
+          const enlaceNoCargado = this.descripcionesNoCargadas.get(String(temaId));
 
-          if (original && descripcion === original.html) {
+          if (enlaceNoCargado) {
+            // La descripción no se pudo descargar: se conserva el documento de Nuxeo tal como estaba
+            descripcion = enlaceNoCargado;
+          } else if (original && descripcion === original.html) {
             // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
             descripcion = original.enlace;
           } else if (this.contieneImagen(descripcion)) {
