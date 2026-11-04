@@ -118,12 +118,20 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   get mensajeBarra(): string {
+    if (this.hallazgosFormulados === 0) {
+      return 'Modo de edición activo. Formule al menos una acción de mejora antes de enviar el plan al auditor.';
+    }
     if (this.hallazgosPendientes.length) {
       const lista = this.hallazgosPendientes.slice(0, 5).join(', ');
       const resto = this.hallazgosPendientes.length > 5 ? '…' : '';
-      return `Modo de edición activo. Recuerde formular acciones para el/los hallazgo(s) ${lista}${resto} antes de enviar al auditor.`;
+      return `Modo de edición activo. Ya puede enviar el plan al auditor. Hallazgo(s) sin acciones (opcional): ${lista}${resto}.`;
     }
     return 'Modo de edición activo. Todos los hallazgos tienen acciones formuladas; puede enviar el plan al auditor.';
+  }
+
+  // La barra de avance se marca como completada (verde) cuando el 100% de los hallazgos tienen acciones
+  get formulacionCompleta(): boolean {
+    return this.totalHallazgos > 0 && this.porcentajeFormulacion === 100;
   }
 
   private usuarioId = 0;
@@ -335,6 +343,17 @@ export class RegistrarPlanComponent implements OnInit {
   enviarAuditor(): void {
     if (this.soloLectura) return;
     if (!this.planMejoramientoId) return;
+
+    // Basta con que al menos un hallazgo tenga al menos una acción de mejora formulada:
+    // de lo contrario el auditor quedaría sin acciones que dictaminar y no podría aprobar
+    // ni devolver el plan (quedaría atascado en REVISION_PLAN_MEJORAMIENTO_AUDITOR).
+    if (this.totalHallazgos === 0 || this.hallazgosFormulados === 0) {
+      this.alertService.showAlert(
+        'Sin acciones formuladas',
+        'Debe formular al menos una acción de mejora antes de enviar el plan a revisión.'
+      );
+      return;
+    }
 
     this.planAuditoriaService
       .get(`plan-mejoramiento-auditor?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true`)

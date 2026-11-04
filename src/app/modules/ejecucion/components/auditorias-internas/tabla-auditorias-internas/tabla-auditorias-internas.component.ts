@@ -15,6 +15,7 @@ import { RolService } from "src/app/core/services/rol.service";
 import { UserService } from "src/app/core/services/user.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { accionesEjecucionFinal, accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { environment } from "src/environments/environment";
 
 @Component({
@@ -200,6 +201,20 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado) {
+      if (estado?.startsWith(prefijo)) {
+        return emojiColorPorPrefijoEstado[prefijo];
+      }
+    }
+    return "⚪";
+  }
+
+  getEstadoConColor(auditoria: any): string {
+    const estado = auditoria.estado_nombre ?? "Sin estado";
+    return `${this.escogerEmojiColorEstado(estado)} ${estado}`;
   }
 
   realizarAccion(auditoria: any, accion: string) {

@@ -43,6 +43,10 @@
                         }
                       </div>
                     }
+                    <!-- Estado con indicador de color -->
+                    @case ('estado') {
+                      <span>{{ getEstadoConColor(row) }}</span>
+                    }
                     <!-- Resto de columnas -->
                     @default {
                       <span>{{ columna.cell(row) }}</span>
