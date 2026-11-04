@@ -197,6 +197,23 @@
   transform: translateY(0);
 }
 
+.descripcion-no-disponible {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px dashed #a11413;
+  border-radius: 4px;
+  background-color: #fff5f5;
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 0.875rem;
+}
+
+.descripcion-no-disponible mat-icon {
+  color: #a11413;
+  flex-shrink: 0;
+}
+
 .quill-editor-custom .ql-toolbar {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;

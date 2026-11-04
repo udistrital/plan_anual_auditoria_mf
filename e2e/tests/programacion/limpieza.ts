@@ -7,6 +7,7 @@
  */
 import { type APIRequestContext, type BrowserContext, type Page, type TestInfo } from '@playwright/test';
 import { environment } from '../../../src/environments/environment.development';
+import { decrypt } from '../../../src/app/shared/utils/util-encrypt';
 
 const CRUD = environment.PLAN_ANUAL_AUDITORIA_SERVICE.replace(/\/$/, '');
 const PARAMETROS = environment.PARAMETROS_SERVICE.replace(/\/$/, '');
@@ -25,9 +26,14 @@ export async function tokenDe(page: Page): Promise<string> {
   return token;
 }
 
-/** Tercero (persona_id) de la cuenta con sesión en la página. */
+/**
+ * Tercero (persona_id) de la cuenta con sesión en la página. El core-mf lo guarda cifrado: se descifra
+ * con la misma utilidad del MF (`UserService.getPersonaId`). Sin persona en la página, `undefined`.
+ */
 export async function personaDe(page: Page): Promise<number | undefined> {
-  const id = Number(await page.evaluate(() => localStorage.getItem('persona_id')));
+  const cifrado = await page.evaluate(() => localStorage.getItem('persona_id'));
+  if (!cifrado) return undefined;
+  const id = Number(decrypt(cifrado));
   return Number.isFinite(id) && id > 0 ? id : undefined;
 }
 
