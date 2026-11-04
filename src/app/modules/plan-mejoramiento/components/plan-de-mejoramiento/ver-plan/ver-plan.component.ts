@@ -303,17 +303,16 @@ export class VerPlanComponent implements OnInit {
       if (!confirmado) return;
 
       const body = {
-        plan_mejoramiento_id:   this.planMejoramientoId,
         usuario_id:             this.usuarioId,
         usuario_rol:            this.role,
         observacion:            'Plan de mejoramiento aprobado',
-        estado_id:              environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.APROBADO_PLAN_MEJORAMIENTO,
         fase_id:                environment.AUDITORIA_FASE.PLAN_MEJORAMIENTO,
         fecha_ejecucion_estado: new Date().toISOString(),
         activo:                 true,
       };
 
-      this.planAuditoriaService.post('plan-mejoramiento-estado', body).subscribe({
+      // El MID genera el no_accion de cada acción y luego registra el estado APROBADO
+      this.planAuditoriaMid.post(`plan-mejoramiento/${this.planMejoramientoId}/aprobar`, body).subscribe({
         next: () => {
           this.alertService.showSuccessAlert('El plan de mejoramiento ha sido aprobado.', 'Aprobado')
             .then(() => this.regresar());

@@ -142,3 +142,51 @@ export interface AuditoriaFormulacionAuditor extends AuditoriaFormulacionPlan {
   acciones_aprobadas: number;
   asignada: boolean;
 }
+
+/** Grupo excluyente de una acción en Gestión de Acciones (lo calcula el MID). */
+export type GrupoAccion = "PENDIENTE_HABILITAR" | "CARGUE_ABIERTO" | "EN_REVISION" | "CALIFICADAS";
+
+// Respuesta de gestion-accion/{auditado/{persona_id}/{cargo_id} | auditor/{persona_id}}/resumen (MID)
+export interface ResumenGestionAcciones {
+  total: number;
+  pendiente_habilitar: number;
+  cargue_abierto: number;
+  en_revision: number;
+  calificadas: number;
+  eficaces: number;
+  en_riesgo: number;
+}
+
+// Elemento de gestion-accion/{auditado/{persona_id}/{cargo_id} | auditor/{persona_id}} (MID)
+export interface AccionGestion {
+  accion_id: string;
+  plan_mejoramiento_id: string;
+  auditoria_id: string;
+  no_auditoria: string;
+  nombre_auditoria: string;
+  tipo_evaluacion_nombre: string;
+  no_hallazgo: string;
+  descripcion_hallazgo: string;
+  no_accion: string;
+  /** "Preventiva" | "Correctiva" | "" */
+  tipo_accion_nombre: string;
+  descripcion_accion: string;
+  /** "" si no hay responsable líder. */
+  dependencia_lider: string;
+  dependencias_apoyo: string[];
+  auditores_plan: string[];
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  /** true = cargue de soportes habilitado para el auditado. */
+  en_revision: boolean;
+  total_soportes: number;
+  calificacion: number | null;
+  fecha_calificacion: string | null;
+  grupo: GrupoAccion;
+  eficaz: boolean;
+  en_riesgo: boolean;
+  /** Días hasta fecha_fin (negativo si venció); null sin fecha_fin. */
+  dias_para_vencer: number | null;
+  /** La persona consultada es auditor del plan (solo vista auditor; false en auditado). */
+  auditor_plan_asignado: boolean;
+}
