@@ -1,18 +1,21 @@
 /**
- * Ejecución › Auditorías internas (auditorias-internas + tabla-auditorias-internas) y el informe
+ * Planeación y Ejecución › Auditorías internas (auditorias-internas + tabla-auditorias-internas: las
+ * dos fases tienen la misma pantalla de listado por vigencia) y el informe de Ejecución
  * (editar-informe: stepper de 4 pasos; el 4 es el resumen de hallazgos, resumen-hallazgos).
- * Rutas: /gestion-auditoria/ejecucion/auditorias-internas y .../editar-informe/:id
+ * Rutas: /gestion-auditoria/<fase>/auditorias-internas y .../ejecucion/auditorias-internas/editar-informe/:id
  */
 import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from '../core/base.page';
 
-export class EjecucionAuditoriasPage extends BasePage {
+export type FaseAuditoriasInternas = 'planeacion' | 'ejecucion';
+
+export class AuditoriasInternasPage extends BasePage {
   readonly selectorVigencia: Locator;
   readonly tabla: Locator;
   readonly filas: Locator;
   readonly menuAcciones: Locator;
 
-  constructor(page: Page) {
+  constructor(page: Page, private readonly fase: FaseAuditoriasInternas) {
     super(page);
     this.selectorVigencia = page.getByRole('combobox', { name: 'Seleccione una vigencia:' });
     this.tabla = page.locator('app-tabla-auditorias-internas table').first();
@@ -21,7 +24,7 @@ export class EjecucionAuditoriasPage extends BasePage {
   }
 
   async abrir() {
-    await this.abrirRuta('/gestion-auditoria/ejecucion/auditorias-internas', this.selectorVigencia);
+    await this.abrirRuta(`/gestion-auditoria/${this.fase}/auditorias-internas`, this.selectorVigencia);
   }
 
   async elegirVigencia(vigencia: string) {
@@ -41,7 +44,13 @@ export class EjecucionAuditoriasPage extends BasePage {
     return (await this.menuAcciones.getByRole('menuitem').allInnerTexts()).map((t) => t.split('\n').pop()!.trim());
   }
 
-  /** Abre el menú de la fila y elige la acción ("Ver Preinforme", "Editar Preinforme", …). */
+  /** Cierra el menú de acciones sin elegir nada. */
+  async cerrarAcciones() {
+    await this.page.keyboard.press('Escape');
+    await expect(this.menuAcciones).toBeHidden();
+  }
+
+  /** Abre el menú de la fila y elige la acción ("Ver Preinforme", "Iniciar Ejecución", …). */
   async accion(fila: Locator, nombre: string) {
     await this.abrirAcciones(fila);
     await this.menuAcciones.getByRole('menuitem', { name: new RegExp(`${nombre}$`) }).click();

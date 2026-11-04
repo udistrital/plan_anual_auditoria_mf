@@ -32,7 +32,22 @@ Archivo: `tests/ejecucion/resumen-hallazgos.spec.ts`
 4. Ninguna descripción larga aparece en la tabla.
 5. No hay escrituras (`escriturasBloqueadas` vacío). Se adjunta una captura del resumen.
 
-### 2. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
+### 2. El auditor asignado inicia la ejecución con su rol (`@planeacion @auditor @lectura`)
+
+Archivo: `tests/planeacion/iniciar-ejecucion-auditor.spec.ts`
+
+1. En **Planeación › Auditorías internas**, vigencia `2010`, el menú de la semilla B incluye **Iniciar Ejecución**.
+2. Al elegirla, pide confirmación ("¿Está seguro(a) de iniciar la ejecución de esta auditoría?").
+3. Al confirmar se intenta `POST …/auditoria-estado` con `estado_id = POR_EJECUTAR`, `fase_id = EJECUCION PRELIMINAR` y `usuario_rol = AUDITOR`. Se adjunta el cuerpo, sin el `usuario_id`.
+4. Esa es la única escritura, y el fixture la bloquea: la semilla B sigue en `APROBADO_PROGRAMA_AUDITADO`.
+
+### 3. El auditor no ve Iniciar Ejecución fuera de su estado (`@planeacion @auditor @lectura`)
+
+Archivo: `tests/planeacion/iniciar-ejecucion-sin-permiso.spec.ts`
+
+1. En la misma pantalla, la semilla A (preinforme en revisión) no ofrece **Iniciar Ejecución**: no tiene menú, o el menú no la incluye.
+
+### 4. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
 
 Archivo: `tests/semillas/ejecucion-2010.spec.ts`
 

@@ -1,10 +1,10 @@
 // spec: e2e/specs/estabilizacion-ejecucion.plan.md
 import { test, expect } from '../../core/fixtures';
-import { EjecucionAuditoriasPage, InformeAuditoriaPage } from '../../pages/ejecucion-auditorias.page';
+import { AuditoriasInternasPage, InformeAuditoriaPage } from '../../pages/auditorias-internas.page';
 import { SEMILLA_RESUMEN_HALLAZGOS as SEMILLA, VIGENCIA_SEMILLA } from './datos';
 
 test('el resumen de hallazgos del preinforme muestra el hallazgo y no su descripción', { tag: ['@ejecucion', '@auditor', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
-  const ejecucion = new EjecucionAuditoriasPage(page);
+  const ejecucion = new AuditoriasInternasPage(page, 'ejecucion');
   const informe = new InformeAuditoriaPage(page);
 
   await test.step(`el auditor abre el preinforme de la auditoría semilla "${SEMILLA.titulo}"`, async () => {
