@@ -99,6 +99,25 @@ export class InformeAuditoriaPage extends BasePage {
     await this.confirmarAlerta();
   }
 
+  /** "Guardar y continuar" del paso 3, aceptando la confirmación. */
+  async guardarYContinuarAspectos() {
+    await this.page.getByRole('button', { name: 'Guardar y continuar', exact: true }).click();
+    expect(await this.textoAlerta()).toContain('¿Está seguro(a) de guardar la información?');
+    await this.confirmarAlerta();
+  }
+
+  /** Agrega un tema al final con su nombre y una imagen en la descripción (botón de imagen del editor). */
+  async agregarTemaConImagen(nombre: string, imagen: { name: string; mimeType: string; buffer: Buffer }) {
+    const antes = await this.temas.count();
+    await this.aspectos.getByRole('button', { name: 'Agregar Tema' }).click();
+    const tema = this.temas.nth(antes);
+    await tema.getByLabel('Nombre del Tema').fill(nombre);
+    const selector = this.page.waitForEvent('filechooser');
+    await tema.locator('quill-editor button.ql-image').click();
+    await (await selector).setFiles(imagen);
+    await expect(tema.locator('quill-editor .ql-editor img')).toHaveCount(1);
+  }
+
   /** Nombre del tema (campo "Nombre del Tema") del nodo indicado. */
   async nombreTema(indice: number): Promise<string> {
     return this.temas.nth(indice).getByLabel('Nombre del Tema').inputValue();

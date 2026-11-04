@@ -55,6 +55,24 @@ export async function simularSubidaGestor(page: Page, enlace: string): Promise<{
   return recibidos;
 }
 
+/**
+ * La subida al gestor falla como el 03/11 (C1): 404 de WSO2 sin cabeceras CORS, de modo que el navegador
+ * ve la misma falla de red. Devuelve los intentos de subida.
+ */
+export async function simularSubidaGestorFallida(page: Page): Promise<string[]> {
+  const intentos: string[] = [];
+  await page.route((url) => /\/gestor_documental_mid\/v1\/document\/uploadAnyFormat$/.test(url.pathname), (route) => {
+    if (route.request().method() !== 'POST') return route.fallback();
+    intentos.push(new URL(route.request().url()).pathname);
+    return route.fulfill({
+      status: 404,
+      contentType: 'application/json',
+      body: JSON.stringify({ fault: { code: 404, message: 'Runtime Error', description: 'No matching resource found for given API Request' } }),
+    });
+  });
+  return intentos;
+}
+
 /** Responde la descarga con el HTML indicado (en base64, campo `file`, como el gestor). */
 export async function simularGestorConDocumento(page: Page, html: string): Promise<string[]> {
   const atendidas: string[] = [];

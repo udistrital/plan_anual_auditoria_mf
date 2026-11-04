@@ -74,7 +74,22 @@ Archivo: `tests/ejecucion/seguimiento-tema-con-imagen.spec.ts`. La subida al ges
 3. Al **Guardar y Continuar**, se sube un HTML con `<img>` al gestor y el `POST tema` lleva `descripcion_titulo: NuxeoEnlace:<enlace>`.
 4. Antes de #940 (C5), el tema con imagen nunca se creaba: el escenario falla por tiempo esperando el `POST tema`.
 
-### 7. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
+### 7. Si la imagen de un tema nuevo no se puede subir al gestor, el guardado lo informa (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/guardado-falla-gestor.spec.ts` (auditoría interna, semilla C). La subida al gestor responde como el 03/11 (404 sin CORS, `simularSubidaGestorFallida`). Los `PUT` de lo que ya existía en la semilla se responden como exitosos, para que el único fallo sea la imagen.
+
+1. Se agrega un tema con una imagen y se pulsa **Guardar y continuar** (con confirmación).
+2. Aparece el modal **"No se guardó todo"**, que dice el tema y la causa ("no se pudo guardar la imagen de la descripción en el gestor documental"). **No** aparece "Guardado exitoso".
+3. Hubo un intento de subida y **ningún** `POST tema`: el tema no se crea sin su imagen.
+4. Se queda en el paso 3, con el tema y su imagen en el formulario para reintentar.
+
+### 8. Lo mismo en seguimiento (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/seguimiento-guardado-falla-gestor.spec.ts` (semilla D). Mismos pasos con **Guardar y Continuar**: modal con el tema y la causa, sin "Guardado exitoso", sin `POST tema` y sin avanzar de paso.
+
+Con el código anterior, los dos escenarios fallan: se muestra "Guardado exitoso".
+
+### 9. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
 
 Archivo: `tests/semillas/ejecucion-2010.spec.ts`
 
