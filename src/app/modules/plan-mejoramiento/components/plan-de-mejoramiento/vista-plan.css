@@ -121,7 +121,12 @@
 .barra-relleno {
   height: 100%;
   background-color: var(--md-primary-500);
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* Dictamen al 100%: la barra se marca como completada en verde */
+.barra-relleno.barra-completa {
+  background-color: #2e7d32;
 }
 
 .contadores {
