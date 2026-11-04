@@ -472,7 +472,7 @@ export class TablaSeguimientoComponent implements OnInit {
         const payload = {
           auditoria_id: auditoria._id,
           usuario_id: this.usuarioId,
-          usuario_rol: [environment.ROL.JEFE, environment.ROL.ADMIN].find(rol => this.rolService.tieneRol(rol)),
+          usuario_rol: [environment.ROL.JEFE, environment.ROL.ADMIN, environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR].find(rol => this.rolService.tieneRol(rol)),
           observacion: "",
           estado_id: environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR,
           fase_id: esSeguimiento ? environment.AUDITORIA_FASE.EJECUCION_FINAL : environment.AUDITORIA_FASE.EJECUCION_PRELIMINAR,
