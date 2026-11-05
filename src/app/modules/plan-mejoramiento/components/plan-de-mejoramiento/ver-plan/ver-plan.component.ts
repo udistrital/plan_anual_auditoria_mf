@@ -81,6 +81,18 @@ export class VerPlanComponent implements OnInit {
       && this.estadosAcciones.some(e => e === this.ESTADO_ACCION.RECHAZADA);
   }
 
+  // Salvaguarda: el auditor puede devolver el plan cuando hay al menos una acción rechazada
+  // o cuando el plan no tiene ninguna acción formulada (plan vacío que de otro modo quedaría
+  // atascado en REVISION_PLAN_MEJORAMIENTO_AUDITOR sin poder aprobarse ni devolverse).
+  get puedeDevolver(): boolean {
+    return this.algunaRechazada || this.estadosAcciones.length === 0;
+  }
+
+  // La barra de avance se marca como completada (verde) cuando el 100% está dictaminado
+  get dictamenCompleto(): boolean {
+    return this.totalAcciones > 0 && this.porcentajeDictamen === 100;
+  }
+
   readonly fuentes: Record<number, string> = {
     1: 'Auditoría Interna',
     2: 'Auditoría Externa',
@@ -325,19 +337,26 @@ export class VerPlanComponent implements OnInit {
   }
 
   rechazar(): void {
-    if (!this.todasRevisadas) {
-      this.alertService.showAlert(
-        'No se puede rechazar el plan',
-        'Debe revisar todas las acciones de mejora antes de rechazar el plan.'
-      );
-      return;
-    }
-    if (!this.algunaRechazada) {
-      this.alertService.showAlert(
-        'No se puede rechazar el plan',
-        'Para rechazar el plan, al menos una acción de mejora debe estar rechazada.'
-      );
-      return;
+    // Un plan sin acciones de mejora que revisar puede devolverse sin exigir revisión previa:
+    // de lo contrario quedaría atascado en REVISION_PLAN_MEJORAMIENTO_AUDITOR sin poder
+    // aprobarse (no hay acciones aprobadas) ni devolverse.
+    const planVacio = this.estadosAcciones.length === 0;
+
+    if (!planVacio) {
+      if (!this.todasRevisadas) {
+        this.alertService.showAlert(
+          'No se puede rechazar el plan',
+          'Debe revisar todas las acciones de mejora antes de rechazar el plan.'
+        );
+        return;
+      }
+      if (!this.algunaRechazada) {
+        this.alertService.showAlert(
+          'No se puede rechazar el plan',
+          'Para rechazar el plan, al menos una acción de mejora debe estar rechazada.'
+        );
+        return;
+      }
     }
 
     const data: DatosModalRechazoPlan = {

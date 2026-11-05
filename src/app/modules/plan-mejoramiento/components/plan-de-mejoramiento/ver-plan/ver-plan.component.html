@@ -56,7 +56,7 @@
             </span>
           </div>
           <div class="barra" aria-hidden="true">
-            <div class="barra-relleno" [style.width.%]="porcentajeDictamen"></div>
+            <div class="barra-relleno" [class.barra-completa]="dictamenCompleto" [style.width.%]="porcentajeDictamen"></div>
           </div>
         </div>
         <div class="contadores">
@@ -195,7 +195,7 @@
           </button>
           @if (mostrarAccionesRevision()) {
             <button mat-stroked-button color="primary" class="boton-secundario" (click)="rechazar()"
-              [disabled]="!algunaRechazada">
+              [disabled]="!puedeDevolver">
               <mat-icon>assignment_return</mat-icon> Devolver con observaciones
             </button>
             <button mat-raised-button color="primary" (click)="aprobar()"

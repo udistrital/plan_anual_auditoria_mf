@@ -19,6 +19,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import { MatDialog } from "@angular/material/dialog";
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEstado";
+import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
 import { environment } from "src/environments/environment";
 
 @Component({
@@ -165,6 +166,20 @@ export class TablaSeguimientosComponent implements OnInit {
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
+  }
+
+  escogerEmojiColorEstado(estado: string): string {
+    for (const prefijo in emojiColorPorPrefijoEstado) {
+      if (estado?.startsWith(prefijo)) {
+        return emojiColorPorPrefijoEstado[prefijo];
+      }
+    }
+    return "⚪";
+  }
+
+  getEstadoConColor(seguimiento: any): string {
+    const estado = seguimiento.estado_nombre || seguimiento.estado_id || "Sin estado";
+    return `${this.escogerEmojiColorEstado(String(estado))} ${estado}`;
   }
 
   realizarAccion(auditoria: any, accion: string) {
