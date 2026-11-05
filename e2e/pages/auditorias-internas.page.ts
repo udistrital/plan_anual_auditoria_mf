@@ -113,9 +113,9 @@ export class InformeAuditoriaPage extends BasePage {
     const tema = this.temas.nth(antes);
     await tema.getByLabel('Nombre del Tema').fill(nombre);
     const selector = this.page.waitForEvent('filechooser');
-    await tema.locator('quill-editor button.ql-image').click();
+    await this.filasTema(antes).locator('quill-editor button.ql-image').click();
     await (await selector).setFiles(imagen);
-    await expect(tema.locator('quill-editor .ql-editor img')).toHaveCount(1);
+    await expect(this.editorDescripcion(antes).locator('img')).toHaveCount(1);
   }
 
   /** Nombre del tema (campo "Nombre del Tema") del nodo indicado. */
@@ -123,14 +123,22 @@ export class InformeAuditoriaPage extends BasePage {
     return this.temas.nth(indice).getByLabel('Nombre del Tema').inputValue();
   }
 
+  /**
+   * Filas propias del tema (nombre y descripción), sin las de sus subtemas: desde #942 el subtema también
+   * tiene editor y aviso de descripción, dentro de `.node-children`.
+   */
+  private filasTema(indice: number): Locator {
+    return this.temas.nth(indice).locator(':scope > :not(.node-children)');
+  }
+
   /** Aviso de que la descripción del tema no se pudo cargar desde el gestor documental. */
   avisoDescripcionNoDisponible(indice: number): Locator {
-    return this.temas.nth(indice).getByRole('alert').filter({ hasText: 'No se pudo cargar la descripción' });
+    return this.filasTema(indice).getByRole('alert').filter({ hasText: 'No se pudo cargar la descripción' });
   }
 
   /** Editor de texto enriquecido de la descripción del tema. */
   editorDescripcion(indice: number): Locator {
-    return this.temas.nth(indice).locator('quill-editor .ql-editor').first();
+    return this.filasTema(indice).locator('quill-editor .ql-editor');
   }
 
   /** Subtemas y hallazgos del tema (cantidad de campos "Nombre del Subtema" y "Hallazgo"). */
