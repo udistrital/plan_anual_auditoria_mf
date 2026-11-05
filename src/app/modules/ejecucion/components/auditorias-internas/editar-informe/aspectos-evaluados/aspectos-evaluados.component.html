@@ -14,26 +14,26 @@
     @for (tema of temas.controls; track tema; let i = $index) {
       <div class="tree-node"
         [formGroupName]="i">
+        <!-- Título del tema (con número), y debajo nombre y descripción, igual que subtema y hallazgo -->
         <div class="node-row tema-row">
           <span class="node-dot tema-dot"></span>
           <span class="nivel-label">Tema</span>
           <span class="indice">{{ i + 2 }}</span>
-          <mat-form-field appearance="outline" class="node-input">
-            <mat-label>Nombre del Tema</mat-label>
-            <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
-            @if (tema.get('nombre')?.hasError('required')) {
-              <mat-error>El nombre es requerido</mat-error>
-            }
-          </mat-form-field>
           @if (!soloLectura) {
             <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
               <mat-icon>delete</mat-icon>
             </button>
           }
         </div>
-        <div class="node-row tema-row">
-          <span class="nivel-label">Descripción</span>
-          <div class="node-input editor-wrapper">
+        <div class="node-body">
+          <mat-form-field appearance="outline" class="hallazgo-input">
+            <mat-label>Nombre del Tema</mat-label>
+            <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
+            @if (tema.get('nombre')?.hasError('required')) {
+              <mat-error>El nombre es requerido</mat-error>
+            }
+          </mat-form-field>
+          <div class="tema-desc-editor">
             <label class="descripcion-label">Descripción del Tema</label>
             @if (descripcionNoDisponible(tema)) {
               <div class="descripcion-no-disponible" role="alert">
@@ -73,22 +73,57 @@
           @for (subtema of getSubtemas(i).controls; track subtema; let j = $index) {
             <div class="tree-node"
               [formGroupName]="j">
+              <!-- Título del subtema (con número), y debajo nombre y descripción, igual que el hallazgo -->
               <div class="node-row subtema-row">
                 <span class="node-dot subtema-dot"></span>
                 <span class="nivel-label">Subtema</span>
                 <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
-                <mat-form-field appearance="outline" class="node-input">
+                @if (!soloLectura) {
+                  <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+              <div class="node-body">
+                <mat-form-field appearance="outline" class="hallazgo-input">
                   <mat-label>Nombre del Subtema</mat-label>
                   <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
                   @if (subtema.get('nombre')?.hasError('required')) {
                     <mat-error>El nombre es requerido</mat-error>
                   }
                 </mat-form-field>
-                @if (!soloLectura) {
-                  <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                }
+                <div class="subtema-desc-editor">
+                  <label class="descripcion-label">Descripción del Subtema (opcional)</label>
+                  @if (descripcionSubtemaNoDisponible(subtema)) {
+                    <div class="descripcion-no-disponible" role="alert">
+                      <mat-icon>cloud_off</mat-icon>
+                      <span>No se pudo cargar la descripción desde el gestor documental. Se conserva sin cambios al guardar.</span>
+                    </div>
+                  } @else {
+                    <quill-editor formControlName="descripcion" [modules]="editorModules" [placeholder]="placeholder" (onEditorCreated)="onEditorCreated($event)" class="quill-editor-custom">
+                      <div quill-editor-toolbar class="toolbar">
+                        <span class="ql-formats">
+                          <button class="ql-bold" [title]="'Bold'"></button>
+                          <button class="ql-italic" [title]="'Italic'"></button>
+                          <button class="ql-underline" [title]="'Underline'"></button>
+                        </span>
+                        <span class="ql-formats">
+                          <button class="ql-list" value="ordered"></button>
+                          <button class="ql-list" value="bullet"></button>
+                        </span>
+                        <span class="ql-formats">
+                          <button class="ql-align" value=""></button>
+                          <button class="ql-align" value="center"></button>
+                          <button class="ql-align" value="right"></button>
+                          <button class="ql-align" value="justify"></button>
+                        </span>
+                        <span class="ql-formats">
+                          <button class="ql-image" [title]="'Insert Image'"></button>
+                        </span>
+                      </div>
+                    </quill-editor>
+                  }
+                </div>
               </div>
               <!-- Hijos: Hallazgos -->
               <div class="node-children" formArrayName="hallazgos">

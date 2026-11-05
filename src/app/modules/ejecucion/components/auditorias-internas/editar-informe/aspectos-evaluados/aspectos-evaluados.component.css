@@ -121,11 +121,6 @@
   white-space: nowrap;
 }
 
-/* ── Inputs en el nodo ── */
-.node-input {
-  flex-grow: 1;
-}
-
 .hallazgo-row {
   margin-bottom: 6px;
 }
@@ -161,13 +156,6 @@
 }
 
 /* ── Estilos para Quill ── */
-
-.node-input.editor-wrapper {
-  flex-grow: 1;
-  margin-top: 8px;
-  margin-bottom: 30px;
-  margin-left: 12px;
-}
 
 .quill-editor-custom {
   width: 94.5%;
@@ -229,4 +217,22 @@
 
 ::ng-deep .ql-editor {
   font-size: 16px;
+}
+
+/* ── Tema y subtema: nombre y descripción debajo del título, a ancho completo ── */
+.tema-desc-editor,
+.subtema-desc-editor {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.tema-desc-editor .descripcion-label,
+.subtema-desc-editor .descripcion-label {
+  margin-left: 0;
+}
+
+.tema-desc-editor .quill-editor-custom,
+.subtema-desc-editor .quill-editor-custom {
+  display: block;
+  width: 100%;
 }
