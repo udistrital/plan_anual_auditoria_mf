@@ -155,6 +155,24 @@ export class InformeAuditoriaPage extends BasePage {
     await expect(this.tablaResumen).toBeVisible({ timeout: 60_000 });
   }
 
+  /**
+   * "Ver informe preliminar" (paso 4): el MID genera el PDF (GET plantilla/informe-auditoria/:auditoriaId) y el
+   * MF lo abre en un modal. Devuelve el PDF tal como lo respondió el MID.
+   */
+  async verInformePreliminar(): Promise<Buffer> {
+    const respuesta = this.page.waitForResponse(
+      (r) => r.request().method() === 'GET' && /\/plantilla\/informe-auditoria\/[0-9a-f]{24}$/.test(new URL(r.url()).pathname),
+      { timeout: 120_000 },
+    );
+    await this.page.getByRole('button', { name: 'Ver informe preliminar' }).click();
+    const r = await respuesta;
+    expect(r.status(), 'el MID genera el preinforme').toBe(200);
+    const base64 = String((await r.json())?.Data ?? '');
+    expect(base64, 'el MID devuelve el PDF en Data').not.toBe('');
+    await expect(this.page.locator('mat-dialog-container')).toBeVisible({ timeout: 60_000 });
+    return Buffer.from(base64, 'base64');
+  }
+
   /** Filas del resumen como { numero, criterio, descripcion } (en el orden de las columnas). */
   async resumen(): Promise<{ numero: string; criterio: string; descripcion: string }[]> {
     const filas: { numero: string; criterio: string; descripcion: string }[] = [];
