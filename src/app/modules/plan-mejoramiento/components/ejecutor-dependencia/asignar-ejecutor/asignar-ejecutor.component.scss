@@ -1,0 +1,34 @@
+.subtitulo {
+  color: #555;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+/* Caja de búsqueda dentro del panel del mat-select */
+.select-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+
+  input {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 6px 10px;
+    outline: none;
+    font-size: 0.9rem;
+
+    &:focus {
+      border-color: var(--md-primary-500);
+    }
+  }
+}
+
+.opcion-detalle {
+  color: #6c757d;
+}

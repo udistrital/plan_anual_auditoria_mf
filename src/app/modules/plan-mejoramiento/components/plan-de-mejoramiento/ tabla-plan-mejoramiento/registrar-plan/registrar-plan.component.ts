@@ -124,7 +124,7 @@ export class RegistrarPlanComponent implements OnInit {
     if (this.hallazgosPendientes.length) {
       const lista = this.hallazgosPendientes.slice(0, 5).join(', ');
       const resto = this.hallazgosPendientes.length > 5 ? '…' : '';
-      return `Modo de edición activo. Ya puede enviar el plan al auditor. Hallazgo(s) sin acciones (opcional): ${lista}${resto}.`;
+      return `Modo de edición activo. Recuerde formular acciones para el/los hallazgo(s) ${lista}${resto} antes de enviar al auditor.`;
     }
     return 'Modo de edición activo. Todos los hallazgos tienen acciones formuladas; puede enviar el plan al auditor.';
   }

@@ -6,6 +6,8 @@ import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
 import { FormulacionPlanesComponent } from './components/formulacion-planes/formulacion-planes.component';
+import { ConsultaEjecutoresComponent } from './components/ejecutor-dependencia/consulta-ejecutores/consulta-ejecutores.component';
+import { AsignarEjecutorComponent } from './components/ejecutor-dependencia/asignar-ejecutor/asignar-ejecutor.component';
 
 const routes: Routes = [
   {
@@ -47,6 +49,19 @@ const routes: Routes = [
   {
     path: 'formulacion-planes',
     component: FormulacionPlanesComponent,
+  },
+  {
+    path: 'ejecutor-dependencia',
+    component: ConsultaEjecutoresComponent,
+  },
+  {
+    path: 'ejecutor-dependencia',
+    children: [
+      {
+        path: 'asignar-ejecutor',
+        component: AsignarEjecutorComponent,
+      },
+    ],
   },
 ];
 

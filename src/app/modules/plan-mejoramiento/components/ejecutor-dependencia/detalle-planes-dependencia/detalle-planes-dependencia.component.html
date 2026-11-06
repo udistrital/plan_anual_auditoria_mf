@@ -1,0 +1,133 @@
+<h2 mat-dialog-title style="color: var(--md-primary-700)">
+  Planes de Mejoramiento
+</h2>
+
+<mat-dialog-content>
+  <div class="cabecera-detalle fondo-acento-50 mb-3">
+    <div>
+      <mat-icon>apartment</mat-icon>
+      <span class="ms-2">
+        <strong>{{ data.dependencia_nombre }}</strong>
+        (Código: {{ data.dependencia_id }})
+      </span>
+    </div>
+    <div class="mt-2">
+      <mat-icon>person</mat-icon>
+      <span class="ms-2">Ejecutor(es): {{ nombresEjecutores }}</span>
+    </div>
+  </div>
+
+  @if (!hayEjecutores) {
+    <div class="aviso-sin-ejecutores mb-3">
+      <mat-icon>warning</mat-icon>
+      <span class="ms-2">
+        Esta dependencia no tiene ejecutores vigentes. Asigne primero un ejecutor
+        a la dependencia para poder asignarle planes.
+      </span>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="d-flex justify-content-center my-4">
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="40"
+      ></mat-progress-spinner>
+    </div>
+  }
+
+  <div class="table-container rounded-table table-scroll">
+    <table mat-table [dataSource]="dataSource">
+      @for (columna of planesConstructorTabla; track columna) {
+        <ng-container [matColumnDef]="columna.columnDef">
+          <th mat-header-cell *matHeaderCellDef>
+            <strong>{{ columna.header }}</strong>
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let plan; let i = index"
+            [ngClass]="{ 'even-row': i % 2 === 0 }"
+          >
+            @if (columna.columnDef; as colDef) {
+              @switch (colDef) {
+                @case ('apertura') {
+                  {{ plan.fecha_apertura | date : "mediumDate" }}
+                }
+                @case ('limite') {
+                  {{ plan.fecha_limite | date : "mediumDate" }}
+                }
+                @case ('estado') {
+                  <span class="status-badge">{{ columna.cell(plan) }}</span>
+                }
+                @case ('ejecutores') {
+                  @if (!plan.ejecutores || plan.ejecutores.length === 0) {
+                    <span class="text-muted">Sin asignar</span>
+                  } @else {
+                    @for (ej of plan.ejecutores; track ej.ejecutor_plan_id) {
+                      <span class="chip-ejecutor">
+                        <mat-icon class="chip-icon">person</mat-icon>
+                        {{ ej.usuario_nombre }}
+                      </span>
+                    }
+                  }
+                }
+                @case ('acciones') {
+                  <button
+                    mat-stroked-button
+                    color="primary"
+                    [matMenuTriggerFor]="menuAcciones"
+                    [disabled]="guardando() || !hayEjecutores"
+                  >
+                    <mat-icon>{{ getIconoAccion('Gestionar') }}</mat-icon>
+                    Gestionar
+                  </button>
+                  <mat-menu #menuAcciones="matMenu">
+                    <!-- Asignar: ejecutores de la dependencia que aún no tienen el plan -->
+                    @for (ej of ejecutoresDisponibles(plan); track ej._id) {
+                      <button mat-menu-item (click)="asignarPlan(plan, ej)">
+                        <mat-icon color="primary">{{
+                          getIconoAccion('Asignar')
+                        }}</mat-icon>
+                        <span>Asignar a {{ ej.usuario_nombre }}</span>
+                      </button>
+                    }
+                    <!-- Desasignar: ejecutores que ya tienen el plan -->
+                    @for (ej of plan.ejecutores; track ej.ejecutor_plan_id) {
+                      <button mat-menu-item (click)="quitarAsignacion(plan, ej)">
+                        <mat-icon color="warn">{{
+                          getIconoAccion('Desasignar')
+                        }}</mat-icon>
+                        <span>Desasignar a {{ ej.usuario_nombre }}</span>
+                      </button>
+                    }
+                  </mat-menu>
+                }
+                @default {
+                  <span>{{ columna.cell(plan) }}</span>
+                }
+              }
+            }
+          </td>
+        </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="tablaColumnas"></tr>
+      <tr mat-row *matRowDef="let row; columns: tablaColumnas"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td
+          class="mat-cell text-center py-4"
+          [attr.colspan]="tablaColumnas.length"
+        >
+          @if (!cargando()) {
+            Esta dependencia no tiene planes de mejoramiento registrados.
+          }
+        </td>
+      </tr>
+    </table>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button color="primary" (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

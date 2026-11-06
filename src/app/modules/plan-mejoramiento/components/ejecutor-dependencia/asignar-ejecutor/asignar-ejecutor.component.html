@@ -1,0 +1,124 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12 my-2">
+      <p>
+        Plan de Mejoramiento / Ejecutores por Dependencia /
+        <strong>Asignar Ejecutor</strong>
+      </p>
+    </div>
+  </div>
+
+  <mat-card class="p-3">
+    <mat-card-content>
+      <div class="d-flex justify-content-between align-items-center my-2">
+        <h2 style="color: var(--md-primary-700)">Asignar Ejecutor</h2>
+        <button mat-stroked-button color="primary" (click)="volver()">
+          <mat-icon>arrow_back</mat-icon> Regresar
+        </button>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <div
+            class="d-flex justify-content-center align-items-center fondo-acento-50 mt-3 mb-3"
+          >
+            <mat-icon>info</mat-icon>
+            <p class="mx-2 mb-0">
+              Seleccione la dependencia y la persona que asumirá el rol de
+              Ejecutor. Puede escribir dentro de cada lista para filtrar.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="form" class="row">
+        <!-- Selector de dependencia -->
+        <mat-form-field appearance="outline" class="col-12 col-md-6">
+          <mat-label>Dependencia</mat-label>
+          <mat-icon matPrefix color="primary">apartment</mat-icon>
+          <mat-select
+            formControlName="dependencia_id"
+            (openedChange)="$event || filtrarDependencias('')"
+            required
+          >
+            <!-- Caja de búsqueda interna -->
+            <div class="select-search">
+              <input
+                matInput
+                type="text"
+                placeholder="Buscar dependencia..."
+                (keyup)="filtrarDependencias($any($event.target).value)"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
+            @if (cargandoDependencias()) {
+              <mat-option disabled>Cargando dependencias...</mat-option>
+            }
+            @for (dep of dependenciasFiltradas; track dep.id) {
+              <mat-option [value]="dep.id">{{ dep.nombre }}</mat-option>
+            }
+            @if (!cargandoDependencias() && dependenciasFiltradas.length === 0) {
+              <mat-option disabled>Sin resultados</mat-option>
+            }
+          </mat-select>
+          @if (form.get('dependencia_id')?.hasError('required')) {
+            <mat-error>La dependencia es obligatoria.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Selector de ejecutor -->
+        <mat-form-field appearance="outline" class="col-12 col-md-6">
+          <mat-label>Persona ejecutora</mat-label>
+          <mat-icon matPrefix color="primary">person</mat-icon>
+          <mat-select
+            formControlName="usuario_id"
+            (openedChange)="$event || filtrarEjecutores('')"
+            required
+          >
+            <div class="select-search">
+              <input
+                matInput
+                type="text"
+                placeholder="Buscar por nombre o documento..."
+                (keyup)="filtrarEjecutores($any($event.target).value)"
+                (click)="$event.stopPropagation()"
+              />
+            </div>
+            @if (cargandoEjecutores()) {
+              <mat-option disabled>Cargando personas...</mat-option>
+            }
+            @for (ej of ejecutoresFiltrados; track ej.usuario_id) {
+              <mat-option [value]="ej.usuario_id">
+                {{ ej.nombre }}
+                <small class="opcion-detalle">
+                  — {{ ej.documento }} ({{ ej.rol_usuario }})
+                </small>
+              </mat-option>
+            }
+            @if (!cargandoEjecutores() && ejecutoresFiltrados.length === 0) {
+              <mat-option disabled>Sin resultados</mat-option>
+            }
+          </mat-select>
+          @if (form.get('usuario_id')?.hasError('required')) {
+            <mat-error>Debe seleccionar una persona.</mat-error>
+          }
+        </mat-form-field>
+      </form>
+
+      <!-- Acciones -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button mat-stroked-button color="primary" (click)="volver()">
+          Cancelar
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          [disabled]="guardando"
+          (click)="confirmar()"
+        >
+          <mat-icon>save</mat-icon> Asignar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

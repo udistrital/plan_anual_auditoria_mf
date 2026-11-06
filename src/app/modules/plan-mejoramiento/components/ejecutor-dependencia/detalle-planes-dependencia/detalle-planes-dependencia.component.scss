@@ -1,0 +1,97 @@
+.cabecera-detalle {
+  display: flex;
+  flex-direction: column;
+
+  div {
+    display: flex;
+    align-items: center;
+  }
+
+  .ms-2 {
+    margin-left: 8px;
+  }
+}
+
+table {
+  width: 100%;
+}
+
+.even-row {
+  background-color: #f9f9f9;
+}
+
+.mat-mdc-header-cell {
+  color: var(--md-primary-900);
+}
+
+.mat-column-estado {
+  text-align: center;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 500;
+  display: inline-block;
+  min-width: 90px;
+  text-align: center;
+  background-color: var(--md-accent-50);
+  color: var(--md-accent-900);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mat-column-acciones {
+  text-align: center;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+/* Chips de ejecutor asignado a un plan */
+.chip-ejecutor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--md-accent-50);
+  color: var(--md-accent-900);
+  border-radius: 16px;
+  padding: 2px 4px 2px 10px;
+  margin: 2px 4px 2px 0;
+  font-size: 0.85rem;
+
+  .chip-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .chip-remove {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+/* Aviso cuando la dependencia no tiene ejecutores vigentes */
+.aviso-sin-ejecutores {
+  display: flex;
+  align-items: center;
+  background-color: #fff4e5;
+  color: #8a5a00;
+  border-radius: 10px;
+  padding: 12px 15px;
+
+  .ms-2 {
+    margin-left: 8px;
+  }
+}

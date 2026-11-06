@@ -29,6 +29,9 @@ import { VistaAuditadoComponent } from './components/formulacion-planes/vista-au
 import { VistaAuditorComponent } from './components/formulacion-planes/vista-auditor/vista-auditor.component';
 import { VistaAuditadoAccionesComponent } from './components/gestion-acciones/vista-auditado/vista-auditado-acciones.component';
 import { VistaAuditorAccionesComponent } from './components/gestion-acciones/vista-auditor/vista-auditor-acciones.component';
+import { ConsultaEjecutoresComponent } from './components/ejecutor-dependencia/consulta-ejecutores/consulta-ejecutores.component';
+import { AsignarEjecutorComponent } from './components/ejecutor-dependencia/asignar-ejecutor/asignar-ejecutor.component';
+import { DetallePlanesDependenciaComponent } from './components/ejecutor-dependencia/detalle-planes-dependencia/detalle-planes-dependencia.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +58,9 @@ import { VistaAuditorAccionesComponent } from './components/gestion-acciones/vis
     VistaAuditorComponent,
     VistaAuditadoAccionesComponent,
     VistaAuditorAccionesComponent,
+    ConsultaEjecutoresComponent,
+    AsignarEjecutorComponent,
+    DetallePlanesDependenciaComponent,
   ],
   imports: [
     CommonModule,
