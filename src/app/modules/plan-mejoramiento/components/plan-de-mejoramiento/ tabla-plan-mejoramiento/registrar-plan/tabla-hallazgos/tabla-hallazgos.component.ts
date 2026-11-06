@@ -61,6 +61,8 @@ export interface ResultadoModalAccion {
   };
   responsablesNuevos: { dependencia_id: number; dependencia_lider: boolean }[];
   responsablesAEliminar: string[];
+  /** Responsables que siguen pero cambian entre líder y apoyo (#947) */
+  responsablesActualizar: { _id: string; dependencia_lider: boolean }[];
 }
 
 export interface FilaTabla {
@@ -539,6 +541,7 @@ export class TablaHallazgosComponent implements OnInit {
             accionAnterior.accionId!,
             resultado.responsablesNuevos,
             resultado.responsablesAEliminar,
+            resultado.responsablesActualizar,
             () => {
               const finalizar = () => {
                 this.recargarTrasCambio();
@@ -787,6 +790,7 @@ export class TablaHallazgosComponent implements OnInit {
     accionId: string,
     nuevos: { dependencia_id: number; dependencia_lider: boolean }[],
     aEliminar: string[],
+    aActualizar: { _id: string; dependencia_lider: boolean }[],
     callback: () => void
   ): void {
     const creaciones = nuevos.map(r =>
@@ -804,7 +808,14 @@ export class TablaHallazgosComponent implements OnInit {
         .pipe(catchError(err => { console.error('Error eliminar responsable:', err); return of(null); }))
     );
 
-    const todas = [...creaciones, ...eliminaciones];
+    // Cambio de rol líder ↔ apoyo de un responsable que ya existía
+    const actualizaciones = aActualizar.map(r =>
+      this.planAuditoriaService
+        .put(`responsable-accion/${r._id}`, { dependencia_lider: r.dependencia_lider } as any)
+        .pipe(catchError(err => { console.error('Error actualizar responsable:', err); return of(null); }))
+    );
+
+    const todas = [...creaciones, ...eliminaciones, ...actualizaciones];
     if (!todas.length) { callback(); return; }
 
     forkJoin(todas).subscribe({ next: () => callback(), error: () => callback() });

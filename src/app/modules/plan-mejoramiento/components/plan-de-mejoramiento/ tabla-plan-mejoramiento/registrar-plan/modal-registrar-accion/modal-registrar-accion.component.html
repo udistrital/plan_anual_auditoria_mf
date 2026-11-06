@@ -173,14 +173,34 @@
         <span>4. Asignación de dependencias</span>
       </div>
       <div class="seccion-cuerpo">
-        <span class="etiqueta">Dependencia líder de la acción (responsable principal de ejecución)</span>
-        <div class="tarjeta-lider mb-3">
-          <mat-icon>stars</mat-icon>
-          <span class="valor">{{ dependenciaLider || 'Sin dependencia líder' }}</span>
-          <span class="chip-lider ms-auto">Líder</span>
-        </div>
+        <fieldset class="lista-lideres">
+          <legend class="etiqueta">Dependencias líderes de la acción (responsables principales de ejecución) *</legend>
+          @for (dep of candidatasLider; track dep.id) {
+            <div class="tarjeta-lider" [class.inactiva]="!esLider(dep.id)">
+              <mat-icon>{{ esLider(dep.id) ? 'stars' : 'domain' }}</mat-icon>
+              <span class="valor">{{ dep.nombre }}</span>
+              <mat-slide-toggle class="ms-auto" color="primary" labelPosition="before"
+                [checked]="esLider(dep.id)" [disabled]="liderFijo"
+                (change)="alternarLider(dep.id, $event.checked)"
+                [aria-label]="'Líder: ' + dep.nombre">Líder</mat-slide-toggle>
+            </div>
+          } @empty {
+            <small class="texto-secundario">{{ cargandoDependencias ? 'Cargando dependencias…' : 'La auditoría no tiene dependencias asociadas.' }}</small>
+          }
+        </fieldset>
+        @if (candidatasLider.length && lideres.size === 0) {
+          <mat-error class="d-block mb-2">Seleccione al menos una dependencia líder.</mat-error>
+        }
 
-        <span class="etiqueta">Dependencias corresponsables / apoyo *</span>
+        <span class="etiqueta mt-3" id="etiquetaApoyo">¿Vincular dependencias corresponsables / de apoyo?</span>
+        <mat-radio-group class="d-flex espacio-2 mb-2" aria-labelledby="etiquetaApoyo"
+          [value]="vincularApoyo" (change)="cambiarVincularApoyo($event.value)">
+          <mat-radio-button color="primary" [value]="false">No</mat-radio-button>
+          <mat-radio-button color="primary" [value]="true">Sí</mat-radio-button>
+        </mat-radio-group>
+
+        @if (vincularApoyo) {
+        <span class="etiqueta">Dependencias corresponsables / apoyo (opcional)</span>
         <div class="chips-dependencias mb-2">
           @for (resp of responsablesAgregados; track resp.id; let i = $index) {
             <span class="chip-dependencia">
@@ -217,6 +237,7 @@
             <mat-icon>add_circle</mat-icon> Vincular dependencia
           </button>
         </div>
+        }
       </div>
     </section>
 

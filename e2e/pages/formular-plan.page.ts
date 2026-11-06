@@ -71,6 +71,16 @@ export class ModalAccionDialog extends BasePage {
   readonly errorCausa: Locator;
   readonly botonGuardar: Locator;
   readonly botonDescartar: Locator;
+  /** Interruptores «Líder» de la sección 4 (uno por dependencia candidata, #947) */
+  readonly interruptoresLider: Locator;
+  readonly errorLider: Locator;
+  readonly apoyoNo: Locator;
+  readonly apoyoSi: Locator;
+  /** Selector y botón para vincular dependencias de apoyo (solo con «Sí») */
+  readonly selectorApoyo: Locator;
+  readonly botonVincular: Locator;
+  readonly chipsApoyo: Locator;
+  readonly estadoFormulario: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -84,6 +94,19 @@ export class ModalAccionDialog extends BasePage {
     this.errorCausa = campoCausa.locator('mat-error');
     this.botonGuardar = this.dialogo.getByRole('button', { name: /Guardar acción/ });
     this.botonDescartar = this.dialogo.getByRole('button', { name: /Descartar/ });
+    this.interruptoresLider = this.dialogo.getByRole('switch', { name: /^Líder: / });
+    this.errorLider = this.dialogo.getByText('Seleccione al menos una dependencia líder.');
+    const grupoApoyo = this.dialogo.getByRole('radiogroup', { name: /Vincular dependencias corresponsables/ });
+    this.apoyoNo = grupoApoyo.getByRole('radio', { name: 'No' });
+    this.apoyoSi = grupoApoyo.getByRole('radio', { name: 'Sí' });
+    this.selectorApoyo = this.dialogo.locator('app-search-selection');
+    this.botonVincular = this.dialogo.getByRole('button', { name: /Vincular dependencia/ });
+    this.chipsApoyo = this.dialogo.locator('.chip-dependencia');
+    this.estadoFormulario = this.dialogo.locator('.estado-formulario');
+  }
+
+  interruptorLider(nombreDependencia: string): Locator {
+    return this.dialogo.getByRole('switch', { name: `Líder: ${nombreDependencia}` });
   }
 
   async esperarAbierto() {
@@ -91,6 +114,8 @@ export class ModalAccionDialog extends BasePage {
     // Fin de la animación de apertura (Material agrega mdc-dialog--open) y de la carga de dependencias
     await expect(this.dialogo).toHaveClass(/mdc-dialog--open/);
     await expect(this.dialogo.locator('mat-spinner, mat-progress-spinner')).toHaveCount(0, { timeout: 30_000 });
+    // Las dependencias (Oikos) llegan después de abrir: hasta entonces la sección 4 dice «Cargando dependencias…»
+    await expect(this.dialogo.getByText('Cargando dependencias…')).toHaveCount(0, { timeout: 60_000 });
   }
 
   async escribirCausa(texto: string) {
