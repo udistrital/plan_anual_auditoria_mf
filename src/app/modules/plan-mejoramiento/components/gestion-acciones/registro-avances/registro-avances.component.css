@@ -151,7 +151,7 @@
 
 .linea-contexto {
   display: grid;
-  grid-template-columns: 120px minmax(0, 1fr) auto;
+  grid-template-columns: 120px minmax(0, 1fr);
   gap: 12px;
   align-items: baseline;
 }
@@ -379,7 +379,7 @@
   :host ::ng-deep mat-card-content > .d-flex.justify-content-between > button { width: 100%; }
 
   .encabezado { grid-template-columns: minmax(0, 1fr); }
-  .linea-contexto { grid-template-columns: minmax(0, 1fr) auto; }
+  .linea-contexto { grid-template-columns: minmax(0, 1fr); }
   .linea-contexto .etiqueta { grid-column: 1 / -1; }
   .datos-clave { grid-template-columns: 1fr; }
   .evidencia { grid-template-columns: 36px minmax(0, 1fr); }

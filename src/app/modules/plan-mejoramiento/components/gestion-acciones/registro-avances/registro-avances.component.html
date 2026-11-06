@@ -70,12 +70,11 @@
         <div class="linea-contexto">
           <span class="etiqueta">Hallazgo {{ hallazgo?.no_hallazgo ?? '' }}</span>
           <p class="recorte mb-0">{{ hallazgo?.descripcion || '—' }}</p>
-          <button type="button" class="enlace" (click)="abrirFicha('hallazgo')">Ver hallazgo</button>
         </div>
+        <!-- «Ver hallazgo» y «Ver acción» se quitaron (#947): el detalle se consulta con «Ficha de la acción» -->
         <div class="linea-contexto">
           <span class="etiqueta">Acción planteada</span>
           <p class="recorte recorte-dos mb-0">{{ accion?.descripcion || '—' }}</p>
-          <button type="button" class="enlace" (click)="abrirFicha('accion')">Ver acción</button>
         </div>
       </div>
       <div class="datos-clave">

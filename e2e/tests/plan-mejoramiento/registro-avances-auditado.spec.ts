@@ -34,8 +34,7 @@ test('el auditado consulta el registro de avances de una acción', { tag: ['@pla
   });
 
   await test.step('la causa de la ficha es la que escribió la dependencia en la acción, no el criterio de fase 3', async () => {
-    await registro.abrirFicha();
-    await registro.ficha.pestana('Hallazgo').click();
+    await registro.abrirFichaEnHallazgo();
     const causa = String(accion.causa ?? '').trim();
     await expect(registro.ficha.dato('Causa')).toHaveText(causa || '—');
     const criterio = String(accion.hallazgo_id?.criterio ?? '').trim();
@@ -44,7 +43,8 @@ test('el auditado consulta el registro de avances de una acción', { tag: ['@pla
     await registro.ficha.cerrar();
   });
 
-  await test.step('"Ver hallazgo" abre la ficha en Hallazgo', async () => {
+  await test.step('ya no hay "Ver hallazgo" ni "Ver acción": el hallazgo se consulta en la pestaña de la ficha (#947)', async () => {
+    await expect(registro.enlacesVerDetalle).toHaveCount(0);
     await registro.abrirFichaEnHallazgo();
     expect(await registro.ficha.nombrePestanaActiva()).toBe('Hallazgo');
     await registro.ficha.cerrar();
