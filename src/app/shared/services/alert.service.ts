@@ -68,6 +68,35 @@ export class AlertService {
     });
   }
 
+  // Error con una lista de detalles (p. ej. qué no se pudo guardar y por qué).
+  // Se arma con nodos del DOM y textContent: los detalles pueden traer texto escrito por el usuario.
+  showErrorListAlert(title: string, mensaje: string, detalles: string[]): Promise<SweetAlertResult> {
+    const contenido = document.createElement("div");
+    const parrafo = document.createElement("p");
+    parrafo.textContent = mensaje;
+    const lista = document.createElement("ul");
+    lista.style.textAlign = "left";
+    for (const detalle of detalles) {
+      const item = document.createElement("li");
+      item.textContent = detalle;
+      lista.appendChild(item);
+    }
+    contenido.append(parrafo, lista);
+
+    return Swal.fire({
+      heightAuto: false,
+      didOpen: this.elevarAlFrente,
+      icon: "error",
+      title: title,
+      html: contenido,
+      confirmButtonText: "Aceptar",
+      customClass: {
+        confirmButton: "alertaConfirmarBoton",
+        cancelButton: "alertaCancelarBoton",
+      },
+    });
+  }
+
   showConfirmAlert(text: string, title: string = "Atención"): Promise<SweetAlertResult> {
     return Swal.fire({
       heightAuto: false,

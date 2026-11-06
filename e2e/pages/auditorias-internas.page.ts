@@ -99,19 +99,46 @@ export class InformeAuditoriaPage extends BasePage {
     await this.confirmarAlerta();
   }
 
+  /** "Guardar y continuar" del paso 3, aceptando la confirmación. */
+  async guardarYContinuarAspectos() {
+    await this.page.getByRole('button', { name: 'Guardar y continuar', exact: true }).click();
+    expect(await this.textoAlerta()).toContain('¿Está seguro(a) de guardar la información?');
+    await this.confirmarAlerta();
+  }
+
+  /** Agrega un tema al final con su nombre y una imagen en la descripción (botón de imagen del editor). */
+  async agregarTemaConImagen(nombre: string, imagen: { name: string; mimeType: string; buffer: Buffer }) {
+    const antes = await this.temas.count();
+    await this.aspectos.getByRole('button', { name: 'Agregar Tema' }).click();
+    const tema = this.temas.nth(antes);
+    await tema.getByLabel('Nombre del Tema').fill(nombre);
+    const selector = this.page.waitForEvent('filechooser');
+    await this.filasTema(antes).locator('quill-editor button.ql-image').click();
+    await (await selector).setFiles(imagen);
+    await expect(this.editorDescripcion(antes).locator('img')).toHaveCount(1);
+  }
+
   /** Nombre del tema (campo "Nombre del Tema") del nodo indicado. */
   async nombreTema(indice: number): Promise<string> {
     return this.temas.nth(indice).getByLabel('Nombre del Tema').inputValue();
   }
 
+  /**
+   * Filas propias del tema (nombre y descripción), sin las de sus subtemas: desde #942 el subtema también
+   * tiene editor y aviso de descripción, dentro de `.node-children`.
+   */
+  private filasTema(indice: number): Locator {
+    return this.temas.nth(indice).locator(':scope > :not(.node-children)');
+  }
+
   /** Aviso de que la descripción del tema no se pudo cargar desde el gestor documental. */
   avisoDescripcionNoDisponible(indice: number): Locator {
-    return this.temas.nth(indice).getByRole('alert').filter({ hasText: 'No se pudo cargar la descripción' });
+    return this.filasTema(indice).getByRole('alert').filter({ hasText: 'No se pudo cargar la descripción' });
   }
 
   /** Editor de texto enriquecido de la descripción del tema. */
   editorDescripcion(indice: number): Locator {
-    return this.temas.nth(indice).locator('quill-editor .ql-editor').first();
+    return this.filasTema(indice).locator('quill-editor .ql-editor');
   }
 
   /** Subtemas y hallazgos del tema (cantidad de campos "Nombre del Subtema" y "Hallazgo"). */
@@ -126,6 +153,24 @@ export class InformeAuditoriaPage extends BasePage {
   async irAlResumen() {
     await this.pasoResumen.click();
     await expect(this.tablaResumen).toBeVisible({ timeout: 60_000 });
+  }
+
+  /**
+   * "Ver informe preliminar" (paso 4): el MID genera el PDF (GET plantilla/informe-auditoria/:auditoriaId) y el
+   * MF lo abre en un modal. Devuelve el PDF tal como lo respondió el MID.
+   */
+  async verInformePreliminar(): Promise<Buffer> {
+    const respuesta = this.page.waitForResponse(
+      (r) => r.request().method() === 'GET' && /\/plantilla\/informe-auditoria\/[0-9a-f]{24}$/.test(new URL(r.url()).pathname),
+      { timeout: 120_000 },
+    );
+    await this.page.getByRole('button', { name: 'Ver informe preliminar' }).click();
+    const r = await respuesta;
+    expect(r.status(), 'el MID genera el preinforme').toBe(200);
+    const base64 = String((await r.json())?.Data ?? '');
+    expect(base64, 'el MID devuelve el PDF en Data').not.toBe('');
+    await expect(this.page.locator('mat-dialog-container')).toBeVisible({ timeout: 60_000 });
+    return Buffer.from(base64, 'base64');
   }
 
   /** Filas del resumen como { numero, criterio, descripcion } (en el orden de las columnas). */

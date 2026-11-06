@@ -17,6 +17,7 @@ Los crea, por la API del CRUD, el escenario `tests/semillas/ejecucion-2010.spec.
 | B | `SEMILLA-E2E Iniciar ejecución` | `SEMILLA-E2E-02` | `APROBADO_PROGRAMA_AUDITADO` | — |
 | C | `SEMILLA-E2E Edición de informe` | `SEMILLA-E2E-03` | `CREANDO_PREINFORME` | Informe con 1 tema cuya descripción es `NuxeoEnlace:<uuid ficticio>`, 1 subtema y 1 hallazgo. El gestor se simula en los escenarios |
 | D | `SEMILLA-E2E Seguimiento` | `SEMILLA-E2E-04` | `CREANDO_INFORME_FINAL` (seguimiento) | Informe sin temas |
+| E | `SEMILLA-E2E PDF con imagen` | `SEMILLA-E2E-05` | `CREANDO_PREINFORME` | Informe con 1 tema cuya descripción (texto + PNG de 37×23 px) está **subida de verdad** al gestor documental (`NuxeoEnlace:<uuid real>`), 1 subtema y 1 hallazgo; el paso 1 del informe con fecha de emisión (sin ella el MID responde 500). El documento de Nuxeo no se puede borrar |
 
 - La semilla es idempotente: lo que ya existe no se vuelve a crear. Se corre solo cuando falta: `E2E_ESCRITURA=1 npx playwright test tests/semillas --grep @semilla`.
 - El prefijo `SEMILLA-E2E` no lo borra la pre-limpieza de Programación (`liberarEspeciales` solo borra `E2E-…`). Al no tener PAA, tampoco choca con `liberarVigencia`.
@@ -74,9 +75,33 @@ Archivo: `tests/ejecucion/seguimiento-tema-con-imagen.spec.ts`. La subida al ges
 3. Al **Guardar y Continuar**, se sube un HTML con `<img>` al gestor y el `POST tema` lleva `descripcion_titulo: NuxeoEnlace:<enlace>`.
 4. Antes de #940 (C5), el tema con imagen nunca se creaba: el escenario falla por tiempo esperando el `POST tema`.
 
-### 7. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
+### 7. Si la imagen de un tema nuevo no se puede subir al gestor, el guardado lo informa (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/guardado-falla-gestor.spec.ts` (auditoría interna, semilla C). La subida al gestor responde como el 03/11 (404 sin CORS, `simularSubidaGestorFallida`). Los `PUT` de lo que ya existía en la semilla se responden como exitosos, para que el único fallo sea la imagen.
+
+1. Se agrega un tema con una imagen y se pulsa **Guardar y continuar** (con confirmación).
+2. Aparece el modal **"No se guardó todo"**, que dice el tema y la causa ("no se pudo guardar la imagen de la descripción en el gestor documental"). **No** aparece "Guardado exitoso".
+3. Hubo un intento de subida y **ningún** `POST tema`: el tema no se crea sin su imagen.
+4. Se queda en el paso 3, con el tema y su imagen en el formulario para reintentar.
+
+### 8. Lo mismo en seguimiento (`@ejecucion @auditor @simulado @lectura`)
+
+Archivo: `tests/ejecucion/seguimiento-guardado-falla-gestor.spec.ts` (semilla D). Mismos pasos con **Guardar y Continuar**: modal con el tema y la causa, sin "Guardado exitoso", sin `POST tema` y sin avanzar de paso.
+
+Con el código anterior, los dos escenarios fallan: se muestra "Guardado exitoso".
+
+### 10. Un preinforme real con imagen la muestra al editar y el MID la incluye en el PDF (`@ejecucion @auditor @lectura`)
+
+Archivo: `tests/ejecucion/descripcion-imagen-real.spec.ts` (semilla E, E4 de la especificación). Sin simulación: gestor documental y MID reales del ambiente.
+
+1. El auditor abre **Editar Preinforme** de `SEMILLA-E2E-05`.
+2. Paso 3: el editor del tema muestra el texto y la imagen descargados del gestor, sin el aviso "No se pudo cargar la descripción…". Si falla, se clasifica la respuesta del gestor (401 / 404 JSON / 404 XML de WSO2) antes de culpar a CORS.
+3. Paso 4 → **Ver informe preliminar**: el `GET plantilla/informe-auditoria/:auditoriaId` del MID responde 200 con el PDF en `Data`. El PDF se adjunta al reporte y contiene una imagen de 37×23 px, el tamaño de la imagen de la semilla, que no se confunde con los logos de la plantilla.
+4. Ninguna escritura: "Ver informe preliminar" no guarda el documento.
+
+### 9. La semilla de Ejecución y Planeación (`@semilla @auditor-experto @escritura`)
 
 Archivo: `tests/semillas/ejecucion-2010.spec.ts`
 
-1. Crea lo que falte de las semillas A y B. Adjunta "creado en esta corrida", o "nada: la semilla ya existía".
+1. Crea lo que falte de las semillas A–E. La E sube su descripción al gestor documental solo si el tema todavía no existe. Adjunta "creado en esta corrida", o "nada: la semilla ya existía".
 2. La segunda corrida no crea nada.

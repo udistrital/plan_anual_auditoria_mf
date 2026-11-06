@@ -24,6 +24,8 @@ cp .env.e2e.example .env.e2e     # y llenar los usuarios de prueba
 | Variable | Para qué |
 |---|---|
 | `E2E_BASE_URL` | URL del root (por defecto `http://localhost:4200`) |
+| `E2E_BASE_URL_PRUEBAS` | URL del root desplegado en pruebas; se usa con `E2E_AMBIENTE=pruebas` |
+| `E2E_AMBIENTE` | Opcional, al correr (no en el archivo): `pruebas` toma `E2E_BASE_URL_PRUEBAS` y guarda las sesiones en `.auth/pruebas/`. Sirve para cualquier ambiente con `E2E_BASE_URL_<NOMBRE>` |
 | `E2E_<ROL>_USER` / `E2E_<ROL>_PASS` | Usuario de prueba de cada rol: `E2E_AUDITOR_*`, `E2E_JEFE_DEPENDENCIA_*` |
 | `E2E_VIGENCIA` | Vigencia con datos para los escenarios (por defecto `2026`) |
 | `E2E_ACCION_ID` | Opcional: acción fija para registro de avances (si no, la primera del listado) |
@@ -39,6 +41,16 @@ npx playwright test --grep @navegacion     # un grupo (por etiqueta)
 npx playwright test --project=auditor      # un rol
 npm run report                             # abre el reporte con capturas
 ```
+
+**Local o pruebas sin editar `.env.e2e`.** Sin nada más, se corre contra `E2E_BASE_URL` (local). Para el ambiente de pruebas desplegado:
+
+```bash
+npm run test:pruebas                                       # todo (sin @escritura) contra pruebas
+npm run test:lectura:pruebas                               # solo lectura contra pruebas
+E2E_AMBIENTE=pruebas npx playwright test --grep @ejecucion # cualquier comando, anteponiendo E2E_AMBIENTE
+```
+
+Al iniciar se imprime `[e2e] ambiente: … → <url>`. Cada ambiente guarda sus sesiones aparte (`.auth/` y `.auth/pruebas/`), así que cambiar de uno a otro no repite los logins. En pruebas solo corren los `@lectura`, salvo aprobación explícita de un `@escritura`.
 
 ### Sesión de los usuarios de prueba (automático)
 

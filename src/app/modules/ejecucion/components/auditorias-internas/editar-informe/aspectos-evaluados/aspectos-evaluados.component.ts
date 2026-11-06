@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
+import { esHtmlVacio } from 'src/app/shared/utils/html.util';
 
 interface Hallazgo {
   _id?: string;
@@ -22,6 +23,7 @@ interface Subtema {
   _id?: string;
   activo?: boolean;
   titulo: string;
+  descripcion?: string;
   hallazgos: Hallazgo[];
 }
 
@@ -56,6 +58,10 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   private readonly documentosNuxeoTema = new Map<string, { enlace: string; html: string }>();
   // Temas cuya descripción no se pudo descargar del gestor documental: al guardar se conserva su enlace original
   private readonly descripcionesNoCargadas = new Map<string, string>();
+  // Igual que documentosNuxeoTema, pero indexado por id de subtema
+  private readonly documentosNuxeoSubtema = new Map<string, { enlace: string; html: string }>();
+  // Subtemas cuya descripción no se pudo descargar del gestor documental: al guardar se conserva su enlace original
+  private readonly descripcionesSubtemaNoCargadas = new Map<string, string>();
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
@@ -212,6 +218,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   async construirFormulario(): Promise<void> {
     this.documentosNuxeoTema.clear();
     this.descripcionesNoCargadas.clear();
+    this.documentosNuxeoSubtema.clear();
+    this.descripcionesSubtemaNoCargadas.clear();
 
     this.observadores.forEach(o => o.disconnect());
     this.observadores = [];
@@ -222,8 +230,26 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     const gruposTemas = await Promise.all(temasActivos.map(async (tema) => {
       const subtemasArray = this.fb.array([]);
 
-      (tema.subtema ?? []).forEach((subtema: any) => {
-        if (!subtema.activo) return;
+      for (const subtema of (tema.subtema ?? []) as any[]) {
+        if (!subtema.activo) continue;
+
+        if (subtema.descripcion && this.comprobarNuxeoEnlace(subtema.descripcion)) {
+          const enlaceOriginal = subtema.descripcion;
+          try {
+            let html = await this.obtenerDocumentoHTML(enlaceOriginal);
+            html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+            subtema.descripcion = html;
+            if (subtema._id) {
+              this.documentosNuxeoSubtema.set(subtema._id.toString(), { enlace: enlaceOriginal, html });
+            }
+          } catch (error) {
+            // Si el gestor documental falla, el subtema se muestra igual (sin su descripción) en vez de dejar vacío el paso
+            console.error(`No se pudo cargar la descripción del subtema "${subtema.titulo}":`, error);
+            if (subtema._id) {
+              this.descripcionesSubtemaNoCargadas.set(subtema._id.toString(), enlaceOriginal);
+            }
+          }
+        }
 
         const hallazgosArray = this.fb.array([]);
 
@@ -241,9 +267,10 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
         subtemasArray.push(this.fb.group({
           _id: [subtema._id ?? null],
           nombre: [subtema.titulo ?? '', Validators.required],
+          descripcion: [subtema.descripcion ?? ''],
           hallazgos: hallazgosArray,
         }));
-      });
+      }
 
       if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
         const enlaceOriginal = tema.descripcion_titulo;
@@ -279,10 +306,14 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
     this.actualizarModoSoloLectura();
 
-    if (this.descripcionesNoCargadas.size > 0) {
+    if (this.descripcionesNoCargadas.size > 0 || this.descripcionesSubtemaNoCargadas.size > 0) {
+      const afectados = [
+        this.descripcionesNoCargadas.size > 0 ? `${this.descripcionesNoCargadas.size} tema(s)` : '',
+        this.descripcionesSubtemaNoCargadas.size > 0 ? `${this.descripcionesSubtemaNoCargadas.size} subtema(s)` : '',
+      ].filter(Boolean).join(' y ');
       this.alertaService.showAlert(
         'Descripción no disponible',
-        `No se pudo cargar desde el gestor documental la descripción de ${this.descripcionesNoCargadas.size} tema(s). ` +
+        `No se pudo cargar desde el gestor documental la descripción de ${afectados}. ` +
         'Se conserva sin cambios al guardar; intente de nuevo más tarde para editarla.'
       );
     }
@@ -292,6 +323,12 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   descripcionNoDisponible(tema: AbstractControl): boolean {
     const temaId = tema.get('_id')?.value;
     return !!temaId && this.descripcionesNoCargadas.has(String(temaId));
+  }
+
+  // Indica si la descripción del subtema no se pudo descargar del gestor documental
+  descripcionSubtemaNoDisponible(subtema: AbstractControl): boolean {
+    const subtemaId = subtema.get('_id')?.value;
+    return !!subtemaId && this.descripcionesSubtemaNoCargadas.has(String(subtemaId));
   }
 
   get temas(): UntypedFormArray {
@@ -320,6 +357,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     const nuevoSubtema = this.fb.group({
       _id: [null],
       nombre: ['', Validators.required],
+      descripcion: [''],
       hallazgos: this.fb.array([]),
     });
     this.getSubtemas(temaIndex).push(nuevoSubtema);
@@ -441,6 +479,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     }
 
     const temasFormValue = this.temas.value;
+    // Lo que no se pudo guardar y por qué: se informa al final en un solo mensaje
+    const fallos: string[] = [];
 
     for (let i = 0; i < temasFormValue.length; i++) {
       const temaForm = temasFormValue[i];
@@ -448,12 +488,17 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
       // Crear o actualizar tema
       if (!temaId) {
+        let descripcion = esHtmlVacio(temaForm.descripcion_titulo) ? '' : temaForm.descripcion_titulo;
         try {
-          let descripcion = temaForm.descripcion_titulo;
           if (this.contieneImagen(descripcion)) {
-            descripcion = await this.subirHtmlTemaANuxeo(descripcion, i);
+            descripcion = await this.subirHtmlANuxeo(descripcion, `Tema ${i + 1} de informe ${this.informeId}.html`, 'Documento HTML (Aspectos Evaluados) de un tema');
           }
-
+        } catch (error) {
+          console.error('Error al subir la descripción del tema al gestor documental:', error);
+          fallos.push(`Tema "${temaForm.nombre}": no se pudo guardar la imagen de la descripción en el gestor documental. No se creó el tema ni sus subtemas y hallazgos.`);
+          continue;
+        }
+        try {
           const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('tema', {
             informe_id: this.informeId,
             titulo: temaForm.nombre,
@@ -463,34 +508,43 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
           this.temas.at(i).patchValue({ _id: temaId, isNew: false });
         } catch (error) {
           console.error('Error al crear tema:', error);
-          this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
+          fallos.push(`Tema "${temaForm.nombre}": no se pudo crear en la base de datos. Tampoco se guardaron sus subtemas y hallazgos.`);
           continue;
         }
       } else {
-        try {
-          let descripcion = temaForm.descripcion_titulo;
-          const original = this.documentosNuxeoTema.get(String(temaId));
-          const enlaceNoCargado = this.descripcionesNoCargadas.get(String(temaId));
+        let descripcion = esHtmlVacio(temaForm.descripcion_titulo) ? '' : temaForm.descripcion_titulo;
+        const original = this.documentosNuxeoTema.get(String(temaId));
+        const enlaceNoCargado = this.descripcionesNoCargadas.get(String(temaId));
+        let actualizarTema = true;
 
-          if (enlaceNoCargado) {
-            // La descripción no se pudo descargar: se conserva el documento de Nuxeo tal como estaba
-            descripcion = enlaceNoCargado;
-          } else if (original && descripcion === original.html) {
-            // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
-            descripcion = original.enlace;
-          } else if (this.contieneImagen(descripcion)) {
-            const htmlGuardado = descripcion;
-            descripcion = await this.subirHtmlTemaANuxeo(htmlGuardado, i);
+        if (enlaceNoCargado) {
+          // La descripción no se pudo descargar: se conserva el documento de Nuxeo tal como estaba
+          descripcion = enlaceNoCargado;
+        } else if (original && descripcion === original.html) {
+          // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
+          descripcion = original.enlace;
+        } else if (this.contieneImagen(descripcion)) {
+          const htmlGuardado = descripcion;
+          try {
+            descripcion = await this.subirHtmlANuxeo(htmlGuardado, `Tema ${i + 1} de informe ${this.informeId}.html`, 'Documento HTML (Aspectos Evaluados) de un tema');
             this.documentosNuxeoTema.set(String(temaId), { enlace: descripcion, html: htmlGuardado });
+          } catch (error) {
+            console.error('Error al subir la descripción del tema al gestor documental:', error);
+            fallos.push(`Tema "${temaForm.nombre}": no se pudo guardar la imagen de la descripción en el gestor documental. El tema conserva su versión anterior.`);
+            actualizarTema = false;
           }
+        }
 
-          await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
-            titulo: temaForm.nombre,
-            descripcion_titulo: descripcion
-          }));
-        } catch (error) {
-          console.error('Error al actualizar tema:', error);
-          this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
+        if (actualizarTema) {
+          try {
+            await firstValueFrom(this.planAnualAuditoriaService.put(`tema/${temaId}`, {
+              titulo: temaForm.nombre,
+              descripcion_titulo: descripcion
+            }));
+          } catch (error) {
+            console.error('Error al actualizar tema:', error);
+            fallos.push(`Tema "${temaForm.nombre}": no se pudo actualizar en la base de datos.`);
+          }
         }
       }
 
@@ -498,13 +552,21 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
       for (let j = 0; j < temaForm.subtemas.length; j++) {
         const subtemaForm = temaForm.subtemas[j];
         let subtemaId = subtemaForm._id;
+        let descripcionSubtema = esHtmlVacio(subtemaForm.descripcion) ? '' : subtemaForm.descripcion;
+        const nombreDocumentoSubtema = `Subtema ${i + 1}.${j + 1} de informe ${this.informeId}.html`;
+        const descripcionDocumentoSubtema = 'Documento HTML (Aspectos Evaluados) de un subtema';
 
         // Crear o actualizar subtema
         if (!subtemaId) {
           try {
+            if (this.contieneImagen(descripcionSubtema)) {
+              descripcionSubtema = await this.subirHtmlANuxeo(descripcionSubtema, nombreDocumentoSubtema, descripcionDocumentoSubtema);
+            }
+
             const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('subtema', {
               tema_id: temaId,
-              titulo: subtemaForm.nombre
+              titulo: subtemaForm.nombre,
+              descripcion: descripcionSubtema
             }));
             // El servidor devuelve el tema con los subtemas embebidos; el nuevo es el último
             const subtemasEnResponse = response?.Data?.subtema ?? [];
@@ -512,17 +574,33 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {
             console.error('Error al crear subtema:', error);
-            this.alertaService.showAlert('Error', `No se pudo crear el subtema "${subtemaForm.nombre}"`);
+            fallos.push(`Subtema "${subtemaForm.nombre}": no se pudo crear en la base de datos. Tampoco se guardaron sus hallazgos.`);
             continue;
           }
         } else {
           try {
+            const original = this.documentosNuxeoSubtema.get(String(subtemaId));
+            const enlaceNoCargado = this.descripcionesSubtemaNoCargadas.get(String(subtemaId));
+
+            if (enlaceNoCargado) {
+              // La descripción no se pudo descargar: se conserva el documento de Nuxeo tal como estaba
+              descripcionSubtema = enlaceNoCargado;
+            } else if (original && descripcionSubtema === original.html) {
+              // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
+              descripcionSubtema = original.enlace;
+            } else if (this.contieneImagen(descripcionSubtema)) {
+              const htmlGuardado = descripcionSubtema;
+              descripcionSubtema = await this.subirHtmlANuxeo(htmlGuardado, nombreDocumentoSubtema, descripcionDocumentoSubtema);
+              this.documentosNuxeoSubtema.set(String(subtemaId), { enlace: descripcionSubtema, html: htmlGuardado });
+            }
+
             await firstValueFrom(this.planAnualAuditoriaService.put(`subtema/${subtemaId}`, {
-              titulo: subtemaForm.nombre
+              titulo: subtemaForm.nombre,
+              descripcion: descripcionSubtema
             }));
           } catch (error) {
             console.error('Error al actualizar subtema:', error);
-            this.alertaService.showAlert('Error', `No se pudo actualizar el subtema "${subtemaForm.nombre}"`);
+            fallos.push(`Subtema "${subtemaForm.nombre}": no se pudo actualizar en la base de datos.`);
           }
         }
 
@@ -546,7 +624,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
               this.getHallazgos(i, j).at(k).patchValue({ _id: hallazgoId, isNew: false });
             } catch (error) {
               console.error('Error al crear hallazgo:', error);
-              this.alertaService.showAlert('Error', `No se pudo crear el hallazgo "${hallazgoForm.hallazgo}"`);
+              fallos.push(`Hallazgo "${hallazgoForm.hallazgo}": no se pudo crear en la base de datos.`);
             }
           } else {
             try {
@@ -557,11 +635,21 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
               }));
             } catch (error) {
               console.error('Error al actualizar hallazgo:', error);
-              this.alertaService.showAlert('Error', `No se pudo actualizar el hallazgo "${hallazgoForm.hallazgo}"`);
+              fallos.push(`Hallazgo "${hallazgoForm.hallazgo}": no se pudo actualizar en la base de datos.`);
             }
           }
         }
       }
+    }
+
+    if (fallos.length > 0) {
+      // No se recargan los datos: lo que no se guardó sigue en el formulario para reintentarlo
+      this.alertaService.showErrorListAlert(
+        'No se guardó todo',
+        'Lo demás quedó guardado. Revise lo siguiente y vuelva a intentarlo:',
+        fallos
+      );
+      return false;
     }
 
     this.alertaService.showAlert('Guardado exitoso', 'Los aspectos evaluados se han guardado correctamente');
@@ -569,8 +657,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     return true;
   }
 
-  // Sube el HTML del tema (con imágenes) a Nuxeo y devuelve el valor a guardar en descripcion_titulo
-  private async subirHtmlTemaANuxeo(htmlOriginal: string, indice: number): Promise<string> {
+  // Sube el HTML de una descripción (con imágenes) a Nuxeo y devuelve el valor a guardar en la descripción
+  private async subirHtmlANuxeo(htmlOriginal: string, nombre: string, descripcionDocumento: string): Promise<string> {
     let html = String(htmlOriginal);
     html = html.replace(/width="(\d+)px"/g, 'style="width:$1px;"');
     html = html.replace(/\sheight="auto"/g, '');
@@ -581,8 +669,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
     const payload = {
       IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES,
-      nombre: `Tema ${indice + 1} de informe ${this.informeId}.html`,
-      descripcion: 'Documento HTML (Aspectos Evaluados) de un tema',
+      nombre,
+      descripcion: descripcionDocumento,
       metadatos: {},
       file: JSON.stringify(base64)
     };
