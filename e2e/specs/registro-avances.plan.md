@@ -6,13 +6,18 @@ Issue: udistrital/sisifo_documentacion#939 (migra las verificaciones de #924 y #
 
 En **Planes de Mejoramiento › Gestión de Acciones**, cada acción de un plan aprobado se abre en una de dos variantes:
 
-- **Auditado** (jefe o asistente de la dependencia): opción **Registrar Avances**, ruta `/registrar-avances/:id`. Sube evidencias y consulta la calificación.
-- **Auditor asignado al plan**: opción **Revisar y calificar**, ruta `/revisar/:id`. Habilita o bloquea el cargue y califica.
+Desde #916 (Sgarcia8, vistas por rol, en develop desde el 27/10/2026) el menú de la fila depende del rol y del estado, y todas las opciones abren `/registrar-avances/:id`; la variante la decide el rol:
+
+- **Auditado** (jefe o asistente de la dependencia): solo ve las acciones de las que es **responsable**. Opción **Registrar Avances** con el cargue abierto; **Ver Calificación** o **Ver Acción** en los demás estados. Sube evidencias y consulta la calificación.
+- **Auditor asignado al plan**: **Habilitar Cargue** (pendiente de habilitar) o **Calificar** (en revisión OCI); en los demás estados, **Ver Acción** o **Ver Calificación**. Habilita o bloquea el cargue y califica.
+
+La ruta `/revisar/:id` sigue existiendo y se usa solo con `E2E_ACCION_ID`.
 
 ## Datos semilla
 
-- Vigencia `2026` (`E2E_VIGENCIA`) con acciones de planes aprobados en el ambiente de pruebas.
-- Se usa la primera acción del listado, o la de `E2E_ACCION_ID`. El usuario de prueba del auditor está asignado al plan de esa acción.
+- Se busca en la vigencia `2026` (`E2E_VIGENCIA`) y, si el rol no tiene acciones allí, en las 5 anteriores.
+- Se usa la primera acción cuya opción principal es la de la variante (en orden de preferencia), o la de `E2E_ACCION_ID`.
+- En pruebas (05/11/2026) la cuenta del jefe de dependencia es responsable de una sola acción, de una vigencia anterior y pendiente de habilitar (opción **Ver Acción**). Sin ella, los escenarios del auditado fallan con un mensaje que lo explica.
 - Ningún escenario crea ni modifica datos. Todos son `@lectura`: el fixture aborta cualquier escritura.
 
 ## Escenarios
@@ -21,9 +26,9 @@ En **Planes de Mejoramiento › Gestión de Acciones**, cada acción de un plan 
 
 Archivo: `tests/plan-mejoramiento/registro-avances-auditado.spec.ts`
 
-1. Entrar desde el listado: la opción de la fila es **Registrar Avances** y abre `/registrar-avances/:id`.
+1. Entrar desde el listado a una acción de la que es responsable (**Registrar Avances**, **Ver Calificación** o **Ver Acción**); abre `/registrar-avances/:id`.
 2. Ve **Evidencias de avance** y **Calificación de Control Interno**. No ve el formulario de calificación ni el botón de cargue del auditor. No hay stepper.
-3. El chip indica el estado del cargue, y **Añadir documento** está presente.
+3. El chip indica el estado del cargue. **Añadir documento** está presente y solo se habilita con **Cargue habilitado**.
 4. **Ficha de la acción** abre el panel en la pestaña **Acción**. Con la flecha derecha recorre Hallazgo → Auditoría → Responsables → Acción, y con Esc se cierra.
 5. **Ver hallazgo** abre el panel directamente en **Hallazgo**.
 6. A 390 px de ancho no hay desborde horizontal.
@@ -32,7 +37,7 @@ Archivo: `tests/plan-mejoramiento/registro-avances-auditado.spec.ts`
 
 Archivo: `tests/plan-mejoramiento/calificacion-auditor.spec.ts`
 
-1. Entrar desde el listado: la opción es **Revisar y calificar** y abre `/revisar/:id`.
+1. Entrar desde el listado con **Calificar** o **Habilitar Cargue**; abre `/registrar-avances/:id` con la vista del auditor.
 2. Ve **Evidencias de la dependencia**, el botón de cargue y **Calificación del auditor**.
 3. Abre el formulario (con **Nueva calificación** si ya hay una vigente).
 4. **Calificar** con el formulario vacío muestra 3 errores y pone el foco en **Porcentaje de avance**.

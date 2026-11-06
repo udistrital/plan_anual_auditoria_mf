@@ -3,7 +3,7 @@ import { test, expect } from '../../core/fixtures';
 import { abrirAccion } from './datos';
 
 test('el auditor revisa la acción y valida el formulario de calificación', { tag: ['@plan-mejoramiento', '@auditor', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
-  const registro = await test.step('entra desde Gestión de acciones con "Revisar y calificar"', () => abrirAccion(page, 'revisar'));
+  const registro = await test.step('entra desde Gestión de acciones con "Calificar" o "Habilitar Cargue" (auditor del plan)', () => abrirAccion(page, 'revisar'));
   const formulario = registro.formulario;
 
   await test.step('ve la variante del auditor asignado', async () => {
