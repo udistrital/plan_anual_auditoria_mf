@@ -21,7 +21,7 @@
           <ng-container [matColumnDef]="columna.columnDef">
             <th mat-header-cell *matHeaderCellDef><b>{{ columna.header }}</b></th>
             <td mat-cell *matCellDef="let fila">
-              @if (columna.columnDef === 'accionPlanteada' || columna.columnDef === 'nombreIndicador' || columna.columnDef === 'formulaIndicador') {
+              @if (columna.columnDef === 'causa' || columna.columnDef === 'accionPlanteada' || columna.columnDef === 'nombreIndicador' || columna.columnDef === 'formulaIndicador') {
                 <span class="celda-justificada celda-truncada" [title]="columna.cell(fila) ?? ''">{{ columna.cell(fila) }}</span>
               } @else if (columna.columnDef === 'estado') {
                 @if (fila.accion) {

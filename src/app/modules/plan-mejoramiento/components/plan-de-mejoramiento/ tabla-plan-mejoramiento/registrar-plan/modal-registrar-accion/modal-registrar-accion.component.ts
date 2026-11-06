@@ -41,6 +41,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   cargandoDependencias = false;
 
+  readonly maxCausa = 1000;
+
   tiposAccion = [
     { id: 1, nombre: 'Preventiva', descripcion: 'Previene la ocurrencia potencial' },
     { id: 2, nombre: 'Correctiva', descripcion: 'Elimina la causa del problema' },
@@ -83,8 +85,9 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private iniciarForm(): void {
     const { fechaInicio, fechaFin } = this.calcularFechas();
-    // La causa del hallazgo se muestra en solo lectura (proviene del informe y no se guarda desde aquí)
+    // La causa la escribe la dependencia en cada acción (no sale del criterio de fase 3, #947)
     this.form = this.fb.group({
+      causa:            ['', [Validators.required, Validators.maxLength(this.maxCausa)]],
       tipoAccion:       ['', Validators.required],
       accionPlanteada:  ['', Validators.required],
       nombreIndicador:  [''],
@@ -170,6 +173,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
     const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : this.form.getRawValue().fechaInicio;
     const fechaFin    = a.fechaFinISO    ? new Date(a.fechaFinISO)    : this.form.getRawValue().fechaFin;
     this.form.patchValue({
+      causa:            a.causa ?? '',
       tipoAccion:       a.tipoAccionId ?? '',
       accionPlanteada:  a.accionPlanteada,
       nombreIndicador:  a.nombreIndicador,
@@ -187,10 +191,6 @@ export class ModalRegistrarAccionComponent implements OnInit {
   get descripcionModal(): string {
     const vigencia = this.data.auditoria?.vigencia_nombre;
     return `Formulación del plan de mejoramiento${vigencia ? ' • Vigencia ' + vigencia : ''}`;
-  }
-
-  get causaHallazgo(): string {
-    return this.data.hallazgo?.causa || 'Sin causa registrada';
   }
 
   longitud(campo: string): number {
@@ -283,6 +283,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
       const resultado: ResultadoModalAccion = {
         accion: {
           accionId:         this.data.accion?.accionId,
+          causa:            (v.causa ?? '').trim(),
           tipoAccionId:     v.tipoAccion,
           accionPlanteada:  v.accionPlanteada,
           nombreIndicador:  v.nombreIndicador,

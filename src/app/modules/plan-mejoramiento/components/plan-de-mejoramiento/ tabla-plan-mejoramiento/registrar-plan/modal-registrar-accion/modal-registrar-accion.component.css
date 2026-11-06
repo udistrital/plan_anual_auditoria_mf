@@ -62,16 +62,6 @@
   color: var(--md-primary-700);
 }
 
-.cita {
-  background-color: #fafafa;
-  border-left: 3px solid var(--md-primary-500);
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-style: italic;
-  white-space: pre-line;
-}
-
 /* ─── Tipo de acción ─────────────────────────────────────────────────────── */
 
 .opciones {

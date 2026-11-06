@@ -24,12 +24,20 @@
           <span class="chip-hallazgo">Hallazgo {{ data.hallazgo.indice }}</span>
           <p class="valor mb-0">{{ data.hallazgo.descripcion }}</p>
         </div>
-        <span class="etiqueta d-flex align-items-center espacio-1">
-          Causa del hallazgo
-          <mat-icon class="tip-suffix" [matTooltip]="tooltips.causa" matTooltipPosition="right"
+        <mat-form-field appearance="outline" class="ancho-completo">
+          <mat-label>Causa del hallazgo</mat-label>
+          <textarea matInput formControlName="causa" required rows="3" class="sin-redimension"
+            [maxlength]="maxCausa" placeholder="Describa la causa que origina el hallazgo"></textarea>
+          <mat-icon matSuffix color="primary" class="tip-suffix"
+            [matTooltip]="tooltips.causa"
+            matTooltipPosition="right"
             matTooltipClass="tooltip-multilinea">help</mat-icon>
-        </span>
-        <div class="cita">“{{ causaHallazgo }}”</div>
+          <mat-hint>Causa identificada por la dependencia para la cual se formula esta acción.</mat-hint>
+          <mat-hint align="end">{{ longitud('causa') }} / {{ maxCausa }}</mat-hint>
+          @if (form.get('causa')?.hasError('required')) {
+            <mat-error>Campo requerido</mat-error>
+          }
+        </mat-form-field>
       </div>
     </section>
 
