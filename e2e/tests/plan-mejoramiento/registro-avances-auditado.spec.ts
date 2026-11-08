@@ -3,7 +3,7 @@ import { test, expect } from '../../core/fixtures';
 import { abrirAccion } from './datos';
 
 test('el auditado consulta el registro de avances de una acción', { tag: ['@plan-mejoramiento', '@jefe-dependencia', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
-  const registro = await test.step('entra desde Gestión de acciones con "Registrar Avances"', () => abrirAccion(page, 'registrar-avances'));
+  const registro = await test.step('entra desde Gestión de acciones a una acción de la que es responsable', () => abrirAccion(page, 'registrar-avances'));
 
   await test.step('ve la variante del auditado', async () => {
     await expect(registro.tituloEvidencias).toHaveText('Evidencias de avance');
@@ -12,7 +12,10 @@ test('el auditado consulta el registro de avances de una acción', { tag: ['@pla
     await expect(registro.botonCargue).toHaveCount(0);
     await expect(registro.stepper).toHaveCount(0);
     await expect(registro.chips).toContainText(/Cargue (habilitado|bloqueado)/);
+    // "Añadir documento" siempre está; solo se habilita con el cargue habilitado (#916)
     await expect(registro.botonAnadirDocumento).toBeVisible();
+    const habilitado = (await registro.textosChips()).includes('Cargue habilitado');
+    await (habilitado ? expect(registro.botonAnadirDocumento).toBeEnabled() : expect(registro.botonAnadirDocumento).toBeDisabled());
     await testInfo.attach('variante del auditado', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
   });
 

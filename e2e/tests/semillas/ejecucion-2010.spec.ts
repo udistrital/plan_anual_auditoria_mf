@@ -2,8 +2,9 @@
 /**
  * Semilla de Ejecución y Planeación en la vigencia de E2E (D8 de sisifo_documentacion#940).
  *
- * Crea por la API del CRUD dos auditorías especiales (padre sin PAA + concreta) con el auditor de
- * pruebas asignado. NO se limpian: son los datos fijos de los escenarios @lectura de Ejecución y
+ * Crea por la API del CRUD auditorías especiales (padre sin PAA + concreta) con el auditor de pruebas
+ * asignado. La semilla E sube además una descripción real al gestor documental (queda en Nuxeo).
+ * NO se limpian: son los datos fijos de los escenarios @lectura de Ejecución y
  * Planeación. Es idempotente: lo que ya existe no se vuelve a crear. El prefijo `SEMILLA-E2E` no lo
  * borra la pre-limpieza de Programación (`liberarEspeciales` solo borra `E2E-…`) y, sin PAA, tampoco
  * choca con `liberarVigencia`.
@@ -13,19 +14,22 @@ import { test, expect } from '../../core/fixtures';
 import { environment } from '../../../src/environments/environment.development';
 import { VIGENCIA_E2E } from '../programacion/datos';
 import { ApiProgramacion, personaDe, tokenDe } from '../programacion/limpieza';
-import { SEMILLA_EDICION_INFORME, SEMILLA_INICIAR_EJECUCION, SEMILLA_RESUMEN_HALLAZGOS, SEMILLA_SEGUIMIENTO } from '../ejecucion/datos';
+import { SEMILLA_EDICION_INFORME, SEMILLA_INICIAR_EJECUCION, SEMILLA_PDF_IMAGEN, SEMILLA_RESUMEN_HALLAZGOS, SEMILLA_SEGUIMIENTO } from '../ejecucion/datos';
+import { pngPatron } from '../ejecucion/gestor';
 
 const CRUD = environment.PLAN_ANUAL_AUDITORIA_SERVICE.replace(/\/$/, '');
+const GESTOR = environment.GESTOR_DOCUMENTAL_SERVICE.replace(/\/$/, '');
 const { PLANEACION, EJECUCION } = environment.AUDITORIA_ESTADO;
 const { AUDITORIA_INTERNA_ID, SEGUIMIENTO_ID } = environment.TIPO_EVALUACION;
 
 type HallazgoSemilla = { criterio: string; titulo: string; descripcion: string };
-type ContenidoInforme = { tema: string; descripcionTema?: string; subtema: string; hallazgos: HallazgoSemilla[] };
+/** `descripcionTema` puede ser una función: así la subida al gestor solo ocurre si el tema todavía no existe. */
+type ContenidoInforme = { tema: string; descripcionTema?: string | (() => Promise<string>); subtema: string; hallazgos: HallazgoSemilla[] };
 
 class ApiSemilla {
   constructor(private readonly request: APIRequestContext, private readonly token: string) {}
 
-  private async llamar(metodo: 'GET' | 'POST', ruta: string, body?: object) {
+  private async llamar(metodo: 'GET' | 'POST' | 'PUT', ruta: string, body?: object) {
     const r = await this.request.fetch(`${CRUD}/${ruta}`, {
       method: metodo,
       headers: { Authorization: `Bearer ${this.token}` },
@@ -37,6 +41,7 @@ class ApiSemilla {
 
   listar = async (ruta: string): Promise<any[]> => (await this.llamar('GET', ruta)) ?? [];
   crear = (coleccion: string, body: object) => this.llamar('POST', coleccion, body);
+  actualizar = (ruta: string, body: object) => this.llamar('PUT', ruta, body);
 }
 
 test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución y Planeación', { tag: ['@semilla', '@auditor-experto', '@escritura'] }, async ({ page, request, comoRol }, testInfo) => {
@@ -116,7 +121,8 @@ test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución 
   async function contenidoInforme(auditoriaId: string, informeId: string, c: ContenidoInforme) {
     let [tema] = await api.listar(`tema?query=informe_id:${informeId},activo:true&limit=1`);
     if (!tema) {
-      tema = await api.crear('tema', { informe_id: informeId, titulo: c.tema, ...(c.descripcionTema ? { descripcion_titulo: c.descripcionTema } : {}) });
+      const descripcion = typeof c.descripcionTema === 'function' ? await c.descripcionTema() : c.descripcionTema;
+      tema = await api.crear('tema', { informe_id: informeId, titulo: c.tema, ...(descripcion ? { descripcion_titulo: descripcion } : {}) });
       creado.push(`tema "${c.tema}"`);
     }
     let subtema = (tema.subtema ?? []).find((sub: any) => sub.activo !== false);
@@ -131,6 +137,26 @@ test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución 
       await api.crear('hallazgo', { auditoria_id: auditoriaId, informe_id: informeId, subtema_id: subtema._id, ...h });
       creado.push(`hallazgo "${h.titulo}"`);
     }
+  }
+
+  /**
+   * Sube al gestor documental real (Nuxeo) el HTML de una descripción, con el mismo cuerpo que arma el MF
+   * (aspectos-evaluados → subirHtmlANuxeo), y devuelve el valor que se guarda en el tema. El gestor no tiene
+   * borrado: el documento queda en Nuxeo de pruebas (se informa en el reporte).
+   */
+  async function subirDescripcionAlGestor(html: string, nombre: string): Promise<string> {
+    const base64 = Buffer.from(html, 'utf8').toString('base64');
+    const r = await request.fetch(`${GESTOR}/document/uploadAnyFormat`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${await tokenDe(page)}` },
+      data: [{ IdTipoDocumento: environment.TIPO_DOCUMENTO.INFORMES, nombre, descripcion: 'Descripción de tema (semilla E2E)', metadatos: {}, file: JSON.stringify(base64) }],
+    });
+    if (!r.ok()) throw new Error(`POST gestor document/uploadAnyFormat → ${r.status()}: ${(await r.text()).slice(0, 300)}`);
+    const cuerpo = await r.json();
+    const enlace = (Array.isArray(cuerpo?.res) ? cuerpo.res[0] : cuerpo?.res)?.Enlace;
+    if (!enlace) throw new Error('el gestor no devolvió el enlace del documento');
+    creado.push(`documento en Nuxeo ${enlace} (no se puede borrar)`);
+    return `NuxeoEnlace:${enlace}`;
   }
 
   await test.step('auditoría con preinforme en revisión del Jefe, con hallazgos (resumen de hallazgos)', async () => {
@@ -155,6 +181,22 @@ test('semilla: auditorías especiales de 2010 para los escenarios de Ejecución 
 
   await test.step('auditoría con el programa aprobado por el auditado (iniciar ejecución)', async () => {
     await auditoria(SEMILLA_INICIAR_EJECUCION, [PLANEACION.CREANDO_PROGRAMA, PLANEACION.APROBADO_PROGRAMA_JEFE, PLANEACION.APROBADO_PROGRAMA_AUDITADO]);
+  });
+
+  await test.step('auditoría con el preinforme en creación y un tema con imagen guardada de verdad en Nuxeo (PDF del MID)', async () => {
+    const s = SEMILLA_PDF_IMAGEN;
+    const auditoriaId = await auditoria(s, [PLANEACION.APROBADO_PROGRAMA_AUDITADO, EJECUCION.POR_EJECUTAR, EJECUCION.CREANDO_PREINFORME]);
+    const html = `<p>${s.textoDescripcion}</p><p><img src="data:image/png;base64,${pngPatron(s.imagen.ancho, s.imagen.alto)}" style="width:${s.imagen.ancho * 4}px;"></p>`;
+    const informeId = await informe(auditoriaId, s.consecutivo);
+    // El MID no genera el PDF sin fecha de emisión (la llena el paso 1, "Información"): se completa una sola vez
+    const [actual] = await api.listar(`informe?query=_id:${informeId}&limit=1`);
+    if (!actual?.fecha_emision) {
+      await api.actualizar(`informe/${informeId}`, s.informe);
+      creado.push(`paso 1 del informe de ${s.consecutivo} (fecha de emisión, muestra y aspectos generales)`);
+    }
+    await contenidoInforme(auditoriaId, informeId, {
+      tema: s.tema, descripcionTema: () => subirDescripcionAlGestor(html, s.tema), subtema: s.subtema, hallazgos: [s.hallazgo],
+    });
   });
 
   await testInfo.attach('creado en esta corrida', { body: creado.join('\n') || 'nada: la semilla ya existía', contentType: 'text/plain' });

@@ -1,6 +1,7 @@
 /**
  * Registro de avances de una acción de mejora (#924) y su variante de revisión del auditor (#925).
- * Rutas: .../gestion-acciones/registrar-avances/:id (auditado) y .../gestion-acciones/revisar/:id (auditor)
+ * Ruta desde el listado (#916): .../gestion-acciones/registrar-avances/:id para los dos roles; la vista la decide el
+ * rol (auditor del plan o auditado). .../gestion-acciones/revisar/:id sigue existiendo (se usa con E2E_ACCION_ID).
  */
 import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from '../core/base.page';

@@ -483,7 +483,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
   async guardarAspectosEvaluados(): Promise<void> {
     if (this.aspectosEvaluadosComponent) {
       const ok = await this.aspectosEvaluadosComponent.guardarAspectos();
-      // Si algo falló no se recarga, para conservar en el formulario lo que no se guardó
+      // Si algo no se guardó, no se avanza ni se recarga: lo escrito queda para reintentarlo
       if (!ok) return;
       this.stepper.next();
       this.cargarTemasYHallazgos();

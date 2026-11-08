@@ -40,20 +40,37 @@ export const ASIGNAR_PLANES_AUDITADO: OpcionFase = {
   titulo: 'Registro de Planes de Mejoramiento',
 };
 
-export const FORMULACION_PLANES: OpcionFase = {
+/**
+ * Formulación de planes: la misma opción y ruta para los dos roles, con una vista por rol (#916):
+ * el auditor OCI revisa y dictamina, el auditado registra su plan. Menú verificado en pruebas el 2026-11-05.
+ */
+export const FORMULACION_PLANES_AUDITOR: OpcionFase = {
   menu: ['Planes de Mejoramiento', 'Formulación de planes'],
   url: '/gestion-auditoria/plan-mejoramiento/formulacion-planes',
   titulo: 'Bandeja de Revisión y Dictamen de Planes',
 };
 
-export const GESTION_ACCIONES: OpcionFase = {
-  menu: ['Planes de Mejoramiento', 'Gestión de Acciones'],
-  url: '/gestion-auditoria/plan-mejoramiento/gestion-acciones',
-  titulo: 'Gestión de Acciones',
+export const FORMULACION_PLANES_AUDITADO: OpcionFase = {
+  menu: ['Planes de Mejoramiento', 'Formulación de planes'],
+  url: '/gestion-auditoria/plan-mejoramiento/formulacion-planes',
+  titulo: 'Registro de Planes de Mejoramiento',
 };
 
-export const FASES_AUDITOR = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES, FORMULACION_PLANES, GESTION_ACCIONES];
-export const FASES_JEFE_DEPENDENCIA = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES_AUDITADO, GESTION_ACCIONES];
+/** Gestión de Acciones: también con una vista por rol desde #916 (textosAuditorGestion / textosAuditadoGestion). */
+export const GESTION_ACCIONES_AUDITOR: OpcionFase = {
+  menu: ['Planes de Mejoramiento', 'Gestión de Acciones'],
+  url: '/gestion-auditoria/plan-mejoramiento/gestion-acciones',
+  titulo: 'Seguimiento y Evaluación de Acciones de Mejoramiento',
+};
+
+export const GESTION_ACCIONES_AUDITADO: OpcionFase = {
+  menu: ['Planes de Mejoramiento', 'Gestión de Acciones'],
+  url: '/gestion-auditoria/plan-mejoramiento/gestion-acciones',
+  titulo: 'Gestión y Consulta de Acciones de Mejoramiento',
+};
+
+export const FASES_AUDITOR = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES, FORMULACION_PLANES_AUDITOR, GESTION_ACCIONES_AUDITOR];
+export const FASES_JEFE_DEPENDENCIA = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES_AUDITADO, FORMULACION_PLANES_AUDITADO, GESTION_ACCIONES_AUDITADO];
 export const MENU_PRINCIPAL = ['Gestión de Auditoría', 'Planes de Mejoramiento'];
 
 // ── Programación (fase 1) ────────────────────────────────────────────────────────────────────

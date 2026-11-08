@@ -47,6 +47,30 @@ export const SEMILLA_EDICION_INFORME = {
   },
 };
 
+/**
+ * Auditoría interna con el preinforme en creación y un tema cuya descripción (texto + imagen de 37×23 px)
+ * está guardada DE VERDAD en el gestor documental. Sin simulación: valida la descarga real y el PDF del MID.
+ */
+export const SEMILLA_PDF_IMAGEN = {
+  titulo: 'SEMILLA-E2E PDF con imagen',
+  consecutivo: 'SEMILLA-E2E-05',
+  tema: 'TEMA PDF CON IMAGEN SEMILLA E2E',
+  textoDescripcion: 'Evidencia fotográfica real de la semilla E2E del PDF.',
+  imagen: { ancho: 37, alto: 23 },
+  /** Paso 1 del informe: sin fecha de emisión el MID no genera el PDF. */
+  informe: {
+    fecha_emision: '2010-12-15T05:00:00.000Z',
+    muestra: 'Muestra de la semilla E2E del PDF.',
+    aspecto_general: '<p>Aspectos generales de la semilla E2E del PDF.</p>',
+  },
+  subtema: 'SUBTEMA PDF SEMILLA E2E',
+  hallazgo: {
+    criterio: 'Resolución No. 129 de 2022 de la Rectoría',
+    titulo: 'Hallazgo de la semilla del PDF',
+    descripcion: 'Descripción del hallazgo de la semilla del PDF E2E.',
+  },
+};
+
 /** Seguimiento con el informe final en creación y sin temas: el auditor lo edita ("Editar Informe"). */
 export const SEMILLA_SEGUIMIENTO = {
   titulo: 'SEMILLA-E2E Seguimiento',
