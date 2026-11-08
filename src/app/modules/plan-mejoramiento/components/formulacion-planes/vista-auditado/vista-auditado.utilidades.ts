@@ -106,7 +106,7 @@ export const flujoPlan: ConfigFlujo = {
 
 // ── Tabla ───────────────────────────────────────────────────
 /** Acciones de accionesPlanMejoramiento que esta vista ya implementa. */
-export const accionesHabilitadas = ["Registrar Plan", "Ver Plan", "Ver Observaciones"];
+export const accionesHabilitadas = ["Registrar Plan", "Ver Plan", "Ver Documentos Auditoría", "Ver Observaciones"];
 
 export const columnasFormulacion: ColumnaFormulacion<AuditoriaFormulacionPlan>[] = [
   columnasComunes.numero,

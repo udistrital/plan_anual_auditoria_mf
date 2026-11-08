@@ -15,6 +15,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { Vigencia } from "src/app/shared/data/models/vigencia.model";
 import { accionesPlanMejoramiento } from "src/app/shared/utils/accionesPorRolYEstado";
+import { DocumentosAuditoriaPlanService } from "../../../services/documentos-auditoria-plan.service";
 import {
   HistorialRechazosData,
   ModalHistorialRechazosComponent,
@@ -66,6 +67,7 @@ export abstract class VistaFormulacionBase<
   private readonly parametrosUtilsService = inject(ParametrosUtilsService);
   private readonly userService = inject(UserService);
   private readonly descargaService = inject(DescargaService);
+  private readonly documentosAuditoriaPlan = inject(DocumentosAuditoriaPlanService);
 
   // ── Configuración de cada vista ───────────────────────────
   abstract readonly textos: TextosVistaFormulacion;
@@ -285,6 +287,14 @@ export abstract class VistaFormulacionBase<
     };
 
     this.dialog.open(ModalHistorialRechazosComponent, { width: "1000px", data });
+  }
+
+  /** El modal necesita la auditoría completa (dependencias, consecutivo), que no viene en la fila. */
+  protected verDocumentosAuditoria(fila: A): void {
+    this.planAuditoriaMid.get(`auditoria/${fila.auditoria_id}`).subscribe({
+      next: (res) => this.documentosAuditoriaPlan.verDocumentosAuditoria(res.Data),
+      error: () => this.alertaService.showErrorAlert("No fue posible consultar los documentos de la auditoría."),
+    });
   }
 
   // ── Exportar ──────────────────────────────────────────────

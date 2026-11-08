@@ -114,6 +114,21 @@ export class InformeAuditoriaPage extends BasePage {
     return this.temas.nth(indice).locator('quill-editor .ql-editor').first();
   }
 
+  /** Bloque de la descripción del primer hallazgo del tema. */
+  descripcionHallazgo(indice: number): Locator {
+    return this.temas.nth(indice).locator('.hallazgo-desc-editor').first();
+  }
+
+  /** Editor de texto enriquecido de la descripción del primer hallazgo del tema. */
+  editorDescripcionHallazgo(indice: number): Locator {
+    return this.descripcionHallazgo(indice).locator('quill-editor .ql-editor');
+  }
+
+  /** Aviso de que la descripción del primer hallazgo no se pudo cargar desde el gestor documental. */
+  avisoDescripcionHallazgoNoDisponible(indice: number): Locator {
+    return this.descripcionHallazgo(indice).getByRole('alert').filter({ hasText: 'No se pudo cargar la descripción' });
+  }
+
   /** Subtemas y hallazgos del tema (cantidad de campos "Nombre del Subtema" y "Hallazgo"). */
   async conteoTema(indice: number): Promise<{ subtemas: number; hallazgos: number }> {
     const tema = this.temas.nth(indice);

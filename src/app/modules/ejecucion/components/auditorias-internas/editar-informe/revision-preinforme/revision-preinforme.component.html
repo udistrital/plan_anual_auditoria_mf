@@ -65,10 +65,10 @@
                         <mat-label>Hallazgo</mat-label>
                         <input matInput [value]="item.hallazgo.titulo" disabled>
                       </mat-form-field>
-                      <mat-form-field appearance="outline" class="hallazgo-input">
-                        <mat-label>Descripción</mat-label>
-                        <textarea matInput [value]="item.hallazgo.descripcion" rows="3" disabled></textarea>
-                      </mat-form-field>
+                      <div class="hallazgo-descripcion">
+                        <span class="hallazgo-descripcion-etiqueta">Descripción</span>
+                        <app-descripcion-hallazgo [valor]="item.hallazgo.descripcion"></app-descripcion-hallazgo>
+                      </div>
                       <!-- Observaciones de los auditados -->
                       <div class="observaciones">
                         <div class="obs-header">

@@ -24,8 +24,8 @@ Archivo: `tests/navegacion/fases-auditor.spec.ts`
 | Gestión de Auditoría › Planeación › Seguimiento e Informes de Ley | `/gestion-auditoria/planeacion/seguimiento` | Planeación de Seguimientos e Informes de Ley |
 | Gestión de Auditoría › Ejecución › Auditorías Internas | `/gestion-auditoria/ejecucion/auditorias-internas` | Auditorías internas |
 | Gestión de Auditoría › Ejecución › Seguimiento e Informes de Ley | `/gestion-auditoria/ejecucion/seguimiento-informes` | Seguimiento e Informes |
-| Planes de Mejoramiento › Asignar Planes | `/gestion-auditoria/plan-mejoramiento/asignar-auditores` | Asignar planes |
-| Planes de Mejoramiento › Formulación de planes | `/gestion-auditoria/plan-mejoramiento` | Formulación de planes |
+| Planes de Mejoramiento › Asignar Planes | `/gestion-auditoria/plan-mejoramiento/formulacion-planes` | Bandeja de Revisión y Dictamen de Planes |
+| Planes de Mejoramiento › Formulación de planes | `/gestion-auditoria/plan-mejoramiento/formulacion-planes` | Bandeja de Revisión y Dictamen de Planes |
 | Planes de Mejoramiento › Gestión de Acciones | `/gestion-auditoria/plan-mejoramiento/gestion-acciones` | Gestión de Acciones |
 
 Resultado esperado: cada pantalla carga con su título, sin errores de JavaScript, y la corrida no hace escrituras.
@@ -34,7 +34,7 @@ Resultado esperado: cada pantalla carga con su título, sin errores de JavaScrip
 
 Archivo: `tests/navegacion/fases-jefe-dependencia.spec.ts`
 
-Igual que el escenario 1, con las opciones del auditado: Planeación y Ejecución (las mismas cuatro), **Asignar Planes** y **Gestión de Acciones**.
+Igual que el escenario 1, con las opciones del auditado: Planeación y Ejecución (las mismas cuatro), **Asignar Planes** y **Gestión de Acciones**. **Asignar Planes** lleva a la misma URL, con el título `Registro de Planes de Mejoramiento`.
 
 Permiso: en **Planes de Mejoramiento** no aparece **Formulación de planes**.
 

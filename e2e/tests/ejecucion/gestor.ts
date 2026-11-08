@@ -70,3 +70,17 @@ export async function simularGestorConDocumento(page: Page, html: string): Promi
   });
   return atendidas;
 }
+
+/**
+ * Hace que los hallazgos consultados por el MF lleguen con la descripción indicada, sin escribir en el ambiente.
+ * Sirve para probar el enlace de Nuxeo sobre la semilla, cuyo hallazgo tiene texto plano.
+ */
+export async function simularDescripcionHallazgos(page: Page, descripcion: string): Promise<void> {
+  await page.route((url) => /\/hallazgo$/.test(url.pathname), async (route) => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    const respuesta = await route.fetch();
+    const cuerpo = await respuesta.json();
+    cuerpo.Data = (cuerpo.Data ?? []).map((hallazgo: Record<string, unknown>) => ({ ...hallazgo, descripcion }));
+    return route.fulfill({ response: respuesta, json: cuerpo });
+  });
+}

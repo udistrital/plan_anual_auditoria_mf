@@ -152,7 +152,7 @@
                 }
                 @case ('hallazgo') {
                   <span class="numero-hallazgo"><mat-icon>flag</mat-icon> {{ row.no_hallazgo }}</span>
-                  <small class="texto-truncado" [title]="row.descripcion_hallazgo">{{ row.descripcion_hallazgo }}</small>
+                  <small class="texto-truncado" [title]="row.descripcion_hallazgo | descripcionTexto">{{ row.descripcion_hallazgo | descripcionTexto }}</small>
                 }
                 @case ('accion') {
                   <span class="numero-accion">{{ row.no_accion }}</span>

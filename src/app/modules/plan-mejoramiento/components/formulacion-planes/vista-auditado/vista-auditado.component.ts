@@ -66,9 +66,10 @@ export class VistaAuditadoComponent
 
   realizarAccion(fila: FilaFormulacion, accion: string): void {
     const acciones: Record<string, () => void> = {
-      "Registrar Plan":    () => this.router.navigate([`/plan-mejoramiento/registrar-plan/${fila.auditoria_id}`]),
-      "Ver Plan":          () => this.router.navigate([`/plan-mejoramiento/ver-plan/${fila.auditoria_id}`]),
-      "Ver Observaciones": () => this.verObservaciones(fila),
+      "Registrar Plan":           () => this.router.navigate([`/plan-mejoramiento/registrar-plan/${fila.auditoria_id}`]),
+      "Ver Plan":                 () => this.router.navigate([`/plan-mejoramiento/ver-plan/${fila.auditoria_id}`]),
+      "Ver Documentos Auditoría": () => this.verDocumentosAuditoria(fila),
+      "Ver Observaciones":        () => this.verObservaciones(fila),
     };
     acciones[accion]?.();
   }

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnChanges, OnDestroy, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { AbstractControl, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
+import { AbstractControl, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
@@ -7,7 +7,10 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
-import { esHtmlVacio } from 'src/app/shared/utils/html.util';
+import { contieneImagen, descripcionAHtml, esHtmlVacio } from 'src/app/shared/utils/html.util';
+
+// `Validators.required` no detecta el HTML vacío que deja Quill (`<p><br></p>`)
+const descripcionRequerida: ValidatorFn = (control) => esHtmlVacio(control.value) ? { required: true } : null;
 
 interface Hallazgo {
   _id?: string;
@@ -62,6 +65,10 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   private readonly documentosNuxeoSubtema = new Map<string, { enlace: string; html: string }>();
   // Subtemas cuya descripción no se pudo descargar del gestor documental: al guardar se conserva su enlace original
   private readonly descripcionesSubtemaNoCargadas = new Map<string, string>();
+  // Por hallazgo, el valor guardado y el HTML que se cargó en el editor: si no cambia, se conserva el valor guardado
+  private readonly descripcionesHallazgo = new Map<string, { guardada: string; html: string }>();
+  // Hallazgos cuya descripción no se pudo descargar del gestor documental: al guardar se conserva su enlace original
+  private readonly descripcionesHallazgoNoCargadas = new Map<string, string>();
   errorMatcher: ErrorStateMatcher = {
     isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
       return !!(control?.invalid && (control?.dirty || control?.touched));
@@ -220,6 +227,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     this.descripcionesNoCargadas.clear();
     this.documentosNuxeoSubtema.clear();
     this.descripcionesSubtemaNoCargadas.clear();
+    this.descripcionesHallazgo.clear();
+    this.descripcionesHallazgoNoCargadas.clear();
 
     this.observadores.forEach(o => o.disconnect());
     this.observadores = [];
@@ -253,14 +262,17 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
         const hallazgosArray = this.fb.array([]);
 
-        (subtema.hallazgo ?? []).forEach((hallazgo: any) => {
-          if (!hallazgo.activo) return;
+        const hallazgosActivos = (subtema.hallazgo ?? []).filter((hallazgo: any) => hallazgo.activo);
+        const descripciones = await Promise.all(
+          hallazgosActivos.map((hallazgo: any) => this.cargarDescripcionHallazgo(hallazgo))
+        );
 
+        hallazgosActivos.forEach((hallazgo: any, indice: number) => {
           hallazgosArray.push(this.fb.group({
             _id: [hallazgo._id ?? null],
             criterio: [hallazgo.criterio ?? '', Validators.required],
             hallazgo: [hallazgo.titulo ?? '', Validators.required],
-            descripcion: [hallazgo.descripcion ?? '', Validators.required],
+            descripcion: [descripciones[indice], descripcionRequerida],
           }));
         });
 
@@ -306,10 +318,11 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
     this.actualizarModoSoloLectura();
 
-    if (this.descripcionesNoCargadas.size > 0 || this.descripcionesSubtemaNoCargadas.size > 0) {
+    if (this.descripcionesNoCargadas.size > 0 || this.descripcionesSubtemaNoCargadas.size > 0 || this.descripcionesHallazgoNoCargadas.size > 0) {
       const afectados = [
         this.descripcionesNoCargadas.size > 0 ? `${this.descripcionesNoCargadas.size} tema(s)` : '',
         this.descripcionesSubtemaNoCargadas.size > 0 ? `${this.descripcionesSubtemaNoCargadas.size} subtema(s)` : '',
+        this.descripcionesHallazgoNoCargadas.size > 0 ? `${this.descripcionesHallazgoNoCargadas.size} hallazgo(s)` : '',
       ].filter(Boolean).join(' y ');
       this.alertaService.showAlert(
         'Descripción no disponible',
@@ -329,6 +342,17 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   descripcionSubtemaNoDisponible(subtema: AbstractControl): boolean {
     const subtemaId = subtema.get('_id')?.value;
     return !!subtemaId && this.descripcionesSubtemaNoCargadas.has(String(subtemaId));
+  }
+
+  // Indica si la descripción del hallazgo no se pudo descargar del gestor documental
+  descripcionHallazgoNoDisponible(hallazgo: AbstractControl): boolean {
+    const hallazgoId = hallazgo.get('_id')?.value;
+    return !!hallazgoId && this.descripcionesHallazgoNoCargadas.has(String(hallazgoId));
+  }
+
+  descripcionHallazgoInvalida(hallazgo: AbstractControl): boolean {
+    const descripcion = hallazgo.get('descripcion');
+    return !!(descripcion?.invalid && (descripcion?.dirty || descripcion?.touched));
   }
 
   get temas(): UntypedFormArray {
@@ -374,7 +398,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
       _id: [null],
       criterio: ['', Validators.required],
       hallazgo: ['', Validators.required],
-      descripcion: ['', Validators.required],
+      descripcion: ['', descripcionRequerida],
     });
     this.getHallazgos(temaIndex, subtemaIndex).push(nuevoHallazgo);
   }
@@ -478,6 +502,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
       return false;
     }
 
+    const errores: string[] = [];
     const temasFormValue = this.temas.value;
 
     for (let i = 0; i < temasFormValue.length; i++) {
@@ -488,7 +513,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
       if (!temaId) {
         try {
           let descripcion = esHtmlVacio(temaForm.descripcion_titulo) ? '' : temaForm.descripcion_titulo;
-          if (this.contieneImagen(descripcion)) {
+          if (contieneImagen(descripcion)) {
             descripcion = await this.subirHtmlANuxeo(descripcion, `Tema ${i + 1} de informe ${this.informeId}.html`, 'Documento HTML (Aspectos Evaluados) de un tema');
           }
 
@@ -501,7 +526,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
           this.temas.at(i).patchValue({ _id: temaId, isNew: false });
         } catch (error) {
           console.error('Error al crear tema:', error);
-          this.alertaService.showAlert('Error', `No se pudo crear el tema "${temaForm.nombre}"`);
+          errores.push(`No se pudo crear el tema "${temaForm.nombre}"`);
           continue;
         }
       } else {
@@ -516,7 +541,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
           } else if (original && descripcion === original.html) {
             // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
             descripcion = original.enlace;
-          } else if (this.contieneImagen(descripcion)) {
+          } else if (contieneImagen(descripcion)) {
             const htmlGuardado = descripcion;
             descripcion = await this.subirHtmlANuxeo(htmlGuardado, `Tema ${i + 1} de informe ${this.informeId}.html`, 'Documento HTML (Aspectos Evaluados) de un tema');
             this.documentosNuxeoTema.set(String(temaId), { enlace: descripcion, html: htmlGuardado });
@@ -528,7 +553,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
           }));
         } catch (error) {
           console.error('Error al actualizar tema:', error);
-          this.alertaService.showAlert('Error', `No se pudo actualizar el tema "${temaForm.nombre}"`);
+          errores.push(`No se pudo actualizar el tema "${temaForm.nombre}"`);
         }
       }
 
@@ -543,7 +568,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
         // Crear o actualizar subtema
         if (!subtemaId) {
           try {
-            if (this.contieneImagen(descripcionSubtema)) {
+            if (contieneImagen(descripcionSubtema)) {
               descripcionSubtema = await this.subirHtmlANuxeo(descripcionSubtema, nombreDocumentoSubtema, descripcionDocumentoSubtema);
             }
 
@@ -558,7 +583,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
             this.getSubtemas(i).at(j).patchValue({ _id: subtemaId, isNew: false });
           } catch (error) {
             console.error('Error al crear subtema:', error);
-            this.alertaService.showAlert('Error', `No se pudo crear el subtema "${subtemaForm.nombre}"`);
+            errores.push(`No se pudo crear el subtema "${subtemaForm.nombre}"`);
             continue;
           }
         } else {
@@ -572,7 +597,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
             } else if (original && descripcionSubtema === original.html) {
               // Sin cambios en el contenido: se reutiliza el documento existente en Nuxeo
               descripcionSubtema = original.enlace;
-            } else if (this.contieneImagen(descripcionSubtema)) {
+            } else if (contieneImagen(descripcionSubtema)) {
               const htmlGuardado = descripcionSubtema;
               descripcionSubtema = await this.subirHtmlANuxeo(htmlGuardado, nombreDocumentoSubtema, descripcionDocumentoSubtema);
               this.documentosNuxeoSubtema.set(String(subtemaId), { enlace: descripcionSubtema, html: htmlGuardado });
@@ -584,7 +609,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
             }));
           } catch (error) {
             console.error('Error al actualizar subtema:', error);
-            this.alertaService.showAlert('Error', `No se pudo actualizar el subtema "${subtemaForm.nombre}"`);
+            errores.push(`No se pudo actualizar el subtema "${subtemaForm.nombre}"`);
           }
         }
 
@@ -592,43 +617,92 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
         for (let k = 0; k < subtemaForm.hallazgos.length; k++) {
           const hallazgoForm = subtemaForm.hallazgos[k];
           let hallazgoId = hallazgoForm._id;
+          const nombreDocumentoHallazgo = `Hallazgo ${i + 1}.${j + 1}.${k + 1} de informe ${this.informeId}.html`;
 
           if (!hallazgoId) {
             try {
+              const descripcion = await this.prepararDescripcionHallazgo(hallazgoForm, nombreDocumentoHallazgo);
               const response: any = await firstValueFrom(this.planAnualAuditoriaService.post('hallazgo', {
                 auditoria_id: this.auditoriaId,
                 informe_id: this.informeId,
                 subtema_id: subtemaId,
                 titulo: hallazgoForm.hallazgo,
                 criterio: hallazgoForm.criterio,
-                descripcion: hallazgoForm.descripcion
+                descripcion
               }));
               // El servidor devuelve el hallazgo creado directamente
               hallazgoId = response?.Data?._id;
               this.getHallazgos(i, j).at(k).patchValue({ _id: hallazgoId, isNew: false });
+              // Si otro elemento falla, al reintentar este hallazgo no vuelve a subir su documento
+              this.descripcionesHallazgo.set(String(hallazgoId), { guardada: descripcion, html: hallazgoForm.descripcion });
             } catch (error) {
               console.error('Error al crear hallazgo:', error);
-              this.alertaService.showAlert('Error', `No se pudo crear el hallazgo "${hallazgoForm.hallazgo}"`);
+              errores.push(`No se pudo crear el hallazgo "${hallazgoForm.hallazgo}"`);
             }
           } else {
             try {
+              const descripcion = await this.prepararDescripcionHallazgo(hallazgoForm, nombreDocumentoHallazgo);
               await firstValueFrom(this.planAnualAuditoriaService.put(`hallazgo/${hallazgoId}`, {
                 titulo: hallazgoForm.hallazgo,
                 criterio: hallazgoForm.criterio,
-                descripcion: hallazgoForm.descripcion
+                descripcion
               }));
             } catch (error) {
               console.error('Error al actualizar hallazgo:', error);
-              this.alertaService.showAlert('Error', `No se pudo actualizar el hallazgo "${hallazgoForm.hallazgo}"`);
+              errores.push(`No se pudo actualizar el hallazgo "${hallazgoForm.hallazgo}"`);
             }
           }
         }
       }
     }
 
+    // Con errores no se avisa éxito ni se recargan los datos, para conservar en el formulario lo que no se guardó
+    if (errores.length > 0) {
+      this.alertaService.showAlert('Error', `${errores.join('. ')}. Los demás cambios se guardaron; intente de nuevo.`);
+      return false;
+    }
+
     this.alertaService.showAlert('Guardado exitoso', 'Los aspectos evaluados se han guardado correctamente');
     this.datosActualizados.emit();
     return true;
+  }
+
+  // Deja la descripción guardada de un hallazgo en HTML para el editor, recordando su valor original
+  private async cargarDescripcionHallazgo(hallazgo: any): Promise<string> {
+    const guardada: string = hallazgo.descripcion ?? '';
+    const hallazgoId = hallazgo._id?.toString();
+    try {
+      const html = await descripcionAHtml(guardada, (uuid) => this.nuxeoService.obtenerPorUUID(uuid));
+      if (hallazgoId) {
+        this.descripcionesHallazgo.set(hallazgoId, { guardada, html });
+      }
+      return html;
+    } catch (error) {
+      // Si el gestor documental falla, el hallazgo se muestra igual en vez de dejar vacío el paso
+      console.error(`No se pudo cargar la descripción del hallazgo "${hallazgo.titulo}":`, error);
+      if (hallazgoId) {
+        this.descripcionesHallazgoNoCargadas.set(hallazgoId, guardada);
+      }
+      return guardada;
+    }
+  }
+
+  // Devuelve el valor a guardar en la descripción de un hallazgo
+  private async prepararDescripcionHallazgo(hallazgoForm: any, nombreDocumento: string): Promise<string> {
+    const html: string = hallazgoForm.descripcion;
+    const hallazgoId = hallazgoForm._id ? String(hallazgoForm._id) : '';
+    const noCargada = this.descripcionesHallazgoNoCargadas.get(hallazgoId);
+    if (noCargada !== undefined) return noCargada;
+
+    const original = this.descripcionesHallazgo.get(hallazgoId);
+    if (original?.html === html) return original.guardada;
+    if (!contieneImagen(html)) return html;
+
+    const enlace = await this.subirHtmlANuxeo(html, nombreDocumento, 'Documento HTML (Aspectos Evaluados) de un hallazgo');
+    if (hallazgoId) {
+      this.descripcionesHallazgo.set(hallazgoId, { guardada: enlace, html });
+    }
+    return enlace;
   }
 
   // Sube el HTML de una descripción (con imágenes) a Nuxeo y devuelve el valor a guardar en la descripción
@@ -654,13 +728,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     if (!enlace) throw new Error('Nuxeo no devolvió el enlace del documento');
 
     return `NuxeoEnlace:${enlace}`;
-  }
-
-  private contieneImagen(html: string): boolean {
-    if (!html) return false;
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.querySelector('img') !== null;
   }
 
   private comprobarNuxeoEnlace(descripcion: any): boolean {

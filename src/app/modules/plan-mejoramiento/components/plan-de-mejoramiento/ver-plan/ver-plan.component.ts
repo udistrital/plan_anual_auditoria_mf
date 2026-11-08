@@ -10,7 +10,7 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { environment } from 'src/environments/environment';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
-import { DatosModalRechazoPlan, ModalRechazoPlanComponent } from '../ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
+import { DatosModalRechazoPlan, ModalRechazoPlanComponent } from './modal-rechazo-plan/modal-rechazo-plan.component';
 import { DatosModalAprobacionPlan, ModalAprobacionPlanComponent } from './modal-aprobacion-plan/modal-aprobacion-plan.component';
 import { DocumentosAuditoriaPlanService } from '../../../services/documentos-auditoria-plan.service';
 
@@ -382,7 +382,7 @@ export class VerPlanComponent implements OnInit {
     if (history.state?.navigationId > 1) {
       this.location.back();
     } else {
-      this.router.navigate(['/plan-mejoramiento']);
+      this.router.navigate(['/plan-mejoramiento/formulacion-planes']);
     }
   }
 }

@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.descripcion-estado {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.descripcion-no-disponible {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px dashed #a11413;
+  border-radius: 4px;
+  background-color: #fff5f5;
+}
+
+.descripcion-no-disponible mat-icon {
+  color: #a11413;
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .descripcion-contenido .ql-container {
+  border: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:host ::ng-deep .descripcion-contenido .ql-editor {
+  height: auto;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+:host ::ng-deep .descripcion-contenido img {
+  max-width: 100%;
+  height: auto;
+}

@@ -207,7 +207,7 @@ export function calcularPlazo(fila: AuditoriaFormulacionAuditor, hoy: Date = new
 
 // ── Tabla ───────────────────────────────────────────────────
 /** Acciones de accionesPlanMejoramiento que esta vista implementa. */
-export const accionesHabilitadasAuditor = ["Asignar Auditor(es)", "Ver Plan", "Ver Observaciones"];
+export const accionesHabilitadasAuditor = ["Asignar Auditor(es)", "Ver Plan", "Ver Documentos Auditoría", "Ver Observaciones"];
 
 /** Roles que pueden aprobar o rechazar el plan en ver-plan (ver VerPlanComponent.mostrarAccionesRevision). */
 export const rolesDictamen: string[] = [environment.ROL.JEFE, environment.ROL.AUDITOR_EXPERTO, environment.ROL.AUDITOR];
