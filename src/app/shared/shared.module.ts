@@ -24,6 +24,8 @@ import { MatOption } from "@angular/material/core";
 import { SearchSelectionComponent } from "./elements/components/search-selection/search-selection.component";
 import { TarjetaIndicadorComponent } from "./elements/components/tarjeta-indicador/tarjeta-indicador.component";
 import { FlujoPasosComponent } from "./elements/components/flujo-pasos/flujo-pasos.component";
+import { DescripcionHallazgoComponent } from "./elements/components/descripcion-hallazgo/descripcion-hallazgo.component";
+import { DescripcionTextoPipe } from "./pipes/descripcion-texto.pipe";
 
 @NgModule({
   declarations: [
@@ -40,6 +42,7 @@ import { FlujoPasosComponent } from "./elements/components/flujo-pasos/flujo-pas
     SearchSelectionComponent,
     TarjetaIndicadorComponent,
     FlujoPasosComponent,
+    DescripcionHallazgoComponent,
   ],
   imports: [
     CommonModule,
@@ -51,6 +54,7 @@ import { FlujoPasosComponent } from "./elements/components/flujo-pasos/flujo-pas
     QuillModule.forRoot(),
     NgxMatSelectSearchModule,
     MatOption,
+    DescripcionTextoPipe,
   ],
   exports: [
     //Componentes
@@ -67,6 +71,8 @@ import { FlujoPasosComponent } from "./elements/components/flujo-pasos/flujo-pas
     SearchSelectionComponent,
     TarjetaIndicadorComponent,
     FlujoPasosComponent,
+    DescripcionHallazgoComponent,
+    DescripcionTextoPipe,
     //modulos
     FormsModule,
     IconosModule,

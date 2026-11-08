@@ -16,7 +16,7 @@
     <div class="info-row">
       <mat-icon class="info-icon">description</mat-icon>
       <span class="info-label">Hallazgo:</span>
-      <span class="info-valor">{{ data.hallazgo.descripcion }}</span>
+      <app-descripcion-hallazgo class="info-valor" [valor]="data.hallazgo.descripcion"></app-descripcion-hallazgo>
     </div>
     <div class="info-row mt-2">
       <mat-icon class="info-icon">apartment</mat-icon>

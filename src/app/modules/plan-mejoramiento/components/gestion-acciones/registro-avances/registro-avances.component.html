@@ -69,7 +69,7 @@
       <div class="resumen-textos">
         <div class="linea-contexto">
           <span class="etiqueta">Hallazgo {{ hallazgo?.no_hallazgo ?? '' }}</span>
-          <p class="recorte mb-0">{{ hallazgo?.descripcion || '—' }}</p>
+          <p class="recorte mb-0">{{ (hallazgo?.descripcion | descripcionTexto) || '—' }}</p>
           <button type="button" class="enlace" (click)="abrirFicha('hallazgo')">Ver hallazgo</button>
         </div>
         <div class="linea-contexto">

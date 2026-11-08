@@ -28,10 +28,16 @@ const PLANEACION_Y_EJECUCION: OpcionFase[] = [
   },
 ];
 
+// Asignar Planes redirige a Formulación de Planes: el título depende de la vista del rol
 export const ASIGNAR_PLANES: OpcionFase = {
   menu: ['Planes de Mejoramiento', 'Asignar Planes'],
-  url: '/gestion-auditoria/plan-mejoramiento/asignar-auditores',
-  titulo: 'Asignar planes',
+  url: '/gestion-auditoria/plan-mejoramiento/formulacion-planes',
+  titulo: 'Bandeja de Revisión y Dictamen de Planes',
+};
+
+export const ASIGNAR_PLANES_AUDITADO: OpcionFase = {
+  ...ASIGNAR_PLANES,
+  titulo: 'Registro de Planes de Mejoramiento',
 };
 
 /**
@@ -64,7 +70,7 @@ export const GESTION_ACCIONES_AUDITADO: OpcionFase = {
 };
 
 export const FASES_AUDITOR = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES, FORMULACION_PLANES_AUDITOR, GESTION_ACCIONES_AUDITOR];
-export const FASES_JEFE_DEPENDENCIA = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES, FORMULACION_PLANES_AUDITADO, GESTION_ACCIONES_AUDITADO];
+export const FASES_JEFE_DEPENDENCIA = [...PLANEACION_Y_EJECUCION, ASIGNAR_PLANES_AUDITADO, FORMULACION_PLANES_AUDITADO, GESTION_ACCIONES_AUDITADO];
 export const MENU_PRINCIPAL = ['Gestión de Auditoría', 'Planes de Mejoramiento'];
 
 // ── Programación (fase 1) ────────────────────────────────────────────────────────────────────

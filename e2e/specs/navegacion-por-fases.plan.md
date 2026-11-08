@@ -24,7 +24,7 @@ Archivo: `tests/navegacion/fases-auditor.spec.ts`
 | Gestión de Auditoría › Planeación › Seguimiento e Informes de Ley | `/gestion-auditoria/planeacion/seguimiento` | Planeación de Seguimientos e Informes de Ley |
 | Gestión de Auditoría › Ejecución › Auditorías Internas | `/gestion-auditoria/ejecucion/auditorias-internas` | Auditorías internas |
 | Gestión de Auditoría › Ejecución › Seguimiento e Informes de Ley | `/gestion-auditoria/ejecucion/seguimiento-informes` | Seguimiento e Informes |
-| Planes de Mejoramiento › Asignar Planes | `/gestion-auditoria/plan-mejoramiento/asignar-auditores` | Asignar planes |
+| Planes de Mejoramiento › Asignar Planes | `/gestion-auditoria/plan-mejoramiento/formulacion-planes` | Bandeja de Revisión y Dictamen de Planes |
 | Planes de Mejoramiento › Formulación de planes | `/gestion-auditoria/plan-mejoramiento/formulacion-planes` | Bandeja de Revisión y Dictamen de Planes (vista del auditor, #916) |
 | Planes de Mejoramiento › Gestión de Acciones | `/gestion-auditoria/plan-mejoramiento/gestion-acciones` | Seguimiento y Evaluación de Acciones de Mejoramiento (vista del auditor, #916; el auditado ve "Gestión y Consulta de Acciones de Mejoramiento") |
 
@@ -34,7 +34,7 @@ Resultado esperado: cada pantalla carga con su título, sin errores de JavaScrip
 
 Archivo: `tests/navegacion/fases-jefe-dependencia.spec.ts`
 
-Igual que el escenario 1, con las opciones del auditado: Planeación y Ejecución (las mismas cuatro), **Asignar Planes**, **Formulación de planes** y **Gestión de Acciones**.
+Igual que el escenario 1, con las opciones del auditado: Planeación y Ejecución (las mismas cuatro), **Asignar Planes**, **Formulación de planes** y **Gestión de Acciones**. **Asignar Planes** lleva a la misma URL, con el título `Registro de Planes de Mejoramiento`.
 
 **Formulación de planes** abre la misma ruta que para el auditor, con la vista del auditado: título **Registro de Planes de Mejoramiento** (#916). Hasta octubre de 2026 el auditado no veía esta opción; el menú de pruebas la muestra desde la vista por rol (verificado el 2026-11-05).
 

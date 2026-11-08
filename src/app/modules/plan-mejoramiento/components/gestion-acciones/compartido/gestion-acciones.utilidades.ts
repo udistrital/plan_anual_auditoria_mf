@@ -1,6 +1,7 @@
 import { environment } from "src/environments/environment";
 import type { AccionGestion, GrupoAccion, ResumenGestionAcciones } from "src/app/shared/data/models/plan-mejoramiento/plan-mejoramiento.models";
 import { VarianteTarjetaIndicador } from "src/app/shared/elements/components/tarjeta-indicador/tarjeta-indicador.component";
+import { descripcionATexto } from "src/app/shared/utils/html.util";
 
 export type FiltroGrupo = GrupoAccion | "EN_RIESGO" | "TODOS";
 
@@ -141,7 +142,7 @@ export function filaExportacion(f: AccionGestion): Record<string, unknown> {
     "Nombre Auditoría": f.nombre_auditoria,
     "Tipo de Evaluación": f.tipo_evaluacion_nombre,
     "No. Hallazgo": f.no_hallazgo,
-    "Hallazgo": f.descripcion_hallazgo,
+    "Hallazgo": descripcionATexto(f.descripcion_hallazgo),
     "No. Acción": f.no_accion,
     "Tipo de Acción": f.tipo_accion_nombre,
     "Síntesis de la Acción": f.descripcion_accion,

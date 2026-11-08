@@ -11,6 +11,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { ParametrosUtilsService } from 'src/app/shared/services/parametros.service';
 import { VistaAuditadoComponent } from './vista-auditado.component';
+import { DocumentosAuditoriaPlanService } from "../../../services/documentos-auditoria-plan.service";
 
 const ESTADO = environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO;
 
@@ -41,6 +42,7 @@ describe('VistaAuditadoComponent', () => {
   let component: VistaAuditadoComponent;
   const router = { navigate: jest.fn() };
   const dialog = { open: jest.fn() };
+  const documentos = { verDocumentosAuditoria: jest.fn() };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -54,6 +56,7 @@ describe('VistaAuditadoComponent', () => {
         { provide: UserService, useValue: { getPersonaId: () => Promise.resolve(10) } },
         { provide: AlertService, useValue: { showAlert: jest.fn(), showErrorAlert: jest.fn() } },
         { provide: DescargaService, useValue: { descargarArchivoBuffer: jest.fn() } },
+        { provide: DocumentosAuditoriaPlanService, useValue: documentos },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
@@ -103,9 +106,9 @@ describe('VistaAuditadoComponent', () => {
     const accionesDe = (estadoId: number) =>
       component.dataSource.data.find((f) => f.estado_plan_id === estadoId)?.acciones;
 
-    expect(accionesDe(ESTADO.SIN_PLAN_MEJORAMIENTO)).toEqual(['Registrar Plan']);
-    expect(accionesDe(ESTADO.CREANDO_PLAN_MEJORAMIENTO)).toEqual(['Registrar Plan']);
-    expect(accionesDe(ESTADO.RECHAZADO_PLAN_MEJORAMIENTO)).toEqual(['Registrar Plan', 'Ver Observaciones']);
+    expect(accionesDe(ESTADO.SIN_PLAN_MEJORAMIENTO)).toEqual(['Registrar Plan', 'Ver Documentos Auditoría']);
+    expect(accionesDe(ESTADO.CREANDO_PLAN_MEJORAMIENTO)).toEqual(['Registrar Plan', 'Ver Documentos Auditoría']);
+    expect(accionesDe(ESTADO.RECHAZADO_PLAN_MEJORAMIENTO)).toEqual(['Registrar Plan', 'Ver Documentos Auditoría', 'Ver Observaciones']);
   });
 
   it('Registrar Plan navega a la ruta existente', () => {
@@ -113,6 +116,17 @@ describe('VistaAuditadoComponent', () => {
     component.realizarAccion(fila, 'Registrar Plan');
 
     expect(router.navigate).toHaveBeenCalledWith([`/plan-mejoramiento/registrar-plan/${fila.auditoria_id}`]);
+  });
+
+  it('Ver Documentos Auditoría abre el modal con la auditoría completa', () => {
+    const fila = component.dataSource.data[0];
+    const auditoria = { _id: fila.auditoria_id, consecutivo_OCI: 'OCI-1' };
+    midGet.mockReturnValueOnce(of({ Data: auditoria }) as never);
+
+    component.realizarAccion(fila, 'Ver Documentos Auditoría');
+
+    expect(midGet).toHaveBeenCalledWith(`auditoria/${fila.auditoria_id}`);
+    expect(documentos.verDocumentosAuditoria).toHaveBeenCalledWith(auditoria);
   });
 
   it('abre el flujo institucional en un modal', () => {

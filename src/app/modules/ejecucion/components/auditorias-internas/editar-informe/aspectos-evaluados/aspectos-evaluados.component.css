@@ -221,18 +221,31 @@
 
 /* ── Tema y subtema: nombre y descripción debajo del título, a ancho completo ── */
 .tema-desc-editor,
-.subtema-desc-editor {
+.subtema-desc-editor,
+.hallazgo-desc-editor {
   width: 100%;
   margin-bottom: 8px;
 }
 
 .tema-desc-editor .descripcion-label,
-.subtema-desc-editor .descripcion-label {
+.subtema-desc-editor .descripcion-label,
+.hallazgo-desc-editor .descripcion-label {
   margin-left: 0;
 }
 
 .tema-desc-editor .quill-editor-custom,
-.subtema-desc-editor .quill-editor-custom {
+.subtema-desc-editor .quill-editor-custom,
+.hallazgo-desc-editor .quill-editor-custom {
   display: block;
   width: 100%;
+}
+
+.quill-editor-custom.editor-invalido {
+  border-color: #a11413;
+}
+
+.descripcion-error {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #a11413;
 }

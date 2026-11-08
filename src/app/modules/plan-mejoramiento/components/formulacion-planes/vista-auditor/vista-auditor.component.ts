@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { environment } from "src/environments/environment";
-import { ModalAsignacionAuditoresComponent } from "../../plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-asignacion-auditores/modal-asignacion-auditores.component";
+import { ModalAsignacionAuditoresComponent } from "./modal-asignacion-auditores/modal-asignacion-auditores.component";
 import type {
   AuditoriaFormulacionAuditor,
   ResumenFormulacionAuditor,
@@ -89,6 +89,7 @@ export class VistaAuditorComponent
     const acciones: Record<string, () => void> = {
       "Ver Plan":                     verPlan,
       "Dictaminar causas y acciones": verPlan,
+      "Ver Documentos Auditoría":     () => this.verDocumentosAuditoria(fila),
       "Ver Observaciones":            () => this.verObservaciones(fila),
       "Asignar Auditor(es)":          () => this.asignarAuditores(fila),
     };

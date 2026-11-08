@@ -99,7 +99,7 @@
                 <mat-icon class="icono-grupo">
                   {{ getHallazgo(fila.hallazgoId)?.expandido ? 'remove' : 'add' }}
                 </mat-icon>
-                <b>{{ fila.hallazgoIndice }}</b>&nbsp;&nbsp;{{ fila.hallazgoDescripcion }}
+                <b>{{ fila.hallazgoIndice }}</b>&nbsp;&nbsp;{{ vistaDictamen ? fila.hallazgoTitulo : (fila.hallazgoDescripcion | descripcionTexto) }}
               </span>
               @if (vistaDictamen) {
                 <span class="estado-chip" [ngClass]="resumenHallazgo(fila.hallazgoId).clase">
