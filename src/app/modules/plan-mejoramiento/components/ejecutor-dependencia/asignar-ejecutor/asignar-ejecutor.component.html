@@ -17,6 +17,7 @@
         </button>
       </div>
 
+      <!-- Paso 1: buscar al usuario -->
       <div class="row">
         <div class="col-12">
           <div
@@ -24,15 +25,85 @@
           >
             <mat-icon>info</mat-icon>
             <p class="mx-2 mb-0">
-              Seleccione la dependencia y la persona que asumirá el rol de
-              Ejecutor. Puede escribir dentro de cada lista para filtrar.
+              Busque al usuario ingresando su documento o correo electrónico; su
+              nombre se completará automáticamente. Luego seleccione la
+              dependencia para asignarle el rol de Ejecutor.
             </p>
           </div>
         </div>
       </div>
 
+      <div class="row">
+        <!-- Documento -->
+        <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
+          <mat-label>Documento de identidad</mat-label>
+          <mat-icon matPrefix color="primary">badge</mat-icon>
+          <input
+            type="number"
+            matInput
+            #documentoInput
+            (keyup.enter)="buscarPorDocumento(documentoInput.value)"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="buscarPorDocumento(documentoInput.value)"
+          >
+            <mat-icon color="primary">search</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Correo -->
+        <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
+          <mat-label>Correo</mat-label>
+          <mat-icon matPrefix color="primary">mail</mat-icon>
+          <input
+            type="text"
+            matInput
+            #emailInput
+            (keyup.enter)="buscarPorCorreo(emailInput.value)"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="buscarPorCorreo(emailInput.value)"
+          >
+            <mat-icon color="primary">search</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Nombres y apellidos (solo lectura) -->
+        <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
+          <mat-label>Nombres y Apellidos</mat-label>
+          <mat-icon matSuffix color="primary">text_fields</mat-icon>
+          <input
+            disabled
+            type="text"
+            matInput
+            readonly
+            [value]="usuarioEncontrado?.nombre ?? ''"
+          />
+        </mat-form-field>
+      </div>
+
+      @if (buscando()) {
+        <div class="d-flex justify-content-center my-2">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="32"
+          ></mat-progress-spinner>
+        </div>
+      }
+
+      <!-- Paso 2: seleccionar dependencia y asignar -->
+      <div
+        class="d-flex justify-content-center align-items-center fondo-acento-50 mt-2 mb-3"
+      >
+        <mat-icon>apartment</mat-icon>
+        <p class="mx-2 mb-0">Dependencia a la que se asignará el ejecutor</p>
+      </div>
+
       <form [formGroup]="form" class="row">
-        <!-- Selector de dependencia -->
         <mat-form-field appearance="outline" class="col-12 col-md-6">
           <mat-label>Dependencia</mat-label>
           <mat-icon matPrefix color="primary">apartment</mat-icon>
@@ -41,7 +112,6 @@
             (openedChange)="$event || filtrarDependencias('')"
             required
           >
-            <!-- Caja de búsqueda interna -->
             <div class="select-search">
               <input
                 matInput
@@ -65,44 +135,6 @@
             <mat-error>La dependencia es obligatoria.</mat-error>
           }
         </mat-form-field>
-
-        <!-- Selector de ejecutor -->
-        <mat-form-field appearance="outline" class="col-12 col-md-6">
-          <mat-label>Persona ejecutora</mat-label>
-          <mat-icon matPrefix color="primary">person</mat-icon>
-          <mat-select
-            formControlName="usuario_id"
-            (openedChange)="$event || filtrarEjecutores('')"
-            required
-          >
-            <div class="select-search">
-              <input
-                matInput
-                type="text"
-                placeholder="Buscar por nombre o documento..."
-                (keyup)="filtrarEjecutores($any($event.target).value)"
-                (click)="$event.stopPropagation()"
-              />
-            </div>
-            @if (cargandoEjecutores()) {
-              <mat-option disabled>Cargando personas...</mat-option>
-            }
-            @for (ej of ejecutoresFiltrados; track ej.usuario_id) {
-              <mat-option [value]="ej.usuario_id">
-                {{ ej.nombre }}
-                <small class="opcion-detalle">
-                  — {{ ej.documento }} ({{ ej.rol_usuario }})
-                </small>
-              </mat-option>
-            }
-            @if (!cargandoEjecutores() && ejecutoresFiltrados.length === 0) {
-              <mat-option disabled>Sin resultados</mat-option>
-            }
-          </mat-select>
-          @if (form.get('usuario_id')?.hasError('required')) {
-            <mat-error>Debe seleccionar una persona.</mat-error>
-          }
-        </mat-form-field>
       </form>
 
       <!-- Acciones -->
@@ -113,7 +145,7 @@
         <button
           mat-raised-button
           color="primary"
-          [disabled]="guardando"
+          [disabled]="guardando || !usuarioEncontrado"
           (click)="confirmar()"
         >
           <mat-icon>save</mat-icon> Asignar

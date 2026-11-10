@@ -8,15 +8,14 @@ import {
 } from "@angular/core";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import { MatPaginator } from "@angular/material/paginator";
-import { MatTableDataSource } from "@angular/material/table";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
 import { environment } from "src/environments/environment";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { DetallePlanesDependenciaComponent } from "../detalle-planes-dependencia/detalle-planes-dependencia.component";
-import { consultaEjecutoresConstructorTabla } from "./consulta-ejecutores.utilidades";
 
 /** Fila consolidada que combina la dependencia con su(s) ejecutor(es) vigentes. */
 export interface FilaDependenciaEjecutor {
@@ -30,6 +29,8 @@ export interface EjecutorVigente {
   _id: string;
   usuario_id: number;
   usuario_nombre: string;
+  usuario_documento: string | null;
+  usuario_correo: string | null;
   fecha_asignacion: string | Date;
 }
 
@@ -43,19 +44,12 @@ export class ConsultaEjecutoresComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   formBusqueda!: FormGroup;
-  /** Definición declarativa de columnas (misma estructura que tabla-plan-mejoramiento). */
-  ejecutoresConstructorTabla = consultaEjecutoresConstructorTabla;
-  /** Lista de columnDef derivada del constructor, usada por matHeaderRowDef/matRowDef. */
-  tablaColumnas: string[] = this.ejecutoresConstructorTabla.map((c) => c.columnDef);
-  dataSource = new MatTableDataSource<FilaDependenciaEjecutor>([]);
+
+  /** Dependencias con su(s) ejecutor(es), una por panel del acordeón. */
+  dependencias: FilaDependenciaEjecutor[] = [];
+
   total = 0;
   opcionesPagina: number[] = [10, 15, 20];
-
-  readonly iconosAccion = new Map<string, string>([
-    ["Asignar / Reasignar",          "person_add"],
-    ["Ver Planes de Mejoramiento",   "assignment"],
-    ["Eliminar Ejecutor",            "delete"],
-  ]);
 
   cargando = signal<boolean>(false);
   permisoEdicion = signal<boolean>(false);
@@ -67,6 +61,7 @@ export class ConsultaEjecutoresComponent implements OnInit {
    * ambos con PLAN_ANUAL_AUDITORIA_SERVICE / PLAN_ANUAL_AUDITORIA_MID.
    */
   private readonly planService = inject(PlanAnualAuditoriaService);
+  private readonly autenticacionService = inject(AutenticacionMidService);
   private readonly rolService = inject(RolService);
   private readonly alertaService = inject(AlertService);
   private readonly dialog = inject(MatDialog);
@@ -83,11 +78,6 @@ export class ConsultaEjecutoresComponent implements OnInit {
         environment.ROL.JEFE_DEPENDENCIA,
       ];
       this.permisoEdicion.set(this.rolService.permisoCreacion(rolesGestion));
-      if (!this.permisoEdicion()) {
-        this.tablaColumnas = this.tablaColumnas.filter(
-          (col) => col !== "acciones"
-        );
-      }
     } catch (error) {
       console.error("Error al cargar los roles del usuario:", error);
     }
@@ -137,9 +127,9 @@ export class ConsultaEjecutoresComponent implements OnInit {
 
     this.planService.planilla(endpoint).subscribe({
       next: (resp: any) => {
-        const filas: FilaDependenciaEjecutor[] = resp?.Data ?? [];
-        this.total = resp?.MetaData?.Count ?? filas.length;
-        this.dataSource.data = filas;
+        const data: FilaDependenciaEjecutor[] = resp?.Data ?? [];
+        this.total = resp?.MetaData?.Count ?? data.length;
+        this.establecerDependencias(data);
         this.cargando.set(false);
         this.cdr.detectChanges();
       },
@@ -150,6 +140,11 @@ export class ConsultaEjecutoresComponent implements OnInit {
         );
       },
     });
+  }
+
+  /** Guarda las dependencias y reconstruye las filas aplanadas de la tabla. */
+  private establecerDependencias(data: FilaDependenciaEjecutor[]): void {
+    this.dependencias = data;
   }
 
   buscar(): void {
@@ -173,9 +168,9 @@ export class ConsultaEjecutoresComponent implements OnInit {
 
     this.planService.planilla(endpoint).subscribe({
       next: (resp: any) => {
-        const filas: FilaDependenciaEjecutor[] = resp?.Data ?? [];
-        this.total = resp?.MetaData?.Count ?? filas.length;
-        this.dataSource.data = filas;
+        const data: FilaDependenciaEjecutor[] = resp?.Data ?? [];
+        this.total = resp?.MetaData?.Count ?? data.length;
+        this.establecerDependencias(data);
         this.cargando.set(false);
         this.cdr.detectChanges();
       },
@@ -193,29 +188,6 @@ export class ConsultaEjecutoresComponent implements OnInit {
     this.hayBusquedaActiva.set(false);
     this.iniciarPaginacion();
     this.cargarEjecutores(this.opcionesPagina[0], 0);
-  }
-
-  /** Acciones disponibles para la fila según el estado de asignación. */
-  acciones(fila: FilaDependenciaEjecutor): string[] {
-    const acciones = ["Asignar / Reasignar", "Ver Planes de Mejoramiento"];
-    if (fila.ejecutores.length > 0) {
-      acciones.push("Eliminar Ejecutor");
-    }
-    return acciones;
-  }
-
-  /** Icono Material asociado a cada acción (análogo a tabla-plan-mejoramiento). */
-  getIconoAccion(accion: string): string {
-    return this.iconosAccion.get(accion) ?? "help_outline";
-  }
-
-  /** Despacha la acción seleccionada sobre la fila. */
-  realizarAccion(fila: FilaDependenciaEjecutor, accion: string): void {
-    const acciones: Record<string, () => void> = {
-      "Asignar / Reasignar": () => this.asignarEjecutor(fila),
-      "Ver Planes de Mejoramiento": () => this.verPlanes(fila),
-    };
-    acciones[accion]?.();
   }
 
   /**
@@ -260,12 +232,8 @@ export class ConsultaEjecutoresComponent implements OnInit {
           .delete("ejecutor-dependencia", { id: ejecutor._id })
           .subscribe({
             next: () => {
-              this.alertaService.showSuccessAlert(
-                "El ejecutor fue retirado.",
-                "Eliminado"
-              );
-              this.iniciarPaginacion();
-              this.cargarEjecutores(this.opcionesPagina[0], 0);
+              // Tras eliminar el registro, se remueve el rol EJECUTOR_AUDITADO.
+              this.removerRolEjecutor(ejecutor.usuario_correo);
             },
             error: () => {
               this.alertaService.showErrorAlert(
@@ -273,6 +241,35 @@ export class ConsultaEjecutoresComponent implements OnInit {
               );
             },
           });
+      });
+  }
+
+  /**
+   * Remueve el rol EJECUTOR_AUDITADO del usuario en WSO2 (rol/remove). El
+   * registro ya fue eliminado; si no hay correo o el remove falla, igual se
+   * refresca el listado sin bloquear la operación.
+   */
+  private removerRolEjecutor(correo: string | null): void {
+    const finalizar = () => {
+      this.alertaService.showSuccessAlert(
+        "El ejecutor fue retirado.",
+        "Eliminado"
+      );
+      this.iniciarPaginacion();
+      this.cargarEjecutores(this.opcionesPagina[0], 0);
+    };
+
+    if (!correo) {
+      finalizar();
+      return;
+    }
+
+    this.autenticacionService
+      .postRol("rol/remove", "EJECUTOR_AUDITADO", correo)
+      .subscribe({
+        next: () => finalizar(),
+        // El registro ya se eliminó; el fallo del remove no debe bloquear la UI.
+        error: () => finalizar(),
       });
   }
 }

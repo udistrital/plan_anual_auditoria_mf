@@ -1,10 +1,10 @@
 import { Component, Inject, OnInit, signal } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { MatTableDataSource } from "@angular/material/table";
+import { forkJoin, of } from "rxjs";
+import { catchError } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
 import { EjecutorVigente } from "../consulta-ejecutores/consulta-ejecutores.component";
-import { detallePlanesDependenciaConstructorTabla } from "./detalle-planes-dependencia.utilidades";
 
 export interface DatosDetallePlanes {
   dependencia_id: number;
@@ -32,6 +32,11 @@ interface PlanFila {
   estado_nombre?: string | null;
   /** Ejecutores asignados a este plan. */
   ejecutores?: EjecutorDePlan[];
+  /**
+   * Ids de ejecutor_dependencia seleccionados en el desplegable para asignar.
+   * Se materializa al pulsar "Guardar" en el panel.
+   */
+  seleccionados?: string[];
 }
 
 @Component({
@@ -41,19 +46,10 @@ interface PlanFila {
   standalone: false,
 })
 export class DetallePlanesDependenciaComponent implements OnInit {
-  /** Definición declarativa de columnas (misma estructura que tabla-plan-mejoramiento). */
-  planesConstructorTabla = detallePlanesDependenciaConstructorTabla;
-  /** Lista de columnDef derivada del constructor, usada por matHeaderRowDef/matRowDef. */
-  tablaColumnas: string[] = this.planesConstructorTabla.map((c) => c.columnDef);
-  dataSource = new MatTableDataSource<PlanFila>([]);
+  /** Planes de la dependencia, con sus ejecutores ya asignados. */
+  planes: PlanFila[] = [];
   cargando = signal<boolean>(true);
   guardando = signal<boolean>(false);
-
-  readonly iconosAccion = new Map<string, string>([
-    ["Gestionar",   "manage_accounts"],
-    ["Asignar",     "person_add"],
-    ["Desasignar",  "person_remove"],
-  ]);
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: DatosDetallePlanes,
@@ -78,11 +74,6 @@ export class DetallePlanesDependenciaComponent implements OnInit {
     return (this.data.ejecutores?.length ?? 0) > 0;
   }
 
-  /** Icono Material asociado a cada acción (análogo a tabla-plan-mejoramiento). */
-  getIconoAccion(accion: string): string {
-    return this.iconosAccion.get(accion) ?? "help_outline";
-  }
-
   /**
    * Obtiene los planes de mejoramiento de la dependencia desde el MID, que
    * resuelve la cadena auditoria_padre -> auditoria -> plan_mejoramiento e
@@ -96,7 +87,11 @@ export class DetallePlanesDependenciaComponent implements OnInit {
       )
       .subscribe({
         next: (resp: any) => {
-          this.dataSource.data = (resp?.Data ?? []) as PlanFila[];
+          this.planes = ((resp?.Data ?? []) as PlanFila[]).map((p) => ({
+            ...p,
+            ejecutores: p.ejecutores ?? [],
+            seleccionados: [],
+          }));
           this.cargando.set(false);
         },
         error: () => {
@@ -118,37 +113,69 @@ export class DetallePlanesDependenciaComponent implements OnInit {
     );
   }
 
-  /** Asigna el plan al ejecutor seleccionado (crea la fila puente). */
-  asignarPlan(plan: PlanFila, ejecutor: EjecutorVigente): void {
-    this.guardando.set(true);
-    const body = {
-      ejecutor_dependencia_id: ejecutor._id,
-      plan_mejoramiento_id: plan.plan_mejoramiento_id,
-      actual: true,
-      activo: true,
-      fecha_asignacion: new Date().toISOString(),
-    };
+  /**
+   * Guarda las asignaciones seleccionadas en el desplegable del plan: crea una
+   * fila puente por cada ejecutor elegido. Tras confirmar, recarga la lista.
+   */
+  guardarAsignaciones(plan: PlanFila): void {
+    const seleccion = plan.seleccionados ?? [];
+    if (seleccion.length === 0) {
+      this.alertaService.showAlert(
+        "Atención",
+        "Selecciona al menos un ejecutor para asignar."
+      );
+      return;
+    }
 
-    this.planService.post("ejecutor-plan", body).subscribe({
-      next: () => {
-        this.guardando.set(false);
-        this.alertaService.showSuccessAlert(
-          `Plan asignado a ${ejecutor.usuario_nombre}.`,
-          "Asignación exitosa"
+    this.alertaService
+      .showConfirmAlert(
+        `Se asignará el plan a ${seleccion.length} ejecutor(es).`,
+        "¿Deseas continuar?"
+      )
+      .then((result) => {
+        if (!result.value) return;
+        this.guardando.set(true);
+        const fecha = new Date().toISOString();
+        const peticiones = seleccion.map((edId) =>
+          this.planService
+            .post("ejecutor-plan", {
+              ejecutor_dependencia_id: edId,
+              plan_mejoramiento_id: plan.plan_mejoramiento_id,
+              actual: true,
+              activo: true,
+              fecha_asignacion: fecha,
+            })
+            .pipe(catchError((err) => of({ error: err })))
         );
-        this.cargarPlanes();
-      },
-      error: (err: any) => {
-        this.guardando.set(false);
-        const mensaje =
-          err?.error?.Data ??
-          "No se pudo asignar el plan al ejecutor. Inténtalo nuevamente.";
-        this.alertaService.showErrorAlert(mensaje);
-      },
-    });
+
+        forkJoin(peticiones).subscribe({
+          next: (resultados: any[]) => {
+            this.guardando.set(false);
+            const conError = resultados.filter((r) => r?.error).length;
+            if (conError === 0) {
+              this.alertaService.showSuccessAlert(
+                "Ejecutores asignados al plan.",
+                "Asignación exitosa"
+              );
+            } else {
+              this.alertaService.showAlert(
+                "Asignación parcial",
+                `${resultados.length - conError} asignados, ${conError} con error.`
+              );
+            }
+            this.cargarPlanes();
+          },
+          error: () => {
+            this.guardando.set(false);
+            this.alertaService.showErrorAlert(
+              "No se pudieron asignar los ejecutores. Inténtalo nuevamente."
+            );
+          },
+        });
+      });
   }
 
-  /** Retira la asignación de un plan a un ejecutor (borrado lógico en la puente). */
+  /** Desasigna el plan de un ejecutor (borrado lógico en la puente) tras confirmar. */
   quitarAsignacion(plan: PlanFila, ejecutor: EjecutorDePlan): void {
     this.alertaService
       .showConfirmAlert(
@@ -157,10 +184,12 @@ export class DetallePlanesDependenciaComponent implements OnInit {
       )
       .then((result) => {
         if (!result.value) return;
+        this.guardando.set(true);
         this.planService
           .delete("ejecutor-plan", { id: ejecutor.ejecutor_plan_id })
           .subscribe({
             next: () => {
+              this.guardando.set(false);
               this.alertaService.showSuccessAlert(
                 "La asignación fue retirada.",
                 "Eliminado"
@@ -168,6 +197,7 @@ export class DetallePlanesDependenciaComponent implements OnInit {
               this.cargarPlanes();
             },
             error: () => {
+              this.guardando.set(false);
               this.alertaService.showErrorAlert(
                 "No se pudo retirar la asignación. Inténtalo nuevamente."
               );

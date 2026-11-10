@@ -32,3 +32,15 @@
 .opcion-detalle {
   color: #6c757d;
 }
+
+/* Resumen del usuario encontrado antes de asignar */
+.usuario-encontrado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+
+  mat-icon {
+    color: var(--md-accent-900);
+  }
+}

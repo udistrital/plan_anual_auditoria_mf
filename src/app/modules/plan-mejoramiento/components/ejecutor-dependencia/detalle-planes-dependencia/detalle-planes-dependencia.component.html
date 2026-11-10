@@ -36,98 +36,99 @@
     </div>
   }
 
-  <div class="table-container rounded-table table-scroll">
-    <table mat-table [dataSource]="dataSource">
-      @for (columna of planesConstructorTabla; track columna) {
-        <ng-container [matColumnDef]="columna.columnDef">
-          <th mat-header-cell *matHeaderCellDef>
-            <strong>{{ columna.header }}</strong>
-          </th>
-          <td
-            mat-cell
-            *matCellDef="let plan; let i = index"
-            [ngClass]="{ 'even-row': i % 2 === 0 }"
-          >
-            @if (columna.columnDef; as colDef) {
-              @switch (colDef) {
-                @case ('apertura') {
-                  {{ plan.fecha_apertura | date : "mediumDate" }}
-                }
-                @case ('limite') {
-                  {{ plan.fecha_limite | date : "mediumDate" }}
-                }
-                @case ('estado') {
-                  <span class="status-badge">{{ columna.cell(plan) }}</span>
-                }
-                @case ('ejecutores') {
-                  @if (!plan.ejecutores || plan.ejecutores.length === 0) {
-                    <span class="text-muted">Sin asignar</span>
-                  } @else {
-                    @for (ej of plan.ejecutores; track ej.ejecutor_plan_id) {
-                      <span class="chip-ejecutor">
-                        <mat-icon class="chip-icon">person</mat-icon>
-                        {{ ej.usuario_nombre }}
-                      </span>
-                    }
-                  }
-                }
-                @case ('acciones') {
+  <!-- Acordeón: un panel por plan de mejoramiento -->
+  <mat-accordion multi>
+    @for (plan of planes; track plan.plan_mejoramiento_id) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header class="panel-plan-header">
+          <mat-panel-title>
+            <mat-icon color="primary" class="me-2">assignment</mat-icon>
+            <b>Plan {{ plan.vigencia_nombre ?? plan.vigencia_id }}</b>
+          </mat-panel-title>
+          <mat-panel-description class="panel-plan-desc">
+            <span class="text-muted">
+              Apertura: {{ plan.fecha_apertura | date : "mediumDate" }}
+              · Límite: {{ plan.fecha_limite | date : "mediumDate" }}
+            </span>
+            <span class="status-badge ms-2">{{
+              plan.estado_nombre ?? "Estado " + plan.estado_id
+            }}</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <!-- Ejecutores ya asignados a este plan (cada uno en su fila) -->
+        <div class="seccion-panel">
+          <h4 class="titulo-seccion">Ejecutores asignados</h4>
+          @if (!plan.ejecutores || plan.ejecutores.length === 0) {
+            <span class="text-muted">
+              Este plan no tiene ejecutores asignados.
+            </span>
+          } @else {
+            <div class="lista-asignados">
+              @for (ej of plan.ejecutores; track ej.ejecutor_plan_id) {
+                <div class="fila-asignado">
+                  <span class="chip-ejecutor">
+                    <mat-icon class="chip-icon">person</mat-icon>
+                    {{ ej.usuario_nombre }}
+                  </span>
                   <button
-                    mat-stroked-button
-                    color="primary"
-                    [matMenuTriggerFor]="menuAcciones"
-                    [disabled]="guardando() || !hayEjecutores"
+                    type="button"
+                    class="estado-chip estado-boton estado-rechazada"
+                    matTooltip="Desasignar del plan"
+                    [disabled]="guardando()"
+                    (click)="quitarAsignacion(plan, ej)"
                   >
-                    <mat-icon>{{ getIconoAccion('Gestionar') }}</mat-icon>
-                    Gestionar
+                    Desasignar
                   </button>
-                  <mat-menu #menuAcciones="matMenu">
-                    <!-- Asignar: ejecutores de la dependencia que aún no tienen el plan -->
-                    @for (ej of ejecutoresDisponibles(plan); track ej._id) {
-                      <button mat-menu-item (click)="asignarPlan(plan, ej)">
-                        <mat-icon color="primary">{{
-                          getIconoAccion('Asignar')
-                        }}</mat-icon>
-                        <span>Asignar a {{ ej.usuario_nombre }}</span>
-                      </button>
-                    }
-                    <!-- Desasignar: ejecutores que ya tienen el plan -->
-                    @for (ej of plan.ejecutores; track ej.ejecutor_plan_id) {
-                      <button mat-menu-item (click)="quitarAsignacion(plan, ej)">
-                        <mat-icon color="warn">{{
-                          getIconoAccion('Desasignar')
-                        }}</mat-icon>
-                        <span>Desasignar a {{ ej.usuario_nombre }}</span>
-                      </button>
-                    }
-                  </mat-menu>
-                }
-                @default {
-                  <span>{{ columna.cell(plan) }}</span>
-                }
+                </div>
               }
-            }
-          </td>
-        </ng-container>
-      }
-
-      <tr mat-header-row *matHeaderRowDef="tablaColumnas"></tr>
-      <tr mat-row *matRowDef="let row; columns: tablaColumnas"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td
-          class="mat-cell text-center py-4"
-          [attr.colspan]="tablaColumnas.length"
-        >
-          @if (!cargando()) {
-            Esta dependencia no tiene planes de mejoramiento registrados.
+            </div>
           }
-        </td>
-      </tr>
-    </table>
-  </div>
+        </div>
+
+        <!-- Asignar nuevos ejecutores (solo los que aún no están en el plan) -->
+        @if (hayEjecutores) {
+          <div class="seccion-panel">
+            <h4 class="titulo-seccion">Asignar ejecutores</h4>
+            @if (ejecutoresDisponibles(plan).length === 0) {
+              <span class="text-muted">
+                Todos los ejecutores de la dependencia ya están asignados a este plan.
+              </span>
+            } @else {
+              <div class="fila-asignar">
+                <mat-form-field appearance="outline" class="select-ejecutores">
+                  <mat-label>Seleccionar ejecutor(es)</mat-label>
+                  <mat-select multiple [(value)]="plan.seleccionados">
+                    @for (ej of ejecutoresDisponibles(plan); track ej._id) {
+                      <mat-option [value]="ej._id">
+                        {{ ej.usuario_nombre }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="guardando() || (plan.seleccionados?.length ?? 0) === 0"
+                  (click)="guardarAsignaciones(plan)"
+                >
+                  <mat-icon>save</mat-icon> Guardar
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+  @if (!cargando() && planes.length === 0) {
+    <div class="text-center py-4 text-muted">
+      Esta dependencia no tiene planes de mejoramiento registrados.
+    </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-stroked-button color="primary" (click)="cerrar()">Cerrar</button>
+  <button mat-raised-button color="primary" (click)="cerrar()">Cerrar</button>
 </mat-dialog-actions>

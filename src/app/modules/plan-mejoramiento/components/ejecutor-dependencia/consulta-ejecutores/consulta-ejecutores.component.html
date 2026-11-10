@@ -84,130 +84,105 @@
             </div>
           }
 
-          <div class="table-container rounded-table table-scroll">
-            <table mat-table [dataSource]="dataSource">
-              @for (columna of ejecutoresConstructorTabla; track columna) {
-                <ng-container [matColumnDef]="columna.columnDef">
-                  <th mat-header-cell *matHeaderCellDef>
-                    <strong>{{ columna.header }}</strong>
-                  </th>
-                  <td
-                    mat-cell
-                    *matCellDef="let fila; let i = index"
-                    [ngClass]="{ 'even-row': i % 2 === 0 }"
-                  >
-                    @if (columna.columnDef; as colDef) {
-                      @switch (colDef) {
-                        @case ('dependencia') {
-                          <span class="dependencia-nombre">{{
-                            fila.dependencia_nombre
-                          }}</span>
-                          <br />
-                          <small class="text-muted"
-                            >Código: {{ fila.dependencia_id }}</small
-                          >
-                        }
-                        @case ('ejecutor') {
-                          @if (fila.ejecutores.length === 0) {
-                            <span class="text-muted">Sin asignar</span>
-                          } @else {
-                            @for (ej of fila.ejecutores; track ej._id) {
-                              <span class="chip-ejecutor">
-                                <mat-icon class="chip-icon">person</mat-icon>
-                                {{ ej.usuario_nombre }}
-                              </span>
-                            }
-                          }
-                        }
-                        @case ('fechaAsignacion') {
-                          @if (fila.ejecutores.length > 0) {
-                            {{
-                              fila.ejecutores[0].fecha_asignacion
-                                | date : "mediumDate"
-                            }}
-                          } @else {
-                            —
-                          }
-                        }
-                        @case ('estado') {
-                          <span
-                            class="status-badge"
-                            [ngClass]="
-                              fila.ejecutores.length > 0 ? 'active' : 'inactive'
-                            "
-                          >
-                            {{
-                              fila.ejecutores.length > 0
-                                ? "Asignado"
-                                : "Sin asignar"
-                            }}
-                          </span>
-                        }
-                        @case ('acciones') {
-                          @if (acciones(fila).length > 0) {
-                            <button mat-icon-button [matMenuTriggerFor]="menu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #menu="matMenu">
-                              @for (accion of acciones(fila); track accion) {
-                                @if (accion === 'Eliminar Ejecutor') {
-                                  <button
-                                    mat-menu-item
-                                    [matMenuTriggerFor]="menuEliminar"
-                                  >
-                                    <mat-icon color="warn">{{
-                                      getIconoAccion(accion)
-                                    }}</mat-icon>
-                                    <span>{{ accion }}</span>
-                                  </button>
-                                } @else {
-                                  <button
-                                    mat-menu-item
-                                    (click)="realizarAccion(fila, accion)"
-                                  >
-                                    <mat-icon color="primary">{{
-                                      getIconoAccion(accion)
-                                    }}</mat-icon>
-                                    <span>{{ accion }}</span>
-                                  </button>
-                                }
-                              }
-                            </mat-menu>
-                            <mat-menu #menuEliminar="matMenu">
-                              @for (ej of fila.ejecutores; track ej._id) {
-                                <button
-                                  mat-menu-item
-                                  (click)="eliminarEjecutor(ej)"
-                                >
-                                  <mat-icon color="warn">person_remove</mat-icon>
-                                  <span>{{ ej.usuario_nombre }}</span>
-                                </button>
-                              }
-                            </mat-menu>
-                          }
-                        }
-                        @default {
-                          <span>{{ columna.cell(fila) }}</span>
-                        }
+          <!-- Acordeón: un panel por dependencia -->
+          <mat-accordion multi>
+            @for (dep of dependencias; track dep.dependencia_id) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header class="panel-dep-header">
+                  <mat-panel-title>
+                    <mat-icon color="primary" class="me-2">apartment</mat-icon>
+                    <b class="dependencia-nombre">{{ dep.dependencia_nombre }}</b>
+                  </mat-panel-title>
+                  <mat-panel-description class="panel-dep-desc">
+                    <span
+                      class="status-badge"
+                      [ngClass]="
+                        dep.ejecutores.length > 0 ? 'active' : 'inactive'
+                      "
+                    >
+                      {{
+                        dep.ejecutores.length > 0
+                          ? dep.ejecutores.length + " ejecutor(es)"
+                          : "Sin asignar"
+                      }}
+                    </span>
+                    <!-- Acciones junto a la dependencia (sin abrir el panel) -->
+                    <span class="acciones-cabecera">
+                      @if (permisoEdicion()) {
+                        <button
+                          mat-stroked-button
+                          color="primary"
+                          (click)="
+                            $event.stopPropagation(); asignarEjecutor(dep)
+                          "
+                        >
+                          <mat-icon>person_add</mat-icon> Asignar
+                        </button>
                       }
+                      <button
+                        mat-stroked-button
+                        color="primary"
+                        (click)="$event.stopPropagation(); verPlanes(dep)"
+                      >
+                        <mat-icon>assignment</mat-icon> Ver planes
+                      </button>
+                    </span>
+                  </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <!-- Ejecutores de la dependencia -->
+                <p class="codigo-dep text-muted">
+                  Código de dependencia: {{ dep.dependencia_id }}
+                </p>
+                @if (dep.ejecutores.length === 0) {
+                  <span class="text-muted">
+                    Esta dependencia no tiene ejecutores asignados.
+                  </span>
+                } @else {
+                  <div class="lista-ejecutores">
+                    @for (ej of dep.ejecutores; track ej._id) {
+                      <div class="fila-ejecutor">
+                        <div class="info-ejecutor">
+                          <span class="chip-ejecutor">
+                            <mat-icon class="chip-icon">person</mat-icon>
+                            {{ ej.usuario_nombre }}
+                          </span>
+                          <span class="dato-usuario">
+                            <mat-icon class="dato-icon">badge</mat-icon>
+                            {{ ej.usuario_documento || "Sin documento" }}
+                          </span>
+                          <span class="dato-usuario">
+                            <mat-icon class="dato-icon">mail</mat-icon>
+                            {{ ej.usuario_correo || "Sin correo" }}
+                          </span>
+                          <span class="dato-usuario text-muted">
+                            <mat-icon class="dato-icon">event</mat-icon>
+                            {{ ej.fecha_asignacion | date : "mediumDate" }}
+                          </span>
+                        </div>
+                        @if (permisoEdicion()) {
+                          <button
+                            type="button"
+                            class="estado-chip estado-boton estado-rechazada"
+                            matTooltip="Quitar ejecutor y remover rol"
+                            (click)="eliminarEjecutor(ej)"
+                          >
+                            Quitar ejecutor
+                          </button>
+                        }
+                      </div>
                     }
-                  </td>
-                </ng-container>
-              }
+                  </div>
+                }
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
 
-              <tr mat-header-row *matHeaderRowDef="tablaColumnas"></tr>
-              <tr mat-row *matRowDef="let row; columns: tablaColumnas"></tr>
-
-              <!-- Fila cuando no hay datos -->
-              <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell text-center py-4" [attr.colspan]="tablaColumnas.length">
-                  @if (!cargando()) {
-                    No se encontraron dependencias con ejecutor asignado.
-                  }
-                </td>
-              </tr>
-            </table>
-          </div>
+          @if (!cargando() && dependencias.length === 0) {
+            <div class="text-center py-4 text-muted">
+              No se encontraron dependencias con ejecutor asignado.
+            </div>
+          }
 
           <mat-paginator
             [pageSizeOptions]="opcionesPagina"
