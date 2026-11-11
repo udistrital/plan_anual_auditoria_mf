@@ -22,7 +22,7 @@
       <div class="seccion-cuerpo">
         <div class="hallazgo">
           <span class="chip-hallazgo">Hallazgo {{ data.hallazgo.indice }}</span>
-          <p class="valor mb-0">{{ data.hallazgo.descripcion }}</p>
+          <app-descripcion-hallazgo class="valor mb-0" [valor]="data.hallazgo.descripcion"></app-descripcion-hallazgo>
         </div>
         <mat-form-field appearance="outline" class="ancho-completo">
           <mat-label>Causa del hallazgo</mat-label>

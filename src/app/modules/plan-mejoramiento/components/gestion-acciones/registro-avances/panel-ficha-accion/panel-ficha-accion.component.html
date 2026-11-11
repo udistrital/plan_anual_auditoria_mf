@@ -41,7 +41,7 @@
       <div class="ficha">
         <div class="dato"><span class="etiqueta">No. hallazgo</span>{{ datos.hallazgo.numero || '—' }}</div>
         <div class="dato"><span class="etiqueta">No. auditoría</span>{{ datos.auditoria.numero ?? '—' }}</div>
-        <div class="dato ancho"><span class="etiqueta">Descripción del hallazgo</span><p class="texto-largo">{{ datos.hallazgo.descripcion || '—' }}</p></div>
+        <div class="dato ancho"><span class="etiqueta">Descripción del hallazgo</span><app-descripcion-hallazgo class="texto-largo" [valor]="datos.hallazgo.descripcion"></app-descripcion-hallazgo></div>
         <div class="dato ancho"><span class="etiqueta">Causa</span><p class="texto-largo">{{ datos.hallazgo.causa || '—' }}</p></div>
       </div>
     }

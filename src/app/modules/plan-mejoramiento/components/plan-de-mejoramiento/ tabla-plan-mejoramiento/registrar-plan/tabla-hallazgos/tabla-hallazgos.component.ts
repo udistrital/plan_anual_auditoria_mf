@@ -9,6 +9,8 @@ import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { RolService } from 'src/app/core/services/rol.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { environment } from 'src/environments/environment';
+import { NuxeoService } from 'src/app/core/services/nuxeo.service';
+import { descripcionAHtml, descripcionATexto, esEnlaceNuxeo, TEXTO_CONTENIDO_CON_IMAGENES } from 'src/app/shared/utils/html.util';
 import { ModalRegistrarAccionComponent } from '../modal-registrar-accion/modal-registrar-accion.component';
 import { ModalRemitirHallazgoComponent, ResultadoModalRemitirHallazgo } from '../modal-remitir-hallazgo/modal-remitir-hallazgo.component';
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from 'src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component';
@@ -20,6 +22,7 @@ import { ModalHistorialObservacionesAccionComponent } from '../modal-historial-o
 export interface HallazgoTabla {
   hallazgoId: string;
   indice: string;
+  titulo: string;
   descripcion: string;
   acciones: AccionPlan[];
   expandido: boolean;
@@ -69,6 +72,7 @@ export interface FilaTabla {
   esGrupo: boolean;
   hallazgoId: string;
   hallazgoIndice: string;
+  hallazgoTitulo: string;
   hallazgoDescripcion: string;
   accion?: AccionPlan;
 }
@@ -150,7 +154,10 @@ export class TablaHallazgosComponent implements OnInit {
 
   private construirColumnas(): void {
     if (this.vistaDictamen) {
-      this.constructorTabla = hallazgosConstructorTabla.filter(c => columnasVistaDictamen.includes(c.columnDef));
+      // En Ver Plan la columna "Descripción del Hallazgo" muestra el título; el detalle queda en los modales
+      this.constructorTabla = hallazgosConstructorTabla
+        .filter(c => columnasVistaDictamen.includes(c.columnDef))
+        .map(c => c.columnDef === 'descripcion' ? { ...c, cell: (fila: any) => fila.hallazgoTitulo } : c);
       this.columnas = [...this.constructorTabla.map(c => c.columnDef), 'estadoDictamen', 'accionOci'];
     } else {
       this.constructorTabla = hallazgosConstructorTabla.filter(
@@ -169,6 +176,7 @@ export class TablaHallazgosComponent implements OnInit {
     private readonly descargaService: DescargaService,
     private readonly rolService: RolService,
     private readonly userService: UserService,
+    private readonly nuxeoService: NuxeoService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -199,6 +207,7 @@ export class TablaHallazgosComponent implements OnInit {
         esGrupo:             true,
         hallazgoId:          h.hallazgoId,
         hallazgoIndice:      h.indice,
+        hallazgoTitulo:      h.titulo,
         hallazgoDescripcion: h.descripcion,
       });
 
@@ -208,6 +217,7 @@ export class TablaHallazgosComponent implements OnInit {
             esGrupo:             false,
             hallazgoId:          h.hallazgoId,
             hallazgoIndice:      h.indice,
+            hallazgoTitulo:      h.titulo,
             hallazgoDescripcion: h.descripcion,
             accion,
           });
@@ -398,6 +408,7 @@ export class TablaHallazgosComponent implements OnInit {
       .map((h: any, i: number) => ({
         hallazgoId:  h._id,
         indice:      h.no_hallazgo ?? String(offset + i + 1),
+        titulo:      h.titulo ?? '',
         descripcion: h.descripcion ?? h.titulo ?? '',
         // En Ver Plan los hallazgos inician expandidos para ver el estado de cada acción
         expandido:   this.expansion.get(h._id) ?? this.vistaDictamen,
@@ -699,6 +710,23 @@ export class TablaHallazgosComponent implements OnInit {
     });
   }
 
+  // Texto de cada descripción para el Excel. Si el gestor documental falla, la exportación continúa con el marcador
+  private async descripcionesParaExportar(hallazgos: HallazgoTabla[]): Promise<Map<string, string>> {
+    const entradas = await Promise.all(hallazgos.map(async (hallazgo): Promise<[string, string]> => {
+      if (!esEnlaceNuxeo(hallazgo.descripcion)) {
+        return [hallazgo.hallazgoId, descripcionATexto(hallazgo.descripcion)];
+      }
+      try {
+        const html = await descripcionAHtml(hallazgo.descripcion, (uuid) => this.nuxeoService.obtenerPorUUID(uuid));
+        return [hallazgo.hallazgoId, descripcionATexto(html)];
+      } catch (error) {
+        console.error(`No se pudo obtener la descripción del hallazgo ${hallazgo.indice}:`, error);
+        return [hallazgo.hallazgoId, TEXTO_CONTENIDO_CON_IMAGENES];
+      }
+    }));
+    return new Map(entradas);
+  }
+
   async exportarTabla(): Promise<void> {
     if (!this.informeId || !this.totalHallazgos) {
       this.alertService.showAlert('Sin registros', 'No hay hallazgos para exportar.');
@@ -731,10 +759,12 @@ export class TablaHallazgosComponent implements OnInit {
         "Fecha Fin"
       ];
 
+    const descripciones = await this.descripcionesParaExportar(todos);
+
     // Una fila por acción; los hallazgos sin acciones también se exportan con las columnas de acción vacías
     const rows = todos.flatMap(hallazgo => {
-      // La causa es de cada acción (#947): en un hallazgo sin acciones queda vacía
-      const datosHallazgo = [hallazgo.indice, hallazgo.descripcion];
+            // La causa es de cada acción (#947): en un hallazgo sin acciones queda vacía
+      const datosHallazgo = [hallazgo.indice, descripciones.get(hallazgo.hallazgoId)];
       if (!hallazgo.acciones.length) {
         return [[...datosHallazgo, '', '', '', '', '', '', '', '', '', '']];
       }

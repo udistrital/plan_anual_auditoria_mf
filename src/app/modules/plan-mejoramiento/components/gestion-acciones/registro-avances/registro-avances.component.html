@@ -69,7 +69,7 @@
       <div class="resumen-textos">
         <div class="linea-contexto">
           <span class="etiqueta">Hallazgo {{ hallazgo?.no_hallazgo ?? '' }}</span>
-          <p class="recorte mb-0">{{ hallazgo?.descripcion || '—' }}</p>
+          <p class="recorte mb-0">{{ (hallazgo?.descripcion | descripcionTexto) || '—' }}</p>
         </div>
         <!-- «Ver hallazgo» y «Ver acción» se quitaron (#947): el detalle se consulta con «Ficha de la acción» -->
         <div class="linea-contexto">

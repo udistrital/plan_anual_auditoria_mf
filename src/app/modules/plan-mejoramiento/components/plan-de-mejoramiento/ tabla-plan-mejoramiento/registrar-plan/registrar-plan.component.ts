@@ -395,7 +395,7 @@ export class RegistrarPlanComponent implements OnInit {
           this.alertService.showSuccessAlert(
             'El plan fue enviado al auditor para revisión.',
             'Enviado'
-          ).then(() => this.router.navigate(['/plan-mejoramiento']));
+          ).then(() => this.router.navigate(['/plan-mejoramiento/formulacion-planes']));
         },
         error: () => {
           this.enviando = false;
@@ -406,7 +406,7 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   regresar(): void {
-    this.router.navigate(['/plan-mejoramiento']);
+    this.router.navigate(['/plan-mejoramiento/formulacion-planes']);
   }
 
   verPlanMejoramiento(): void {

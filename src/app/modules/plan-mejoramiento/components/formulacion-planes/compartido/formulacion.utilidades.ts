@@ -79,6 +79,7 @@ export const iconosAccion = new Map<string, string>([
   ["Registrar Plan",               "edit"],
   ["Ver Plan",                     "visibility"],
   ["Dictaminar causas y acciones", "rate_review"],
+  ["Ver Documentos Auditoría",     "description"],
   ["Ver Observaciones",            "history"],
   ["Asignar Auditor(es)",          "manage_accounts"],
 ]);

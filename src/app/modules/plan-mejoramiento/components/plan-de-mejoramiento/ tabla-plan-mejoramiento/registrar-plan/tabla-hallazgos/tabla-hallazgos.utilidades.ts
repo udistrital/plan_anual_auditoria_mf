@@ -1,3 +1,5 @@
+import { descripcionATexto } from 'src/app/shared/utils/html.util';
+
 export const hallazgosConstructorTabla = [
   {
     columnDef: 'noHallazgo',
@@ -9,7 +11,7 @@ export const hallazgosConstructorTabla = [
     columnDef: 'descripcion',
     header: 'Descripción del Hallazgo',
     sortable: false,
-    cell: (fila: any) => fila.hallazgoDescripcion,
+    cell: (fila: any) => descripcionATexto(fila.hallazgoDescripcion),
   },
   {
     columnDef: 'causa',

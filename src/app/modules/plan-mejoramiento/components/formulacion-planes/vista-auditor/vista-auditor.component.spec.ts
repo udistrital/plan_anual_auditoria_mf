@@ -10,8 +10,9 @@ import { UserService } from 'src/app/core/services/user.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { DescargaService } from 'src/app/shared/services/descarga.service';
 import { ParametrosUtilsService } from 'src/app/shared/services/parametros.service';
-import { ModalAsignacionAuditoresComponent } from '../../plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-asignacion-auditores/modal-asignacion-auditores.component';
+import { ModalAsignacionAuditoresComponent } from './modal-asignacion-auditores/modal-asignacion-auditores.component';
 import { VistaAuditorComponent } from './vista-auditor.component';
+import { DocumentosAuditoriaPlanService } from "../../../services/documentos-auditoria-plan.service";
 
 const ESTADO = environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO;
 const RUTA = 'plan-mejoramiento/formulacion/auditor/10';
@@ -51,6 +52,7 @@ describe('VistaAuditorComponent', () => {
   let component: VistaAuditorComponent;
   const router = { navigate: jest.fn() };
   const dialog = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
+  const documentos = { verDocumentosAuditoria: jest.fn() };
 
   async function crear(rol: string, get: jest.Mock = midGet): Promise<void> {
     await TestBed.configureTestingModule({
@@ -64,6 +66,7 @@ describe('VistaAuditorComponent', () => {
         { provide: UserService, useValue: { getPersonaId: () => Promise.resolve(10) } },
         { provide: AlertService, useValue: { showAlert: jest.fn(), showErrorAlert: jest.fn() } },
         { provide: DescargaService, useValue: { descargarArchivoBuffer: jest.fn() } },
+        { provide: DocumentosAuditoriaPlanService, useValue: documentos },
       ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();

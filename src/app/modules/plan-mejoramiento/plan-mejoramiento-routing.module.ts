@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { PlanDeMejoramientoComponent } from './components/plan-de-mejoramiento/plan-mejoramiento.component';
 import { RegistrarPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/registrar-plan/registrar-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
@@ -9,14 +8,15 @@ import { FormulacionPlanesComponent } from './components/formulacion-planes/form
 
 const routes: Routes = [
   {
+    // Las opciones del menú y los enlaces guardados siguen llegando a estas dos rutas
     path: '',
-    component: PlanDeMejoramientoComponent,
-    data: { titulo: 'Formulación de planes', accionesPermitidas: ['Registrar Plan', 'Enviar a Revisión', 'Ver Plan', 'Aprobar Plan', 'Rechazar Plan', 'Ver Documentos Auditoría', 'Ver Observaciones'] },
+    redirectTo: 'formulacion-planes',
+    pathMatch: 'full',
   },
   {
     path: 'asignar-auditores',
-    component: PlanDeMejoramientoComponent,
-    data: { titulo: 'Asignar planes', accionesPermitidas: ['Asignar Auditor(es)'] },
+    redirectTo: 'formulacion-planes',
+    pathMatch: 'full',
   },
   {
     path: 'registrar-plan/:id',

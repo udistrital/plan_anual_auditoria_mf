@@ -1,0 +1,17 @@
+@switch (estado()) {
+  @case ('cargando') {
+    <span class="descripcion-estado">Cargando descripción...</span>
+  }
+  @case ('error') {
+    <div class="descripcion-no-disponible" role="alert">
+      <mat-icon>cloud_off</mat-icon>
+      <span>Descripción no disponible: no se pudo cargar desde el gestor documental.</span>
+    </div>
+  }
+  @case ('vacia') {
+    <span class="descripcion-estado">—</span>
+  }
+  @default {
+    <quill-view-html class="descripcion-contenido" [content]="html()" [sanitize]="true"></quill-view-html>
+  }
+}

@@ -93,7 +93,7 @@
                   }
                 </mat-form-field>
                 <div class="subtema-desc-editor">
-                  <label class="descripcion-label">Descripción del Subtema (opcional)</label>
+                  <label class="descripcion-label">Descripción del Subtema</label>
                   @if (descripcionSubtemaNoDisponible(subtema)) {
                     <div class="descripcion-no-disponible" role="alert">
                       <mat-icon>cloud_off</mat-icon>
@@ -156,13 +156,41 @@
                           <mat-error>El hallazgo es requerido</mat-error>
                         }
                       </mat-form-field>
-                      <mat-form-field appearance="outline" class="hallazgo-input">
-                        <mat-label>Descripción</mat-label>
-                        <textarea matInput formControlName="descripcion" rows="3" [errorStateMatcher]="errorMatcher"></textarea>
-                        @if (hallazgo.get('descripcion')?.hasError('required')) {
-                          <mat-error>La descripción es requerida</mat-error>
+                      <div class="hallazgo-desc-editor">
+                        <label class="descripcion-label">Descripción *</label>
+                        @if (descripcionHallazgoNoDisponible(hallazgo)) {
+                          <div class="descripcion-no-disponible" role="alert">
+                            <mat-icon>cloud_off</mat-icon>
+                            <span>No se pudo cargar la descripción desde el gestor documental. Se conserva sin cambios al guardar.</span>
+                          </div>
+                        } @else {
+                          <quill-editor formControlName="descripcion" [modules]="editorModules" [placeholder]="placeholder" (onEditorCreated)="onEditorCreated($event)" class="quill-editor-custom" [class.editor-invalido]="descripcionHallazgoInvalida(hallazgo)">
+                            <div quill-editor-toolbar class="toolbar">
+                              <span class="ql-formats">
+                                <button class="ql-bold" [title]="'Bold'"></button>
+                                <button class="ql-italic" [title]="'Italic'"></button>
+                                <button class="ql-underline" [title]="'Underline'"></button>
+                              </span>
+                              <span class="ql-formats">
+                                <button class="ql-list" value="ordered"></button>
+                                <button class="ql-list" value="bullet"></button>
+                              </span>
+                              <span class="ql-formats">
+                                <button class="ql-align" value=""></button>
+                                <button class="ql-align" value="center"></button>
+                                <button class="ql-align" value="right"></button>
+                                <button class="ql-align" value="justify"></button>
+                              </span>
+                              <span class="ql-formats">
+                                <button class="ql-image" [title]="'Insert Image'"></button>
+                              </span>
+                            </div>
+                          </quill-editor>
+                          @if (descripcionHallazgoInvalida(hallazgo)) {
+                            <div class="descripcion-error" role="alert">La descripción es requerida</div>
+                          }
                         }
-                      </mat-form-field>
+                      </div>
                     </div>
                   </div>
                 }
