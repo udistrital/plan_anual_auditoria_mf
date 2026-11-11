@@ -17,6 +17,7 @@ import { ModalRemitirHallazgoComponent } from './components/plan-de-mejoramiento
 import { ModalRechazoPlanComponent } from './components/plan-de-mejoramiento/ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { ModalAprobacionPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-aprobacion-plan/modal-aprobacion-plan.component';
+import { ModalAsignarEjecutoresPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-asignar-ejecutores-plan/modal-asignar-ejecutores-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
@@ -52,6 +53,7 @@ import { DetallePlanesDependenciaComponent } from './components/ejecutor-depende
     ModalRechazoPlanComponent,
     VerPlanComponent,
     ModalAprobacionPlanComponent,
+    ModalAsignarEjecutoresPlanComponent,
     GestionAccionesComponent,
     FormulacionPlanesComponent,
     VistaAuditadoComponent,

@@ -1,196 +1,186 @@
-<div class="container">
+<plantilla-tarjeta-contenedora
+  title="Asignación de Ejecutor por Dependencia"
+  breadcrumb="Plan de Mejoramiento / <strong>Ejecutores por Dependencia</strong>"
+  [contenido]="contenidoConsulta"
+>
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoConsulta>
+  <!-- Acción principal: asignar ejecutor -->
+  @if (permisoEdicion()) {
+    <div class="d-flex justify-content-end my-2">
+      <button mat-raised-button color="primary" (click)="asignarEjecutor()">
+        <mat-icon>person_add</mat-icon> Asignar Ejecutor
+      </button>
+    </div>
+  }
+
+  <!-- Banner informativo -->
   <div class="row">
-    <div class="col-12 my-2">
-      <p>Plan de Mejoramiento / <strong>Ejecutores por Dependencia</strong></p>
+    <div class="col-12">
+      <div
+        class="d-flex justify-content-center align-items-center fondo-acento-50 mt-3 mb-3"
+      >
+        <mat-icon>info</mat-icon>
+        <p class="mx-2 mb-0">
+          Consulte las dependencias con el usuario que tiene asignado el rol
+          de Ejecutor. Desde aquí puede asignar o reasignar ejecutores y ver
+          los planes de mejoramiento de cada dependencia.
+        </p>
+      </div>
     </div>
   </div>
 
-  <mat-card class="p-3">
-    <mat-card-content>
-      <!-- Encabezado -->
-      <div class="d-flex justify-content-between align-items-center my-2">
-        <h2 style="color: var(--md-primary-700)">
-          Asignación de Ejecutor por Dependencia
-        </h2>
-        @if (permisoEdicion()) {
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="asignarEjecutor()"
-          >
-            <mat-icon>person_add</mat-icon> Asignar Ejecutor
-          </button>
-        }
-      </div>
+  <!-- Búsqueda -->
+  <div class="row align-items-center">
+    <mat-form-field
+      appearance="outline"
+      [formGroup]="formBusqueda"
+      class="col-12 col-md-10 col-lg-6"
+    >
+      <mat-label>Nombre o código de la dependencia</mat-label>
+      <mat-icon matPrefix color="primary">apartment</mat-icon>
+      <input
+        matInput
+        formControlName="dependencia"
+        (keyup.enter)="buscar()"
+      />
+      <button mat-icon-button matSuffix (click)="buscar()">
+        <mat-icon color="primary">search</mat-icon>
+      </button>
+    </mat-form-field>
 
-      <!-- Banner informativo -->
-      <div class="row">
-        <div class="col-12">
-          <div
-            class="d-flex justify-content-center align-items-center fondo-acento-50 mt-3 mb-3"
-          >
-            <mat-icon>info</mat-icon>
-            <p class="mx-2 mb-0">
-              Consulte las dependencias con el usuario que tiene asignado el rol
-              de Ejecutor. Desde aquí puede asignar o reasignar ejecutores y ver
-              los planes de mejoramiento de cada dependencia.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Búsqueda -->
-      <div class="row align-items-center">
-        <mat-form-field
-          appearance="outline"
-          [formGroup]="formBusqueda"
-          class="col-12 col-md-10 col-lg-6"
+    @if (hayBusquedaActiva()) {
+      <div class="col-12 col-md-4 col-lg-3 mb-3">
+        <button
+          mat-stroked-button
+          color="primary"
+          style="border: 1px solid var(--md-primary-500)"
+          (click)="limpiarBusqueda()"
         >
-          <mat-label>Nombre o código de la dependencia</mat-label>
-          <mat-icon matPrefix color="primary">apartment</mat-icon>
-          <input
-            matInput
-            formControlName="dependencia"
-            (keyup.enter)="buscar()"
-          />
-          <button mat-icon-button matSuffix (click)="buscar()">
-            <mat-icon color="primary">search</mat-icon>
-          </button>
-        </mat-form-field>
-
-        @if (hayBusquedaActiva()) {
-          <div class="col-12 col-md-4 col-lg-3 mb-3">
-            <button
-              mat-stroked-button
-              color="primary"
-              style="border: 1px solid var(--md-primary-500)"
-              (click)="limpiarBusqueda()"
-            >
-              <mat-icon>clear</mat-icon> Ver listado completo
-            </button>
-          </div>
-        }
+          <mat-icon>clear</mat-icon> Ver listado completo
+        </button>
       </div>
+    }
+  </div>
 
-      <!-- Tabla -->
-      <div class="row">
-        <div class="col-12">
-          @if (cargando()) {
-            <div class="d-flex justify-content-center my-4">
-              <mat-progress-spinner
-                mode="indeterminate"
-                diameter="40"
-              ></mat-progress-spinner>
-            </div>
-          }
+  <!-- Tabla -->
+  <div class="row">
+    <div class="col-12">
+      @if (cargando()) {
+        <div class="d-flex justify-content-center my-4">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="40"
+          ></mat-progress-spinner>
+        </div>
+      }
 
-          <!-- Acordeón: un panel por dependencia -->
-          <mat-accordion multi>
-            @for (dep of dependencias; track dep.dependencia_id) {
-              <mat-expansion-panel>
-                <mat-expansion-panel-header class="panel-dep-header">
-                  <mat-panel-title>
-                    <mat-icon color="primary" class="me-2">apartment</mat-icon>
-                    <b class="dependencia-nombre">{{ dep.dependencia_nombre }}</b>
-                  </mat-panel-title>
-                  <mat-panel-description class="panel-dep-desc">
-                    <span
-                      class="status-badge"
-                      [ngClass]="
-                        dep.ejecutores.length > 0 ? 'active' : 'inactive'
+      <!-- Acordeón: un panel por dependencia -->
+      <mat-accordion multi>
+        @for (dep of dependencias; track dep.dependencia_id) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="panel-dep-header">
+              <mat-panel-title>
+                <mat-icon color="primary" class="me-2">apartment</mat-icon>
+                <b class="dependencia-nombre">{{ dep.dependencia_nombre }}</b>
+              </mat-panel-title>
+              <mat-panel-description class="panel-dep-desc">
+                <span
+                  class="status-badge"
+                  [ngClass]="
+                    dep.ejecutores.length > 0 ? 'active' : 'inactive'
+                  "
+                >
+                  {{
+                    dep.ejecutores.length > 0
+                      ? dep.ejecutores.length + " ejecutor(es)"
+                      : "Sin asignar"
+                  }}
+                </span>
+                <!-- Acciones junto a la dependencia (sin abrir el panel) -->
+                <span class="acciones-cabecera">
+                  @if (permisoEdicion()) {
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      (click)="
+                        $event.stopPropagation(); asignarEjecutor(dep)
                       "
                     >
-                      {{
-                        dep.ejecutores.length > 0
-                          ? dep.ejecutores.length + " ejecutor(es)"
-                          : "Sin asignar"
-                      }}
-                    </span>
-                    <!-- Acciones junto a la dependencia (sin abrir el panel) -->
-                    <span class="acciones-cabecera">
-                      @if (permisoEdicion()) {
-                        <button
-                          mat-stroked-button
-                          color="primary"
-                          (click)="
-                            $event.stopPropagation(); asignarEjecutor(dep)
-                          "
-                        >
-                          <mat-icon>person_add</mat-icon> Asignar
-                        </button>
-                      }
-                      <button
-                        mat-stroked-button
-                        color="primary"
-                        (click)="$event.stopPropagation(); verPlanes(dep)"
-                      >
-                        <mat-icon>assignment</mat-icon> Ver planes
-                      </button>
-                    </span>
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
+                      <mat-icon>person_add</mat-icon> Asignar
+                    </button>
+                  }
+                  <button
+                    mat-stroked-button
+                    color="primary"
+                    (click)="$event.stopPropagation(); verPlanes(dep)"
+                  >
+                    <mat-icon>assignment</mat-icon> Ver planes
+                  </button>
+                </span>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
 
-                <!-- Ejecutores de la dependencia -->
-                <p class="codigo-dep text-muted">
-                  Código de dependencia: {{ dep.dependencia_id }}
-                </p>
-                @if (dep.ejecutores.length === 0) {
-                  <span class="text-muted">
-                    Esta dependencia no tiene ejecutores asignados.
-                  </span>
-                } @else {
-                  <div class="lista-ejecutores">
-                    @for (ej of dep.ejecutores; track ej._id) {
-                      <div class="fila-ejecutor">
-                        <div class="info-ejecutor">
-                          <span class="chip-ejecutor">
-                            <mat-icon class="chip-icon">person</mat-icon>
-                            {{ ej.usuario_nombre }}
-                          </span>
-                          <span class="dato-usuario">
-                            <mat-icon class="dato-icon">badge</mat-icon>
-                            {{ ej.usuario_documento || "Sin documento" }}
-                          </span>
-                          <span class="dato-usuario">
-                            <mat-icon class="dato-icon">mail</mat-icon>
-                            {{ ej.usuario_correo || "Sin correo" }}
-                          </span>
-                          <span class="dato-usuario text-muted">
-                            <mat-icon class="dato-icon">event</mat-icon>
-                            {{ ej.fecha_asignacion | date : "mediumDate" }}
-                          </span>
-                        </div>
-                        @if (permisoEdicion()) {
-                          <button
-                            type="button"
-                            class="estado-chip estado-boton estado-rechazada"
-                            matTooltip="Quitar ejecutor y remover rol"
-                            (click)="eliminarEjecutor(ej)"
-                          >
-                            Quitar ejecutor
-                          </button>
-                        }
-                      </div>
+            <!-- Ejecutores de la dependencia -->
+            <p class="codigo-dep text-muted">
+              Código de dependencia: {{ dep.dependencia_id }}
+            </p>
+            @if (dep.ejecutores.length === 0) {
+              <span class="text-muted">
+                Esta dependencia no tiene ejecutores asignados.
+              </span>
+            } @else {
+              <div class="lista-ejecutores">
+                @for (ej of dep.ejecutores; track ej._id) {
+                  <div class="fila-ejecutor">
+                    <div class="info-ejecutor">
+                      <span class="chip-ejecutor">
+                        <mat-icon class="chip-icon">person</mat-icon>
+                        {{ ej.usuario_nombre }}
+                      </span>
+                      <span class="dato-usuario">
+                        <mat-icon class="dato-icon">badge</mat-icon>
+                        {{ ej.usuario_documento || "Sin documento" }}
+                      </span>
+                      <span class="dato-usuario">
+                        <mat-icon class="dato-icon">mail</mat-icon>
+                        {{ ej.usuario_correo || "Sin correo" }}
+                      </span>
+                      <span class="dato-usuario text-muted">
+                        <mat-icon class="dato-icon">event</mat-icon>
+                        {{ ej.fecha_asignacion | date : "mediumDate" }}
+                      </span>
+                    </div>
+                    @if (permisoEdicion()) {
+                      <button
+                        type="button"
+                        class="estado-chip estado-boton estado-rechazada"
+                        matTooltip="Quitar ejecutor y remover rol"
+                        (click)="eliminarEjecutor(ej)"
+                      >
+                        Quitar ejecutor
+                      </button>
                     }
                   </div>
                 }
-              </mat-expansion-panel>
+              </div>
             }
-          </mat-accordion>
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
 
-          @if (!cargando() && dependencias.length === 0) {
-            <div class="text-center py-4 text-muted">
-              No se encontraron dependencias con ejecutor asignado.
-            </div>
-          }
-
-          <mat-paginator
-            [pageSizeOptions]="opcionesPagina"
-            [length]="total"
-            showFirstLastButtons
-          ></mat-paginator>
+      @if (!cargando() && dependencias.length === 0) {
+        <div class="text-center py-4 text-muted">
+          No se encontraron dependencias con ejecutor asignado.
         </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+      }
+
+      <mat-paginator
+        [pageSizeOptions]="opcionesPagina"
+        [length]="total"
+        showFirstLastButtons
+      ></mat-paginator>
+    </div>
+  </div>
+</ng-template>

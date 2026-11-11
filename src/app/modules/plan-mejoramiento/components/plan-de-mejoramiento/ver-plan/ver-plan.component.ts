@@ -12,6 +12,7 @@ import { environment } from 'src/environments/environment';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
 import { DatosModalRechazoPlan, ModalRechazoPlanComponent } from '../ tabla-plan-mejoramiento/modal-rechazo-plan/modal-rechazo-plan.component';
 import { DatosModalAprobacionPlan, ModalAprobacionPlanComponent } from './modal-aprobacion-plan/modal-aprobacion-plan.component';
+import { DatosAsignarEjecutoresPlan, DependenciaPlan, ModalAsignarEjecutoresPlanComponent } from './modal-asignar-ejecutores-plan/modal-asignar-ejecutores-plan.component';
 import { DocumentosAuditoriaPlanService } from '../../../services/documentos-auditoria-plan.service';
 
 const ESTADO_PLAN = environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO;
@@ -167,6 +168,63 @@ export class VerPlanComponent implements OnInit {
       .map((d: any) => d.dependencia_nombre).filter(Boolean).join(', ') || '';
   }
 
+  /**
+   * Dependencias auditadas del plan (pares id + nombre). Un plan puede cubrir
+   * varias dependencias: `auditoria.dependencia_id` y `dependencia_nombre` son
+   * arreglos paralelos resueltos por el MID.
+   */
+  get dependenciasDelPlan(): DependenciaPlan[] {
+    const ids: number[] = Array.isArray(this.auditoria?.dependencia_id)
+      ? this.auditoria.dependencia_id
+      : this.auditoria?.dependencia_id != null
+        ? [this.auditoria.dependencia_id]
+        : [];
+    const nombres: string[] = Array.isArray(this.auditoria?.dependencia_nombre)
+      ? this.auditoria.dependencia_nombre
+      : [];
+    return ids
+      .filter((id) => id != null)
+      .map((id, idx) => ({
+        dependencia_id: Number(id),
+        dependencia_nombre: nombres[idx] ?? `Dependencia ${id}`,
+      }));
+  }
+
+  /**
+   * Solo el Auditor experto puede consultar los ejecutores del plan desde esta
+   * vista (solo lectura); la asignación se realiza en la vista del auditado.
+   */
+  get puedeVerEjecutores(): boolean {
+    return this.rolService.tieneRol(environment.ROL.AUDITOR_EXPERTO);
+  }
+
+  /** Abre el modal de ejecutores del plan en solo lectura (vista del auditor). */
+  verEjecutores(): void {
+    if (!this.planMejoramientoId) return;
+
+    const dependencias = this.dependenciasDelPlan;
+    if (dependencias.length === 0) {
+      this.alertService.showAlert(
+        'Sin dependencias',
+        'No se encontraron dependencias auditadas asociadas a este plan.'
+      );
+      return;
+    }
+
+    const data: DatosAsignarEjecutoresPlan = {
+      plan_mejoramiento_id: this.planMejoramientoId,
+      dependencias,
+      soloLectura: true,
+    };
+
+    this.dialog.open(ModalAsignarEjecutoresPlanComponent, {
+      width: '1050px',
+      maxWidth: '95vw',
+      data,
+      autoFocus: false,
+    });
+  }
+
   mostrarAccionesRevision(): boolean {
     // Aprobar/Rechazar solo cuando el plan está pendiente de revisión del auditor.
     if (this.estadoPlanId !== environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO.REVISION_PLAN_MEJORAMIENTO_AUDITOR) {
@@ -194,6 +252,9 @@ export class VerPlanComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.auditoriaId = this.route.snapshot.paramMap.get('id')!;
+    // Asegura que los roles del usuario estén cargados antes de evaluar permisos
+    // (de lo contrario los getters de permiso devuelven false y se oculta el botón).
+    await this.rolService.cargarRoles();
     this.role = this.rolService.getRolPrioritario([
       environment.ROL.JEFE,
       environment.ROL.AUDITOR_EXPERTO,

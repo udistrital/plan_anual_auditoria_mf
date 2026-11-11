@@ -3,7 +3,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { forkJoin, of } from "rxjs";
 import { catchError } from "rxjs/operators";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
+import { RolService } from "src/app/core/services/rol.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { environment } from "src/environments/environment";
 import { EjecutorVigente } from "../consulta-ejecutores/consulta-ejecutores.component";
 
 export interface DatosDetallePlanes {
@@ -50,15 +52,29 @@ export class DetallePlanesDependenciaComponent implements OnInit {
   planes: PlanFila[] = [];
   cargando = signal<boolean>(true);
   guardando = signal<boolean>(false);
+  /** Solo los roles de auditado pueden asignar/desasignar ejecutores. */
+  puedeEditar = signal<boolean>(false);
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: DatosDetallePlanes,
     private readonly dialogRef: MatDialogRef<DetallePlanesDependenciaComponent>,
     private readonly planService: PlanAnualAuditoriaService,
+    private readonly rolService: RolService,
     private readonly alertaService: AlertService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    try {
+      await this.rolService.cargarRoles();
+      this.puedeEditar.set(
+        this.rolService.permisoCreacion([
+          environment.ROL.JEFE_DEPENDENCIA,
+          environment.ROL.ASISTENTE_DEPENDENCIA,
+        ])
+      );
+    } catch (error) {
+      console.error("Error al cargar los roles del usuario:", error);
+    }
     this.cargarPlanes();
   }
 
@@ -118,6 +134,8 @@ export class DetallePlanesDependenciaComponent implements OnInit {
    * fila puente por cada ejecutor elegido. Tras confirmar, recarga la lista.
    */
   guardarAsignaciones(plan: PlanFila): void {
+    if (!this.puedeEditar()) return;
+
     const seleccion = plan.seleccionados ?? [];
     if (seleccion.length === 0) {
       this.alertaService.showAlert(
@@ -177,6 +195,8 @@ export class DetallePlanesDependenciaComponent implements OnInit {
 
   /** Desasigna el plan de un ejecutor (borrado lógico en la puente) tras confirmar. */
   quitarAsignacion(plan: PlanFila, ejecutor: EjecutorDePlan): void {
+    if (!this.puedeEditar()) return;
+
     this.alertaService
       .showConfirmAlert(
         `Se desasignará el plan a ${ejecutor.usuario_nombre}.`,

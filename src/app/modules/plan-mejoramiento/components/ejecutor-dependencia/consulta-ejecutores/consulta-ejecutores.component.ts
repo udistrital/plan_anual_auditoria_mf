@@ -41,7 +41,15 @@ export interface EjecutorVigente {
   standalone: false,
 })
 export class ConsultaEjecutoresComponent implements OnInit {
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  paginator!: MatPaginator;
+
+  @ViewChild(MatPaginator)
+  set matPaginator(paginator: MatPaginator | undefined) {
+    if (paginator && paginator !== this.paginator) {
+      this.paginator = paginator;
+      this.configurarPaginador();
+    }
+  }
 
   formBusqueda!: FormGroup;
 
@@ -73,9 +81,10 @@ export class ConsultaEjecutoresComponent implements OnInit {
 
     try {
       await this.rolService.cargarRoles();
+      // Solo los roles de auditado pueden asignar/gestionar ejecutores.
       const rolesGestion = [
-        environment.ROL.AUDITOR_EXPERTO,
         environment.ROL.JEFE_DEPENDENCIA,
+        environment.ROL.ASISTENTE_DEPENDENCIA,
       ];
       this.permisoEdicion.set(this.rolService.permisoCreacion(rolesGestion));
     } catch (error) {
@@ -85,8 +94,7 @@ export class ConsultaEjecutoresComponent implements OnInit {
     this.cargarEjecutores(this.opcionesPagina[0], 0);
   }
 
-  ngAfterViewInit(): void {
-    if (!this.paginator) return;
+  private configurarPaginador(): void {
     this.paginator._intl.itemsPerPageLabel = "Elementos por página";
     this.paginator._intl.nextPageLabel = "Página siguiente";
     this.paginator._intl.previousPageLabel = "Página anterior";

@@ -1,156 +1,145 @@
-<div class="container">
+<plantilla-tarjeta-contenedora
+  title="Asignar Ejecutor"
+  breadcrumb="Plan de Mejoramiento / Ejecutores por Dependencia / <strong>Asignar Ejecutor</strong>"
+  [contenido]="contenidoAsignar"
+  [mostrarBotonRegresar]="true"
+  (regresar)="volver()"
+>
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoAsignar>
+  <!-- Paso 1: buscar al usuario -->
   <div class="row">
-    <div class="col-12 my-2">
-      <p>
-        Plan de Mejoramiento / Ejecutores por Dependencia /
-        <strong>Asignar Ejecutor</strong>
-      </p>
+    <div class="col-12">
+      <div
+        class="d-flex justify-content-center align-items-center fondo-acento-50 mt-3 mb-3"
+      >
+        <mat-icon>info</mat-icon>
+        <p class="mx-2 mb-0">
+          Busque al usuario ingresando su documento o correo electrónico; su
+          nombre se completará automáticamente. Luego seleccione la
+          dependencia para asignarle el rol de Ejecutor.
+        </p>
+      </div>
     </div>
   </div>
 
-  <mat-card class="p-3">
-    <mat-card-content>
-      <div class="d-flex justify-content-between align-items-center my-2">
-        <h2 style="color: var(--md-primary-700)">Asignar Ejecutor</h2>
-        <button mat-stroked-button color="primary" (click)="volver()">
-          <mat-icon>arrow_back</mat-icon> Regresar
-        </button>
-      </div>
-
-      <!-- Paso 1: buscar al usuario -->
-      <div class="row">
-        <div class="col-12">
-          <div
-            class="d-flex justify-content-center align-items-center fondo-acento-50 mt-3 mb-3"
-          >
-            <mat-icon>info</mat-icon>
-            <p class="mx-2 mb-0">
-              Busque al usuario ingresando su documento o correo electrónico; su
-              nombre se completará automáticamente. Luego seleccione la
-              dependencia para asignarle el rol de Ejecutor.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <!-- Documento -->
-        <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
-          <mat-label>Documento de identidad</mat-label>
-          <mat-icon matPrefix color="primary">badge</mat-icon>
-          <input
-            type="number"
-            matInput
-            #documentoInput
-            (keyup.enter)="buscarPorDocumento(documentoInput.value)"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="buscarPorDocumento(documentoInput.value)"
-          >
-            <mat-icon color="primary">search</mat-icon>
-          </button>
-        </mat-form-field>
-
-        <!-- Correo -->
-        <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
-          <mat-label>Correo</mat-label>
-          <mat-icon matPrefix color="primary">mail</mat-icon>
-          <input
-            type="text"
-            matInput
-            #emailInput
-            (keyup.enter)="buscarPorCorreo(emailInput.value)"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="buscarPorCorreo(emailInput.value)"
-          >
-            <mat-icon color="primary">search</mat-icon>
-          </button>
-        </mat-form-field>
-
-        <!-- Nombres y apellidos (solo lectura) -->
-        <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
-          <mat-label>Nombres y Apellidos</mat-label>
-          <mat-icon matSuffix color="primary">text_fields</mat-icon>
-          <input
-            disabled
-            type="text"
-            matInput
-            readonly
-            [value]="usuarioEncontrado?.nombre ?? ''"
-          />
-        </mat-form-field>
-      </div>
-
-      @if (buscando()) {
-        <div class="d-flex justify-content-center my-2">
-          <mat-progress-spinner
-            mode="indeterminate"
-            diameter="32"
-          ></mat-progress-spinner>
-        </div>
-      }
-
-      <!-- Paso 2: seleccionar dependencia y asignar -->
-      <div
-        class="d-flex justify-content-center align-items-center fondo-acento-50 mt-2 mb-3"
+  <div class="row">
+    <!-- Documento -->
+    <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
+      <mat-label>Documento de identidad</mat-label>
+      <mat-icon matPrefix color="primary">badge</mat-icon>
+      <input
+        type="number"
+        matInput
+        #documentoInput
+        (keyup.enter)="buscarPorDocumento(documentoInput.value)"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="buscarPorDocumento(documentoInput.value)"
       >
-        <mat-icon>apartment</mat-icon>
-        <p class="mx-2 mb-0">Dependencia a la que se asignará el ejecutor</p>
-      </div>
+        <mat-icon color="primary">search</mat-icon>
+      </button>
+    </mat-form-field>
 
-      <form [formGroup]="form" class="row">
-        <mat-form-field appearance="outline" class="col-12 col-md-6">
-          <mat-label>Dependencia</mat-label>
-          <mat-icon matPrefix color="primary">apartment</mat-icon>
-          <mat-select
-            formControlName="dependencia_id"
-            (openedChange)="$event || filtrarDependencias('')"
-            required
-          >
-            <div class="select-search">
-              <input
-                matInput
-                type="text"
-                placeholder="Buscar dependencia..."
-                (keyup)="filtrarDependencias($any($event.target).value)"
-                (click)="$event.stopPropagation()"
-              />
-            </div>
-            @if (cargandoDependencias()) {
-              <mat-option disabled>Cargando dependencias...</mat-option>
-            }
-            @for (dep of dependenciasFiltradas; track dep.id) {
-              <mat-option [value]="dep.id">{{ dep.nombre }}</mat-option>
-            }
-            @if (!cargandoDependencias() && dependenciasFiltradas.length === 0) {
-              <mat-option disabled>Sin resultados</mat-option>
-            }
-          </mat-select>
-          @if (form.get('dependencia_id')?.hasError('required')) {
-            <mat-error>La dependencia es obligatoria.</mat-error>
-          }
-        </mat-form-field>
-      </form>
+    <!-- Correo -->
+    <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
+      <mat-label>Correo</mat-label>
+      <mat-icon matPrefix color="primary">mail</mat-icon>
+      <input
+        type="text"
+        matInput
+        #emailInput
+        (keyup.enter)="buscarPorCorreo(emailInput.value)"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="buscarPorCorreo(emailInput.value)"
+      >
+        <mat-icon color="primary">search</mat-icon>
+      </button>
+    </mat-form-field>
 
-      <!-- Acciones -->
-      <div class="d-flex justify-content-end gap-2 mt-4">
-        <button mat-stroked-button color="primary" (click)="volver()">
-          Cancelar
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          [disabled]="guardando || !usuarioEncontrado"
-          (click)="confirmar()"
-        >
-          <mat-icon>save</mat-icon> Asignar
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
+    <!-- Nombres y apellidos (solo lectura) -->
+    <mat-form-field class="col-12 col-md-6 col-lg-4" appearance="outline">
+      <mat-label>Nombres y Apellidos</mat-label>
+      <mat-icon matSuffix color="primary">text_fields</mat-icon>
+      <input
+        disabled
+        type="text"
+        matInput
+        readonly
+        [value]="usuarioEncontrado?.nombre ?? ''"
+      />
+    </mat-form-field>
+  </div>
+
+  @if (buscando()) {
+    <div class="d-flex justify-content-center my-2">
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="32"
+      ></mat-progress-spinner>
+    </div>
+  }
+
+  <!-- Paso 2: seleccionar dependencia y asignar -->
+  <div
+    class="d-flex justify-content-center align-items-center fondo-acento-50 mt-2 mb-3"
+  >
+    <mat-icon>apartment</mat-icon>
+    <p class="mx-2 mb-0">Dependencia a la que se asignará el ejecutor</p>
+  </div>
+
+  <form [formGroup]="form" class="row">
+    <mat-form-field appearance="outline" class="col-12 col-md-6">
+      <mat-label>Dependencia</mat-label>
+      <mat-icon matPrefix color="primary">apartment</mat-icon>
+      <mat-select
+        formControlName="dependencia_id"
+        (openedChange)="$event || filtrarDependencias('')"
+        required
+      >
+        <div class="select-search">
+          <input
+            matInput
+            type="text"
+            placeholder="Buscar dependencia..."
+            (keyup)="filtrarDependencias($any($event.target).value)"
+            (click)="$event.stopPropagation()"
+          />
+        </div>
+        @if (cargandoDependencias()) {
+          <mat-option disabled>Cargando dependencias...</mat-option>
+        }
+        @for (dep of dependenciasFiltradas; track dep.id) {
+          <mat-option [value]="dep.id">{{ dep.nombre }}</mat-option>
+        }
+        @if (!cargandoDependencias() && dependenciasFiltradas.length === 0) {
+          <mat-option disabled>Sin resultados</mat-option>
+        }
+      </mat-select>
+      @if (form.get('dependencia_id')?.hasError('required')) {
+        <mat-error>La dependencia es obligatoria.</mat-error>
+      }
+    </mat-form-field>
+  </form>
+
+  <!-- Acciones -->
+  <div class="d-flex justify-content-end gap-2 mt-4">
+    <button mat-stroked-button color="primary" (click)="volver()">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="guardando || !usuarioEncontrado"
+      (click)="confirmar()"
+    >
+      <mat-icon>save</mat-icon> Asignar
+    </button>
+  </div>
+</ng-template>
