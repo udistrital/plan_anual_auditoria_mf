@@ -71,8 +71,8 @@ export class ModalAccionDialog extends BasePage {
   readonly errorCausa: Locator;
   readonly botonGuardar: Locator;
   readonly botonDescartar: Locator;
-  /** Interruptores «Líder» de la sección 4 (uno por dependencia candidata, #947) */
-  readonly interruptoresLider: Locator;
+  /** Select múltiple de dependencias líderes de la sección 4 (#947) */
+  readonly selectLideres: Locator;
   readonly errorLider: Locator;
   readonly apoyoNo: Locator;
   readonly apoyoSi: Locator;
@@ -94,7 +94,7 @@ export class ModalAccionDialog extends BasePage {
     this.errorCausa = campoCausa.locator('mat-error');
     this.botonGuardar = this.dialogo.getByRole('button', { name: /Guardar acción/ });
     this.botonDescartar = this.dialogo.getByRole('button', { name: /Descartar/ });
-    this.interruptoresLider = this.dialogo.getByRole('switch', { name: /^Líder: / });
+    this.selectLideres = this.dialogo.getByRole('combobox', { name: /Dependencias líderes/ });
     this.errorLider = this.dialogo.getByText('Seleccione al menos una dependencia líder.');
     const grupoApoyo = this.dialogo.getByRole('radiogroup', { name: /Vincular dependencias corresponsables/ });
     this.apoyoNo = grupoApoyo.getByRole('radio', { name: 'No' });
@@ -105,8 +105,36 @@ export class ModalAccionDialog extends BasePage {
     this.estadoFormulario = this.dialogo.locator('.estado-formulario');
   }
 
-  interruptorLider(nombreDependencia: string): Locator {
-    return this.dialogo.getByRole('switch', { name: `Líder: ${nombreDependencia}` });
+  /**
+   * Abre el select de líderes y devuelve sus opciones con su estado; lo cierra con Escape.
+   * El panel de Material se abre fuera del diálogo (overlay), por eso las opciones se buscan en la página.
+   */
+  /** Abre el select de líderes: vacío, su etiqueta de Material lo tapa, así que se hace clic en el campo. */
+  private async abrirSelectLideres() {
+    await this.dialogo
+      .locator('mat-form-field')
+      .filter({ has: this.page.getByRole('combobox', { name: /Dependencias líderes/ }) })
+      .click();
+  }
+
+  async opcionesLideres(): Promise<{ nombre: string; seleccionada: boolean }[]> {
+    await this.abrirSelectLideres();
+    const opciones = this.page.getByRole('option');
+    await expect(opciones.first()).toBeVisible();
+    const lista = await opciones.evaluateAll((els) =>
+      els.map((e) => ({ nombre: (e.textContent ?? '').trim(), seleccionada: e.getAttribute('aria-selected') === 'true' })),
+    );
+    await this.page.keyboard.press('Escape');
+    await expect(opciones).toHaveCount(0);
+    return lista;
+  }
+
+  /** Marca o desmarca en el select de líderes las dependencias indicadas (en una sola apertura). */
+  async alternarLideres(nombres: string[]) {
+    await this.abrirSelectLideres();
+    for (const nombre of nombres) await this.page.getByRole('option', { name: nombre, exact: true }).click();
+    await this.page.keyboard.press('Escape');
+    await expect(this.page.getByRole('option')).toHaveCount(0);
   }
 
   async esperarAbierto() {

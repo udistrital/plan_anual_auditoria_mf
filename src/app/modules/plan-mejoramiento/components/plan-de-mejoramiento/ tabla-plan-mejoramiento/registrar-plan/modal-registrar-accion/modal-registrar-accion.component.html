@@ -173,23 +173,24 @@
         <span>4. Asignación de dependencias</span>
       </div>
       <div class="seccion-cuerpo">
-        <fieldset class="lista-lideres">
-          <legend class="etiqueta">Dependencias líderes de la acción (responsables principales de ejecución) *</legend>
-          @for (dep of candidatasLider; track dep.id) {
-            <div class="tarjeta-lider" [class.inactiva]="!esLider(dep.id)">
-              <mat-icon>{{ esLider(dep.id) ? 'stars' : 'domain' }}</mat-icon>
-              <span class="valor">{{ dep.nombre }}</span>
-              <mat-slide-toggle class="ms-auto" color="primary" labelPosition="before"
-                [checked]="esLider(dep.id)" [disabled]="liderFijo"
-                (change)="alternarLider(dep.id, $event.checked)"
-                [aria-label]="'Líder: ' + dep.nombre">Líder</mat-slide-toggle>
-            </div>
-          } @empty {
-            <small class="texto-secundario">{{ cargandoDependencias ? 'Cargando dependencias…' : 'La auditoría no tiene dependencias asociadas.' }}</small>
+        @if (candidatasLider.length) {
+          <mat-form-field appearance="outline" class="ancho-completo">
+            <mat-label>Dependencias líderes de la acción (responsables principales de ejecución)</mat-label>
+            <mat-icon matPrefix color="primary">stars</mat-icon>
+            <mat-select multiple required [value]="idsLideres" [disabled]="liderFijo"
+              (selectionChange)="cambiarLideres($event.value)" (openedChange)="!$event && (lideresTocados = true)"
+              placeholder="Seleccione una o más dependencias líderes">
+              @for (dep of candidatasLider; track dep.id) {
+                <mat-option [value]="dep.id">{{ dep.nombre }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Solo se listan las dependencias de la auditoría.</mat-hint>
+          </mat-form-field>
+          @if (lideresTocados && lideres.size === 0) {
+            <mat-error class="d-block mb-2">Seleccione al menos una dependencia líder.</mat-error>
           }
-        </fieldset>
-        @if (candidatasLider.length && lideres.size === 0) {
-          <mat-error class="d-block mb-2">Seleccione al menos una dependencia líder.</mat-error>
+        } @else {
+          <small class="texto-secundario d-block mb-2">{{ cargandoDependencias ? 'Cargando dependencias…' : 'La auditoría no tiene dependencias asociadas.' }}</small>
         }
 
         <span class="etiqueta mt-3" id="etiquetaApoyo">¿Vincular dependencias corresponsables / de apoyo?</span>

@@ -138,8 +138,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
   private iniciarDependenciaLider(): void {
     if (this.modoEdicion) return;
     this.armarCandidatasLider();
-    // Al crear se marcan todas las de la auditoría (comportamiento anterior); la dependencia puede desmarcarlas
-    this.lideres = new Set(this.candidatasLider.map(d => d.id));
+    // Al crear el select inicia vacío; con una sola candidata, esa es la líder (#947)
+    this.lideres = new Set(this.liderFijo ? [this.candidatasLider[0].id] : []);
   }
 
   private cargarDependencias(): void {
@@ -172,7 +172,10 @@ export class ModalRegistrarAccionComponent implements OnInit {
           this.responsablesActuales = res.Data ?? [];
           const idsLideres = this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id);
           this.armarCandidatasLider(idsLideres);
-          this.lideres = new Set(idsLideres);
+          // Acción antigua sin líder: con una sola candidata se preselecciona (el select queda deshabilitado)
+          this.lideres = new Set(!idsLideres.length && this.liderFijo ? [this.candidatasLider[0].id] : idsLideres);
+          // Si aún falta la líder, el aviso se muestra sin esperar a que toquen el select
+          this.lideresTocados = this.lideres.size === 0;
           // El apoyo son los responsables que no son líderes
           this.responsablesAgregados = this.responsablesActuales
             .filter(r => !r.dependencia_lider)
@@ -234,20 +237,20 @@ export class ModalRegistrarAccionComponent implements OnInit {
     return this.candidatasLider.length === 1;
   }
 
-  esLider(id: number): boolean {
-    return this.lideres.has(id);
+  /** Ids seleccionados en el select múltiple de líderes */
+  get idsLideres(): number[] {
+    return [...this.lideres];
   }
 
-  alternarLider(id: number, marcado: boolean): void {
-    const lideres = new Set(this.lideres);
-    if (marcado) {
-      lideres.add(id);
-      // Una dependencia no puede ser líder y apoyo a la vez
-      this.responsablesAgregados = this.responsablesAgregados.filter(r => r.id !== id);
-    } else {
-      lideres.delete(id);
-    }
-    this.lideres = lideres;
+  /** El aviso de «al menos una líder» se muestra después de tocar el select */
+  lideresTocados = false;
+
+  /** Lo seleccionado en el select son las líderes (#947) */
+  cambiarLideres(ids: number[]): void {
+    this.lideres = new Set(ids);
+    this.lideresTocados = true;
+    // Una dependencia no puede ser líder y apoyo a la vez
+    this.responsablesAgregados = this.responsablesAgregados.filter(r => !this.lideres.has(r.id));
     this.actualizarDisponibles();
   }
 

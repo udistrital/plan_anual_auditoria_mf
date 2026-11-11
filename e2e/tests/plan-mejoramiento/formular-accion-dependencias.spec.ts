@@ -25,12 +25,12 @@ test(
     const responsablesData: any[] = (await (await responsables).json())?.Data ?? [];
     const depsAuditoria: number[] = [(await (await auditoria).json())?.Data?.dependencia_id ?? []].flat().map(Number);
 
-    await test.step('con una sola dependencia en la auditoría, esa es la líder y no se puede desmarcar', async () => {
+    await test.step('con una sola dependencia en la auditoría, el select la trae seleccionada y deshabilitado', async () => {
+      expect(depsAuditoria.length, 'la auditoría semilla debe tener una sola dependencia').toBe(1);
       const modal = await plan.abrirAgregarAccion(plan.filasHallazgo.first());
-      const cantidad = await modal.interruptoresLider.count();
-      expect(cantidad, 'la auditoría semilla debe tener al menos una dependencia').toBeGreaterThan(0);
-      for (let i = 0; i < cantidad; i++) await expect(modal.interruptoresLider.nth(i)).toBeChecked();
-      if (cantidad === 1) await expect(modal.interruptoresLider.first()).toBeDisabled();
+      await expect(modal.selectLideres).toBeDisabled();
+      await expect(modal.selectLideres).not.toHaveText(/Seleccione/);
+      await expect(modal.errorLider).toBeHidden();
       await modal.descartar();
     });
 
@@ -56,14 +56,7 @@ test(
       await modal.descartar();
     });
 
-    await test.step('con varias dependencias se puede elegir una o más líderes (al menos una)', async () => {
-      // Nombre de la dependencia real de la auditoría, tal como lo muestra el modal
-      const auditoriaDep = await (async () => {
-        const modal = await plan.abrirAgregarAccion(plan.filasHallazgo.first());
-        const nombre = ((await modal.interruptoresLider.first().getAttribute('aria-label')) ?? '').replace(/^Líder: /, '');
-        await modal.descartar();
-        return nombre;
-      })();
+    await test.step('con varias dependencias el select inicia vacío y se eligen una o más líderes (al menos una)', async () => {
       // Segunda dependencia: otra responsable de las acciones del plan (existe en Oikos, con nombre real)
       const otra = [...new Set(responsablesData.map((r) => Number(r.dependencia_id)))].find((id) => id && !depsAuditoria.includes(id));
       expect(depsAuditoria.length && otra, 'el plan semilla debe tener una acción con una responsable que no sea de la auditoría').toBeTruthy();
@@ -74,38 +67,38 @@ test(
       await expect(plan.filasHallazgo.first()).toBeVisible({ timeout: 60_000 });
 
       const modal = await plan.abrirAgregarAccion(plan.filasHallazgo.first());
-      await expect(modal.interruptoresLider).toHaveCount(2);
-      await expect(modal.interruptorLider(auditoriaDep)).toBeChecked();
-      await expect(modal.interruptoresLider.nth(1)).toBeChecked();
-      await expect(modal.interruptoresLider.nth(0)).toBeEnabled();
-      await expect(modal.interruptoresLider.nth(1)).toBeEnabled();
+      await expect(modal.selectLideres).toBeEnabled();
+      // Solo lista las dependencias de la auditoría, y ninguna viene seleccionada
+      const opciones = await modal.opcionesLideres();
+      expect(opciones).toHaveLength(2);
+      expect(opciones.every((o) => !o.seleccionada)).toBe(true);
+      const [primera, segunda] = opciones.map((o) => o.nombre);
 
-      // Con los demás obligatorios llenos, lo único que decide si está completo es la líder
+      // Con los demás obligatorios llenos, lo único que falta es la líder
       await modal.escribirCausa('Causa de prueba');
       await modal.dialogo.getByRole('radio', { name: /Preventiva/ }).check();
       await modal.dialogo.getByRole('textbox', { name: /Acción planteada/ }).fill('Implementar un control');
-      await expect(modal.estadoFormulario).toHaveText(/Campos obligatorios completos/);
+      await expect(modal.estadoFormulario).toHaveText(/Faltan campos obligatorios/);
 
-      // Queda una sola líder
-      await modal.interruptoresLider.nth(1).click();
-      await expect(modal.interruptoresLider.nth(1)).not.toBeChecked();
+      // Las dos como líderes
+      await modal.alternarLideres([primera, segunda]);
+      expect((await modal.opcionesLideres()).every((o) => o.seleccionada)).toBe(true);
+      await expect(modal.estadoFormulario).toHaveText(/Campos obligatorios completos/);
+      await modal.apoyoNo.scrollIntoViewIfNeeded();
+      await testInfo.attach('dos dependencias líderes', { body: await page.screenshot(), contentType: 'image/png' });
+
+      // Se quita una: queda una sola líder
+      await modal.alternarLideres([segunda]);
+      await expect(modal.selectLideres).toHaveText(new RegExp(primera.slice(0, 15)));
       await expect(modal.errorLider).toBeHidden();
       await expect(modal.estadoFormulario).toHaveText(/Campos obligatorios completos/);
 
       // Sin ninguna líder aparece el aviso y el formulario no está completo
-      await modal.interruptoresLider.nth(0).click();
+      await modal.alternarLideres([primera]);
       await expect(modal.errorLider).toBeVisible();
       await expect(modal.estadoFormulario).toHaveText(/Faltan campos obligatorios/);
       await modal.apoyoNo.scrollIntoViewIfNeeded();
       await testInfo.attach('sin dependencia líder', { body: await page.screenshot(), contentType: 'image/png' });
-
-      // Las dos como líderes
-      await modal.interruptoresLider.nth(0).click();
-      await modal.interruptoresLider.nth(1).click();
-      await expect(modal.interruptoresLider.nth(0)).toBeChecked();
-      await expect(modal.interruptoresLider.nth(1)).toBeChecked();
-      await expect(modal.errorLider).toBeHidden();
-      await expect(modal.estadoFormulario).toHaveText(/Campos obligatorios completos/);
       await modal.apoyoNo.scrollIntoViewIfNeeded();
       await testInfo.attach('dos dependencias líderes', { body: await page.screenshot(), contentType: 'image/png' });
       await modal.descartar();
@@ -124,13 +117,17 @@ test(
       const lideres = datos.filter((r) => r.dependencia_lider).length;
       const apoyo = datos.filter((r) => !r.dependencia_lider).length;
 
-      await expect
-        .poll(() => modal.interruptoresLider.evaluateAll((els) => els.filter((e) => e.getAttribute('aria-checked') === 'true').length))
-        .toBe(lideres);
       await expect(modal.chipsApoyo).toHaveCount(apoyo);
       await expect(apoyo ? modal.apoyoSi : modal.apoyoNo).toBeChecked();
-      // Una acción antigua sin líder guardado pide elegir una antes de guardar
-      await (lideres ? expect(modal.errorLider).toBeHidden() : expect(modal.errorLider).toBeVisible());
+      if (await modal.selectLideres.isDisabled()) {
+        // Una sola candidata: queda seleccionada aunque la acción antigua no tuviera líder guardado
+        await expect(modal.selectLideres).not.toHaveText(/Seleccione/);
+        await expect(modal.errorLider).toBeHidden();
+      } else {
+        // Las seleccionadas son las líderes guardadas; sin ninguna, el aviso aparece de entrada
+        expect((await modal.opcionesLideres()).filter((o) => o.seleccionada)).toHaveLength(lideres);
+        await (lideres ? expect(modal.errorLider).toBeHidden() : expect(modal.errorLider).toBeVisible());
+      }
       await modal.apoyoNo.scrollIntoViewIfNeeded();
       await testInfo.attach('editar: responsables guardados', { body: await page.screenshot(), contentType: 'image/png' });
 

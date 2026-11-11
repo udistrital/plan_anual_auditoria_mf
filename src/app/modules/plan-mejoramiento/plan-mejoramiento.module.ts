@@ -19,7 +19,6 @@ import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver
 import { ModalAprobacionPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-aprobacion-plan/modal-aprobacion-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
 import { FormularioCalificacionComponent } from './components/gestion-acciones/registro-avances/formulario-calificacion/formulario-calificacion.component';
 import { PanelFichaAccionComponent } from './components/gestion-acciones/registro-avances/panel-ficha-accion/panel-ficha-accion.component';
@@ -64,8 +63,6 @@ import { VistaAuditorAccionesComponent } from './components/gestion-acciones/vis
     SharedModule,
     PlanesRoutingModule,
     MaterialModule,
-    // Interruptor «Líder» de las dependencias en el modal de acción (#947)
-    MatSlideToggleModule,
   ],
 })
 export class PlanesModule { }

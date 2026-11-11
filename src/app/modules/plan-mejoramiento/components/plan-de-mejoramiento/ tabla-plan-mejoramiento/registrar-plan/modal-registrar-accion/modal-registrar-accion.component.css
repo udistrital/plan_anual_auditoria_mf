@@ -107,45 +107,6 @@
 
 /* ─── Dependencias ───────────────────────────────────────────────────────── */
 
-.tarjeta-lider {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--md-primary-500);
-  border-left-width: 6px;
-}
-
-.tarjeta-lider mat-icon {
-  color: var(--md-primary-500);
-  flex-shrink: 0;
-}
-
-.lista-lideres {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 0 0 8px;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-
-.lista-lideres legend {
-  padding: 0;
-}
-
-/* Dependencia de la auditoría no marcada como líder */
-.tarjeta-lider.inactiva {
-  border-color: #e0e0e0;
-  border-left-width: 1px;
-}
-
-.tarjeta-lider.inactiva mat-icon {
-  color: #9e9e9e;
-}
-
 .chips-dependencias {
   display: flex;
   flex-wrap: wrap;

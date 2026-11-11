@@ -7,8 +7,8 @@ Issue: udistrital/sisifo_documentacion#947 · MF: plan_anual_auditoria_mf · Eti
 En **Planes de Mejoramiento › Formulación de planes › Registrar Plan**, el auditado (jefe o asistente de la dependencia) formula las acciones de cada hallazgo con el modal **Añadir/Editar acción del hallazgo**. Lo que cambia #947:
 
 - **Fase 1, causa**: la causa del hallazgo es un **texto abierto** que escribe la dependencia en cada acción (`accion_mejora.causa`). Es obligatorio, tiene máximo 1000 caracteres y un contador. Ya no sale del criterio de fase 3 (`hallazgo.criterio`). La tabla, el Excel, el dictamen del auditor, la ficha de Registrar avances y el PDF la leen desde la acción.
-- **Fase 2, líder y apoyo**: la sección 4 lista las dependencias de la auditoría, cada una con su interruptor «Líder» (una o más, al menos una). El apoyo es opcional: «¿Vincular dependencias corresponsables / de apoyo? No/Sí».
-- **Fase 4, remisión**: pendiente de aprobación en la daily.
+- **Fase 2, líder y apoyo**: la sección 4 tiene un **select múltiple** de líderes que lista solo las dependencias de la auditoría (una o más, al menos una; al crear inicia vacío, salvo que haya una sola, que queda seleccionada y el select deshabilitado). El apoyo es opcional: «¿Vincular dependencias corresponsables / de apoyo? No/Sí».
+- **Fase 4, remisión**: planteamiento aprobado; se implementa en otra issue.
 
 ## Datos semilla
 
@@ -34,10 +34,10 @@ Archivo: `tests/plan-mejoramiento/formular-accion-causa.spec.ts`
 
 Archivo: `tests/plan-mejoramiento/formular-accion-dependencias.spec.ts`
 
-1. Con el plan simulado en Creando, **Agregar Acción**: las dependencias de la auditoría aparecen marcadas como líderes. Si es una sola, su interruptor está deshabilitado.
+1. Con el plan simulado en Creando, **Agregar Acción**: la auditoría semilla tiene una sola dependencia, así que el select de líderes la trae seleccionada y está deshabilitado, sin aviso.
 2. El apoyo inicia en **No**, sin selector ni «Vincular dependencia». Con **Sí** aparecen («Vincular» deshabilitado sin selección) y con **No** se ocultan. Sin apoyo, al llenar causa, tipo y acción planteada el pie dice «Campos obligatorios completos».
-3. Con la auditoría simulada con **dos** dependencias (la real y otra responsable del plan, vía `page.route` sobre `GET MID auditoria/:id`): las dos aparecen como líderes y habilitadas. Se puede dejar solo una. Sin ninguna aparece «Seleccione al menos una dependencia líder.» y el pie dice «Faltan campos obligatorios». Con las dos vuelve a estar completo.
-4. **Editar Acción**: los interruptores marcados y los chips de apoyo coinciden con `responsable-accion` de esa acción, y «Sí/No» refleja si tiene apoyo. Una acción antigua sin líder guardado muestra el aviso de líder obligatorio. **No** quita los chips de apoyo y oculta el selector; **Sí** lo vuelve a mostrar vacío.
+3. Con la auditoría simulada con **dos** dependencias (la real y otra responsable del plan, vía `page.route` sobre `GET MID auditoria/:id`): el select está habilitado, lista solo esas dos y ninguna viene seleccionada; con causa, tipo y acción llenos el pie dice «Faltan campos obligatorios». Se seleccionan las dos (completo), se quita una (sigue completo) y se quita la otra: aparece «Seleccione al menos una dependencia líder.» y «Faltan campos obligatorios».
+4. **Editar Acción**: las opciones seleccionadas del select coinciden con las líderes de `responsable-accion` de esa acción (con una sola candidata, el select deshabilitado la trae seleccionada aunque la acción antigua no tuviera líder) y los chips de apoyo con las de apoyo; «Sí/No» refleja si tiene apoyo. Si queda sin líder, el aviso aparece de entrada. **No** quita los chips de apoyo y oculta el selector; **Sí** lo vuelve a mostrar vacío.
 5. Ninguna escritura.
 
 Guardar los responsables (`POST`/`PUT`/`DELETE responsable-accion`) es `@escritura`: requiere el CRUD local con datos dedicados y no se automatizó en esta fase. Se verifica a mano.
