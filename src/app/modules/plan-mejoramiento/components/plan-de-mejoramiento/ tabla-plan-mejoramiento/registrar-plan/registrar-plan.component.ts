@@ -434,8 +434,8 @@ export class RegistrarPlanComponent implements OnInit {
   }
 
   /**
-   * Abre el modal de ejecutores del plan. Si el plan es editable el auditado
-   * puede asignar/desasignar; si ya no lo es, el modal se abre en solo lectura.
+   * Abre el modal de ejecutores del plan. El auditado puede asignar/desasignar
+   * en cualquier estado del plan.
    */
   gestionarEjecutores(): void {
     if (!this.planMejoramientoId) return;
@@ -452,7 +452,7 @@ export class RegistrarPlanComponent implements OnInit {
     const data: DatosAsignarEjecutoresPlan = {
       plan_mejoramiento_id: this.planMejoramientoId,
       dependencias,
-      soloLectura: this.soloLectura,
+      soloLectura: false,
     };
 
     this.dialog.open(ModalAsignarEjecutoresPlanComponent, {

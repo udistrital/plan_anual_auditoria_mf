@@ -15,7 +15,10 @@ export interface DependenciaPlan {
 /**
  * Datos de entrada del modal. Un plan de mejoramiento puede cubrir varias
  * dependencias auditadas; cada una se gestiona en su propio panel.
- * `soloLectura` desactiva asignar/desasignar (p. ej. para el Auditor experto).
+ *
+ * `soloLectura` desactiva asignar/desasignar; lo usa únicamente la vista del
+ * Auditor experto (`ver-plan`). El auditado (`registrar-plan`) siempre abre el
+ * modal en modo edición, en cualquier estado del plan.
  */
 export interface DatosAsignarEjecutoresPlan {
   plan_mejoramiento_id: string;
