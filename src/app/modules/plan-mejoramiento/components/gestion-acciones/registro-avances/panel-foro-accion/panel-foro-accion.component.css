@@ -1,21 +1,62 @@
-.aviso-construccion {
+.estado-error {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   padding: 8px 12px;
-  border: 1px solid #ffe082;
+  border: 1px solid #ef9a9a;
   border-radius: 6px;
-  background-color: #fff8e1;
-  color: #8d6e00;
+  background-color: #ffebee;
+  color: #b71c1c;
   font-size: 12px;
 }
 
-.aviso-construccion mat-icon {
+output.vacio {
+  display: block;
+}
+
+.anteriores {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.solo-lectura {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+  color: #616161;
+  font-size: 12px;
+}
+
+.solo-lectura mat-icon {
   flex-shrink: 0;
   font-size: 18px;
   height: 18px;
   width: 18px;
+}
+
+.error-envio {
+  margin: 6px 0 0;
+  color: #b71c1c;
+  font-size: 12px;
+}
+
+.contador {
+  margin-right: auto;
+  align-self: center;
+  color: #6b6b6b;
+  font-size: 12px;
+}
+
+.contador-limite {
+  color: #b71c1c;
+  font-weight: 600;
 }
 
 .mensaje {

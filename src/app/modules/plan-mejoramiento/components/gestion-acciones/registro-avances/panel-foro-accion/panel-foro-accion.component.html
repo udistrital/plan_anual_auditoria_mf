@@ -1,36 +1,77 @@
 <div class="panel-cabecera">
   <div>
     <h2 class="panel-titulo" id="tituloPanelForo">Foro de seguimiento</h2>
-    <p class="pista">Conversación entre la dependencia y los auditores sobre esta acción.</p>
+    <p class="pista">Conversación entre la dependencia y Control Interno sobre esta acción.</p>
   </div>
+  <button mat-icon-button type="button" (click)="cargar()" [disabled]="cargando" aria-label="Actualizar mensajes">
+    <mat-icon>refresh</mat-icon>
+  </button>
   <button mat-icon-button mat-dialog-close aria-label="Cerrar">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
-<div class="panel-cuerpo">
-  <p class="aviso-construccion">
-    <mat-icon>construction</mat-icon>
-    <span><b>Foro en construcción:</b> los mensajes son de ejemplo y no se guardan.</span>
-  </p>
-  @for (mensaje of mensajes; track $index) {
-    <div class="mensaje">
-      <div class="mensaje-cabecera">
-        <span class="iniciales" aria-hidden="true">{{ iniciales(mensaje.autor) }}</span>
-        <div><b>{{ mensaje.autor }}</b> · {{ mensaje.rol }}<br>{{ mensaje.fecha | date: 'dd/MM/yyyy hh:mm a' }}</div>
-      </div>
-      <p class="texto-largo mensaje-texto">{{ mensaje.texto }}</p>
+<div class="panel-cuerpo" #cuerpo>
+  @if (cargando && !comentarios.length) {
+    <output class="vacio">Cargando mensajes…</output>
+  } @else if (errorCarga) {
+    <div class="estado-error" role="alert">
+      <span>No se pudieron cargar los mensajes.</span>
+      <button mat-stroked-button type="button" (click)="cargar()">Reintentar</button>
     </div>
   }
-</div>
 
-<div class="redactar">
-  <label class="etiqueta" for="nuevoMensajeForo">Nuevo mensaje</label>
-  <textarea id="nuevoMensajeForo" class="campo" rows="3" maxlength="1000" [(ngModel)]="nuevoMensaje"
-    [placeholder]="datos.esAuditor ? 'Escriba su comentario para la dependencia' : 'Escriba su comentario para el auditor'"></textarea>
-  <div class="redactar-pie">
-    <button mat-flat-button color="primary" type="button" [disabled]="!nuevoMensaje.trim()" (click)="enviar()">
-      <mat-icon>send</mat-icon> Enviar
-    </button>
+  @if (!cargando && !errorCarga && !comentarios.length) {
+    <p class="vacio">Aún no hay mensajes en el foro de esta acción.</p>
+  }
+
+  @if (hayAnteriores && comentarios.length) {
+    <div class="anteriores">
+      <button mat-stroked-button type="button" (click)="verAnteriores()" [disabled]="cargandoAnteriores">
+        {{ cargandoAnteriores ? 'Cargando…' : 'Ver anteriores (' + (total - comentarios.length) + ')' }}
+      </button>
+    </div>
+  }
+
+  <div aria-live="polite">
+    @for (mensaje of comentarios; track mensaje._id) {
+      <div class="mensaje">
+        <div class="mensaje-cabecera">
+          <span class="iniciales" aria-hidden="true">{{ iniciales(mensaje.usuario_nombre) }}</span>
+          <div>
+            <b>{{ mensaje.usuario_nombre }}</b> · {{ mensaje.rol_nombre }}
+            @if (mensaje.dependencia_nombre) {
+              · {{ mensaje.dependencia_nombre }}
+            }
+            <br>{{ mensaje.fecha_creacion | date: 'dd/MM/yyyy hh:mm a' }}
+          </div>
+        </div>
+        <p class="texto-largo mensaje-texto">{{ mensaje.mensaje }}</p>
+      </div>
+    }
   </div>
 </div>
+
+@if (puedeComentar) {
+  <div class="redactar">
+    <label class="etiqueta" for="nuevoMensajeForo">Nuevo mensaje</label>
+    <textarea id="nuevoMensajeForo" class="campo" rows="3" [attr.maxlength]="maximoMensaje" [(ngModel)]="nuevoMensaje"
+      [disabled]="enviando" placeholder="Escriba su comentario"></textarea>
+    @if (errorEnvio) {
+      <p class="error-envio" role="alert">{{ errorEnvio }}</p>
+    }
+    <div class="redactar-pie">
+      <span class="contador" [class.contador-limite]="nuevoMensaje.length >= maximoMensaje">
+        {{ nuevoMensaje.length }}/{{ maximoMensaje }}
+      </span>
+      <button mat-flat-button color="primary" type="button" [disabled]="!mensajeValido || enviando" (click)="enviar()">
+        <mat-icon>send</mat-icon> {{ enviando ? 'Enviando…' : 'Enviar' }}
+      </button>
+    </div>
+  </div>
+} @else if (!cargando && !errorCarga) {
+  <p class="solo-lectura">
+    <mat-icon>lock</mat-icon>
+    <span>Solo lectura: pueden comentar las dependencias responsables de la acción y el personal de Control Interno.</span>
+  </p>
+}

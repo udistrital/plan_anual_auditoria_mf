@@ -341,7 +341,9 @@ export class TablaHallazgosComponent implements OnInit {
     tolerarErrores = true
   ): Observable<{ hallazgos: HallazgoTabla[]; total: number }> {
     return this.planAuditoriaService
-      .get(`hallazgo?query=informe_id:${informeId},activo:true&limit=${limit}&offset=${offset}&sortby=_id&order=asc`)
+      // rechazado__not:true: los hallazgos rechazados en el preinforme no llegan al plan (igual que en el MID);
+      // a diferencia de rechazado:false, incluye los hallazgos antiguos que no tienen el campo.
+      .get(`hallazgo?query=informe_id:${informeId},activo:true,rechazado__not:true&limit=${limit}&offset=${offset}&sortby=_id&order=asc`)
       .pipe(
         switchMap((resHallazgos) => {
           const hallazgosData: any[] = resHallazgos.Data ?? [];
