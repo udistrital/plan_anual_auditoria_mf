@@ -32,6 +32,11 @@
         <span><b>Auditor asignado:</b> {{ auditoresPlan || 'Sin asignar' }}</span>
       </div>
     </div>
+    @if (planMejoramientoId) {
+      <button mat-stroked-button color="primary" class="boton-secundario" (click)="gestionarEjecutores()">
+        <mat-icon>group_add</mat-icon> Asignar ejecutores
+      </button>
+    }
   </div>
 
   <!-- Avance de la formulación (plan completo) -->
