@@ -68,4 +68,4 @@ No prueba el backend: muestra cómo preparar un estado sin escribir datos.
 ## Fuera de este plan
 
 - Subir y guardar un PDF, guardar la calificación y bloquear el cargue de verdad: son `@escritura` y quedan para el CRUD local con limpieza.
-- Foro: está en construcción (datos de ejemplo).
+- Foro: tiene su propio plan, [foro-accion.plan.md](foro-accion.plan.md) (#948); ya guarda los mensajes en el backend.
