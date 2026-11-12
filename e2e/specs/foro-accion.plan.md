@@ -72,8 +72,35 @@ Archivo: `tests/plan-mejoramiento/foro-error-envio.spec.ts`
 3. Con un 500 se muestra el texto fijo «No se pudo enviar el comentario. Intente de nuevo.», sin el detalle técnico, y el texto sigue ahí.
 4. No se creó ningún mensaje.
 
+### 7. Contenido hostil y límites con datos reales (`@auditor`, `@escritura`)
+
+Archivo: `tests/plan-mejoramiento/foro-xss-limites.spec.ts`
+
+1. Publica `<script>window.__xss=1</script><img src=x onerror=…> <b>negrita</b>`: se muestra como texto (sin `img`, `script` ni `b` dentro del cuerpo) y `window.__xss` queda sin definir, también tras releerlo de la base con **Actualizar**.
+2. Publica un mensaje con salto de línea, tildes, `ñ`, `¿?` y emojis: se conservan.
+3. Un mensaje de exactamente 1000 caracteres se acepta y el contador marca `1000/1000`.
+4. El campo no acepta más de 1000 caracteres.
+5. Un doble clic en **Enviar** crea un solo mensaje, con una sola petición `POST`, y el CRUD guarda uno solo.
+
+### 8. Conversación real entre dos roles (`@auditor`, `@escritura`)
+
+Archivo: `tests/plan-mejoramiento/foro-conversacion-dos-roles.spec.ts`
+
+1. El auditor publica una pregunta.
+2. El Jefe de Control Interno (`comoRol('jefe-oci')`) abre la misma acción, ve la pregunta con el rol «Auditor», puede redactar y responde.
+3. El auditor pulsa **Actualizar** y ve la respuesta con el rol «Jefe de Control Interno», después de su pregunta (orden cronológico).
+4. El CRUD tiene los dos mensajes, una sola vez cada uno.
+
+### 9. Solo lectura decidido por el MID, sin simular (`@jefe-dependencia`, `@lectura`)
+
+Archivo: `tests/plan-mejoramiento/foro-solo-lectura-real.spec.ts`
+
+1. En la acción propia de la cuenta, el MID responde `puede_comentar: true`.
+2. Se busca una acción ajena (por el MID, con la persona de la cuenta) que cargue en Registro de avances; en ella el foro abre en solo lectura, sin campo ni **Enviar**.
+3. Las candidatas se fijan con `E2E_ACCIONES_CANDIDATAS`; por defecto son acciones de otras dependencias del ambiente de pruebas. Si ninguna sirve, el error lista por qué descartó cada una.
+
 ## Fuera de este plan
 
 - Los 403 del MID (dependencia ajena, administrador), los 400 y la paginación del API: los cubren los specs del MID y la prueba manual de la Fase 1.
-- Sin cobertura E2E todavía (sugeridas por el análisis de impacto): error de lectura con **Reintentar**, estado vacío con datos simulados, contador en el límite de 1000 caracteres y el foro con un rol sin permiso (secretario, administrador).
+- Sin cobertura E2E todavía: error de lectura con **Reintentar**, estado vacío con datos simulados, paginación real con más de 20 mensajes sembrados, sesión vencida a mitad de un envío, la pantalla a 390 px y con teclado, el foro con los roles secretario y administrador (sin cuenta de prueba usable), y carga o concurrencia del backend.
 - Nota interna, eventos automáticos y «Seguir» con correo (existían en Sísifo v1): fuera de la issue #948.
