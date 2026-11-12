@@ -24,7 +24,6 @@ export interface HallazgoTabla {
   indice: string;
   titulo: string;
   descripcion: string;
-  causa: string;
   acciones: AccionPlan[];
   expandido: boolean;
 }
@@ -32,6 +31,8 @@ export interface HallazgoTabla {
 export interface AccionPlan {
   accionId?: string;
   numero: string;
+  /** Causa escrita por la dependencia en la acción (#947); las acciones anteriores pueden no tenerla */
+  causa: string;
   tipoAccion: string;
   tipoAccionId?: number;
   accionPlanteada: string;
@@ -51,6 +52,7 @@ export interface AccionPlan {
 
 export interface ResultadoModalAccion {
   accion: {
+    causa: string;
     tipoAccionId: number;
     accionPlanteada: string;
     nombreIndicador: string;
@@ -62,6 +64,8 @@ export interface ResultadoModalAccion {
   };
   responsablesNuevos: { dependencia_id: number; dependencia_lider: boolean }[];
   responsablesAEliminar: string[];
+  /** Responsables que siguen pero cambian entre líder y apoyo (#947) */
+  responsablesActualizar: { _id: string; dependencia_lider: boolean }[];
 }
 
 export interface FilaTabla {
@@ -70,7 +74,6 @@ export interface FilaTabla {
   hallazgoIndice: string;
   hallazgoTitulo: string;
   hallazgoDescripcion: string;
-  hallazgoCausa: string;
   accion?: AccionPlan;
 }
 
@@ -206,7 +209,6 @@ export class TablaHallazgosComponent implements OnInit {
         hallazgoIndice:      h.indice,
         hallazgoTitulo:      h.titulo,
         hallazgoDescripcion: h.descripcion,
-        hallazgoCausa:       h.causa,
       });
 
       if (h.expandido && h.acciones.length > 0) {
@@ -217,7 +219,6 @@ export class TablaHallazgosComponent implements OnInit {
             hallazgoIndice:      h.indice,
             hallazgoTitulo:      h.titulo,
             hallazgoDescripcion: h.descripcion,
-            hallazgoCausa:       h.causa,
             accion,
           });
         });
@@ -241,6 +242,7 @@ export class TablaHallazgosComponent implements OnInit {
       accionId:         a._id,
       // no_accion solo existe desde la aprobación del plan; antes se usa la posición en el hallazgo
       numero:           a.no_accion || String(index + 1),
+      causa:            a.causa ?? '',
       tipoAccionId:     a.tipo_id ?? 1,
       tipoAccion:       TIPO_NOMBRES[a.tipo_id] ?? '',
       accionPlanteada:  a.descripcion ?? '',
@@ -408,7 +410,6 @@ export class TablaHallazgosComponent implements OnInit {
         indice:      h.no_hallazgo ?? String(offset + i + 1),
         titulo:      h.titulo ?? '',
         descripcion: h.descripcion ?? h.titulo ?? '',
-        causa:       h.criterio ?? '',
         // En Ver Plan los hallazgos inician expandidos para ver el estado de cada acción
         expandido:   this.expansion.get(h._id) ?? this.vistaDictamen,
         acciones:    (accionesPorHallazgo.get(h._id) ?? [])
@@ -481,6 +482,7 @@ export class TablaHallazgosComponent implements OnInit {
     const body = {
       plan_mejoramiento_id: this.planMejoramientoId,
       hallazgo_id:          hallazgo.hallazgoId,
+      causa:                resultado.accion.causa,
       descripcion:          resultado.accion.accionPlanteada,
       tipo_id:              resultado.accion.tipoAccionId,
       nombre_indicador:     resultado.accion.nombreIndicador,
@@ -527,6 +529,7 @@ export class TablaHallazgosComponent implements OnInit {
 
   private actualizarAccion(resultado: ResultadoModalAccion, accionAnterior: AccionPlan): void {
     const body = {
+      causa:             resultado.accion.causa,
       descripcion:       resultado.accion.accionPlanteada,
       tipo_id:           resultado.accion.tipoAccionId,
       nombre_indicador:  resultado.accion.nombreIndicador,
@@ -549,6 +552,7 @@ export class TablaHallazgosComponent implements OnInit {
             accionAnterior.accionId!,
             resultado.responsablesNuevos,
             resultado.responsablesAEliminar,
+            resultado.responsablesActualizar,
             () => {
               const finalizar = () => {
                 this.recargarTrasCambio();
@@ -604,7 +608,7 @@ export class TablaHallazgosComponent implements OnInit {
       hallazgo: {
         indice:      fila.hallazgoIndice,
         descripcion: fila.hallazgoDescripcion,
-        causa:       fila.hallazgoCausa,
+        causa:       accion.causa,
       },
       accion,
       soloLectura: !this.modoRevision,
@@ -759,12 +763,14 @@ export class TablaHallazgosComponent implements OnInit {
 
     // Una fila por acción; los hallazgos sin acciones también se exportan con las columnas de acción vacías
     const rows = todos.flatMap(hallazgo => {
-      const datosHallazgo = [hallazgo.indice, descripciones.get(hallazgo.hallazgoId), hallazgo.causa];
+            // La causa es de cada acción (#947): en un hallazgo sin acciones queda vacía
+      const datosHallazgo = [hallazgo.indice, descripciones.get(hallazgo.hallazgoId)];
       if (!hallazgo.acciones.length) {
-        return [[...datosHallazgo, '', '', '', '', '', '', '', '', '']];
+        return [[...datosHallazgo, '', '', '', '', '', '', '', '', '', '']];
       }
       return hallazgo.acciones.map(accion => [
         ...datosHallazgo,
+        accion.causa,
         accion.numero,
         accion.tipoAccion,
         accion.accionPlanteada,
@@ -814,6 +820,7 @@ export class TablaHallazgosComponent implements OnInit {
     accionId: string,
     nuevos: { dependencia_id: number; dependencia_lider: boolean }[],
     aEliminar: string[],
+    aActualizar: { _id: string; dependencia_lider: boolean }[],
     callback: () => void
   ): void {
     const creaciones = nuevos.map(r =>
@@ -831,7 +838,14 @@ export class TablaHallazgosComponent implements OnInit {
         .pipe(catchError(err => { console.error('Error eliminar responsable:', err); return of(null); }))
     );
 
-    const todas = [...creaciones, ...eliminaciones];
+    // Cambio de rol líder ↔ apoyo de un responsable que ya existía
+    const actualizaciones = aActualizar.map(r =>
+      this.planAuditoriaService
+        .put(`responsable-accion/${r._id}`, { dependencia_lider: r.dependencia_lider } as any)
+        .pipe(catchError(err => { console.error('Error actualizar responsable:', err); return of(null); }))
+    );
+
+    const todas = [...creaciones, ...eliminaciones, ...actualizaciones];
     if (!todas.length) { callback(); return; }
 
     forkJoin(todas).subscribe({ next: () => callback(), error: () => callback() });

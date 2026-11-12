@@ -17,7 +17,8 @@ export const hallazgosConstructorTabla = [
     columnDef: 'causa',
     header: 'Causa del Hallazgo',
     sortable: false,
-    cell: (fila: any) => fila.hallazgoCausa || 'Sin causa registrada',
+    // La causa es de cada acción (#947); la fila del hallazgo no la muestra
+    cell: (fila: any) => (fila.accion ? fila.accion.causa || 'Sin causa registrada' : ''),
   },
   {
     columnDef: 'numero',

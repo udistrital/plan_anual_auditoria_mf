@@ -428,7 +428,8 @@ export class RegistroAvancesComponent implements OnInit {
       hallazgo: {
         numero: this.hallazgo?.no_hallazgo,
         descripcion: this.hallazgo?.descripcion,
-        causa: this.hallazgo?.criterio,
+        // La causa la escribe la dependencia en la acción; no es el criterio de fase 3 (#947)
+        causa: this.accion?.causa,
       },
       auditoria: {
         numero: this.auditoria?.consecutivo_no_auditoria,

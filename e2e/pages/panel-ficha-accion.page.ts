@@ -29,6 +29,15 @@ export class PanelFichaAccion extends BasePage {
     return this.pestanas.getByRole('tab', { name: nombre });
   }
 
+  /** Valor de un dato de la pestaña activa por su etiqueta (p. ej. «Causa» en Hallazgo). */
+  dato(etiqueta: string): Locator {
+    return this.dialogo
+      .locator('.dato')
+      .filter({ has: this.page.locator('.etiqueta', { hasText: new RegExp(`^${etiqueta}$`) }) })
+      .locator('p, span:not(.etiqueta)')
+      .first();
+  }
+
   async nombrePestanaActiva(): Promise<string> {
     return (await this.pestanaActiva.innerText()).trim();
   }

@@ -30,7 +30,8 @@ Archivo: `tests/plan-mejoramiento/registro-avances-auditado.spec.ts`
 2. Ve **Evidencias de avance** y **Calificación de Control Interno**. No ve el formulario de calificación ni el botón de cargue del auditor. No hay stepper.
 3. El chip indica el estado del cargue. **Añadir documento** está presente y solo se habilita con **Cargue habilitado**.
 4. **Ficha de la acción** abre el panel en la pestaña **Acción**. Con la flecha derecha recorre Hallazgo → Auditoría → Responsables → Acción, y con Esc se cierra.
-5. **Ver hallazgo** abre el panel directamente en **Hallazgo**.
+4a. En la pestaña **Hallazgo**, el dato **Causa** es la causa escrita en la acción (`accion_mejora.causa`) o «—», no el criterio de fase 3 (#947, ver `formulacion-dependencias-hallazgos.plan.md`).
+5. No están los enlaces **Ver hallazgo** ni **Ver acción** (se quitaron en #947). El hallazgo se consulta en la ficha, pestaña **Hallazgo**.
 6. A 390 px de ancho no hay desborde horizontal.
 
 ### 2. El auditor revisa y valida el formulario de calificación (`@auditor`)
