@@ -302,7 +302,8 @@ export class RegistrarPlanComponent implements OnInit {
           if (!informeId) return of({ hallazgos: [] as any[], acciones: [] as any[] });
           return forkJoin({
             hallazgos: this.planAuditoriaService
-              .get(`hallazgo?query=informe_id:${informeId},activo:true&limit=0&fields=_id,no_hallazgo&sortby=_id&order=asc`),
+              // Sin los rechazados en el preinforme: la misma lista que muestra la tabla de hallazgos
+              .get(`hallazgo?query=informe_id:${informeId},activo:true,rechazado__not:true&limit=0&fields=_id,no_hallazgo&sortby=_id&order=asc`),
             acciones: this.planAuditoriaService
               .get(`accion-mejora?query=plan_mejoramiento_id:${this.planMejoramientoId},activo:true&limit=0&fields=hallazgo_id`),
           }).pipe(switchMap(({ hallazgos, acciones }) => of({
