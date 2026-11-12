@@ -14,6 +14,7 @@ import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/d
 import { catchError, firstValueFrom, forkJoin, of, Subscription, switchMap } from 'rxjs';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
+import { DatosAsignarEjecutoresPlan, DependenciaPlan, ModalAsignarEjecutoresPlanComponent } from '../../ver-plan/modal-asignar-ejecutores-plan/modal-asignar-ejecutores-plan.component';
 
 @Component({
     selector: 'app-registrar-plan',
@@ -58,6 +59,29 @@ export class RegistrarPlanComponent implements OnInit {
   get gestoresDelProceso(): string {
     return (this.auditoria?.datos_dependencias ?? [])
       .map((d: any) => d.dependencia_nombre).filter(Boolean).join(', ') || '';
+  }
+
+  /**
+   * Dependencias auditadas del plan (pares id + nombre). Un plan puede cubrir
+   * varias dependencias: `auditoria.dependencia_id` y `dependencia_nombre` son
+   * arreglos paralelos resueltos por el MID.
+   */
+  get dependenciasDelPlan(): DependenciaPlan[] {
+    const auditoria: any = this.auditoria;
+    const ids: number[] = Array.isArray(auditoria?.dependencia_id)
+      ? auditoria.dependencia_id
+      : auditoria?.dependencia_id != null
+        ? [auditoria.dependencia_id]
+        : [];
+    const nombres: string[] = Array.isArray(auditoria?.dependencia_nombre)
+      ? auditoria.dependencia_nombre
+      : [];
+    return ids
+      .filter((id) => id != null)
+      .map((id, idx) => ({
+        dependencia_id: Number(id),
+        dependencia_nombre: nombres[idx] ?? `Dependencia ${id}`,
+      }));
   }
 
   get titulo(): string {
@@ -124,7 +148,7 @@ export class RegistrarPlanComponent implements OnInit {
     if (this.hallazgosPendientes.length) {
       const lista = this.hallazgosPendientes.slice(0, 5).join(', ');
       const resto = this.hallazgosPendientes.length > 5 ? '…' : '';
-      return `Modo de edición activo. Ya puede enviar el plan al auditor. Hallazgo(s) sin acciones (opcional): ${lista}${resto}.`;
+      return `Modo de edición activo. Recuerde formular acciones para el/los hallazgo(s) ${lista}${resto} antes de enviar al auditor.`;
     }
     return 'Modo de edición activo. Todos los hallazgos tienen acciones formuladas; puede enviar el plan al auditor.';
   }
@@ -408,6 +432,36 @@ export class RegistrarPlanComponent implements OnInit {
 
   regresar(): void {
     this.router.navigate(['/plan-mejoramiento/formulacion-planes']);
+  }
+
+  /**
+   * Abre el modal de ejecutores del plan. El auditado puede asignar/desasignar
+   * en cualquier estado del plan.
+   */
+  gestionarEjecutores(): void {
+    if (!this.planMejoramientoId) return;
+
+    const dependencias = this.dependenciasDelPlan;
+    if (dependencias.length === 0) {
+      this.alertService.showAlert(
+        'Sin dependencias',
+        'No se encontraron dependencias auditadas asociadas a este plan.'
+      );
+      return;
+    }
+
+    const data: DatosAsignarEjecutoresPlan = {
+      plan_mejoramiento_id: this.planMejoramientoId,
+      dependencias,
+      soloLectura: false,
+    };
+
+    this.dialog.open(ModalAsignarEjecutoresPlanComponent, {
+      width: '1050px',
+      maxWidth: '95vw',
+      data,
+      autoFocus: false,
+    });
   }
 
   verPlanMejoramiento(): void {

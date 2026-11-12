@@ -62,16 +62,6 @@
   color: var(--md-primary-700);
 }
 
-.cita {
-  background-color: #fafafa;
-  border-left: 3px solid var(--md-primary-500);
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-style: italic;
-  white-space: pre-line;
-}
-
 /* ─── Tipo de acción ─────────────────────────────────────────────────────── */
 
 .opciones {
@@ -116,31 +106,6 @@
 }
 
 /* ─── Dependencias ───────────────────────────────────────────────────────── */
-
-.tarjeta-lider {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--md-primary-500);
-  border-left-width: 6px;
-}
-
-.tarjeta-lider mat-icon {
-  color: var(--md-primary-500);
-  flex-shrink: 0;
-}
-
-.chip-lider {
-  white-space: nowrap;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #ffffff;
-  background-color: var(--md-primary-500);
-}
 
 .chips-dependencias {
   display: flex;

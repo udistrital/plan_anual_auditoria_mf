@@ -15,6 +15,7 @@ import { ModalRemitirHallazgoComponent } from './components/plan-de-mejoramiento
 import { ModalRechazoPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-rechazo-plan/modal-rechazo-plan.component';
 import { VerPlanComponent } from './components/plan-de-mejoramiento/ver-plan/ver-plan.component';
 import { ModalAprobacionPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-aprobacion-plan/modal-aprobacion-plan.component';
+import { ModalAsignarEjecutoresPlanComponent } from './components/plan-de-mejoramiento/ver-plan/modal-asignar-ejecutores-plan/modal-asignar-ejecutores-plan.component';
 import { GestionAccionesComponent } from './components/gestion-acciones/gestion-acciones.component';
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 import { RegistroAvancesComponent } from './components/gestion-acciones/registro-avances/registro-avances.component';
@@ -27,6 +28,9 @@ import { VistaAuditadoComponent } from './components/formulacion-planes/vista-au
 import { VistaAuditorComponent } from './components/formulacion-planes/vista-auditor/vista-auditor.component';
 import { VistaAuditadoAccionesComponent } from './components/gestion-acciones/vista-auditado/vista-auditado-acciones.component';
 import { VistaAuditorAccionesComponent } from './components/gestion-acciones/vista-auditor/vista-auditor-acciones.component';
+import { ConsultaEjecutoresComponent } from './components/ejecutor-dependencia/consulta-ejecutores/consulta-ejecutores.component';
+import { AsignarEjecutorComponent } from './components/ejecutor-dependencia/asignar-ejecutor/asignar-ejecutor.component';
+import { DetallePlanesDependenciaComponent } from './components/ejecutor-dependencia/detalle-planes-dependencia/detalle-planes-dependencia.component';
 
 @NgModule({
   declarations: [
@@ -45,12 +49,16 @@ import { VistaAuditorAccionesComponent } from './components/gestion-acciones/vis
     ModalRechazoPlanComponent,
     VerPlanComponent,
     ModalAprobacionPlanComponent,
+    ModalAsignarEjecutoresPlanComponent,
     GestionAccionesComponent,
     FormulacionPlanesComponent,
     VistaAuditadoComponent,
     VistaAuditorComponent,
     VistaAuditadoAccionesComponent,
     VistaAuditorAccionesComponent,
+    ConsultaEjecutoresComponent,
+    AsignarEjecutorComponent,
+    DetallePlanesDependenciaComponent,
   ],
   imports: [
     CommonModule,

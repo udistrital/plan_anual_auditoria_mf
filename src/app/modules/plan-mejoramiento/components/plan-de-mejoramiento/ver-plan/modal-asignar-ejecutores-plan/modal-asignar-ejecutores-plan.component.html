@@ -1,0 +1,131 @@
+<plantilla-modal
+  [icono]="soloLectura ? 'visibility' : 'group_add'"
+  [titulo]="soloLectura ? 'Ejecutores del plan de mejoramiento' : 'Asignación de ejecutores al plan'"
+  [descripcion]="soloLectura ? 'Consulta de ejecutores asignados' : 'Asigne ejecutores por dependencia auditada'"
+  [contenido]="contenidoEjecutores"
+  [footer]="footerEjecutores"
+  [alignFooter]="'end'"
+></plantilla-modal>
+
+<ng-template #contenidoEjecutores>
+  @if (soloLectura) {
+    <div class="aviso-lectura mb-3">
+      <mat-icon>visibility</mat-icon>
+      <span class="ms-2">
+        Vista de solo lectura para consultar los ejecutores asignados
+      </span>
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="d-flex justify-content-center my-4">
+      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    </div>
+  }
+
+  @if (!cargando() && paneles.length === 0) {
+    <div class="text-center py-4 text-muted">
+      Este plan no tiene dependencias auditadas asociadas.
+    </div>
+  }
+
+  <!-- Acordeón: un panel por dependencia auditada del plan -->
+  <mat-accordion multi>
+    @for (panel of paneles; track panel.dependencia_id) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header class="panel-dep-header">
+          <mat-panel-title>
+            <mat-icon color="primary" class="me-2">apartment</mat-icon>
+            <b>{{ panel.dependencia_nombre }}</b>
+          </mat-panel-title>
+          <mat-panel-description class="panel-dep-desc">
+            <span class="status-badge ms-2">
+              {{ panel.asignados.length }} ejecutor(es) asignado(s)
+            </span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <!-- Ejecutores ya asignados a este plan por la dependencia -->
+        <div class="seccion-panel">
+          <h4 class="titulo-seccion">Ejecutores asignados</h4>
+          @if (panel.asignados.length === 0) {
+            <span class="text-muted">
+              Esta dependencia no tiene ejecutores asignados al plan.
+            </span>
+          } @else {
+            <div class="lista-asignados">
+              @for (ej of panel.asignados; track ej.ejecutor_plan_id) {
+                <div class="fila-asignado">
+                  <span class="chip-ejecutor">
+                    <mat-icon class="chip-icon">person</mat-icon>
+                    {{ ej.usuario_nombre }}
+                  </span>
+                  @if (!soloLectura) {
+                    <button
+                      type="button"
+                      class="estado-chip estado-boton estado-rechazada"
+                      matTooltip="Desasignar del plan"
+                      [disabled]="guardando()"
+                      (click)="quitarAsignacion(ej)"
+                    >
+                      Desasignar
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Asignar nuevos ejecutores (oculto en modo solo lectura) -->
+        @if (!soloLectura) {
+          <div class="seccion-panel">
+            <h4 class="titulo-seccion">Asignar ejecutores</h4>
+            @if (!hayEjecutores(panel)) {
+              <div class="aviso-sin-ejecutores">
+                <mat-icon>warning</mat-icon>
+                <span class="ms-2">
+                  Esta dependencia no tiene ejecutores vigentes. Registre primero
+                  un ejecutor para la dependencia antes de asignarle el plan.
+                </span>
+              </div>
+            } @else if (ejecutoresDisponibles(panel).length === 0) {
+              <span class="text-muted">
+                Todos los ejecutores de la dependencia ya están asignados al plan.
+              </span>
+            } @else {
+              <div class="fila-asignar">
+                <mat-form-field appearance="outline" class="select-ejecutores">
+                  <mat-label>Seleccionar ejecutor(es)</mat-label>
+                  <mat-select multiple [(value)]="panel.seleccionados">
+                    @for (ej of ejecutoresDisponibles(panel); track ej._id) {
+                      <mat-option [value]="ej._id">
+                        {{ ej.usuario_nombre }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  [disabled]="guardando() || panel.seleccionados.length === 0"
+                  (click)="guardarAsignaciones(panel)"
+                >
+                  <mat-icon>save</mat-icon> Guardar
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+</ng-template>
+
+<ng-template #footerEjecutores>
+  <div class="mb-3 me-3">
+    <button mat-stroked-button color="primary" [mat-dialog-close]>
+      <mat-icon>toll</mat-icon> Cerrar
+    </button>
+  </div>
+</ng-template>

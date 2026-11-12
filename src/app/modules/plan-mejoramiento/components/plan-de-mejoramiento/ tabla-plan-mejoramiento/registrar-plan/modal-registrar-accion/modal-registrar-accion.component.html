@@ -24,12 +24,20 @@
           <span class="chip-hallazgo">Hallazgo {{ data.hallazgo.indice }}</span>
           <app-descripcion-hallazgo class="valor mb-0" [valor]="data.hallazgo.descripcion"></app-descripcion-hallazgo>
         </div>
-        <span class="etiqueta d-flex align-items-center espacio-1">
-          Causa del hallazgo
-          <mat-icon class="tip-suffix" [matTooltip]="tooltips.causa" matTooltipPosition="right"
+        <mat-form-field appearance="outline" class="ancho-completo">
+          <mat-label>Causa del hallazgo</mat-label>
+          <textarea matInput formControlName="causa" required rows="3" class="sin-redimension"
+            [maxlength]="maxCausa" placeholder="Describa la causa que origina el hallazgo"></textarea>
+          <mat-icon matSuffix color="primary" class="tip-suffix"
+            [matTooltip]="tooltips.causa"
+            matTooltipPosition="right"
             matTooltipClass="tooltip-multilinea">help</mat-icon>
-        </span>
-        <div class="cita">“{{ causaHallazgo }}”</div>
+          <mat-hint>Causa identificada por la dependencia para la cual se formula esta acción.</mat-hint>
+          <mat-hint align="end">{{ longitud('causa') }} / {{ maxCausa }}</mat-hint>
+          @if (form.get('causa')?.hasError('required')) {
+            <mat-error>Campo requerido</mat-error>
+          }
+        </mat-form-field>
       </div>
     </section>
 
@@ -165,14 +173,35 @@
         <span>4. Asignación de dependencias</span>
       </div>
       <div class="seccion-cuerpo">
-        <span class="etiqueta">Dependencia líder de la acción (responsable principal de ejecución)</span>
-        <div class="tarjeta-lider mb-3">
-          <mat-icon>stars</mat-icon>
-          <span class="valor">{{ dependenciaLider || 'Sin dependencia líder' }}</span>
-          <span class="chip-lider ms-auto">Líder</span>
-        </div>
+        @if (candidatasLider.length) {
+          <mat-form-field appearance="outline" class="ancho-completo">
+            <mat-label>Dependencias líderes de la acción (responsables principales de ejecución)</mat-label>
+            <mat-icon matPrefix color="primary">stars</mat-icon>
+            <mat-select multiple required [value]="idsLideres" [disabled]="liderFijo"
+              (selectionChange)="cambiarLideres($event.value)" (openedChange)="!$event && (lideresTocados = true)"
+              placeholder="Seleccione una o más dependencias líderes">
+              @for (dep of candidatasLider; track dep.id) {
+                <mat-option [value]="dep.id">{{ dep.nombre }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Solo se listan las dependencias de la auditoría.</mat-hint>
+          </mat-form-field>
+          @if (lideresTocados && lideres.size === 0) {
+            <mat-error class="d-block mb-2">Seleccione al menos una dependencia líder.</mat-error>
+          }
+        } @else {
+          <small class="texto-secundario d-block mb-2">{{ cargandoDependencias ? 'Cargando dependencias…' : 'La auditoría no tiene dependencias asociadas.' }}</small>
+        }
 
-        <span class="etiqueta">Dependencias corresponsables / apoyo *</span>
+        <span class="etiqueta mt-3" id="etiquetaApoyo">¿Vincular dependencias corresponsables / de apoyo?</span>
+        <mat-radio-group class="d-flex espacio-2 mb-2" aria-labelledby="etiquetaApoyo"
+          [value]="vincularApoyo" (change)="cambiarVincularApoyo($event.value)">
+          <mat-radio-button color="primary" [value]="false">No</mat-radio-button>
+          <mat-radio-button color="primary" [value]="true">Sí</mat-radio-button>
+        </mat-radio-group>
+
+        @if (vincularApoyo) {
+        <span class="etiqueta">Dependencias corresponsables / apoyo (opcional)</span>
         <div class="chips-dependencias mb-2">
           @for (resp of responsablesAgregados; track resp.id; let i = $index) {
             <span class="chip-dependencia">
@@ -209,6 +238,7 @@
             <mat-icon>add_circle</mat-icon> Vincular dependencia
           </button>
         </div>
+        }
       </div>
     </section>
 

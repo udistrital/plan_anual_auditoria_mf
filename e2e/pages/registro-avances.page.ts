@@ -20,7 +20,7 @@ export class RegistroAvancesPage extends BasePage {
   readonly botonFicha: Locator;
   readonly botonForo: Locator;
   readonly botonHistorial: Locator;
-  readonly enlaceVerHallazgo: Locator;
+  readonly enlacesVerDetalle: Locator;
   readonly botonAnadirDocumento: Locator;
   readonly botonCargue: Locator;
   readonly botonNuevaCalificacion: Locator;
@@ -40,7 +40,8 @@ export class RegistroAvancesPage extends BasePage {
     this.botonFicha = page.getByRole('button', { name: 'Ficha de la acción' });
     this.botonForo = page.getByRole('button', { name: 'Foro' });
     this.botonHistorial = page.getByRole('button', { name: /Historial \(\d+\)/ });
-    this.enlaceVerHallazgo = page.getByRole('button', { name: 'Ver hallazgo' });
+    // Enlaces retirados en #947 (se usan para comprobar que ya no están)
+    this.enlacesVerDetalle = page.getByRole('button', { name: /^Ver (hallazgo|acción)$/ });
     this.botonAnadirDocumento = page.getByRole('button', { name: 'Añadir documento' });
     this.botonCargue = page.getByRole('button', { name: /Bloquear cargue para revisar|Habilitar cargue/ });
     this.botonNuevaCalificacion = page.getByRole('button', { name: 'Nueva calificación' });
@@ -77,9 +78,10 @@ export class RegistroAvancesPage extends BasePage {
     await this.foro.esperarAbierto();
   }
 
+  /** Desde #947 no hay enlace «Ver hallazgo»: se abre la ficha y se pasa a su pestaña Hallazgo. */
   async abrirFichaEnHallazgo() {
-    await this.enlaceVerHallazgo.click();
-    await this.ficha.esperarAbierto();
+    await this.abrirFicha();
+    await this.ficha.pestana('Hallazgo').click();
   }
 
   /** Pasa a modo edición de la calificación si ya hay una vigente. */

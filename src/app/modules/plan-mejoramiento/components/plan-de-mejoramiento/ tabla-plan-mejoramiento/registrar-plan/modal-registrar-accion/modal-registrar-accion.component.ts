@@ -30,16 +30,26 @@ export interface Dependencia {
 export class ModalRegistrarAccionComponent implements OnInit {
   form!: FormGroup;
   modoEdicion = false;
-  dependenciaLider = '';
 
   todasDependencias: Dependencia[] = [];
+  /** Dependencias que pueden ser líderes: las de la auditoría (y, al editar, las que ya eran líderes) (#947) */
+  candidatasLider: Dependencia[] = [];
+  /** Ids de las dependencias marcadas como líder (al menos una) */
+  lideres = new Set<number>();
+  /** Respuesta a «¿Vincular dependencias de apoyo?»; el apoyo es opcional (#947) */
+  vincularApoyo = false;
+
   dependenciasDisponibles: Dependencia[] = [];
   responsableSeleccionado: FormControl<Dependencia | null>;
+  /** Dependencias de apoyo (dependencia_lider = false) */
   responsablesAgregados: Dependencia[] = [];
 
+  /** Responsables guardados de la acción (solo en edición) */
   private responsablesActuales: { _id: string; dependencia_id: number; dependencia_lider: boolean }[] = [];
 
   cargandoDependencias = false;
+
+  readonly maxCausa = 1000;
 
   tiposAccion = [
     { id: 1, nombre: 'Preventiva', descripcion: 'Previene la ocurrencia potencial' },
@@ -71,7 +81,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly oikosService: OikosService,
   ) {
-    this.responsableSeleccionado = new FormControl<Dependencia | null>(null, Validators.required);
+    // El apoyo es opcional (#947): el selector no lleva Validators.required (mostraba «*»)
+    this.responsableSeleccionado = new FormControl<Dependencia | null>(null);
   }
 
   ngOnInit(): void {
@@ -83,8 +94,9 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private iniciarForm(): void {
     const { fechaInicio, fechaFin } = this.calcularFechas();
-    // La causa del hallazgo se muestra en solo lectura (proviene del informe y no se guarda desde aquí)
+    // La causa la escribe la dependencia en cada acción (no sale del criterio de fase 3, #947)
     this.form = this.fb.group({
+      causa:            ['', [Validators.required, Validators.maxLength(this.maxCausa)]],
       tipoAccion:       ['', Validators.required],
       accionPlanteada:  ['', Validators.required],
       nombreIndicador:  [''],
@@ -107,20 +119,27 @@ export class ModalRegistrarAccionComponent implements OnInit {
   }
 
   // dependencia_id puede llegar como número o como arreglo
-  private get idsDependenciasLider(): number[] {
+  private get idsDependenciasAuditoria(): number[] {
     const ids: any = this.data.auditoria?.dependencia_id;
     if (ids === null || ids === undefined) return [];
-    return Array.isArray(ids) ? ids : [ids];
+    return (Array.isArray(ids) ? ids : [ids]).map(Number);
+  }
+
+  private nombreDependencia(id: number): string {
+    return this.todasDependencias.find(d => d.id === id)?.nombre ?? `Dependencia ${id}`;
+  }
+
+  /** Candidatas a líder: las dependencias de la auditoría más las que ya eran líderes al editar */
+  private armarCandidatasLider(idsLideresGuardados: number[] = []): void {
+    const ids = [...new Set([...this.idsDependenciasAuditoria, ...idsLideresGuardados])];
+    this.candidatasLider = ids.map(id => ({ id, nombre: this.nombreDependencia(id) }));
   }
 
   private iniciarDependenciaLider(): void {
-    if (!this.modoEdicion) {
-      const depsLideres = this.todasDependencias.filter(
-        d => this.idsDependenciasLider.includes(d.id)
-      );
-      this.responsablesActuales.push(...depsLideres.map(d => ({ _id: '', dependencia_id: d.id, dependencia_lider: true })));
-      this.dependenciaLider = depsLideres.map(d => d.nombre).join(', ');
-    }
+    if (this.modoEdicion) return;
+    this.armarCandidatasLider();
+    // Al crear el select inicia vacío; con una sola candidata, esa es la líder (#947)
+    this.lideres = new Set(this.liderFijo ? [this.candidatasLider[0].id] : []);
   }
 
   private cargarDependencias(): void {
@@ -151,17 +170,21 @@ export class ModalRegistrarAccionComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.responsablesActuales = res.Data ?? [];
-          // Mostrar en UI solo los que NO son líderes
-          const dependenciasActuales = this.responsablesActuales.filter(r => !r.dependencia_lider);
-          const idsLideres = new Set(this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id));
-          this.responsablesAgregados = dependenciasActuales.map(r => {
-            const dep = this.todasDependencias.find(d => d.id === r.dependencia_id);
-            return { id: r.dependencia_id, nombre: dep?.nombre ?? `Dependencia ${r.dependencia_id}` };
-          });
-          this.dependenciaLider = this.todasDependencias.filter(d => idsLideres.has(d.id)).map(d => d.nombre).join(', ');
+          const idsLideres = this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id);
+          this.armarCandidatasLider(idsLideres);
+          // Acción antigua sin líder: con una sola candidata se preselecciona (el select queda deshabilitado)
+          this.lideres = new Set(!idsLideres.length && this.liderFijo ? [this.candidatasLider[0].id] : idsLideres);
+          // Si aún falta la líder, el aviso se muestra sin esperar a que toquen el select
+          this.lideresTocados = this.lideres.size === 0;
+          // El apoyo son los responsables que no son líderes
+          this.responsablesAgregados = this.responsablesActuales
+            .filter(r => !r.dependencia_lider)
+            .map(r => ({ id: r.dependencia_id, nombre: this.nombreDependencia(r.dependencia_id) }));
+          this.vincularApoyo = this.responsablesAgregados.length > 0;
           this.actualizarDisponibles();
         },
-        error: () => {}
+        // Sin los responsables guardados se ofrecen las de la auditoría para elegir de nuevo
+        error: () => { this.armarCandidatasLider(); }
       });
   }
 
@@ -170,6 +193,7 @@ export class ModalRegistrarAccionComponent implements OnInit {
     const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : this.form.getRawValue().fechaInicio;
     const fechaFin    = a.fechaFinISO    ? new Date(a.fechaFinISO)    : this.form.getRawValue().fechaFin;
     this.form.patchValue({
+      causa:            a.causa ?? '',
       tipoAccion:       a.tipoAccionId ?? '',
       accionPlanteada:  a.accionPlanteada,
       nombreIndicador:  a.nombreIndicador,
@@ -189,10 +213,6 @@ export class ModalRegistrarAccionComponent implements OnInit {
     return `Formulación del plan de mejoramiento${vigencia ? ' • Vigencia ' + vigencia : ''}`;
   }
 
-  get causaHallazgo(): string {
-    return this.data.hallazgo?.causa || 'Sin causa registrada';
-  }
-
   longitud(campo: string): number {
     return this.form.get(campo)?.value?.length ?? 0;
   }
@@ -207,15 +227,46 @@ export class ModalRegistrarAccionComponent implements OnInit {
     return `${meses} mes(es) (${dias} días)`;
   }
 
-  /** Obligatorios del formulario completos y al menos un responsable de apoyo */
+  /** Obligatorios del formulario completos y al menos una dependencia líder (el apoyo es opcional, #947) */
   get formularioCompleto(): boolean {
-    return this.form.valid && this.responsablesAgregados.length > 0;
+    return this.form.valid && this.lideres.size > 0;
+  }
+
+  /** Con una sola candidata, esa es la líder y no se puede desmarcar */
+  get liderFijo(): boolean {
+    return this.candidatasLider.length === 1;
+  }
+
+  /** Ids seleccionados en el select múltiple de líderes */
+  get idsLideres(): number[] {
+    return [...this.lideres];
+  }
+
+  /** El aviso de «al menos una líder» se muestra después de tocar el select */
+  lideresTocados = false;
+
+  /** Lo seleccionado en el select son las líderes (#947) */
+  cambiarLideres(ids: number[]): void {
+    this.lideres = new Set(ids);
+    this.lideresTocados = true;
+    // Una dependencia no puede ser líder y apoyo a la vez
+    this.responsablesAgregados = this.responsablesAgregados.filter(r => !this.lideres.has(r.id));
+    this.actualizarDisponibles();
+  }
+
+  cambiarVincularApoyo(vincular: boolean): void {
+    this.vincularApoyo = vincular;
+    if (!vincular) {
+      // «No» quita las de apoyo agregadas (al editar, se eliminan al guardar)
+      this.responsablesAgregados = [];
+      this.responsableSeleccionado.patchValue(null);
+      this.actualizarDisponibles();
+    }
   }
 
   private actualizarDisponibles(): void {
-    const idsAgregados = new Set(this.responsablesAgregados.map(r => r.id));
-    const idsLideres = new Set(this.responsablesActuales.filter(r => r.dependencia_lider).map(r => r.dependencia_id));
-    this.dependenciasDisponibles = this.todasDependencias.filter(d => !idsAgregados.has(d.id) && !idsLideres.has(d.id));
+    const ocupadas = new Set([...this.responsablesAgregados.map(r => r.id), ...this.lideres]);
+    this.dependenciasDisponibles = this.todasDependencias.filter(d => !ocupadas.has(d.id));
   }
 
   agregarResponsable(): void {
@@ -238,8 +289,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
       return;
     }
 
-    if (this.responsablesAgregados.length === 0) {
-      this.alertService.showAlert('Sin responsables', 'Debe agregar al menos un responsable de la acción.');
+    if (this.lideres.size === 0) {
+      this.alertService.showAlert('Sin dependencia líder', 'Seleccione al menos una dependencia líder de la acción.');
       return;
     }
 
@@ -247,42 +298,12 @@ export class ModalRegistrarAccionComponent implements OnInit {
       if (!conf.value) return;
 
       const v = this.form.getRawValue();
-      const liderDependenciaId: number[] = this.idsDependenciasLider;
-
-      // IDs de dependencias (no-lider) que ya estaban en DB
-      const idsActualesNoLider = new Set(
-        this.responsablesActuales
-          .filter(r => !r.dependencia_lider)
-          .map(r => r.dependencia_id)
-      );
-      const idsEnUI = new Set(this.responsablesAgregados.map(r => r.id));
-
-      // Registros a eliminar: estaban en DB pero el usuario los quitó
-      const responsablesAEliminar = this.responsablesActuales
-        .filter(r => !r.dependencia_lider && !idsEnUI.has(r.dependencia_id))
-        .map(r => r._id);
-
-      const responsablesNuevos: { dependencia_id: number; dependencia_lider: boolean }[] = [];
-
-      // En creación: incluir la dependencia líder solo si tiene ID válido
-      if (!this.modoEdicion && liderDependenciaId) {
-        responsablesNuevos.push(
-          ...liderDependenciaId.map(id => {
-            return { dependencia_id: id, dependencia_lider: true } 
-          })
-        );
-      }
-
-      // Dependencias que el usuario agregó y no estaban en DB
-      this.responsablesAgregados.forEach(r => {
-        if (!idsActualesNoLider.has(r.id)) {
-          responsablesNuevos.push({ dependencia_id: r.id, dependencia_lider: false });
-        }
-      });
+      const { responsablesNuevos, responsablesAEliminar, responsablesActualizar } = this.calcularCambiosResponsables();
 
       const resultado: ResultadoModalAccion = {
         accion: {
           accionId:         this.data.accion?.accionId,
+          causa:            (v.causa ?? '').trim(),
           tipoAccionId:     v.tipoAccion,
           accionPlanteada:  v.accionPlanteada,
           nombreIndicador:  v.nombreIndicador,
@@ -293,9 +314,37 @@ export class ModalRegistrarAccionComponent implements OnInit {
         },
         responsablesNuevos,
         responsablesAEliminar,
+        responsablesActualizar,
       };
 
       this.dialogRef.close(resultado);
     });
+  }
+
+  /**
+   * Compara lo elegido (líderes + apoyo) con lo guardado: nuevos (POST), quitados (DELETE) y los que
+   * siguen pero cambian de rol líder/apoyo (PUT dependencia_lider). Al crear, todo es nuevo.
+   */
+  private calcularCambiosResponsables(): Pick<ResultadoModalAccion, 'responsablesNuevos' | 'responsablesAEliminar' | 'responsablesActualizar'> {
+    const elegidos = new Map<number, boolean>();
+    this.lideres.forEach(id => elegidos.set(id, true));
+    this.responsablesAgregados.forEach(r => { if (!elegidos.has(r.id)) elegidos.set(r.id, false); });
+
+    const guardados = new Map(this.responsablesActuales.map(r => [r.dependencia_id, r]));
+    const responsablesNuevos: ResultadoModalAccion['responsablesNuevos'] = [];
+    const responsablesActualizar: ResultadoModalAccion['responsablesActualizar'] = [];
+    elegidos.forEach((lider, dependenciaId) => {
+      const guardado = guardados.get(dependenciaId);
+      if (!guardado) {
+        responsablesNuevos.push({ dependencia_id: dependenciaId, dependencia_lider: lider });
+      } else if (!!guardado.dependencia_lider !== lider) {
+        responsablesActualizar.push({ _id: guardado._id, dependencia_lider: lider });
+      }
+    });
+    const responsablesAEliminar = this.responsablesActuales
+      .filter(r => !elegidos.has(r.dependencia_id))
+      .map(r => r._id);
+
+    return { responsablesNuevos, responsablesAEliminar, responsablesActualizar };
   }
 }
