@@ -80,6 +80,20 @@ export interface SeguimientoAccion {
   fecha_modificacion: string;
 }
 
+/** Comentario del foro de una acción, tal como lo devuelve el MID (#948). */
+export interface ComentarioAccion {
+  _id: string;
+  accion_mejora_id: string;
+  mensaje: string;
+  fecha_creacion: string;
+  usuario_id: number;
+  usuario_nombre: string;
+  usuario_rol: string;
+  rol_nombre: string;
+  dependencia_id: number | null;
+  dependencia_nombre: string | null;
+}
+
 export interface EficaciaAccion {
   _id: string;
   accion_mejora_id: string;

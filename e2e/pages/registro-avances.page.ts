@@ -8,6 +8,7 @@ import { BasePage } from '../core/base.page';
 import { RUTA_GESTION_ACCIONES } from './gestion-acciones.page';
 import { FormularioCalificacion } from './formulario-calificacion.page';
 import { PanelFichaAccion } from './panel-ficha-accion.page';
+import { PanelForo } from './panel-foro.page';
 
 export type VarianteRegistro = 'registrar-avances' | 'revisar';
 
@@ -28,6 +29,7 @@ export class RegistroAvancesPage extends BasePage {
   readonly sinCalificacion: Locator;
   readonly formulario: FormularioCalificacion;
   readonly ficha: PanelFichaAccion;
+  readonly foro: PanelForo;
 
   constructor(page: Page) {
     super(page);
@@ -48,6 +50,7 @@ export class RegistroAvancesPage extends BasePage {
     this.sinCalificacion = page.getByText('El auditor aún no ha calificado esta acción.');
     this.formulario = new FormularioCalificacion(page);
     this.ficha = new PanelFichaAccion(page);
+    this.foro = new PanelForo(page);
   }
 
   async abrir(accionId: string, variante: VarianteRegistro) {
@@ -67,6 +70,12 @@ export class RegistroAvancesPage extends BasePage {
   async abrirFicha() {
     await this.botonFicha.click();
     await this.ficha.esperarAbierto();
+  }
+
+  /** Abre el panel del foro y espera a que lea los mensajes. */
+  async abrirForo() {
+    await this.botonForo.click();
+    await this.foro.esperarAbierto();
   }
 
   /** Desde #947 no hay enlace «Ver hallazgo»: se abre la ficha y se pasa a su pestaña Hallazgo. */
