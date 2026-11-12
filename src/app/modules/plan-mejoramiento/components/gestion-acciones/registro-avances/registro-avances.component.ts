@@ -20,7 +20,7 @@ import { CriterioEvaluacion, TIPOS_ACCION, criterioPorId, nombreRol } from './re
 import { ValoresCalificacion } from './formulario-calificacion/formulario-calificacion.component';
 import { DatosFichaAccion, PanelFichaAccionComponent, PestanaFicha } from './panel-ficha-accion/panel-ficha-accion.component';
 import { CalificacionHistorial, PanelHistorialCalificacionesComponent } from './panel-historial-calificaciones/panel-historial-calificaciones.component';
-import { PanelForoAccionComponent } from './panel-foro-accion/panel-foro-accion.component';
+import { DatosPanelForo, PanelForoAccionComponent } from './panel-foro-accion/panel-foro-accion.component';
 
 interface DocumentoAvances extends DocumentoReferenciaPdf {
   tipoArchivo: string;
@@ -457,10 +457,22 @@ export class RegistroAvancesComponent implements OnInit {
   }
 
   abrirForo() {
+    // El MID decide quién puede comentar: el rol prioritario va primero Control Interno y luego dependencia
+    const rol = this.rolService.getRolPrioritario([
+      environment.ROL.JEFE,
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+      environment.ROL.AUDITOR_ASISTENTE,
+      environment.ROL.SECRETARIO,
+      environment.ROL.JEFE_DEPENDENCIA,
+      environment.ROL.ASISTENTE_DEPENDENCIA,
+      environment.ROL.ADMIN,
+    ]);
+    const datos: DatosPanelForo = { accionId: this.accionId, personaId: this.usuarioId, rol };
     this.dialog.open(PanelForoAccionComponent, {
       ...CONFIG_PANEL_LATERAL,
       ariaLabelledBy: 'tituloPanelForo',
-      data: { esAuditor: this.esAuditorAsignado() },
+      data: datos,
     });
   }
 
