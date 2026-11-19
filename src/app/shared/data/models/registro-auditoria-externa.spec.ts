@@ -7,6 +7,7 @@ import {
   HallazgoExterno,
   pendientesParaContinuar,
   mensajesErrorRegistro,
+  formatearTamanio,
   armarCuerpoRegistro,
   RegistroAuditoriaExterna,
 } from './registro-auditoria-externa';
@@ -272,6 +273,21 @@ describe('registro-auditoria-externa', () => {
         'vigencia_pad',
       ]);
       expect(JSON.stringify(cuerpo)).not.toContain(registro.informeFinal!.base64);
+    });
+  });
+
+  describe('formatearTamanio', () => {
+    it('usa bytes, KB y MB con coma decimal', () => {
+      expect(formatearTamanio(850)).toBe('850 B');
+      expect(formatearTamanio(1024)).toBe('1 KB');
+      expect(formatearTamanio(340 * 1024)).toBe('340 KB');
+      expect(formatearTamanio(1.25 * 1024 * 1024)).toBe('1,3 MB');
+      expect(formatearTamanio(5 * 1024 * 1024)).toBe('5,0 MB');
+    });
+
+    it('devuelve vacío si el tamaño no es válido', () => {
+      expect(formatearTamanio(-1)).toBe('');
+      expect(formatearTamanio(Number.NaN)).toBe('');
     });
   });
 });

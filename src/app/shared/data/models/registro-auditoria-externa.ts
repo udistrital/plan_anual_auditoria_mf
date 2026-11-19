@@ -214,3 +214,12 @@ export function armarCuerpoRegistro(
     usuario_rol: usuario.rol,
   };
 }
+
+/** Tamaño de un archivo en texto corto: «850 B», «340 KB», «1,2 MB». */
+export function formatearTamanio(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  return `${(kb / 1024).toFixed(1).replace('.', ',')} MB`;
+}

@@ -1,49 +1,6 @@
-.documento-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-}
+/* Los estilos comunes (chips, tarjetas, archivo adjunto y barra inferior) están en vista-externa.css */
 
-.documento-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.nombre-archivo {
-  color: rgba(0, 0, 0, 0.6);
-  word-break: break-all;
-}
-
-.icon-buttons {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.separador {
-  border: 0;
-  height: 2px;
-  background: var(--primary);
-  opacity: 0.5;
-}
-
-button.mat-flat-button {
-  color: var(--md-primary-contrast-500);
-}
-
+/* Al llevar al auditor a la sección incompleta, que no quede pegada al borde de la pantalla */
 .seccion-registro {
-  margin-bottom: 24px;
   scroll-margin-top: 16px;
-}
-
-.totales-hallazgos {
-  white-space: nowrap;
 }

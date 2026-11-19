@@ -1,6 +1,26 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center espacio-2 mb-3">
+  <div class="d-flex flex-wrap espacio-2">
+    <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+      (click)="agregarHallazgo()" [disabled]="limiteAlcanzado">
+      <mat-icon>add</mat-icon> Agregar Hallazgo
+    </button>
+    <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+      (click)="cargueMasivo()" [disabled]="limiteAlcanzado">
+      <mat-icon>upload_file</mat-icon> Cargue masivo
+    </button>
+    <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+      (click)="descargarPlantilla()">
+      <mat-icon>download</mat-icon> Descargar plantilla
+    </button>
+  </div>
+  <small class="texto-secundario">{{ hallazgos.length }} de {{ maximo }} hallazgos</small>
+</div>
+
 @if (hallazgos.length === 0) {
-  <div class="d-flex justify-content-center align-items-center py-4 border rounded">
-    <p class="mb-0 text-muted">No hay hallazgos agregados.</p>
+  <div class="estado-vacio border rounded">
+    <mat-icon>find_in_page</mat-icon>
+    <p class="mb-0">No hay hallazgos agregados.</p>
+    <small class="texto-secundario">Agréguelos uno a uno o con el cargue masivo.</small>
   </div>
 } @else {
   <div class="table-container">
@@ -12,7 +32,9 @@
 
       <ng-container matColumnDef="vigencia">
         <th mat-header-cell *matHeaderCellDef><b>Vigencia</b></th>
-        <td mat-cell *matCellDef="let hallazgo">{{ hallazgo.vigencia_nombre }}</td>
+        <td mat-cell *matCellDef="let hallazgo">
+          <span class="chip chip-vigencia">{{ hallazgo.vigencia_nombre }}</span>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="codigo">
@@ -22,12 +44,20 @@
 
       <ng-container matColumnDef="descripcion">
         <th mat-header-cell *matHeaderCellDef><b>Descripción</b></th>
-        <td mat-cell *matCellDef="let hallazgo" class="celda-descripcion">{{ hallazgo.descripcion }}</td>
+        <td mat-cell *matCellDef="let hallazgo">
+          <span class="celda-truncada" [title]="hallazgo.descripcion">{{ hallazgo.descripcion }}</span>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="dependencias">
         <th mat-header-cell *matHeaderCellDef><b>Dependencias responsables</b></th>
-        <td mat-cell *matCellDef="let hallazgo">{{ hallazgo.dependencias_nombre.join(', ') }}</td>
+        <td mat-cell *matCellDef="let hallazgo">
+          <div class="chips-dependencias">
+            @for (dependencia of hallazgo.dependencias_nombre; track dependencia) {
+              <span class="chip chip-neutro">{{ dependencia }}</span>
+            }
+          </div>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="acciones">
@@ -50,18 +80,3 @@
     </mat-paginator>
   </div>
 }
-
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
-  <div class="d-flex flex-wrap gap-2">
-    <button mat-stroked-button color="primary" (click)="agregarHallazgo()" [disabled]="limiteAlcanzado">
-      <mat-icon>add</mat-icon> Agregar Hallazgo
-    </button>
-    <button mat-stroked-button color="primary" (click)="cargueMasivo()" [disabled]="limiteAlcanzado">
-      <mat-icon>upload_file</mat-icon> Cargue masivo
-    </button>
-    <button mat-stroked-button color="primary" (click)="descargarPlantilla()">
-      <mat-icon>download</mat-icon> Descargar plantilla
-    </button>
-  </div>
-  <small class="text-muted">{{ hallazgos.length }} de {{ maximo }} hallazgos</small>
-</div>

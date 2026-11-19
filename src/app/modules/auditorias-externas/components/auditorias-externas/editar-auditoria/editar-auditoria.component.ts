@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { Formulario } from 'src/app/shared/data/models/formulario.model';
 import {
   anioDeFecha,
+  formatearTamanio,
   mensajesErrorRegistro,
   HallazgoExterno,
   pendientesParaContinuar,
@@ -30,7 +31,7 @@ import {
 @Component({
   selector: 'app-editar-auditoria',
   templateUrl: './editar-auditoria.component.html',
-  styleUrls: ['./editar-auditoria.component.css'],
+  styleUrls: ['../../../vista-externa.css', './editar-auditoria.component.css'],
   standalone: false,
 })
 export class EditarAuditoriaComponent implements OnInit, OnDestroy {
@@ -108,6 +109,43 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
     return this.alertaService
       .showConfirmAlert('Hay información sin guardar. Si sale ahora la perderá. ¿Desea salir?')
       .then((respuesta) => !!respuesta.value);
+  }
+
+  // ── Resumen del encabezado (se lee del formulario, sin guardar nada) ───────────
+
+  /** Código y nombre del ente, tal como se van escribiendo. */
+  get entidadResumen(): string {
+    const valor = this.formularioInformacionComponent?.form?.value ?? {};
+    return [valor.codigo_entidad, valor.nombre_entidad]
+      .map((texto) => String(texto ?? '').trim())
+      .filter(Boolean)
+      .join(' - ');
+  }
+
+  /** Fecha del informe final elegida, en formato corto. */
+  get fechaInformeResumen(): string {
+    const fecha = this.formularioInformacionComponent?.form?.value?.fecha_informe_final;
+    if (!fecha || anioDeFecha(fecha) === null) return '';
+    return new Date(fecha).toLocaleDateString('es-CO');
+  }
+
+  /** Nombre de la vigencia elegida (la lista llega del servicio de Parámetros). */
+  get vigenciaNombre(): string {
+    const id = this.formularioInformacionComponent?.form?.value?.vigencia;
+    if (id === null || id === undefined || id === '') return '';
+    const campo = this.formInformacion?.campos?.find((c) => c.nombre === 'vigencia');
+    return campo?.parametros?.opciones?.find((o) => o.Id === id)?.Nombre ?? '';
+  }
+
+  /** Tamaño del PDF elegido, legible (p. ej. «1,2 MB»). */
+  get tamanioInforme(): string {
+    const informe = this.registro.informeFinal;
+    return informe ? formatearTamanio(informe.tamanio) : '';
+  }
+
+  quitarInforme(): void {
+    this.informeSubido = null;
+    this.registro.informeFinal = null;
   }
 
   regresarRuta(): void {
@@ -217,17 +255,14 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
     if (!informe) return;
     this.dialog
       .open(ModalVisualizarRecargarInformeAuditoriaComponent, {
-        data: { base64Document: informe.base64, nombre: informe.nombre },
+        data: { base64Document: informe.base64, nombre: informe.nombre, tamanio: this.tamanioInforme },
         width: '80%',
         height: '80vh',
       })
       .afterClosed()
       .subscribe((accion: AccionInformeModal | undefined) => {
         if (accion === 'cambiar') this.abrirSelectorInforme();
-        if (accion === 'quitar') {
-          this.informeSubido = null;
-          this.registro.informeFinal = null;
-        }
+        if (accion === 'quitar') this.quitarInforme();
       });
   }
 

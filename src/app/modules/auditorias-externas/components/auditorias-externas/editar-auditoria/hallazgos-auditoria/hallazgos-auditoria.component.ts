@@ -35,7 +35,7 @@ import {
 @Component({
   selector: 'app-hallazgos-auditoria',
   templateUrl: './hallazgos-auditoria.component.html',
-  styleUrls: ['./hallazgos-auditoria.component.css'],
+  styleUrls: ['../../../../vista-externa.css', './hallazgos-auditoria.component.css'],
   standalone: false,
 })
 export class HallazgosAuditoriaComponent implements OnInit {

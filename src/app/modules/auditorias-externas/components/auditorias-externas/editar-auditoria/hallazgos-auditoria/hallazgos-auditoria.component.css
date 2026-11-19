@@ -1,8 +1,29 @@
+/* Los chips, el estado vacío y la celda truncada están en vista-externa.css */
 .table-container {
   overflow-x: auto;
 }
 
-.celda-descripcion {
-  min-width: 260px;
-  white-space: pre-wrap;
+th.mat-column-numeral,
+td.mat-column-numeral,
+th.mat-column-vigencia,
+td.mat-column-vigencia {
+  white-space: nowrap;
+}
+
+th.mat-column-acciones,
+td.mat-column-acciones {
+  width: 112px;
+  white-space: nowrap;
+}
+
+/* Paginador en celular: el rango en una línea y sin la etiqueta «Elementos por página» */
+@media (max-width: 768px) {
+  :host ::ng-deep .mat-mdc-paginator-page-size-label {
+    display: none;
+  }
+
+  :host ::ng-deep .mat-mdc-paginator-range-label {
+    margin: 0 8px;
+    white-space: nowrap;
+  }
 }
