@@ -5,7 +5,7 @@ import { AuditoriasExternasPage } from '../../pages/auditorias-externas.page';
 
 const PDF = path.resolve(__dirname, '../../fixtures/acta-e2e.pdf');
 
-test('Continuar sin información general, PDF u hallazgos lista lo que falta y no escribe', { tag: ['@auditorias-externas', '@auditor', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
+test('Continuar sin información general, PDF u hallazgos lista lo que falta y no escribe', { tag: ['@auditorias-externas', '@auditor-experto', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
   const registro = new AuditoriasExternasPage(page);
   await registro.abrirRegistro();
 

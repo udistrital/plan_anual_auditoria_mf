@@ -14,7 +14,7 @@ Ninguno. Los escenarios de lectura no necesitan auditorías registradas: validan
 
 ## Escenarios
 
-### 1. El registro es una sola pantalla con tres secciones (`@auditorias-externas @auditor @lectura`)
+### 1. El registro es una sola pantalla con tres secciones (`@auditorias-externas @auditor-experto @lectura`)
 
 Archivo: `tests/auditorias-externas/registro-pantalla-unica.spec.ts`
 
@@ -22,7 +22,7 @@ Archivo: `tests/auditorias-externas/registro-pantalla-unica.spec.ts`
 2. Las secciones son **Información general**, **Informe final** y **Hallazgos**, en ese orden; no hay `mat-stepper`.
 3. Están **Cancelar** y **Continuar**; no hay "Guardar y Continuar" ni "Volver".
 
-### 2. Continuar sin datos lista lo que falta y no escribe (`@auditorias-externas @auditor @lectura`)
+### 2. Continuar sin datos lista lo que falta y no escribe (`@auditorias-externas @auditor-experto @lectura`)
 
 Archivo: `tests/auditorias-externas/continuar-bloqueado.spec.ts`
 
@@ -30,7 +30,7 @@ Archivo: `tests/auditorias-externas/continuar-bloqueado.spec.ts`
 2. Adjuntar el PDF y volver a pulsar: ya no pide el PDF, sigue pidiendo la información general y los hallazgos.
 3. Ninguna escritura sale hacia el servidor (`escriturasBloqueadas` vacío).
 
-### 3. El listado pide al MID las auditorías de la vigencia y Crear abre el registro con la vigencia (`@auditorias-externas @auditor @lectura`)
+### 3. El listado pide al MID las auditorías de la vigencia y Crear abre el registro con la vigencia (`@auditorias-externas @auditor-experto @lectura`)
 
 Archivo: `tests/auditorias-externas/listado.spec.ts`
 

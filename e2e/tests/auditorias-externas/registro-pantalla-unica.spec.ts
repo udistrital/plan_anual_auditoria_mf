@@ -2,7 +2,7 @@
 import { test, expect } from '../../core/fixtures';
 import { AuditoriasExternasPage } from '../../pages/auditorias-externas.page';
 
-test('el registro de una auditoría externa es una sola pantalla con tres secciones', { tag: ['@auditorias-externas', '@auditor', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
+test('el registro de una auditoría externa es una sola pantalla con tres secciones', { tag: ['@auditorias-externas', '@auditor-experto', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
   const registro = new AuditoriasExternasPage(page);
 
   await test.step('al abrir el registro se ven las secciones Información general, Informe final y Hallazgos, en ese orden', async () => {

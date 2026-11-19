@@ -3,7 +3,7 @@ import { test, expect } from '../../core/fixtures';
 import { AuditoriasExternasPage } from '../../pages/auditorias-externas.page';
 import { VIGENCIA_E2E } from '../programacion/datos';
 
-test('el listado pide al MID las auditorías externas y Crear abre el registro con la vigencia', { tag: ['@auditorias-externas', '@auditor', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
+test('el listado pide al MID las auditorías externas y Crear abre el registro con la vigencia', { tag: ['@auditorias-externas', '@auditor-experto', '@lectura'] }, async ({ page, escriturasBloqueadas }, testInfo) => {
   const listado = new AuditoriasExternasPage(page);
 
   await test.step('al abrir el listado, el MID responde 200 y se muestran las filas o el aviso de vacío', async () => {
