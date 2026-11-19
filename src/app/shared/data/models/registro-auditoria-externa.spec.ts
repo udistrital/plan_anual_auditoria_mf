@@ -192,18 +192,18 @@ describe('registro-auditoria-externa', () => {
         crearRegistro({ datosGenerales: null, hallazgos: [], informeFinal: null }),
       );
 
-      expect(pendientes).toHaveLength(3);
+      expect(pendientes.map((p) => p.seccion)).toEqual(['informacion', 'informe', 'hallazgos']);
     });
 
     it('exige el PDF aunque haya hallazgos', () => {
       expect(pendientesParaContinuar(crearRegistro({ informeFinal: null }))).toEqual([
-        'Adjunte el informe final en formato PDF.',
+        { seccion: 'informe', mensaje: 'Adjunte el informe final en formato PDF.' },
       ]);
     });
 
     it('exige al menos un hallazgo', () => {
       expect(pendientesParaContinuar(crearRegistro({ hallazgos: [] }))).toEqual([
-        'Registre al menos un hallazgo.',
+        { seccion: 'hallazgos', mensaje: 'Registre al menos un hallazgo.' },
       ]);
     });
   });

@@ -39,8 +39,11 @@ button.mat-flat-button {
   color: var(--md-primary-contrast-500);
 }
 
-.steps-bloqueados ::ng-deep mat-step-header:nth-of-type(5),
-.steps-bloqueados ::ng-deep mat-step-header:nth-of-type(6) {
-  pointer-events: none;
-  opacity: 0.4;
+.seccion-registro {
+  margin-bottom: 24px;
+  scroll-margin-top: 16px;
+}
+
+.totales-hallazgos {
+  white-space: nowrap;
 }

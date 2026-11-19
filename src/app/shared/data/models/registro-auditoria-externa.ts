@@ -141,20 +141,27 @@ export function anioDeFecha(valor: Date | string | null | undefined): number | n
   return Number.isNaN(fecha.getTime()) ? null : fecha.getFullYear();
 }
 
+export type SeccionRegistro = 'informacion' | 'informe' | 'hallazgos';
+
+export interface PendienteRegistro {
+  seccion: SeccionRegistro;
+  mensaje: string;
+}
+
 /**
  * Lo que falta para poder pulsar Continuar. Lista vacía = el registro está completo:
  * datos generales, PDF y al menos un hallazgo (el MID vuelve a validar todo).
  */
-export function pendientesParaContinuar(registro: RegistroAuditoriaExterna): string[] {
-  const pendientes: string[] = [];
+export function pendientesParaContinuar(registro: RegistroAuditoriaExterna): PendienteRegistro[] {
+  const pendientes: PendienteRegistro[] = [];
   if (!registro.datosGenerales) {
-    pendientes.push('Complete y guarde la información general de la auditoría.');
-  }
-  if (!registro.hallazgos.length) {
-    pendientes.push('Registre al menos un hallazgo.');
+    pendientes.push({ seccion: 'informacion', mensaje: 'Complete la información general de la auditoría.' });
   }
   if (!registro.informeFinal) {
-    pendientes.push('Adjunte el informe final en formato PDF.');
+    pendientes.push({ seccion: 'informe', mensaje: 'Adjunte el informe final en formato PDF.' });
+  }
+  if (!registro.hallazgos.length) {
+    pendientes.push({ seccion: 'hallazgos', mensaje: 'Registre al menos un hallazgo.' });
   }
   return pendientes;
 }

@@ -6,7 +6,6 @@ import { AuditoriasExternasRoutingModule } from './auditorias-externas-routing.m
 import { MaterialModule } from 'src/app/shared/modules/material.module';
 import { EditarAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/editar-auditoria.component';
 import { TablaAuditoriasExternasComponent } from './components/auditorias-externas/tabla-auditorias-externas/tabla-auditorias-externas.component';
-import { ResumenHallazgosComponent } from './components/auditorias-externas/editar-auditoria/resumen-hallazgos/resumen-hallazgos.component';
 import { HallazgosAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/hallazgos-auditoria/hallazgos-auditoria.component';
 import { ModalVisualizarRecargarInformeAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/modal-visualizar-recargar-informe-auditoria/modal-visualizar-recargar-informe-auditoria.component';
 import { ModalCargueHallazgosExternosComponent } from './components/auditorias-externas/editar-auditoria/modal-cargue-hallazgos-externos/modal-cargue-hallazgos-externos.component';
@@ -17,7 +16,6 @@ import { ModalHallazgoExternoComponent } from './components/auditorias-externas/
     AuditoriasExternasComponent,
     EditarAuditoriaComponent,
     TablaAuditoriasExternasComponent,
-    ResumenHallazgosComponent,
     HallazgosAuditoriaComponent,
     ModalVisualizarRecargarInformeAuditoriaComponent,
     ModalHallazgoExternoComponent,

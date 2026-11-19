@@ -1,7 +1,5 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatStepper } from '@angular/material/stepper';
 import { MatDialog } from '@angular/material/dialog';
-import { BreakpointObserver } from '@angular/cdk/layout';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Formulario } from 'src/app/shared/data/models/formulario.model';
@@ -9,6 +7,7 @@ import {
   anioDeFecha,
   HallazgoExterno,
   pendientesParaContinuar,
+  SeccionRegistro,
   RegistroAuditoriaExterna,
 } from 'src/app/shared/data/models/registro-auditoria-externa';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
@@ -30,7 +29,6 @@ import {
   standalone: false,
 })
 export class EditarAuditoriaComponent implements OnInit, OnDestroy {
-  @ViewChild('stepper') stepper!: MatStepper;
   @ViewChild('inputInforme') inputInforme?: ElementRef<HTMLInputElement>;
 
   /** Se enlaza apenas el formulario dinámico existe (vive dentro de una plantilla). */
@@ -45,8 +43,6 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
 
   formInformacion?: Formulario;
   auditoriaId: string | null = null;
-  esLineal = false;
-  orientation: 'horizontal' | 'vertical' = 'horizontal';
   registro: RegistroAuditoriaExterna = {
     datosGenerales: null,
     hallazgos: [],
@@ -60,7 +56,6 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly alertaService: AlertService,
-    private readonly breakpointObserver: BreakpointObserver,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
@@ -69,7 +64,6 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Copia propia: el formulario dinámico escribe las opciones dentro del objeto.
     this.formInformacion = JSON.parse(JSON.stringify(formularioInformacionAuditoria));
-    this.manejarResponsiveStepper();
     this.auditoriaId = this.route.snapshot.paramMap.get('id');
     const vigencia = Number(this.route.snapshot.queryParamMap.get('vigencia'));
     this.vigenciaPreseleccionada = Number.isFinite(vigencia) && vigencia > 0 ? vigencia : null;
@@ -108,15 +102,7 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
     this.router.navigate(['/auditorias-externas']);
   }
 
-  manejarResponsiveStepper(): void {
-    this.suscripciones.add(
-      this.breakpointObserver.observe(['(max-width: 992px)']).subscribe((resultado) => {
-        this.orientation = resultado.matches ? 'vertical' : 'horizontal';
-      }),
-    );
-  }
-
-  // ── Paso 1: información general ─────────────────────────────────
+  // ── Información general ─────────────────────────────────
 
   private enlazarFormulario(componente: FormularioDinamicoComponent): void {
     const form = componente.form;
@@ -155,17 +141,16 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
     if (opcion?.Id !== undefined) control.setValue(opcion.Id);
   }
 
-  enviarFormInformacion(): void {
-    this.formularioInformacionComponent?.onSubmit();
+  /** Dependencias distintas entre todos los hallazgos registrados. */
+  get totalDependencias(): number {
+    return new Set(this.registro.hallazgos.flatMap((h) => h.dependencias_nombre)).size;
   }
 
   /** Recibe el formulario ya validado (o null si faltan campos obligatorios). */
   guardarInformacion(dataForm: any): void {
     if (!dataForm) {
-      this.alertaService.showAlert(
-        'Formulario incompleto',
-        'Debe llenar todos los campos obligatorios',
-      );
+      this.registro.datosGenerales = null;
+      this.validarYConfirmar();
       return;
     }
     this.registro.datosGenerales = {
@@ -175,16 +160,16 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
       fecha_informe_final: new Date(dataForm.fecha_informe_final).toISOString(),
       vigencia_id: Number(dataForm.vigencia),
     };
-    this.stepper.next();
+    this.validarYConfirmar();
   }
 
-  // ── Paso 2 y 3: hallazgos ───────────────────────────────────────
+  // ── Hallazgos ───────────────────────────────────────────────
 
   onHallazgosActualizados(hallazgos: HallazgoExterno[]): void {
     this.registro.hallazgos = hallazgos;
   }
 
-  // ── Paso 4: informe final (PDF local, se sube a Nuxeo al continuar) ──
+  // ── Informe final (PDF local, se sube a Nuxeo al continuar) ──
 
   abrirSelectorInforme(): void {
     this.inputInforme?.nativeElement.click();
@@ -232,14 +217,22 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
 
   // ── Continuar ───────────────────────────────────────────────────
 
+  /** Valida el formulario (lo que dispara `guardarInformacion`) y luego el resto del registro. */
   continuar(): void {
+    const formulario = this.formularioInformacionComponent;
+    if (!formulario) return;
+    formulario.onSubmit();
+  }
+
+  private validarYConfirmar(): void {
     const pendientes = pendientesParaContinuar(this.registro);
     if (pendientes.length) {
       this.alertaService.showErrorListAlert(
         'No es posible continuar',
         'Complete lo siguiente antes de continuar:',
-        pendientes,
+        pendientes.map((p) => p.mensaje),
       );
+      this.irASeccion(pendientes[0].seccion);
       return;
     }
 
@@ -249,11 +242,15 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
       )
       .then((respuesta) => {
         if (!respuesta.value) return;
-        // TODO(T1.9): subir el PDF a Nuxeo y enviar el registro al MID (POST /auditoria-externa).
+        // TODO(T1.10): subir el PDF a Nuxeo y enviar el registro al MID (POST /auditoria-externa).
         this.alertaService.showNotification(
           'Registro completo',
           'La información está completa. El envío al servicio se habilita en la siguiente tarea.',
         );
       });
+  }
+
+  private irASeccion(seccion: SeccionRegistro): void {
+    document.getElementById(`seccion-${seccion}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }

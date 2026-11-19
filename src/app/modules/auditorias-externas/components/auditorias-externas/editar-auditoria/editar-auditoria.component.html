@@ -5,146 +5,97 @@
 <ng-template #contenidoDePlantilla>
   <div class="row">
     <div class="col-12">
-      <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
-        <ng-template matStepperIcon="number">
-          <mat-icon>lens</mat-icon>
-        </ng-template>
 
-        <!-- Paso 1: Información -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 1</p>
-            <b style="color: var(--primary)">Información</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>assignment</mat-icon></div>
-            <div class="mx-3">
-              <h2>Información</h2>
-              Información general de la Auditoría Externa
-            </div>
+      <!-- Información general -->
+      <section id="seccion-informacion" class="seccion-registro">
+        <div class="d-flex align-items-center fondo-acento-50 my-3">
+          <div><mat-icon>assignment</mat-icon></div>
+          <div class="mx-3">
+            <h2>Información general</h2>
+            Datos generales de la auditoría externa
           </div>
-          @if (formInformacion != null) {
-            <div class="mt-4">
-              <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
-                (submitFormulario)="guardarInformacion($event)">
-              </app-formulario-dinamico>
-              <div class="d-flex justify-content-end mt-4">
-                <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
-                  Guardar y Continuar
-                </button>
+        </div>
+        @if (formInformacion != null) {
+          <div class="mt-4">
+            <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
+              (submitFormulario)="guardarInformacion($event)">
+            </app-formulario-dinamico>
+          </div>
+        }
+      </section>
+
+      <!-- Informe final -->
+      <section id="seccion-informe" class="seccion-registro">
+        <div class="d-flex align-items-center fondo-acento-50 my-3">
+          <div><mat-icon>attach_file</mat-icon></div>
+          <div class="mx-3">
+            <h2>Informe final</h2>
+            Adjunte el informe final emitido por el ente de control (solo PDF)
+          </div>
+        </div>
+        <div class="mt-4">
+          <input #inputInforme type="file" accept="application/pdf" hidden
+            (change)="seleccionarInforme($event)" />
+          <mat-card class="documento-card">
+            <div class="documento-content">
+              <div class="d-flex flex-column">
+                <span class="mb-md">Informe final de la auditoría</span>
+                @if (registro.informeFinal; as informe) {
+                  <small class="nombre-archivo">{{ informe.nombre }}</small>
+                } @else {
+                  <small class="nombre-archivo">Ningún archivo seleccionado</small>
+                }
+              </div>
+              <div class="icon-buttons">
+                @if (registro.informeFinal === null) {
+                  <button mat-icon-button color="primary" aria-label="Adjuntar informe final"
+                    (click)="abrirSelectorInforme()">
+                    <mat-icon>upload</mat-icon>
+                  </button>
+                } @else {
+                  <button mat-icon-button color="primary" aria-label="Ver informe final"
+                    (click)="verInformeAuditoria()">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                }
               </div>
             </div>
-          }
-        </mat-step>
+          </mat-card>
+        </div>
+      </section>
 
-        <!-- Paso 2: Hallazgos -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 2</p>
-            <b style="color: var(--primary)">Hallazgos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>find_in_page</mat-icon></div>
-            <div class="mx-3">
-              <h2>Hallazgos</h2>
-              Registre los hallazgos del informe de la auditoría externa
-            </div>
+      <!-- Hallazgos -->
+      <section id="seccion-hallazgos" class="seccion-registro">
+        <div class="d-flex align-items-center fondo-acento-50 my-3">
+          <div><mat-icon>find_in_page</mat-icon></div>
+          <div class="mx-3 flex-grow-1">
+            <h2>Hallazgos</h2>
+            Registre los hallazgos del informe de la auditoría externa
           </div>
-          <div class="mt-4">
-            <app-hallazgos-auditoria
-              [hallazgos]="registro.hallazgos"
-              (hallazgosActualizados)="onHallazgosActualizados($event)">
-            </app-hallazgos-auditoria>
-            <div class="d-flex justify-content-end mt-4 gap-2">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button mat-flat-button color="primary" matStepperNext>
-                Continuar
-              </button>
-            </div>
+          <div class="totales-hallazgos mx-3" aria-live="polite">
+            <b>{{ registro.hallazgos.length }}</b>
+            {{ registro.hallazgos.length === 1 ? 'hallazgo' : 'hallazgos' }}
+            · <b>{{ totalDependencias }}</b>
+            {{ totalDependencias === 1 ? 'dependencia' : 'dependencias' }}
           </div>
-        </mat-step>
+        </div>
+        <div class="mt-4">
+          <app-hallazgos-auditoria
+            [hallazgos]="registro.hallazgos"
+            (hallazgosActualizados)="onHallazgosActualizados($event)">
+          </app-hallazgos-auditoria>
+        </div>
+      </section>
 
-        <!-- Paso 3: Resumen -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 3</p>
-            <b style="color: var(--primary)">Resumen de Hallazgos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>summarize</mat-icon></div>
-            <div class="mx-3">
-              <h2>Resumen de Hallazgos</h2>
-              Resumen de los hallazgos registrados
-            </div>
-          </div>
-          <div class="mt-4">
-            <app-resumen-hallazgos [hallazgos]="registro.hallazgos"></app-resumen-hallazgos>
-            <div class="d-flex justify-content-end mt-4 gap-2">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button mat-flat-button color="primary" matStepperNext>
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
+      <div class="d-flex justify-content-end mt-4 gap-2">
+        <button mat-stroked-button color="primary" type="button" (click)="regresarRuta()">
+          Cancelar
+        </button>
+        <button mat-raised-button color="primary" type="button" (click)="continuar()">
+          Continuar
+        </button>
+      </div>
 
-        <!-- Paso 4: Informe final -->
-        <mat-step>
-          <ng-template matStepLabel>
-            <p>Paso 4</p>
-            <b style="color: var(--primary)">Informe Final</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>attach_file</mat-icon></div>
-            <div class="mx-3">
-              <h2>Informe Final</h2>
-              Adjunte el informe final emitido por el ente de control (solo PDF)
-            </div>
-          </div>
-          <div class="mt-4">
-            <input #inputInforme type="file" accept="application/pdf" hidden
-              (change)="seleccionarInforme($event)" />
-            <mat-card class="documento-card">
-              <div class="documento-content">
-                <div class="d-flex flex-column">
-                  <span class="mb-md">Informe final de la auditoría</span>
-                  @if (registro.informeFinal; as informe) {
-                    <small class="nombre-archivo">{{ informe.nombre }}</small>
-                  } @else {
-                    <small class="nombre-archivo">Ningún archivo seleccionado</small>
-                  }
-                </div>
-                <div class="icon-buttons">
-                  @if (registro.informeFinal === null) {
-                    <button mat-icon-button color="primary" aria-label="Adjuntar informe final"
-                      (click)="abrirSelectorInforme()">
-                      <mat-icon>upload</mat-icon>
-                    </button>
-                  } @else {
-                    <button mat-icon-button color="primary" aria-label="Ver informe final"
-                      (click)="verInformeAuditoria()">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                  }
-                </div>
-              </div>
-            </mat-card>
-            <div class="d-flex justify-content-end mt-4 gap-2">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button mat-raised-button color="primary" (click)="continuar()">
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
-
-      </mat-stepper>
     </div>
   </div>
 </ng-template>
