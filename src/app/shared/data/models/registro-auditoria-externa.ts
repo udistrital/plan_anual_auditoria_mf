@@ -134,6 +134,29 @@ export function extraerErroresCargue(error: any): {
   return { mensaje, errores };
 }
 
+/**
+ * Mensajes para el auditor cuando el MID rechaza el registro: uno por error de validación
+ * (con el número de hallazgo cuando aplica) o uno solo para 403, 409, 502 y fallos de red.
+ */
+export function mensajesErrorRegistro(error: any): string[] {
+  const cuerpo = error?.error;
+  const estado = error?.status ?? cuerpo?.status;
+  const texto = Array.isArray(cuerpo?.message) ? cuerpo.message.join(' ') : cuerpo?.message;
+  const errores: { fila: number; motivo: string }[] = Array.isArray(cuerpo?.details?.errores)
+    ? cuerpo.details.errores
+    : [];
+
+  if (estado === 400 && errores.length) {
+    return errores.map((e) => (e.fila > 0 ? `Hallazgo ${e.fila}: ${e.motivo}` : e.motivo));
+  }
+  if (estado === 403) return ['Su rol no permite registrar auditorías externas.'];
+  if (estado === 409 && typeof texto === 'string') return [texto];
+  if (estado === 502) {
+    return ['No fue posible guardar el registro; no se guardó nada. Intente de nuevo en unos minutos.'];
+  }
+  return ['No fue posible registrar la auditoría externa. Intente de nuevo.'];
+}
+
 /** Año de una fecha (Date o texto ISO); null si no es una fecha válida. */
 export function anioDeFecha(valor: Date | string | null | undefined): number | null {
   if (!valor) return null;
@@ -164,4 +187,30 @@ export function pendientesParaContinuar(registro: RegistroAuditoriaExterna): Pen
     pendientes.push({ seccion: 'hallazgos', mensaje: 'Registre al menos un hallazgo.' });
   }
   return pendientes;
+}
+
+/** Cuerpo que recibe `POST /auditoria-externa` del MID. */
+export function armarCuerpoRegistro(
+  registro: RegistroAuditoriaExterna,
+  documento: { nuxeo_id: number; nuxeo_enlace: string },
+  usuario: { id: number; rol: string },
+) {
+  const datos = registro.datosGenerales!;
+  return {
+    codigo_entidad: datos.codigo_entidad,
+    nombre_entidad: datos.nombre_entidad,
+    nombre_auditoria: datos.nombre_auditoria,
+    fecha_informe_final: datos.fecha_informe_final,
+    vigencia_id: datos.vigencia_id,
+    hallazgos: registro.hallazgos.map((h) => ({
+      vigencia_pad: h.vigencia_pad,
+      codigo_auditoria_pad: h.codigo_auditoria_pad,
+      numeral: h.numeral,
+      descripcion: h.descripcion,
+      dependencia_id: h.dependencia_id,
+    })),
+    documento,
+    usuario_id: usuario.id,
+    usuario_rol: usuario.rol,
+  };
 }

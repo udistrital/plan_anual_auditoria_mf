@@ -9,12 +9,14 @@ import { TablaAuditoriasExternasComponent } from './components/auditorias-extern
 import { HallazgosAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/hallazgos-auditoria/hallazgos-auditoria.component';
 import { ModalVisualizarRecargarInformeAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/modal-visualizar-recargar-informe-auditoria/modal-visualizar-recargar-informe-auditoria.component';
 import { ModalCargueHallazgosExternosComponent } from './components/auditorias-externas/editar-auditoria/modal-cargue-hallazgos-externos/modal-cargue-hallazgos-externos.component';
+import { DetalleAuditoriaComponent } from './components/auditorias-externas/detalle-auditoria/detalle-auditoria.component';
 import { ModalHallazgoExternoComponent } from './components/auditorias-externas/editar-auditoria/modal-hallazgo-externo/modal-hallazgo-externo.component';
 
 @NgModule({
   declarations: [
     AuditoriasExternasComponent,
     EditarAuditoriaComponent,
+    DetalleAuditoriaComponent,
     TablaAuditoriasExternasComponent,
     HallazgosAuditoriaComponent,
     ModalVisualizarRecargarInformeAuditoriaComponent,

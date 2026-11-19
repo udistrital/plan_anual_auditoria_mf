@@ -1,0 +1,23 @@
+.seccion-detalle {
+  margin-bottom: 24px;
+}
+
+.datos-generales dt {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.85rem;
+}
+
+.datos-generales dd {
+  margin-bottom: 12px;
+  word-break: break-word;
+}
+
+.celda-descripcion {
+  white-space: pre-line;
+  min-width: 240px;
+}
+
+.total-hallazgos {
+  white-space: nowrap;
+}

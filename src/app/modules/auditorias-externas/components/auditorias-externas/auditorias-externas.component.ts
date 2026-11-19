@@ -17,7 +17,7 @@ export class AuditoriasExternasComponent implements OnInit {
 
   vigencias: any[] = [];
   vigenciaForm!: FormGroup;
-  vigenciaSeleccionada!: number;
+  vigenciaSeleccionada?: number;
 
   constructor(
     private readonly fb: FormBuilder,

@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { Formulario } from 'src/app/shared/data/models/formulario.model';
 import {
   anioDeFecha,
+  mensajesErrorRegistro,
   HallazgoExterno,
   pendientesParaContinuar,
   SeccionRegistro,
@@ -12,6 +13,10 @@ import {
 } from 'src/app/shared/data/models/registro-auditoria-externa';
 import { FormularioDinamicoComponent } from 'src/app/shared/elements/components/formulario-dinamico/formulario-dinamico.component';
 import { AlertService } from 'src/app/shared/services/alert.service';
+import { RolService } from 'src/app/core/services/rol.service';
+import { UserService } from 'src/app/core/services/user.service';
+import { environment } from 'src/environments/environment';
+import { AuditoriaExternaService } from '../../../services/auditoria-externa.service';
 import { formularioInformacionAuditoria } from './editar-auditoria.utilidades';
 import {
   AccionInformeModal,
@@ -50,6 +55,10 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
   };
   /** Verdadero cuando el registro ya se envió: no se pregunta al salir. */
   registroEnviado = false;
+  /** Verdadero mientras se sube el informe y se envía el registro (evita el doble clic). */
+  enviando = false;
+  /** Informe ya subido a Nuxeo: si el registro falla y se reintenta, no se sube de nuevo. */
+  private informeSubido: { nuxeo_id: number; nuxeo_enlace: string; nombre: string } | null = null;
 
   private vigenciaPreseleccionada: number | null = null;
   private readonly suscripciones = new Subscription();
@@ -59,6 +68,9 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
+    private readonly rolService: RolService,
+    private readonly userService: UserService,
+    private readonly auditoriaExternaService: AuditoriaExternaService,
   ) {}
 
   ngOnInit(): void {
@@ -189,6 +201,7 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
     const lector = new FileReader();
     lector.onload = () => {
       const contenido = String(lector.result ?? '');
+      this.informeSubido = null;
       this.registro.informeFinal = {
         nombre: archivo.name,
         base64: contenido.split(',')[1] ?? '',
@@ -211,7 +224,10 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
       .afterClosed()
       .subscribe((accion: AccionInformeModal | undefined) => {
         if (accion === 'cambiar') this.abrirSelectorInforme();
-        if (accion === 'quitar') this.registro.informeFinal = null;
+        if (accion === 'quitar') {
+          this.informeSubido = null;
+          this.registro.informeFinal = null;
+        }
       });
   }
 
@@ -241,13 +257,58 @@ export class EditarAuditoriaComponent implements OnInit, OnDestroy {
         '¿Está seguro(a) de continuar? Se registrará la auditoría externa y se iniciará el plan de mejoramiento.',
       )
       .then((respuesta) => {
-        if (!respuesta.value) return;
-        // TODO(T1.10): subir el PDF a Nuxeo y enviar el registro al MID (POST /auditoria-externa).
-        this.alertaService.showNotification(
-          'Registro completo',
-          'La información está completa. El envío al servicio se habilita en la siguiente tarea.',
-        );
+        if (respuesta.value) void this.enviarRegistro();
       });
+  }
+
+  /** Sube el informe a Nuxeo y envía el registro al MID; todo o nada en el servidor. */
+  private async enviarRegistro(): Promise<void> {
+    if (this.enviando) return;
+    const rol = this.rolService.getRolPrioritario([
+      environment.ROL.AUDITOR_EXPERTO,
+      environment.ROL.AUDITOR,
+    ]);
+    if (!rol) {
+      this.alertaService.showErrorAlert('Su rol no permite registrar auditorías externas.');
+      return;
+    }
+
+    this.enviando = true;
+    try {
+      const usuarioId = await this.userService.getPersonaId();
+      const informe = this.registro.informeFinal!;
+      if (!this.informeSubido) {
+        const subido = await this.auditoriaExternaService.subirInforme(
+          informe,
+          this.registro.datosGenerales!.codigo_entidad,
+        );
+        this.informeSubido = { ...subido, nombre: informe.nombre };
+      }
+      await this.auditoriaExternaService.registrar(
+        this.registro,
+        { nuxeo_id: this.informeSubido.nuxeo_id, nuxeo_enlace: this.informeSubido.nuxeo_enlace },
+        { id: usuarioId, rol },
+      );
+      this.registroEnviado = true;
+      await this.alertaService.showSuccessAlert(
+        'La auditoría externa quedó registrada y se creó su plan de mejoramiento.',
+        'Registro exitoso',
+      );
+      this.router.navigate(['/auditorias-externas']);
+    } catch (error) {
+      const mensajes = mensajesErrorRegistro(error);
+      if (mensajes.length > 1) {
+        this.alertaService.showErrorListAlert(
+          'No fue posible registrar la auditoría',
+          'Corrija lo siguiente y vuelva a continuar:',
+          mensajes,
+        );
+      } else {
+        this.alertaService.showErrorAlert(mensajes[0]);
+      }
+    } finally {
+      this.enviando = false;
+    }
   }
 
   private irASeccion(seccion: SeccionRegistro): void {

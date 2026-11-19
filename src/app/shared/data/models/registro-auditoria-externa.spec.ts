@@ -6,6 +6,8 @@ import {
   extraerErroresCargue,
   HallazgoExterno,
   pendientesParaContinuar,
+  mensajesErrorRegistro,
+  armarCuerpoRegistro,
   RegistroAuditoriaExterna,
 } from './registro-auditoria-externa';
 
@@ -205,6 +207,71 @@ describe('registro-auditoria-externa', () => {
       expect(pendientesParaContinuar(crearRegistro({ hallazgos: [] }))).toEqual([
         { seccion: 'hallazgos', mensaje: 'Registre al menos un hallazgo.' },
       ]);
+    });
+  });
+
+  describe('mensajesErrorRegistro', () => {
+    it('lista cada error de validación, con el número de hallazgo cuando aplica', () => {
+      const mensajes = mensajesErrorRegistro({
+        status: 400,
+        error: {
+          details: {
+            errores: [
+              { fila: 0, campo: 'documento', motivo: 'Debe adjuntar el informe final en PDF.' },
+              { fila: 2, campo: 'numeral', motivo: 'El hallazgo "3.1" ya está en la fila 1.' },
+            ],
+          },
+        },
+      });
+
+      expect(mensajes).toEqual([
+        'Debe adjuntar el informe final en PDF.',
+        'Hallazgo 2: El hallazgo "3.1" ya está en la fila 1.',
+      ]);
+    });
+
+    it('explica el 403, el 409 con el mensaje del servidor y el 502', () => {
+      expect(mensajesErrorRegistro({ status: 403, error: {} })).toEqual([
+        'Su rol no permite registrar auditorías externas.',
+      ]);
+      expect(
+        mensajesErrorRegistro({ status: 409, error: { message: 'Ya existe una auditoría externa' } }),
+      ).toEqual(['Ya existe una auditoría externa']);
+      expect(mensajesErrorRegistro({ status: 502, error: {} })[0]).toContain('no se guardó nada');
+    });
+
+    it('da un mensaje genérico ante cualquier otro fallo (sin detalles internos)', () => {
+      expect(mensajesErrorRegistro(new Error('Network down'))).toEqual([
+        'No fue posible registrar la auditoría externa. Intente de nuevo.',
+      ]);
+      expect(mensajesErrorRegistro({ status: 500, error: { message: 'stack interno' } })[0]).not.toContain(
+        'stack',
+      );
+    });
+  });
+
+  describe('armarCuerpoRegistro', () => {
+    it('envía solo lo que el MID espera, sin los nombres ni el PDF en Base64', () => {
+      const registro = crearRegistro();
+
+      const cuerpo = armarCuerpoRegistro(
+        registro,
+        { nuxeo_id: 55, nuxeo_enlace: 'https://nuxeo/doc' },
+        { id: 101, rol: 'AUDITOR' },
+      );
+
+      expect(cuerpo.documento).toEqual({ nuxeo_id: 55, nuxeo_enlace: 'https://nuxeo/doc' });
+      expect(cuerpo.usuario_id).toBe(101);
+      expect(cuerpo.usuario_rol).toBe('AUDITOR');
+      expect(cuerpo.vigencia_id).toBe(registro.datosGenerales!.vigencia_id);
+      expect(Object.keys(cuerpo.hallazgos[0]).sort()).toEqual([
+        'codigo_auditoria_pad',
+        'dependencia_id',
+        'descripcion',
+        'numeral',
+        'vigencia_pad',
+      ]);
+      expect(JSON.stringify(cuerpo)).not.toContain(registro.informeFinal!.base64);
     });
   });
 });

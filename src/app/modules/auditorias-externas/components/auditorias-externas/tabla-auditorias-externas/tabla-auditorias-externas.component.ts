@@ -1,118 +1,90 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from "@angular/core";
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
-import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { AuditoriaExterna } from "src/app/shared/data/models/auditoria-externa";
-import { RolService } from "src/app/core/services/rol.service";
-import { accionesEjecucionPreliminar } from "src/app/shared/utils/accionesPorRolYEstado";
-import { colocacionesContructorTabla } from "./tabla-auditorias-externas.utilidades";
 import { Router } from "@angular/router";
+import { AuditoriaExterna } from "src/app/shared/data/models/auditoria-externa";
+import { AlertService } from "src/app/shared/services/alert.service";
+import { AuditoriaExternaService } from "../../../services/auditoria-externa.service";
+import { colocacionesContructorTabla } from "./tabla-auditorias-externas.utilidades";
 
+/** Listado de auditorías externas registradas (#953), paginado en el servidor. */
 @Component({
     selector: "app-tabla-auditorias-externas",
     templateUrl: "./tabla-auditorias-externas.component.html",
     styleUrls: ["./tabla-auditorias-externas.component.css"],
     standalone: false
 })
-export class TablaAuditoriasExternasComponent implements OnInit, AfterViewInit {
-  @Input() vigenciaId: any;
-  @ViewChild(MatSort) sort!: MatSort;
+export class TablaAuditoriasExternasComponent implements OnInit, OnChanges {
+  /** Vigencia elegida en la pantalla (null = todas). */
+  @Input() vigenciaId: number | null = null;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  auditoriasDataSource: MatTableDataSource<any> = new MatTableDataSource();
-  auditoriasContructorTabla: any;
-  banderaTablaAuditoriasExternas: boolean = false;
-  tablaColumnas: any;
-  roles: string[] = [];
-  totalRegistros: number = 0;
-  pageSize: number = 5;
-  pageIndex: number = 0;
+  auditoriasDataSource: MatTableDataSource<AuditoriaExterna> = new MatTableDataSource<AuditoriaExterna>();
+  auditoriasContructorTabla = colocacionesContructorTabla;
+  tablaColumnas: string[] = this.auditoriasContructorTabla.map((c) => c.columnDef);
+  cargando = true;
+  totalRegistros = 0;
+  pageSize = 5;
+  pageIndex = 0;
   opcionesPagina: number[] = [5, 10, 25];
-  mostrarAcciones: boolean = false;
-  iconosAccion = new Map<string, string>([["Editar Auditoria", "edit_note"]]);
-
-  auditoriasPorVigencia: AuditoriaExterna[] = [
-    {
-      _id: "1",
-      vigencia_nombre: "2025",
-      auditoria_nombre: "Auditoría Financiera",
-      origen: "Plan Anual de Auditoría",
-      auditores: [{"nombre": "Juan Pérez"}, {"nombre": "María Gómez"}],
-      dependencia_nombre: "Dirección Financiera"
-    },
-    {
-      _id: "2",
-      vigencia_nombre: "2025",
-      auditoria_nombre: "Auditoría de Cumplimiento",
-      origen: "Plan Anual de Auditoría",
-      auditores: [{"nombre": "Carlos López"}, {"nombre": "Ana Martínez"}],
-      dependencia_nombre: "Secretaría General"
-    }
-  ];
+  iconosAccion = new Map<string, string>([["Ver Auditoria", "visibility"]]);
+  readonly acciones = ["Ver Auditoria"];
 
   constructor(
-    private readonly rolService: RolService,
     private readonly router: Router,
+    private readonly auditoriaExternaService: AuditoriaExternaService,
+    private readonly alertaService: AlertService,
   ) { }
 
   ngOnInit() {
-    this.roles = this.rolService.getRoles();
-    this.setPermisos();
-    this.cargarPlanesAuditoria();
+    void this.cargarAuditorias();
   }
 
-  ngAfterViewInit() {
-    this.auditoriasDataSource.paginator = this.paginator;
-    this.auditoriasDataSource.sort = this.sort;
-  }
-
-  setPermisos() {
-    if (this.rolService.mostrarAcciones(accionesEjecucionPreliminar)) {
-      this.mostrarAcciones = true;
+  ngOnChanges(cambios: SimpleChanges) {
+    // La primera carga la hace ngOnInit
+    if (cambios["vigenciaId"] && !cambios["vigenciaId"].firstChange) {
+      this.pageIndex = 0;
+      void this.cargarAuditorias();
     }
   }
 
-  cargarPlanesAuditoria() {
-    const auditorias = this.auditoriasPorVigencia.map((auditoria) => ({
-      ...auditoria,
-      acciones: ["Editar Auditoria"],
-    }));
-
-    this.auditoriasDataSource = new MatTableDataSource(auditorias);
-
-    this.auditoriasContructorTabla = colocacionesContructorTabla;
-    this.tablaColumnas = this.auditoriasContructorTabla.map((c: any) => c.columnDef);
-
-    this.totalRegistros = this.auditoriasPorVigencia.length;
-    this.banderaTablaAuditoriasExternas = true;
+  async cargarAuditorias() {
+    this.cargando = true;
+    try {
+      const { auditorias, total } = await this.auditoriaExternaService.listar(
+        this.vigenciaId,
+        this.pageSize,
+        this.pageIndex * this.pageSize,
+      );
+      this.auditoriasDataSource = new MatTableDataSource(auditorias);
+      this.totalRegistros = total;
+    } catch {
+      this.auditoriasDataSource = new MatTableDataSource<AuditoriaExterna>();
+      this.totalRegistros = 0;
+      this.alertaService.showErrorAlert("No fue posible cargar las auditorías externas.");
+    } finally {
+      this.cargando = false;
+    }
   }
 
   manejarCambioPaginado(evento: PageEvent) {
     this.pageSize = evento.pageSize;
     this.pageIndex = evento.pageIndex;
-  }
-
-  getAccionesPorRolYEstado(estado: number) {
-    return Array.from(
-      new Set(
-        this.roles.flatMap((rol) => accionesEjecucionPreliminar[rol]?.[estado] ?? [])
-      )
-    );
+    void this.cargarAuditorias();
   }
 
   getIconoAccion(accion: string): string {
     return this.iconosAccion.get(accion) ?? "help";
   }
 
-  realizarAccion(auditoria: any, accion: string) {
-    const acciones: Record<string, Function | null> = {
-      "Editar Auditoria": () => this.editarAuditoria(auditoria),
+  realizarAccion(auditoria: AuditoriaExterna, accion: string) {
+    const acciones: Record<string, () => void> = {
+      "Ver Auditoria": () => this.verAuditoria(auditoria),
     };
     acciones[accion]?.();
   }
 
-  editarAuditoria(auditoria: AuditoriaExterna) {
-    const auditoriaId = auditoria._id;
-    this.router.navigate([`/auditorias-externas/editar-auditoria/${auditoriaId}`]);
+  verAuditoria(auditoria: AuditoriaExterna) {
+    this.router.navigate([`/auditorias-externas/ver-auditoria/${auditoria._id}`]);
   }
 }

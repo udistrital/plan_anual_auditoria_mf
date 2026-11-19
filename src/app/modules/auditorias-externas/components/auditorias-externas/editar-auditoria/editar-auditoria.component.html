@@ -88,11 +88,13 @@
       </section>
 
       <div class="d-flex justify-content-end mt-4 gap-2">
-        <button mat-stroked-button color="primary" type="button" (click)="regresarRuta()">
+        <button mat-stroked-button color="primary" type="button" [disabled]="enviando"
+          (click)="regresarRuta()">
           Cancelar
         </button>
-        <button mat-raised-button color="primary" type="button" (click)="continuar()">
-          Continuar
+        <button mat-raised-button color="primary" type="button" [disabled]="enviando"
+          (click)="continuar()">
+          {{ enviando ? 'Registrando…' : 'Continuar' }}
         </button>
       </div>
 
