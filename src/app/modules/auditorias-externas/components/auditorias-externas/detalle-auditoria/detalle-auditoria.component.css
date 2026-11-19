@@ -1,23 +1,16 @@
-.seccion-detalle {
-  margin-bottom: 24px;
+/* Los estilos comunes (encabezado, chips, tarjetas y celdas de datos) están en vista-externa.css */
+.table-container {
+  overflow-x: auto;
 }
 
-.datos-generales dt {
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 0.85rem;
-}
+/* Paginador en celular: el rango en una línea y sin la etiqueta «Elementos por página» */
+@media (max-width: 768px) {
+  :host ::ng-deep .mat-mdc-paginator-page-size-label {
+    display: none;
+  }
 
-.datos-generales dd {
-  margin-bottom: 12px;
-  word-break: break-word;
-}
-
-.celda-descripcion {
-  white-space: pre-line;
-  min-width: 240px;
-}
-
-.total-hallazgos {
-  white-space: nowrap;
+  :host ::ng-deep .mat-mdc-paginator-range-label {
+    margin: 0 8px;
+    white-space: nowrap;
+  }
 }

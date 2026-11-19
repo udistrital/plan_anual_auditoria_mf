@@ -16,7 +16,7 @@ import { AuditoriaExternaService } from '../../../services/auditoria-externa.ser
 @Component({
   selector: 'app-detalle-auditoria',
   templateUrl: './detalle-auditoria.component.html',
-  styleUrls: ['./detalle-auditoria.component.css'],
+  styleUrls: ['../../../vista-externa.css', './detalle-auditoria.component.css'],
   standalone: false,
 })
 export class DetalleAuditoriaComponent implements OnInit {
