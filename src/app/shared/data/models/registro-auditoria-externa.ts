@@ -66,6 +66,74 @@ export function buscarHallazgoDuplicado(
   );
 }
 
+/** Error de un archivo de cargue masivo, tal como lo reporta el MID. */
+export interface ErrorCargueHallazgo {
+  /** Fila del archivo (la 1 es el encabezado); 0 si afecta a todo el archivo. */
+  fila: number;
+  columna: string;
+  motivo: string;
+}
+
+/** Hallazgo validado por el MID: trae además la fila del archivo de donde salió. */
+export type HallazgoCargado = HallazgoExterno & { fila?: number };
+
+/**
+ * Suma los hallazgos de un archivo ya validado a los que el auditor tiene registrados.
+ * Todo o nada: si alguno repite código + número de un hallazgo existente, o se supera
+ * el máximo, no se agrega ninguno y se devuelven los errores.
+ */
+export function combinarHallazgos(
+  existentes: HallazgoExterno[],
+  cargados: HallazgoCargado[],
+  maximo: number = MAX_HALLAZGOS_EXTERNOS,
+): { hallazgos: HallazgoExterno[]; errores: ErrorCargueHallazgo[] } {
+  const errores: ErrorCargueHallazgo[] = [];
+
+  if (existentes.length + cargados.length > maximo) {
+    errores.push({
+      fila: 0,
+      columna: 'Archivo',
+      motivo: `Ya hay ${existentes.length} hallazgos registrados y el archivo trae ${cargados.length}: el máximo es ${maximo}.`,
+    });
+  }
+
+  cargados.forEach((cargado, indice) => {
+    const posicion = buscarHallazgoDuplicado(existentes, cargado);
+    if (posicion >= 0) {
+      errores.push({
+        fila: cargado.fila ?? indice + 2,
+        columna: 'No. Hallazgo',
+        motivo: `El hallazgo "${cargado.numeral}" de la auditoría "${cargado.codigo_auditoria_pad}" ya está registrado (hallazgo ${posicion + 1} de la lista).`,
+      });
+    }
+  });
+
+  if (errores.length) return { hallazgos: existentes, errores };
+
+  const nuevos = cargados.map(({ fila: _fila, ...hallazgo }) => hallazgo);
+  return { hallazgos: [...existentes, ...nuevos], errores: [] };
+}
+
+/**
+ * Lee el error de una llamada de cargue al MID. El filtro de errores del MID entrega
+ * `{ status, message, details: { errores } }`, que el cliente HTTP deja en `error.error`.
+ */
+export function extraerErroresCargue(error: any): {
+  mensaje: string;
+  errores: ErrorCargueHallazgo[];
+} {
+  const cuerpo = error?.error;
+  const errores: ErrorCargueHallazgo[] = Array.isArray(cuerpo?.details?.errores)
+    ? cuerpo.details.errores
+    : [];
+  const texto = Array.isArray(cuerpo?.message) ? cuerpo.message.join(' ') : cuerpo?.message;
+  const mensaje =
+    typeof texto === 'string' && texto.trim()
+      ? texto
+      : 'No fue posible validar el archivo. Intente de nuevo.';
+  return { mensaje, errores };
+}
+
 /** Año de una fecha (Date o texto ISO); null si no es una fecha válida. */
 export function anioDeFecha(valor: Date | string | null | undefined): number | null {
   if (!valor) return null;

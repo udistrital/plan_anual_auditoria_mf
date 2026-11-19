@@ -2,6 +2,8 @@ import {
   anioDeFecha,
   buscarHallazgoDuplicado,
   claveHallazgoExterno,
+  combinarHallazgos,
+  extraerErroresCargue,
   HallazgoExterno,
   pendientesParaContinuar,
   RegistroAuditoriaExterna,
@@ -84,6 +86,86 @@ describe('registro-auditoria-externa', () => {
           0,
         ),
       ).toBe(1);
+    });
+  });
+
+  describe('combinarHallazgos', () => {
+    const existentes = [crearHallazgo({ numeral: '1' }), crearHallazgo({ numeral: '2' })];
+
+    it('suma los hallazgos del archivo a los existentes y quita la fila del archivo', () => {
+      const { hallazgos, errores } = combinarHallazgos(existentes, [
+        { ...crearHallazgo({ numeral: '3' }), fila: 2 },
+        { ...crearHallazgo({ numeral: '4' }), fila: 3 },
+      ]);
+
+      expect(errores).toEqual([]);
+      expect(hallazgos.map((h) => h.numeral)).toEqual(['1', '2', '3', '4']);
+      expect(hallazgos.some((h) => 'fila' in h)).toBe(false);
+    });
+
+    it('no agrega nada si alguno repite un hallazgo ya registrado (todo o nada)', () => {
+      const { hallazgos, errores } = combinarHallazgos(existentes, [
+        { ...crearHallazgo({ numeral: '3' }), fila: 2 },
+        { ...crearHallazgo({ numeral: '2' }), fila: 5 },
+      ]);
+
+      expect(hallazgos).toBe(existentes);
+      expect(errores).toEqual([
+        {
+          fila: 5,
+          columna: 'No. Hallazgo',
+          motivo:
+            'El hallazgo "2" de la auditoría "PAD-1" ya está registrado (hallazgo 2 de la lista).',
+        },
+      ]);
+    });
+
+    it('rechaza el archivo si junto a lo registrado supera el máximo', () => {
+      const { hallazgos, errores } = combinarHallazgos(
+        existentes,
+        [crearHallazgo({ numeral: '3' })],
+        2,
+      );
+
+      expect(hallazgos).toBe(existentes);
+      expect(errores).toHaveLength(1);
+      expect(errores[0]).toMatchObject({ fila: 0, columna: 'Archivo' });
+    });
+  });
+
+  describe('extraerErroresCargue', () => {
+    it('lee los errores por fila y el mensaje del filtro de errores del MID', () => {
+      const resultado = extraerErroresCargue({
+        status: 400,
+        error: {
+          status: 400,
+          message: 'El archivo contiene errores.',
+          details: {
+            errores: [{ fila: 3, columna: 'Vigencia', motivo: 'La vigencia "1999" no existe.' }],
+          },
+        },
+      });
+
+      expect(resultado.mensaje).toBe('El archivo contiene errores.');
+      expect(resultado.errores).toEqual([
+        { fila: 3, columna: 'Vigencia', motivo: 'La vigencia "1999" no existe.' },
+      ]);
+    });
+
+    it('sin errores por fila devuelve solo el mensaje (archivo no válido, columnas faltantes)', () => {
+      const resultado = extraerErroresCargue({
+        error: { message: 'El archivo no es un Excel (.xlsx) válido.', details: {} },
+      });
+
+      expect(resultado.errores).toEqual([]);
+      expect(resultado.mensaje).toBe('El archivo no es un Excel (.xlsx) válido.');
+    });
+
+    it('usa un mensaje genérico si no hay respuesta del servidor', () => {
+      expect(extraerErroresCargue(undefined)).toEqual({
+        mensaje: 'No fue posible validar el archivo. Intente de nuevo.',
+        errores: [],
+      });
     });
   });
 

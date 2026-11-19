@@ -51,9 +51,17 @@
   </div>
 }
 
-<div class="d-flex justify-content-between align-items-center mt-3">
-  <button mat-stroked-button color="primary" (click)="agregarHallazgo()" [disabled]="limiteAlcanzado">
-    <mat-icon>add</mat-icon> Agregar Hallazgo
-  </button>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+  <div class="d-flex flex-wrap gap-2">
+    <button mat-stroked-button color="primary" (click)="agregarHallazgo()" [disabled]="limiteAlcanzado">
+      <mat-icon>add</mat-icon> Agregar Hallazgo
+    </button>
+    <button mat-stroked-button color="primary" (click)="cargueMasivo()" [disabled]="limiteAlcanzado">
+      <mat-icon>upload_file</mat-icon> Cargue masivo
+    </button>
+    <button mat-stroked-button color="primary" (click)="descargarPlantilla()">
+      <mat-icon>download</mat-icon> Descargar plantilla
+    </button>
+  </div>
   <small class="text-muted">{{ hallazgos.length }} de {{ maximo }} hallazgos</small>
 </div>
