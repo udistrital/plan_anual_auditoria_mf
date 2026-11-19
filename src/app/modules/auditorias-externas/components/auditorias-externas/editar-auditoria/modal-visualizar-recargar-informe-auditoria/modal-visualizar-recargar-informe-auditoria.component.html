@@ -1,7 +1,7 @@
 <plantilla-modal
   [icono]="'list_alt'"
-  [titulo]="'Ver Informe Auditoría'"
-  [descripcion]="'Informe de auditoría externa'"
+  [titulo]="'Ver Informe Final'"
+  [descripcion]="data.nombre || 'Informe final de la auditoría externa'"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
 ></plantilla-modal>
@@ -9,14 +9,18 @@
 <ng-template #contenidoDeModal>
   <div class="row">
     <div class="col-12">
-      <app-pdf-visualizador [base64Document]="base64"></app-pdf-visualizador>
+      <app-pdf-visualizador [base64Document]="data.base64Document"></app-pdf-visualizador>
     </div>
   </div>
 </ng-template>
 
 <ng-template #footerDeModal>
-  <button mat-raised-button color="primary" (click)="actualizarDocumento()">
+  <button mat-stroked-button color="warn" (click)="quitarDocumento()">
+    <mat-icon>delete</mat-icon>
+    Quitar
+  </button>
+  <button mat-raised-button color="primary" (click)="cambiarDocumento()">
     <mat-icon>file_upload</mat-icon>
-    Actualizar
+    Cambiar archivo
   </button>
 </ng-template>

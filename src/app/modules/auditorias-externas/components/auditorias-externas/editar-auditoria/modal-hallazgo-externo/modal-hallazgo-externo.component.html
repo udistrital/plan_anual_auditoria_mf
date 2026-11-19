@@ -1,0 +1,82 @@
+<plantilla-modal
+  [icono]="'find_in_page'"
+  [titulo]="esEdicion ? 'Editar hallazgo' : 'Agregar hallazgo'"
+  [descripcion]="'Hallazgo del informe de la auditoría externa'"
+  [contenido]="contenidoDeModal"
+  [footer]="footerDeModal"
+></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <form [formGroup]="form" class="row mt-2">
+    <mat-form-field appearance="outline" class="col-md-4 col-12">
+      <mat-label>Vigencia</mat-label>
+      <mat-icon color="primary" matPrefix>today</mat-icon>
+      <mat-select formControlName="vigencia_pad">
+        @for (vigencia of data.vigencias; track vigencia.Id) {
+          <mat-option [value]="vigencia.Id">{{ vigencia.Nombre }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('vigencia_pad')?.hasError('required')) {
+        <mat-error>La vigencia es requerida</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-md-4 col-12">
+      <mat-label>Código de la auditoría</mat-label>
+      <mat-icon color="primary" matPrefix>pin</mat-icon>
+      <input matInput formControlName="codigo_auditoria_pad" placeholder="Código PAD o PDVCF" />
+      @if (form.get('codigo_auditoria_pad')?.hasError('required')) {
+        <mat-error>El código de la auditoría es requerido</mat-error>
+      }
+      @if (form.get('codigo_auditoria_pad')?.hasError('maxlength')) {
+        <mat-error>Máximo 50 caracteres</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-md-4 col-12">
+      <mat-label>No. de hallazgo</mat-label>
+      <mat-icon color="primary" matPrefix>tag</mat-icon>
+      <input matInput formControlName="numeral" placeholder="Numeral del informe" />
+      @if (form.get('numeral')?.hasError('required')) {
+        <mat-error>El número de hallazgo es requerido</mat-error>
+      }
+      @if (form.get('numeral')?.hasError('maxlength')) {
+        <mat-error>Máximo 50 caracteres</mat-error>
+      }
+      @if (form.get('numeral')?.hasError('duplicado')) {
+        <mat-error>Ya existe en el hallazgo {{ form.get('numeral')?.errors?.['duplicado'] }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-12">
+      <mat-label>Descripción del hallazgo</mat-label>
+      <mat-icon color="primary" matPrefix>description</mat-icon>
+      <textarea matInput formControlName="descripcion" rows="4" maxlength="2000"
+        placeholder="Descripción corta del hallazgo"></textarea>
+      @if (form.get('descripcion')?.hasError('required')) {
+        <mat-error>La descripción es requerida</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="col-12">
+      <mat-label>Dependencias responsables</mat-label>
+      <mat-icon color="primary" matPrefix>apartment</mat-icon>
+      <mat-select formControlName="dependencia_id" multiple>
+        @for (dependencia of data.dependencias; track dependencia.Id) {
+          <mat-option [value]="dependencia.Id">{{ dependencia.Nombre }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>Puede seleccionar una o varias</mat-hint>
+      @if (form.get('dependencia_id')?.hasError('required')) {
+        <mat-error>Seleccione al menos una dependencia</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <button mat-stroked-button color="primary" (click)="cancelar()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="guardar()">
+    {{ esEdicion ? 'Guardar cambios' : 'Agregar' }}
+  </button>
+</ng-template>

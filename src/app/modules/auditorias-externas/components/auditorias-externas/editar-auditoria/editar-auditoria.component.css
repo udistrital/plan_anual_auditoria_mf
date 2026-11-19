@@ -16,6 +16,11 @@
   flex-wrap: wrap;
 }
 
+.nombre-archivo {
+  color: rgba(0, 0, 0, 0.6);
+  word-break: break-all;
+}
+
 .icon-buttons {
   display: flex;
   align-items: center;

@@ -1,45 +1,34 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
-import { CargarArchivoComponent } from 'src/app/shared/elements/components/cargar-archivo/cargar-archivo.component';
-import { environment } from 'src/environments/environment';
+import { Component, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+/** Lo que el auditor pide hacer con el PDF que está viendo. */
+export type AccionInformeModal = 'cambiar' | 'quitar';
+
+/**
+ * Vista previa del informe final elegido en el registro de una auditoría externa.
+ * El archivo aún no se sube: el modal solo lo muestra y devuelve la acción pedida.
+ */
 @Component({
-    selector: 'app-modal-visualizar-recargar-informe-auditoria',
-    templateUrl: './modal-visualizar-recargar-informe-auditoria.component.html',
-    styleUrl: './modal-visualizar-recargar-informe-auditoria.component.css',
-    standalone: false
+  selector: 'app-modal-visualizar-recargar-informe-auditoria',
+  templateUrl: './modal-visualizar-recargar-informe-auditoria.component.html',
+  styleUrl: './modal-visualizar-recargar-informe-auditoria.component.css',
+  standalone: false,
 })
-export class ModalVisualizarRecargarInformeAuditoriaComponent implements OnInit {
-  protected base64: string = '';
-  protected idAuditoria: string = '';
-
+export class ModalVisualizarRecargarInformeAuditoriaComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { base64Document: string; id: string },
-    private readonly dialog: MatDialog,
-  ) { }
+    public data: { base64Document: string; nombre?: string },
+    private readonly dialogRef: MatDialogRef<
+      ModalVisualizarRecargarInformeAuditoriaComponent,
+      AccionInformeModal
+    >,
+  ) {}
 
-  ngOnInit() {
-    if (this.data.base64Document) {
-      this.base64 = this.data.base64Document;
-      this.idAuditoria = this.data.id;
-    } else {
-      console.error('No se proporcionó un documento PDF');
-    }
+  cambiarDocumento(): void {
+    this.dialogRef.close('cambiar');
   }
 
-  actualizarDocumento() {
-    this.dialog.open(CargarArchivoComponent, {
-      width: '800px',
-      data: {
-        tipoArchivo: 'pdf',
-        id: this.idAuditoria,
-        idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
-        descripcion: 'Informe de auditoría externa',
-        cargaLambda: false,
-        tipoIdReferencia: environment.TIPO_DOCUMENTO_PARAMETROS.COMPROMISO_ETICO,
-        referencia: 'Auditoria',
-      },
-    });
+  quitarDocumento(): void {
+    this.dialogRef.close('quitar');
   }
 }

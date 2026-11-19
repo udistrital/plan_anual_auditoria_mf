@@ -9,6 +9,7 @@ import { TablaAuditoriasExternasComponent } from './components/auditorias-extern
 import { ResumenHallazgosComponent } from './components/auditorias-externas/editar-auditoria/resumen-hallazgos/resumen-hallazgos.component';
 import { HallazgosAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/hallazgos-auditoria/hallazgos-auditoria.component';
 import { ModalVisualizarRecargarInformeAuditoriaComponent } from './components/auditorias-externas/editar-auditoria/modal-visualizar-recargar-informe-auditoria/modal-visualizar-recargar-informe-auditoria.component';
+import { ModalHallazgoExternoComponent } from './components/auditorias-externas/editar-auditoria/modal-hallazgo-externo/modal-hallazgo-externo.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { ModalVisualizarRecargarInformeAuditoriaComponent } from './components/a
     ResumenHallazgosComponent,
     HallazgosAuditoriaComponent,
     ModalVisualizarRecargarInformeAuditoriaComponent,
+    ModalHallazgoExternoComponent,
   ],
   imports: [
     CommonModule,

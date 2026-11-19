@@ -20,14 +20,13 @@
             <div><mat-icon>assignment</mat-icon></div>
             <div class="mx-3">
               <h2>Información</h2>
-              Información general de la Auditoría
+              Información general de la Auditoría Externa
             </div>
           </div>
           @if (formInformacion != null) {
             <div class="mt-4">
               <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
-                (submitFormulario)="preguntarGuardadoInformacion($event)"
-                (campoSeleccionado)="manejarCambioSelect($event)">
+                (submitFormulario)="guardarInformacion($event)">
               </app-formulario-dinamico>
               <div class="d-flex justify-content-end mt-4">
                 <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
@@ -48,12 +47,12 @@
             <div><mat-icon>find_in_page</mat-icon></div>
             <div class="mx-3">
               <h2>Hallazgos</h2>
-              Registre los hallazgos de la auditoría
+              Registre los hallazgos del informe de la auditoría externa
             </div>
           </div>
           <div class="mt-4">
             <app-hallazgos-auditoria
-              [auditoriaId]="auditoriaId"
+              [hallazgos]="registro.hallazgos"
               (hallazgosActualizados)="onHallazgosActualizados($event)">
             </app-hallazgos-auditoria>
             <div class="d-flex justify-content-end mt-4 gap-2">
@@ -81,7 +80,7 @@
             </div>
           </div>
           <div class="mt-4">
-            <app-resumen-hallazgos [hallazgos]="hallazgos"></app-resumen-hallazgos>
+            <app-resumen-hallazgos [hallazgos]="registro.hallazgos"></app-resumen-hallazgos>
             <div class="d-flex justify-content-end mt-4 gap-2">
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
@@ -93,39 +92,41 @@
           </div>
         </mat-step>
 
-        <!-- Paso 4: Documentos Anexos -->
+        <!-- Paso 4: Informe final -->
         <mat-step>
           <ng-template matStepLabel>
             <p>Paso 4</p>
-            <b style="color: var(--primary)">Documentos Anexos</b>
+            <b style="color: var(--primary)">Informe Final</b>
           </ng-template>
           <div class="d-flex align-items-center fondo-acento-50 my-3">
             <div><mat-icon>attach_file</mat-icon></div>
             <div class="mx-3">
-              <h2>Documentos Anexos</h2>
-              Suba los documentos relacionados con la auditoría
+              <h2>Informe Final</h2>
+              Adjunte el informe final emitido por el ente de control (solo PDF)
             </div>
           </div>
           <div class="mt-4">
+            <input #inputInforme type="file" accept="application/pdf" hidden
+              (change)="seleccionarInforme($event)" />
             <mat-card class="documento-card">
               <div class="documento-content">
-                <span class="mb-md">Informe Auditoría</span>
+                <div class="d-flex flex-column">
+                  <span class="mb-md">Informe final de la auditoría</span>
+                  @if (registro.informeFinal; as informe) {
+                    <small class="nombre-archivo">{{ informe.nombre }}</small>
+                  } @else {
+                    <small class="nombre-archivo">Ningún archivo seleccionado</small>
+                  }
+                </div>
                 <div class="icon-buttons">
-                  @if (base64InformeAuditoria === null) {
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="subirInformeAuditoria()"
-                      >
+                  @if (registro.informeFinal === null) {
+                    <button mat-icon-button color="primary" aria-label="Adjuntar informe final"
+                      (click)="abrirSelectorInforme()">
                       <mat-icon>upload</mat-icon>
                     </button>
-                  }
-                  @if (base64InformeAuditoria !== null) {
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="verInformeAuditoria()"
-                      >
+                  } @else {
+                    <button mat-icon-button color="primary" aria-label="Ver informe final"
+                      (click)="verInformeAuditoria()">
                       <mat-icon>visibility</mat-icon>
                     </button>
                   }
@@ -136,8 +137,8 @@
               <button matStepperPrevious mat-stroked-button color="primary">
                 Volver
               </button>
-              <button mat-raised-button color="primary" (click)="guardarYCerrar()">
-                Guardar y Cerrar
+              <button mat-raised-button color="primary" (click)="continuar()">
+                Continuar
               </button>
             </div>
           </div>
