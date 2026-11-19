@@ -68,7 +68,7 @@ export class AuditoriasExternasPage extends BasePage {
   }
 
   titulosDeSeccion(): Locator {
-    return this.page.locator('section.seccion-registro h2');
+    return this.page.locator('section.seccion-registro .seccion-titulo');
   }
 
   async adjuntarInforme(rutaArchivo: string) {
