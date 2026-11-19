@@ -1,0 +1,290 @@
+/*
+ * Estilos comunes de las vistas de auditorías externas (listado, registro y detalle, #953).
+ * Siguen el lenguaje de Ver Plan y Registrar Plan del plan de mejoramiento (encabezado con
+ * chips, tarjetas de datos y barra inferior de acciones), con copia propia para no acoplar los
+ * dos módulos. Colores del Root y Open Sans: no se adopta otra paleta.
+ */
+
+.seccion-titulo {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+:host ::ng-deep .container {
+  max-width: 1600px !important;
+}
+
+/* ─── Encabezado ─────────────────────────────────────────── */
+
+.encabezado-vista {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.metadatos {
+  font-size: 13px;
+  color: #616161;
+}
+
+.separador-punto {
+  margin: 0 6px;
+  color: #bdbdbd;
+}
+
+.acciones-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ─── Chips ──────────────────────────────────────────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.chip mat-icon {
+  font-size: 14px;
+  height: 14px;
+  width: 14px;
+}
+
+.chip-vigencia {
+  color: var(--md-primary-700);
+  border-color: var(--md-primary-500);
+}
+
+.chip-ok {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  border-color: #a5d6a7;
+}
+
+.chip-nuevo {
+  background-color: #fff8e1;
+  color: #8d6e00;
+  border-color: #ffe082;
+}
+
+.chip-neutro {
+  background-color: #f5f5f5;
+  color: #424242;
+  border-color: #e0e0e0;
+}
+
+/* Dependencias de un hallazgo: varias chips que se acomodan en la celda */
+.chips-dependencias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chips-dependencias .chip {
+  white-space: normal;
+  font-weight: 500;
+}
+
+/* ─── Tarjetas ───────────────────────────────────────────── */
+
+.tarjeta {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.tarjeta-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tarjeta-cuerpo {
+  padding: 12px 16px;
+}
+
+.row.tarjeta-cuerpo {
+  margin: 0;
+}
+
+.dato {
+  height: 100%;
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.etiqueta {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 2px;
+}
+
+.valor {
+  font-size: 13px;
+  word-break: break-word;
+}
+
+/* ─── Tablas ─────────────────────────────────────────────── */
+
+/* Descripciones largas: una línea con puntos suspensivos; el texto completo va en `title` */
+.celda-truncada {
+  display: inline-block;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.entidad-principal {
+  display: block;
+  font-weight: 600;
+}
+
+.entidad-secundaria {
+  display: block;
+  font-size: 12px;
+  color: #757575;
+}
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  text-align: center;
+  color: #616161;
+}
+
+.estado-vacio > mat-icon {
+  font-size: 40px;
+  height: 40px;
+  width: 40px;
+  color: #bdbdbd;
+}
+
+/* ─── Archivo adjunto (informe final) ────────────────────── */
+
+.archivo-informe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px dashed #bdbdbd;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.archivo-informe.con-archivo {
+  border-style: solid;
+  border-color: var(--md-primary-500);
+  background-color: #ffffff;
+}
+
+.archivo-informe > mat-icon {
+  color: var(--md-primary-500);
+}
+
+.archivo-datos {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.archivo-nombre {
+  display: block;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.archivo-meta {
+  font-size: 12px;
+  color: #757575;
+}
+
+/* ─── Barra de acciones ──────────────────────────────────── */
+
+.barra-acciones {
+  position: sticky;
+  bottom: 0;
+  z-index: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.mensaje-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 320px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  font-size: 12px;
+  color: #616161;
+}
+
+.mensaje-barra mat-icon {
+  color: var(--md-primary-500);
+  flex-shrink: 0;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.boton-secundario {
+  border: 1px solid var(--md-primary-500);
+}
+
+/* En celular la barra fija ocupa demasiado: queda en el flujo de la página */
+@media (max-width: 768px) {
+  .barra-acciones {
+    position: static;
+  }
+
+  .celda-truncada {
+    max-width: 220px;
+  }
+}
+
+/* Utilidades locales (el tema solo incluye el grid de Bootstrap) */
+.espacio-2 { gap: 0.5rem; }
+.texto-secundario { color: #757575; }
+.ancho-completo { width: 100%; }
