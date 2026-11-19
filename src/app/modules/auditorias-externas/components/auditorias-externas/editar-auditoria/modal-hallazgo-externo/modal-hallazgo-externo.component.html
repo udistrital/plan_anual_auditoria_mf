@@ -8,6 +8,11 @@
 
 <ng-template #contenidoDeModal>
   <form [formGroup]="form" class="row mt-2">
+    <div class="col-12 mb-2">
+      <h6 class="seccion-titulo mb-0">Identificación</h6>
+      <small class="texto-secundario">Vigencia y numeración del hallazgo en el informe del ente de control</small>
+    </div>
+
     <mat-form-field appearance="outline" class="col-md-4 col-12">
       <mat-label>Vigencia</mat-label>
       <mat-icon color="primary" matPrefix>today</mat-icon>
@@ -48,6 +53,11 @@
       }
     </mat-form-field>
 
+    <div class="col-12 mt-2 mb-2">
+      <h6 class="seccion-titulo mb-0">Descripción y responsables</h6>
+      <small class="texto-secundario">Qué se encontró y qué dependencias deben responder</small>
+    </div>
+
     <mat-form-field appearance="outline" class="col-12">
       <mat-label>Descripción del hallazgo</mat-label>
       <mat-icon color="primary" matPrefix>description</mat-icon>
@@ -71,6 +81,14 @@
         <mat-error>Seleccione al menos una dependencia</mat-error>
       }
     </mat-form-field>
+
+    @if (dependenciasSeleccionadas.length > 0) {
+      <div class="col-12 chips-dependencias" aria-live="polite">
+        @for (dependencia of dependenciasSeleccionadas; track dependencia) {
+          <span class="chip chip-neutro">{{ dependencia }}</span>
+        }
+      </div>
+    }
   </form>
 </ng-template>
 

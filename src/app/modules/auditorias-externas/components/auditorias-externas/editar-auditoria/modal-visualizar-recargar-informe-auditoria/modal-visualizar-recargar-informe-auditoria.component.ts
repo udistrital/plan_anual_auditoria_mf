@@ -17,7 +17,7 @@ export type AccionInformeModal = 'cambiar' | 'quitar';
 export class ModalVisualizarRecargarInformeAuditoriaComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: { base64Document: string; nombre?: string },
+    public data: { base64Document: string; nombre?: string; tamanio?: string },
     private readonly dialogRef: MatDialogRef<
       ModalVisualizarRecargarInformeAuditoriaComponent,
       AccionInformeModal

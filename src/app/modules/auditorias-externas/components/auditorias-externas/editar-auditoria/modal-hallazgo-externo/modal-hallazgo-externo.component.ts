@@ -25,7 +25,7 @@ export interface DatosModalHallazgoExterno {
 @Component({
   selector: 'app-modal-hallazgo-externo',
   templateUrl: './modal-hallazgo-externo.component.html',
-  styleUrl: './modal-hallazgo-externo.component.css',
+  styleUrls: ['../../../../vista-externa.css', './modal-hallazgo-externo.component.css'],
   standalone: false,
 })
 export class ModalHallazgoExternoComponent {
@@ -49,6 +49,12 @@ export class ModalHallazgoExternoComponent {
       descripcion: [h?.descripcion ?? '', [Validators.required, Validators.maxLength(2000)]],
       dependencia_id: [h?.dependencia_id ?? [], Validators.required],
     });
+  }
+
+  /** Nombres de las dependencias elegidas, para mostrarlas como chips bajo el selector. */
+  get dependenciasSeleccionadas(): string[] {
+    const ids: number[] = this.form.get('dependencia_id')?.value ?? [];
+    return ids.map((id) => this.data.dependencias.find((d) => d.Id === id)?.Nombre ?? String(id));
   }
 
   guardar(): void {

@@ -20,7 +20,7 @@ export type AccionCargueHallazgos = 'agregar' | 'recargar';
 @Component({
   selector: 'app-modal-cargue-hallazgos-externos',
   templateUrl: './modal-cargue-hallazgos-externos.component.html',
-  styleUrl: './modal-cargue-hallazgos-externos.component.css',
+  styleUrls: ['../../../../vista-externa.css', './modal-cargue-hallazgos-externos.component.css'],
   standalone: false,
 })
 export class ModalCargueHallazgosExternosComponent {

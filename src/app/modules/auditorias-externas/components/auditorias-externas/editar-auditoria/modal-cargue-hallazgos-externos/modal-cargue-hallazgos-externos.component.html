@@ -8,11 +8,23 @@
 
 <ng-template #contenidoDeModal>
   @if (hayErrores) {
-    <div class="d-flex align-items-center fondo-acento-50 my-2 p-2">
+    <div class="row g-2 mb-2">
+      <div class="col-md-6 col-12">
+        <div class="dato">
+          <span class="etiqueta">Errores encontrados</span>
+          <span class="valor"><b>{{ data.errores.length }}</b></span>
+        </div>
+      </div>
+      <div class="col-md-6 col-12">
+        <div class="dato">
+          <span class="etiqueta">Hallazgos agregados</span>
+          <span class="valor"><b>0</b> (todo o nada)</span>
+        </div>
+      </div>
+    </div>
+    <div class="mensaje-barra mb-2">
       <mat-icon>info</mat-icon>
-      <p class="mx-2 mb-0">
-        {{ data.mensaje || 'No se agregó ningún hallazgo. Corrija el archivo y vuelva a cargarlo.' }}
-      </p>
+      <span>{{ data.mensaje || 'No se agregó ningún hallazgo. Corrija el archivo y vuelva a cargarlo.' }}</span>
     </div>
 
     @if (data.errores.length > 0) {
@@ -36,11 +48,23 @@
       </div>
     }
   } @else {
-    <div class="d-flex align-items-center fondo-acento-50 my-2 p-2">
+    <div class="row g-2 mb-2">
+      <div class="col-md-6 col-12">
+        <div class="dato">
+          <span class="etiqueta">Hallazgos válidos</span>
+          <span class="valor"><b>{{ data.hallazgos.length }}</b></span>
+        </div>
+      </div>
+      <div class="col-md-6 col-12">
+        <div class="dato">
+          <span class="etiqueta">Errores</span>
+          <span class="valor"><b>0</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="mensaje-barra mb-2">
       <mat-icon>check_circle</mat-icon>
-      <p class="mx-2 mb-0">
-        El archivo es válido: {{ data.hallazgos.length }} hallazgo(s). Revíselos y pulse Agregar para sumarlos a la tabla.
-      </p>
+      <span>El archivo es válido. Revise los hallazgos y pulse Agregar para sumarlos a la tabla.</span>
     </div>
 
     <div class="tabla-scroll">
@@ -63,7 +87,13 @@
         </ng-container>
         <ng-container matColumnDef="dependencias">
           <th mat-header-cell *matHeaderCellDef><b>Dependencias</b></th>
-          <td mat-cell *matCellDef="let hallazgo">{{ hallazgo.dependencias_nombre.join(', ') }}</td>
+          <td mat-cell *matCellDef="let hallazgo">
+            <div class="chips-dependencias">
+              @for (dependencia of hallazgo.dependencias_nombre; track dependencia) {
+                <span class="chip chip-neutro">{{ dependencia }}</span>
+              }
+            </div>
+          </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="columnasHallazgos; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: columnasHallazgos"></tr>

@@ -1,7 +1,7 @@
 <plantilla-modal
   [icono]="'list_alt'"
   [titulo]="'Ver Informe Final'"
-  [descripcion]="data.nombre || 'Informe final de la auditoría externa'"
+  [descripcion]="(data.nombre || 'Informe final de la auditoría externa') + (data.tamanio ? ' · ' + data.tamanio : '')"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
 ></plantilla-modal>
