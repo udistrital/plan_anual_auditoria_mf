@@ -8,7 +8,7 @@ import { TablaAuditoriasExternasComponent } from "./tabla-auditorias-externas/ta
 @Component({
     selector: "app-auditorias-externas",
     templateUrl: "./auditorias-externas.component.html",
-    styleUrls: ["./auditorias-externas.component.css"],
+    styleUrls: ["../../vista-externa.css", "./auditorias-externas.component.css"],
     standalone: false
 })
 export class AuditoriasExternasComponent implements OnInit {
@@ -18,6 +18,9 @@ export class AuditoriasExternasComponent implements OnInit {
   vigencias: any[] = [];
   vigenciaForm!: FormGroup;
   vigenciaSeleccionada?: number;
+  vigenciaSeleccionadaNombre = "";
+  /** Total de auditorías que trae el listado (lo informa la tabla). */
+  totalAuditorias = 0;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -50,6 +53,7 @@ export class AuditoriasExternasComponent implements OnInit {
 
   mostrarAuditoriasPorVigencia(vigencia: Vigencia) {
     this.vigenciaSeleccionada = vigencia.Id;
+    this.vigenciaSeleccionadaNombre = vigencia.Nombre;
   }
 
   iniciarvigenciaForm() {

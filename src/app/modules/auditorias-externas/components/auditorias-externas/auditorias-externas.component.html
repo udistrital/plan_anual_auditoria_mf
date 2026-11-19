@@ -3,38 +3,43 @@
 </plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row">
-    <div class="col-12">
-      <form [formGroup]="vigenciaForm">
-        <div class="row">
-          <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
-            <mat-label>Seleccione una vigencia:</mat-label>
-            <mat-icon color="primary" matPrefix>today</mat-icon>
-            <mat-select formControlName="vigencia" (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
-              color="primary">
-              <mat-option disabled value="">--Seleccionar--</mat-option>
-              @for (vigencia of vigencias; track vigencia) {
-                <mat-option [value]="vigencia">{{ vigencia.Nombre }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
-            <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
-              <button mat-raised-button color="primary" class="mx-3" type="button"
-                (click)="crearAuditoria()">
-                Crear
-              </button>
-            </div>
-          </div>
-        </div>
-        <p>Seleccione el año de la vigencia a registrar la auditoría externa</p>
-      </form>
+  <!-- Filtro por vigencia, botón Crear y resumen de lo que se ve -->
+  <div class="encabezado-vista">
+    <form [formGroup]="vigenciaForm" class="filtro-vigencia">
+      <mat-form-field class="campo-vigencia" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Seleccione una vigencia:</mat-label>
+        <mat-icon color="primary" matPrefix>today</mat-icon>
+        <mat-select formControlName="vigencia" (selectionChange)="mostrarAuditoriasPorVigencia($event.value)"
+          color="primary">
+          <mat-option disabled value="">--Seleccionar--</mat-option>
+          @for (vigencia of vigencias; track vigencia) {
+            <mat-option [value]="vigencia">{{ vigencia.Nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="button" (click)="crearAuditoria()">
+        <mat-icon>add</mat-icon>
+        Crear
+      </button>
+    </form>
+
+    <div class="d-flex flex-wrap align-items-center espacio-2" aria-live="polite">
+      @if (vigenciaSeleccionadaNombre) {
+        <span class="chip chip-vigencia">
+          <mat-icon>calendar_today</mat-icon> Vigencia {{ vigenciaSeleccionadaNombre }}
+        </span>
+      }
+      <span class="chip chip-neutro">
+        <mat-icon>fact_check</mat-icon>
+        {{ totalAuditorias }} {{ totalAuditorias === 1 ? 'auditoría' : 'auditorías' }}
+      </span>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-12">
-      <app-tabla-auditorias-externas [vigenciaId]="vigenciaSeleccionada ?? null"></app-tabla-auditorias-externas>
-    </div>
-  </div>
+  <p class="texto-secundario mb-3">
+    Seleccione el año de la vigencia a registrar la auditoría externa. Sin vigencia, el listado muestra todas.
+  </p>
+
+  <app-tabla-auditorias-externas [vigenciaId]="vigenciaSeleccionada ?? null"
+    (totalCambio)="totalAuditorias = $event"></app-tabla-auditorias-externas>
 </ng-template>

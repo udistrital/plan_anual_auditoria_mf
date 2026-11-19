@@ -1,17 +1,33 @@
-@if (!cargando || auditoriasDataSource.data.length > 0) {
-  <div class="row mt-4">
-    <div class="col-12">
-      <h3 class="my-3">Listado de Auditorías Externas</h3>
-      <p class="mb-2 mx-2">
-        Seleccione la auditoría externa para ver su información.
-      </p>
+<section class="tarjeta">
+  <div class="tarjeta-encabezado">
+    <div class="d-flex align-items-center espacio-2">
+      <mat-icon color="primary">fact_check</mat-icon>
+      <div>
+        <h5 class="seccion-titulo mb-0">Listado de Auditorías Externas</h5>
+        <small class="texto-secundario">Seleccione la auditoría externa para ver su información.</small>
+      </div>
     </div>
-    <div class="col-12">
-      @if (!cargando && auditoriasDataSource.data.length === 0) {
-        <div class="d-flex justify-content-center align-items-center py-4 border rounded">
-          <p class="mb-0 text-muted">No hay auditorías externas registradas.</p>
-        </div>
-      }
+  </div>
+
+  <div class="tarjeta-cuerpo">
+    @if (cargando && auditoriasDataSource.data.length === 0) {
+      <div class="text-center py-4">
+        <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+      </div>
+    }
+
+    @if (!cargando && auditoriasDataSource.data.length === 0) {
+      <div class="estado-vacio">
+        <mat-icon>folder_off</mat-icon>
+        <p class="mb-0">No hay auditorías externas registradas.</p>
+        <button mat-stroked-button color="primary" class="boton-secundario" type="button" (click)="registrarAuditoria()">
+          <mat-icon>add</mat-icon>
+          Registrar auditoría externa
+        </button>
+      </div>
+    }
+
+    @if (auditoriasDataSource.data.length > 0) {
       <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           @for (columna of auditoriasContructorTabla; track columna) {
@@ -20,43 +36,31 @@
                 <b>{{ columna.header }}</b>
               </th>
               <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-                @if (columna.columnDef; as colDef) {
-                  @switch (colDef) {
-                    @case ('numero') {
-                      <div>
-                        <span>{{ pageIndex * pageSize + i + 1 }}</span>
-                      </div>
+                @switch (columna.columnDef) {
+                  @case ('numero') {
+                    <span>{{ pageIndex * pageSize + i + 1 }}</span>
+                  }
+                  @case ('vigencia') {
+                    <span class="chip chip-vigencia">{{ row.vigencia_nombre }}</span>
+                  }
+                  @case ('entidad') {
+                    <span class="entidad-principal">{{ row.nombre_entidad }}</span>
+                    <span class="entidad-secundaria">Código {{ row.codigo_entidad }}<span class="solo-celular"> · Vigencia {{ row.vigencia_nombre }}</span></span>
+                  }
+                  @case ('auditoria') {
+                    <span class="celda-truncada" [title]="row.nombre_auditoria">{{ row.nombre_auditoria }}</span>
+                  }
+                  @case ('acciones') {
+                    @for (accion of acciones; track accion) {
+                      <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+                        [attr.aria-label]="accion + ': ' + row.nombre_auditoria" (click)="realizarAccion(row, accion)">
+                        <mat-icon>{{ getIconoAccion(accion) }}</mat-icon>
+                        <span class="texto-accion">{{ accion }}</span>
+                      </button>
                     }
-                    <!-- Acciones -->
-                    @case ('acciones') {
-                      <div>
-                        @if (acciones.length > 0) {
-                          <button
-                            mat-icon-button
-                            color="primary"
-                            [matMenuTriggerFor]="menu"
-                            >
-                            <mat-icon>more_vert</mat-icon>
-                          </button>
-                          <mat-menu #menu="matMenu">
-                            @for (accion of acciones; track accion) {
-                              <button
-                                mat-menu-item
-                                (click)="realizarAccion(row, accion)"
-                                >
-                                <mat-icon color="primary">{{
-                                  getIconoAccion(accion)
-                                }}</mat-icon>
-                                <span>{{ accion }}</span>
-                              </button>
-                            }
-                          </mat-menu>
-                        }
-                      </div>
-                    }
-                    @default {
-                      <span>{{ columna.cell(row) }}</span>
-                    }
+                  }
+                  @default {
+                    <span>{{ columna.cell(row) }}</span>
                   }
                 }
               </td>
@@ -64,11 +68,14 @@
           }
           <tr mat-header-row *matHeaderRowDef="tablaColumnas"></tr>
           <tr mat-row *matRowDef="let row; columns: tablaColumnas"></tr>
-          <br />
         </table>
       </div>
+    }
+
+    @if (totalRegistros > 0) {
       <mat-paginator #paginator class="mt-3" [length]="totalRegistros" [pageSize]="pageSize"
-      [pageIndex]="pageIndex" (page)="manejarCambioPaginado($event)" [pageSizeOptions]="opcionesPagina" showFirstLastButtons></mat-paginator>
-    </div>
+        [pageIndex]="pageIndex" (page)="manejarCambioPaginado($event)" [pageSizeOptions]="opcionesPagina"
+        showFirstLastButtons></mat-paginator>
+    }
   </div>
-}
+</section>

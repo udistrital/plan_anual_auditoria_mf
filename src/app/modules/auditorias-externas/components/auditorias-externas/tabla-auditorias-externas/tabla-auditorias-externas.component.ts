@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from "@angular/core";
 import { MatPaginator, PageEvent } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { Router } from "@angular/router";
@@ -11,12 +11,14 @@ import { colocacionesContructorTabla } from "./tabla-auditorias-externas.utilida
 @Component({
     selector: "app-tabla-auditorias-externas",
     templateUrl: "./tabla-auditorias-externas.component.html",
-    styleUrls: ["./tabla-auditorias-externas.component.css"],
+    styleUrls: ["../../../vista-externa.css", "./tabla-auditorias-externas.component.css"],
     standalone: false
 })
 export class TablaAuditoriasExternasComponent implements OnInit, OnChanges {
   /** Vigencia elegida en la pantalla (null = todas). */
   @Input() vigenciaId: number | null = null;
+  /** Informa cuántas auditorías trae el listado (para el resumen de la pantalla). */
+  @Output() totalCambio = new EventEmitter<number>();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   auditoriasDataSource: MatTableDataSource<AuditoriaExterna> = new MatTableDataSource<AuditoriaExterna>();
@@ -58,9 +60,11 @@ export class TablaAuditoriasExternasComponent implements OnInit, OnChanges {
       );
       this.auditoriasDataSource = new MatTableDataSource(auditorias);
       this.totalRegistros = total;
+      this.totalCambio.emit(total);
     } catch {
       this.auditoriasDataSource = new MatTableDataSource<AuditoriaExterna>();
       this.totalRegistros = 0;
+      this.totalCambio.emit(0);
       this.alertaService.showErrorAlert("No fue posible cargar las auditorías externas.");
     } finally {
       this.cargando = false;
@@ -82,6 +86,13 @@ export class TablaAuditoriasExternasComponent implements OnInit, OnChanges {
       "Ver Auditoria": () => this.verAuditoria(auditoria),
     };
     acciones[accion]?.();
+  }
+
+  /** Desde el estado vacío: abre el registro con la vigencia elegida, si la hay. */
+  registrarAuditoria() {
+    this.router.navigate(["/auditorias-externas/registrar-auditoria"], {
+      queryParams: this.vigenciaId ? { vigencia: this.vigenciaId } : {},
+    });
   }
 
   verAuditoria(auditoria: AuditoriaExterna) {
