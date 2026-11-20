@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-between align-items-center p-3 shadow">
+<div class="d-flex justify-content-between align-items-center p-3 shadow sui-modal-cabecera">
   <div class="d-flex align-items-center">
     <div>
       <mat-icon color="primary">{{ icono }}</mat-icon>
@@ -20,6 +20,9 @@
     <ng-container *ngTemplateOutlet="contenido"></ng-container>
   </div>
 </mat-dialog-content>
-<mat-dialog-actions [align]="alignFooter">
-  <ng-container *ngTemplateOutlet="footer"></ng-container>
-</mat-dialog-actions>
+<!-- En los modales homologados no se dibuja un pie vacío (dejaba espacio libre bajo los botones) -->
+@if (footer || !homologado) {
+  <mat-dialog-actions [align]="alignFooter">
+    <ng-container *ngTemplateOutlet="footer"></ng-container>
+  </mat-dialog-actions>
+}

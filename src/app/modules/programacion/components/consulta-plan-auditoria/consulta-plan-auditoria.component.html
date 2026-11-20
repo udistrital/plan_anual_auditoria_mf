@@ -4,6 +4,7 @@
     '<p>Gestión Auditoría / Programación / <b>Plan Anual de Auditorías</b></p>'
   "
   [contenido]="contenidoDePlantilla"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -26,9 +27,9 @@
 
       <!-- Selector -->
       @if (permisoCreacion) {
-        <div class="section" data-tour="crear-paa">
-          <div class="filter-section">
-            <mat-form-field appearance="outline" style="width: 320px">
+        <div class="section sui-seccion" data-tour="crear-paa">
+          <div class="filter-section sui-fila">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 320px; max-width: 100%">
               <mat-label>Seleccione el año del PAA:</mat-label>
               <mat-icon color="primary" matPrefix>today</mat-icon>
               <mat-select id="ano-select" [(value)]="selectedYearId">
@@ -42,20 +43,21 @@
             <button
               mat-raised-button
               color="primary"
-              class="mx-3"
               (click)="crearPlan()"
               >
+              <mat-icon>add_circle</mat-icon>
               Crear PAA
             </button>
           </div>
-          <p>Seleccione el año del PAA de auditoría (PAA) a realizar</p>
+          <p class="sui-subtitulo mt-3 mb-0">Seleccione el año del PAA de auditoría (PAA) a realizar</p>
         </div>
       }
 
       <div class="row mt-3">
         <div class="col-12">
-          <h3 class="my-3">Listado de Planes de Auditoría</h3>
-          <p>
+         <div class="sui-seccion">
+          <h3 class="sui-seccion-titulo"><mat-icon>event_note</mat-icon>Listado de Planes de Auditoría</h3>
+          <p class="sui-subtitulo">
             Seleccione un Plan Anual de Auditoría (PAA) para realizar modificaciones o enviarlo a aprobación.
           </p>
 
@@ -112,12 +114,12 @@
                   <b>Estado</b>
                 </th>
                 <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-                  {{element.colorEstado}} {{ element.estado }}
+                  <span class="estado-chip" [ngClass]="element.estado | claseEstado">{{ element.estado }}</span>
                 </td>
               </ng-container>
 
               <!-- Acciones -->
-              <ng-container matColumnDef="acciones">
+              <ng-container matColumnDef="acciones" [stickyEnd]="true">
                 <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
                 <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
                   @if (element.acciones?.length > 0) {
@@ -155,6 +157,7 @@
             [length]="total"
             showFirstLastButtons
           ></mat-paginator>
+         </div>
         </div>
       </div>
     </div>

@@ -375,8 +375,9 @@ export class ConsultaPlanAuditoriaComponent implements OnInit, OnDestroy {
 
   enviarPlan(element: any) {
     const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
-      width: '500px',
+      width: '560px',
       autoFocus: false,
+      data: { homologado: true },
     });
 
     dialogRef.afterClosed().subscribe((observacion: string | null) => {

@@ -1,24 +1,24 @@
-<div class="container">
+<div class="container" [class.sisifo-ui]="homologada">
   <div class="row">
-    <div class="col-12 my-2">
+    <div class="col-12 my-2 sui-breadcrumb">
       <div [innerHTML]="breadcrumb"></div>
     </div>
   </div>
-  <mat-card class="p-3">
+  <mat-card class="p-3 sui-tarjeta">
     <mat-card-content>
       @if (subtitle) {
-        <div class="d-flex align-items-center my-1">
+        <div class="d-flex align-items-center my-1 sui-vigencia">
           <mat-icon color="primary" style="margin-right: 5px;">calendar_today</mat-icon>
           <b>Vigencia {{ subtitle }}</b>
         </div>
       }
       @if (subtitleChild) {
-        <div class="d-flex align-items-center my-1">
+        <div class="d-flex align-items-center my-1 sui-vigencia">
           <mat-icon color="primary" style="margin-right: 5px;">bookmark</mat-icon>
           <b>{{ subtitleChild }}</b>
         </div>
       }
-      <div class="d-flex justify-content-between align-items-center my-2">
+      <div class="d-flex justify-content-between align-items-center my-2 sui-titulo-vista">
         <h2 style="color: var(--md-primary-700)">{{ title }}</h2>
         @if (mostrarBotonRegresar) {
           <button

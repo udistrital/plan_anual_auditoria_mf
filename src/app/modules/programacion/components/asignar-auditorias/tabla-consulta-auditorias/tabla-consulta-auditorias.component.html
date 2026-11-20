@@ -1,17 +1,18 @@
 @if (banderaTabla) {
-  <div class="row mt-4">
-    <div class="col-12">
-      <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
-      <p class="mb-2 mx-2">
+  <div class="sui-seccion">
+    <div>
+      <h3 class="sui-seccion-titulo"><mat-icon>group_add</mat-icon>Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
+      <p class="sui-subtitulo">
         Seleccionar la auditoría para realizar asignación de auditores.
       </p>
     </div>
-    <div class="col-12">
+    <div>
       <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           @for (columna of auditoriasContructorTabla; track columna) {
             <ng-container
               [matColumnDef]="columna.columnDef"
+              [stickyEnd]="columna.columnDef === 'acciones'"
               >
               <th
                 mat-header-cell
@@ -49,6 +50,9 @@
                           </button>
                         </mat-menu>
                       </div>
+                    }
+                    @case ('estado') {
+                      <span class="estado-chip" [ngClass]="columna.cell(row) | claseEstado">{{ columna.cell(row) }}</span>
                     }
                     @default {
                       <div>

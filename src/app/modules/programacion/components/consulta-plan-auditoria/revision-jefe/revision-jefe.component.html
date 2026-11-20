@@ -6,94 +6,83 @@
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
-      <div class="d-flex flex-row-reverse my-2">
-        <button mat-flat-button color="primary" (click)="descargarTodo()">
-          Descargar Todo <mat-icon> insert_drive_file</mat-icon>
-        </button>
-        @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
-          @for (boton of tabs[selectedTab].botones; track boton) {
-            <button
-              class="mx-2"
-              mat-flat-button [color]="boton.color || 'accent'"
-              (click)="boton.accion()"
-              >
-              {{ boton.nombre }} @if (boton.icono) {
-              <mat-icon>{{ boton.icono }}</mat-icon>
-            }
-          </button>
-        }
-      }
-    </div>
-    <div class="row">
-      <div class="col-sm-12 col-md-4 col-lg-3">
-        <div class="d-flex flex-column">
-          @for (tab of tabs; track tab; let i = $index) {
-            @if (documentosPorTab[i] || tab.obligatorio) {
-              <button
-                class="mb-2"
-                mat-stroked-button
-                [ngClass]="selectedTab === i ? 'selected' : ''"
-                (click)="selectTab(i)"
-                >
-                {{tab.nombre}}
-              </button>
-            }
-          }
+      <div class="row g-4">
+        <!-- Panel de documentos: Descargar Todo arriba de la lista -->
+        <div class="col-sm-12 col-md-4 col-lg-3">
+          <div class="sui-panel-documentos">
+            <button mat-stroked-button color="primary" class="sui-boton-descargar-todo" (click)="descargarTodo()">
+              <mat-icon>file_download</mat-icon> Descargar Todo
+            </button>
+            <div class="d-flex flex-column sui-lista-documentos">
+              @for (tab of tabs; track tab; let i = $index) {
+                @if (documentosPorTab[i] || tab.obligatorio) {
+                  <button
+                    mat-stroked-button
+                    [ngClass]="selectedTab === i ? 'selected' : ''"
+                    (click)="selectTab(i)"
+                    >
+                    <mat-icon>picture_as_pdf</mat-icon>
+                    {{tab.nombre}}
+                  </button>
+                }
+              }
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-sm-12 col-md-8 col-lg-9">
-        <div>
-          @for (tab of tabs; track tab; let i = $index) {
-            <div>
-              @if (selectedTab === i) {
-                <div>
-                  <div class="row">
-                    <div class="col-12">
-                      <div style="border: 1px solid #ebdddd">
-                        <app-pdf-visualizador
-                          [base64Document]="documentosPorTab[i]"
-                        ></app-pdf-visualizador>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        <div class="col-sm-12 col-md-8 col-lg-9">
+          <!-- Acciones propias del documento seleccionado (p. ej. "Actualizar Documento") -->
+          @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
+            <div class="d-flex flex-wrap justify-content-end mb-3" style="gap: 8px">
+              @for (boton of tabs[selectedTab].botones; track boton) {
+                <button
+                  mat-flat-button [color]="boton.color || 'accent'"
+                  (click)="boton.accion()"
+                  >
+                  {{ boton.nombre }} @if (boton.icono) {
+                  <mat-icon>{{ boton.icono }}</mat-icon>
+                }
+              </button>
               }
             </div>
           }
+          @for (tab of tabs; track tab; let i = $index) {
+            @if (selectedTab === i) {
+              <div class="sui-visor">
+                <app-pdf-visualizador
+                  [base64Document]="documentosPorTab[i]"
+                  [herramientas]="true"
+                  [nombreArchivo]="tab.nombre"
+                ></app-pdf-visualizador>
+              </div>
+            }
+          }
         </div>
       </div>
-    </div>
-    @if (mostrarBotones) {
-      <mat-dialog-actions align="center">
-        <div class="row">
-          <div class="col-12 my-4">
-            <button
-              (click)="abrirModalRechazo()"
-              mat-stroked-button
-              color="primary"
-              class="mx-2"
-              style="border: 1px solid var(--md-primary-500)"
-              >
-              <mat-icon>cancel</mat-icon>Rechazar plan
-            </button>
-            <button
-              class="mx-2"
-              mat-raised-button
-              color="primary"
-              (click)="abrirModalEnviar()"
-              >
-              <mat-icon>check_circle</mat-icon>
-              Aprobar y enviar a Secretario
-            </button>
-          </div>
+      @if (mostrarBotones) {
+        <div class="sui-barra-acciones">
+          <button
+            (click)="abrirModalRechazo()"
+            mat-stroked-button
+            color="primary"
+            >
+            <mat-icon>cancel</mat-icon>Rechazar plan
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="abrirModalEnviar()"
+            >
+            <mat-icon>check_circle</mat-icon>
+            Aprobar y enviar a Secretario
+          </button>
         </div>
-      </mat-dialog-actions>
-    }
+      }
+    </div>
   </div>
-</div>
 </ng-template>

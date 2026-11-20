@@ -1,13 +1,59 @@
 @if (pdfLoaded) {
-  <div>
-    <pdf-viewer
-      [src]="pdfSrc"
-      [render-text]="true"
-      [original-size]="false"
-      [show-all]="true"
-      [zoom]="1.0"
-      class="pdf-container"
-      style="min-width: 200px; min-height: 550px; width: 100%; height: auto"
-    ></pdf-viewer>
+  <div #contenedorVisor class="visor-pdf" [class.visor-pdf--completo]="enPantallaCompleta">
+    @if (herramientas) {
+      <div class="visor-pdf__barra" role="toolbar" aria-label="Herramientas del PDF">
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Alejar"
+          aria-label="Alejar"
+          [disabled]="!puedeAlejar"
+          (click)="alejar()"
+          >
+          <mat-icon>zoom_out</mat-icon>
+        </button>
+        <span class="visor-pdf__zoom" aria-live="polite">{{ porcentajeZoom }}%</span>
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Acercar"
+          aria-label="Acercar"
+          [disabled]="!puedeAcercar"
+          (click)="acercar()"
+          >
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+        <span class="visor-pdf__separador"></span>
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Descargar este PDF"
+          aria-label="Descargar este PDF"
+          (click)="descargar()"
+          >
+          <mat-icon>download</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          [matTooltip]="enPantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'"
+          [attr.aria-label]="enPantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'"
+          (click)="alternarPantallaCompleta()"
+          >
+          <mat-icon>{{ enPantallaCompleta ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+        </button>
+      </div>
+    }
+    <div class="visor-pdf__cuerpo">
+      <pdf-viewer
+        [src]="pdfSrc"
+        [render-text]="true"
+        [original-size]="false"
+        [show-all]="true"
+        [zoom]="zoom"
+        class="pdf-container"
+        style="min-width: 200px; min-height: 550px; width: 100%; height: auto"
+      ></pdf-viewer>
+    </div>
   </div>
 }

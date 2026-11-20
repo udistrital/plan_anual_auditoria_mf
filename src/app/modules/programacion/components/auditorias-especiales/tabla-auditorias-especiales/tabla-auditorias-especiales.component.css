@@ -36,3 +36,12 @@
 .fila-auditoria-concreta {
   font-weight: 400;
 }
+
+/* Auditorías concretas (filas hijas): separadas de la fila padre con una línea punteada */
+.fila-auditoria-padre td {
+  font-weight: 600;
+}
+
+.fila-auditoria-concreta td {
+  border-top: 1px dashed #e0e0e0;
+}

@@ -1,8 +1,72 @@
 .pdf-container {
-    background-color: #f3f3f3; 
+    background-color: #f3f3f3;
   }
-  
+
 
 pdf-viewer::ng-deep .page {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   }
+
+/* Barra de herramientas del visor (solo con [herramientas]="true") */
+.visor-pdf {
+  display: flex;
+  flex-direction: column;
+  background-color: #f3f3f3;
+}
+
+.visor-pdf__barra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  min-height: 52px;
+  padding: 4px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #ffffff;
+}
+
+.visor-pdf__barra .mat-mdc-icon-button {
+  border-radius: 0;
+  color: #424242;
+}
+
+.visor-pdf__barra .mat-mdc-icon-button:not([disabled]):hover {
+  color: var(--md-primary-500);
+}
+
+.visor-pdf__zoom {
+  min-width: 48px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: #424242;
+}
+
+.visor-pdf__separador {
+  width: 1px;
+  height: 22px;
+  margin: 0 6px;
+  background-color: #e0e0e0;
+}
+
+.visor-pdf__cuerpo {
+  flex: 1;
+  overflow: auto;
+}
+
+/* Pantalla completa: el visor ocupa toda la pantalla y conserva la barra */
+.visor-pdf--completo {
+  width: 100vw;
+  height: 100vh;
+  background-color: #525659;
+}
+
+.visor-pdf--completo .visor-pdf__barra {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.visor-pdf--completo pdf-viewer {
+  height: calc(100vh - 52px) !important;
+}

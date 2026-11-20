@@ -1,6 +1,1 @@
-.selected {
-  background-color: #ffd7ce !important;
-  color: #731514 !important;
-  border: 1px solid #731514 !important;
-  font-weight: 600;
-}
+/* El documento seleccionado usa el estilo común .sui-lista-documentos (assets/styles/_sisifo-ui.scss) */
