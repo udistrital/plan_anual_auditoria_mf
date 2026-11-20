@@ -65,7 +65,8 @@ export class AuditoriaExternaService {
         },
       ]),
     );
-    const documento = respuesta?.[0];
+    // El gestor documental responde [{ Status, res: { Id, Enlace, ... } }]
+    const documento = respuesta?.[0]?.res;
     if (!documento?.Id || !documento?.Enlace) {
       throw new Error('No se recibió una respuesta válida al guardar el informe en Nuxeo.');
     }
