@@ -27,7 +27,7 @@ test('una dependencia que no es responsable de la acción ve el foro en solo lec
   const token = await page.evaluate(() => localStorage.getItem('access_token'));
 
   const consultaMid = async (id: string) =>
-    request.get(`${MID}/accion-mejora/${id}/comentario?limit=1&persona_id=${persona}&rol=JEFE_DEPENDENCIA`, {
+    request.get(`${MID}/comentario-accion?accion_mejora_id=${id}&limit=1&persona_id=${persona}&rol=JEFE_DEPENDENCIA`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

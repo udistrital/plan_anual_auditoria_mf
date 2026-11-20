@@ -1,44 +1,44 @@
+import { AuditoriaExterna } from "src/app/shared/data/models/auditoria-externa";
+
 export const colocacionesContructorTabla = [
   {
     columnDef: "numero",
     header: "No.",
-    cell: (auditoria: any) => "",
+    cell: (auditoria: AuditoriaExterna) => "",
     sortable: false,
   },
   {
     columnDef: "vigencia",
     header: "Vigencia",
-    cell: (auditoria: any) => auditoria.vigencia_nombre,
+    cell: (auditoria: AuditoriaExterna) => auditoria.vigencia_nombre,
+    sortable: false,
+  },
+  {
+    columnDef: "entidad",
+    header: "Entidad",
+    cell: (auditoria: AuditoriaExterna) =>
+      `${auditoria.codigo_entidad} - ${auditoria.nombre_entidad}`,
     sortable: false,
   },
   {
     columnDef: "auditoria",
     header: "Auditoria",
-    cell: (auditoria: any) => auditoria.auditoria_nombre,
+    cell: (auditoria: AuditoriaExterna) => auditoria.nombre_auditoria,
     sortable: false,
   },
   {
-    columnDef: "origen",
-    header: "Origen",
-    cell: (auditoria: any) => auditoria.origen,
-    sortable: false,
-  },
-  {
-    columnDef: "auditores",
-    header: "Auditor(es)",
-    cell: (auditoria: any) => auditoria.auditores.map((auditor: any) => auditor.nombre).join(", "),
-    sortable: false,
-  },
-  {
-    columnDef: "dependencia",
-    header: "Dependencia",
-    cell: (auditoria: any) => auditoria.dependencia_nombre,
+    columnDef: "fecha",
+    header: "Fecha del informe final",
+    cell: (auditoria: AuditoriaExterna) =>
+      auditoria.fecha_informe_final
+        ? new Date(auditoria.fecha_informe_final).toLocaleDateString("es-CO", { timeZone: "UTC" })
+        : "",
     sortable: false,
   },
   {
     columnDef: "acciones",
     header: "Acciones",
-    cell: (auditoria: any) => "",
+    cell: (auditoria: AuditoriaExterna) => "",
     sortable: false,
   },
 ];

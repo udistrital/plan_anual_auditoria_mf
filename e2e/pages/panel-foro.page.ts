@@ -1,12 +1,12 @@
 /**
  * Panel lateral "Foro de seguimiento" de la acción (#948): mensajes guardados por el MID
- * (GET/POST .../accion-mejora/:accionId/comentario), con «Actualizar», «Ver anteriores» y redacción
+ * (GET/POST .../comentario-accion; la acción va en `accion_mejora_id`), con «Actualizar», «Ver anteriores» y redacción
  * solo si el MID dice que la persona puede comentar.
  */
 import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from '../core/base.page';
 
-const RUTA_COMENTARIOS = /\/accion-mejora\/[0-9a-f]{24}\/comentario(\?|$)/;
+const RUTA_COMENTARIOS = /\/comentario-accion(\?|$)/;
 
 export class PanelForo extends BasePage {
   readonly dialogo: Locator;

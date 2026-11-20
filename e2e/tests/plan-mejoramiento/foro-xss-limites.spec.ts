@@ -63,7 +63,7 @@ test('el foro muestra como texto el HTML y los scripts, respeta saltos de línea
   await test.step('un doble clic en Enviar crea un solo mensaje y una sola petición', async () => {
     let posts = 0;
     page.on('request', (r) => {
-      if (r.method() === 'POST' && /\/accion-mejora\/[0-9a-f]{24}\/comentario/.test(r.url())) posts++;
+      if (r.method() === 'POST' && /\/comentario-accion(\?|$)/.test(r.url())) posts++;
     });
     const texto = `${marca} doble clic`;
     await foro.campo.fill(texto);

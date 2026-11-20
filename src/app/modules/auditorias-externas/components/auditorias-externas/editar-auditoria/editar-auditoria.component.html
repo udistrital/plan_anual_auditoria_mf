@@ -1,149 +1,148 @@
-<plantilla-tarjeta-contenedora [title]="''" [breadcrumb]="'<p>Gestión Auditoría / <b>Auditorías Externas</b></p>'"
+<plantilla-tarjeta-contenedora [title]="'Registrar auditoría externa'" [breadcrumb]="'<p>Gestión Auditoría / <b>Auditorías Externas</b></p>'"
 [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
 </plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row">
-    <div class="col-12">
-      <mat-stepper [linear]="esLineal" #stepper labelPosition="bottom" color="primary" [orientation]="orientation">
-        <ng-template matStepperIcon="number">
-          <mat-icon>lens</mat-icon>
-        </ng-template>
+  <!-- Encabezado: tipo de registro, vigencia y lo que se va escribiendo -->
+  <div class="encabezado-vista">
+    <div>
+      <div class="d-flex flex-wrap align-items-center espacio-2 mb-1">
+        <span class="chip chip-nuevo">
+          <mat-icon>edit_note</mat-icon> Nuevo registro
+        </span>
+        @if (vigenciaNombre) {
+          <span class="chip chip-vigencia">
+            <mat-icon>calendar_today</mat-icon> Vigencia {{ vigenciaNombre }}
+          </span>
+        }
+      </div>
+      <p class="metadatos mb-0" aria-live="polite">
+        <span><b>Entidad:</b> {{ entidadResumen || '—' }}</span>
+        <span class="separador-punto">•</span>
+        <span><b>Fecha del informe final:</b> {{ fechaInformeResumen || '—' }}</span>
+      </p>
+    </div>
+  </div>
 
-        <!-- Paso 1: Información -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 1</p>
-            <b style="color: var(--primary)">Información</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>assignment</mat-icon></div>
-            <div class="mx-3">
-              <h2>Información</h2>
-              Información general de la Auditoría
-            </div>
-          </div>
-          @if (formInformacion != null) {
-            <div class="mt-4">
-              <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
-                (submitFormulario)="preguntarGuardadoInformacion($event)"
-                (campoSeleccionado)="manejarCambioSelect($event)">
-              </app-formulario-dinamico>
-              <div class="d-flex justify-content-end mt-4">
-                <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
-                  Guardar y Continuar
-                </button>
-              </div>
-            </div>
+  <!-- Información general -->
+  <section id="seccion-informacion" class="tarjeta seccion-registro">
+    <div class="tarjeta-encabezado">
+      <div class="d-flex align-items-center espacio-2">
+        <mat-icon color="primary">assignment</mat-icon>
+        <div>
+          <h5 class="seccion-titulo mb-0">Información general</h5>
+          <small class="texto-secundario">Datos generales de la auditoría externa</small>
+        </div>
+      </div>
+    </div>
+    <div class="tarjeta-cuerpo">
+      @if (formInformacion != null) {
+        <app-formulario-dinamico #formularioInformacionComp [formulario]="formInformacion"
+          (submitFormulario)="guardarInformacion($event)">
+        </app-formulario-dinamico>
+      }
+    </div>
+  </section>
+
+  <!-- Informe final -->
+  <section id="seccion-informe" class="tarjeta seccion-registro">
+    <div class="tarjeta-encabezado">
+      <div class="d-flex align-items-center espacio-2">
+        <mat-icon color="primary">attach_file</mat-icon>
+        <div>
+          <h5 class="seccion-titulo mb-0">Informe final</h5>
+          <small class="texto-secundario">Informe emitido por el ente de control (solo PDF)</small>
+        </div>
+      </div>
+      @if (registro.informeFinal) {
+        <span class="chip chip-ok"><mat-icon>check_circle</mat-icon> PDF adjunto</span>
+      }
+    </div>
+    <div class="tarjeta-cuerpo">
+      <input #inputInforme type="file" accept="application/pdf" hidden
+        (change)="seleccionarInforme($event)" />
+      <div class="archivo-informe" [class.con-archivo]="registro.informeFinal !== null">
+        <mat-icon>{{ registro.informeFinal ? 'picture_as_pdf' : 'upload_file' }}</mat-icon>
+        <div class="archivo-datos">
+          @if (registro.informeFinal; as informe) {
+            <span class="archivo-nombre">{{ informe.nombre }}</span>
+            <span class="archivo-meta">PDF · {{ tamanioInforme }}</span>
+          } @else {
+            <span class="archivo-nombre">Ningún archivo seleccionado</span>
+            <span class="archivo-meta">Solo se admite formato PDF</span>
           }
-        </mat-step>
+        </div>
+        <div class="d-flex flex-wrap espacio-2">
+          @if (registro.informeFinal === null) {
+            <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+              (click)="abrirSelectorInforme()">
+              <mat-icon>upload</mat-icon>
+              Adjuntar informe final
+            </button>
+          } @else {
+            <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+              (click)="verInformeAuditoria()">
+              <mat-icon>visibility</mat-icon>
+              Ver informe final
+            </button>
+            <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+              (click)="abrirSelectorInforme()">
+              <mat-icon>swap_horiz</mat-icon>
+              Cambiar
+            </button>
+            <button mat-stroked-button color="warn" type="button" (click)="quitarInforme()">
+              <mat-icon>delete</mat-icon>
+              Quitar
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Paso 2: Hallazgos -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 2</p>
-            <b style="color: var(--primary)">Hallazgos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>find_in_page</mat-icon></div>
-            <div class="mx-3">
-              <h2>Hallazgos</h2>
-              Registre los hallazgos de la auditoría
-            </div>
-          </div>
-          <div class="mt-4">
-            <app-hallazgos-auditoria
-              [auditoriaId]="auditoriaId"
-              (hallazgosActualizados)="onHallazgosActualizados($event)">
-            </app-hallazgos-auditoria>
-            <div class="d-flex justify-content-end mt-4 gap-2">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button mat-flat-button color="primary" matStepperNext>
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
+  <!-- Hallazgos -->
+  <section id="seccion-hallazgos" class="tarjeta seccion-registro">
+    <div class="tarjeta-encabezado">
+      <div class="d-flex align-items-center espacio-2">
+        <mat-icon color="primary">find_in_page</mat-icon>
+        <div>
+          <h5 class="seccion-titulo mb-0">Hallazgos</h5>
+          <small class="texto-secundario">Registre los hallazgos del informe de la auditoría externa</small>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap espacio-2" aria-live="polite">
+        <span class="chip chip-neutro">
+          <b>{{ registro.hallazgos.length }}</b>
+          {{ registro.hallazgos.length === 1 ? 'hallazgo' : 'hallazgos' }}
+        </span>
+        <span class="chip chip-neutro">
+          <b>{{ totalDependencias }}</b>
+          {{ totalDependencias === 1 ? 'dependencia' : 'dependencias' }}
+        </span>
+      </div>
+    </div>
+    <div class="tarjeta-cuerpo">
+      <app-hallazgos-auditoria
+        [hallazgos]="registro.hallazgos"
+        (hallazgosActualizados)="onHallazgosActualizados($event)">
+      </app-hallazgos-auditoria>
+    </div>
+  </section>
 
-        <!-- Paso 3: Resumen -->
-        <mat-step [completed]="true">
-          <ng-template matStepLabel>
-            <p>Paso 3</p>
-            <b style="color: var(--primary)">Resumen de Hallazgos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>summarize</mat-icon></div>
-            <div class="mx-3">
-              <h2>Resumen de Hallazgos</h2>
-              Resumen de los hallazgos registrados
-            </div>
-          </div>
-          <div class="mt-4">
-            <app-resumen-hallazgos [hallazgos]="hallazgos"></app-resumen-hallazgos>
-            <div class="d-flex justify-content-end mt-4 gap-2">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button mat-flat-button color="primary" matStepperNext>
-                Continuar
-              </button>
-            </div>
-          </div>
-        </mat-step>
-
-        <!-- Paso 4: Documentos Anexos -->
-        <mat-step>
-          <ng-template matStepLabel>
-            <p>Paso 4</p>
-            <b style="color: var(--primary)">Documentos Anexos</b>
-          </ng-template>
-          <div class="d-flex align-items-center fondo-acento-50 my-3">
-            <div><mat-icon>attach_file</mat-icon></div>
-            <div class="mx-3">
-              <h2>Documentos Anexos</h2>
-              Suba los documentos relacionados con la auditoría
-            </div>
-          </div>
-          <div class="mt-4">
-            <mat-card class="documento-card">
-              <div class="documento-content">
-                <span class="mb-md">Informe Auditoría</span>
-                <div class="icon-buttons">
-                  @if (base64InformeAuditoria === null) {
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="subirInformeAuditoria()"
-                      >
-                      <mat-icon>upload</mat-icon>
-                    </button>
-                  }
-                  @if (base64InformeAuditoria !== null) {
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="verInformeAuditoria()"
-                      >
-                      <mat-icon>visibility</mat-icon>
-                    </button>
-                  }
-                </div>
-              </div>
-            </mat-card>
-            <div class="d-flex justify-content-end mt-4 gap-2">
-              <button matStepperPrevious mat-stroked-button color="primary">
-                Volver
-              </button>
-              <button mat-raised-button color="primary" (click)="guardarYCerrar()">
-                Guardar y Cerrar
-              </button>
-            </div>
-          </div>
-        </mat-step>
-
-      </mat-stepper>
+  <!-- Barra inferior de acciones -->
+  <div class="barra-acciones">
+    <div class="mensaje-barra">
+      <mat-icon>info</mat-icon>
+      <span>Todo se guarda al pulsar Continuar, y con eso se crea el plan de mejoramiento de la auditoría.</span>
+    </div>
+    <div class="botones">
+      <button mat-stroked-button color="primary" class="boton-secundario" type="button" [disabled]="enviando"
+        (click)="regresarRuta()">
+        Cancelar
+      </button>
+      <button mat-raised-button color="primary" type="button" [disabled]="enviando" (click)="continuar()">
+        {{ enviando ? 'Registrando…' : 'Continuar' }}
+      </button>
     </div>
   </div>
 </ng-template>

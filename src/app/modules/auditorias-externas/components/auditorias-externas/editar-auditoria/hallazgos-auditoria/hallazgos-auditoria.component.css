@@ -1,25 +1,12 @@
-.hallazgo-header {
-  gap: 10px;
-}
+/* Los chips, el estado vacío y la celda truncada están en vista-externa.css */
+/* Paginador en celular: el rango en una línea y sin la etiqueta «Elementos por página» */
+@media (max-width: 768px) {
+  :host ::ng-deep .mat-mdc-paginator-page-size-label {
+    display: none;
+  }
 
-.hallazgo-input {
-  width: 100%;
-}
-
-.indice {
-  font-weight: bold;
-  font-size: 1.2em;
-  padding: 4px 8px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  text-align: center;
-  min-width: 35px;
-}
-
-.hallazgo-box {
-  border: 1px solid #ddd;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 6px;
+  :host ::ng-deep .mat-mdc-paginator-range-label {
+    margin: 0 8px;
+    white-space: nowrap;
+  }
 }

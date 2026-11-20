@@ -4,7 +4,7 @@ Issue: udistrital/sisifo_documentacion#948 · MF: plan_anual_auditoria_mf · Eti
 
 ## Contexto
 
-En **Registro de avances** (Gestión de acciones), el botón **Foro** abre un panel lateral con la conversación de la acción. Los mensajes los guarda y los lee el MID (`GET`/`POST /accion-mejora/:accionId/comentario`) en la colección `comentario_accion` del CRUD:
+En **Registro de avances** (Gestión de acciones), el botón **Foro** abre un panel lateral con la conversación de la acción. Los mensajes los guarda y los lee el MID (`GET`/`POST /comentario-accion`, con `accion_mejora_id` en la query del GET y en el body del POST) en la colección `comentario_accion` del CRUD:
 
 - Lista plana, más recientes al final, de 20 en 20 con «Ver anteriores». Se lee al abrir el panel, con **Actualizar** y tras enviar (no hay tiempo real).
 - Cada mensaje muestra autor, rol, dependencia (si es de una dependencia) y fecha.
