@@ -1,21 +1,4 @@
 /* Los chips, el estado vacío y la celda truncada están en vista-externa.css */
-.table-container {
-  overflow-x: auto;
-}
-
-th.mat-column-numeral,
-td.mat-column-numeral,
-th.mat-column-vigencia,
-td.mat-column-vigencia {
-  white-space: nowrap;
-}
-
-th.mat-column-acciones,
-td.mat-column-acciones {
-  width: 112px;
-  white-space: nowrap;
-}
-
 /* Paginador en celular: el rango en una línea y sin la etiqueta «Elementos por página» */
 @media (max-width: 768px) {
   :host ::ng-deep .mat-mdc-paginator-page-size-label {

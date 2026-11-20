@@ -14,8 +14,7 @@ td.mat-column-fecha {
 
 th.mat-column-acciones,
 td.mat-column-acciones {
-  width: 200px;
-  text-align: right;
+  width: 190px;
   white-space: nowrap;
 }
 

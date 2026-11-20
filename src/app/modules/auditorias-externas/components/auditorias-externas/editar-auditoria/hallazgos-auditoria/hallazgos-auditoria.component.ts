@@ -47,6 +47,10 @@ export class HallazgosAuditoriaComponent implements OnInit {
   pageSize = 10;
   pageIndex = 0;
 
+  /** Panel «Herramientas de la tabla»: abierto por defecto; recuerda la preferencia del usuario. */
+  herramientasAbiertas = true;
+  private static readonly CLAVE_HERRAMIENTAS = 'sisifo.herramientasTabla';
+
   vigencias: OpcionCatalogo[] = [];
   dependencias: OpcionCatalogo[] = [];
 
@@ -61,6 +65,13 @@ export class HallazgosAuditoriaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    try {
+      this.herramientasAbiertas =
+        localStorage.getItem(HallazgosAuditoriaComponent.CLAVE_HERRAMIENTAS) !== 'cerrado';
+    } catch {
+      this.herramientasAbiertas = true;
+    }
+
     this.parametrosUtilsService
       .getVigencias()
       .pipe(catchError(() => of([])))
@@ -73,6 +84,18 @@ export class HallazgosAuditoriaComponent implements OnInit {
         const lista = Array.isArray(respuesta) ? respuesta : [];
         this.dependencias = lista.filter((d: OpcionCatalogo) => d.Nombre?.length > 0);
       });
+  }
+
+  alternarHerramientas(): void {
+    this.herramientasAbiertas = !this.herramientasAbiertas;
+    try {
+      localStorage.setItem(
+        HallazgosAuditoriaComponent.CLAVE_HERRAMIENTAS,
+        this.herramientasAbiertas ? 'abierto' : 'cerrado',
+      );
+    } catch {
+      // sin almacenamiento disponible: la preferencia solo vale para esta sesión
+    }
   }
 
   /** Hallazgos de la página actual (el paginado es solo visual: 500 filas como máximo). */

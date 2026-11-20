@@ -1,19 +1,38 @@
-<div class="d-flex flex-wrap justify-content-between align-items-center espacio-2 mb-3">
-  <div class="d-flex flex-wrap espacio-2">
-    <button mat-stroked-button color="primary" class="boton-secundario" type="button"
-      (click)="agregarHallazgo()" [disabled]="limiteAlcanzado">
-      <mat-icon>add</mat-icon> Agregar Hallazgo
-    </button>
-    <button mat-stroked-button color="primary" class="boton-secundario" type="button"
-      (click)="cargueMasivo()" [disabled]="limiteAlcanzado">
-      <mat-icon>upload_file</mat-icon> Cargue masivo
-    </button>
-    <button mat-stroked-button color="primary" class="boton-secundario" type="button"
-      (click)="descargarPlantilla()">
-      <mat-icon>download</mat-icon> Descargar plantilla
-    </button>
+<div class="panel-herramientas" [class.cerrado]="!herramientasAbiertas">
+  <button type="button" class="cab-herramientas" (click)="alternarHerramientas()"
+    [attr.aria-expanded]="herramientasAbiertas" aria-controls="cuerpo-herramientas-hallazgos">
+    <span class="etiqueta">Herramientas de la tabla</span>
+    <span class="espacio-flexible"></span>
+    @if (!herramientasAbiertas) {
+      <span class="conteo">2 acciones</span>
+    }
+    <mat-icon class="giro">expand_more</mat-icon>
+  </button>
+  <div class="cuerpo-herramientas" id="cuerpo-herramientas-hallazgos">
+    <div>
+      <button type="button" class="accion-fila" (click)="cargueMasivo()" [disabled]="limiteAlcanzado">
+        <span class="insignia"><mat-icon>upload_file</mat-icon></span>
+        <span>
+          <b>Cargue masivo</b>
+          <small>Carga varios hallazgos desde la plantilla Excel</small>
+        </span>
+      </button>
+      <button type="button" class="accion-fila" (click)="descargarPlantilla()">
+        <span class="insignia"><mat-icon>grid_on</mat-icon></span>
+        <span>
+          <b>Descargar plantilla</b>
+          <small>Formato Excel para el cargue masivo</small>
+        </span>
+      </button>
+    </div>
   </div>
-  <small class="texto-secundario">{{ hallazgos.length }} de {{ maximo }} hallazgos</small>
+</div>
+
+<div class="barra-tabla">
+  <span class="texto-secundario">{{ hallazgos.length }} de {{ maximo }} hallazgos</span>
+  <button mat-flat-button color="primary" type="button" (click)="agregarHallazgo()" [disabled]="limiteAlcanzado">
+    <mat-icon>add</mat-icon> Agregar Hallazgo
+  </button>
 </div>
 
 @if (hallazgos.length === 0) {
@@ -23,8 +42,8 @@
     <small class="texto-secundario">Agréguelos uno a uno o con el cargue masivo.</small>
   </div>
 } @else {
-  <div class="table-container">
-    <table mat-table [dataSource]="hallazgosPagina" class="w-100">
+  <div class="tabla-externa-contenedor">
+    <table mat-table [dataSource]="hallazgosPagina" class="tabla-externa">
       <ng-container matColumnDef="numeral">
         <th mat-header-cell *matHeaderCellDef><b>No. hallazgo</b></th>
         <td mat-cell *matCellDef="let hallazgo">{{ hallazgo.numeral }}</td>
@@ -33,7 +52,7 @@
       <ng-container matColumnDef="vigencia">
         <th mat-header-cell *matHeaderCellDef><b>Vigencia</b></th>
         <td mat-cell *matCellDef="let hallazgo">
-          <span class="chip chip-vigencia">{{ hallazgo.vigencia_nombre }}</span>
+          {{ hallazgo.vigencia_nombre }}
         </td>
       </ng-container>
 
@@ -45,16 +64,16 @@
       <ng-container matColumnDef="descripcion">
         <th mat-header-cell *matHeaderCellDef><b>Descripción</b></th>
         <td mat-cell *matCellDef="let hallazgo">
-          <span class="celda-truncada" [title]="hallazgo.descripcion">{{ hallazgo.descripcion }}</span>
+          <span class="celda-lista" [title]="hallazgo.descripcion">{{ hallazgo.descripcion }}</span>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="dependencias">
         <th mat-header-cell *matHeaderCellDef><b>Dependencias responsables</b></th>
         <td mat-cell *matCellDef="let hallazgo">
-          <div class="chips-dependencias">
+          <div class="lista-simple">
             @for (dependencia of hallazgo.dependencias_nombre; track dependencia) {
-              <span class="chip chip-neutro">{{ dependencia }}</span>
+              <span>{{ dependencia }}</span>
             }
           </div>
         </td>
@@ -63,12 +82,20 @@
       <ng-container matColumnDef="acciones">
         <th mat-header-cell *matHeaderCellDef><b>Acciones</b></th>
         <td mat-cell *matCellDef="let hallazgo; let i = index">
-          <button mat-icon-button color="primary" aria-label="Editar hallazgo" (click)="editarHallazgo(i)">
-            <mat-icon>edit</mat-icon>
+          <button mat-icon-button color="primary" type="button" aria-label="Acciones del hallazgo"
+            [matMenuTriggerFor]="menuAcciones">
+            <mat-icon>more_vert</mat-icon>
           </button>
-          <button mat-icon-button color="warn" aria-label="Eliminar hallazgo" (click)="eliminarHallazgo(i)">
-            <mat-icon>delete</mat-icon>
-          </button>
+          <mat-menu #menuAcciones="matMenu">
+            <button mat-menu-item type="button" (click)="editarHallazgo(i)">
+              <mat-icon color="primary">edit</mat-icon>
+              <span>Editar hallazgo</span>
+            </button>
+            <button mat-menu-item type="button" (click)="eliminarHallazgo(i)">
+              <mat-icon color="warn">delete</mat-icon>
+              <span>Eliminar hallazgo</span>
+            </button>
+          </mat-menu>
         </td>
       </ng-container>
 

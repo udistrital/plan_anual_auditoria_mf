@@ -21,7 +21,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding-bottom: 12px;
   margin-bottom: 12px;
@@ -288,3 +288,268 @@
 .espacio-2 { gap: 0.5rem; }
 .texto-secundario { color: #757575; }
 .ancho-completo { width: 100%; }
+
+/* ─── Tabla de hallazgos (misma línea visual de las tablas de la Fase 1: mockups de S. García) ─── */
+
+.tabla-externa-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.tabla-externa {
+  width: 100%;
+}
+
+.tabla-externa th.mat-mdc-header-cell {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #424242;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.tabla-externa td.mat-mdc-cell {
+  padding: 16px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 13px;
+  line-height: 1.5;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.tabla-externa th.mat-mdc-header-cell:first-child,
+.tabla-externa td.mat-mdc-cell:first-child {
+  padding-left: 20px;
+}
+
+.tabla-externa th.mat-mdc-header-cell:last-child,
+.tabla-externa td.mat-mdc-cell:last-child {
+  padding-right: 20px;
+}
+
+.tabla-externa tr.mat-mdc-row:last-child td.mat-mdc-cell {
+  border-bottom: 0;
+}
+
+/* Sin franjas: solo el resalte suave de la fila bajo el cursor */
+.tabla-externa tr.mat-mdc-row {
+  transition: background-color 0.12s ease;
+}
+
+.tabla-externa tr.mat-mdc-row:hover td.mat-mdc-cell {
+  background-color: #f2f2f2;
+}
+
+.tabla-externa tr.mat-mdc-row:hover td.mat-mdc-cell:first-child {
+  box-shadow: inset 3px 0 0 var(--md-primary-500);
+}
+
+/* Columna Acciones fija a la derecha, con borde y sombra que la separan al desplazar */
+.tabla-externa th.mat-column-acciones,
+.tabla-externa td.mat-column-acciones {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  width: 96px;
+  border-left: 1px solid #e0e0e0;
+  box-shadow: -6px 0 8px -6px rgba(0, 0, 0, 0.12);
+}
+
+.tabla-externa th.mat-column-acciones {
+  z-index: 2;
+}
+
+.tabla-externa .mat-column-numeral {
+  white-space: nowrap;
+}
+
+/* Textos largos: dos líneas como máximo; el texto completo va en `title` */
+.celda-lista {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 320px;
+  margin: 0 auto;
+  word-break: break-word;
+}
+
+/* Dependencias: texto normal, una por línea (sin chips) */
+.lista-simple span {
+  display: block;
+}
+
+/* ─── Herramientas de la tabla (panel contraíble con tarjetas de acción, como en la Fase 1) ─── */
+
+.panel-herramientas {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  transition: padding 0.2s ease;
+}
+
+.panel-herramientas.cerrado {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.panel-herramientas .etiqueta {
+  margin: 0;
+  letter-spacing: 0.06em;
+}
+
+.cab-herramientas {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cab-herramientas:focus-visible {
+  outline: 2px solid var(--md-primary-300, #ff6968);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.espacio-flexible {
+  flex: 1;
+}
+
+.cab-herramientas .conteo {
+  font-size: 11px;
+  font-weight: 600;
+  color: #616161;
+}
+
+.cab-herramientas .giro {
+  color: var(--md-primary-500);
+  transition: transform 0.2s ease;
+}
+
+.panel-herramientas.cerrado .giro {
+  transform: rotate(-90deg);
+}
+
+.cuerpo-herramientas {
+  display: grid;
+  grid-template-rows: 1fr;
+  margin-top: 14px;
+  transition: grid-template-rows 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
+}
+
+.cuerpo-herramientas > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.panel-herramientas.cerrado .cuerpo-herramientas {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.accion-fila {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 0;
+  background-color: #ffffff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.accion-fila:hover {
+  border-color: var(--md-primary-300, #ff6968);
+  background-color: var(--md-primary-50, #ffeae6);
+}
+
+.accion-fila .insignia {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--md-primary-50, #ffeae6);
+}
+
+.accion-fila .insignia mat-icon {
+  color: var(--md-primary-500);
+}
+
+.accion-fila b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--md-primary-700);
+}
+
+.accion-fila small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #616161;
+}
+
+@media (max-width: 1100px) {
+  .cuerpo-herramientas > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+}
+
+/* Texto de ayuda bajo el encabezado: mismo tamaño y color que los subtítulos de las tarjetas */
+.subtitulo-vista {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #616161;
+}
+
+/* Encabezados de columna ordenables centrados, como el resto de la tabla */
+.tabla-externa ::ng-deep .mat-sort-header-container {
+  justify-content: center;
+}
+
+/* Fila sobre la tabla: contador a la izquierda y la acción principal a la derecha */
+.barra-tabla {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.accion-fila:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.accion-fila:disabled:hover {
+  border-color: #e0e0e0;
+  background-color: #ffffff;
+}

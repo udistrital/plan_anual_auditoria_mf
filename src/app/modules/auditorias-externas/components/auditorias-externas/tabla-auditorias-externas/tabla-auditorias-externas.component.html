@@ -28,27 +28,27 @@
     }
 
     @if (auditoriasDataSource.data.length > 0) {
-      <div class="table-container rounded-table table-scroll">
-        <table mat-table [dataSource]="auditoriasDataSource" matSort>
+      <div class="tabla-externa-contenedor">
+        <table mat-table [dataSource]="auditoriasDataSource" matSort class="tabla-externa">
           @for (columna of auditoriasContructorTabla; track columna) {
             <ng-container [matColumnDef]="columna.columnDef">
               <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!columna.sortable">
                 <b>{{ columna.header }}</b>
               </th>
-              <td mat-cell *matCellDef="let row; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
+              <td mat-cell *matCellDef="let row; let i = index">
                 @switch (columna.columnDef) {
                   @case ('numero') {
                     <span>{{ pageIndex * pageSize + i + 1 }}</span>
                   }
                   @case ('vigencia') {
-                    <span class="chip chip-vigencia">{{ row.vigencia_nombre }}</span>
+                    <span>{{ row.vigencia_nombre }}</span>
                   }
                   @case ('entidad') {
                     <span class="entidad-principal">{{ row.nombre_entidad }}</span>
                     <span class="entidad-secundaria">Código {{ row.codigo_entidad }}<span class="solo-celular"> · Vigencia {{ row.vigencia_nombre }}</span></span>
                   }
                   @case ('auditoria') {
-                    <span class="celda-truncada" [title]="row.nombre_auditoria">{{ row.nombre_auditoria }}</span>
+                    <span class="celda-lista" [title]="row.nombre_auditoria">{{ row.nombre_auditoria }}</span>
                   }
                   @case ('acciones') {
                     @for (accion of acciones; track accion) {
