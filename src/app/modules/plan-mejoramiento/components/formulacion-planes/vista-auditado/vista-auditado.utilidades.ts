@@ -9,6 +9,7 @@ import {
   ConTodos,
   IndicadorFormulacion,
   OpcionEstadoPlan,
+  PerfilFormulacion,
   TextosVistaFormulacion,
   columnasComunes,
   crearAgrupador,
@@ -126,4 +127,19 @@ export const claseChipPorGrupo: Record<Grupo, string> = {
   EN_FORMULACION: "estado-formulacion",
   EN_REVISION:    "estado-revision",
   APROBADOS:      "estado-aprobado",
+};
+
+// ── Perfil de Auditoría Interna ─────────────────────────────
+/** Toda la configuración de la vista auditado para Auditoría Interna. */
+export const perfilInterna: PerfilFormulacion<AuditoriaFormulacionPlan, ResumenFormulacionPlanes, Grupo> = {
+  tipoEvaluacionId:     environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID,
+  nombreTipoEvaluacion: "Auditoría Interna",
+  textos:               textosAuditado,
+  flujo:                flujoPlan,
+  indicadores:          indicadoresFormulacion,
+  opcionesEstadoPlan:   opcionesEstadoPlan,
+  columnas:             columnasFormulacion,
+  estadosDeGrupo:       estadosDeGrupo,
+  claseEstado:          (estadoId) => claseChipPorGrupo[grupoDeEstado(estadoId)],
+  accionesHabilitadas:  accionesHabilitadas,
 };

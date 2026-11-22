@@ -63,6 +63,30 @@ export interface DatosFilaVista {
   mostrarObservaciones: boolean;
 }
 
+/**
+ * Configuración completa de un tipo de evaluación dentro de una misma vista. Permite que el
+ * select "Tipo de Evaluación" alterne entre perfiles (p. ej. Auditoría Interna / Externa)
+ * reutilizando la misma plantilla y lógica de la base.
+ *
+ * @typeParam A Fila que devuelve el MID.
+ * @typeParam R Resumen que devuelve el MID.
+ * @typeParam G Grupos de estado de la vista.
+ */
+export interface PerfilFormulacion<A, R, G extends string> {
+  /** Id del parámetro del tipo de evaluación (environment.TIPO_EVALUACION). */
+  tipoEvaluacionId: number;
+  nombreTipoEvaluacion: string;
+  textos: TextosVistaFormulacion;
+  flujo: ConfigFlujo;
+  indicadores: IndicadorFormulacion<R>[];
+  opcionesEstadoPlan: OpcionEstadoPlan<G, R>[];
+  columnas: ColumnaFormulacion<A>[];
+  estadosDeGrupo: (grupo: ConTodos<G>) => number[];
+  claseEstado: (estadoId: number) => string;
+  /** Acciones de accionesPlanMejoramiento que el perfil implementa. */
+  accionesHabilitadas: string[];
+}
+
 // ── Tabla ───────────────────────────────────────────────────
 /** Textos de la columna Auditoría en singular o plural (pipe i18nPlural, "#" es el número). */
 export const pluralHallazgos: Record<string, string> = {

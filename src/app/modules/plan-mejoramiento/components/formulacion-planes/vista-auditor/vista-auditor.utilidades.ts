@@ -10,6 +10,7 @@ import {
   ConTodos,
   IndicadorFormulacion,
   OpcionEstadoPlan,
+  PerfilFormulacion,
   TextosVistaFormulacion,
   columnasComunes,
   crearAgrupador,
@@ -231,3 +232,18 @@ export const columnasAuditor: ColumnaFormulacion<AuditoriaFormulacionAuditor>[] 
   columnasComunes.estado,
   columnasComunes.acciones,
 ];
+
+// ── Perfil de Auditoría Interna (revisión y dictamen) ───────
+/** Toda la configuración de la vista auditor para Auditoría Interna. */
+export const perfilAuditorInterna: PerfilFormulacion<AuditoriaFormulacionAuditor, ResumenFormulacionAuditor, GrupoAuditor> = {
+  tipoEvaluacionId:     environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID,
+  nombreTipoEvaluacion: "Auditoría Interna",
+  textos:               textosAuditor,
+  flujo:                flujoAuditor,
+  indicadores:          indicadoresAuditor,
+  opcionesEstadoPlan:   opcionesEstadoAuditor,
+  columnas:             columnasAuditor,
+  estadosDeGrupo:       estadosDeGrupo,
+  claseEstado:          (estadoId) => claseChipPorGrupoAuditor[grupoDeEstado(estadoId)],
+  accionesHabilitadas:  accionesHabilitadasAuditor,
+};

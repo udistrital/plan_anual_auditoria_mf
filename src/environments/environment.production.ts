@@ -194,6 +194,8 @@ export const environment = {
   TIPO_EVALUACION: {
     TIPO_PARAMETRO_ID: 101,
     AUDITORIA_INTERNA_ID: 5246,
+    // TODO: confirmar el Id real del parámetro "Auditoría Externa" en este ambiente.
+    AUDITORIA_EXTERNA_ID: 5249,
     SEGUIMIENTO_ID: 5247,
     INFORME_ID: 5248,
   },

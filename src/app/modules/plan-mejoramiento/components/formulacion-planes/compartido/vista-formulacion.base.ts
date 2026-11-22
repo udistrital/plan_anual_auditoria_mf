@@ -91,9 +91,19 @@ export abstract class VistaFormulacionBase<
 
   filtrosForm!: FormGroup;
   vigencias: Vigencia[] = [];
-  readonly tiposEvaluacion = [
+
+  /**
+   * Tipos de evaluación que ofrece el filtro. Por defecto solo Auditoría Interna;
+   * las vistas que operan sobre otro tipo (p. ej. externa) lo sobreescriben.
+   */
+  protected readonly tiposEvaluacion: { Id: number; Nombre: string }[] = [
     { Id: environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID, Nombre: "Auditoría Interna" },
   ];
+
+  /** Tipo de evaluación seleccionado al iniciar. Por defecto, el primero de tiposEvaluacion. */
+  protected get tipoEvaluacionInicial(): number {
+    return this.tiposEvaluacion[0].Id;
+  }
 
   resumen: R | null = null;
   dataSource = new MatTableDataSource<A & DatosFilaVista>([]);
@@ -125,7 +135,7 @@ export abstract class VistaFormulacionBase<
   private iniciarForm(): void {
     this.filtrosForm = this.fb.group({
       vigencia:       [null],
-      tipoEvaluacion: [environment.TIPO_EVALUACION.AUDITORIA_INTERNA_ID],
+      tipoEvaluacion: [this.tipoEvaluacionInicial],
       busqueda:       [""],
       grupoEstado:    ["TODOS"],
     });
@@ -178,8 +188,16 @@ export abstract class VistaFormulacionBase<
   }
 
   // ── Filtros ───────────────────────────────────────────────
+  /**
+   * Hook para que la vista reaccione a un cambio de tipo de evaluación antes de recargar
+   * (p. ej. alternar la configuración interna/externa y limpiar el grupo de estado).
+   * Por defecto no hace nada.
+   */
+  protected alCambiarTipoEvaluacion(): void {}
+
   /** Cambio de vigencia o tipo de evaluación: recarga indicadores y tabla. */
   recargar(): void {
+    this.alCambiarTipoEvaluacion();
     this.pageIndex = 0;
     this.cargarResumen();
     this.cargarAuditorias();
