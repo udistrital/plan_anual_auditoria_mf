@@ -10,6 +10,7 @@
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -78,7 +79,7 @@
                   }
                 </mat-accordion>
               }
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                 <button
                   mat-raised-button
                   color="primary"
@@ -112,8 +113,9 @@
             [soloLectura]="soloLectura"
             [minFechaStr]="auditoria.fecha_inicio"
             [maxFechaStr]="auditoria.fecha_fin"
+            (cargueMasivo)="subirArchivoCargueMasivo()"
           ></app-actividades-auditoria>
-          <div class="d-flex justify-content-end mt-4">
+          <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
             <button matStepperPrevious mat-stroked-button color="primary">
               <mat-icon>arrow_back_ios</mat-icon>
               Volver
@@ -127,16 +129,6 @@
                 >
                 <mat-icon>add_box</mat-icon>
                 Crear Actividad
-              </button>
-            }
-            @if (!soloLectura) {
-              <button
-                class="mx-2"
-                mat-raised-button
-                color="primary"
-                (click)="subirArchivoCargueMasivo()"
-                >
-                <mat-icon>file_upload</mat-icon> Cargue Masivo
               </button>
             }
             <button matStepperNext mat-flat-button color="primary" class="mx-2">
@@ -189,7 +181,7 @@
             </div>
           }
           <div class="mt-4">
-            <div class="d-flex justify-content-end mt-4">
+            <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
               <button mat-stroked-button color="primary" matStepperPrevious>
                 <mat-icon>arrow_back_ios</mat-icon>
                 Volver
@@ -226,7 +218,7 @@
             [soloLectura]="soloLectura"
             (guardarDocumentos)="manejarEnvioDocumentos($event)"
           ></app-documentos-anexos-auditoria>
-          <div class="d-flex justify-content-end mt-4">
+          <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
             <button matStepperPrevious mat-stroked-button color="primary">
               <mat-icon>arrow_back_ios</mat-icon>
               Volver

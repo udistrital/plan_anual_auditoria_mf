@@ -1,14 +1,14 @@
 <plantilla-tarjeta-contenedora [title]="'Seguimiento e Informes'"
   [breadcrumb]="'<p>Gestión Auditoría / Ejecución / <b>Seguimiento e Informes</b></p>'"
-  [contenido]="contenidoDePlantilla">
+  [contenido]="contenidoDePlantilla" [homologada]="true">
 </plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row">
     <div class="col-12">
-      <form [formGroup]="vigenciaForm">
-        <div class="row">
-          <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+      <form [formGroup]="vigenciaForm" class="sui-seccion">
+        <div class="sui-fila">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 320px; max-width: 100%">
             <mat-label>Seleccione una vigencia:</mat-label>
             <mat-icon color="primary" matPrefix>today</mat-icon>
             <mat-select formControlName="vigencia" (selectionChange)="mostrarSeguimientosPorVigencia($event.value)"
@@ -19,12 +19,14 @@
               }
             </mat-select>
           </mat-form-field>
-          <div class="col-md-8 col-12 d-flex align-items-center centrar-md">
-            <mat-icon color="primary" class="me-2">info</mat-icon>
-            <p style="font-size: 14px">
-              Se cargarán los seguimientos e informes correspondientes a la vigencia seleccionada.
-            </p>
-          </div>
+          <!-- Nota informativa: solo el ícono, el texto aparece al pasar el mouse -->
+          <mat-icon
+            class="sui-info-tip"
+            tabindex="0"
+            matTooltip="Se cargarán los seguimientos e informes correspondientes a la vigencia seleccionada."
+            aria-label="Se cargarán los seguimientos e informes correspondientes a la vigencia seleccionada."
+            aria-hidden="false"
+            >info</mat-icon>
         </div>
       </form>
     </div>

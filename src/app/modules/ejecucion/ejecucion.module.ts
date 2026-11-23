@@ -1,3 +1,4 @@
+import { ClaseEstadoPipe } from "src/app/shared/pipes/clase-estado.pipe";
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeguimientoInformesComponent } from './components/seguimiento-informes/seguimiento-informes.component';
@@ -48,6 +49,7 @@ Quill.register('modules/blotFormatter', BlotFormatter);
     EjecucionRoutingModule,
     MaterialModule,
     ReactiveFormsModule,
+    ClaseEstadoPipe,
   ]
 })
 export class EjecucionModule { }

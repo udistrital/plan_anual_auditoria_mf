@@ -94,12 +94,22 @@ export class PdfVisualizadorComponent implements OnChanges {
     }
   }
 
+  /**
+   * Descarga el documento que se está visualizando.
+   * Se reconstruye desde el base64: ng2-pdf-viewer transfiere `pdfSrc` al worker de pdf.js,
+   * que deja ese buffer vacío (detached), así que no sirve para generar el archivo.
+   */
   descargar(): void {
-    if (!this.pdfSrc) {
+    if (!this.base64Document) {
       return;
     }
-    const nombre = (this.nombreArchivo || "documento").trim();
-    saveAs(new Blob([this.pdfSrc as BlobPart], { type: "application/pdf" }), `${nombre}.pdf`);
+    try {
+      const bytes = new Uint8Array(this.base64ToArrayBuffer(this.base64Document));
+      const nombre = (this.nombreArchivo || "documento").trim();
+      saveAs(new Blob([bytes], { type: "application/pdf" }), `${nombre}.pdf`);
+    } catch (error) {
+      console.error("Error al descargar el PDF:", error);
+    }
   }
 
   alternarPantallaCompleta(): void {

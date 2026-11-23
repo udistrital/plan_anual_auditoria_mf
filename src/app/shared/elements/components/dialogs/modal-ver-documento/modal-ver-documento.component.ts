@@ -30,6 +30,8 @@ export class ModalVerDocumentoComponent implements OnInit {
   @Input() onGuardarTodos?: () => void;
   @Input() onDescargarDocumentoDOCX?: (indice: number) => void;
   documentoSrc: any;
+  /** Base64 del documento único que se muestra en el visor (se actualiza al regenerar). */
+  base64Actual: string = "";
   documentoSeleccionadoSrc: Uint8Array | null = null;
   modoMultiple: boolean = false;
   mostrarCheckGuardado: boolean = true;
@@ -59,6 +61,7 @@ export class ModalVerDocumentoComponent implements OnInit {
       return;
     }
 
+    this.base64Actual = this.documentoBase64;
     const arrayBuffer = this.base64ToArrayBuffer(this.documentoBase64);
     this.documentoSrc = new Uint8Array(arrayBuffer);
   }
@@ -113,6 +116,7 @@ export class ModalVerDocumentoComponent implements OnInit {
     const newBase64 = await this.onRegenerarIndividual(indice);
 
     if (!this.modoMultiple) {
+      this.base64Actual = newBase64;
       this.documentoSrc = new Uint8Array(this.base64ToArrayBuffer(newBase64));
       console.log("Documento regenerado");
       return;

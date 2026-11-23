@@ -7,20 +7,11 @@
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex flex-row-reverse my-2">
-        <button mat-button color="primary" (click)="descargarPDF()">
-          Descargar PDF <mat-icon> insert_drive_file</mat-icon>
-        </button>
-      </div>
-      @if (pdfLoaded) {
-        <div>
-          <pdf-viewer [src]="pdfSrc" [render-text]="true" [original-size]="false" [show-all]="true" [zoom]="1.0"
-            class="pdf-container"
-          style="min-width: 200px; min-height: 520px; width: 100%; height: auto;"></pdf-viewer>
-        </div>
-      }
-    </div>
+  <div class="sui-visor mt-3">
+    <app-pdf-visualizador
+      [base64Document]="data.base64Document"
+      [herramientas]="true"
+      [nombreArchivo]="'Plan Anual de Auditoria ' + data.vigenciaNombre"
+    ></app-pdf-visualizador>
   </div>
 </ng-template>

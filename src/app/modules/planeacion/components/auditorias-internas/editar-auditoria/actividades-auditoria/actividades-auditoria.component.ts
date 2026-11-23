@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, Input } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { MatTableDataSource } from "@angular/material/table";
 import { CargarArchivoComponent } from "src/app/shared/elements/components/cargar-archivo/cargar-archivo.component";
@@ -14,6 +14,14 @@ import { RolService } from "src/app/core/services/rol.service";
 import { mostrarAccionPlaneacionMarcarActividadCompletada } from "src/app/shared/utils/accionesPorRolYEstado";
 import { environment } from "src/environments/environment";
 
+function ACTIVIDADES_LEER_HERRAMIENTAS(): boolean {
+  try {
+    return localStorage.getItem("sisifo-herramientas-tabla") !== "cerrado";
+  } catch {
+    return true;
+  }
+}
+
 @Component({
     selector: "app-actividades-auditoria",
     templateUrl: "./actividades-auditoria.component.html",
@@ -23,6 +31,21 @@ import { environment } from "src/environments/environment";
 export class ActividadesAuditoriaComponent implements OnInit {
   @Input() idAuditoria!: string;
   @Input() soloLectura: boolean = false;
+  /** Cargue masivo de actividades: lo ejecuta la vista padre (Editar Auditoría/Seguimiento). */
+  @Output() cargueMasivo = new EventEmitter<void>();
+
+  /** Sección contraíble "Herramientas de la tabla": recuerda la preferencia del usuario. */
+  herramientasAbiertas: boolean = ACTIVIDADES_LEER_HERRAMIENTAS();
+
+  alternarHerramientas(): void {
+    this.herramientasAbiertas = !this.herramientasAbiertas;
+    try {
+      localStorage.setItem("sisifo-herramientas-tabla", this.herramientasAbiertas ? "abierto" : "cerrado");
+    } catch {
+      // Sin almacenamiento disponible la sección simplemente inicia abierta
+    }
+  }
+
   @Input() minFechaStr!: string;
   @Input() maxFechaStr!: string;
   minFecha: Date | null = null;

@@ -338,7 +338,7 @@ $sui-hover-fila: #f2f2f2;
 
     > div {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 14px;
       min-height: 0;
       overflow: hidden;
@@ -459,6 +459,41 @@ $sui-hover-fila: #f2f2f2;
     }
   }
 
+  // Encabezado del panel de documentos: título y Descargar Todo (pasa debajo si no cabe)
+  .cabecera-documentos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+
+    .sui-seccion-titulo {
+      flex: 0 0 auto;
+      margin: 0 !important;
+    }
+
+    .mdc-button {
+      flex: 1 0 170px;
+    }
+  }
+
+  // Aviso común (reemplaza alert alert-info de Bootstrap, que este MF no compila)
+  .sui-aviso {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    background-color: var(--md-primary-50);
+    color: var(--md-primary-900);
+    font-size: 13px;
+
+    .mat-icon {
+      color: var(--md-primary-500);
+    }
+  }
+
   .sui-visor {
     overflow: hidden;
     border: 1px solid $sui-borde;
@@ -469,6 +504,222 @@ $sui-hover-fila: #f2f2f2;
     width: 100%;
     margin-bottom: 18px;
   }
+}
+
+// ── Stepper y encabezados de bloque (Editar/Ver Auditoría, Seguimiento, Informe) ──
+.sisifo-ui {
+  .mat-stepper-horizontal .mat-horizontal-stepper-header-container {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid $sui-borde;
+  }
+
+  .mat-step-label {
+    p {
+      margin: 0;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #888888;
+    }
+
+    b {
+      font-size: 13.5px;
+    }
+  }
+
+  .mat-step-header .mat-step-icon-selected {
+    box-shadow: 0 0 0 5px var(--md-primary-50);
+  }
+
+  // Encabezado de cada bloque dentro de un paso (antes fondo-acento-50 con h2)
+  .mat-stepper-horizontal,
+  .mat-stepper-vertical {
+    .fondo-acento-50 {
+      gap: 14px;
+      margin: 24px 0 !important;
+      padding: 16px 20px;
+      border: 1px solid var(--md-primary-100);
+      border-radius: 8px;
+      background-color: var(--md-primary-50);
+      color: $sui-texto-2;
+      font-size: 13px;
+
+      > div:first-child {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ffffff;
+
+        .mat-icon {
+          color: var(--md-primary-500);
+        }
+      }
+
+      > div:last-child {
+        margin: 0 !important;
+      }
+
+      h2 {
+        margin: 0 0 2px;
+        font-family: "Raleway", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--md-primary-700);
+      }
+    }
+  }
+}
+
+// ── Árbol Tema › Subtema › Hallazgo (Aspectos Evaluados y Revisión del preinforme) ──
+// Solo estilos: se conserva el DOM (.tree, .tree-node, .node-row, .node-children) que usan las e2e.
+.sisifo-ui .tree {
+  padding-left: 0;
+
+  // Tema: tarjeta con borde primario
+  > .tree-node {
+    margin-bottom: 20px !important;
+    padding: 20px 22px !important;
+    border: 1px solid $sui-borde !important;
+    border-left: 4px solid var(--md-primary-500) !important;
+    border-radius: 10px;
+    background-color: #ffffff;
+  }
+
+  // Subtemas y hallazgos: tarjetas anidadas con guía punteada
+  .node-children {
+    padding-left: 20px;
+    margin-left: 8px;
+
+    &::before {
+      border-left: 2px dashed $sui-borde;
+    }
+
+    > .tree-node {
+      margin-bottom: 14px;
+      padding: 16px 18px;
+      border: 1px solid $sui-borde;
+      border-radius: 10px;
+      background-color: #ffffff;
+
+      &::before {
+        left: -20px;
+        width: 18px;
+        border-top: 2px dashed $sui-borde;
+      }
+    }
+
+    > .tree-node:has(> .subtema-row) {
+      border-left: 4px solid var(--md-primary-300);
+      background-color: #fffdfd;
+    }
+
+    > .tree-node:has(> .hallazgo-row) {
+      border-left: 4px solid #ffb74d;
+    }
+  }
+
+  // Los puntos se reemplazan por el borde de color de cada tarjeta
+  .node-dot {
+    display: none;
+  }
+
+  .node-row {
+    gap: 12px;
+  }
+
+  // Etiqueta del nivel como chip
+  .nivel-label {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .tema-row .nivel-label {
+    background-color: var(--md-primary-100);
+    color: var(--md-primary-900);
+  }
+
+  .subtema-row .nivel-label {
+    background-color: var(--md-primary-50);
+    color: var(--md-primary-700);
+  }
+
+  .hallazgo-row .nivel-label {
+    background-color: #fff3e0;
+    color: #8d4a00;
+  }
+
+  // Numeral destacado (2, 2.1, 2.1.1)
+  .indice {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: "Raleway", sans-serif;
+    font-weight: 700;
+    color: var(--md-primary-700);
+  }
+
+  // Bloque de observaciones de cada hallazgo (Revisión del preinforme)
+  .observaciones {
+    margin-top: 16px;
+    padding: 18px 20px;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+    background-color: $sui-fondo-suave;
+  }
+
+  .obs-header {
+    color: var(--md-primary-700);
+    font-weight: 600;
+
+    .obs-icono {
+      color: var(--md-primary-500);
+    }
+  }
+
+}
+
+// Pasos bloqueados del informe (steps-bloqueados): además de la opacidad, un candado indica por qué no se abren
+.sisifo-ui {
+  .steps-bloqueados mat-step-header:nth-of-type(5),
+  .steps-bloqueados mat-step-header:nth-of-type(6),
+  .steps-bloqueados-con-revision mat-step-header:nth-of-type(6),
+  .steps-bloqueados-con-revision mat-step-header:nth-of-type(7) {
+    .mat-step-icon {
+      position: relative;
+      background-color: #9e9e9e;
+
+      .mat-icon {
+        visibility: hidden;
+      }
+
+      &::after {
+        content: "lock";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Material Icons";
+        font-size: 14px;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+// Aviso de fecha límite de revisión del auditado
+.sisifo-ui mat-card .fecha-revision {
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px !important;
 }
 
 // ── Modales homologados (plantilla-modal [homologado]) ─────────────────────

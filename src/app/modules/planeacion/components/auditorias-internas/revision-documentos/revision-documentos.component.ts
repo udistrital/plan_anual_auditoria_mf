@@ -418,6 +418,7 @@ export class RevisionDocumentosComponent implements OnInit {
       this.cargueCartasDialogRef = this.dialog.open(ModalVerDocumentosComponent, {
         width: "1200px",
         data: {
+          homologado: true,
           entityId: this.auditoriaId,
           titulo: "Cartas de representación",
           descripcion:
@@ -486,6 +487,7 @@ export class RevisionDocumentosComponent implements OnInit {
       this.cargueCartasDialogRef = this.dialog.open(ModalVerDocumentosComponent, {
         width: "1200px",
         data: {
+          homologado: true,
           entityId: this.auditoriaId,
           titulo: "Oficio Anuncio Solicitud de información",
           descripcion:

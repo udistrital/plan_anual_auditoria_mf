@@ -296,8 +296,9 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
     }
 
     const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
-      width: '500px',
+      width: '560px',
       autoFocus: false,
+      data: { homologado: true },
     });
 
     dialogRef.afterClosed().subscribe((observacion: string | null) => {

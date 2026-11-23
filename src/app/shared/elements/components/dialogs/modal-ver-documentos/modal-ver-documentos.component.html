@@ -1,8 +1,39 @@
 <plantilla-modal [icono]="'list_alt'" [titulo]="titulo" [descripcion]="descripcion" [contenido]="contenidoDeModal"
-[footer]="footerDeModal"></plantilla-modal>
+[footer]="footerDeModal" [homologado]="homologado"></plantilla-modal>
 
 <ng-template #contenidoDeModal>
-  <div class="d-flex flex-row-reverse my-2">
+  @if (homologado) {
+    <!-- Línea gráfica homologada (#956): Descargar Todo arriba de la lista, acciones de la pestaña sobre el visor -->
+    <div class="row g-4 mt-1">
+      <div class="col-sm-12 col-md-4 col-lg-3">
+        <div class="sui-panel-documentos">
+          @if (!ocultarDescargarTodo) {
+            <button mat-stroked-button color="primary" class="sui-boton-descargar-todo" (click)="descargarTodo()">
+              <mat-icon>file_download</mat-icon> Descargar Todo
+            </button>
+          }
+          <div class="d-flex flex-column sui-lista-documentos">
+            <ng-container *ngTemplateOutlet="listaPestanas"></ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-12 col-md-8 col-lg-9">
+        <div class="d-flex flex-wrap justify-content-end mb-3" style="gap: 8px">
+          <ng-container *ngTemplateOutlet="botonesPestana"></ng-container>
+        </div>
+        @if (documentosPorTab[selectedTab]) {
+          <div class="sui-visor">
+            <app-pdf-visualizador
+              [base64Document]="documentosPorTab[selectedTab]"
+              [herramientas]="true"
+              [nombreArchivo]="tabs[selectedTab]?.nombre ?? nombreArchivoDescarga"
+            ></app-pdf-visualizador>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="d-flex flex-row-reverse my-2">
     @if (!ocultarDescargarTodo) {
       <button
         class="modal-btn"
@@ -12,6 +43,25 @@
         Descargar Todo <mat-icon>insert_drive_file</mat-icon>
       </button>
     }
+      <ng-container *ngTemplateOutlet="botonesPestana"></ng-container>
+    </div>
+    <div class="row">
+      <div class="col-sm-12 col-md-4 col-lg-3 d-flex flex-column">
+        <ng-container *ngTemplateOutlet="listaPestanas"></ng-container>
+      </div>
+      <div class="col-sm-12 col-md-8 col-lg-9">
+        @if (documentosPorTab[selectedTab]) {
+          <div style="border: 1px solid #ebdddd">
+            <app-pdf-visualizador [base64Document]="documentosPorTab[selectedTab]"></app-pdf-visualizador>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</ng-template>
+
+<!-- Botones propios de la pestaña seleccionada y cargue de adjunto -->
+<ng-template #botonesPestana>
     @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
       @for (boton of tabs[selectedTab].botones; track boton) {
         @switch (boton.tipo || 'flat') {
@@ -122,13 +172,17 @@
     }
   }
 }
-</div>
-<div class="row">
-  <div class="col-sm-12 col-md-4 col-lg-3 d-flex flex-column">
+</ng-template>
+
+<!-- Lista de pestañas (documentos) -->
+<ng-template #listaPestanas>
     @for (tab of tabs; track tab; let i = $index) {
       @if (documentosPorTab[i] || tab.obligatorio) {
         <button class="mb-2 tab-btn" mat-stroked-button
           [ngClass]="selectedTab === i ? 'selected' : ''" (click)="selectTab(i)">
+          @if (homologado) {
+            <mat-icon>picture_as_pdf</mat-icon>
+          }
           {{ tab.nombre }}
           @if (tab.fecha_subida) {
             <span >{{ tab.fecha_subida | date:'dd/MM/yyyy' }}</span>
@@ -136,15 +190,6 @@
         </button>
       }
     }
-  </div>
-  <div class="col-sm-12 col-md-8 col-lg-9">
-    @if (documentosPorTab[selectedTab]) {
-      <div style="border: 1px solid #ebdddd">
-        <app-pdf-visualizador [base64Document]="documentosPorTab[selectedTab]"></app-pdf-visualizador>
-      </div>
-    }
-  </div>
-</div>
 </ng-template>
 <ng-template #footerDeModal>
   @for (accionFooter of accionesFooter; track accionFooter) {

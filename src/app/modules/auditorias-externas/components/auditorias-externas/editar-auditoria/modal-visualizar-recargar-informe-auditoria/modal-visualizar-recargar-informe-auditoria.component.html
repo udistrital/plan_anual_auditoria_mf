@@ -4,12 +4,13 @@
   [descripcion]="'Informe de auditoría externa'"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
+  [homologado]="true"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   <div class="row">
     <div class="col-12">
-      <app-pdf-visualizador [base64Document]="base64"></app-pdf-visualizador>
+      <app-pdf-visualizador [base64Document]="base64" [herramientas]="true" nombreArchivo="Informe Auditoría"></app-pdf-visualizador>
     </div>
   </div>
 </ng-template>

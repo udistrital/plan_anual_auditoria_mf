@@ -1,13 +1,41 @@
-<!-- ← Botón de descarga de plantilla de cargue masivo -->
-<div class="mb-3">
-  @if (!soloLectura) {
-    <button mat-raised-button color="primary" (click)="descargarPlantilla()">
-      <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
+<!-- Herramientas de la tabla: sección contraíble, recuerda la preferencia del usuario -->
+@if (!soloLectura) {
+  <div class="sui-herramientas" [class.cerrado]="!herramientasAbiertas">
+    <button
+      type="button"
+      class="sui-herramientas-cabecera"
+      aria-controls="herramientas-actividades"
+      [attr.aria-expanded]="herramientasAbiertas"
+      (click)="alternarHerramientas()"
+      >
+      <span class="sui-etiqueta">Herramientas de la tabla</span>
+      <mat-icon>expand_more</mat-icon>
     </button>
-  }
-</div>
-
-<h3 class="mt-5 mb-3">Lista de actividades</h3>
+    <div class="sui-herramientas-cuerpo" id="herramientas-actividades" [attr.aria-hidden]="!herramientasAbiertas">
+      <div>
+        <button
+          type="button"
+          class="sui-accion"
+          [attr.tabindex]="herramientasAbiertas ? null : -1"
+          (click)="descargarPlantilla()"
+          >
+          <span class="sui-insignia"><mat-icon svgIcon="excel"></mat-icon></span>
+          <span><b>Descargar Plantilla</b><small>Formato Excel para el cargue masivo</small></span>
+        </button>
+        <button
+          type="button"
+          class="sui-accion"
+          [attr.tabindex]="herramientasAbiertas ? null : -1"
+          (click)="cargueMasivo.emit()"
+          >
+          <span class="sui-insignia"><mat-icon>file_upload</mat-icon></span>
+          <span><b>Cargue Masivo</b><small>Carga las actividades desde la plantilla</small></span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+<h3 class="sui-seccion-titulo mt-4"><mat-icon>checklist</mat-icon>Lista de actividades</h3>
 <div class="table-container rounded-table table-scroll">
   <table mat-table [dataSource]="datos">
     <!-- No. Column -->
@@ -89,7 +117,7 @@
     </ng-container>
 
     <!-- Acciones -->
-    <ng-container matColumnDef="acciones">
+    <ng-container matColumnDef="acciones" [stickyEnd]="true">
       <th mat-header-cell *matHeaderCellDef class="header">
         <b>Acciones</b>
       </th>

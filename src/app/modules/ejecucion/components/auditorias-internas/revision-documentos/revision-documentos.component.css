@@ -1,47 +1,19 @@
-.selected {
-  background-color: var(--md-primary-50);
-  color: var(--md-primary-600) !important;
-  border: 1px solid var(--md-primary-200) !important;
-  font-weight: 600;
-}
-
-.custom-button {
-  width: 100%;
-  padding: 10px 12px;
-  height: auto !important;
-}
-
-.custom-button .mdc-button__label,
-.custom-button .mat-button-wrapper {
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.25;
-}
-
-@media (max-width: 768px) {
-  .custom-button {
-    padding: 8px 10px;
-  }
-}
-
+/* La lista de documentos, el visor y la barra usan los estilos comunes de assets/styles/_sisifo-ui.scss.
+   Aquí solo se limita la altura de la lista cuando hay muchas cartas de representación. */
 .documentos-panel {
   height: auto;
-  max-height: 520px;
+  max-height: 600px;
 }
 
 .documentos-scroll {
   overflow-y: auto;
-  max-height: calc(520px - 56px);
-  padding-right: 10px;
+  max-height: calc(600px - 110px);
+  padding-right: 6px;
   scrollbar-width: thin;
 }
 
 .documentos-scroll::-webkit-scrollbar {
   width: 6px;
-}
-
-.documentos-scroll::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .documentos-scroll::-webkit-scrollbar-thumb {
@@ -50,17 +22,10 @@
 
 @media (max-width: 768px) {
   .documentos-panel {
-    height: auto;
     max-height: none;
   }
 
   .documentos-scroll {
     max-height: 280px;
   }
-}
-
-.borde-redondo {
-  border: 1px solid #d8d8d8;
-  border-radius: 6px;
-  padding: 20px;
 }

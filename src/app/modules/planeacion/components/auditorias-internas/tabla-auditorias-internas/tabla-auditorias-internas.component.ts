@@ -470,6 +470,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
+          homologado: true,
         entityId: auditoriaId,
         inferTabs: false,
         tabs: [
@@ -569,8 +570,9 @@ export class TablaAuditoriasInternasComponent implements OnInit {
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
     const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
-      width: '500px',
+      width: '560px',
       autoFocus: false,
+      data: { homologado: true },
     });
 
     dialogRef.afterClosed().subscribe((observacion: string | null) => {

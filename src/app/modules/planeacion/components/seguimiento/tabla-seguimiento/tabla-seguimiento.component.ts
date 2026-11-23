@@ -490,8 +490,9 @@ export class TablaSeguimientoComponent implements OnInit {
 
   preguntarEnvioAprobacionPorJefe(auditoria: Auditoria) {
     const dialogRef = this.dialog.open(ModalEnviarAprobacionComponent, {
-      width: '500px',
+      width: '560px',
       autoFocus: false,
+      data: { homologado: true },
     });
 
     dialogRef.afterClosed().subscribe((observacion: string | null) => {
@@ -691,6 +692,7 @@ export class TablaSeguimientoComponent implements OnInit {
     this.dialog.open(ModalVerDocumentosComponent, {
       width: "1200px",
       data: {
+          homologado: true,
         entityId: auditoriaId,
         descripcion: "Documentos de la Auditoría de Seguimiento",
         sufijo: `oci-${auditoria.consecutivo_OCI}`,

@@ -1,28 +1,30 @@
 <plantilla-tarjeta-contenedora [title]="'Revisión de documentos'" [breadcrumb]="
     '<p>Gestión Auditoría / Planeación / Auditorías Internas / <b>Revisión documentos</b></p>'
   " [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()"
-[mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
+[mostrarBotonRegresar]="true" [homologada]="true"></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
-      <div class="d-flex flex-row-reverse my-2">
-        <button mat-button color="primary" (click)="descargarTodo()">
-          Descargar Todo <mat-icon> file_download</mat-icon>
-        </button>
-      </div>
-      <div class="row">
+      <div class="row g-4">
         <div class="col-sm-12 col-md-5 col-lg-4">
-          <div class="d-flex flex-column borde-redondo documentos-panel">
-            <h3 class="mb-3">Documentos</h3>
-            <div class="documentos-scroll">
+          <div class="d-flex flex-column sui-panel-documentos documentos-panel">
+            <!-- Encabezado del panel: título y Descargar Todo -->
+            <div class="cabecera-documentos">
+              <h3 class="sui-seccion-titulo">Documentos</h3>
+              <button mat-stroked-button color="primary" (click)="descargarTodo()">
+                <mat-icon>file_download</mat-icon> Descargar Todo
+              </button>
+            </div>
+            <div class="documentos-scroll sui-lista-documentos">
               @for (doc of documentosVisibles; track doc; let i = $index) {
                 <button
-                  class="mb-2 custom-button"
+                  class="custom-button"
                   mat-stroked-button
                   [ngClass]="selectedTab === i ? 'selected' : ''"
                   (click)="selectTab(i)"
                   >
+                  <mat-icon>picture_as_pdf</mat-icon>
                   {{ doc.titulo }}
                 </button>
               }
@@ -30,58 +32,54 @@
           </div>
         </div>
         <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
-          <div class="borde-redondo">
-            @if (documentosVisibles[selectedTab]; as documentoSeleccionado) {
-              <h3>{{ documentoSeleccionado.titulo }}</h3>
-              <div class="row">
-                <app-pdf-visualizador class="mt-3" [base64Document]="documentoSeleccionado.base64"></app-pdf-visualizador>
-              </div>
-            }
-            @if (documentosVisibles.length === 0) {
-              <div class="alert alert-info mb-0">
-                No hay documentos disponibles para mostrar.
-              </div>
-            }
-          </div>
+          @if (documentosVisibles[selectedTab]; as documentoSeleccionado) {
+            <h3 class="sui-seccion-titulo mb-3">{{ documentoSeleccionado.titulo }}</h3>
+            <div class="sui-visor">
+              <app-pdf-visualizador
+                [base64Document]="documentoSeleccionado.base64"
+                [herramientas]="true"
+                [nombreArchivo]="documentoSeleccionado.titulo"
+              ></app-pdf-visualizador>
+            </div>
+          }
+          @if (documentosVisibles.length === 0) {
+            <div class="sui-aviso">
+              <mat-icon>info</mat-icon>
+              No hay documentos disponibles para mostrar.
+            </div>
+          }
         </div>
       </div>
       @if (role) {
-        <mat-dialog-actions align="center">
-          @if (mostrarAcciones(role, estadoAuditoriaId)) {
-            <div class="row">
-              <div class="col-12 my-4">
-                @if (mostrarRechazoAuditoria(role, estadoAuditoriaId)) {
-                  <button mat-stroked-button color="primary" class="mx-2 width-100-md"
-                    style="border: 1px solid var(--md-primary-500)" (click)="abrirModalRechazo()">
-                    <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
-                  </button>
-                }
-                @if (!puedeCargarCartaFirmada()) {
-                  <button
-                    class="mx-2 width-100-md mt-md"
-                    mat-raised-button color="primary"
-                    (click)="preguntarAprobacionAuditoria()"
-                    >
-                    <mat-icon>fact_check</mat-icon>
-                    {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
-                  </button>
-                }
-                @if (puedeCargarCartaFirmada()) {
-                  <button
-                    mat-flat-button
-                    color="accent"
-                    class="mx-2 width-100-md mt-md"
-                    (click)="abrirModalCargueCartasFirmadas()"
-                    [matTooltip]="rolesAprobacion[role]?.tooltipFirmar ?? ''"
-                    >
-                    <mat-icon>{{ rolesAprobacion[role]?.iconoFirmar ?? 'upload_file' }}</mat-icon>
-                    {{ rolesAprobacion[role]?.botonFirmar ?? '' }}
-                  </button>
-                }
-              </div>
-            </div>
-          }
-        </mat-dialog-actions>
+        @if (mostrarAcciones(role, estadoAuditoriaId)) {
+          <div class="sui-barra-acciones">
+            @if (mostrarRechazoAuditoria(role, estadoAuditoriaId)) {
+              <button mat-stroked-button color="primary" (click)="abrirModalRechazo()">
+                <mat-icon>disabled_by_default</mat-icon>Rechazar Auditoría
+              </button>
+            }
+            @if (!puedeCargarCartaFirmada()) {
+              <button
+                mat-raised-button color="primary"
+                (click)="preguntarAprobacionAuditoria()"
+                >
+                <mat-icon>fact_check</mat-icon>
+                {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
+              </button>
+            }
+            @if (puedeCargarCartaFirmada()) {
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="abrirModalCargueCartasFirmadas()"
+                [matTooltip]="rolesAprobacion[role]?.tooltipFirmar ?? ''"
+                >
+                <mat-icon>{{ rolesAprobacion[role]?.iconoFirmar ?? 'upload_file' }}</mat-icon>
+                {{ rolesAprobacion[role]?.botonFirmar ?? '' }}
+              </button>
+            }
+          </div>
+        }
       }
     </div>
   </div>

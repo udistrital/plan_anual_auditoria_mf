@@ -1,12 +1,12 @@
 @if (banderaTablaAuditoriasInternas) {
-  <div class="row mt-4">
-    <div class="col-12">
-      <h3 class="my-3">Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
-      <p class="mb-2 mx-2">
+  <div class="sui-seccion">
+    <div>
+      <h3 class="sui-seccion-titulo"><mat-icon>fact_check</mat-icon>Listado de Auditorías Aprobadas en el Plan Anual de Auditorías (PAA)</h3>
+      <p class="sui-subtitulo">
         Seleccione la auditoría interna para realizar la revisión y/o ejecución.
       </p>
     </div>
-    <div class="col-12">
+    <div>
       @if (mostrarFiltros) {
         <div class="row mb-3">
           <div class="col-12">
@@ -37,6 +37,7 @@
           @for (columna of auditoriasContructorTabla; track columna) {
             <ng-container
               [matColumnDef]="columna.columnDef"
+              [stickyEnd]="columna.columnDef === 'acciones'"
               >
               <th
                 mat-header-cell
@@ -87,7 +88,7 @@
                     }
                     @case('estado') {
                       <div>
-                        <span>{{ getEstadoConColor(row) }}</span>
+                        <span class="estado-chip" [ngClass]="(row.estado_nombre ?? 'Sin estado') | claseEstado">{{ row.estado_nombre ?? 'Sin estado' }}</span>
                       </div>
                     }
                     @default {
