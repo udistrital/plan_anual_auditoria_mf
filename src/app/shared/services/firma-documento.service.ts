@@ -9,6 +9,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import type { DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
 import { AlertService } from "./alert.service";
 import { TercerosService } from "./terceros.service";
+import { construirNombreCompleto } from "../utils/nombre-completo.util";
 
 /** Cargo y oficina con los que firma el usuario autenticado */
 export interface CargoFirmante {
@@ -20,6 +21,33 @@ export const CARGO_JEFE_OCI: CargoFirmante = {
   cargo: "Jefe Oficina de Control Interno",
   oficina: "Oficina de Control Interno",
 };
+
+/** Cargo con el que el Jefe de dependencia firma la carta de representación de su dependencia */
+export const cargoJefeDependencia = (dependenciaNombre: string): CargoFirmante => ({
+  cargo: "Jefe de Dependencia",
+  oficina: dependenciaNombre,
+});
+
+/** Mecanismo con el que se firmó un documento (metadato tipo_firma) */
+export const TIPO_FIRMA = {
+  ELECTRONICA: "electronica",
+  MANUAL: "manual",
+} as const;
+
+export type TipoFirma = (typeof TIPO_FIRMA)[keyof typeof TIPO_FIRMA];
+
+/**
+ * Indica cómo se firmó un documento. Los documentos firmados antes de registrar tipo_firma
+ * se infieren: la firma electrónica guarda el enlace del original sin firmar.
+ * @returns undefined si el documento no está firmado
+ */
+export function obtenerTipoFirma(documento?: { metadatos?: Record<string, any> }): TipoFirma | undefined {
+  const metadatos = documento?.metadatos;
+  if (!metadatos?.["firmado"]) return undefined;
+  if (metadatos["tipo_firma"] === TIPO_FIRMA.ELECTRONICA || metadatos["tipo_firma"] === TIPO_FIRMA.MANUAL)
+    return metadatos["tipo_firma"];
+  return metadatos["nuxeo_enlace_sin_firma"] ? TIPO_FIRMA.ELECTRONICA : TIPO_FIRMA.MANUAL;
+}
 
 /** Documento referenciado que se firma */
 export interface DocumentoFirma {
@@ -38,7 +66,7 @@ export interface DocumentoAuditoriaFirma extends DocumentoFirma {
 }
 
 export const DOCUMENTOS_AUDITORIA_FIRMA: Record<
-  "PROGRAMA_TRABAJO" | "OFICIO_SOLICITUD_INFORMACION" | "INFORME_FINAL",
+  "PROGRAMA_TRABAJO" | "OFICIO_SOLICITUD_INFORMACION" | "INFORME_FINAL" | "CARTA_REPRESENTACION",
   DocumentoAuditoriaFirma
 > = {
   PROGRAMA_TRABAJO: {
@@ -62,7 +90,22 @@ export const DOCUMENTOS_AUDITORIA_FIRMA: Record<
     prefijoNombre: "Informe_Final_Firmado",
     descripcion: "Informe final de auditoría firmado electrónicamente",
   },
+  CARTA_REPRESENTACION: {
+    tipoDocumento: environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION,
+    idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
+    etiqueta: "la Carta de representación",
+    prefijoNombre: "Carta_Representacion_Firmada",
+    descripcion: "Carta de representación firmada electrónicamente",
+  },
 };
+
+/** Opciones para firmar uno de varios documentos del mismo tipo (ej. una carta por dependencia) */
+export interface OpcionesFirmaDocumento {
+  /** _id del documento a firmar; si se omite se firma el vigente del tipo */
+  documentoId?: string;
+  /** Se agrega al nombre del PDF firmado para distinguirlo (ej. la dependencia) */
+  sufijoNombre?: string;
+}
 
 export interface SolicitudFirmaDocumento extends DocumentoFirma {
   referenciaId: string;
@@ -71,6 +114,8 @@ export interface SolicitudFirmaDocumento extends DocumentoFirma {
   nombre: string;
   metadatos?: Record<string, any>;
   cargoFirmante: CargoFirmante;
+  /** _id del documento a firmar cuando la referencia tiene varios del mismo tipo */
+  documentoId?: string;
 }
 
 /** Extrae el detalle de un error de firma para mostrarlo al usuario */
@@ -107,7 +152,7 @@ export class FirmaDocumentoService {
     const { referenciaId, referenciaTipo, tipoDocumento, etiqueta, cargoFirmante } = solicitud;
 
     return forkJoin({
-      documento: this.consultarDocumento(referenciaId, tipoDocumento),
+      documento: this.consultarDocumento(referenciaId, tipoDocumento, solicitud.documentoId),
       firmante: this.tercerosService.getAuthenticatedUserTerceroResponse().pipe(
         throwIfEmpty(() => new Error("No se encontró la información del firmante."))
       ),
@@ -131,7 +176,7 @@ export class FirmaDocumentoService {
               descripcion: solicitud.descripcion,
               metadatos: solicitud.metadatos ?? {},
               firmantes: [{
-                nombre: firmante.Tercero.NombreCompleto,
+                nombre: construirNombreCompleto(firmante.Tercero) || firmante.Tercero.NombreCompleto,
                 ...cargoFirmante,
                 tipoId: firmante.Identificacion?.TipoDocumentoId?.CodigoAbreviacion ?? "CC",
                 identificacion: firmante.Identificacion?.Numero,
@@ -154,6 +199,7 @@ export class FirmaDocumentoService {
               {
                 ...documento.metadatos,
                 firmado: true,
+                tipo_firma: TIPO_FIRMA.ELECTRONICA,
                 nuxeo_enlace_sin_firma: enlaceSinFirma,
               },
               false,
@@ -169,7 +215,8 @@ export class FirmaDocumentoService {
   firmarDocumentoAuditoria(
     auditoriaId: string,
     documento: DocumentoAuditoriaFirma,
-    cargoFirmante: CargoFirmante
+    cargoFirmante: CargoFirmante,
+    opciones: OpcionesFirmaDocumento = {}
   ): Observable<any> {
     return this.planAuditoriaMid.get(`auditoria/${auditoriaId}`).pipe(
       switchMap((res: any) => {
@@ -181,13 +228,16 @@ export class FirmaDocumentoService {
           ...datosDocumento,
           referenciaId: auditoriaId,
           referenciaTipo: "Auditoria",
-          nombre: `${prefijoNombre}_${consecutivoOci || auditoriaId}`,
+          nombre: [prefijoNombre, consecutivoOci || auditoriaId, opciones.sufijoNombre]
+            .filter(Boolean)
+            .join("_"),
           metadatos: {
             auditoria_id: auditoriaId,
             consecutivo_oci: consecutivoOci,
             vigencia: auditoria?.vigencia_nombre ?? "",
           },
           cargoFirmante,
+          documentoId: opciones.documentoId,
         });
       })
     );
@@ -200,10 +250,11 @@ export class FirmaDocumentoService {
   firmarDocumentoAuditoriaConAlerta(
     auditoriaId: string,
     documento: DocumentoAuditoriaFirma,
-    cargoFirmante: CargoFirmante
+    cargoFirmante: CargoFirmante,
+    opciones: OpcionesFirmaDocumento = {}
   ): Promise<boolean> {
     return this.ejecutarFirma(
-      this.firmarDocumentoAuditoria(auditoriaId, documento, cargoFirmante),
+      this.firmarDocumentoAuditoria(auditoriaId, documento, cargoFirmante, opciones),
       documento.etiqueta
     );
   }
@@ -216,12 +267,18 @@ export class FirmaDocumentoService {
   async aplicarFirmaDocumentoAuditoria(
     auditoriaId: string,
     documento: DocumentoAuditoriaFirma,
-    cargoFirmante: CargoFirmante
+    cargoFirmante: CargoFirmante,
+    opciones: OpcionesFirmaDocumento = {}
   ): Promise<boolean> {
-    if (await this.estaFirmado(auditoriaId, documento.tipoDocumento)) {
+    const tipoFirma = obtenerTipoFirma(
+      await lastValueFrom(this.consultarDocumento(auditoriaId, documento.tipoDocumento, opciones.documentoId))
+    );
+    if (tipoFirma) {
       this.alertService.showAlert(
         "Documento firmado",
-        `${capitalizar(documento.etiqueta)} ya fue firmado electrónicamente.`
+        tipoFirma === TIPO_FIRMA.MANUAL
+          ? `${capitalizar(documento.etiqueta)} ya fue cargado con firma; no es posible aplicar la firma electrónica.`
+          : `${capitalizar(documento.etiqueta)} ya fue firmado electrónicamente.`
       );
       return false;
     }
@@ -231,7 +288,7 @@ export class FirmaDocumentoService {
     );
     if (!confirmado.value) return false;
 
-    const firmado = await this.firmarDocumentoAuditoriaConAlerta(auditoriaId, documento, cargoFirmante);
+    const firmado = await this.firmarDocumentoAuditoriaConAlerta(auditoriaId, documento, cargoFirmante, opciones);
     if (firmado)
       this.alertService.showSuccessAlert(`${capitalizar(documento.etiqueta)} fue firmado electrónicamente.`);
     return firmado;
@@ -243,10 +300,16 @@ export class FirmaDocumentoService {
     return !!documento?.metadatos?.["firmado"];
   }
 
-  private consultarDocumento(referenciaId: string, tipoDocumento: number): Observable<DocumentoReferenciaPdf | undefined> {
+  private consultarDocumento(
+    referenciaId: string,
+    tipoDocumento: number,
+    documentoId?: string
+  ): Observable<DocumentoReferenciaPdf | undefined> {
     return this.referenciaPdfService
       .consultarDocumentos(referenciaId, { tipo_id: tipoDocumento })
-      .pipe(map((documentos) => this.referenciaPdfService.filtrarValidos(documentos)[0]));
+      .pipe(map((documentos) => documentoId
+        ? documentos.find((documento) => documento._id === documentoId)
+        : this.referenciaPdfService.filtrarValidos(documentos)[0]));
   }
 
   private async ejecutarFirma(firma$: Observable<any>, etiqueta: string): Promise<boolean> {

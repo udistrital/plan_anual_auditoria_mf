@@ -13,6 +13,10 @@ export interface TerceroIdentification {
   Id: number;
   NombreCompleto: string;
   UsuarioWSO2: string;
+  PrimerNombre?: string | null;
+  SegundoNombre?: string | null;
+  PrimerApellido?: string | null;
+  SegundoApellido?: string | null;
 }
 
 export interface TerceroResponse {

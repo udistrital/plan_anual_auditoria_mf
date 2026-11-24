@@ -32,22 +32,26 @@
           </div>
         </div>
         <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
-          @if (documentosVisibles[selectedTab]; as documentoSeleccionado) {
-            <h3 class="sui-seccion-titulo mb-3">{{ documentoSeleccionado.titulo }}</h3>
-            <div class="sui-visor">
-              <app-pdf-visualizador
-                [base64Document]="documentoSeleccionado.base64"
-                [herramientas]="true"
-                [nombreArchivo]="documentoSeleccionado.titulo"
-              ></app-pdf-visualizador>
-            </div>
-          }
-          @if (documentosVisibles.length === 0) {
-            <div class="sui-aviso">
-              <mat-icon>info</mat-icon>
-              No hay documentos disponibles para mostrar.
-            </div>
-          }
+          <div class="sui-panel-visor">
+            @if (documentosVisibles[selectedTab]; as documentoSeleccionado) {
+              <div class="sui-cabecera-visor">
+                <h3 class="sui-seccion-titulo">{{ documentoSeleccionado.titulo }}</h3>
+              </div>
+              <div class="sui-visor">
+                <app-pdf-visualizador
+                  [base64Document]="documentoSeleccionado.base64"
+                  [herramientas]="true"
+                  [nombreArchivo]="documentoSeleccionado.titulo"
+                ></app-pdf-visualizador>
+              </div>
+            }
+            @if (documentosVisibles.length === 0) {
+              <div class="sui-aviso">
+                <mat-icon>info</mat-icon>
+                No hay documentos disponibles para mostrar.
+              </div>
+            }
+          </div>
         </div>
       </div>
       @if (role) {

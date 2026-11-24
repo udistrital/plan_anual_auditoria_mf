@@ -21,7 +21,15 @@ import { NotificacionesService, DestinatariosEmail, VariablesSolicitud, Variable
 import { NotificacionRegistroCrudService } from "src/app/core/services/notificacion-registro-crud.service";
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
-import { CARGO_JEFE_OCI, DOCUMENTOS_AUDITORIA_FIRMA, FirmaDocumentoService } from "src/app/shared/services/firma-documento.service";
+import {
+  CARGO_JEFE_OCI,
+  cargoJefeDependencia,
+  DOCUMENTOS_AUDITORIA_FIRMA,
+  FirmaDocumentoService,
+  obtenerTipoFirma,
+  TIPO_FIRMA,
+} from "src/app/shared/services/firma-documento.service";
+import { construirNombreCompleto } from "src/app/shared/utils/nombre-completo.util";
 import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
@@ -73,6 +81,7 @@ export class RevisionDocumentosComponent implements OnInit {
   cargueCartasDialogRef?: MatDialogRef<any>;
   esJefeOCI: boolean = false;
   esAuditado: boolean = false;
+  esJefeDependencia: boolean = false;
 
   constructor(
     public readonly dialog: MatDialog,
@@ -139,7 +148,7 @@ export class RevisionDocumentosComponent implements OnInit {
       if (!carta?.metadatos?.["firmado"]) {
         this.alertService.showAlert(
           "Carta sin firmar",
-          `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido cargada con firma. Por favor, cargue la carta firmada antes de aprobar la auditoría.`
+          `La carta de representación para la dependencia ${this.resolverNombreDependencia(carta, 0)} no ha sido firmada. Por favor, aplique la firma electrónica o cargue la carta firmada antes de aprobar la auditoría.`
         );
         return;
       }
@@ -287,6 +296,7 @@ export class RevisionDocumentosComponent implements OnInit {
       this.role === environment.ROL.ASISTENTE_DEPENDENCIA;
 
     this.esJefeOCI = this.role === environment.ROL.JEFE;
+    this.esJefeDependencia = this.role === environment.ROL.JEFE_DEPENDENCIA;
   }
 
   mostrarAcciones(role: string, estadoAuditoriaId: number): boolean {
@@ -390,11 +400,32 @@ export class RevisionDocumentosComponent implements OnInit {
             color: "primary",
             estilo: "border: 1px solid var(--md-primary-500);",
             tipo: "stroked",
+            // Firmada electrónicamente ya no se descarga la plantilla para firmar
+            visible: (carta) => !!carta && obtenerTipoFirma(carta) !== TIPO_FIRMA.ELECTRONICA,
             accion: async () => {
               const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
               this.descargaService.descargarArchivo(
                 base64, "application/pdf", `Carta_Representacion_${dependenciaNombre}`
               );
+            }
+          }, {
+            nombre: "Aplicar Firma Electrónica",
+            icono: "draw",
+            color: "primary",
+            tipo: "flat",
+            // Solo el Jefe de dependencia firma, y solo si la carta no se ha firmado por ningún medio
+            visible: (carta) => this.esJefeDependencia && !!carta && !obtenerTipoFirma(carta),
+            accion: async (contexto) => {
+              const firmado = await this.firmaDocumentoService.aplicarFirmaDocumentoAuditoria(
+                this.auditoriaId,
+                DOCUMENTOS_AUDITORIA_FIRMA.CARTA_REPRESENTACION,
+                cargoJefeDependencia(dependenciaNombre),
+                { documentoId: documento._id, sufijoNombre: dependenciaNombre.replace(/\s+/g, "_") }
+              );
+              if (!firmado) return;
+              cartasAuditado = await this.cargarCartasAuditado();
+              this.cargarDocumentos();
+              await contexto?.refresh();
             }
           }],
           cargueAdjuntoConfig: {
@@ -406,7 +437,9 @@ export class RevisionDocumentosComponent implements OnInit {
             idTipoDocumento: environment.TIPO_DOCUMENTO.PROGRAMA_TRABAJO_AUDITORIA,
             descripcion: `Carta de representación firmada - ${dependenciaNombre}`,
             referenciaTipoFallback: "Auditoria",
-            metadatosAdicionales: { firmado: true },
+            metadatosAdicionales: { firmado: true, tipo_firma: TIPO_FIRMA.MANUAL },
+            // Se puede reemplazar la carta cargada, pero no una firmada electrónicamente
+            visible: (carta) => !!carta && obtenerTipoFirma(carta) !== TIPO_FIRMA.ELECTRONICA,
             onSuccess: async () => {
               cartasAuditado = await this.cargarCartasAuditado();
               this.cargarDocumentos();
@@ -885,7 +918,7 @@ export class RevisionDocumentosComponent implements OnInit {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(construirNombreCompleto(tercero) || tercero.NombreCompleto),
         });
       }),
 

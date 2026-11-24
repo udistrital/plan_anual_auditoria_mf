@@ -18,18 +18,24 @@
         </div>
       </div>
       <div class="col-sm-12 col-md-8 col-lg-9">
-        <div class="d-flex flex-wrap justify-content-end mb-3" style="gap: 8px">
-          <ng-container *ngTemplateOutlet="botonesPestana"></ng-container>
-        </div>
-        @if (documentosPorTab[selectedTab]) {
-          <div class="sui-visor">
-            <app-pdf-visualizador
-              [base64Document]="documentosPorTab[selectedTab]"
-              [herramientas]="true"
-              [nombreArchivo]="tabs[selectedTab]?.nombre ?? nombreArchivoDescarga"
-            ></app-pdf-visualizador>
+        <div class="sui-panel-visor">
+          <!-- Encabezado fijo: nombre del documento y sus acciones, alineado con el de la lista -->
+          <div class="sui-cabecera-visor">
+            <h3 class="sui-seccion-titulo">{{ tabs[selectedTab]?.nombre }}</h3>
+            <div class="sui-acciones-visor">
+              <ng-container *ngTemplateOutlet="botonesPestana"></ng-container>
+            </div>
           </div>
-        }
+          @if (documentosPorTab[selectedTab]) {
+            <div class="sui-visor">
+              <app-pdf-visualizador
+                [base64Document]="documentosPorTab[selectedTab]"
+                [herramientas]="true"
+                [nombreArchivo]="tabs[selectedTab]?.nombre ?? nombreArchivoDescarga"
+              ></app-pdf-visualizador>
+            </div>
+          }
+        </div>
       </div>
     </div>
   } @else {
@@ -60,120 +66,86 @@
   }
 </ng-template>
 
-<!-- Botones propios de la pestaña seleccionada y cargue de adjunto -->
+<!-- Botones propios de la pestaña seleccionada y cargue de adjunto (icono a la izquierda, como hijo directo para que Material lo alinee) -->
 <ng-template #botonesPestana>
-    @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
-      @for (boton of tabs[selectedTab].botones; track boton) {
+  @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
+    @for (boton of tabs[selectedTab].botones; track boton) {
+      @if (esVisible(boton.visible)) {
         @switch (boton.tipo || 'flat') {
-          @case ('flat') {
-            <button
-              class="modal-btn"
-              mat-flat-button
-              [color]="boton.color || 'accent'"
-              [style]="boton.estilo ?? ''"
-              (click)="ejecutarBotonTab(boton)"
-              >
-              {{ boton.nombre }} @if (boton.icono) {
-              <mat-icon>{{ boton.icono }}</mat-icon>
-            }
-          </button>
-        }
-        @case ('stroked') {
-          <button
-            class="modal-btn"
-            mat-stroked-button
-            [color]="boton.color || 'accent'"
-            [style]="boton.estilo ?? ''"
-            (click)="ejecutarBotonTab(boton)"
-            >
-            {{ boton.nombre }} @if (boton.icono) {
-            <mat-icon>{{ boton.icono }}</mat-icon>
+          @case ('stroked') {
+            <button class="modal-btn" mat-stroked-button [color]="boton.color || 'accent'" [style]="boton.estilo ?? ''"
+              (click)="ejecutarBotonTab(boton)">
+              @if (boton.icono) {
+                <mat-icon>{{ boton.icono }}</mat-icon>
+              }
+              {{ boton.nombre }}
+            </button>
           }
+          @case ('raised') {
+            <button class="modal-btn" mat-raised-button [color]="boton.color || 'accent'" [style]="boton.estilo ?? ''"
+              (click)="ejecutarBotonTab(boton)">
+              @if (boton.icono) {
+                <mat-icon>{{ boton.icono }}</mat-icon>
+              }
+              {{ boton.nombre }}
+            </button>
+          }
+          @case ('basic') {
+            <button class="modal-btn" mat-button [color]="boton.color || 'accent'" [style]="boton.estilo ?? ''"
+              (click)="ejecutarBotonTab(boton)">
+              @if (boton.icono) {
+                <mat-icon>{{ boton.icono }}</mat-icon>
+              }
+              {{ boton.nombre }}
+            </button>
+          }
+          @default {
+            <button class="modal-btn" mat-flat-button [color]="boton.color || 'accent'" [style]="boton.estilo ?? ''"
+              (click)="ejecutarBotonTab(boton)">
+              @if (boton.icono) {
+                <mat-icon>{{ boton.icono }}</mat-icon>
+              }
+              {{ boton.nombre }}
+            </button>
+          }
+        }
+      }
+    }
+  }
+  @if (tabs && tabs[selectedTab] && tabs[selectedTab].cargueAdjuntoConfig && esVisible(tabs[selectedTab].cargueAdjuntoConfig?.visible)) {
+    @let cargue = tabs[selectedTab].cargueAdjuntoConfig!;
+    @switch (cargue.tipoBoton || 'flat') {
+      @case ('stroked') {
+        <button class="modal-btn" mat-stroked-button [color]="cargue.colorBoton || 'accent'" [style]="cargue.estiloBoton ?? ''"
+          (click)="abrirCargueAdjuntoTabActual()">
+          <mat-icon>{{ cargue.iconoBoton || 'upload_file' }}</mat-icon>
+          {{ cargue.nombreBoton || 'Cargar adjunto' }}
         </button>
       }
       @case ('raised') {
-        <button
-          class="modal-btn"
-          mat-raised-button
-          [color]="boton.color || 'accent'"
-          [style]="boton.estilo ?? ''"
-          (click)="ejecutarBotonTab(boton)"
-          >
-          {{ boton.nombre }} @if (boton.icono) {
-          <mat-icon>{{ boton.icono }}</mat-icon>
-        }
-      </button>
-    }
-    @case ('basic') {
-      <button
-        class="modal-btn"
-        mat-button
-        [color]="boton.color || 'accent'"
-        [style]="boton.estilo ?? ''"
-        (click)="ejecutarBotonTab(boton)"
-        >
-        {{ boton.nombre }} @if (boton.icono) {
-        <mat-icon>{{ boton.icono }}</mat-icon>
+        <button class="modal-btn" mat-raised-button [color]="cargue.colorBoton || 'accent'" [style]="cargue.estiloBoton ?? ''"
+          (click)="abrirCargueAdjuntoTabActual()">
+          <mat-icon>{{ cargue.iconoBoton || 'upload_file' }}</mat-icon>
+          {{ cargue.nombreBoton || 'Cargar adjunto' }}
+        </button>
       }
-    </button>
-  }
-}
-}
-}
-@if (tabs && tabs[selectedTab] && tabs[selectedTab].cargueAdjuntoConfig) {
-  @switch (tabs[selectedTab].cargueAdjuntoConfig?.tipoBoton || 'flat') {
-    @case ('flat') {
-      <button
-        class="modal-btn"
-        mat-flat-button
-        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-        (click)="abrirCargueAdjuntoTabActual()"
-        >
-        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-      </button>
-    }
-    @case ('stroked') {
-      <button
-        class="modal-btn"
-        mat-stroked-button
-        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-        (click)="abrirCargueAdjuntoTabActual()"
-        >
-        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-      </button>
-    }
-    @case ('raised') {
-      <button
-        class="modal-btn"
-        mat-raised-button
-        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-        (click)="abrirCargueAdjuntoTabActual()"
-        >
-        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-      </button>
-    }
-    @case ('basic') {
-      <button
-        class="modal-btn"
-        mat-button
-        [color]="tabs[selectedTab].cargueAdjuntoConfig?.colorBoton || 'accent'"
-        [style]="tabs[selectedTab].cargueAdjuntoConfig?.estiloBoton ?? ''"
-        (click)="abrirCargueAdjuntoTabActual()"
-        >
-        {{ tabs[selectedTab].cargueAdjuntoConfig?.nombreBoton || 'Cargar adjunto' }}
-        <mat-icon>{{ tabs[selectedTab].cargueAdjuntoConfig?.iconoBoton || 'upload_file' }}</mat-icon>
-      </button>
+      @case ('basic') {
+        <button class="modal-btn" mat-button [color]="cargue.colorBoton || 'accent'" [style]="cargue.estiloBoton ?? ''"
+          (click)="abrirCargueAdjuntoTabActual()">
+          <mat-icon>{{ cargue.iconoBoton || 'upload_file' }}</mat-icon>
+          {{ cargue.nombreBoton || 'Cargar adjunto' }}
+        </button>
+      }
+      @default {
+        <button class="modal-btn" mat-flat-button [color]="cargue.colorBoton || 'accent'" [style]="cargue.estiloBoton ?? ''"
+          (click)="abrirCargueAdjuntoTabActual()">
+          <mat-icon>{{ cargue.iconoBoton || 'upload_file' }}</mat-icon>
+          {{ cargue.nombreBoton || 'Cargar adjunto' }}
+        </button>
+      }
     }
   }
-}
 </ng-template>
-
 <!-- Lista de pestañas (documentos) -->
 <ng-template #listaPestanas>
     @for (tab of tabs; track tab; let i = $index) {

@@ -28,18 +28,22 @@
           </div>
         </div>
         <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
-          @for (doc of opcionesDocumentos; track doc; let i = $index) {
-            @if (selectedTab === i) {
-              <h3 class="sui-seccion-titulo mb-3">{{ doc.nombre }}</h3>
-              <div class="sui-visor">
-                <app-pdf-visualizador
-                  [base64Document]="doc.base64"
-                  [herramientas]="true"
-                  [nombreArchivo]="doc.nombre"
-                ></app-pdf-visualizador>
-              </div>
+          <div class="sui-panel-visor">
+            @for (doc of opcionesDocumentos; track doc; let i = $index) {
+              @if (selectedTab === i) {
+                <div class="sui-cabecera-visor">
+                  <h3 class="sui-seccion-titulo">{{ doc.nombre }}</h3>
+                </div>
+                <div class="sui-visor">
+                  <app-pdf-visualizador
+                    [base64Document]="doc.base64"
+                    [herramientas]="true"
+                    [nombreArchivo]="doc.nombre"
+                  ></app-pdf-visualizador>
+                </div>
+              }
             }
-          }
+          </div>
         </div>
       </div>
 

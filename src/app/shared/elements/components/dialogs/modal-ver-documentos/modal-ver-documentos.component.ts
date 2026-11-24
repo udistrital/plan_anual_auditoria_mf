@@ -24,8 +24,13 @@ export interface BotonTabDocumentoContext {
   refresh: () => Promise<void>;
 }
 
+/** Decide si un botón se muestra según el documento cargado en la pestaña (undefined mientras carga) */
+export type VisibilidadBotonTab = (documento?: DocumentoReferenciaPdf) => boolean;
+
 export interface BotonTabDocumento {
   nombre: string;
+  /** Si se omite, el botón siempre se muestra */
+  visible?: VisibilidadBotonTab;
   accion: (context?: BotonTabDocumentoContext) => void | Promise<void>;
   color?: string;
   icono?: string;
@@ -44,6 +49,8 @@ export interface CargueAdjuntoTabConfig {
   descripcion: string;
   referenciaTipoFallback?: string;
   metadatosAdicionales?: Record<string, any>;
+  /** Si se omite, el botón de cargue siempre se muestra */
+  visible?: VisibilidadBotonTab;
   onSuccess?: (context: BotonTabDocumentoContext) => void | Promise<void>;
 }
 
@@ -265,6 +272,11 @@ export class ModalVerDocumentosComponent implements OnInit {
     if (debeCerrar) {
       this.dialogRef.close(true);
     }
+  }
+
+  /** Evalúa la visibilidad de un botón con el documento de la pestaña seleccionada */
+  esVisible(visible?: VisibilidadBotonTab): boolean {
+    return visible ? visible(this.documentoInfoPorTab[this.selectedTab]) : true;
   }
 
   getBotonContext(): BotonTabDocumentoContext {
