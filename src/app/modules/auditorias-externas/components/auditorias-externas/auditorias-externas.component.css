@@ -1,59 +1,21 @@
-.custom-card {
-  margin: 40px;
-  padding: 20px;
-  box-shadow: 0 0.7rem 1.5rem rgba(44, 51, 73, 0.3);
-  border-radius: 10px;
+/* Filtro de vigencia y botón Crear en una sola fila (los estilos comunes están en vista-externa.css) */
+.encabezado-vista {
+  margin-top: 16px;
 }
 
-.content {
+.filtro-vigencia {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
-.table-container {
-  width: 20%;
-  max-height: 500px;
-  overflow-y: auto;
-  background: #ffffff;
-
+.campo-vigencia {
+  min-width: 280px;
 }
 
-.pdf-container {
-  width: 80%;
-  border: 1px solid black;
-  height: 557px;
-  padding: 5px;
-  background: #f9f9f9;
-}
-
-#descargarBtn {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.button_down {
-  display: flex;
-  margin-top: 50px;
-  justify-content: center;
-
-  button {
-    color: var(--md-primary-contrast-300);
-    margin-left: 5px;
-    margin-right: 5px;
+@media (max-width: 768px) {
+  .campo-vigencia {
+    min-width: 100%;
   }
-}
-
-.selected {
-  background-color: #E79B8F;
-  color: #6E1413;
-  font-weight: bold;
-}
-
-.unselected {
-  background-color: #ffffff;
-  color: #6E1413;
-}
-
-.mat-mdc-cell {
-  border-bottom-style: none;
 }

@@ -1,0 +1,16 @@
+/* Los estilos comunes (encabezado, chips, tarjetas y celdas de datos) están en vista-externa.css */
+.table-container {
+  overflow-x: auto;
+}
+
+/* Paginador en celular: el rango en una línea y sin la etiqueta «Elementos por página» */
+@media (max-width: 768px) {
+  :host ::ng-deep .mat-mdc-paginator-page-size-label {
+    display: none;
+  }
+
+  :host ::ng-deep .mat-mdc-paginator-range-label {
+    margin: 0 8px;
+    white-space: nowrap;
+  }
+}

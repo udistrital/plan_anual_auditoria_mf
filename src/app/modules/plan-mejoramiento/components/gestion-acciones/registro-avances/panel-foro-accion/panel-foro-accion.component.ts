@@ -100,7 +100,8 @@ export class PanelForoAccionComponent implements OnInit {
     this.enviando = true;
     this.errorEnvio = '';
     this.planAuditoriaMid
-      .post(`accion-mejora/${this.datos.accionId}/comentario`, {
+      .post('comentario-accion', {
+        accion_mejora_id: this.datos.accionId,
         mensaje: this.nuevoMensaje.trim(),
         usuario_id: this.datos.personaId,
         usuario_rol: this.datos.rol,
@@ -128,12 +129,12 @@ export class PanelForoAccionComponent implements OnInit {
   }
 
   private pedirPagina(offset: number) {
-    const consulta = new URLSearchParams({ limit: String(LIMITE_PAGINA), offset: String(offset) });
+    const consulta = new URLSearchParams({ accion_mejora_id: this.datos.accionId, limit: String(LIMITE_PAGINA), offset: String(offset) });
     if (this.datos.rol) {
       consulta.set('persona_id', String(this.datos.personaId));
       consulta.set('rol', this.datos.rol);
     }
-    return this.planAuditoriaMid.get(`accion-mejora/${this.datos.accionId}/comentario?${consulta.toString()}`);
+    return this.planAuditoriaMid.get(`comentario-accion?${consulta.toString()}`);
   }
 
   /** Mezcla por _id (puede haber llegado alguno nuevo entre páginas) y ordena del más antiguo al más reciente. */

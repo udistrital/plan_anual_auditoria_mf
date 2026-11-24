@@ -1,0 +1,9 @@
+.tabla-scroll {
+  max-height: 50vh;
+  overflow: auto;
+}
+
+.motivo {
+  min-width: 220px;
+  white-space: pre-wrap;
+}
