@@ -1,0 +1,156 @@
+<plantilla-tarjeta-contenedora [title]="'Auditoría externa'" [breadcrumb]="'<p>Gestión Auditoría / <b>Auditorías Externas</b></p>'"
+[contenido]="contenidoDePlantilla" (regresar)="regresarRuta()" [mostrarBotonRegresar]="true">
+</plantilla-tarjeta-contenedora>
+
+<ng-template #contenidoDePlantilla>
+  @if (cargando) {
+    <div class="text-center py-4">
+      <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+    </div>
+  }
+
+  @if (auditoria) {
+    <!-- Encabezado: vigencia, plan creado y datos clave -->
+    <div class="encabezado-vista">
+      <div>
+        <div class="d-flex flex-wrap align-items-center espacio-2 mb-1">
+          <span class="chip chip-vigencia">
+            <mat-icon>calendar_today</mat-icon> Vigencia {{ auditoria.vigencia_nombre }}
+          </span>
+          @if (auditoria.plan_mejoramiento) {
+            <span class="chip chip-ok">
+              <mat-icon>check_circle</mat-icon> Plan de mejoramiento creado
+            </span>
+          }
+          @if (!auditoria.informe_final) {
+            <span class="chip chip-nuevo">
+              <mat-icon>warning</mat-icon> Sin informe final adjunto
+            </span>
+          }
+        </div>
+        <p class="metadatos mb-0">
+          <span><b>Entidad:</b> {{ auditoria.codigo_entidad }} - {{ auditoria.nombre_entidad }}</span>
+          <span class="separador-punto">•</span>
+          <span><b>Fecha del informe final:</b> {{ auditoria.fecha_informe_final | date: 'dd/MM/yyyy' : 'UTC' }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Información general -->
+    <section class="tarjeta">
+      <div class="tarjeta-encabezado">
+        <div class="d-flex align-items-center espacio-2">
+          <mat-icon color="primary">assignment</mat-icon>
+          <div>
+            <h5 class="seccion-titulo mb-0">Información general</h5>
+            <small class="texto-secundario">Datos generales de la auditoría externa</small>
+          </div>
+        </div>
+        <button mat-stroked-button color="primary" class="boton-secundario" type="button"
+          [disabled]="!auditoria.informe_final" (click)="verInformeFinal()">
+          <mat-icon>visibility</mat-icon> Ver informe final
+        </button>
+      </div>
+      <div class="row tarjeta-cuerpo g-2">
+        <div class="col-lg-3 col-md-4 col-12">
+          <div class="dato">
+            <span class="etiqueta">Código de la entidad</span>
+            <span class="valor">{{ auditoria.codigo_entidad }}</span>
+          </div>
+        </div>
+        <div class="col-lg-5 col-md-8 col-12">
+          <div class="dato">
+            <span class="etiqueta">Nombre de la entidad</span>
+            <span class="valor">{{ auditoria.nombre_entidad }}</span>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="dato">
+            <span class="etiqueta">Fecha de emisión del informe final</span>
+            <span class="valor">{{ auditoria.fecha_informe_final | date: 'dd/MM/yyyy' : 'UTC' }}</span>
+          </div>
+        </div>
+        <div class="col-lg-8 col-12">
+          <div class="dato">
+            <span class="etiqueta">Nombre de la auditoría</span>
+            <span class="valor">{{ auditoria.nombre_auditoria }}</span>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-12">
+          <div class="dato">
+            <span class="etiqueta">Dependencias de los hallazgos</span>
+            <span class="valor">{{ auditoria.dependencias_nombre.length }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hallazgos -->
+    <section class="tarjeta">
+      <div class="tarjeta-encabezado">
+        <div class="d-flex align-items-center espacio-2">
+          <mat-icon color="primary">find_in_page</mat-icon>
+          <div>
+            <h5 class="seccion-titulo mb-0">Hallazgos</h5>
+            <small class="texto-secundario">Hallazgos del informe de la auditoría externa</small>
+          </div>
+        </div>
+        <span class="chip chip-neutro">
+          <b>{{ auditoria.hallazgos.length }}</b>
+          {{ auditoria.hallazgos.length === 1 ? 'hallazgo' : 'hallazgos' }}
+        </span>
+      </div>
+      <div class="tarjeta-cuerpo">
+        @if (auditoria.hallazgos.length === 0) {
+          <div class="estado-vacio border rounded">
+            <mat-icon>find_in_page</mat-icon>
+            <p class="mb-0">No hay hallazgos registrados.</p>
+          </div>
+        } @else {
+          <div class="tabla-externa-contenedor">
+            <table mat-table [dataSource]="hallazgosDataSource" class="tabla-externa">
+              <ng-container matColumnDef="numeral">
+                <th mat-header-cell *matHeaderCellDef><b>No. hallazgo</b></th>
+                <td mat-cell *matCellDef="let hallazgo">{{ hallazgo.numeral }}</td>
+              </ng-container>
+              <ng-container matColumnDef="vigencia">
+                <th mat-header-cell *matHeaderCellDef><b>Vigencia</b></th>
+                <td mat-cell *matCellDef="let hallazgo">
+                  {{ hallazgo.vigencia_nombre }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="codigo">
+                <th mat-header-cell *matHeaderCellDef><b>Código auditoría</b></th>
+                <td mat-cell *matCellDef="let hallazgo">{{ hallazgo.codigo_auditoria }}</td>
+              </ng-container>
+              <ng-container matColumnDef="descripcion">
+                <th mat-header-cell *matHeaderCellDef><b>Descripción</b></th>
+                <td mat-cell *matCellDef="let hallazgo">
+                  <span class="celda-lista" [title]="hallazgo.descripcion">{{ hallazgo.descripcion }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="dependencias">
+                <th mat-header-cell *matHeaderCellDef><b>Dependencias responsables</b></th>
+                <td mat-cell *matCellDef="let hallazgo">
+                  <div class="lista-simple">
+                    @for (dependencia of hallazgo.dependencias_nombre; track dependencia) {
+                      <span>{{ dependencia }}</span>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="columnasHallazgos"></tr>
+              <tr mat-row *matRowDef="let row; columns: columnasHallazgos"></tr>
+            </table>
+          </div>
+          <mat-paginator [pageSize]="10" [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+        }
+      </div>
+    </section>
+  } @else if (!cargando) {
+    <div class="estado-vacio border rounded">
+      <mat-icon>folder_off</mat-icon>
+      <p class="mb-0">No se encontró la auditoría externa.</p>
+    </div>
+  }
+</ng-template>

@@ -1,0 +1,73 @@
+/* Las columnas de entidad y auditoría se reparten el ancho; el resto se ajusta a su contenido */
+th.mat-column-numero,
+td.mat-column-numero {
+  width: 56px;
+}
+
+th.mat-column-vigencia,
+td.mat-column-vigencia,
+th.mat-column-fecha,
+td.mat-column-fecha {
+  width: 140px;
+  white-space: nowrap;
+}
+
+th.mat-column-acciones,
+td.mat-column-acciones {
+  width: 190px;
+  white-space: nowrap;
+}
+
+td.mat-column-acciones button {
+  white-space: nowrap;
+}
+
+.solo-celular {
+  display: none;
+}
+
+/* En celular quedan la entidad (con su código y vigencia) y la acción; lo demás se ve en el detalle */
+@media (max-width: 768px) {
+  th.mat-column-numero,
+  td.mat-column-numero,
+  th.mat-column-vigencia,
+  td.mat-column-vigencia,
+  th.mat-column-auditoria,
+  td.mat-column-auditoria,
+  th.mat-column-fecha,
+  td.mat-column-fecha {
+    display: none;
+  }
+
+  .solo-celular {
+    display: inline;
+  }
+
+  th.mat-column-acciones,
+  td.mat-column-acciones {
+    width: 64px;
+  }
+
+  /* Solo el ícono (el botón conserva su aria-label con el nombre de la acción) */
+  .texto-accion {
+    display: none;
+  }
+
+  td.mat-column-acciones button {
+    min-width: 0;
+    padding: 0 10px;
+  }
+
+  td.mat-column-acciones button mat-icon {
+    margin: 0;
+  }
+
+  :host ::ng-deep .mat-mdc-paginator-range-label {
+    margin: 0 8px;
+    white-space: nowrap;
+  }
+
+  :host ::ng-deep .mat-mdc-paginator-page-size-label {
+    display: none;
+  }
+}
