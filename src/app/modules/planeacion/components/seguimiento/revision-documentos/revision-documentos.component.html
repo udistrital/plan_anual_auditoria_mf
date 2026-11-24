@@ -38,26 +38,32 @@
           </div>
         </div>
         <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
-          @if (selectedTab === 0) {
-            <h3 class="sui-seccion-titulo mb-3">Oficio Anuncio Solicitud de Información</h3>
-            <div class="sui-visor">
-              <app-pdf-visualizador
-                [base64Document]="getDocumentoBase64ByTIPO('SOLICITUD_INFORMACION')"
-                [herramientas]="true"
-                nombreArchivo="Oficio Anuncio Solicitud de Información"
-              ></app-pdf-visualizador>
-            </div>
-          }
-          @if (selectedTab === 1) {
-            <h3 class="sui-seccion-titulo mb-3">Compromiso Ético</h3>
-            <div class="sui-visor">
-              <app-pdf-visualizador
-                [base64Document]="getDocumentoBase64ByTIPO('COMPROMISO_ETICO')"
-                [herramientas]="true"
-                nombreArchivo="Compromiso Ético"
-              ></app-pdf-visualizador>
-            </div>
-          }
+          <div class="sui-panel-visor">
+            @if (selectedTab === 0) {
+              <div class="sui-cabecera-visor">
+                <h3 class="sui-seccion-titulo">Oficio Anuncio Solicitud de Información</h3>
+              </div>
+              <div class="sui-visor">
+                <app-pdf-visualizador
+                  [base64Document]="getDocumentoBase64ByTIPO('SOLICITUD_INFORMACION')"
+                  [herramientas]="true"
+                  nombreArchivo="Oficio Anuncio Solicitud de Información"
+                ></app-pdf-visualizador>
+              </div>
+            }
+            @if (selectedTab === 1) {
+              <div class="sui-cabecera-visor">
+                <h3 class="sui-seccion-titulo">Compromiso Ético</h3>
+              </div>
+              <div class="sui-visor">
+                <app-pdf-visualizador
+                  [base64Document]="getDocumentoBase64ByTIPO('COMPROMISO_ETICO')"
+                  [herramientas]="true"
+                  nombreArchivo="Compromiso Ético"
+                ></app-pdf-visualizador>
+              </div>
+            }
+          </div>
         </div>
       </div>
       @if (role) {

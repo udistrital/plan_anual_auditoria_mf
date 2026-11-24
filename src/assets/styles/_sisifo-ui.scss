@@ -12,6 +12,8 @@ $sui-borde-suave: #eeeeee;
 $sui-fondo-suave: #fafafa;
 $sui-texto-2: #666666;
 $sui-hover-fila: #f2f2f2;
+// Alto común de los encabezados de lista y visor (igual a un botón de Material)
+$sui-alto-cabecera: 40px;
 
 .sisifo-ui {
   // ── Contenedor y tarjeta ─────────────────────────────────────────────────
@@ -466,6 +468,7 @@ $sui-hover-fila: #f2f2f2;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    min-height: $sui-alto-cabecera;
     margin-bottom: 18px;
 
     .sui-seccion-titulo {
@@ -502,7 +505,63 @@ $sui-hover-fila: #f2f2f2;
 
   .sui-boton-descargar-todo {
     width: 100%;
+    min-height: $sui-alto-cabecera;
     margin-bottom: 18px;
+  }
+
+  // Panel del visor: mismo marco que .sui-panel-documentos para que ambas columnas
+  // inicien a la misma altura y el visor quede alineado con la lista
+  .sui-panel-visor {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 20px;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+  }
+
+  // Encabezado del visor: nombre del documento y sus acciones. Siempre ocupa al menos
+  // la altura del encabezado de la lista, haya o no botones, para no desplazar el visor
+  .sui-cabecera-visor {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: $sui-alto-cabecera;
+    margin-bottom: 18px;
+
+    .sui-seccion-titulo {
+      flex: 1 1 220px;
+      min-width: 0;
+      margin: 0 !important;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  // Acciones del documento: mismo alto, icono a la izquierda y separación uniforme
+  .sui-acciones-visor {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+
+    .mdc-button {
+      min-height: $sui-alto-cabecera;
+      margin: 0 !important;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 576px) {
+      width: 100%;
+
+      .mdc-button {
+        flex: 1 1 auto;
+      }
+    }
   }
 }
 

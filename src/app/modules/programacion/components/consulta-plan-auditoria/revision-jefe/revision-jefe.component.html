@@ -36,32 +36,35 @@
           </div>
         </div>
         <div class="col-sm-12 col-md-8 col-lg-9">
-          <!-- Acciones propias del documento seleccionado (p. ej. "Actualizar Documento") -->
-          @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
-            <div class="d-flex flex-wrap justify-content-end mb-3" style="gap: 8px">
-              @for (boton of tabs[selectedTab].botones; track boton) {
-                <button
-                  mat-flat-button [color]="boton.color || 'accent'"
-                  (click)="boton.accion()"
-                  >
-                  {{ boton.nombre }} @if (boton.icono) {
-                  <mat-icon>{{ boton.icono }}</mat-icon>
-                }
-              </button>
+          <div class="sui-panel-visor">
+            <!-- Encabezado fijo: nombre del documento y sus acciones (p. ej. "Actualizar Documento") -->
+            <div class="sui-cabecera-visor">
+              <h3 class="sui-seccion-titulo">{{ tabs[selectedTab]?.nombre }}</h3>
+              @if (tabs && tabs[selectedTab] && tabs[selectedTab].botones) {
+                <div class="sui-acciones-visor">
+                  @for (boton of tabs[selectedTab].botones; track boton) {
+                    <button mat-flat-button [color]="boton.color || 'accent'" (click)="boton.accion()">
+                      @if (boton.icono) {
+                        <mat-icon>{{ boton.icono }}</mat-icon>
+                      }
+                      {{ boton.nombre }}
+                    </button>
+                  }
+                </div>
               }
             </div>
-          }
-          @for (tab of tabs; track tab; let i = $index) {
-            @if (selectedTab === i) {
-              <div class="sui-visor">
-                <app-pdf-visualizador
-                  [base64Document]="documentosPorTab[i]"
-                  [herramientas]="true"
-                  [nombreArchivo]="tab.nombre"
-                ></app-pdf-visualizador>
-              </div>
+            @for (tab of tabs; track tab; let i = $index) {
+              @if (selectedTab === i) {
+                <div class="sui-visor">
+                  <app-pdf-visualizador
+                    [base64Document]="documentosPorTab[i]"
+                    [herramientas]="true"
+                    [nombreArchivo]="tab.nombre"
+                  ></app-pdf-visualizador>
+                </div>
+              }
             }
-          }
+          </div>
         </div>
       </div>
       @if (mostrarBotones) {

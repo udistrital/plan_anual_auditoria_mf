@@ -21,6 +21,8 @@ import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-audi
 import { UserService } from "src/app/core/services/user.service";
 import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
+import type { DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
+import { obtenerTipoFirma, TIPO_FIRMA } from "src/app/shared/services/firma-documento.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { accionesPlaneacion } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
@@ -461,7 +463,10 @@ export class TablaAuditoriasInternasComponent implements OnInit {
           cargueAdjuntoConfig: cargueAdjuntoConfig
             ? {
                 ...cargueAdjuntoConfig,
-                metadatosAdicionales: { firmado: true},
+                metadatosAdicionales: { firmado: true, tipo_firma: TIPO_FIRMA.MANUAL },
+                // Una carta firmada electrónicamente no se reemplaza por cargue manual
+                visible: (documento?: DocumentoReferenciaPdf) =>
+                  !!documento && obtenerTipoFirma(documento) !== TIPO_FIRMA.ELECTRONICA,
               }
             : undefined,
         }

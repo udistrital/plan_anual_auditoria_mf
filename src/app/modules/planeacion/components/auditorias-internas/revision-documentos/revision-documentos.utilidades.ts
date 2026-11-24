@@ -10,6 +10,14 @@ const configAuditado = {
   tooltipFirmar: "Cargar Carta de Representación firmada por el jefe de la dependencia que va a ser auditada"
 };
 
+/** El Jefe de dependencia puede firmar electrónicamente la carta o cargarla firmada */
+const configJefeDependencia = {
+  ...configAuditado,
+  botonFirmar: "Firmar Carta",
+  iconoFirmar: "draw",
+  tooltipFirmar: "Aplicar la firma electrónica o cargar firmada la Carta de Representación de la dependencia que va a ser auditada"
+};
+
 const configJefe = {
   estadoAprobacion: [
     environment.AUDITORIA_ESTADO.PLANEACION.APROBADO_PROGRAMA_JEFE,
@@ -27,6 +35,6 @@ const configJefe = {
 
 export const rolesAprobacion: { [key: string]: any } = {
   [environment.ROL.JEFE]: configJefe,
-  [environment.ROL.JEFE_DEPENDENCIA]: configAuditado,
+  [environment.ROL.JEFE_DEPENDENCIA]: configJefeDependencia,
   [environment.ROL.ASISTENTE_DEPENDENCIA]: configAuditado,
 };
