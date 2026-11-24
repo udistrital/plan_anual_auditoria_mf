@@ -10,6 +10,7 @@
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -76,7 +77,7 @@
                     }
                   </mat-accordion>
                 }
-                <div class="d-flex justify-content-end mt-4">
+                <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                   @if (!pasosInicialesSoloLectura && !soloLectura && !bloqueadoEnRevision) {
                     <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
                       Guardar y continuar
@@ -111,7 +112,7 @@
               <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
                 <app-editor-enriquecido formControlName="aspecto_general"
                 [placeholder]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
-                <div class="d-flex justify-content-end mt-4">
+                <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                   <button matStepperPrevious mat-stroked-button color="primary">
                     Volver
                   </button>
@@ -148,7 +149,7 @@
 
             <div class="mt-4">
               <app-aspectos-evaluados [informeId]="informeId" [auditoriaId]="auditoriaId" [soloLectura]="pasosInicialesSoloLectura || soloLectura || bloqueadoEnRevision" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #aspectosEvaluadosComp (datosActualizados)="onDatosActualizados()"></app-aspectos-evaluados>
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                 <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious>
                   Volver
                 </button>
@@ -188,7 +189,7 @@
             </div>
             <div class="mt-4">
               <app-resumen-hallazgos [informeId]="informeId" [temasRaw]="temasRaw" [hallazgosRaw]="hallazgosRaw" #resumenHallazgosComp></app-resumen-hallazgos>
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                 <button matStepperPrevious mat-stroked-button color="primary">
                   Volver
                 </button>
@@ -247,7 +248,7 @@
                   [fechaFinRevision]="informeData?.fecha_fin_revision"
                   (datosModificados)="cargarTemasYHallazgos()">
                 </app-revision-preinforme>
-                <div class="d-flex justify-content-end mt-4">
+                <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                   <button mat-stroked-button color="primary" class="mx-2" matStepperPrevious type="button">
                     Volver
                   </button>
@@ -285,7 +286,7 @@
               <form [formGroup]="formRespuestaPreliminar" (ngSubmit)="guardarRespuestaPreliminar()">
                 <app-editor-enriquecido formControlName="respuesta_preliminar"
                 [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
-                <div class="d-flex justify-content-end mt-4">
+                <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                   <button matStepperPrevious mat-stroked-button color="primary">
                     Volver
                   </button>
@@ -331,7 +332,7 @@
 
                 <h3 style="color: var(--primary)" class="my-2">Notas</h3>
                 <app-editor-enriquecido formControlName="nota" [placeholder]="soloLectura ? '' : 'Edita tu texto...'"></app-editor-enriquecido>
-                <div class="d-flex justify-content-end mt-4">
+                <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                   <button matStepperPrevious mat-stroked-button color="primary">
                     Volver
                   </button>

@@ -5,6 +5,7 @@
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -12,18 +13,21 @@
     <div class="col-12" data-tour="formulario-marco-general">
       @if (modoEditar) {
         @if (datosCargados) {
-          <app-formulario-dinamico
-            [formulario]="formulario"
-            (submitFormulario)="manejarEnvio($event)"
-            />
+          <div class="sui-seccion mb-0">
+            <app-formulario-dinamico
+              [formulario]="formulario"
+              (submitFormulario)="manejarEnvio($event)"
+              />
+          </div>
         }
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-end sui-barra-acciones">
           <div class="button-container" data-tour="guardar-marco-general">
             <button
               mat-raised-button
               color="primary"
               (click)="guardarInformacion()"
               >
+              <mat-icon>save</mat-icon>
               Guardar
             </button>
           </div>

@@ -91,3 +91,13 @@
     max-height: 35vh;
   }
 }
+
+/* Línea gráfica homologada (#956): lista y visor alineados arriba, sin el margen del visor anterior */
+.multiple-listado,
+.multiple-visor {
+  margin-top: 16px;
+}
+
+.multiple-visor {
+  min-width: 0;
+}

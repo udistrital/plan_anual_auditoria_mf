@@ -2,6 +2,7 @@ import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 import { PlaneacionRoutingModule } from "./planeacion-routing.module";
+import { ClaseEstadoPipe } from "src/app/shared/pipes/clase-estado.pipe";
 import { AuditoriasInternasComponent } from "./components/auditorias-internas/auditorias-internas.component";
 import { MaterialModule } from "src/app/shared/modules/material.module";
 import { ReactiveFormsModule } from "@angular/forms";
@@ -65,7 +66,8 @@ import { ModalAprobacionAuditadoComponent } from "./components/auditorias-intern
     MaterialModule,
     ReactiveFormsModule,
     SharedModule,
-    QuillModule
+    QuillModule,
+    ClaseEstadoPipe,
   ],
 })
 export class PlaneacionModule {}

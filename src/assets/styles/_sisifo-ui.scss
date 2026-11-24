@@ -1,0 +1,757 @@
+// =============================================================================
+// Línea gráfica homologada de SÍSIFO (udistrital/sisifo_documentacion#956)
+//
+// Todas las reglas están dentro de `.sisifo-ui`: solo afectan las vistas que la activan
+// (plantilla-tarjeta-contenedora [homologada] y plantilla-modal [homologado]).
+// Las fases que aún no se migran no cambian.
+// =============================================================================
+
+// ── Tokens ──────────────────────────────────────────────────────────────────
+$sui-borde: #e0e0e0;
+$sui-borde-suave: #eeeeee;
+$sui-fondo-suave: #fafafa;
+$sui-texto-2: #666666;
+$sui-hover-fila: #f2f2f2;
+
+.sisifo-ui {
+  // ── Contenedor y tarjeta ─────────────────────────────────────────────────
+  &.container {
+    box-sizing: border-box;
+    max-width: 100% !important;
+    padding-left: 60px !important;
+    padding-right: 60px !important;
+
+    @media (max-width: 992px) {
+      padding-left: 24px !important;
+      padding-right: 24px !important;
+    }
+
+    @media (max-width: 576px) {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+  }
+
+  .sui-breadcrumb p {
+    margin: 8px 0 18px;
+    font-size: 13px;
+    color: $sui-texto-2;
+
+    b {
+      color: #212121;
+    }
+  }
+
+  > mat-card.sui-tarjeta {
+    padding: 16px 20px !important;
+    border-radius: 12px;
+  }
+
+  .sui-vigencia {
+    gap: 8px;
+    font-size: 13px;
+    color: var(--md-primary-700);
+  }
+
+  .sui-titulo-vista {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin: 4px 0 32px !important;
+    border-bottom: 1px solid $sui-borde;
+
+    h2 {
+      margin: 0;
+      font-family: "Raleway", sans-serif;
+      font-weight: 700;
+    }
+  }
+
+  // ── Botones: esquinas rectas, íconos centrados ───────────────────────────
+  .mdc-button,
+  .mat-mdc-icon-button,
+  .mat-mdc-icon-button .mat-mdc-button-persistent-ripple,
+  .mat-mdc-icon-button .mat-mdc-button-ripple,
+  .mat-mdc-icon-button .mat-mdc-focus-indicator {
+    border-radius: 0 !important;
+  }
+
+  .mdc-button {
+    min-height: 40px;
+    padding: 0 20px;
+    font-weight: 600;
+
+    .mat-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      top: 1px;
+    }
+  }
+
+  .mat-mdc-outlined-button:not([disabled]) {
+    border-color: var(--md-primary-500);
+  }
+
+  // ── Secciones ────────────────────────────────────────────────────────────
+  .sui-seccion {
+    box-sizing: border-box;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+    background-color: #ffffff;
+
+    @media (max-width: 768px) {
+      padding: 20px;
+    }
+  }
+
+  .sui-seccion-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px !important;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--md-primary-700);
+
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .sui-subtitulo {
+    margin: 0 0 24px !important;
+    font-size: 13px;
+    line-height: 1.5;
+    color: $sui-texto-2;
+  }
+
+  .sui-fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 20px;
+  }
+
+  // Nota informativa: solo el ícono, el texto aparece como tooltip
+  .sui-info-tip {
+    color: var(--md-primary-500);
+    cursor: help;
+  }
+
+  // ── Tablas: contenido centrado, sin franjas, hover de fila ──────────────
+  .table-container {
+    border-radius: 12px;
+  }
+
+  table.mat-mdc-table {
+    width: 100%;
+
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      text-align: center;
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    .mat-mdc-header-cell {
+      font-size: 12px;
+      color: #424242;
+    }
+
+    .mat-mdc-header-cell:first-child,
+    .mat-mdc-cell:first-child {
+      padding-left: 20px;
+    }
+
+    .mat-mdc-header-cell:last-child,
+    .mat-mdc-cell:last-child {
+      padding-right: 20px;
+    }
+
+    // El encabezado ordenable también se centra
+    .mat-sort-header-container {
+      justify-content: center;
+    }
+
+    // Solo la columna Estado lleva color: se quitan las franjas de las demás filas
+    .mat-mdc-cell.even-row,
+    .even-row {
+      background-color: #ffffff;
+    }
+
+    .mat-mdc-row {
+      transition: background-color 0.12s ease;
+    }
+
+    .mat-mdc-cell {
+      background-color: #ffffff;
+    }
+
+    // Hover de fila y fila con el menú ⋮ abierto (mat-menu marca aria-expanded en el disparador)
+    .mat-mdc-row:hover .mat-mdc-cell,
+    .mat-mdc-row:has(button[aria-expanded="true"]) .mat-mdc-cell {
+      background-color: $sui-hover-fila;
+    }
+
+    .mat-mdc-row:hover .mat-mdc-cell:first-child,
+    .mat-mdc-row:has(button[aria-expanded="true"]) .mat-mdc-cell:first-child {
+      box-shadow: inset 3px 0 0 var(--md-primary-500);
+    }
+
+    // Columna Acciones fija a la derecha con fondo sólido y sombra
+    .mat-mdc-table-sticky-border-elem-right {
+      border-left: 1px solid $sui-borde;
+      box-shadow: -6px 0 8px -6px rgba(0, 0, 0, 0.12);
+    }
+
+    .mat-column-acciones {
+      width: 96px;
+    }
+  }
+
+  .mat-mdc-paginator {
+    margin-top: 8px;
+  }
+
+  // ── Chips de estado: revisión amarillo, borrador gris, rechazado rojo, aprobado verde ──
+  .estado-chip {
+    display: inline-block;
+    max-width: 170px;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  .estado-borrador {
+    background-color: #f5f5f5;
+    color: #616161;
+    border-color: #e0e0e0;
+  }
+
+  .estado-revision {
+    background-color: #fff8e1;
+    color: #8d6e00;
+    border-color: #ffe082;
+  }
+
+  .estado-aprobado {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+    border-color: #a5d6a7;
+  }
+
+  .estado-rechazado {
+    background-color: #ffebee;
+    color: #b71c1c;
+    border-color: #ef9a9a;
+  }
+
+  // ── Barra de acciones inferior ──────────────────────────────────────────
+  .sui-barra-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    padding: 20px 0 4px;
+    border-top: 1px solid $sui-borde;
+    background-color: #ffffff;
+
+    .mdc-button {
+      margin: 0 !important;
+    }
+
+    @media (max-width: 768px) {
+      .mdc-button {
+        flex: 1 1 100%;
+      }
+    }
+  }
+
+  // ── Herramientas de la tabla (sección contraíble) ───────────────────────
+  .sui-herramientas {
+    margin-bottom: 28px;
+    padding: 18px 20px;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+    background-color: $sui-fondo-suave;
+    transition: padding 0.2s ease;
+
+    &.cerrado {
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+  }
+
+  .sui-herramientas-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+
+    .sui-etiqueta {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #757575;
+    }
+
+    .mat-icon {
+      margin-left: auto;
+      color: var(--md-primary-500);
+      transition: transform 0.2s ease;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--md-primary-300);
+      outline-offset: 4px;
+    }
+  }
+
+  .sui-herramientas.cerrado .sui-herramientas-cabecera .mat-icon {
+    transform: rotate(-90deg);
+  }
+
+  .sui-herramientas-cuerpo {
+    display: grid;
+    grid-template-rows: 1fr;
+    margin-top: 14px;
+    transition: grid-template-rows 0.2s ease, opacity 0.2s ease, margin-top 0.2s ease;
+
+    > div {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      min-height: 0;
+      overflow: hidden;
+
+      @media (max-width: 1100px) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+      }
+    }
+  }
+
+  .sui-herramientas.cerrado .sui-herramientas-cuerpo {
+    grid-template-rows: 0fr;
+    margin-top: 0;
+    opacity: 0;
+  }
+
+  .sui-accion {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid $sui-borde;
+    border-radius: 0;
+    background-color: #ffffff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+
+    &:hover {
+      border-color: var(--md-primary-300);
+      background-color: var(--md-primary-50);
+    }
+
+    .sui-insignia {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: var(--md-primary-50);
+
+      .mat-icon {
+        color: var(--md-primary-500);
+      }
+    }
+
+    b {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--md-primary-700);
+    }
+
+    small {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      line-height: 1.4;
+      color: $sui-texto-2;
+    }
+
+    &.peligro {
+      .sui-insignia {
+        background-color: #ffebee;
+
+        .mat-icon {
+          color: #c62828;
+        }
+      }
+
+      b {
+        color: #b71c1c;
+      }
+
+      &:hover {
+        border-color: #ef9a9a;
+        background-color: #fff5f5;
+      }
+    }
+  }
+
+  // ── Revisión de documentos: lista + visor ───────────────────────────────
+  .sui-panel-documentos {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 20px;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+  }
+
+  .sui-lista-documentos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .mdc-button {
+      justify-content: flex-start;
+      min-height: 48px;
+      padding: 10px 16px;
+      border: 1px solid $sui-borde !important;
+      color: #424242;
+      font-weight: 500;
+      text-align: left;
+      white-space: normal;
+      line-height: 1.4;
+    }
+
+    .mdc-button.selected {
+      border-color: var(--md-primary-200) !important;
+      background-color: var(--md-primary-50) !important;
+      color: var(--md-primary-900) !important;
+      box-shadow: inset 3px 0 0 var(--md-primary-500);
+      font-weight: 600;
+    }
+  }
+
+  // Encabezado del panel de documentos: título y Descargar Todo (pasa debajo si no cabe)
+  .cabecera-documentos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+
+    .sui-seccion-titulo {
+      flex: 0 0 auto;
+      margin: 0 !important;
+    }
+
+    .mdc-button {
+      flex: 1 0 170px;
+    }
+  }
+
+  // Aviso común (reemplaza alert alert-info de Bootstrap, que este MF no compila)
+  .sui-aviso {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    background-color: var(--md-primary-50);
+    color: var(--md-primary-900);
+    font-size: 13px;
+
+    .mat-icon {
+      color: var(--md-primary-500);
+    }
+  }
+
+  .sui-visor {
+    overflow: hidden;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+  }
+
+  .sui-boton-descargar-todo {
+    width: 100%;
+    margin-bottom: 18px;
+  }
+}
+
+// ── Stepper y encabezados de bloque (Editar/Ver Auditoría, Seguimiento, Informe) ──
+.sisifo-ui {
+  .mat-stepper-horizontal .mat-horizontal-stepper-header-container {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid $sui-borde;
+  }
+
+  .mat-step-label {
+    p {
+      margin: 0;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #888888;
+    }
+
+    b {
+      font-size: 13.5px;
+    }
+  }
+
+  .mat-step-header .mat-step-icon-selected {
+    box-shadow: 0 0 0 5px var(--md-primary-50);
+  }
+
+  // Encabezado de cada bloque dentro de un paso (antes fondo-acento-50 con h2)
+  .mat-stepper-horizontal,
+  .mat-stepper-vertical {
+    .fondo-acento-50 {
+      gap: 14px;
+      margin: 24px 0 !important;
+      padding: 16px 20px;
+      border: 1px solid var(--md-primary-100);
+      border-radius: 8px;
+      background-color: var(--md-primary-50);
+      color: $sui-texto-2;
+      font-size: 13px;
+
+      > div:first-child {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ffffff;
+
+        .mat-icon {
+          color: var(--md-primary-500);
+        }
+      }
+
+      > div:last-child {
+        margin: 0 !important;
+      }
+
+      h2 {
+        margin: 0 0 2px;
+        font-family: "Raleway", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--md-primary-700);
+      }
+    }
+  }
+}
+
+// ── Árbol Tema › Subtema › Hallazgo (Aspectos Evaluados y Revisión del preinforme) ──
+// Solo estilos: se conserva el DOM (.tree, .tree-node, .node-row, .node-children) que usan las e2e.
+.sisifo-ui .tree {
+  padding-left: 0;
+
+  // Tema: tarjeta con borde primario
+  > .tree-node {
+    margin-bottom: 20px !important;
+    padding: 20px 22px !important;
+    border: 1px solid $sui-borde !important;
+    border-left: 4px solid var(--md-primary-500) !important;
+    border-radius: 10px;
+    background-color: #ffffff;
+  }
+
+  // Subtemas y hallazgos: tarjetas anidadas con guía punteada
+  .node-children {
+    padding-left: 20px;
+    margin-left: 8px;
+
+    &::before {
+      border-left: 2px dashed $sui-borde;
+    }
+
+    > .tree-node {
+      margin-bottom: 14px;
+      padding: 16px 18px;
+      border: 1px solid $sui-borde;
+      border-radius: 10px;
+      background-color: #ffffff;
+
+      &::before {
+        left: -20px;
+        width: 18px;
+        border-top: 2px dashed $sui-borde;
+      }
+    }
+
+    > .tree-node:has(> .subtema-row) {
+      border-left: 4px solid var(--md-primary-300);
+      background-color: #fffdfd;
+    }
+
+    > .tree-node:has(> .hallazgo-row) {
+      border-left: 4px solid #ffb74d;
+    }
+  }
+
+  // Los puntos se reemplazan por el borde de color de cada tarjeta
+  .node-dot {
+    display: none;
+  }
+
+  .node-row {
+    gap: 12px;
+  }
+
+  // Etiqueta del nivel como chip
+  .nivel-label {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .tema-row .nivel-label {
+    background-color: var(--md-primary-100);
+    color: var(--md-primary-900);
+  }
+
+  .subtema-row .nivel-label {
+    background-color: var(--md-primary-50);
+    color: var(--md-primary-700);
+  }
+
+  .hallazgo-row .nivel-label {
+    background-color: #fff3e0;
+    color: #8d4a00;
+  }
+
+  // Numeral destacado (2, 2.1, 2.1.1)
+  .indice {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: "Raleway", sans-serif;
+    font-weight: 700;
+    color: var(--md-primary-700);
+  }
+
+  // Bloque de observaciones de cada hallazgo (Revisión del preinforme)
+  .observaciones {
+    margin-top: 16px;
+    padding: 18px 20px;
+    border: 1px solid $sui-borde;
+    border-radius: 8px;
+    background-color: $sui-fondo-suave;
+  }
+
+  .obs-header {
+    color: var(--md-primary-700);
+    font-weight: 600;
+
+    .obs-icono {
+      color: var(--md-primary-500);
+    }
+  }
+
+}
+
+// Pasos bloqueados del informe (steps-bloqueados): además de la opacidad, un candado indica por qué no se abren
+.sisifo-ui {
+  .steps-bloqueados mat-step-header:nth-of-type(5),
+  .steps-bloqueados mat-step-header:nth-of-type(6),
+  .steps-bloqueados-con-revision mat-step-header:nth-of-type(6),
+  .steps-bloqueados-con-revision mat-step-header:nth-of-type(7) {
+    .mat-step-icon {
+      position: relative;
+      background-color: #9e9e9e;
+
+      .mat-icon {
+        visibility: hidden;
+      }
+
+      &::after {
+        content: "lock";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Material Icons";
+        font-size: 14px;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+// Aviso de fecha límite de revisión del auditado
+.sisifo-ui mat-card .fecha-revision {
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px !important;
+}
+
+// ── Modales homologados (plantilla-modal [homologado]) ─────────────────────
+plantilla-modal.sisifo-ui {
+  .sui-modal-cabecera {
+    padding: 20px 28px !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid $sui-borde;
+
+    b {
+      font-family: "Raleway", sans-serif;
+      font-size: 18px;
+      color: var(--md-primary-700);
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: $sui-texto-2;
+    }
+  }
+
+  .mat-mdc-dialog-actions {
+    gap: 12px;
+    padding: 16px 28px 20px !important;
+  }
+}
+
+// Modales que conservan su diseño de producción (p. ej. Añadir Auditoría): solo botones rectos
+.sui-botones-rectos {
+  .mdc-button,
+  .mat-mdc-icon-button {
+    border-radius: 0 !important;
+  }
+}

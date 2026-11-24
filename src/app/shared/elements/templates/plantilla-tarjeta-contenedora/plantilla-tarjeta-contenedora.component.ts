@@ -59,6 +59,13 @@ export class PlantillaTarjetaContenedoraComponent {
   @Input() mostrarBotonRegresar: boolean = false;
 
   /**
+   * Activa la línea gráfica homologada (`.sisifo-ui`, ver `assets/styles/_sisifo-ui.scss`).
+   * Las vistas que aún no se migran la dejan en `false` y conservan su apariencia.
+   * @default false
+   */
+  @Input() homologada: boolean = false;
+
+  /**
    * Evento emitido cuando se presiona el botón "Regresar".
    * Útil para manejar acciones en el componente padre, como la navegación.
    * @example

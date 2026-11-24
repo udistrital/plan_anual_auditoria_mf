@@ -1,73 +1,69 @@
 <plantilla-tarjeta-contenedora [title]="'Ver Documentos'" [breadcrumb]="
     '<p>Gestión Auditoría / Ejecución / Auditorías Internas / <b>Ver Documentos</b></p>'
   " [contenido]="contenidoDePlantilla" (regresar)="regresarRuta()"
-[mostrarBotonRegresar]="true"></plantilla-tarjeta-contenedora>
+[mostrarBotonRegresar]="true" [homologada]="true"></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
-      <div class="row">
-
-        <div class="col-sm-12 col-md-5 col-lg-4 mt-md">
-          <div class="d-flex flex-column borde-redondo documentos-panel">
-            <h3 class="mb-3">Documentos</h3>
-            <div class="documentos-scroll">
+      <div class="row g-4">
+        <div class="col-sm-12 col-md-5 col-lg-4">
+          <div class="d-flex flex-column sui-panel-documentos documentos-panel">
+            <!-- Encabezado del panel: título y Descargar Todo -->
+            <div class="cabecera-documentos">
+              <h3 class="sui-seccion-titulo">Documentos</h3>
+              <button mat-stroked-button color="primary" (click)="descargarTodo()">
+                <mat-icon>file_download</mat-icon> Descargar Todo
+              </button>
+            </div>
+            <div class="documentos-scroll d-flex flex-column sui-lista-documentos">
               @for (doc of opcionesDocumentos; track doc; let i = $index) {
-                <button class="mb-2 custom-button" mat-stroked-button [ngClass]="selectedTab === i ? 'selected' : ''"
+                <button class="custom-button" mat-stroked-button [ngClass]="selectedTab === i ? 'selected' : ''"
                   (click)="selectTab(i)">
+                  <mat-icon>picture_as_pdf</mat-icon>
                   {{ doc.nombre }}
                 </button>
               }
             </div>
-            <button mat-button color="primary" class="mt-2" (click)="descargarTodo()">
-              Descargar Todo <mat-icon> file_download</mat-icon>
-            </button>
           </div>
         </div>
-
         <div class="col-sm-12 col-md-7 col-lg-8 mt-md">
-          <div class="borde-redondo">
-            @for (doc of opcionesDocumentos; track doc; let i = $index) {
-              @if (selectedTab === i) {
-                <div>
-                  <h3>{{ doc.nombre }}</h3>
-                  <div class="row">
-                    <app-pdf-visualizador class="mt-3" [base64Document]="doc.base64"></app-pdf-visualizador>
-                  </div>
-                </div>
-              }
+          @for (doc of opcionesDocumentos; track doc; let i = $index) {
+            @if (selectedTab === i) {
+              <h3 class="sui-seccion-titulo mb-3">{{ doc.nombre }}</h3>
+              <div class="sui-visor">
+                <app-pdf-visualizador
+                  [base64Document]="doc.base64"
+                  [herramientas]="true"
+                  [nombreArchivo]="doc.nombre"
+                ></app-pdf-visualizador>
+              </div>
             }
-          </div>
+          }
         </div>
-
       </div>
 
       @if (role) {
-        <mat-dialog-actions align="center">
-          @if (mostrarAcciones()) {
-            <div class="row">
-              <div class="col-12 my-4">
-                @if (dependenciaYaDecidio) {
-                  <div class="d-flex justify-content-center align-items-center gap-2 mb-3 text-muted">
-                    <mat-icon>check_circle</mat-icon>
-                    <span>Ya registraste tu decisión para esta dependencia.</span>
-                  </div>
-                }
-                <button mat-stroked-button color="primary" class="mx-2 width-100-md"
-                  style="border: 1px solid var(--md-primary-500)" (click)="accionBotonRechazo()">
-                  <mat-icon>{{ rolesAprobacion[role]?.esRedireccionHallazgos ? 'rate_review' : 'disabled_by_default' }}</mat-icon>{{ rolesAprobacion[role]?.botonRechazo ?? "Rechazar Informe" }}
-                </button>
-                <button class="mx-2 width-100-md mt-md" mat-raised-button color="primary"
-                  (click)="preguntarAprobacion()"
-                  [disabled]="dependenciaYaDecidio || dependenciaTieneObservaciones === true"
-                  [matTooltip]="dependenciaYaDecidio ? 'Ya registraste tu decisión para esta dependencia.' : (dependenciaTieneObservaciones ? 'Tienes observaciones registradas. Finaliza desde Revisar hallazgos.' : '')">
-                  <mat-icon>fact_check</mat-icon>
-                  {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
-                </button>
-              </div>
+        @if (mostrarAcciones()) {
+          @if (dependenciaYaDecidio) {
+            <div class="sui-aviso mt-4">
+              <mat-icon>check_circle</mat-icon>
+              <span>Ya registraste tu decisión para esta dependencia.</span>
             </div>
           }
-        </mat-dialog-actions>
+          <div class="sui-barra-acciones">
+            <button mat-stroked-button color="primary" (click)="accionBotonRechazo()">
+              <mat-icon>{{ rolesAprobacion[role]?.esRedireccionHallazgos ? 'rate_review' : 'disabled_by_default' }}</mat-icon>{{ rolesAprobacion[role]?.botonRechazo ?? "Rechazar Informe" }}
+            </button>
+            <button mat-raised-button color="primary"
+              (click)="preguntarAprobacion()"
+              [disabled]="dependenciaYaDecidio || dependenciaTieneObservaciones === true"
+              [matTooltip]="dependenciaYaDecidio ? 'Ya registraste tu decisión para esta dependencia.' : (dependenciaTieneObservaciones ? 'Tienes observaciones registradas. Finaliza desde Revisar hallazgos.' : '')">
+              <mat-icon>fact_check</mat-icon>
+              {{ rolesAprobacion[role]?.botonAprobacion ?? '' }}
+            </button>
+          </div>
+        }
       }
 
     </div>

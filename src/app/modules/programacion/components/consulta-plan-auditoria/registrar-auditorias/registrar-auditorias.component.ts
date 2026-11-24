@@ -55,6 +55,9 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
   base64Matriz: any = null;
   ordenSeleccionado: string = '';
   mostrarOrdenamiento: boolean = false;
+  /** Sección contraíble "Herramientas de la tabla": recuerda la preferencia del usuario. */
+  herramientasAbiertas: boolean = true;
+  private static readonly HERRAMIENTAS_KEY = 'sisifo-herramientas-tabla';
   estadoIdActual: number | null = null;
   edicionExtraordinaria: string[] = [];
 
@@ -85,6 +88,7 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit(): Promise<void> {
+    this.herramientasAbiertas = this.leerPreferenciaHerramientas();
     // El tour abre los modales de "Añadir auditoría" y "Cargar archivo" sobre
     // esta vista, así que al cancelarlo hay que cerrarlos: si no quedan flotando
     // sobre una página que el tour ya abandonó.
@@ -116,7 +120,31 @@ export class RegistrarAuditoriasComponent implements OnInit, OnDestroy {
     });
     this.breadcrumb = `<p>Gestión Auditoría / Programación / Plan Anual de Auditorías / <b>${this.modoEditar || this.modoEditarExtraordinario ? 'Registrar Auditorías' : 'Ver Auditorías'}</b></p>`;
     this.title = `${this.modoEditar || this.modoEditarExtraordinario ? 'Registrar' : ''} Auditorías del Plan Anual de Auditoría (PAA)`;
+    // El tour resalta Descargar Plantilla y Exportar Tabla: la sección debe estar abierta
+    if (this.tourService.hayContinuacionPendiente()) {
+      this.herramientasAbiertas = true;
+    }
     this.tourService.continuarTourSiCorresponde();
+  }
+
+  alternarHerramientas(): void {
+    this.herramientasAbiertas = !this.herramientasAbiertas;
+    try {
+      localStorage.setItem(
+        RegistrarAuditoriasComponent.HERRAMIENTAS_KEY,
+        this.herramientasAbiertas ? 'abierto' : 'cerrado'
+      );
+    } catch {
+      // Sin almacenamiento disponible la sección simplemente inicia abierta
+    }
+  }
+
+  private leerPreferenciaHerramientas(): boolean {
+    try {
+      return localStorage.getItem(RegistrarAuditoriasComponent.HERRAMIENTAS_KEY) !== 'cerrado';
+    } catch {
+      return true;
+    }
   }
 
   ngOnDestroy(): void {

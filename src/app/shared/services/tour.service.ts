@@ -97,6 +97,15 @@ export class TourService {
   }
 
   /**
+   * Indica, sin consumirla, si el tour viene navegando hacia la página actual.
+   * Sirve para que la página muestre los elementos que el tour va a resaltar
+   * (por ejemplo, una sección contraíble) antes de `continuarTourSiCorresponde()`.
+   */
+  hayContinuacionPendiente(): boolean {
+    return sessionStorage.getItem(TourService.TOUR_NAVEGACION_KEY) !== null;
+  }
+
+  /**
    * La invoca la página de destino una vez montada. Espera a que exista el
    * elemento que el tour debe enfocar y sólo entonces avanza o retrocede, para
    * que driver.js no tenga que resaltar un elemento que todavía no existe.

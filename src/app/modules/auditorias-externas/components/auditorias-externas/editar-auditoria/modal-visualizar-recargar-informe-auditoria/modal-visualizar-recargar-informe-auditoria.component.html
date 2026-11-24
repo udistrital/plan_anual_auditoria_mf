@@ -4,12 +4,13 @@
   [descripcion]="(data.nombre || 'Informe final de la auditoría externa') + (data.tamanio ? ' · ' + data.tamanio : '')"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
+  [homologado]="true"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   <div class="row">
     <div class="col-12">
-      <app-pdf-visualizador [base64Document]="data.base64Document"></app-pdf-visualizador>
+      <app-pdf-visualizador [base64Document]="data.base64Document" [herramientas]="true" [nombreArchivo]="data.nombre || 'Informe Auditoría'"></app-pdf-visualizador>
     </div>
   </div>
 </ng-template>

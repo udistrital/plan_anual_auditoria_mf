@@ -5,66 +5,79 @@
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
   <div class="row mt-3">
     <div class="col-12">
-      <div class="d-flex justify-content-between">
-        @if (mostrarOrdenamiento) {
-          <div class="filter-section">
-            <label for="select" class="label-select">Ordenado por: </label>
-            <mat-form-field appearance="outline">
-              <mat-label>Selección </mat-label>
-              <mat-select id="select" [(ngModel)]="ordenSeleccionado">
-                <mat-option value="">Revertir</mat-option>
-                <mat-option value="tipo_evaluacion">Tipo de evaluación A-Z</mat-option>
-                <mat-option value="titulo">Nombre de auditoría A-Z</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <button mat-icon-button (click)="aplicarOrdenamiento()">
-              <mat-icon color="primary">sort</mat-icon>
-            </button>
-          </div>
-        }
-        <div>
-          @if (modoEditar) {
-            <div class="d-flex flex-column">
+     <div class="sui-seccion">
+      @if (mostrarOrdenamiento) {
+        <div class="filter-section mb-4">
+          <label for="select" class="label-select">Ordenado por: </label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Selección </mat-label>
+            <mat-select id="select" [(ngModel)]="ordenSeleccionado">
+              <mat-option value="">Revertir</mat-option>
+              <mat-option value="tipo_evaluacion">Tipo de evaluación A-Z</mat-option>
+              <mat-option value="titulo">Nombre de auditoría A-Z</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button (click)="aplicarOrdenamiento()">
+            <mat-icon color="primary">sort</mat-icon>
+          </button>
+        </div>
+      }
+
+      <!-- Herramientas de la tabla: sección contraíble, recuerda la preferencia del usuario -->
+      @if (modoEditar) {
+        <div class="sui-herramientas" [class.cerrado]="!herramientasAbiertas">
+          <button
+            type="button"
+            class="sui-herramientas-cabecera"
+            aria-controls="herramientas-tabla"
+            [attr.aria-expanded]="herramientasAbiertas"
+            (click)="alternarHerramientas()"
+            >
+            <span class="sui-etiqueta">Herramientas de la tabla</span>
+            <mat-icon>expand_more</mat-icon>
+          </button>
+          <div class="sui-herramientas-cuerpo" id="herramientas-tabla" [attr.aria-hidden]="!herramientasAbiertas">
+            <div>
               <button
-                class="mb-2"
-                mat-raised-button
-                color="primary"
+                type="button"
+                class="sui-accion"
+                [attr.tabindex]="herramientasAbiertas ? null : -1"
                 (click)="descargarPlantilla()"
                 data-tour="descargar-plantilla"
                 >
-                <mat-icon svgIcon="excel"></mat-icon>Descargar Plantilla
+                <span class="sui-insignia"><mat-icon svgIcon="excel"></mat-icon></span>
+                <span><b>Descargar Plantilla</b><small>Formato Excel para el cargue masivo</small></span>
               </button>
               <button
-                class="mx-2"
-                mat-stroked-button
-                color="primary"
-                style="border: 1px solid var(--md-primary-500) !important"
+                type="button"
+                class="sui-accion"
+                [attr.tabindex]="herramientasAbiertas ? null : -1"
                 (click)="exportarTabla()"
                 data-tour="exportar-auditorias"
                 >
-                <mat-icon>file_download</mat-icon> Exportar Tabla
+                <span class="sui-insignia"><mat-icon>file_download</mat-icon></span>
+                <span><b>Exportar Tabla</b><small>Descarga el listado actual en Excel</small></span>
               </button>
-              @if (modoEditar) {
-                <button
-                  class="mx-2 mt-2"
-                  mat-stroked-button
-                  color="primary"
-                  style="border: 1px solid var(--md-primary-500) !important"
-                  (click)="eliminarAuditorias()"
-                  data-tour="eliminar-auditorias-masiva"
-                  >
-                  <mat-icon>delete_sweep</mat-icon> Eliminación Auditorías
-                </button>
-              }
+              <button
+                type="button"
+                class="sui-accion peligro"
+                [attr.tabindex]="herramientasAbiertas ? null : -1"
+                (click)="eliminarAuditorias()"
+                data-tour="eliminar-auditorias-masiva"
+                >
+                <span class="sui-insignia"><mat-icon>delete_sweep</mat-icon></span>
+                <span><b>Eliminación Auditorías</b><small>Elimina todas las auditorías del PAA</small></span>
+              </button>
             </div>
-          }
+          </div>
         </div>
-      </div>
+      }
 
       <!-- Agregar cdkDropList a la tabla -->
       <div class="table-container rounded-table table-scroll"
@@ -161,12 +174,12 @@
               <b>Estado</b>
             </th>
             <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{ 'even-row': i % 2 === 0 }">
-              {{ element.estado }}
+              <span class="estado-chip" [ngClass]="element.estado | claseEstado">{{ element.estado }}</span>
             </td>
           </ng-container>
 
           <!-- Acciones Column -->
-          <ng-container matColumnDef="acciones">
+          <ng-container matColumnDef="acciones" [stickyEnd]="true">
             <th mat-header-cell *matHeaderCellDef class="header">
               <b>Acciones</b>
             </th>
@@ -196,10 +209,11 @@
         </table>
       </div>
 
-      <div class="row mt-3">
+     </div>
+      <div>
         @if (!modoEditar && !modoEditarExtraordinario) {
           <div
-            class="d-flex justify-content-end"
+            class="d-flex justify-content-end sui-barra-acciones"
             >
             <button
               class="mx-2"
@@ -232,7 +246,7 @@
             }
           </div>
         } @else {
-          <div class="d-flex justify-content-end">
+          <div class="d-flex justify-content-end sui-barra-acciones">
             @if (!modoEditarExtraordinario) {
               <button
                 class="mx-2"
@@ -248,7 +262,7 @@
             @if (!modoEditarExtraordinario) {
               <button
                 class="mx-2"
-                mat-raised-button
+                mat-stroked-button
                 color="primary"
                 (click)="subirArchivoCargueMasivo()"
                 data-tour="cargue-masivo"
@@ -259,7 +273,7 @@
             @if (modoEditarExtraordinario) {
               <button
                 class="mx-2"
-                mat-raised-button
+                mat-stroked-button
                 color="primary"
                 (click)="subirActaModificacion()"
                 >
@@ -268,7 +282,7 @@
             }
             <button
               class="mx-2"
-              mat-raised-button
+              mat-stroked-button
               color="primary"
               (click)="renderizar()"
               data-tour="ver-paa-pdf"
@@ -276,12 +290,12 @@
               <mat-icon>visibility</mat-icon>Ver
             </button>
             @if (base64Matriz===null) {
-              <button class="mx-2" mat-raised-button color="primary" (click)="subirArchivoMatriz()">
+              <button class="mx-2" mat-stroked-button color="primary" (click)="subirArchivoMatriz()">
                 <mat-icon>file_upload</mat-icon>Matriz
               </button>
             }
             @if (base64Matriz!==null && !modoEditarExtraordinario) {
-              <button class="mx-2" mat-raised-button color="primary" (click)="verMatriz()">
+              <button class="mx-2" mat-stroked-button color="primary" (click)="verMatriz()">
                 <mat-icon>visibility</mat-icon>Ver Matriz
               </button>
             }

@@ -10,6 +10,7 @@
   [contenido]="contenidoDePlantilla"
   (regresar)="regresarRuta()"
   [mostrarBotonRegresar]="true"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
@@ -69,7 +70,7 @@
                   }
                 </mat-accordion>
               }
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                 @if (!soloLectura) {
                   <button mat-raised-button color="primary" (click)="enviarFormInformacion()">
                     Guardar y Continuar
@@ -103,7 +104,7 @@
             <form [formGroup]="formAspectosGenerales" (ngSubmit)="guardarAspectosGenerales()">
               <app-editor-enriquecido formControlName="aspecto_general"
               placeholder="Edita tu texto..."></app-editor-enriquecido>
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
                   Volver
                 </button>
@@ -138,7 +139,7 @@
           </div>
           <div class="mt-4">
             <app-aspectos-evaluados-seguimiento [informeId]="informeId" [soloLectura]="soloLectura"></app-aspectos-evaluados-seguimiento>
-            <div class="d-flex justify-content-end mt-4">
+            <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
               <button mat-stroked-button color="primary" matStepperPrevious class="me-2">
                 Volver
               </button>
@@ -178,7 +179,7 @@
               <h3 class="titulo-seccion mt-4">Notas</h3>
               <app-editor-enriquecido formControlName="nota" placeholder="Edita tu texto..."></app-editor-enriquecido>
 
-              <div class="d-flex justify-content-end mt-4">
+              <div class="d-flex justify-content-end mt-4 sui-barra-acciones">
                 <button matStepperPrevious mat-stroked-button color="primary" class="me-2">
                   Volver
                 </button>

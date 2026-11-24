@@ -4,12 +4,13 @@
     '<p>Gestión Auditoría / Programación /  <b>Registro Auditorías Especiales</b></p>'
   "
   [contenido]="contenidoDePlantilla"
+  [homologada]="true"
 ></plantilla-tarjeta-contenedora>
 
 <ng-template #contenidoDePlantilla>
-  <div class="row mt-3">
-    <form [formGroup]="vigenciaForm" class="col-12 d-flex justify-content-between align-items-center">
-      <mat-form-field class="col-md-4 col-12 mt-4" appearance="outline">
+  <div class="sui-seccion">
+    <form [formGroup]="vigenciaForm" class="d-flex flex-wrap justify-content-between align-items-center" style="gap: 16px">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" style="width: 320px; max-width: 100%">
         <mat-label>Seleccione una vigencia: </mat-label>
         <mat-icon color="primary" matPrefix>today</mat-icon>
         <mat-select
@@ -27,20 +28,20 @@
       </mat-form-field>
       @if (permiso) {
         <button
-          class="mx-3"
           mat-raised-button
           color="primary"
           (click)="nuevaAuditoria()"
           >
+          <mat-icon>add_circle</mat-icon>
           Crear Auditoría Especial
         </button>
       }
     </form>
-    <p>Seleccione el año de auditoría especial a realizar</p>
+    <p class="sui-subtitulo mt-3 mb-0">Seleccione el año de auditoría especial a realizar</p>
   </div>
 
-  <div class="row mt-3">
-    <div class="col-12">
+  <div>
+    <div>
       <app-tabla-auditorias-especiales
         [vigenciaId]="vigenciaSeleccionada"
         [permiso]="permiso"

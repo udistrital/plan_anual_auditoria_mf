@@ -28,3 +28,21 @@
   justify-content: flex-end;
   margin-top: 20px;
 }
+
+/* Documentos anexos: una tarjeta por fila (línea gráfica homologada #956) */
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.documento-card {
+  margin-bottom: 0;
+  padding: 18px 20px;
+  box-shadow: none !important;
+}
+
+.documento-content > span {
+  font-weight: 600;
+  color: #424242;
+}

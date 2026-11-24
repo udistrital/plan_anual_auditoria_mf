@@ -1,16 +1,16 @@
 @if (banderaTablaAuditorias) {
-  <div class="row mt-4">
-    <div class="col-12">
-      <h3 class="my-3">Lista de auditorías</h3>
-      <p class="mb-2 mx-2">
+  <div class="sui-seccion">
+    <div>
+      <h3 class="sui-seccion-titulo"><mat-icon>track_changes</mat-icon>Lista de auditorías</h3>
+      <p class="sui-subtitulo">
         Seleccione la auditoría para realizar revisión y/o evaluación del informe.
       </p>
     </div>
-    <div class="col-12">
+    <div>
       <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           @for (columna of constructorTablaAuditorias; track columna) {
-            <ng-container [matColumnDef]="columna.columnDef">
+            <ng-container [matColumnDef]="columna.columnDef" [stickyEnd]="columna.columnDef === 'acciones'">
               <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!columna.sortable">
                 <b>{{ columna.header }}</b>
               </th>
@@ -45,7 +45,7 @@
                     }
                     <!-- Estado con indicador de color -->
                     @case ('estado') {
-                      <span>{{ getEstadoConColor(row) }}</span>
+                      <span class="estado-chip" [ngClass]="(row.estado_nombre || row.estado_id || 'Sin estado') | claseEstado">{{ row.estado_nombre || row.estado_id || 'Sin estado' }}</span>
                     }
                     <!-- Resto de columnas -->
                     @default {

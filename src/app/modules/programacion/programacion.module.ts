@@ -22,6 +22,7 @@ import { RegistrarAuditoriasComponent } from "./components/consulta-plan-auditor
 import { ModalAgregarAuditorComponent } from "./components/asignar-auditorias/modal-agregar-auditor/modal-agregar-auditor.component";
 import { MatTooltip } from "@angular/material/tooltip";
 import { UnirConComaPipe } from "src/app/shared/pipes/unir-con-coma.pipe";
+import { ClaseEstadoPipe } from "src/app/shared/pipes/clase-estado.pipe";
 import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-especiales/tabla-auditorias-especiales/tabla-auditorias-especiales.component";
 
 @NgModule({
@@ -51,6 +52,7 @@ import { TablaAuditoriasEspecialesComponent } from "./components/auditorias-espe
     MatTooltip,
     IconosModule,
     UnirConComaPipe,
+    ClaseEstadoPipe,
   ],
 })
 export class ProgramacionModule {}

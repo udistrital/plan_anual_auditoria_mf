@@ -1,12 +1,12 @@
 @if (banderaTablaSeguimiento) {
-  <div class="row mt-4">
-    <div class="col-12">
-      <h3 class="my-3">Listado de Seguimientos e Informes de Ley Aprobados en el Plan Anual de Auditorías (PAA)</h3>
-      <p class="mb-2 mx-2">
+  <div class="sui-seccion">
+    <div>
+      <h3 class="sui-seccion-titulo"><mat-icon>track_changes</mat-icon>Listado de Seguimientos e Informes de Ley Aprobados en el Plan Anual de Auditorías (PAA)</h3>
+      <p class="sui-subtitulo">
         Seleccione el seguimiento y/o informe de ley para realizar la revisión y/o planeación.
       </p>
     </div>
-    <div class="col-12">
+    <div>
       @if (mostrarFiltros) {
         <div class="row mb-3">
           <div class="col-12">
@@ -32,11 +32,12 @@
         </div>
       }
 
-      <div class="table-container table-scroll">
+      <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           @for (columna of auditoriasContructorTabla; track columna) {
             <ng-container
               [matColumnDef]="columna.columnDef"
+              [stickyEnd]="columna.columnDef === 'acciones'"
               >
               <th
                 mat-header-cell
@@ -105,7 +106,7 @@
                     }
                     @case('estado') {
                       <div>
-                        <span>{{ getEstadoConColor(row) }}</span>
+                        <span class="estado-chip" [ngClass]="(row.estado_nombre ?? 'Sin estado') | claseEstado">{{ row.estado_nombre ?? 'Sin estado' }}</span>
                       </div>
                     }
                     @default {

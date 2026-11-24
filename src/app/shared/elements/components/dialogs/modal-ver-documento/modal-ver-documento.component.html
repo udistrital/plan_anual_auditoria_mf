@@ -4,31 +4,30 @@
   [descripcion]="'Vista previa del documento seleccionado'"
   [contenido]="contenidoDeModal"
   [footer]="footerDeModal"
+  [homologado]="true"
 ></plantilla-modal>
 
 <ng-template #contenidoDeModal>
   @if (!modoMultiple) {
-    <div style="z-index: 0">
-      <pdf-viewer
-        [src]="documentoSrc"
-        [render-text]="true"
-        [original-size]="false"
-        [show-all]="true"
-        [zoom]="0.98"
-        class="visualizador"
-      ></pdf-viewer>
+    <div class="sui-visor mt-3">
+      <app-pdf-visualizador
+        [base64Document]="base64Actual"
+        [herramientas]="true"
+        nombreArchivo="documento"
+      ></app-pdf-visualizador>
     </div>
   }
 
   @if (modoMultiple) {
     <div class="multiple-container">
-      <div class="multiple-listado">
+      <div class="multiple-listado sui-lista-documentos">
         @for (documento of documentosMultiples; track documento; let i = $index) {
           <button
             mat-stroked-button
             class="multiple-item"
             (click)="seleccionarDocumento(i)"
             [class.listado-activo]="indiceSeleccionado === i"
+            [class.selected]="indiceSeleccionado === i"
             matTooltip="Documento no firmado"
             [matTooltipPosition]="'above'"
             [matTooltipDisabled]="documento.firmado !== false"
@@ -48,15 +47,12 @@
         }
       </div>
       @if (documentoSeleccionadoSrc) {
-        <div class="multiple-visor">
-          <pdf-viewer
-            [src]="documentoSeleccionadoSrc"
-            [render-text]="true"
-            [original-size]="false"
-            [show-all]="true"
-            [zoom]="0.98"
-            class="visualizador"
-          ></pdf-viewer>
+        <div class="multiple-visor sui-visor">
+          <app-pdf-visualizador
+            [base64Document]="documentosMultiples[indiceSeleccionado]?.base64 ?? ''"
+            [herramientas]="true"
+            [nombreArchivo]="documentosMultiples[indiceSeleccionado]?.titulo ?? 'documento'"
+          ></app-pdf-visualizador>
         </div>
       }
     </div>
