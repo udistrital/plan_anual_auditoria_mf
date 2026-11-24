@@ -1,0 +1,75 @@
+<!-- Filtros de búsqueda: sección contraíble, recuerda la preferencia del usuario -->
+<div class="sui-herramientas filtros-auditoria" [class.cerrado]="!abierto">
+  <button
+    type="button"
+    class="sui-herramientas-cabecera"
+    [attr.aria-controls]="idCuerpo"
+    [attr.aria-expanded]="abierto"
+    (click)="alternar()"
+    >
+    <span class="sui-etiqueta">Filtros de búsqueda</span>
+    @if (filtrosActivos) {
+      <span class="filtros-auditoria__activos">
+        {{ filtrosActivos }} {{ filtrosActivos === 1 ? 'filtro activo' : 'filtros activos' }}
+      </span>
+    }
+    <mat-icon>expand_more</mat-icon>
+  </button>
+
+  <div class="sui-herramientas-cuerpo" [id]="idCuerpo" [attr.aria-hidden]="!abierto">
+    <div class="filtros-auditoria__campos">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Estado</mat-label>
+        <mat-icon matPrefix>flag</mat-icon>
+        <mat-select
+          [value]="estadoSeleccionado"
+          [tabIndex]="abierto ? 0 : -1"
+          (selectionChange)="cambiarEstado($event.value)"
+          >
+          <mat-option [value]="null">Todos los estados</mat-option>
+          @for (opcion of estados; track opcion.id) {
+            <mat-option [value]="opcion.id">{{ opcion.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Consecutivo OCI</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          autocomplete="off"
+          [value]="textoConsecutivo"
+          [attr.tabindex]="abierto ? null : -1"
+          (input)="cambiarConsecutivo($any($event.target).value)"
+          />
+        @if (textoConsecutivo) {
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Borrar consecutivo"
+            matTooltip="Borrar"
+            [attr.tabindex]="abierto ? null : -1"
+            (click)="limpiarConsecutivo()"
+            >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <button
+        mat-stroked-button
+        color="primary"
+        type="button"
+        class="filtros-auditoria__limpiar"
+        [disabled]="!filtrosActivos"
+        [attr.tabindex]="abierto ? null : -1"
+        (click)="limpiar()"
+        >
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+</div>

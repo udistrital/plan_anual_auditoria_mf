@@ -44,6 +44,12 @@ export const seguimientosConstructorTabla = [
     sortable: false,
   },
   {
+    columnDef: "consecutivo_OCI",
+    header: "Consecutivo OCI",
+    cell: (seguimiento: any) => seguimiento.consecutivo_OCI ?? 'no definido',
+    sortable: false,
+  },
+  {
     columnDef: "estado",
     header: "Estado",
     cell: (seguimiento: any) => seguimiento.estado_nombre || seguimiento.estado_id,

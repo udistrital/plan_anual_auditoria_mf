@@ -5,6 +5,15 @@
       <p class="sui-subtitulo"> Seleccione la auditoría interna para realizar la revisión y/o ejecución.</p>
     </div>
     <div>
+      @if (mostrarFiltros) {
+        <app-filtros-auditoria
+          [estados]="estadoOptions"
+          [estado]="filtroEstado"
+          [consecutivo]="filtroConsecutivo"
+          (filtrosCambio)="aplicarFiltros($event)"
+        ></app-filtros-auditoria>
+      }
+
       <div class="table-container rounded-table table-scroll">
         <table mat-table [dataSource]="auditoriasDataSource" matSort>
           @for (columna of auditoriasContructorTabla; track columna) {

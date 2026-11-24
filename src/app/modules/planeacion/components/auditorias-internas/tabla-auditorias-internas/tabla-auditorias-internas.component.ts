@@ -39,6 +39,7 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
+import { FiltrosAuditoria } from "src/app/shared/elements/components/filtros-auditoria/filtros-auditoria.component";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -288,6 +289,17 @@ export class TablaAuditoriasInternasComponent implements OnInit {
     }
 
     this.changeDetector.detectChanges();
+  }
+
+  /** Aplica los filtros de búsqueda y vuelve a la primera página. */
+  aplicarFiltros(filtros: FiltrosAuditoria): void {
+    this.filtroEstado = filtros.estado;
+    this.filtroConsecutivo = filtros.consecutivo;
+    this.pageIndex = 0;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, 0);
   }
 
   manejarCambioPaginado(evento: PageEvent) {

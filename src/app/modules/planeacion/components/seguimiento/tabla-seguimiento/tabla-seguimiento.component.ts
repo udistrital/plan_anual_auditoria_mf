@@ -32,6 +32,7 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
+import { FiltrosAuditoria } from "src/app/shared/elements/components/filtros-auditoria/filtros-auditoria.component";
 
 @Component({
     selector: "app-tabla-seguimiento",
@@ -361,6 +362,17 @@ export class TablaSeguimientoComponent implements OnInit {
     }
 
     this.changeDetector.detectChanges();
+  }
+
+  /** Aplica los filtros de búsqueda y vuelve a la primera página. */
+  aplicarFiltros(filtros: FiltrosAuditoria): void {
+    this.filtroEstado = filtros.estado;
+    this.filtroConsecutivo = filtros.consecutivo;
+    this.pageIndex = 0;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, 0);
   }
 
   manejarCambioPaginado(evento: PageEvent) {
