@@ -22,7 +22,7 @@ export const colocacionesContructorTabla = [
   },
   {
     columnDef: "auditoria",
-    header: "Auditoria",
+    header: "Auditoría",
     cell: (auditoria: AuditoriaExterna) => auditoria.nombre_auditoria,
     sortable: false,
   },

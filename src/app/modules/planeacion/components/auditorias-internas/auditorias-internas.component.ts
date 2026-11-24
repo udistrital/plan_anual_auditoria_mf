@@ -30,9 +30,11 @@ export class AuditoriasInternasComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
+    // El formulario se crea antes del await: Angular pinta la plantilla mientras se resuelve
+    // la persona y [formGroup] no puede recibir undefined (NG01052).
+    this.iniciarvigenciaForm();
     this.personaId = await this.userService.getPersonaId();
     this.obtenerRolPrioritario();
-    this.iniciarvigenciaForm();
     this.cargarVigencias();
   }
 

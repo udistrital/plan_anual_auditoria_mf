@@ -403,10 +403,17 @@ export class RevisionDocumentosComponent implements OnInit {
             // Firmada electrónicamente ya no se descarga la plantilla para firmar
             visible: (carta) => !!carta && obtenerTipoFirma(carta) !== TIPO_FIRMA.ELECTRONICA,
             accion: async () => {
-              const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
-              this.descargaService.descargarArchivo(
-                base64, "application/pdf", `Carta_Representacion_${dependenciaNombre}`
-              );
+              try {
+                const base64 = await this.nuxeoService.obtenerPorUUID(documento.nuxeo_enlace);
+                await this.descargaService.descargarArchivo(
+                  base64, "application/pdf", `Carta_Representacion_${dependenciaNombre}`
+                );
+              } catch (error) {
+                console.error("Error al descargar la carta de representación:", error);
+                this.alertService.showErrorAlert(
+                  DescargaService.mensajeError(error, "No se pudo descargar la carta de representación.")
+                );
+              }
             }
           }, {
             nombre: "Aplicar Firma Electrónica",
@@ -759,6 +766,7 @@ export class RevisionDocumentosComponent implements OnInit {
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
+      this.alertService.showErrorAlert(DescargaService.mensajeError(error, "No se pudieron descargar los documentos."));
     }
   }
 

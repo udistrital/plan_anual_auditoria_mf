@@ -63,7 +63,7 @@ export class DocumentosAnexosAuditoriaComponent implements OnInit, OnDestroy {
 
   documentos = [
     {
-      nombre: "Programa de Auditoria",
+      nombre: "Programa de Auditoría",
       plantilla: "programa-auditoria",
       parametro: environment.TIPO_DOCUMENTO_PARAMETROS.PROGRAMA_TRABAJO,
     },

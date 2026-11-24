@@ -14,7 +14,7 @@ import { RolService } from 'src/app/core/services/rol.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import type { DocumentoReferenciaPdf } from 'src/app/core/services/referencia-pdf.service';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
-import { DescargaService } from 'src/app/shared/services/descarga.service';
+import { DescargaError, DescargaService, MENSAJE_DOCUMENTO_NO_DISPONIBLE } from 'src/app/shared/services/descarga.service';
 import { TercerosService } from 'src/app/shared/services/terceros.service';
 import { CriterioEvaluacion, TIPOS_ACCION, criterioPorId, nombreRol } from './registro-avances.utilidades';
 import { ValoresCalificacion } from './formulario-calificacion/formulario-calificacion.component';
@@ -335,8 +335,16 @@ export class RegistroAvancesComponent implements OnInit {
 
   async descargarDocumento(index: number) {
     const doc = this.documentos[index];
-    const archivo = await this.gestorDocumentalService.obtenerPorUUID(doc.nuxeo_enlace);
-    this.descargaService.descargarArchivo(archivo, doc.tipoArchivo ?? 'application/pdf', doc.nombre!);
+    try {
+      if (!doc?.nuxeo_enlace) {
+        throw new DescargaError(MENSAJE_DOCUMENTO_NO_DISPONIBLE);
+      }
+      const archivo = await this.gestorDocumentalService.obtenerPorUUID(doc.nuxeo_enlace);
+      await this.descargaService.descargarArchivo(archivo, doc.tipoArchivo ?? 'application/pdf', doc.nombre || 'documento');
+    } catch (error) {
+      console.error('Error al descargar el documento:', error);
+      this.alertService.showErrorAlert(DescargaService.mensajeError(error, 'No se pudo descargar el documento.'));
+    }
   }
 
   eliminarDocumento(index: number) {
