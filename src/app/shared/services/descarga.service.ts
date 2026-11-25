@@ -5,6 +5,17 @@ import { saveAs } from 'file-saver';
 import { environment } from "src/environments/environment";
 import base64ToArrayBuffer from '../utils/base64ToArrayBuffer';
 
+/** Error de descarga con un mensaje pensado para mostrarse al usuario. */
+export class DescargaError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DescargaError';
+  }
+}
+
+export const MENSAJE_DOCUMENTO_NO_DISPONIBLE = 'El documento no está disponible para descargar.';
+export const MENSAJE_SIN_DOCUMENTOS = 'No hay documentos disponibles para descargar.';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -17,6 +28,9 @@ export class DescargaService {
    * @throws Error si ocurre algún problema durante el proceso de descarga.
    */
   async descargarArchivo(base64File: string, fileType: string, fileName: string): Promise<void> {
+    if (!base64File) {
+      throw new DescargaError(MENSAJE_DOCUMENTO_NO_DISPONIBLE);
+    }
     try {
       const arrayBuffer = base64ToArrayBuffer(base64File);
       const blob = new Blob([arrayBuffer], { type: fileType });
@@ -35,6 +49,9 @@ export class DescargaService {
    * @throws Error if any issue occurs during the download process.
    */
   async descargarArchivoBuffer(buffer: ArrayBuffer, fileType: string, fileName: string): Promise<void> {
+    if (!buffer?.byteLength) {
+      throw new DescargaError(MENSAJE_DOCUMENTO_NO_DISPONIBLE);
+    }
     try {
       const blob = new Blob([buffer], { type: fileType });
       this.descargarArchivoBlob(blob, fileType, fileName);
@@ -52,16 +69,9 @@ export class DescargaService {
    * @throws Error if any issue occurs during the download process.
    */
   private descargarArchivoBlob(blob: Blob, fileType: string, fileName: string): void {
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${fileName}.${this.obtenerExtencionMimeType(fileType)}`;
-    link.target = '_blank';
-    link.click();
-
-    // Limpiar la URL temporal para liberar memoria.
-    window.URL.revokeObjectURL(url);
+    // file-saver difiere la liberación de la URL temporal; revocarla justo después del clic
+    // puede cancelar la descarga en algunos navegadores.
+    saveAs(blob, `${fileName}.${this.obtenerExtencionMimeType(fileType)}`);
   }
 
   /**
@@ -82,8 +92,14 @@ export class DescargaService {
     const nombreBaseContador = new Map<string, number>();
     const suffixNormalizado = suffix ? `-${suffix.replace(/\s+/g, '-')}` : '';
   
+    // Los documentos sin contenido se omiten: generarían PDF vacíos dentro del ZIP
+    const disponibles = (documentos ?? []).filter((doc) => !!doc?.base64);
+    if (!disponibles.length) {
+      throw new DescargaError(MENSAJE_SIN_DOCUMENTOS);
+    }
+
     try {
-      documentos.forEach((doc, index) => {
+      disponibles.forEach((doc, index) => {
         const nombreBasePersonalizado = typeof doc.fileName === 'string'
           ? this.normalizarNombreArchivo(doc.fileName)
           : '';
@@ -126,6 +142,14 @@ export class DescargaService {
    * @param mimeType - El tipo MIME del archivo (ejemplo: 'application/pdf').
    * @returns La extensión de archivo asociada (ejemplo: 'pdf').
    */
+  /**
+   * Mensaje para el usuario ante un fallo de descarga: el propio si es un `DescargaError`
+   * (p. ej. documento ausente) o el genérico indicado.
+   */
+  static mensajeError(error: unknown, porDefecto: string): string {
+    return error instanceof DescargaError ? error.message : porDefecto;
+  }
+
   private obtenerExtencionMimeType(mimeType: string): string {
     const mimeMap: { [key: string]: string } = {
       'application/pdf': 'pdf',

@@ -14,6 +14,14 @@
   margin-right: 0.4rem;
 }
 
+/*
+ * Texto de ayuda bajo el selector de año: la regla global .sui-subtitulo fija
+ * margin-bottom 24px con !important, que se suma al relleno de la sección.
+ */
+.sui-subtitulo.texto-ayuda-paa {
+  margin: 12px 0 0 !important;
+}
+
 .mat-column-no {
   text-align: center;
 }

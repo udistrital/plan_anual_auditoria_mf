@@ -2,7 +2,7 @@
   [homologado]="true"
   [icono]="'list_alt'"
   [titulo]="'Ver PAA'"
-  [descripcion]="data.actualizado ? 'Plan Anual de Auditoria actualizado' : 'Plan Anual de Auditoria'"
+  [descripcion]="data.actualizado ? 'Plan Anual de Auditoría actualizado' : 'Plan Anual de Auditoría'"
   [contenido]="contenidoDeModal"
 ></plantilla-modal>
 
@@ -11,7 +11,7 @@
     <app-pdf-visualizador
       [base64Document]="data.base64Document"
       [herramientas]="true"
-      [nombreArchivo]="'Plan Anual de Auditoria ' + data.vigenciaNombre"
+      [nombreArchivo]="'Plan Anual de Auditoría ' + data.vigenciaNombre"
     ></app-pdf-visualizador>
   </div>
 </ng-template>

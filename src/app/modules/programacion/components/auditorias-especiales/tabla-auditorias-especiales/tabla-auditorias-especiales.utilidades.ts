@@ -84,7 +84,7 @@ export const colocacionesContructorTablaEspeciales: ColumnaTablaAuditoriaEspecia
   },
   {
     columnDef: "auditoria",
-    header: "Auditoria",
+    header: "Auditoría",
     cell: (auditoria: AuditoriaEspecialTablaRow) =>
       tituloAuditoriaEspecial(auditoria),
     sortable: false,

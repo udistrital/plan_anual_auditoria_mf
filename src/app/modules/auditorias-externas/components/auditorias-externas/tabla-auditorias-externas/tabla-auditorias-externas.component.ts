@@ -29,8 +29,8 @@ export class TablaAuditoriasExternasComponent implements OnInit, OnChanges {
   pageSize = 5;
   pageIndex = 0;
   opcionesPagina: number[] = [5, 10, 25];
-  iconosAccion = new Map<string, string>([["Ver Auditoria", "visibility"]]);
-  readonly acciones = ["Ver Auditoria"];
+  iconosAccion = new Map<string, string>([["Ver Auditoría", "visibility"]]);
+  readonly acciones = ["Ver Auditoría"];
 
   constructor(
     private readonly router: Router,
@@ -83,7 +83,7 @@ export class TablaAuditoriasExternasComponent implements OnInit, OnChanges {
 
   realizarAccion(auditoria: AuditoriaExterna, accion: string) {
     const acciones: Record<string, () => void> = {
-      "Ver Auditoria": () => this.verAuditoria(auditoria),
+      "Ver Auditoría": () => this.verAuditoria(auditoria),
     };
     acciones[accion]?.();
   }

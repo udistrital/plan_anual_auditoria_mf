@@ -23,6 +23,10 @@ pdf-viewer::ng-deep .page {
   padding: 4px 12px;
   border-bottom: 1px solid #e0e0e0;
   background-color: #ffffff;
+  /* Fija los controles al recorrer documentos largos dentro del contenedor con scroll */
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .visor-pdf__barra .mat-mdc-icon-button {
@@ -61,12 +65,18 @@ pdf-viewer::ng-deep .page {
   background-color: #525659;
 }
 
-.visor-pdf--completo .visor-pdf__barra {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
 .visor-pdf--completo pdf-viewer {
   height: calc(100vh - 52px) !important;
+}
+
+/* Documento que no se pudo interpretar o renderizar */
+.visor-pdf__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  color: #b3261e;
+  background-color: #fdecea;
+  border: 1px solid #f5c2c0;
+  border-radius: 4px;
 }

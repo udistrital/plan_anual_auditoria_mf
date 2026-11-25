@@ -11,6 +11,7 @@ import { NuxeoService } from "src/app/core/services/nuxeo.service";
 import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.service";
 import { DescargaService } from "src/app/shared/services/descarga.service";
 import { TercerosService } from "src/app/shared/services/terceros.service";
+import { AlertService } from "src/app/shared/services/alert.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
@@ -41,6 +42,7 @@ export class RevisionSecretarioComponent {
     private readonly rolService: RolService,
     private readonly parametrosUtilsService: ParametrosUtilsService,
     private readonly documentoUtils: DocumentoUtils,
+    private readonly alertService: AlertService,
   ) { }
 
   botonSeleccionado: string = "formato";
@@ -200,6 +202,7 @@ export class RevisionSecretarioComponent {
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
+      this.alertService.showErrorAlert(DescargaService.mensajeError(error, "No se pudieron descargar los documentos."));
     }
   }
 }

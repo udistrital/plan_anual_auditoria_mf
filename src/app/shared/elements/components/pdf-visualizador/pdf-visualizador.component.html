@@ -23,6 +23,16 @@
           >
           <mat-icon>zoom_in</mat-icon>
         </button>
+        <button
+          mat-icon-button
+          type="button"
+          matTooltip="Restablecer zoom (100%)"
+          aria-label="Restablecer zoom al 100%"
+          [disabled]="!puedeRestablecer"
+          (click)="restablecerZoom()"
+          >
+          <mat-icon>restart_alt</mat-icon>
+        </button>
         <span class="visor-pdf__separador"></span>
         <button
           mat-icon-button
@@ -51,9 +61,16 @@
         [original-size]="false"
         [show-all]="true"
         [zoom]="zoom"
+        (error)="alFallarRenderizado($event)"
         class="pdf-container"
         style="min-width: 200px; min-height: 550px; width: 100%; height: auto"
       ></pdf-viewer>
     </div>
+  </div>
+}
+@if (errorCarga) {
+  <div class="visor-pdf__error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>No se pudo mostrar el documento. Es posible que el archivo esté dañado o no sea un PDF.</span>
   </div>
 }

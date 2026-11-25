@@ -1,0 +1,40 @@
+/*
+ * La sección plegable usa .sui-herramientas (estilos homologados de _sisifo-ui.scss).
+ * Aquí solo se ajusta la distribución de los campos: estado y consecutivo con el mismo ancho
+ * y el botón de limpiar a su lado; en pantallas angostas, uno debajo del otro.
+ */
+.sui-herramientas-cuerpo > .filtros-auditoria__campos {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  /* Margen para que la etiqueta flotante del campo no quede recortada */
+  padding-top: 6px;
+}
+
+.filtros-auditoria__campos .mat-mdc-form-field {
+  width: 100%;
+}
+
+.filtros-auditoria__limpiar {
+  white-space: nowrap;
+}
+
+.filtros-auditoria__activos {
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--md-primary-700);
+  background-color: var(--md-primary-50, #e3f2fd);
+}
+
+@media (max-width: 900px) {
+  .sui-herramientas-cuerpo > .filtros-auditoria__campos {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .filtros-auditoria__limpiar {
+    justify-self: end;
+  }
+}

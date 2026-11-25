@@ -26,6 +26,7 @@ import { TarjetaIndicadorComponent } from "./elements/components/tarjeta-indicad
 import { FlujoPasosComponent } from "./elements/components/flujo-pasos/flujo-pasos.component";
 import { DescripcionHallazgoComponent } from "./elements/components/descripcion-hallazgo/descripcion-hallazgo.component";
 import { DescripcionTextoPipe } from "./pipes/descripcion-texto.pipe";
+import { FiltrosAuditoriaComponent } from "./elements/components/filtros-auditoria/filtros-auditoria.component";
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { DescripcionTextoPipe } from "./pipes/descripcion-texto.pipe";
     TarjetaIndicadorComponent,
     FlujoPasosComponent,
     DescripcionHallazgoComponent,
+    FiltrosAuditoriaComponent,
   ],
   imports: [
     CommonModule,
@@ -72,6 +74,7 @@ import { DescripcionTextoPipe } from "./pipes/descripcion-texto.pipe";
     TarjetaIndicadorComponent,
     FlujoPasosComponent,
     DescripcionHallazgoComponent,
+    FiltrosAuditoriaComponent,
     DescripcionTextoPipe,
     //modulos
     FormsModule,

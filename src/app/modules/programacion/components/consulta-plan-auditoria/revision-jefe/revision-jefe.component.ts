@@ -373,6 +373,7 @@ export class RevisionJefeComponent implements OnInit {
       );
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
+      this.alertService.showErrorAlert(DescargaService.mensajeError(error, "No se pudieron descargar los documentos."));
     }
   }
 }

@@ -67,11 +67,11 @@ export class ModalPdfVisualizadorComponent implements OnInit {
       await this.descargaService.descargarArchivo(
         base64File,
         'application/pdf',
-        'Plan Anual de Auditoria ' + this.data.vigenciaNombre
+        'Plan Anual de Auditoría ' + this.data.vigenciaNombre
       );
     } catch (error) {
       console.error("Error al descargar el PAA:", error);
-      this.alertService.showErrorAlert("Error al descargarel el PAA");
+      this.alertService.showErrorAlert(DescargaService.mensajeError(error, "No se pudo descargar el Plan Anual de Auditoría."));
     }
   }
 }

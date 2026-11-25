@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from "@angular/core";
 import { saveAs } from "file-saver";
+import { AlertService } from "src/app/shared/services/alert.service";
 
 @Component({
     selector: "app-pdf-visualizador",
@@ -25,10 +26,13 @@ export class PdfVisualizadorComponent implements OnChanges {
   static readonly ZOOM_MINIMO = 0.5;
   static readonly ZOOM_MAXIMO = 2;
   static readonly PASO_ZOOM = 0.25;
+  static readonly ZOOM_INICIAL = 1;
 
   pdfLoaded = false;
+  /** El documento no se pudo interpretar o renderizar como PDF. */
+  errorCarga = false;
   pdfSrc: Uint8Array | undefined;
-  zoom = 1;
+  zoom = PdfVisualizadorComponent.ZOOM_INICIAL;
   enPantallaCompleta = false;
 
   @Input() base64Document: string = "";
@@ -42,11 +46,21 @@ export class PdfVisualizadorComponent implements OnChanges {
   /** Nombre (sin extensión) con el que se descarga el PDF desde la barra de herramientas. */
   @Input() nombreArchivo: string = "documento";
 
+  constructor(private readonly alertService: AlertService) {}
+
   // Este método se ejecuta cada vez que el valor de base64Document cambia.
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['base64Document'] && this.base64Document) {
-      this.zoom = 1;
+    if (!changes['base64Document']) {
+      return;
+    }
+    this.zoom = PdfVisualizadorComponent.ZOOM_INICIAL;
+    this.errorCarga = false;
+    if (this.base64Document) {
       this.cargarPdfDeBase64(this.base64Document);  // Cargar el nuevo PDF
+    } else {
+      // Sin documento no se conserva el anterior en pantalla
+      this.pdfLoaded = false;
+      this.pdfSrc = undefined;
     }
   }
 
@@ -57,7 +71,20 @@ export class PdfVisualizadorComponent implements OnChanges {
       this.pdfLoaded = true;
     } catch (error) {
       console.error("Error loading PDF:", error);
+      this.marcarErrorCarga();
     }
+  }
+
+  /** pdf.js no pudo abrir el documento (contenido dañado o que no es un PDF). */
+  alFallarRenderizado(error: unknown): void {
+    console.error("Error al renderizar el PDF:", error);
+    this.marcarErrorCarga();
+  }
+
+  private marcarErrorCarga(): void {
+    this.errorCarga = true;
+    this.pdfLoaded = false;
+    this.pdfSrc = undefined;
   }
 
   base64ToArrayBuffer(base64: string): ArrayBuffer {
@@ -82,6 +109,10 @@ export class PdfVisualizadorComponent implements OnChanges {
     return this.zoom < PdfVisualizadorComponent.ZOOM_MAXIMO;
   }
 
+  get puedeRestablecer(): boolean {
+    return this.zoom !== PdfVisualizadorComponent.ZOOM_INICIAL;
+  }
+
   alejar(): void {
     if (this.puedeAlejar) {
       this.zoom = Math.max(PdfVisualizadorComponent.ZOOM_MINIMO, this.zoom - PdfVisualizadorComponent.PASO_ZOOM);
@@ -101,15 +132,21 @@ export class PdfVisualizadorComponent implements OnChanges {
    */
   descargar(): void {
     if (!this.base64Document) {
+      this.alertService.showErrorAlert("El documento no está disponible para descargar.");
       return;
     }
     try {
       const bytes = new Uint8Array(this.base64ToArrayBuffer(this.base64Document));
-      const nombre = (this.nombreArchivo || "documento").trim();
+      const nombre = (this.nombreArchivo || "documento").trim() || "documento";
       saveAs(new Blob([bytes], { type: "application/pdf" }), `${nombre}.pdf`);
     } catch (error) {
       console.error("Error al descargar el PDF:", error);
+      this.alertService.showErrorAlert("No se pudo descargar el documento.");
     }
+  }
+
+  restablecerZoom(): void {
+    this.zoom = PdfVisualizadorComponent.ZOOM_INICIAL;
   }
 
   alternarPantallaCompleta(): void {

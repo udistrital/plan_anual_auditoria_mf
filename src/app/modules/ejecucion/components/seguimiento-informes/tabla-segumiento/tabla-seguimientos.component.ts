@@ -20,6 +20,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { HistorialRechazosData, ModalHistorialRechazosComponent } from "src/app/shared/elements/components/dialogs/modal-historial-rechazos/modal-historial-rechazos.component";
 import { accionesEjecucionFinal } from "src/app/shared/utils/accionesPorRolYEstado";
 import emojiColorPorPrefijoEstado from "src/app/shared/utils/colorPorPrefijoEstado";
+import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
+import { FiltrosAuditoria, OpcionEstadoFiltro } from "src/app/shared/elements/components/filtros-auditoria/filtros-auditoria.component";
 import { environment } from "src/environments/environment";
 
 @Component({
@@ -52,6 +54,21 @@ export class TablaSeguimientosComponent implements OnInit {
     ["Historial de Observaciones", "history"],
   ]);
 
+  // Filtros de la vista (estado, consecutivo)
+  private readonly rolesConFiltros = [
+    environment.ROL.JEFE,
+    environment.ROL.AUDITOR_EXPERTO,
+    environment.ROL.AUDITOR,
+    environment.ROL.AUDITOR_ASISTENTE,
+  ];
+  filtroEstado: number | null = null;
+  filtroConsecutivo: string = "";
+  estadoOptions: OpcionEstadoFiltro[] = [];
+
+  get mostrarFiltros(): boolean {
+    return this.rolesConFiltros.some((rol) => this.rolService.tieneRol(rol));
+  }
+
   constructor(
     private readonly alertaService: AlertService,
     private readonly rolService: RolService,
@@ -61,12 +78,16 @@ export class TablaSeguimientosComponent implements OnInit {
     private readonly planAuditoriaService: PlanAnualAuditoriaService,
     private readonly referenciaPdfService: ReferenciaPdfService,
     private readonly router: Router,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly parametrosUtilsService: ParametrosUtilsService,
   ) { }
 
   ngOnInit() {
     this.roles = this.rolService.getRoles();
     this.setPermisos();
+    if (this.mostrarFiltros) {
+      this.cargarEstadosFiltro();
+    }
   }
 
   setPermisos() {
@@ -78,7 +99,8 @@ export class TablaSeguimientosComponent implements OnInit {
   listarAuditoriasPorVigencia(
     vigenciaId: number,
     limit: number = this.itemsPerPage[0],
-    offset: number = 0
+    offset: number = 0,
+    _retry: boolean = false
   ) {
     this.auditoriasPorVigencia = [];
 
@@ -86,7 +108,7 @@ export class TablaSeguimientosComponent implements OnInit {
     const informe_id = environment.TIPO_EVALUACION.INFORME_ID;
     
     let queryParams = `query=vigencia_id:${vigenciaId}`;
-    queryParams += `,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}`;
+    queryParams += this.criteriosFiltro();
     queryParams += `,tipo_evaluacion_id__in:${seguimiento_id}|${informe_id}`;
     queryParams += `,activo:true`;
     queryParams += `&limit=${limit}`
@@ -106,6 +128,17 @@ export class TablaSeguimientosComponent implements OnInit {
         this.auditoriasDataSource.data = [];
         // Refresco al limpiar la tabla
         this.changeDetector.detectChanges();
+        if (this.hayFiltrosActivos() && !_retry) {
+          // Igual que en Planeación: se avisa, se limpian los filtros y se muestra la vigencia completa
+          this.alertaService.showAlert(
+            "No se encontraron auditorías",
+            "No se encontraron auditorías con los filtros aplicados. Se mostrará la lista completa para la vigencia."
+          );
+          this.filtroEstado = null;
+          this.filtroConsecutivo = "";
+          setTimeout(() => this.listarAuditoriasPorVigencia(vigenciaId, limit, offset, true), 200);
+          return;
+        }
         return this.alertaService.showAlert(
           "No hay auditorías registradas",
           "Actualmente no hay auditorías registradas para la vigencia seleccionada."
@@ -141,6 +174,52 @@ export class TablaSeguimientosComponent implements OnInit {
     }
 
     this.changeDetector.detectChanges();
+  }
+
+  /** Estados que puede tener una auditoría en Ejecución (para el filtro). */
+  private cargarEstadosFiltro(): void {
+    this.parametrosUtilsService
+      .getEstadosAuditoria(
+        environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR,
+        environment.AUDITORIA_ESTADO.EJECUCION.RECHAZADO_INFORME_FINAL_JEFE
+      )
+      .subscribe({
+        next: (estados) => {
+          this.estadoOptions = estados.map((estado) => ({ id: estado.Id, nombre: estado.Nombre }));
+        },
+        error: (error) => {
+          console.error(error);
+          this.estadoOptions = [];
+          this.alertaService.showErrorAlert("No fue posible cargar los estados de auditoría.");
+        },
+      });
+  }
+
+  /** Criterios de la consulta según los filtros: un estado exacto reemplaza el rango de Ejecución. */
+  private criteriosFiltro(): string {
+    let criterios = this.filtroEstado
+      ? `,estado_id:${this.filtroEstado}`
+      : `,estado_id__gte:${environment.AUDITORIA_ESTADO.EJECUCION.POR_EJECUTAR}`;
+    const consecutivo = this.filtroConsecutivo.trim();
+    if (consecutivo) {
+      criterios += `,consecutivo_OCI__icontains:${consecutivo}`;
+    }
+    return criterios;
+  }
+
+  private hayFiltrosActivos(): boolean {
+    return !!this.filtroEstado || this.filtroConsecutivo.trim() !== "";
+  }
+
+  /** Aplica los filtros de búsqueda y vuelve a la primera página. */
+  aplicarFiltros(filtros: FiltrosAuditoria): void {
+    this.filtroEstado = filtros.estado;
+    this.filtroConsecutivo = filtros.consecutivo;
+    this.pageIndex = 0;
+    if (this.paginator) {
+      this.paginator.pageIndex = 0;
+    }
+    this.listarAuditoriasPorVigencia(this.vigenciaId, this.pageSize, 0);
   }
 
   manejarCambioPaginado(evento: PageEvent) {

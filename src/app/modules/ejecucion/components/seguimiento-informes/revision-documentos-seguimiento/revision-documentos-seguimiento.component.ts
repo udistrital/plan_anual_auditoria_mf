@@ -213,6 +213,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
       await this.descargaService.descargarMultiplesArchivos(this.documentos, "documentos-seguimiento.zip");
     } catch (error) {
       console.error("Error al crear el archivo ZIP:", error);
+      this.alertService.showErrorAlert(DescargaService.mensajeError(error, "No se pudieron descargar los documentos."));
     }
   }
 }
