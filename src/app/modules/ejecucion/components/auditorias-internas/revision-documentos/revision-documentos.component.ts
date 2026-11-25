@@ -3,6 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 import { ModalRechazoAuditoriaEjecucionComponent } from "./modal-rechazo-auditoria/modal-rechazo-auditoria.component";
+import { ModalAprobacionInformeFinalComponent } from "./modal-aprobacion-informe-final/modal-aprobacion-informe-final.component";
 import { MatDialog } from "@angular/material/dialog";
 import { environment } from "src/environments/environment";
 
@@ -246,12 +247,77 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
       ? rolAprobacion.estadoAprobacion
       : [rolAprobacion.estadoAprobacion];
 
+    // Aprobación del informe final por el Jefe OCI: usa el modal con la fecha de emisión final (issue #958)
+    if (estados.includes(environment.AUDITORIA_ESTADO.EJECUCION.APROBADO_INFORME_FINAL_JEFE)) {
+      this.aprobarInformeFinalConFecha(estados, rolAprobacion.mensajeAprobacion);
+      return;
+    }
+
     this.alertService
       .showConfirmAlert(rolAprobacion.preguntaAprobacion)
       .then(confirmado => {
         if (!confirmado.value) return;
         this.aprobarAuditoria(estados, rolAprobacion.mensajeAprobacion);
       });
+  }
+
+  /**
+   * Abre el modal del Jefe OCI para confirmar/modificar la fecha de emisión final y, si confirma,
+   * persiste la fecha y continúa con la aprobación del informe final (issue #958).
+   * La autorización por rol se garantiza en el front: solo el rol Jefe (OCI) llega aquí porque
+   * configJefeFinal está asociado a environment.ROL.JEFE en rolesAprobacion.
+   */
+  private aprobarInformeFinalConFecha(estados: number[], mensajeAprobacion: string): void {
+    if (this.role !== environment.ROL.JEFE) {
+      this.alertService.showErrorAlert("No está autorizado para aprobar el informe final.");
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ModalAprobacionInformeFinalComponent, {
+      width: "600px",
+      autoFocus: false,
+      data: {
+        auditoriaId: this.auditoriaId,
+        fechaEmisionFinal: this.informeData?.fecha_emision_final ?? null,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(async (resultado) => {
+      // Sin resultado = el Jefe canceló el modal; no se aprueba.
+      if (!resultado) return;
+
+      // La fecha de emisión final es opcional: solo se persiste si el Jefe la seleccionó.
+      if (resultado.fecha_emision_final) {
+        const fechaGuardada = await this.guardarFechaEmisionFinal(resultado.fecha_emision_final);
+        if (!fechaGuardada) {
+          this.alertService.showErrorAlert("No se pudo guardar la fecha de emisión final.");
+          return;
+        }
+      }
+      await this.aprobarAuditoria(estados, mensajeAprobacion);
+    });
+  }
+
+  /** Persiste la fecha de emisión final en el informe. Devuelve true si se guardó. */
+  private async guardarFechaEmisionFinal(fechaIso: string): Promise<boolean> {
+    try {
+      let informeId = this.informeId;
+      if (!informeId) {
+        const res: any = await firstValueFrom(
+          this.planAuditoriaService.get(`informe?query=auditoria_id:${this.auditoriaId}`)
+        );
+        informeId = res?.Data?.[0]?._id ?? null;
+      }
+      if (!informeId) return false;
+
+      await firstValueFrom(
+        this.planAuditoriaService.put(`informe/${informeId}`, { fecha_emision_final: fechaIso })
+      );
+      this.informeData = { ...this.informeData, fecha_emision_final: fechaIso };
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async aprobarAuditoria(estados: number[], mensajeAprobacion: string) {

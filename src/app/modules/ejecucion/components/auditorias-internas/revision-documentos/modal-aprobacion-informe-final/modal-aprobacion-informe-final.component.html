@@ -1,0 +1,34 @@
+<plantilla-modal [icono]="'event_available'" [titulo]="titulo" [descripcion]="descripcion"
+  [contenido]="contenidoDeModal" [footer]="footerDeModal"></plantilla-modal>
+
+<ng-template #contenidoDeModal>
+  <div class="row mt-3">
+    <div class="col-12">
+      <form [formGroup]="formAprobacion">
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12">
+            <mat-label>Fecha de emisión final (opcional)</mat-label>
+            <mat-icon color="primary" matPrefix>event</mat-icon>
+            <input matInput [matDatepicker]="picker" [min]="fechaMinima"
+              formControlName="fecha_emision_final" readonly (click)="picker.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #footerDeModal>
+  <div class="mb-3">
+    <button mat-stroked-button color="primary" style="border: 1px solid var(--md-primary-500)"
+      (click)="cancelar()">
+      <mat-icon>toll</mat-icon>No, regresar
+    </button>
+    <button mat-raised-button color="primary" (click)="confirmar()">
+      <mat-icon>check_circle</mat-icon>
+      {{ botonConfirmar }}
+    </button>
+  </div>
+</ng-template>

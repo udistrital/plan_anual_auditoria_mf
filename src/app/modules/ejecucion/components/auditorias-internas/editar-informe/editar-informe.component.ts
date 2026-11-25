@@ -401,6 +401,10 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     if (this.informeData?.fecha_emision) {
       valoresIniciales.fecha_emision = new Date(this.informeData.fecha_emision);
     }
+    // Fecha de emisión final (issue #958): solo informativa en este formulario
+    if (this.informeData?.fecha_emision_final) {
+      valoresIniciales.fecha_emision_final = new Date(this.informeData.fecha_emision_final);
+    }
     if (this.informeData?.muestra) {
       valoresIniciales.muestra = this.informeData.muestra;
     }
@@ -501,7 +505,10 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Confirmación y guardado paso 6/7 - Informe final
+  // Confirmación y guardado del antiguo paso "Informe Final".
+  // El paso fue retirado del stepper por el issue #958 (ver editar-informe.component.html).
+  // Se conserva el método y formInformeFinal documentados, sin uso en la plantilla, por si
+  // se requiere reactivar la sección; los campos siguen en el modelo y en la plantilla del PDF.
   guardarInformeFinal() {
     this.confirmarGuardado(() =>
       this.guardarPaso(
