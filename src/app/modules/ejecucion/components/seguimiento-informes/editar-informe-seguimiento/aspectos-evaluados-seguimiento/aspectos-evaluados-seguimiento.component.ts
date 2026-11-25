@@ -6,6 +6,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
+import { tamanoImagenAAtributo, tamanoImagenAEstilo } from 'src/app/shared/utils/html.util';
 
 interface Subtema {
   _id?: string;
@@ -164,8 +165,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
       if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
         const enlaceOriginal = tema.descripcion_titulo;
         try {
-          let html = await this.obtenerDocumentoHTML(enlaceOriginal);
-          html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+          const html = tamanoImagenAAtributo(await this.obtenerDocumentoHTML(enlaceOriginal));
           tema.descripcion_titulo = html;
           if (tema._id) {
             this.documentosNuxeoTema.set(tema._id.toString(), { enlace: enlaceOriginal, html });
@@ -407,9 +407,7 @@ export class AspectosEvaluadosSeguimientoComponent implements OnInit, OnChanges 
 
   // Sube el HTML del tema (con imágenes) a Nuxeo y devuelve el valor a guardar en descripcion_titulo
   private async subirHtmlTemaANuxeo(htmlOriginal: string, indice: number): Promise<string> {
-    let html = String(htmlOriginal);
-    html = html.replace(/width="(\d+)px"/g, 'style="width:$1px;"');
-    html = html.replace(/\sheight="auto"/g, '');
+    const html = tamanoImagenAEstilo(String(htmlOriginal));
 
     const blob = new Blob([html], { type: 'text/html' });
     const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });

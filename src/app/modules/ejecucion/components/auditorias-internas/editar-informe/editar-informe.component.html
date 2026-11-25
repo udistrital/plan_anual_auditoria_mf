@@ -267,7 +267,7 @@
             </mat-step>
           }
 
-          <!-- Paso 5/6: Respuesta Preliminar -->
+          <!-- Paso 5/6: Respuesta Preliminar (último paso tras eliminar "Informe Final") -->
           <mat-step [completed]="pasosInicialesSoloLectura">
             <ng-template matStepLabel>
               <p>Paso {{ esRevisionPreinformeAuditado ? 6 : 5 }}</p>
@@ -290,14 +290,13 @@
                   <button matStepperPrevious mat-stroked-button color="primary">
                     Volver
                   </button>
+                  <!-- Generación del informe conservada en el recorrido (issue #958) -->
+                  <button mat-flat-button color="primary" class="mx-2" (click)="verInforme()" type="button">
+                    Ver informe final
+                  </button>
                   @if (!soloLectura) {
                     <button mat-flat-button color="primary" type="submit" class="mx-2">
-                      Guardar y continuar
-                    </button>
-                  }
-                  @if (soloLectura) {
-                    <button matStepperNext mat-flat-button color="primary" class="mx-2" type="button">
-                      Continuar
+                      Guardar
                     </button>
                   }
                 </div>
@@ -305,7 +304,18 @@
             </div>
           </mat-step>
 
-          <!-- Paso 6/7: Informe Final -->
+          <!--
+            ===================================================================
+            SECCIÓN "INFORME FINAL" - ELIMINADA por issue #958
+            ===================================================================
+            El último paso de la Fase 3 ("Informe Final") se retira de la
+            navegación según el requerimiento de Control Interno. NO se borra:
+            se conserva comentado para referencia histórica y posible reversión.
+
+            Los campos informe_final / observacion_conclusion / nota permanecen
+            en el modelo del informe y en la plantilla; solo se quita este paso
+            de edición manual del stepper.
+
           <mat-step>
             <ng-template matStepLabel>
               <p>Paso {{ esRevisionPreinformeAuditado ? 7 : 6 }}</p>
@@ -348,6 +358,8 @@
               </form>
             </div>
           </mat-step>
+            ===================================================================
+          -->
         </mat-stepper>
       </div>
     </div>

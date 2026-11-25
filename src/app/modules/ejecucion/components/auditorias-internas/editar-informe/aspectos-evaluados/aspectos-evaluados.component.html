@@ -3,7 +3,7 @@
   @if (!soloLectura) {
     <div class="section-actions">
       <button mat-raised-button color="primary" (click)="agregarTema()">
-        <mat-icon>add</mat-icon> Agregar Tema
+        <mat-icon>add</mat-icon> Agregar desarrollo de la auditoría
       </button>
     </div>
   }
@@ -17,24 +17,24 @@
         <!-- Título del tema (con número), y debajo nombre y descripción, igual que subtema y hallazgo -->
         <div class="node-row tema-row">
           <span class="node-dot tema-dot"></span>
-          <span class="nivel-label">Tema</span>
+          <span class="nivel-label">Desarrollo de la auditoría</span>
           <span class="indice">{{ i + 2 }}</span>
           @if (!soloLectura) {
-            <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar tema">
+            <button mat-icon-button class="delete-btn" (click)="eliminarTema(i)" matTooltip="Eliminar desarrollo de la auditoría">
               <mat-icon>delete</mat-icon>
             </button>
           }
         </div>
         <div class="node-body">
           <mat-form-field appearance="outline" class="hallazgo-input">
-            <mat-label>Nombre del Tema</mat-label>
+            <mat-label>Nombre del desarrollo de la auditoría</mat-label>
             <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
             @if (tema.get('nombre')?.hasError('required')) {
               <mat-error>El nombre es requerido</mat-error>
             }
           </mat-form-field>
           <div class="tema-desc-editor">
-            <label class="descripcion-label">Descripción del Tema</label>
+            <label class="descripcion-label">Descripción del desarrollo de la auditoría</label>
             @if (descripcionNoDisponible(tema)) {
               <div class="descripcion-no-disponible" role="alert">
                 <mat-icon>cloud_off</mat-icon>
@@ -76,24 +76,24 @@
               <!-- Título del subtema (con número), y debajo nombre y descripción, igual que el hallazgo -->
               <div class="node-row subtema-row">
                 <span class="node-dot subtema-dot"></span>
-                <span class="nivel-label">Subtema</span>
+                <span class="nivel-label">Ejes temáticos</span>
                 <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
                 @if (!soloLectura) {
-                  <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar subtema">
+                  <button mat-icon-button class="delete-btn" (click)="eliminarSubtema(i, j)" matTooltip="Eliminar eje temático">
                     <mat-icon>delete</mat-icon>
                   </button>
                 }
               </div>
               <div class="node-body">
                 <mat-form-field appearance="outline" class="hallazgo-input">
-                  <mat-label>Nombre del Subtema</mat-label>
+                  <mat-label>Nombre del eje temático</mat-label>
                   <input matInput formControlName="nombre" [errorStateMatcher]="errorMatcher">
                   @if (subtema.get('nombre')?.hasError('required')) {
                     <mat-error>El nombre es requerido</mat-error>
                   }
                 </mat-form-field>
                 <div class="subtema-desc-editor">
-                  <label class="descripcion-label">Descripción del Subtema</label>
+                  <label class="descripcion-label">Descripción del eje temático</label>
                   @if (descripcionSubtemaNoDisponible(subtema)) {
                     <div class="descripcion-no-disponible" role="alert">
                       <mat-icon>cloud_off</mat-icon>
@@ -207,7 +207,7 @@
           @if (!soloLectura) {
             <div class="add-leaf-action">
               <button mat-stroked-button color="primary" (click)="agregarSubtema(i)">
-                <mat-icon>add</mat-icon> Agregar Subtema
+                <mat-icon>add</mat-icon> Agregar eje temático
               </button>
             </div>
           }
