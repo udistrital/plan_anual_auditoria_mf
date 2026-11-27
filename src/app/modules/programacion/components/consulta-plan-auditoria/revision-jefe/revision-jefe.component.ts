@@ -20,6 +20,7 @@ import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones
 import { RolService } from "src/app/core/services/rol.service";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 @Component({
     selector: "app-revision-jefe",
@@ -129,7 +130,7 @@ export class RevisionJefeComponent implements OnInit {
           data: {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
-            nombreRemitente: tercero.NombreCompleto,
+            nombreRemitente: nombreTercero(tercero),
             rolRemitente: "Jefe OCI",
           },
         });
@@ -258,7 +259,7 @@ export class RevisionJefeComponent implements OnInit {
           nombre_documento: "Plan Anual de Auditoría",
           vigencia: vigenciaNombre,
           rol_remitente: rolRemitente,
-          nombre_remitente: tercero.NombreCompleto || rolRemitente,
+          nombre_remitente: nombreTercero(tercero) || rolRemitente,
           fecha_envio: new Date().toLocaleDateString(),
         };
 

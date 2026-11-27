@@ -9,7 +9,7 @@ import { ReferenciaPdfService } from "src/app/core/services/referencia-pdf.servi
 import type { DocumentoReferenciaPdf } from "src/app/core/services/referencia-pdf.service";
 import { AlertService } from "./alert.service";
 import { TercerosService } from "./terceros.service";
-import { construirNombreCompleto } from "../utils/nombre-completo.util";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 /** Cargo y oficina con los que firma el usuario autenticado */
 export interface CargoFirmante {
@@ -176,7 +176,7 @@ export class FirmaDocumentoService {
               descripcion: solicitud.descripcion,
               metadatos: solicitud.metadatos ?? {},
               firmantes: [{
-                nombre: construirNombreCompleto(firmante.Tercero) || firmante.Tercero.NombreCompleto,
+                nombre: nombreTercero(firmante.Tercero),
                 ...cargoFirmante,
                 tipoId: firmante.Identificacion?.TipoDocumentoId?.CodigoAbreviacion ?? "CC",
                 identificacion: firmante.Identificacion?.Numero,

@@ -7,6 +7,7 @@ import { AlertService } from 'src/app/shared/services/alert.service';
 import { AccionPlan, ResultadoModalAccion } from '../tabla-hallazgos/tabla-hallazgos.component';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { sumarDiasHabiles } from 'src/app/shared/utils/dias-habiles.util';
+import { parsearFechaCalendario } from "../../../../../../../shared/utils/fecha-calendario.util";
 
 export interface DatosModalAccion {
   hallazgo: any;
@@ -190,8 +191,8 @@ export class ModalRegistrarAccionComponent implements OnInit {
 
   private poblarForm(): void {
     const a = this.data.accion!;
-    const fechaInicio = a.fechaInicioISO ? new Date(a.fechaInicioISO) : this.form.getRawValue().fechaInicio;
-    const fechaFin    = a.fechaFinISO    ? new Date(a.fechaFinISO)    : this.form.getRawValue().fechaFin;
+    const fechaInicio = a.fechaInicioISO ? parsearFechaCalendario(a.fechaInicioISO) : this.form.getRawValue().fechaInicio;
+    const fechaFin    = a.fechaFinISO    ? parsearFechaCalendario(a.fechaFinISO)    : this.form.getRawValue().fechaFin;
     this.form.patchValue({
       causa:            a.causa ?? '',
       tipoAccion:       a.tipoAccionId ?? '',

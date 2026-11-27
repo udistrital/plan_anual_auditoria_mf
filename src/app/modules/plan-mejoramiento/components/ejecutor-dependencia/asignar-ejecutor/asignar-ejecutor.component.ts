@@ -12,6 +12,7 @@ import { OikosService } from "src/app/core/services/oikos.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
 import { TercerosCrudService } from "src/app/core/services/terceros-crud.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 /** Dependencia seleccionable (OIKOS). */
 interface OpcionDependencia {
@@ -214,7 +215,7 @@ export class AsignarEjecutorComponent implements OnInit {
         next: (data: any) => {
           const registro = Array.isArray(data) ? data[0] : data;
           const tercero = registro?.Tercero ?? registro;
-          const nombre = tercero?.NombreCompleto;
+          const nombre = nombreTercero(tercero) || undefined;
           const terceroId = tercero?.Id ?? registro?.TerceroId;
 
           if (nombre && terceroId != null) {

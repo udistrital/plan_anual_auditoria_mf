@@ -8,6 +8,7 @@ import { AlertService } from "src/app/shared/services/alert.service";
 import { AutenticacionMidService } from "src/app/core/services/autenticacion-mid.service";
 import { FormControl } from "@angular/forms";
 import { Auditor } from "src/app/shared/data/models/auditoria-auditor";
+import { formatearFechaCalendario } from "../../../../../../shared/utils/fecha-calendario.util";
 
 export interface DatosModalAsignacionAuditores {
   auditoria: any;
@@ -74,10 +75,10 @@ export class ModalAsignacionAuditoresComponent implements OnInit {
     this.subtituloModal = auditoria?.titulo ?? "";
 
     const inicio = auditoria?.fecha_inicio
-      ? new Date(auditoria.fecha_inicio).toLocaleDateString("es-CO")
+      ? formatearFechaCalendario(auditoria.fecha_inicio)
       : "";
     const fin = auditoria?.fecha_fin
-      ? new Date(auditoria.fecha_fin).toLocaleDateString("es-CO")
+      ? formatearFechaCalendario(auditoria.fecha_fin)
       : "";
     this.cronogramaTexto =
       inicio && fin ? `${inicio} — ${fin}` : "Sin cronograma registrado";

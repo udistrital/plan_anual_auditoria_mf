@@ -13,6 +13,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { environment } from "src/environments/environment";
 import { RolService } from "src/app/core/services/rol.service";
 import { mostrarAccionPlaneacionMarcarActividadCompletada } from "src/app/shared/utils/accionesPorRolYEstado";
+import { parsearFechaCalendario } from "../../../../../../shared/utils/fecha-calendario.util";
 
 function ACTIVIDADES_LEER_HERRAMIENTAS(): boolean {
   try {
@@ -166,8 +167,8 @@ export class ActividadesSeguimientoComponent implements OnInit {
           actividades.map((item: Actividad): ActividadPlan => ({
             id: item._id,
             actividad: item.titulo,
-            fechaInicio: new Date(item.fecha_inicio),
-            fechaFin: new Date(item.fecha_fin),
+            fechaInicio: parsearFechaCalendario(item.fecha_inicio)!,
+            fechaFin: parsearFechaCalendario(item.fecha_fin)!,
             completada: item.completada || false,
             observaciones: item.observacion,
             papelTrabajoReferencia: item.referencia,

@@ -16,6 +16,7 @@ import { RolService } from "src/app/core/services/rol.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { DocumentoUtils, REFRESHABLES } from "../consulta-plan.auditoria.utils";
 import { TabDocumento } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 @Component({
     selector: "app-revision-secretario",
@@ -120,7 +121,7 @@ export class RevisionSecretarioComponent {
             usuarioId: this.usuarioId,
             planAuditoriaId: this.planAuditoriaId,
             rolRemitente: "Secretario Auditor",
-            nombreRemitente: tercero.NombreCompleto,
+            nombreRemitente: nombreTercero(tercero),
             vigencia: null,
           },
         });

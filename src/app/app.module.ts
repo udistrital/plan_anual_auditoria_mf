@@ -7,7 +7,8 @@ import { SpinnerInterceptor } from "./core/intercerptors/spinner.interceptor";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { SpinnerComponent } from "./shared/elements/components/spinner/spinner.component";
-import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter, MAT_DATE_FORMATS, DateAdapter } from '@angular/material/core';
+import { FechaCalendarioDateAdapter } from "./shared/utils/fecha-calendario-date-adapter";
 import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
 
 @NgModule({
@@ -28,6 +29,8 @@ import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
             withInterceptorsFromDi()
         ),
         provideNativeDateAdapter(),
+        // Interpreta las fechas ISO del backend como días de calendario (evita el desfase de un día en UTC-5)
+        { provide: DateAdapter, useClass: FechaCalendarioDateAdapter },
         // CDK 21 abre los overlays como popover (top layer) y quedan encima del spinner y de SweetAlert
         { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },
         { provide: MAT_DATE_LOCALE, useValue: 'es-CO' },

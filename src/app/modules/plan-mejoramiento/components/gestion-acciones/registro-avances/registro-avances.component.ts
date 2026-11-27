@@ -21,6 +21,7 @@ import { ValoresCalificacion } from './formulario-calificacion/formulario-califi
 import { DatosFichaAccion, PanelFichaAccionComponent, PestanaFicha } from './panel-ficha-accion/panel-ficha-accion.component';
 import { CalificacionHistorial, PanelHistorialCalificacionesComponent } from './panel-historial-calificaciones/panel-historial-calificaciones.component';
 import { DatosPanelForo, PanelForoAccionComponent } from './panel-foro-accion/panel-foro-accion.component';
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 interface DocumentoAvances extends DocumentoReferenciaPdf {
   tipoArchivo: string;
@@ -262,7 +263,7 @@ export class RegistroAvancesComponent implements OnInit {
       if (data) {
         const doc = data?.documento as DocumentoAvances;
         this.tercerosService.getTerceroById(this.usuarioId).subscribe(t => {
-          doc.usuario = t?.NombreCompleto;
+          doc.usuario = nombreTercero(t);
         });
         doc.rol = this.roles.filter(r => r in environment.ROL)[0];
         this.documentos.unshift(doc);

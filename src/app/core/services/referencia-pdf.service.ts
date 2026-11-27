@@ -131,10 +131,10 @@ export class ReferenciaPdfService {
             );
 
             if (tipo || !deduplicarPorTipo) {
-              return documentosValidos;
+              return this.ordenarMasRecientePrimero(documentosValidos);
             }
 
-            return this.filtrarValidos(documentosValidos);
+            return this.ordenarMasRecientePrimero(this.filtrarValidos(documentosValidos));
           }
           throw new Error("No se encontraron enlaces válidos en la respuesta.");
         }),
@@ -143,6 +143,21 @@ export class ReferenciaPdfService {
           return of([]); // Retorna un arreglo vacío en caso de error (of = observable)
         })
       );
+  }
+
+  /**
+   * Ordena los documentos del más nuevo al más antiguo para que los visores los listen así.
+   * Usa fecha_creacion y, si falta o empata, nuxeo_id (los IDs de Nuxeo son incrementales).
+   */
+  ordenarMasRecientePrimero(documentos: DocumentoReferenciaPdf[]): DocumentoReferenciaPdf[] {
+    const marcaTiempo = (doc: DocumentoReferenciaPdf): number => {
+      const tiempo = doc.fecha_creacion ? new Date(doc.fecha_creacion).getTime() : Number.NaN;
+      return Number.isNaN(tiempo) ? 0 : tiempo;
+    };
+
+    return [...documentos].sort(
+      (a, b) => marcaTiempo(b) - marcaTiempo(a) || (b.nuxeo_id ?? 0) - (a.nuxeo_id ?? 0)
+    );
   }
 
   // Filtra los documentos para quedarse solo con el más reciente por tipo_id,

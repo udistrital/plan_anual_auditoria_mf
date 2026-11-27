@@ -2,6 +2,7 @@ import { environment } from "src/environments/environment";
 import type { AccionGestion, GrupoAccion, ResumenGestionAcciones } from "src/app/shared/data/models/plan-mejoramiento/plan-mejoramiento.models";
 import { VarianteTarjetaIndicador } from "src/app/shared/elements/components/tarjeta-indicador/tarjeta-indicador.component";
 import { descripcionATexto } from "src/app/shared/utils/html.util";
+import { formatearFechaCalendario } from "../../../../../shared/utils/fecha-calendario.util";
 
 export type FiltroGrupo = GrupoAccion | "EN_RIESGO" | "TODOS";
 
@@ -149,8 +150,8 @@ export function filaExportacion(f: AccionGestion): Record<string, unknown> {
     "Dependencia Líder": f.dependencia_lider,
     "Dependencias de Apoyo": f.dependencias_apoyo.join(", "),
     "Auditor(es) del Plan": f.auditores_plan.join(", "),
-    "Fecha Inicio": f.fecha_inicio ? new Date(f.fecha_inicio).toLocaleDateString("es-CO") : "",
-    "Fecha Fin": f.fecha_fin ? new Date(f.fecha_fin).toLocaleDateString("es-CO") : "",
+    "Fecha Inicio": formatearFechaCalendario(f.fecha_inicio),
+    "Fecha Fin": formatearFechaCalendario(f.fecha_fin),
     "Soportes": f.total_soportes,
     "Calificación (%)": f.calificacion ?? "",
     "Estado": estadoPorGrupo[f.grupo].texto,

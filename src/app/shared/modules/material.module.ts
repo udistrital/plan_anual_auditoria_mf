@@ -8,7 +8,8 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatMenuModule } from "@angular/material/menu";
-import { MatNativeDateModule, MatOptionModule } from "@angular/material/core";
+import { DateAdapter, MatNativeDateModule, MatOptionModule } from "@angular/material/core";
+import { FechaCalendarioDateAdapter } from "../utils/fecha-calendario-date-adapter";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { MatRadioModule } from "@angular/material/radio";
 import { MatSelectModule } from "@angular/material/select";
@@ -52,5 +53,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     MatSliderModule,
     MatSlideToggleModule,
   ],
+  // MatNativeDateModule registra su NativeDateAdapter en cada módulo lazy que importa este;
+  // se reemplaza para que los datepickers no muestren las fechas del backend un día antes.
+  providers: [{ provide: DateAdapter, useClass: FechaCalendarioDateAdapter }],
 })
 export class MaterialModule {}

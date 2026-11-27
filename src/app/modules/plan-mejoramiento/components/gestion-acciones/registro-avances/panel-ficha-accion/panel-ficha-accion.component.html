@@ -33,8 +33,8 @@
         <div class="dato ancho"><span class="etiqueta">Nombre del indicador</span>{{ datos.accion.nombreIndicador || '—' }}</div>
         <div class="dato ancho"><span class="etiqueta">Fórmula del indicador</span>{{ datos.accion.formulaIndicador || '—' }}</div>
         <div class="dato ancho"><span class="etiqueta">Meta</span>{{ datos.accion.meta || '—' }}</div>
-        <div class="dato"><span class="etiqueta">Fecha de inicio</span>{{ (datos.accion.fechaInicio | date: 'dd/MM/yyyy') || '—' }}</div>
-        <div class="dato"><span class="etiqueta">Fecha de fin</span>{{ (datos.accion.fechaFin | date: 'dd/MM/yyyy') || '—' }}</div>
+        <div class="dato"><span class="etiqueta">Fecha de inicio</span>{{ (datos.accion.fechaInicio | date: 'dd/MM/yyyy' : 'UTC') || '—' }}</div>
+        <div class="dato"><span class="etiqueta">Fecha de fin</span>{{ (datos.accion.fechaFin | date: 'dd/MM/yyyy' : 'UTC') || '—' }}</div>
       </div>
     }
     @case ('hallazgo') {

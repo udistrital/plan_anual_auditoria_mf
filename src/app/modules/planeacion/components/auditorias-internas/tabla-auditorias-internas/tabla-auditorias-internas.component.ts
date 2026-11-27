@@ -40,6 +40,7 @@ import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 import { FiltrosAuditoria } from "src/app/shared/elements/components/filtros-auditoria/filtros-auditoria.component";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 interface DocumentoAdjuntoCarta {
   nuxeo_enlace?: string;
@@ -699,7 +700,7 @@ export class TablaAuditoriasInternasComponent implements OnInit {
         forkJoin({
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
           jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),

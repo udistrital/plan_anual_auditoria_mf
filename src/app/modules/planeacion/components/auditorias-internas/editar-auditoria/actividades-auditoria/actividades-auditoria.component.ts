@@ -13,6 +13,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { RolService } from "src/app/core/services/rol.service";
 import { mostrarAccionPlaneacionMarcarActividadCompletada } from "src/app/shared/utils/accionesPorRolYEstado";
 import { environment } from "src/environments/environment";
+import { parsearFechaCalendario } from "../../../../../../shared/utils/fecha-calendario.util";
 
 function ACTIVIDADES_LEER_HERRAMIENTAS(): boolean {
   try {
@@ -151,10 +152,6 @@ export class ActividadesAuditoriaComponent implements OnInit {
     });
   }
 
-  private parsearFechaLocal(fechaISO: string): string {
-    if (!fechaISO) return '';
-    return new Date(fechaISO.substring(0, 10) + "T00:00:00").toLocaleDateString();
-  }
   // Descarga la plantilla de cargue masivo de actividades desde el gestor documental.
   async descargarPlantilla(): Promise<void> {
     try {
@@ -192,8 +189,8 @@ export class ActividadesAuditoriaComponent implements OnInit {
           actividades.map((item: Actividad): ActividadPlan => ({
             id: item._id,
             actividad: item.titulo,
-            fechaInicio: new Date(item.fecha_inicio),
-            fechaFin: new Date(item.fecha_fin),
+            fechaInicio: parsearFechaCalendario(item.fecha_inicio)!,
+            fechaFin: parsearFechaCalendario(item.fecha_fin)!,
             observaciones: item.observacion,
             completada: item.completada || false,
             papelTrabajoReferencia: item.referencia,

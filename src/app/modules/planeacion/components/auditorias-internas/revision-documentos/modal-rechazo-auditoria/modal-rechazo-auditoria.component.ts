@@ -18,6 +18,7 @@ import { ParametrosUtilsService } from "src/app/shared/services/parametros.servi
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 @Component({
     selector: "app-modal-rechazo-auditoria",
@@ -131,7 +132,7 @@ export class ModalRechazoAuditoriaComponent implements OnInit {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
         });
       }),
 

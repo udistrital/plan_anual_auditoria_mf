@@ -19,6 +19,7 @@ import { ImplicitAutenticationService } from 'src/app/core/services/implicit_aut
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { environment } from 'src/environments/environment';
 import { accionesEjecucionFinal, accionesEjecucionPreliminar } from 'src/app/shared/utils/accionesPorRolYEstado';
+import { parsearFechaCalendario } from "../../../../../shared/utils/fecha-calendario.util";
 
 @Component({
   selector: 'app-editar-informe-seguimiento',
@@ -201,7 +202,7 @@ export class EditarInformeSeguimientoComponent implements OnInit, AfterViewInit 
     };
 
     if (this.informeData?.fecha_emision) {
-      valoresIniciales.fecha_emision_informe = new Date(this.informeData.fecha_emision);
+      valoresIniciales.fecha_emision_informe = parsearFechaCalendario(this.informeData.fecha_emision);
     }
     if (this.informeData?.muestra) {
       valoresIniciales.muestra = this.informeData.muestra;

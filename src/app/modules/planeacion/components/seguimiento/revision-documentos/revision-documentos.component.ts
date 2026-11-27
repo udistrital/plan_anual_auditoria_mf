@@ -25,6 +25,7 @@ import { DescargaService } from "src/app/shared/services/descarga.service";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
 import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/dialogs/modal-ver-documentos/modal-ver-documentos.component";
 import { CARGO_JEFE_OCI, DOCUMENTOS_AUDITORIA_FIRMA, FirmaDocumentoService } from "src/app/shared/services/firma-documento.service";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 @Component({
     selector: "app-revision-documentos-seguimiento",
@@ -298,7 +299,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
         });
       }),
 
@@ -439,7 +440,7 @@ export class RevisionDocumentosSeguimientoComponent implements OnInit {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
         });
       }),
 

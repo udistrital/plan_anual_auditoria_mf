@@ -5,6 +5,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { PlanAnualAuditoriaMid } from 'src/app/core/services/plan-anual-auditoria-mid.service';
 import { TercerosService } from 'src/app/shared/services/terceros.service';
 import { environment } from 'src/environments/environment';
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 const ESTADO = environment.ACCION_MEJORA_ESTADOS;
 
@@ -48,7 +49,7 @@ export class ModalHistorialObservacionesAccionComponent implements OnInit {
                 catchError(() => of(null)),
                 switchMap((tercero) => of({
                   ...e,
-                  usuario: { nombre: tercero?.NombreCompleto ?? String(e.usuario_id) },
+                  usuario: { nombre: nombreTercero(tercero) || String(e.usuario_id) },
                 })),
               )
             )

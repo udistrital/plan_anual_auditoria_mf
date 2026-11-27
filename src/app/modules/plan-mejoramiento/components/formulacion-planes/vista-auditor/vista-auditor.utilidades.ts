@@ -14,6 +14,7 @@ import {
   columnasComunes,
   crearAgrupador,
 } from "../compartido/formulacion.utilidades";
+import { parsearFechaCalendario } from "../../../../../shared/utils/fecha-calendario.util";
 
 const ESTADO = environment.AUDITORIA_ESTADO.PLAN_MEJORAMIENTO;
 
@@ -177,7 +178,8 @@ function detallePlazo(fila: AuditoriaFormulacionAuditor, hoy: Date): DetallePlaz
       return sinPlazo("Sin plan registrado");
     case "EN_FORMULACION": {
       if (!fila.fecha_limite) return sinPlazo("Sin plazo registrado");
-      const limite = new Date(fila.fecha_limite);
+      const limite = parsearFechaCalendario(fila.fecha_limite);
+      if (!limite) return sinPlazo("Sin plazo registrado");
       return estadoPlazo(`Límite ${formatearFecha(limite)}`, limite, hoy);
     }
     case "EN_REVISION":

@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs';
 import { PlanAnualAuditoriaService } from 'src/app/core/services/plan-anual-auditoria.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { environment } from 'src/environments/environment';
+import { formatearFechaCalendario } from "../../../../../../shared/utils/fecha-calendario.util";
 
 interface HallazgoObs {
   hallazgo: any;
@@ -38,9 +39,7 @@ export class RevisionPreinformeComponent implements OnChanges {
   @Output() datosModificados = new EventEmitter<void>();
 
   get fechaFinFormateada(): string {
-    if (!this.fechaFinRevision) return '';
-    return new Date(this.fechaFinRevision).toLocaleDateString('es-CO', {
-      timeZone: 'America/Bogota',
+    return formatearFechaCalendario(this.fechaFinRevision, {
       day: '2-digit',
       month: 'long',
       year: 'numeric',

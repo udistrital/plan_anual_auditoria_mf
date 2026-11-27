@@ -22,6 +22,7 @@ import { TercerosService } from "src/app/shared/services/terceros.service";
 import { TercerosCrudService } from "src/app/core/services/terceros-crud.service";
 import { CARGO_JEFE_OCI, DOCUMENTOS_AUDITORIA_FIRMA, FirmaDocumentoService } from "src/app/shared/services/firma-documento.service";
 import rolRemitentePorRol from "src/app/shared/utils/rolRemitentePorRol";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 const configAuditado = {
   estadoAprobacion: [
@@ -477,7 +478,7 @@ export class RevisionDocumentosEjecucionComponent implements OnInit {
         nombre_documento: `Informe Preliminar${datosAuditoria?.titulo ?  ' - ' + datosAuditoria.titulo : ''}`,
         vigencia: datosAuditoria?.vigencia_nombre ?? String(datosAuditoria?.vigencia_id ?? ''),
         rol_remitente: rolRemitentePorRol[this.role!] ?? 'Jefe OCI',
-        nombre_remitente: tercero?.NombreCompleto ?? 'Jefe OCI',
+        nombre_remitente: nombreTercero(tercero) || 'Jefe OCI',
         fecha_envio: new Date().toLocaleDateString('es-CO'),
       };
 

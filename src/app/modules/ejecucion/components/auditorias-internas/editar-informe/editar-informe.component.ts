@@ -23,6 +23,7 @@ import { AspectosEvaluadosComponent } from './aspectos-evaluados/aspectos-evalua
 import { ResumenHallazgosComponent } from './resumen-hallazgos/resumen-hallazgos.component';
 import { ModalVerDocumentoComponent } from 'src/app/shared/elements/components/dialogs/modal-ver-documento/modal-ver-documento.component';
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
+import { formatearFechaCalendario, parsearFechaCalendario } from "../../../../../shared/utils/fecha-calendario.util";
 
 @Component({
   selector: 'app-editar-informe',
@@ -81,10 +82,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
    * - Auditores en estado CREANDO_INFORME_FINAL (agregan observaciones del auditor)
    */
   get fechaFinRevisionFormateada(): string {
-    const fecha = this.informeData?.fecha_fin_revision;
-    if (!fecha) return '';
-    return new Date(fecha).toLocaleDateString('es-CO', {
-      timeZone: 'America/Bogota',
+    return formatearFechaCalendario(this.informeData?.fecha_fin_revision, {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -399,7 +397,7 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
     };
 
     if (this.informeData?.fecha_emision) {
-      valoresIniciales.fecha_emision = new Date(this.informeData.fecha_emision);
+      valoresIniciales.fecha_emision = parsearFechaCalendario(this.informeData.fecha_emision);
     }
     if (this.informeData?.muestra) {
       valoresIniciales.muestra = this.informeData.muestra;

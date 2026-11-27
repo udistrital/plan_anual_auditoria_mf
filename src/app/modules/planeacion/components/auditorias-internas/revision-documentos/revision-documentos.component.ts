@@ -29,10 +29,10 @@ import {
   obtenerTipoFirma,
   TIPO_FIRMA,
 } from "src/app/shared/services/firma-documento.service";
-import { construirNombreCompleto } from "src/app/shared/utils/nombre-completo.util";
 import { firstValueFrom, forkJoin, lastValueFrom, of, throwError } from "rxjs";
 import { catchError, exhaustMap, switchMap, tap } from "rxjs/operators";
 import { Auditoria } from "src/app/shared/data/models/auditoria";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 interface DocumentoAdjuntoRevision {
   _id?: string;
@@ -136,7 +136,7 @@ export class RevisionDocumentosComponent implements OnInit {
       .subscribe((res) => { this.consecutivoOci = res.Data?.consecutivo_OCI ?? ""; });
   }
 
-  verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
+  async verificarFirmaCartaYPreguntarAprobacion(cartas: DocumentoAdjuntoRevision[]) {
     // El Jefe OCI puede enviar sin haber aplicado la firma: en ese caso el oficio se firma al enviar
     if (this.esJefeOCI) {
       const oficioFirmado = cartas.length > 0 && cartas.every((carta) => carta?.metadatos?.["firmado"]);
@@ -154,7 +154,30 @@ export class RevisionDocumentosComponent implements OnInit {
       }
     }
 
+    // Varias dependencias pueden firmar su carta: la auditoría solo pasa al auditor cuando
+    // todas están firmadas, para no quitarles la acción de firma a las que faltan
+    const pendientes = await this.obtenerDependenciasConCartaSinFirmar();
+    if (pendientes.length > 0) {
+      this.alertService.showAlert(
+        "Cartas pendientes de firma",
+        `La carta de su dependencia ya está firmada. La auditoría se enviará al auditor cuando se firme la carta de representación de: ${pendientes.join(", ")}.`
+      );
+      return;
+    }
+
     this.preguntarAprobacionAuditoria();
+  }
+
+  /** Nombres de las dependencias de la auditoría cuya carta de representación aún no está firmada */
+  private async obtenerDependenciasConCartaSinFirmar(): Promise<string[]> {
+    await this.cargarDependenciasPorAuditoria();
+    const cartas = (await lastValueFrom(this.referenciaPdfService.consultarDocumentos(this.auditoriaId)))
+      .filter((documento) => documento.tipo_id === environment.TIPO_DOCUMENTO_PARAMETROS.CARTA_PRESENTACION) as DocumentoAdjuntoRevision[];
+
+    return cartas
+      .map((carta, index) => ({ carta, index }))
+      .filter(({ carta }) => !carta?.metadatos?.["firmado"])
+      .map(({ carta, index }) => this.resolverNombreDependencia(carta, index));
   }
 
   /**
@@ -346,8 +369,13 @@ export class RevisionDocumentosComponent implements OnInit {
     return cartas;
   }
 
-  async obtenerDependenciasIdAuditado(): Promise<number[]> {
-    const cargosAuditado = [environment.CARGO.JEFE_DEPENDENCIA_ID, environment.CARGO.ASISTENTE_DEPENDENCIA_ID];
+  /**
+   * Dependencias en las que el usuario tiene vinculación con alguno de los cargos indicados
+   * @param cargosAuditado por defecto Jefe y Asistente de dependencia
+   */
+  async obtenerDependenciasIdAuditado(
+    cargosAuditado: number[] = [environment.CARGO.JEFE_DEPENDENCIA_ID, environment.CARGO.ASISTENTE_DEPENDENCIA_ID]
+  ): Promise<number[]> {
     return firstValueFrom(this.tercerosService.getVinculacionByTerceroId(this.usuarioId).pipe(
       switchMap((vinculaciones: VinculacionResponse[]) =>
         of(vinculaciones.filter((v) =>
@@ -377,6 +405,10 @@ export class RevisionDocumentosComponent implements OnInit {
     try {
       let cartasAuditado = await this.cargarCartasAuditado();
       console.debug("Cartas de representación visibles para modal:", cartasAuditado);
+      // Dependencias de las que el usuario es Jefe: solo puede firmar electrónicamente sus cartas
+      const dependenciasJefe = this.esJefeDependencia
+        ? await this.obtenerDependenciasIdAuditado([environment.CARGO.JEFE_DEPENDENCIA_ID])
+        : [];
 
       if (!Array.isArray(cartasAuditado) || cartasAuditado.length === 0) {
         this.alertService.showAlert(
@@ -420,9 +452,20 @@ export class RevisionDocumentosComponent implements OnInit {
             icono: "draw",
             color: "primary",
             tipo: "flat",
-            // Solo el Jefe de dependencia firma, y solo si la carta no se ha firmado por ningún medio
-            visible: (carta) => this.esJefeDependencia && !!carta && !obtenerTipoFirma(carta),
+            // Solo el Jefe de la dependencia de la carta firma, y solo si no se ha firmado por ningún medio
+            visible: (carta) =>
+              this.esJefeDependencia && !!carta && !obtenerTipoFirma(carta) &&
+              this.esCartaDeDependencias(carta, dependenciasJefe),
             accion: async (contexto) => {
+              // Se revalida contra las vinculaciones vigentes antes de firmar
+              const dependenciasJefeVigentes = await this.obtenerDependenciasIdAuditado([environment.CARGO.JEFE_DEPENDENCIA_ID]);
+              if (!this.esJefeDependencia || !this.esCartaDeDependencias(documento, dependenciasJefeVigentes)) {
+                this.alertService.showAlert(
+                  "Firma no permitida",
+                  `Solo el Jefe de la dependencia ${dependenciaNombre} puede firmar su carta de representación.`
+                );
+                return;
+              }
               const firmado = await this.firmaDocumentoService.aplicarFirmaDocumentoAuditoria(
                 this.auditoriaId,
                 DOCUMENTOS_AUDITORIA_FIRMA.CARTA_REPRESENTACION,
@@ -736,6 +779,12 @@ export class RevisionDocumentosComponent implements OnInit {
     return fallback;
   }
 
+  /** Indica si la carta pertenece a alguna de las dependencias indicadas (metadato dependencia_id) */
+  private esCartaDeDependencias(carta: { metadatos?: Record<string, any> }, dependenciasIds: number[]): boolean {
+    const dependenciaId = Number(carta?.metadatos?.["dependencia_id"]);
+    return Number.isFinite(dependenciaId) && dependenciasIds.includes(dependenciaId);
+  }
+
   private deberiaMostrarCarta(
     carta: DocumentoAdjuntoRevision,
     dependenciasAuditado: number[]
@@ -743,8 +792,7 @@ export class RevisionDocumentosComponent implements OnInit {
     if (![environment.ROL.JEFE_DEPENDENCIA, environment.ROL.ASISTENTE_DEPENDENCIA].includes(this.role!))
       return true;
 
-    const dependenciaId = Number(carta.metadatos?.["dependencia_id"]);
-    return Number.isFinite(dependenciaId) && dependenciasAuditado.includes(dependenciaId);
+    return this.esCartaDeDependencias(carta, dependenciasAuditado);
   }
 
   async descargarTodo() {
@@ -793,7 +841,7 @@ export class RevisionDocumentosComponent implements OnInit {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
         });
       }),
 
@@ -926,7 +974,7 @@ export class RevisionDocumentosComponent implements OnInit {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(construirNombreCompleto(tercero) || tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
         });
       }),
 

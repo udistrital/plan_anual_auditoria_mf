@@ -18,6 +18,7 @@ import {
   TiposMensajeRechazo,
   tiposMensajeRechazo,
 } from "./modal-rechazo-seguimiento.utilidades";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 
 export interface RechazoData {
@@ -129,7 +130,7 @@ export class ModalRechazoSeguimientoComponent {
             `auditor?query=auditoria_id:${auditoriaId},asignado:true,activo:true&limit=0`
           ),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
         });
       }),
 
