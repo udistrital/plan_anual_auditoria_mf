@@ -18,6 +18,7 @@ import { columnasVistaDictamen, hallazgosConstructorTabla, iconosAccionHallazgo,
 import { Auditoria } from 'src/app/shared/data/models/auditoria';
 import { DatosModalObservacionAccion, ModalObservacionAccionComponent, ResultadoDictamenAccion } from '../modal-observacion-accion/modal-observacion-accion.component';
 import { ModalHistorialObservacionesAccionComponent } from '../modal-historial-observaciones-accion/modal-historial-observaciones-accion.component';
+import { formatearFechaCalendario } from "../../../../../../../shared/utils/fecha-calendario.util";
 
 export interface HallazgoTabla {
   hallazgoId: string;
@@ -261,9 +262,7 @@ export class TablaHallazgosComponent implements OnInit {
   }
 
   private formatearFecha(fecha: string | null | undefined): string {
-    if (!fecha) return '';
-    const d = new Date(fecha);
-    return isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-CO');
+    return formatearFechaCalendario(fecha);
   }
 
   // ─── Carga de datos ──────────────────────────────────────────────────────────

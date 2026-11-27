@@ -53,7 +53,7 @@
           <mat-panel-description class="panel-plan-desc">
             <span class="text-muted">
               Apertura: {{ plan.fecha_apertura | date : "mediumDate" }}
-              · Límite: {{ plan.fecha_limite | date : "mediumDate" }}
+              · Límite: {{ plan.fecha_limite | date : "mediumDate" : "UTC" }}
             </span>
             <span class="status-badge ms-2">{{
               plan.estado_nombre ?? "Estado " + plan.estado_id

@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { firstValueFrom } from "rxjs";
 import { PlanAnualAuditoriaService } from "src/app/core/services/plan-anual-auditoria.service";
 import { AlertService } from "src/app/shared/services/alert.service";
+import { parsearFechaCalendario } from "../../../../../shared/utils/fecha-calendario.util";
 
 export interface ModalAmpliarRevisionData {
   informeId: string;
@@ -37,7 +38,7 @@ export class ModalAmpliarRevisionAuditadoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.fechaActual = new Date(this.data.fechaFinRevision);
+    this.fechaActual = parsearFechaCalendario(this.data.fechaFinRevision) ?? new Date(this.data.fechaFinRevision);
     this.fechaActualTexto = this.fechaActual.toLocaleDateString('es-CO', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
     });

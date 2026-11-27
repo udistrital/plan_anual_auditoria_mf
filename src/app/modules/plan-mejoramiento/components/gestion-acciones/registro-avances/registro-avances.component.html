@@ -90,7 +90,7 @@
           <span class="etiqueta">Periodo de ejecución</span>
           <span class="valor">
             @if (accion?.fecha_inicio || accion?.fecha_fin) {
-              {{ (accion?.fecha_inicio | date: 'dd/MM/yyyy') || '—' }} – {{ (accion?.fecha_fin | date: 'dd/MM/yyyy') || '—' }}
+              {{ (accion?.fecha_inicio | date: 'dd/MM/yyyy' : 'UTC') || '—' }} – {{ (accion?.fecha_fin | date: 'dd/MM/yyyy' : 'UTC') || '—' }}
             } @else {
               Sin definir
             }

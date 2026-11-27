@@ -148,8 +148,8 @@
           <div class="col-lg-2 col-md-4 col-6">
             <div class="dato">
               <span class="etiqueta">Fechas auditoría</span>
-              <span class="valor d-block">Inicio: {{ (auditoria?.fecha_inicio | date:'dd/MM/yyyy') || '—' }}</span>
-              <span class="valor d-block">Fin: {{ (auditoria?.fecha_fin | date:'dd/MM/yyyy') || '—' }}</span>
+              <span class="valor d-block">Inicio: {{ (auditoria?.fecha_inicio | date:'dd/MM/yyyy':'UTC') || '—' }}</span>
+              <span class="valor d-block">Fin: {{ (auditoria?.fecha_fin | date:'dd/MM/yyyy':'UTC') || '—' }}</span>
             </div>
           </div>
         </div>

@@ -180,8 +180,8 @@
                 }
                 @case ('cronograma') {
                   <div class="celda-plazo">
-                    <span class="fecha-plazo">{{ row.fecha_inicio ? (row.fecha_inicio | date: 'dd/MM/yy') : '—' }}</span>
-                    <small class="texto-subtitulo">{{ row.fecha_fin ? (row.fecha_fin | date: 'dd/MM/yy') : '—' }}</small>
+                    <span class="fecha-plazo">{{ row.fecha_inicio ? (row.fecha_inicio | date: 'dd/MM/yy' : 'UTC') : '—' }}</span>
+                    <small class="texto-subtitulo">{{ row.fecha_fin ? (row.fecha_fin | date: 'dd/MM/yy' : 'UTC') : '—' }}</small>
                     @if (row.vencimiento) {
                       <small class="detalle-plazo" [ngClass]="row.vencimiento.clase">
                         <mat-icon>schedule</mat-icon> {{ row.vencimiento.texto }}

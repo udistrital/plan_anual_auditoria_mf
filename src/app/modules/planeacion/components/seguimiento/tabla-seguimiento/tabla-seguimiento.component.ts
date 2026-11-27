@@ -33,6 +33,7 @@ import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/componen
 import { forkJoin, of, throwError } from "rxjs";
 import { catchError, exhaustMap, tap } from "rxjs/operators";
 import { FiltrosAuditoria } from "src/app/shared/elements/components/filtros-auditoria/filtros-auditoria.component";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 @Component({
     selector: "app-tabla-seguimiento",
@@ -614,7 +615,7 @@ export class TablaSeguimientoComponent implements OnInit {
         forkJoin({
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
           jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),

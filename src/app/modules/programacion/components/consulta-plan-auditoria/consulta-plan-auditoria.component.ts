@@ -29,6 +29,7 @@ import { ModalVerDocumentosComponent } from "src/app/shared/elements/components/
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
 import { TourService } from "src/app/shared/services/tour.service";
 import { crearPasosTour, TOUR_RETORNO_LISTA_KEY, type PaginaTour } from "./consulta-plan-auditoria.tour";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 
 const PLANTILLA_SOLICITUD_NOMBRE = "SISIFO_PLANTILLA_SOLICITUD";
 
@@ -473,7 +474,7 @@ export class ConsultaPlanAuditoriaComponent implements OnInit, OnDestroy {
 
       // Fetch the full name of the sender
       exhaustMap(({ usuario,  jefeOCI }) => {
-        const nombreRemitente = usuario?.NombreCompleto || "Usuario";
+        const nombreRemitente = nombreTercero(usuario) || "Usuario";
         const correoJefe = jefeOCI?.UsuarioWSO2;
         return of({ nombreRemitente, correoJefe });
       }),

@@ -67,9 +67,9 @@
           <span class="contador" [class.contador-vencido]="diasHabilesRestantes === -1">
             <mat-icon>schedule</mat-icon>
             @if (diasHabilesRestantes === -1) {
-              Plazo vencido ({{ fechaLimite | date:'dd/MM/yyyy' }})
+              Plazo vencido ({{ fechaLimite | date:'dd/MM/yyyy':'UTC' }})
             } @else {
-              Plazo: <b>{{ diasHabilesRestantes }} día(s) hábil(es)</b> ({{ fechaLimite | date:'dd/MM/yyyy' }})
+              Plazo: <b>{{ diasHabilesRestantes }} día(s) hábil(es)</b> ({{ fechaLimite | date:'dd/MM/yyyy':'UTC' }})
             }
           </span>
         }
@@ -135,13 +135,13 @@
         <div class="col-md-4 col-12">
           <div class="dato">
             <span class="etiqueta">Fecha inicio auditoría</span>
-            <span class="valor">{{ auditoria?.fecha_inicio | date:'dd/MM/yyyy' }}</span>
+            <span class="valor">{{ auditoria?.fecha_inicio | date:'dd/MM/yyyy':'UTC' }}</span>
           </div>
         </div>
         <div class="col-md-4 col-12">
           <div class="dato">
             <span class="etiqueta">Fecha fin auditoría</span>
-            <span class="valor">{{ auditoria?.fecha_fin | date:'dd/MM/yyyy' }}</span>
+            <span class="valor">{{ auditoria?.fecha_fin | date:'dd/MM/yyyy':'UTC' }}</span>
           </div>
         </div>
         <div class="col-md-4 col-12">

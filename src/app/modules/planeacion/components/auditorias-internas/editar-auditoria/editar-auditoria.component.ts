@@ -35,6 +35,7 @@ import { NotificacionRegistroCrudService } from "src/app/core/services/notificac
 import { PLANTILLA_SOLICITUD_NOMBRE } from "src/app/core/services/notificaciones-mid.service";
 import { ParametrosUtilsService } from "src/app/shared/services/parametros.service";
 import { ModalEnviarAprobacionComponent } from "src/app/shared/elements/components/dialogs/modal-enviar-aprobacion/modal-enviar-aprobacion.component";
+import { nombreTercero } from "src/app/shared/utils/nombre-completo.util";
 @Component({
     selector: "app-editar-auditoria",
     templateUrl: "./editar-auditoria.component.html",
@@ -545,7 +546,7 @@ export class EditarAuditoriaComponent implements OnInit, AfterViewInit {
         forkJoin({
           auditoria: this.planAuditoriaService.get(`auditoria/${auditoriaId}`),
           vigencias: this.parametrosUtilsService.getVigencias(),
-          nombreRemitente: of(tercero.NombreCompleto),
+          nombreRemitente: of(nombreTercero(tercero)),
           jefeOCI: this.tercerosService.getJefeOCI(),
         })
       ),

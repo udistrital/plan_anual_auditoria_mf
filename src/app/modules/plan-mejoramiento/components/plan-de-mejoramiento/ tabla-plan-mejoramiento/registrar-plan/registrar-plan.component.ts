@@ -15,6 +15,7 @@ import { catchError, firstValueFrom, forkJoin, of, Subscription, switchMap } fro
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
 import { DatosAsignarEjecutoresPlan, DependenciaPlan, ModalAsignarEjecutoresPlanComponent } from '../../ver-plan/modal-asignar-ejecutores-plan/modal-asignar-ejecutores-plan.component';
+import { parsearFechaCalendario } from "../../../../../../shared/utils/fecha-calendario.util";
 
 @Component({
     selector: 'app-registrar-plan',
@@ -127,8 +128,8 @@ export class RegistrarPlanComponent implements OnInit {
   /** Días hábiles que faltan para la fecha límite de formulación (negativo = vencido) */
   get diasHabilesRestantes(): number | null {
     if (!this.fechaLimite) return null;
-    const limite = new Date(this.fechaLimite);
-    if (isNaN(limite.getTime())) return null;
+    const limite = parsearFechaCalendario(this.fechaLimite);
+    if (!limite) return null;
     const hoy = new Date();
     const actual = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
     const fin = new Date(limite.getFullYear(), limite.getMonth(), limite.getDate());
