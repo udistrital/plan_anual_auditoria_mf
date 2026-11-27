@@ -15,6 +15,7 @@ export const vistaPorRol: Record<string, VistaFormulacion> = {
   [environment.ROL.AUDITOR_ASISTENTE]:     "auditor",
   [environment.ROL.JEFE_DEPENDENCIA]:      "auditado",
   [environment.ROL.ASISTENTE_DEPENDENCIA]: "auditado",
+  [environment.ROL.EJECUTOR]:              "auditado",
 };
 
 @Component({

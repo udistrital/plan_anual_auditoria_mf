@@ -42,6 +42,14 @@ describe('FormulacionPlanesComponent', () => {
     expect(component.vista).toBe('auditado');
   });
 
+  it('muestra la vista del auditado para el Ejecutor', async () => {
+    rolesUsuario = [environment.ROL.EJECUTOR];
+    await component.ngOnInit();
+
+    expect(component.vista).toBe('auditado');
+    expect(component.rol).toBe(environment.ROL.EJECUTOR);
+  });
+
   it.each([
     environment.ROL.JEFE,
     environment.ROL.AUDITOR_EXPERTO,

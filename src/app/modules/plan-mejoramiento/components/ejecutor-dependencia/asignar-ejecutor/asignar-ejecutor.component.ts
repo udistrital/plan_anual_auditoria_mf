@@ -71,18 +71,33 @@ export class AsignarEjecutorComponent implements OnInit {
     this.dependenciaNombre = params["dependencia_nombre"] ?? "";
     this.dependenciaPreseleccionada = !!dependenciaId;
 
-    this.form = this.fb.group({
-      dependencia_id: [
-        { value: dependenciaId, disabled: this.dependenciaPreseleccionada },
-        [Validators.required],
-      ],
-    });
+    this.form = this.fb.group(
+      {
+        dependencia_id: [
+          { value: dependenciaId, disabled: this.dependenciaPreseleccionada },
+          [Validators.required],
+        ],
+        fecha_inicio: [null, [Validators.required]],
+        fecha_fin: [null, [Validators.required]],
+      },
+      { validators: [this.rangoFechasValido] }
+    );
 
     this.cargarDependencias();
   }
 
   get tituloDependencia(): string {
     return this.dependenciaNombre ? this.dependenciaNombre : "Nueva asignación";
+  }
+
+  /** La fecha fin de la habilitación no puede ser anterior a la de inicio. */
+  private rangoFechasValido(group: FormGroup) {
+    const inicio = group.get("fecha_inicio")?.value;
+    const fin = group.get("fecha_fin")?.value;
+    if (inicio && fin && new Date(fin) < new Date(inicio)) {
+      return { rangoInvalido: true };
+    }
+    return null;
   }
 
   // ── Dependencias (OIKOS) ──────────────────────────────────
@@ -243,10 +258,6 @@ export class AsignarEjecutorComponent implements OnInit {
   // ── Guardado ──────────────────────────────────────────────
 
   confirmar(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
     if (!this.usuarioEncontrado) {
       this.alertaService.showAlert(
         "Atención",
@@ -254,19 +265,31 @@ export class AsignarEjecutorComponent implements OnInit {
       );
       return;
     }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
+    this.guardarAsignacion();
+  }
+
+  /** Crea la asignación en el CRUD y luego agrega el rol en WSO2. */
+  private guardarAsignacion(): void {
+    const { fecha_inicio, fecha_fin } = this.form.getRawValue();
     this.guardando = true;
     const body = {
       dependencia_id: Number(this.form.getRawValue().dependencia_id),
-      usuario_id: this.usuarioEncontrado.usuario_id,
+      usuario_id: this.usuarioEncontrado!.usuario_id,
       usuario_rol: "ejecutor",
       actual: true,
       activo: true,
       fecha_asignacion: new Date().toISOString(),
+      fecha_inicio: new Date(fecha_inicio).toISOString(),
+      fecha_fin: new Date(fecha_fin).toISOString(),
     };
 
-    const nombre = this.usuarioEncontrado.nombre;
-    const correo = this.usuarioEncontrado.correo;
+    const nombre = this.usuarioEncontrado!.nombre;
+    const correo = this.usuarioEncontrado!.correo;
 
     this.planService.post("ejecutor-dependencia", body).subscribe({
       next: () => {
@@ -275,8 +298,10 @@ export class AsignarEjecutorComponent implements OnInit {
       },
       error: (err: any) => {
         this.guardando = false;
+        // El CRUD devuelve el mensaje apto para el usuario en Data; se muestra tal cual.
         const mensaje =
           err?.error?.Data ??
+          err?.error?.Message ??
           "No se pudo asignar el ejecutor. Verifica los datos e inténtalo nuevamente.";
         this.alertaService.showErrorAlert(mensaje);
       },
