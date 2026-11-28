@@ -1,5 +1,5 @@
 quill-editor {
-  height: 200px;
+  height: var(--editor-enriquecido-height, 200px);
   width: 100%;
 }
 

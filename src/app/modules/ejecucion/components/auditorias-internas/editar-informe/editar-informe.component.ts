@@ -231,9 +231,13 @@ export class EditarInformeComponent implements OnInit, AfterViewInit {
           .get(`vinculacion?query=TerceroPrincipalId:${personaId},Activo:true,CargoId:${cargoId}&fields=DependenciaId`)
           .subscribe({
             next: (resp: any) => {
-              this.dependenciaIds = (resp ?? [])
-                .map((v: any) => v.DependenciaId)
-                .filter((id: any) => id != null);
+              this.dependenciaIds = [
+                ...new Set<number>(
+                  (resp ?? [])
+                    .map((v: any) => v.DependenciaId)
+                    .filter((id: any) => id != null),
+                ),
+              ];
             },
             error: () => { this.dependenciaIds = []; },
           });
