@@ -12,6 +12,12 @@
     <span class="descripcion-estado">—</span>
   }
   @default {
-    <quill-view-html class="descripcion-contenido" [content]="html()" [sanitize]="true"></quill-view-html>
+    <!--
+      [sanitize]="false" conserva las imágenes en base64 y sus atributos de tamaño; con "true",
+      ngx-quill pasa el HTML a [innerHTML] y el sanitizador de Angular elimina el `src` data: y el
+      `style`, y las imágenes no cargan. El contenido proviene del propio gestor documental y del
+      editor de la aplicación, por lo que se considera de confianza.
+    -->
+    <quill-view-html class="descripcion-contenido" [content]="html()" [sanitize]="false"></quill-view-html>
   }
 }

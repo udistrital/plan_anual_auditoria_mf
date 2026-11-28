@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { NuxeoService } from 'src/app/core/services/nuxeo.service';
 import { ReferenciaPdfService } from 'src/app/core/services/referencia-pdf.service';
-import { contieneImagen, descripcionAHtml, esHtmlVacio } from 'src/app/shared/utils/html.util';
+import { contieneImagen, descripcionAHtml, esHtmlVacio, tamanoImagenAAtributo, tamanoImagenAEstilo } from 'src/app/shared/utils/html.util';
 
 // `Validators.required` no detecta el HTML vacío que deja Quill (`<p><br></p>`)
 const descripcionRequerida: ValidatorFn = (control) => esHtmlVacio(control.value) ? { required: true } : null;
@@ -77,15 +77,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
   private readonly ANCHO_MAX_IMG = 500;
   private observadores: MutationObserver[] = [];
-  private botonPresionado = false;
-  private revisores: Array<() => void> = [];
-
-  private readonly alPresionar = () => { this.botonPresionado = true; };
-  private readonly alSoltar = () => {
-    this.botonPresionado = false;
-    // Se espera un instante para no interferir con el cierre del arrastre de blotFormatter
-    setTimeout(() => this.revisores.forEach(revisar => revisar()), 0);
-  };
 
   editorModules = {
     toolbar: [
@@ -143,11 +134,8 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener('mousedown', this.alPresionar, true);
-    document.removeEventListener('mouseup', this.alSoltar, true);
     this.observadores.forEach(o => o.disconnect());
     this.observadores = [];
-    this.revisores = [];
   }
 
   private async usarDatosProporcionados(): Promise<void> {
@@ -232,7 +220,6 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
     this.observadores.forEach(o => o.disconnect());
     this.observadores = [];
-    this.revisores = [];
 
     const temasActivos = this.temasData.filter(tema => tema.activo);
 
@@ -245,8 +232,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
         if (subtema.descripcion && this.comprobarNuxeoEnlace(subtema.descripcion)) {
           const enlaceOriginal = subtema.descripcion;
           try {
-            let html = await this.obtenerDocumentoHTML(enlaceOriginal);
-            html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+            const html = tamanoImagenAAtributo(await this.obtenerDocumentoHTML(enlaceOriginal));
             subtema.descripcion = html;
             if (subtema._id) {
               this.documentosNuxeoSubtema.set(subtema._id.toString(), { enlace: enlaceOriginal, html });
@@ -287,8 +273,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
       if (tema.descripcion_titulo && this.comprobarNuxeoEnlace(tema.descripcion_titulo)) {
         const enlaceOriginal = tema.descripcion_titulo;
         try {
-          let html = await this.obtenerDocumentoHTML(enlaceOriginal);
-          html = html.replace(/style="width:\s*(\d+)px;?"/g, 'width="$1px"');
+          const html = tamanoImagenAAtributo(await this.obtenerDocumentoHTML(enlaceOriginal));
           tema.descripcion_titulo = html;
           if (tema._id) {
             this.documentosNuxeoTema.set(tema._id.toString(), { enlace: enlaceOriginal, html });
@@ -726,9 +711,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
 
   // Sube el HTML de una descripción (con imágenes) a Nuxeo y devuelve el valor a guardar en la descripción
   private async subirHtmlANuxeo(htmlOriginal: string, nombre: string, descripcionDocumento: string): Promise<string> {
-    let html = String(htmlOriginal);
-    html = html.replace(/width="(\d+)px"/g, 'style="width:$1px;"');
-    html = html.replace(/\sheight="auto"/g, '');
+    const html = tamanoImagenAEstilo(String(htmlOriginal));
 
     const blob = new Blob([html], { type: 'text/html' });
     const htmlFile = new File([blob], 'archivo.html', { type: 'text/html' });
@@ -787,16 +770,12 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
     // Imágenes que ya existen al cargar el contenido
     root.querySelectorAll('img').forEach(limitar);
 
-    this.revisores.push(() => root.querySelectorAll('img').forEach(limitar));
-
-    // Cada vez que cambie el ancho (arrastrando) o se agregue una imagen, se corrige
+    // Solo se observa la inserción de imágenes (childList). No se observan 'attributes', porque
+    // reaccionar a los cambios de width/style mientras blotFormatter redimensiona desincroniza su
+    // overlay y provoca el error "getComputedStyle: parameter 1 is not of type 'Element'".
     const observador = new MutationObserver((mutaciones) => {
-      if (this.botonPresionado) return;
-
       for (const m of mutaciones) {
-        if (m.type === 'attributes' && m.target instanceof HTMLImageElement) {
-          limitar(m.target);
-        } else if (m.type === 'childList') {
+        if (m.type === 'childList') {
           m.addedNodes.forEach((n) => {
             if (n instanceof HTMLImageElement) limitar(n);
             else if (n instanceof HTMLElement) n.querySelectorAll('img').forEach(limitar);
@@ -804,12 +783,7 @@ export class AspectosEvaluadosComponent implements OnInit, OnChanges, OnDestroy 
         }
       }
     });
-    observador.observe(root, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['width', 'style'],
-    });
+    observador.observe(root, { subtree: true, childList: true });
     this.observadores.push(observador);
   }
 }

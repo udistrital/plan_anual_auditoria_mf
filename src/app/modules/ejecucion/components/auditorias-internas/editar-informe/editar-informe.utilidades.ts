@@ -15,7 +15,7 @@ export const formularioInformacionAuditoria: Formulario = {
     },
     {
       nombre: "fecha_emision",
-      etiqueta: "Fecha de Emisión Informe",
+      etiqueta: "Fecha de Emisión Preliminar",
       icono: "event",
       parametros: {
         vista: "year",
@@ -23,6 +23,21 @@ export const formularioInformacionAuditoria: Formulario = {
       },
       validaciones: [{ tipo: "requerido", valor: "" }],
       deshabilitado: false,
+      tipo: "date",
+      claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
+    },
+    {
+      // Fecha de emisión del informe final. Independiente de la preliminar.
+      // Su edición autorizada la realiza el Jefe OCI al aprobar (modal de aprobación);
+      // aquí se muestra solo como información.
+      nombre: "fecha_emision_final",
+      etiqueta: "Fecha de Emisión Final",
+      icono: "event_available",
+      parametros: {
+        vista: "year",
+        fecha_inicio: "2024-01-01T05:00:00.000Z",
+      },
+      deshabilitado: true,
       tipo: "date",
       claseGrid: "col-lg-6 col-md-6 col-sm-12 col-xs-12",
     },

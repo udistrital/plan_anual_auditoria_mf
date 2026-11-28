@@ -1,5 +1,6 @@
 <form [formGroup]="editorForm">
-  <quill-editor formControlName="editorContent" [modules]="editorModules" [placeholder]="placeholder" class="editor">
+  <quill-editor formControlName="editorContent" [modules]="editorModules" [placeholder]="placeholder"
+    (onEditorCreated)="onEditorCreated($event)" class="editor">
     <div quill-editor-toolbar class="toolbar">
       <span class="ql-formats">
         <button class="ql-bold" [title]="'Bold'"></button>
@@ -10,6 +11,11 @@
         <button class="ql-list" value="ordered"></button>
         <button class="ql-list" value="bullet"></button>
       </span>
+      @if (permitirImagenes) {
+        <span class="ql-formats">
+          <button class="ql-image" [title]="'Insert Image'"></button>
+        </span>
+      }
     </div>
   </quill-editor>
 </form>

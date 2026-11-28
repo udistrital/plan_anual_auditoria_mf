@@ -15,6 +15,7 @@ import { EditarInformeSeguimientoComponent } from './components/seguimiento-info
 import { TablaSeguimientosComponent } from './components/seguimiento-informes/tabla-segumiento/tabla-seguimientos.component';
 import { RevisionDocumentosEjecucionComponent } from './components/auditorias-internas/revision-documentos/revision-documentos.component';
 import { ModalRechazoAuditoriaEjecucionComponent } from './components/auditorias-internas/revision-documentos/modal-rechazo-auditoria/modal-rechazo-auditoria.component';
+import { ModalAprobacionInformeFinalComponent } from './components/auditorias-internas/revision-documentos/modal-aprobacion-informe-final/modal-aprobacion-informe-final.component';
 import { RevisionDocumentosSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/revision-documentos-seguimiento.component';
 import { ModalRechazoSeguimientoComponent } from './components/seguimiento-informes/revision-documentos-seguimiento/modal-rechazo-seguimiento/modal-rechazo-seguimiento.component';
 import { RevisionPreinformeComponent } from './components/auditorias-internas/editar-informe/revision-preinforme/revision-preinforme.component';
@@ -38,6 +39,7 @@ Quill.register('modules/blotFormatter', BlotFormatter);
     TablaSeguimientosComponent,
     RevisionDocumentosEjecucionComponent,
     ModalRechazoAuditoriaEjecucionComponent,
+    ModalAprobacionInformeFinalComponent,
     RevisionDocumentosSeguimientoComponent,
     ModalRechazoSeguimientoComponent,
     RevisionPreinformeComponent,

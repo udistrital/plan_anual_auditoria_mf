@@ -19,10 +19,10 @@
       <div class="tree-node">
         <div class="node-row tema-row">
           <span class="node-dot tema-dot"></span>
-          <span class="nivel-label">Tema</span>
+          <span class="nivel-label">Desarrollo de la auditoría</span>
           <span class="indice">{{ i + 2 }}</span>
           <mat-form-field appearance="outline" class="node-input">
-            <mat-label>Nombre del Tema</mat-label>
+            <mat-label>Nombre del desarrollo de la auditoría</mat-label>
             <input matInput [value]="temaItem.tema.titulo" disabled>
           </mat-form-field>
         </div>
@@ -32,10 +32,10 @@
             <div class="tree-node">
               <div class="node-row subtema-row">
                 <span class="node-dot subtema-dot"></span>
-                <span class="nivel-label">Subtema</span>
+                <span class="nivel-label">Ejes temáticos</span>
                 <span class="indice">{{ i + 2 }}.{{ j + 1 }}</span>
                 <mat-form-field appearance="outline" class="node-input">
-                  <mat-label>Nombre del Subtema</mat-label>
+                  <mat-label>Nombre del eje temático</mat-label>
                   <input matInput [value]="subtemaItem.subtema.titulo" disabled>
                 </mat-form-field>
               </div>
@@ -76,16 +76,15 @@
                           <span class="obs-titulo">Observaciones</span>
                         </div>
                         @for (obs of item.observacionesAuditado; track obs) {
-                          <!-- Mi observación: editable -->
+                          <!-- Editable con texto enriquecido e imágenes  -->
                           @if (puedeEscribirObservacionAuditado && obs.usuario_id === usuarioId && !item.hallazgo.rechazado) {
-                            <mat-form-field appearance="outline" class="hallazgo-input">
-                              <mat-label>Observación</mat-label>
-                              <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
-                                (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
-                                [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
-                                placeholder="Ingrese su observación...">
-                              </textarea>
-                            </mat-form-field>
+                            <label class="descripcion-label">Observación</label>
+                            <app-editor-enriquecido [permitirImagenes]="true"
+                              placeholder="Ingrese su observación..."
+                              [ngModel]="textoInline.get(item.hallazgo._id) ?? ''"
+                              (ngModelChange)="actualizarTexto(item.hallazgo._id, $event)"
+                              [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
+                            </app-editor-enriquecido>
                             <div class="d-flex justify-content-end">
                               <button mat-flat-button color="primary" (click)="guardarObservacion(item, obs)"
                                 [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
@@ -93,23 +92,20 @@
                               </button>
                             </div>
                           } @else {
-                            <mat-form-field appearance="outline" class="hallazgo-input">
-                              <mat-label>Observación del auditado ({{ obs.usuario_rol }})</mat-label>
-                              <textarea matInput [value]="obs.observacion" rows="3" disabled></textarea>
-                            </mat-form-field>
+                            <!-- Observación de otro auditado: solo lectura, resuelve HTML/imágenes del gestor documental -->
+                            <label class="descripcion-label">Observación del auditado</label>
+                            <app-descripcion-hallazgo [valor]="obs.observacion"></app-descripcion-hallazgo>
                           }
-                          <!-- Observación de otro auditado: solo lectura -->
                         }
                         <!-- Si aún no tengo observación, muestro campo vacío para crear -->
                         @if (puedeEscribirObservacionAuditado && !miObservacionAuditado(item) && !item.hallazgo.rechazado) {
-                          <mat-form-field appearance="outline" class="hallazgo-input">
-                            <mat-label>Observación</mat-label>
-                            <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
-                              (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
-                              [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado"
-                              placeholder="Ingrese su observación...">
-                            </textarea>
-                          </mat-form-field>
+                          <label class="descripcion-label">Observación</label>
+                          <app-editor-enriquecido [permitirImagenes]="true"
+                            placeholder="Ingrese su observación..."
+                            [ngModel]="textoInline.get(item.hallazgo._id) ?? ''"
+                            (ngModelChange)="actualizarTexto(item.hallazgo._id, $event)"
+                            [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
+                          </app-editor-enriquecido>
                           <div class="d-flex justify-content-end">
                             <button mat-flat-button color="primary" (click)="guardarObservacion(item, null)"
                               [disabled]="estaGuardando(item.hallazgo._id) || item.hallazgo.rechazado">
@@ -119,22 +115,18 @@
                         }
                         <!-- Observación del auditor (solo lectura si no es auditor, o si el hallazgo está rechazado) -->
                         @if ((!puedeEscribirObservacionAuditor || item.hallazgo.rechazado) && item.observacionAuditor) {
-                          <mat-form-field
-                            appearance="outline" class="hallazgo-input">
-                            <mat-label>Observación del auditor</mat-label>
-                            <textarea matInput [value]="item.observacionAuditor.observacion" rows="3" disabled></textarea>
-                          </mat-form-field>
+                          <label class="descripcion-label">Observación del auditor</label>
+                          <app-descripcion-hallazgo [valor]="item.observacionAuditor.observacion"></app-descripcion-hallazgo>
                         }
                         <!-- Observación editable del auditor -->
                         @if (puedeEscribirObservacionAuditor && !item.hallazgo.rechazado) {
-                          <mat-form-field appearance="outline" class="hallazgo-input">
-                            <mat-label>Observación del auditor</mat-label>
-                            <textarea matInput rows="3" [value]="textoInline.get(item.hallazgo._id) ?? ''"
-                              (input)="actualizarTexto(item.hallazgo._id, $any($event.target).value)"
-                              [disabled]="estaGuardando(item.hallazgo._id)"
-                              placeholder="Ingrese la observación del auditor...">
-                            </textarea>
-                          </mat-form-field>
+                          <label class="descripcion-label">Observación del auditor</label>
+                          <app-editor-enriquecido [permitirImagenes]="true"
+                            placeholder="Ingrese la observación del auditor..."
+                            [ngModel]="textoInline.get(item.hallazgo._id) ?? ''"
+                            (ngModelChange)="actualizarTexto(item.hallazgo._id, $event)"
+                            [disabled]="estaGuardando(item.hallazgo._id)">
+                          </app-editor-enriquecido>
                           <div class="d-flex justify-content-end gap-2">
                             @if (!item.hallazgo.rechazado) {
                               <button mat-stroked-button color="primary" class="mx-2"
